@@ -53,7 +53,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class RingtonePlayer implements CoreStartable {
     private static final String TAG = "RingtonePlayer";
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = true;
     private final Context mContext;
 
     // TODO: support Uri switching under same IBinder

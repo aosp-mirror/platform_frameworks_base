@@ -19,11 +19,13 @@ package com.android.systemui.util.kotlin
 import android.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printCollection
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,19 +66,20 @@ interface FlowDumper : Dumpable {
 }
 
 /**
- * An implementation of [FlowDumper]. This be extended directly, or can be used to implement
- * [FlowDumper] by delegation.
- *
- * @param dumpManager if provided, this will be used by the [FlowDumperImpl] to register and
- *   unregister itself when there is something to dump.
- * @param tag a static name by which this [FlowDumperImpl] is registered. If not provided, this
- *   class's name will be used. If you're implementing by delegation, you probably want to provide
- *   this tag to get a meaningful dumpable name.
+ * The minimal implementation of FlowDumper. The owner must either register this with the
+ * DumpManager, or else call [dumpFlows] from its own [Dumpable.dump] method.
  */
-open class FlowDumperImpl(private val dumpManager: DumpManager?, tag: String? = null) : FlowDumper {
+open class SimpleFlowDumper : FlowDumper {
+
     private val stateFlowMap = ConcurrentHashMap<String, StateFlow<*>>()
     private val sharedFlowMap = ConcurrentHashMap<String, SharedFlow<*>>()
     private val flowCollectionMap = ConcurrentHashMap<Pair<String, String>, Any>()
+
+    protected fun isNotEmpty(): Boolean =
+        stateFlowMap.isNotEmpty() || sharedFlowMap.isNotEmpty() || flowCollectionMap.isNotEmpty()
+
+    protected open fun onMapKeysChanged(added: Boolean) {}
+
     override fun dumpFlows(pw: IndentingPrintWriter) {
         pw.printCollection("StateFlow (value)", stateFlowMap.toSortedMap().entries) { (key, flow) ->
             append(key).append('=').println(flow.value)
@@ -92,43 +95,62 @@ open class FlowDumperImpl(private val dumpManager: DumpManager?, tag: String? = 
         }
     }
 
-    private val Any.idString: String
-        get() = Integer.toHexString(System.identityHashCode(this))
-
     override fun <T> Flow<T>.dumpWhileCollecting(dumpName: String): Flow<T> = flow {
         val mapKey = dumpName to idString
         try {
             collect {
                 flowCollectionMap[mapKey] = it ?: "null"
-                updateRegistration(required = true)
+                onMapKeysChanged(added = true)
                 emit(it)
             }
         } finally {
             flowCollectionMap.remove(mapKey)
-            updateRegistration(required = false)
+            onMapKeysChanged(added = false)
         }
     }
 
     override fun <T, F : StateFlow<T>> F.dumpValue(dumpName: String): F {
         stateFlowMap[dumpName] = this
+        onMapKeysChanged(added = true)
         return this
     }
 
     override fun <T, F : SharedFlow<T>> F.dumpReplayCache(dumpName: String): F {
         sharedFlowMap[dumpName] = this
+        onMapKeysChanged(added = true)
         return this
     }
 
-    private val dumpManagerName = tag ?: "[$idString] ${javaClass.simpleName}"
+    protected val Any.idString: String
+        get() = Integer.toHexString(System.identityHashCode(this))
+}
+
+/**
+ * An implementation of [FlowDumper] that registers itself whenever there is something to dump. This
+ * class is meant to be extended.
+ *
+ * @param dumpManager this will be used by the [FlowDumperImpl] to register and unregister itself
+ *   when there is something to dump.
+ * @param tag a static name by which this [FlowDumperImpl] is registered. If not provided, this
+ *   class's name will be used.
+ */
+abstract class FlowDumperImpl(
+    private val dumpManager: DumpManager,
+    private val tag: String? = null,
+) : SimpleFlowDumper() {
+
+    override fun onMapKeysChanged(added: Boolean) {
+        updateRegistration(required = added)
+    }
+
+    private val dumpManagerName = "[$idString] ${tag ?: javaClass.simpleName}"
+
     private var registered = AtomicBoolean(false)
+
     private fun updateRegistration(required: Boolean) {
-        if (dumpManager == null) return
         if (required && registered.get()) return
         synchronized(registered) {
-            val shouldRegister =
-                stateFlowMap.isNotEmpty() ||
-                    sharedFlowMap.isNotEmpty() ||
-                    flowCollectionMap.isNotEmpty()
+            val shouldRegister = isNotEmpty()
             val wasRegistered = registered.getAndSet(shouldRegister)
             if (wasRegistered != shouldRegister) {
                 if (shouldRegister) {
@@ -138,5 +160,51 @@ open class FlowDumperImpl(private val dumpManager: DumpManager?, tag: String? = 
                 }
             }
         }
+    }
+}
+
+/**
+ * A [FlowDumper] that also has an [activateFlowDumper] suspend function that allows the dumper to
+ * be registered with the [DumpManager] only when activated, just like
+ * [Activatable.activate()][com.android.systemui.lifecycle.Activatable.activate].
+ */
+interface ActivatableFlowDumper : FlowDumper {
+    suspend fun activateFlowDumper(): Nothing
+}
+
+/**
+ * Implementation of [ActivatableFlowDumper] that only registers when activated.
+ *
+ * This is generally used to implement [ActivatableFlowDumper] by delegation, especially for
+ * [SysUiViewModel] implementations.
+ *
+ * @param dumpManager used to automatically register and unregister this instance when activated and
+ *   there is something to dump.
+ * @param tag the name with which this is dumper registered.
+ */
+class ActivatableFlowDumperImpl(
+    private val dumpManager: DumpManager,
+    tag: String,
+) : SimpleFlowDumper(), ActivatableFlowDumper {
+
+    private val registration =
+        object : ExclusiveActivatable() {
+            override suspend fun onActivated(): Nothing {
+                try {
+                    dumpManager.registerCriticalDumpable(
+                        dumpManagerName,
+                        this@ActivatableFlowDumperImpl
+                    )
+                    awaitCancellation()
+                } finally {
+                    dumpManager.unregisterDumpable(dumpManagerName)
+                }
+            }
+        }
+
+    private val dumpManagerName = "[$idString] $tag"
+
+    override suspend fun activateFlowDumper(): Nothing {
+        registration.activate()
     }
 }

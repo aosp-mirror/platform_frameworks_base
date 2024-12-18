@@ -18,13 +18,13 @@ package com.android.systemui.ambient.touch;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.android.systemui.ambient.dagger.AmbientModule.LOGGING_NAME;
 import static com.android.systemui.shared.Flags.bouncerAreaExclusion;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
@@ -44,6 +44,9 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.Logger;
+import com.android.systemui.log.dagger.CommunalTouchLog;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.display.DisplayHelper;
 
@@ -62,6 +65,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+
 
 /**
  * {@link TouchMonitor} is responsible for monitoring touches and gestures over the
@@ -70,9 +75,12 @@ import javax.inject.Inject;
  * touches are consumed.
  */
 public class TouchMonitor {
+    // An incrementing id used to identify the touch monitor instance.
+    private static int sNextInstanceId = 0;
+
+    private final Logger mLogger;
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
-    public String TAG = "DreamOverlayTouchMonitor";
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
 
@@ -116,6 +124,11 @@ public class TouchMonitor {
             TouchSessionImpl touchSessionImpl) {
         return CallbackToFutureAdapter.getFuture(completer -> {
             mMainExecutor.execute(() -> {
+                mLogger.i(msg -> "Session popped, hashCode: " + msg.getInt1(), msg -> {
+                    msg.setInt1(touchSessionImpl.hashCode());
+                    return kotlin.Unit.INSTANCE;
+                });
+
                 if (mActiveTouchSessions.remove(touchSessionImpl)) {
                     touchSessionImpl.onRemoved();
 
@@ -128,8 +141,13 @@ public class TouchMonitor {
                     completer.set(predecessor);
                 }
 
-                if (mActiveTouchSessions.isEmpty() && mStopMonitoringPending) {
-                    stopMonitoring(false);
+                if (mActiveTouchSessions.isEmpty() && mInitialized) {
+                    if (mStopMonitoringPending) {
+                        stopMonitoring(false);
+                    } else {
+                        // restart monitoring to reset any destructive state on the input session
+                        startMonitoring();
+                    }
                 }
             });
 
@@ -256,7 +274,7 @@ public class TouchMonitor {
 
         @Override
         public void onDestroy(LifecycleOwner owner) {
-            stopMonitoring(true);
+            destroy();
         }
     };
 
@@ -264,6 +282,12 @@ public class TouchMonitor {
      * When invoked, instantiates a new {@link InputSession} to monitor touch events.
      */
     private void startMonitoring() {
+        if (!mInitialized) {
+            mLogger.w("attempting to startMonitoring when not initialized");
+            return;
+        }
+
+        mLogger.i("startMonitoring(): monitoring started");
         stopMonitoring(true);
 
         if (bouncerAreaExclusion()) {
@@ -280,13 +304,12 @@ public class TouchMonitor {
                     mWindowManagerService.registerSystemGestureExclusionListener(
                             mGestureExclusionListener, mDisplayId);
                 } catch (RemoteException e) {
-                    // Handle the exception
-                    Log.e(TAG, "Failed to register gesture exclusion listener", e);
+                    mLogger.e("Failed to register gesture exclusion listener", e);
                 }
             });
         }
         mCurrentInputSession = mInputSessionFactory.create(
-                        "dreamOverlay",
+                        mLoggingName,
                         mInputEventListener,
                         mOnGestureListener,
                         true)
@@ -308,7 +331,7 @@ public class TouchMonitor {
                     }
                 } catch (RemoteException e) {
                     // Handle the exception
-                    Log.e(TAG, "unregisterSystemGestureExclusionListener: failed", e);
+                    mLogger.e("unregisterSystemGestureExclusionListener: failed", e);
                 }
             });
         }
@@ -317,22 +340,33 @@ public class TouchMonitor {
         }
 
         if (!mActiveTouchSessions.isEmpty() && !force) {
+            mLogger.i(msg -> "stopMonitoring(): waiting for sessions to end: " + msg.getStr1(),
+                    msg -> {
+                        msg.setStr1(mActiveTouchSessions.stream().map(Object::hashCode).map(
+                                Object::toString).collect(Collectors.joining(",")));
+                        return kotlin.Unit.INSTANCE;
+                    });
             mStopMonitoringPending = true;
             return;
         }
 
         // When we stop monitoring touches, we must ensure that all active touch sessions and
         // descendants informed of the removal so any cleanup for active tracking can proceed.
-        mMainExecutor.execute(() -> mActiveTouchSessions.forEach(touchSession -> {
-            while (touchSession != null) {
-                touchSession.onRemoved();
-                touchSession = touchSession.getPredecessor();
-            }
-        }));
+        mMainExecutor.execute(() -> {
+            mActiveTouchSessions.forEach(touchSession -> {
+                while (touchSession != null) {
+                    touchSession.onRemoved();
+                    touchSession = touchSession.getPredecessor();
+                }
+            });
+            mActiveTouchSessions.clear();
+        });
 
         mCurrentInputSession.dispose();
         mCurrentInputSession = null;
         mStopMonitoringPending = false;
+
+        mLogger.i("stopMonitoring(): monitoring finished");
     }
 
 
@@ -397,12 +431,29 @@ public class TouchMonitor {
                         // created so the
                         // final session is correct.
                         sessionMap.forEach((dreamTouchHandler, touchSession)
-                                -> dreamTouchHandler.onSessionStart(touchSession));
+                                -> {
+                            if (ev instanceof MotionEvent motionEvent) {
+                                int x = Math.round(motionEvent.getX());
+                                int y = Math.round(motionEvent.getY());
+                                mLogger.i(
+                                        msg -> "Session start, handler: " + msg.getStr1() + ", x: "
+                                                + msg.getLong1() + ", y: " + msg.getLong2()
+                                                + ", hashCode: " + msg.getInt1(), msg -> {
+                                            msg.setStr1(
+                                                    dreamTouchHandler.getClass().getSimpleName());
+                                            msg.setLong1(x);
+                                            msg.setLong2(y);
+                                            msg.setInt1(touchSession.hashCode());
+                                            return kotlin.Unit.INSTANCE;
+                                        });
+                            }
+                            dreamTouchHandler.onSessionStart(touchSession);
+                        });
                     }
 
                     // Find active sessions and invoke on InputEvent.
                     mActiveTouchSessions.stream()
-                            .map(touchSessionStack -> touchSessionStack.getEventListeners())
+                            .map(TouchSessionImpl::getEventListeners)
                             .flatMap(Collection::stream)
                             .forEach(inputEventListener -> inputEventListener.onInputEvent(ev));
                 }
@@ -497,6 +548,7 @@ public class TouchMonitor {
     private InputSession mCurrentInputSession;
     private final int mDisplayId;
     private final IWindowManager mWindowManagerService;
+    private final String mLoggingName;
 
     private Rect mMaxBounds;
 
@@ -518,6 +570,8 @@ public class TouchMonitor {
      *                            returned.
      * @param handlers            This set represents the {@link TouchHandler} instances that will
      *                            participate in touch handling.
+     * @param loggingName         Identifying string for this {@link TouchMonitor} that will be used
+     *                            when logging to {@link CommunalTouchLog}.
      */
     @Inject
     public TouchMonitor(
@@ -529,7 +583,9 @@ public class TouchMonitor {
             ConfigurationInteractor configurationInteractor,
             Set<TouchHandler> handlers,
             IWindowManager windowManagerService,
-            @DisplayId int displayId) {
+            @DisplayId int displayId,
+            @Named(LOGGING_NAME) String loggingName,
+            @CommunalTouchLog LogBuffer logBuffer) {
         mDisplayId = displayId;
         mHandlers = handlers;
         mInputSessionFactory = inputSessionFactory;
@@ -539,6 +595,8 @@ public class TouchMonitor {
         mDisplayHelper = displayHelper;
         mWindowManagerService = windowManagerService;
         mConfigurationInteractor = configurationInteractor;
+        mLoggingName = loggingName + ":TouchMonitor[" + sNextInstanceId++ + "]";
+        mLogger = new Logger(logBuffer, mLoggingName);
     }
 
     /**
@@ -563,7 +621,8 @@ public class TouchMonitor {
      */
     public void destroy() {
         if (!mInitialized) {
-            throw new IllegalStateException("TouchMonitor not initialized");
+            // In the case that we've already been destroyed, this is a no-op
+            return;
         }
 
         stopMonitoring(true);
@@ -571,6 +630,10 @@ public class TouchMonitor {
         mLifecycle.removeObserver(mLifecycleObserver);
         if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
             mBoundsFlow.cancel(new CancellationException());
+        }
+
+        for (TouchHandler handler : mHandlers) {
+            handler.onDestroy();
         }
 
         mInitialized = false;

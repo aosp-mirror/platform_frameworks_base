@@ -135,7 +135,7 @@ static void android_graphics_HardwareBufferRenderer_setLightAlpha(JNIEnv* env, j
     proxy->setLightAlpha((uint8_t)(255 * ambientShadowAlpha), (uint8_t)(255 * spotShadowAlpha));
 }
 
-static jlong android_graphics_HardwareBufferRenderer_getFinalizer() {
+static jlong android_graphics_HardwareBufferRenderer_getFinalizer(CRITICAL_JNI_PARAMS) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&HardwareBufferRenderer_destroy));
 }
 

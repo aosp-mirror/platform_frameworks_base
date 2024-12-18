@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.res.Configuration.ASSETS_SEQ_UNDEFINED;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -72,6 +74,7 @@ import android.os.LocaleList;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -81,11 +84,12 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -110,6 +114,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowProcessController" : TAG_ATM;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
+
+    /**
+     * The max number of processes which can be top scheduling group if there are non-top visible
+     * freeform activities run in the process.
+     */
+    private static final int MAX_NUM_PERCEPTIBLE_FREEFORM =
+            SystemProperties.getInt("persist.wm.max_num_perceptible_freeform", 1);
 
     private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
@@ -193,6 +204,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
+    /** Whether this process has ever completed ActivityThread#handleBindApplication. */
+    boolean mHasEverAttached;
+
     /** Non-null if this process may have a window. */
     @Nullable
     Session mWindowSession;
@@ -274,14 +288,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
     /** It is set for wakefulness transition. */
     static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
-    /** Whether the legacy {@link RecentsAnimation} is running. */
-    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ANIMATING_REASON_REMOTE_ANIMATION,
             ANIMATING_REASON_WAKEFULNESS_CHANGE,
-            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
     })
     @interface AnimatingReason {}
 
@@ -309,14 +320,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mWasStoppedLogged;
 
     // The bits used for mActivityStateFlags.
-    private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
-    private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
-    private static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
-    private static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
-    private static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
-    private static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
-    private static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
+    public static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
+    public static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING = 1 << 18;
+    public static final int ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING = 1 << 19;
+    public static final int ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE = 1 << 20;
+    public static final int ACTIVITY_STATE_FLAG_HAS_RESUMED = 1 << 21;
+    public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
+    public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
+    public static final int ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM = 1 << 24;
+    public static final int ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE = 1 << 25;
+    public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
      * The state for oom-adjustment calculation. The higher 16 bits are the activity states, and the
@@ -347,9 +361,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
-
-        onConfigurationChanged(atm.getGlobalConfiguration());
-        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
     public void setPid(int pid) {
@@ -425,7 +436,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
                 onConfigurationChangePreScheduled(mLastReportedConfiguration);
-                configurationChangeItem = ConfigurationChangeItem.obtain(
+                configurationChangeItem = new ConfigurationChangeItem(
                         mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
@@ -686,20 +697,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(
                 mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */).allows();
+                BackgroundLaunchProcessController.CHECK_FOR_FGS_START).allows();
     }
 
     BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(
-                appSwitchState,
-                false /* isCheckingForFgsStart */);
-    }
-
-    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState, boolean isCheckingForFgsStart) {
+            int appSwitchState, BalCheckConfiguration checkConfiguration) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
-                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                mInfo.packageName, appSwitchState, checkConfiguration,
                 hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -1211,31 +1215,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    public interface ComputeOomAdjCallback {
-        void onVisibleActivity();
-        void onPausedActivity();
-        void onStoppingActivity(boolean finishing);
-        void onOtherActivity();
-    }
-
     /**
-     * Returns the minimum task layer rank. It should only be called if {@link #hasActivities}
-     * returns {@code true}.
+     * Returns the current ACTIVITY_STATE_FLAG_* of this process. It should only be called if
+     * {@link #hasActivities} returns {@code true}.
      */
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
-    public int computeOomAdjFromActivities(ComputeOomAdjCallback callback) {
-        final int flags = mActivityStateFlags;
-        if ((flags & ACTIVITY_STATE_FLAG_IS_VISIBLE) != 0) {
-            callback.onVisibleActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
-            callback.onPausedActivity();
-        } else if ((flags & ACTIVITY_STATE_FLAG_IS_STOPPING) != 0) {
-            callback.onStoppingActivity(
-                    (flags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0);
-        } else {
-            callback.onOtherActivity();
-        }
-        return flags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
+    public int getActivityStateFlags() {
+        return mActivityStateFlags;
     }
 
     void computeProcessActivityState() {
@@ -1245,6 +1231,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         ActivityRecord.State bestInvisibleState = DESTROYED;
         boolean allStoppingFinishing = true;
         boolean visible = false;
+        boolean hasResumedFreeform = false;
         int minTaskLayer = Integer.MAX_VALUE;
         int stateFlags = 0;
         final boolean wasResumed = hasResumedActivity();
@@ -1256,14 +1243,27 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 stateFlags |= ACTIVITY_STATE_FLAG_IS_WINDOW_VISIBLE;
             }
             final Task task = r.getTask();
-            if (task != null && task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
+            if (task == null) {
+                Slog.e(TAG, "Unexpected detached " + r + " in " + this);
+                continue;
+            }
+            if (task.mLayerRank != Task.LAYER_RANK_INVISIBLE) {
                 stateFlags |= ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK;
             }
             if (r.isVisibleRequested()) {
                 if (r.isState(RESUMED)) {
                     stateFlags |= ACTIVITY_STATE_FLAG_HAS_RESUMED;
+                    final int windowingMode = r.getWindowingMode();
+                    if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                            && com.android.window.flags.Flags
+                                    .processPriorityPolicyForMultiWindowMode()
+                            && task.getAdjacentTask() != null) {
+                        stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
+                    } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
+                        hasResumedFreeform = true;
+                    }
                 }
-                if (task != null && minTaskLayer > 0) {
+                if (minTaskLayer > 0) {
                     final int layer = task.mLayerRank;
                     if (layer >= 0 && minTaskLayer > layer) {
                         minTaskLayer = layer;
@@ -1294,6 +1294,16 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
+        if (hasResumedFreeform
+                && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
+                // Exclude task layer 1 because it is already the top most.
+                && minTaskLayer > 1) {
+            if (minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+                stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+            } else {
+                stateFlags |= ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE;
+            }
+        }
         stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {
             stateFlags |= ACTIVITY_STATE_FLAG_IS_VISIBLE;
@@ -1675,7 +1685,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 resolvedConfig,
                 false /* optsOutEdgeToEdge */,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
@@ -1707,8 +1718,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         onConfigurationChangePreScheduled(config);
-        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
-                config, mLastTopActivityDeviceId));
+        scheduleClientTransactionItem(
+                thread, new ConfigurationChangeItem(config, mLastTopActivityDeviceId));
     }
 
     private void onConfigurationChangePreScheduled(@NonNull Configuration config) {
@@ -1925,7 +1936,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // showing.
                 // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
-                unregisterActivityConfigurationListener();
+                // The call to `onServiceStarted` is not guarded with WM lock.
+                mAtm.mH.post(() -> {
+                    synchronized (mAtm.mGlobalLock) {
+                        unregisterActivityConfigurationListener();
+                    }
+                });
                 break;
             default:
                 break;
@@ -2005,14 +2021,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Returns whether this app is being launched for the first time since install */
     boolean wasFirstLaunch() {
         return mStoppedState == STOPPED_STATE_FIRST_LAUNCH;
-    }
-
-    void setRunningRecentsAnimation(boolean running) {
-        if (running) {
-            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        } else {
-            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        }
     }
 
     void setRunningRemoteAnimation(boolean running) {
@@ -2109,9 +2117,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
                 pw.print("wakefulness|");
             }
-            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
-                pw.print("legacy-recents");
-            }
             pw.println();
         }
         if (mUseFifoUiScheduling) {
@@ -2128,6 +2133,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print("V|");
                 if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_RESUMED) != 0) {
                     pw.print("R|");
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN) != 0) {
+                        pw.print("RS|");
+                    }
+                    if ((stateFlags & ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0) {
+                        pw.print("PF|");
+                    }
                 }
             } else if ((stateFlags & ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED) != 0) {
                 pw.print("P|");

@@ -20,9 +20,9 @@ import android.os.Handler
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -31,6 +31,8 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
+import com.android.systemui.qs.tiles.dialog.WifiStateWorker
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
@@ -45,7 +47,6 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -54,12 +55,18 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
+@RunWith(AndroidJUnit4::class)
 class InternetTileNewImplTest : SysuiTestCase() {
     lateinit var underTest: InternetTileNewImpl
 
@@ -84,6 +91,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var logger: QSLogger
     @Mock private lateinit var dialogManager: InternetDialogManager
+    @Mock private lateinit var wifiStateWorker: WifiStateWorker
     @Mock private lateinit var accessPointController: AccessPointController
 
     @Before
@@ -119,6 +127,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
                 logger,
                 viewModel,
                 dialogManager,
+                wifiStateWorker,
                 accessPointController
             )
 
@@ -228,11 +237,28 @@ class InternetTileNewImplTest : SysuiTestCase() {
             assertThat(underTest.state.secondaryLabel).isEqualTo(WIFI_SSID)
         }
 
+    @Test
+    fun secondaryClick_turnsWifiOff() {
+        whenever(wifiStateWorker.isWifiEnabled).thenReturn(true)
+
+        underTest.secondaryClick(null)
+
+        verify(wifiStateWorker, times(1)).isWifiEnabled = eq(false)
+    }
+
+    @Test
+    fun secondaryClick_turnsWifiOn() {
+        whenever(wifiStateWorker.isWifiEnabled).thenReturn(false)
+
+        underTest.secondaryClick(null)
+
+        verify(wifiStateWorker, times(1)).isWifiEnabled = eq(true)
+    }
+
     companion object {
         const val WIFI_SSID = "test ssid"
         val ACTIVE_WIFI =
-            WifiNetworkModel.Active(
-                networkId = 1,
+            WifiNetworkModel.Active.of(
                 isValidated = true,
                 level = 4,
                 ssid = WIFI_SSID,

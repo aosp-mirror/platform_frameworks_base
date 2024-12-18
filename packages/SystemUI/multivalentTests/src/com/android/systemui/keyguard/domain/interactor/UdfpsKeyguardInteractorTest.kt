@@ -27,11 +27,18 @@ import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
+import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
+import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
@@ -62,6 +69,7 @@ class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase(
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val keyguardRepository = kosmos.fakeKeyguardRepository
+    val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     val shadeRepository = kosmos.fakeShadeRepository
     val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
@@ -132,8 +140,15 @@ class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase(
             assertThat(burnInOffsets?.x).isEqualTo(0)
 
             // WHEN we're in the middle of the doze amount change
-            keyguardRepository.setDozeAmount(.50f)
-            runCurrent()
+            if (SceneContainerFlag.isEnabled) {
+                sendTransitionSteps(
+                    TransitionStep(to = DOZING, value = 0.0f, transitionState = STARTED),
+                    TransitionStep(to = DOZING, value = 0.5f, transitionState = RUNNING),
+                )
+            } else {
+                keyguardRepository.setDozeAmount(.50f)
+                runCurrent()
+            }
 
             // THEN burn in is updated (between 0 and the full offset)
             assertThat(burnInOffsets?.progress).isGreaterThan(0f)
@@ -144,8 +159,14 @@ class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase(
             assertThat(burnInOffsets?.x).isLessThan(burnInXOffset)
 
             // WHEN we're fully dozing
-            keyguardRepository.setDozeAmount(1f)
-            runCurrent()
+            if (SceneContainerFlag.isEnabled) {
+                sendTransitionSteps(
+                    TransitionStep(to = DOZING, value = 1.0f, transitionState = FINISHED)
+                )
+            } else {
+                keyguardRepository.setDozeAmount(1f)
+                runCurrent()
+            }
 
             // THEN burn in offsets are updated to final current values (for the given time)
             assertThat(burnInOffsets?.progress).isEqualTo(burnInProgress)
@@ -217,12 +238,21 @@ class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase(
     }
 
     private fun setAwake() {
-        keyguardRepository.setDozeAmount(0f)
+        if (!SceneContainerFlag.isEnabled) {
+            keyguardRepository.setDozeAmount(0f)
+        }
         keyguardRepository.dozeTimeTick()
 
         bouncerRepository.setAlternateVisible(false)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         bouncerRepository.setPrimaryShow(false)
         powerInteractor.setAwakeForTest()
+    }
+
+    private suspend fun sendTransitionSteps(vararg steps: TransitionStep) {
+        steps.forEach { step ->
+            keyguardTransitionRepository.sendTransitionStep(step)
+            testScope.runCurrent()
+        }
     }
 }

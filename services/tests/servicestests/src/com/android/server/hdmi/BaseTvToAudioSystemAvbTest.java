@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP;
+import static com.android.server.hdmi.HdmiCecFeatureAction.DELAY_GIVE_AUDIO_STATUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -221,6 +222,9 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
                 AudioManager.ADJUST_RAISE,
                 AudioDeviceVolumeManager.ADJUST_MODE_NORMAL
         );
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(DELAY_GIVE_AUDIO_STATUS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(

@@ -19,3 +19,23 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "action_bar_wrap_content"
+    namespace: "accessibility"
+    description: "Applies WRAP_CONTENT to the action bar in A11yMenu settings to better fit large fonts"
+    bug: "347911378"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hide_restricted_actions"
+    namespace: "accessibility"
+    description: "Hides shortcut buttons for possibly restricted actions like brightness/volume adjustment"
+    bug: "347269196"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

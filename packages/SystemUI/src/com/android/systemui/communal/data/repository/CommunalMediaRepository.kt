@@ -30,6 +30,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 /** Encapsulates the state of smartspace in communal. */
 interface CommunalMediaRepository {
     val mediaModel: Flow<CommunalMediaModel>
+
+    /** Start listening for media updates. */
+    fun startListening()
+
+    /** Stop listening for media updates. */
+    fun stopListening()
 }
 
 @SysUISingleton
@@ -38,29 +44,7 @@ class CommunalMediaRepositoryImpl
 constructor(
     private val mediaDataManager: MediaDataManager,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
-) : CommunalMediaRepository {
-
-    private val mediaDataListener =
-        object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(
-                key: String,
-                oldKey: String?,
-                data: MediaData,
-                immediately: Boolean,
-                receivedSmartspaceCardLatency: Int,
-                isSsReactivated: Boolean
-            ) {
-                updateMediaModel(data)
-            }
-
-            override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
-                updateMediaModel()
-            }
-        }
-
-    init {
-        mediaDataManager.addListener(mediaDataListener)
-    }
+) : CommunalMediaRepository, MediaDataManager.Listener {
 
     private val _mediaModel: MutableStateFlow<CommunalMediaModel> =
         MutableStateFlow(CommunalMediaModel.INACTIVE)
@@ -72,11 +56,34 @@ constructor(
             initialValue = CommunalMediaModel.INACTIVE,
         )
 
+    override fun startListening() {
+        mediaDataManager.addListener(this)
+    }
+
+    override fun stopListening() {
+        mediaDataManager.removeListener(this)
+    }
+
+    override fun onMediaDataLoaded(
+        key: String,
+        oldKey: String?,
+        data: MediaData,
+        immediately: Boolean,
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
+    ) {
+        updateMediaModel(data)
+    }
+
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
+        updateMediaModel()
+    }
+
     private fun updateMediaModel(data: MediaData? = null) {
-        if (mediaDataManager.hasActiveMediaOrRecommendation()) {
+        if (mediaDataManager.hasAnyMediaOrRecommendation()) {
             _mediaModel.value =
                 CommunalMediaModel(
-                    hasActiveMediaOrRecommendation = true,
+                    hasAnyMediaOrRecommendation = true,
                     createdTimestampMillis = data?.createdTimestampMillis ?: 0L,
                 )
         } else {

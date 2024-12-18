@@ -26,13 +26,15 @@ import static android.view.WindowManager.DOCKED_TOP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
-import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
-import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.animation.Interpolators.DIM_INTERPOLATOR;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
+import static com.android.wm.shell.shared.animation.Interpolators.LINEAR;
+import static com.android.wm.shell.shared.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 
 import android.animation.Animator;
@@ -46,6 +48,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -53,25 +56,31 @@ import android.view.RoundedCorner;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.InteractionJankMonitorUtils;
-import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
-import com.android.wm.shell.common.split.SplitScreenConstants.SnapPosition;
-import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SnapPosition;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.splitscreen.StageTaskListener;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -87,9 +96,30 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public static final int PARALLAX_ALIGN_CENTER = 2;
 
     public static final int FLING_RESIZE_DURATION = 250;
-    private static final int FLING_SWITCH_DURATION = 350;
     private static final int FLING_ENTER_DURATION = 450;
     private static final int FLING_EXIT_DURATION = 450;
+
+    // Here are some (arbitrarily decided) layer definitions used during animations to make sure the
+    // layers stay in order. Note: This does not affect any other layer numbering systems because
+    // the layer system in WindowManager is local within sibling groups. So, for example, each
+    // "veil layer" defined here actually has two sub-layers; and *their* layer values, which we set
+    // in SplitDecorManager, are only important relative to each other.
+    public static final int DIVIDER_LAYER = 0;
+    public static final int FRONT_APP_VEIL_LAYER = DIVIDER_LAYER + 20;
+    public static final int FRONT_APP_LAYER = DIVIDER_LAYER + 10;
+    public static final int BEHIND_APP_VEIL_LAYER = DIVIDER_LAYER - 10;
+    public static final int BEHIND_APP_LAYER = DIVIDER_LAYER - 20;
+
+    // Animation specs for the swap animation
+    private static final int SWAP_ANIMATION_TOTAL_DURATION = 500;
+    private static final float SWAP_ANIMATION_SHRINK_DURATION = 83;
+    private static final float SWAP_ANIMATION_SHRINK_MARGIN_DP = 14;
+    private static final Interpolator SHRINK_INTERPOLATOR =
+            new PathInterpolator(0.2f, 0f, 0f, 1f);
+    private static final Interpolator GROW_INTERPOLATOR =
+            new PathInterpolator(0.45f, 0f, 0.5f, 1f);
+    @ShellMainThread
+    private final Handler mHandler;
 
     private int mDividerWindowWidth;
     private int mDividerInsets;
@@ -131,14 +161,17 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     private final boolean mDimNonImeSide;
     private final boolean mAllowLeftRightSplitInPortrait;
+    private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mIsLeftRightSplit;
     private ValueAnimator mDividerFlingAnimator;
+    private AnimatorSet mSwapAnimator;
 
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayController displayController, DisplayImeController displayImeController,
-            ShellTaskOrganizer taskOrganizer, int parallaxType) {
+            ShellTaskOrganizer taskOrganizer, int parallaxType, @ShellMainThread Handler handler) {
+        mHandler = handler;
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
@@ -163,6 +196,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        mInteractionJankMonitor = InteractionJankMonitor.getInstance();
         resetDividerPosition();
         updateInvisibleRect();
     }
@@ -515,7 +549,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * to middle position if the provided SnapTarget is not supported.
      */
     public void setDivideRatio(@PersistentSnapPosition int snapPosition) {
-        final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
+        final SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
                 snapPosition);
 
         setDividerPosition(snapTarget != null
@@ -549,7 +583,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Sets new divider position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
      */
-    public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
+    public void snapToTarget(int currentPosition, SnapTarget snapTarget) {
         switch (snapTarget.snapPosition) {
             case SNAP_TO_START_AND_DISMISS:
                 flingDividerPosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
@@ -569,23 +603,27 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void onStartDragging() {
-        InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_RESIZE, mContext,
-                getDividerLeash(), null /* tag */);
+        mInteractionJankMonitor.begin(getDividerLeash(), mContext, mHandler,
+                CUJ_SPLIT_SCREEN_RESIZE);
     }
 
     void onDraggingCancelled() {
-        InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_RESIZE);
+        mInteractionJankMonitor.cancel(CUJ_SPLIT_SCREEN_RESIZE);
     }
 
     void onDoubleTappedDivider() {
+        if (isCurrentlySwapping()) {
+            return;
+        }
+
         mSplitLayoutHandler.onDoubleTappedDivider();
     }
 
     /**
-     * Returns {@link DividerSnapAlgorithm.SnapTarget} which matches passing position and velocity.
+     * Returns {@link SnapTarget} which matches passing position and velocity.
      * If hardDismiss is set to {@code true}, it will be harder to reach dismiss target.
      */
-    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity,
+    public SnapTarget findSnapTarget(int position, float velocity,
             boolean hardDismiss) {
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
@@ -638,7 +676,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             if (flingFinishedCallback != null) {
                 flingFinishedCallback.run();
             }
-            InteractionJankMonitorUtils.endTracing(
+            mInteractionJankMonitor.end(
                     CUJ_SPLIT_SCREEN_RESIZE);
             return;
         }
@@ -651,9 +689,18 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 .ofInt(from, to)
                 .setDuration(duration);
         mDividerFlingAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+
+        // If the divider is being physically controlled by the user, we use a cool parallax effect
+        // on the task windows. So if this "snap" animation is an extension of a user-controlled
+        // movement, we pass in true here to continue the parallax effect smoothly.
+        boolean isBeingMovedByUser = mSplitWindowManager.getDividerView() != null
+                && mSplitWindowManager.getDividerView().isMoving();
+
         mDividerFlingAnimator.addUpdateListener(
                 animation -> updateDividerBounds(
-                        (int) animation.getAnimatedValue(), false /* shouldUseParallaxEffect */)
+                        (int) animation.getAnimatedValue(),
+                        isBeingMovedByUser /* shouldUseParallaxEffect */
+                )
         );
         mDividerFlingAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -661,7 +708,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 if (flingFinishedCallback != null) {
                     flingFinishedCallback.run();
                 }
-                InteractionJankMonitorUtils.endTracing(
+                mInteractionJankMonitor.end(
                         CUJ_SPLIT_SCREEN_RESIZE);
                 mDividerFlingAnimator = null;
             }
@@ -675,40 +722,47 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /** Switch both surface position with animation. */
-    public void splitSwitching(SurfaceControl.Transaction t, SurfaceControl leash1,
-            SurfaceControl leash2, Consumer<Rect> finishCallback) {
+    public void playSwapAnimation(SurfaceControl.Transaction t, StageTaskListener topLeftStage,
+            StageTaskListener bottomRightStage, Consumer<Rect> finishCallback) {
         final Rect insets = getDisplayStableInsets(mContext);
+        // If we have insets in the direction of the swap, the animation won't look correct because
+        // window contents will shift and redraw again at the end. So we show a veil to hide that.
         insets.set(mIsLeftRightSplit ? insets.left : 0, mIsLeftRightSplit ? 0 : insets.top,
                 mIsLeftRightSplit ? insets.right : 0, mIsLeftRightSplit ? 0 : insets.bottom);
+        final boolean shouldVeil =
+                insets.left != 0 || insets.top != 0 || insets.right != 0 || insets.bottom != 0;
 
         final int dividerPos = mDividerSnapAlgorithm.calculateNonDismissingSnapTarget(
                 mIsLeftRightSplit ? mBounds2.width() : mBounds2.height()).position;
-        final Rect distBounds1 = new Rect();
-        final Rect distBounds2 = new Rect();
-        final Rect distDividerBounds = new Rect();
-        // Compute dist bounds.
-        updateBounds(dividerPos, distBounds2, distBounds1, distDividerBounds,
+        final Rect endBounds1 = new Rect();
+        final Rect endBounds2 = new Rect();
+        final Rect endDividerBounds = new Rect();
+        // Compute destination bounds.
+        updateBounds(dividerPos, endBounds2, endBounds1, endDividerBounds,
                 false /* setEffectBounds */);
         // Offset to real position under root container.
-        distBounds1.offset(-mRootBounds.left, -mRootBounds.top);
-        distBounds2.offset(-mRootBounds.left, -mRootBounds.top);
-        distDividerBounds.offset(-mRootBounds.left, -mRootBounds.top);
+        endBounds1.offset(-mRootBounds.left, -mRootBounds.top);
+        endBounds2.offset(-mRootBounds.left, -mRootBounds.top);
+        endDividerBounds.offset(-mRootBounds.left, -mRootBounds.top);
 
-        ValueAnimator animator1 = moveSurface(t, leash1, getRefBounds1(), distBounds1,
-                -insets.left, -insets.top);
-        ValueAnimator animator2 = moveSurface(t, leash2, getRefBounds2(), distBounds2,
-                insets.left, insets.top);
-        ValueAnimator animator3 = moveSurface(t, getDividerLeash(), getRefDividerBounds(),
-                distDividerBounds, 0 /* offsetX */, 0 /* offsetY */);
+        ValueAnimator animator1 = moveSurface(t, topLeftStage, getRefBounds1(), endBounds1,
+                -insets.left, -insets.top, true /* roundCorners */, true /* isGoingBehind */,
+                shouldVeil);
+        ValueAnimator animator2 = moveSurface(t, bottomRightStage, getRefBounds2(), endBounds2,
+                insets.left, insets.top, true /* roundCorners */, false /* isGoingBehind */,
+                shouldVeil);
+        ValueAnimator animator3 = moveSurface(t, null /* stage */, getRefDividerBounds(),
+                endDividerBounds, 0 /* offsetX */, 0 /* offsetY */, false /* roundCorners */,
+                false /* isGoingBehind */, false /* addVeil */);
 
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(animator1, animator2, animator3);
-        set.setDuration(FLING_SWITCH_DURATION);
-        set.addListener(new AnimatorListenerAdapter() {
+        mSwapAnimator = new AnimatorSet();
+        mSwapAnimator.playTogether(animator1, animator2, animator3);
+        mSwapAnimator.setDuration(SWAP_ANIMATION_TOTAL_DURATION);
+        mSwapAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
-                        mContext, getDividerLeash(), null /*tag*/);
+                mInteractionJankMonitor.begin(getDividerLeash(),
+                        mContext, mHandler, CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
 
             @Override
@@ -716,44 +770,155 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 mDividerPosition = dividerPos;
                 updateBounds(mDividerPosition);
                 finishCallback.accept(insets);
-                InteractionJankMonitorUtils.endTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+                mInteractionJankMonitor.end(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+                mInteractionJankMonitor.cancel(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
         });
-        set.start();
+        mSwapAnimator.start();
     }
 
-    private ValueAnimator moveSurface(SurfaceControl.Transaction t, SurfaceControl leash,
-            Rect start, Rect end, float offsetX, float offsetY) {
+    /** Returns true if a swap animation is currently playing. */
+    public boolean isCurrentlySwapping() {
+        return mSwapAnimator != null && mSwapAnimator.isRunning();
+    }
+
+    /**
+     * Animates a task leash across the screen. Currently used only for the swap animation.
+     *
+     * @param stage The stage holding the task being animated. If null, it is the divider.
+     * @param roundCorners Whether we should round the corners of the task while animating.
+     * @param isGoingBehind Whether we should a shrink-and-grow effect to the task while it is
+     *                           moving. (Simulates moving behind the divider.)
+     */
+    private ValueAnimator moveSurface(SurfaceControl.Transaction t, StageTaskListener stage,
+            Rect start, Rect end, float offsetX, float offsetY, boolean roundCorners,
+            boolean isGoingBehind, boolean addVeil) {
+        final boolean isApp = stage != null; // check if this is an app or a divider
+        final SurfaceControl leash = isApp ? stage.getRootLeash() : getDividerLeash();
+        final ActivityManager.RunningTaskInfo taskInfo = isApp ? stage.getRunningTaskInfo() : null;
+        final SplitDecorManager decorManager = isApp ? stage.getDecorManager() : null;
+
         Rect tempStart = new Rect(start);
         Rect tempEnd = new Rect(end);
         final float diffX = tempEnd.left - tempStart.left;
         final float diffY = tempEnd.top - tempStart.top;
         final float diffWidth = tempEnd.width() - tempStart.width();
         final float diffHeight = tempEnd.height() - tempStart.height();
+
+        // Get display measurements (for possible shrink animation).
+        final RoundedCorner roundedCorner = mSplitWindowManager.getDividerView().getDisplay()
+                .getRoundedCorner(0 /* position */);
+        float cornerRadius = roundedCorner == null ? 0 : roundedCorner.getRadius();
+        float shrinkMarginPx = PipUtils.dpToPx(
+                SWAP_ANIMATION_SHRINK_MARGIN_DP, mContext.getResources().getDisplayMetrics());
+        float shrinkAmountPx = shrinkMarginPx * 2;
+
+        // Timing calculations
+        float shrinkPortion = SWAP_ANIMATION_SHRINK_DURATION / SWAP_ANIMATION_TOTAL_DURATION;
+        float growPortion = 1 - shrinkPortion;
+
         ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+        // Set the base animation to proceed linearly. Each component of the animation (movement,
+        // shrinking, growing) overrides it with a different interpolator later.
+        animator.setInterpolator(LINEAR);
         animator.addUpdateListener(animation -> {
             if (leash == null) return;
+            if (roundCorners) {
+                // Add rounded corners to the task leash while it is animating.
+                t.setCornerRadius(leash, cornerRadius);
+            }
 
-            final float scale = (float) animation.getAnimatedValue();
-            final float distX = tempStart.left + scale * diffX;
-            final float distY = tempStart.top + scale * diffY;
-            final int width = (int) (tempStart.width() + scale * diffWidth);
-            final int height = (int) (tempStart.height() + scale * diffHeight);
-            if (offsetX == 0 && offsetY == 0) {
-                t.setPosition(leash, distX, distY);
-                t.setWindowCrop(leash, width, height);
+            final float progress = (float) animation.getAnimatedValue();
+            final float moveProgress = EMPHASIZED.getInterpolation(progress);
+            float instantaneousX = tempStart.left + moveProgress * diffX;
+            float instantaneousY = tempStart.top + moveProgress * diffY;
+            int width = (int) (tempStart.width() + moveProgress * diffWidth);
+            int height = (int) (tempStart.height() + moveProgress * diffHeight);
+
+            if (isGoingBehind) {
+                float shrinkDiffX; // the position adjustments needed for this frame
+                float shrinkDiffY;
+                float shrinkScaleX; // the scale adjustments needed for this frame
+                float shrinkScaleY;
+
+                // Find the max amount we will be shrinking this leash, as a proportion (e.g. 0.1f).
+                float maxShrinkX = shrinkAmountPx / height;
+                float maxShrinkY = shrinkAmountPx / width;
+
+                // Find if we are in the shrinking part of the animation, or the growing part.
+                boolean shrinking = progress <= shrinkPortion;
+
+                if (shrinking) {
+                    // Find how far into the shrink portion we are (e.g. 0.5f).
+                    float shrinkProgress = progress / shrinkPortion;
+                    // Find how much we should have progressed in shrinking the leash (e.g. 0.8f).
+                    float interpolatedShrinkProgress =
+                            SHRINK_INTERPOLATOR.getInterpolation(shrinkProgress);
+                    // Find how much width proportion we should be taking off (e.g. 0.1f)
+                    float widthProportionLost =  maxShrinkX * interpolatedShrinkProgress;
+                    shrinkScaleX = 1 - widthProportionLost;
+                    // Find how much height proportion we should be taking off (e.g. 0.1f)
+                    float heightProportionLost =  maxShrinkY * interpolatedShrinkProgress;
+                    shrinkScaleY = 1 - heightProportionLost;
+                    // Add a small amount to the leash's position to keep the task centered.
+                    shrinkDiffX = (width * widthProportionLost) / 2;
+                    shrinkDiffY = (height * heightProportionLost) / 2;
+                } else {
+                    // Find how far into the grow portion we are (e.g. 0.5f).
+                    float growProgress = (progress - shrinkPortion) / growPortion;
+                    // Find how much we should have progressed in growing the leash (e.g. 0.8f).
+                    float interpolatedGrowProgress =
+                            GROW_INTERPOLATOR.getInterpolation(growProgress);
+                    // Find how much width proportion we should be taking off (e.g. 0.1f)
+                    float widthProportionLost =  maxShrinkX * (1 - interpolatedGrowProgress);
+                    shrinkScaleX = 1 - widthProportionLost;
+                    // Find how much height proportion we should be taking off (e.g. 0.1f)
+                    float heightProportionLost =  maxShrinkY * (1 - interpolatedGrowProgress);
+                    shrinkScaleY = 1 - heightProportionLost;
+                    // Add a small amount to the leash's position to keep the task centered.
+                    shrinkDiffX = (width * widthProportionLost) / 2;
+                    shrinkDiffY = (height * heightProportionLost) / 2;
+                }
+
+                instantaneousX += shrinkDiffX;
+                instantaneousY += shrinkDiffY;
+                width *= shrinkScaleX;
+                height *= shrinkScaleY;
+                // Set scale on the leash's contents.
+                t.setScale(leash, shrinkScaleX, shrinkScaleY);
+            }
+
+            // Set layers
+            if (taskInfo != null) {
+                t.setLayer(leash, isGoingBehind ? BEHIND_APP_LAYER : FRONT_APP_LAYER);
             } else {
-                final int diffOffsetX = (int) (scale * offsetX);
-                final int diffOffsetY = (int) (scale * offsetY);
-                t.setPosition(leash, distX + diffOffsetX, distY + diffOffsetY);
+                t.setLayer(leash, DIVIDER_LAYER);
+            }
+
+            if (offsetX == 0 && offsetY == 0) {
+                t.setPosition(leash, instantaneousX, instantaneousY);
+                mTempRect.set((int) instantaneousX, (int) instantaneousY,
+                        (int) (instantaneousX + width), (int) (instantaneousY + height));
+                t.setWindowCrop(leash, width, height);
+                if (addVeil) {
+                    decorManager.drawNextVeilFrameForSwapAnimation(
+                            taskInfo, mTempRect, t, isGoingBehind, leash, 0, 0);
+                }
+            } else {
+                final int diffOffsetX = (int) (moveProgress * offsetX);
+                final int diffOffsetY = (int) (moveProgress * offsetY);
+                t.setPosition(leash, instantaneousX + diffOffsetX, instantaneousY + diffOffsetY);
                 mTempRect.set(0, 0, width, height);
                 mTempRect.offsetTo(-diffOffsetX, -diffOffsetY);
                 t.setCrop(leash, mTempRect);
+                if (addVeil) {
+                    decorManager.drawNextVeilFrameForSwapAnimation(
+                            taskInfo, mTempRect, t, isGoingBehind, leash, diffOffsetX, diffOffsetY);
+                }
             }
             t.apply();
         });

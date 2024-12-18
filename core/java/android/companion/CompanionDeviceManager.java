@@ -21,6 +21,7 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_P
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
 
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -119,31 +120,40 @@ public final class CompanionDeviceManager {
      * is created successfully.
      */
     public static final int RESULT_OK = -1;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates if the association dialog
      * is implicitly cancelled.
      * E.g. phone is locked, switch to another app or press outside the dialog.
      */
     public static final int RESULT_CANCELED = 0;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the association dialog
      * is explicitly declined by the users.
      */
     public static final int RESULT_USER_REJECTED = 1;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the association
      * dialog is dismissed if there's no device found after 20 seconds.
      */
     public static final int RESULT_DISCOVERY_TIMEOUT = 2;
-
+    //TODO(b/331459560) Need to update the java doc after API cut for W.
     /**
      * The result code to propagate back to the user activity, indicates the internal error
      * in CompanionDeviceManager.
      */
     public static final int RESULT_INTERNAL_ERROR = 3;
+
+    /**
+     * The result code to propagate back to the user activity and
+     * {@link Callback#onFailure(int, CharSequence)}, indicates app is not allow to create the
+     * association due to the security issue.
+     * E.g. There are missing necessary permissions when creating association.
+     */
+    @FlaggedApi(Flags.FLAG_ASSOCIATION_FAILURE_CODE)
+    public static final int RESULT_SECURITY_ERROR = 4;
 
     /**
      * Requesting applications will receive the String in {@link Callback#onFailure} if the
@@ -374,6 +384,19 @@ public final class CompanionDeviceManager {
          * @param error error message.
          */
         public abstract void onFailure(@Nullable CharSequence error);
+
+        /**
+         * Invoked if the association could not be created.
+         *
+         * Please note that both {@link #onFailure(CharSequence error)} and this
+         * API will be called if the association could not be created.
+         *
+         * @param errorCode indicate the particular error code why the association
+         *                  could not be created.
+         * @param error error message.
+         */
+        @FlaggedApi(Flags.FLAG_ASSOCIATION_FAILURE_CODE)
+        public void onFailure(@ResultCode int errorCode, @Nullable CharSequence error) {}
     }
 
     private final ICompanionDeviceManager mService;
@@ -1156,6 +1179,12 @@ public final class CompanionDeviceManager {
      * BluetoothDevice#ACTION_BOND_STATE_CHANGED} intents to be notified when the bond removal
      * process completes, and its result.
      *
+     * <p>This API should be used to remove a bluetooth bond that was created either
+     * by using {@link BluetoothDevice#createBond(int)} or by a direct user action.
+     * The association must already exist with this device before calling this method, but
+     * this may be done retroactively to remove a bond that was created outside of the
+     * CompanionDeviceManager.
+     *
      * @param associationId an already-associated companion device to remove bond from
      * @return false on immediate error, true if bond removal process will begin
      */
@@ -1803,7 +1832,11 @@ public final class CompanionDeviceManager {
         }
 
         @Override
-        public void onFailure(CharSequence error) throws RemoteException {
+        public void onFailure(@ResultCode int errorCode, @Nullable CharSequence error) {
+            if (Flags.associationFailureCode()) {
+                execute(mCallback::onFailure, errorCode, error);
+            }
+
             execute(mCallback::onFailure, error);
         }
 
@@ -1812,6 +1845,12 @@ public final class CompanionDeviceManager {
                 mExecutor.execute(() -> callback.accept(arg));
             } else if (mHandler != null) {
                 mHandler.post(() -> callback.accept(arg));
+            }
+        }
+
+        private <T, U> void execute(BiConsumer<T, U> callback, T arg1, U arg2) {
+            if (mExecutor != null) {
+                mExecutor.execute(() -> callback.accept(arg1, arg2));
             }
         }
     }

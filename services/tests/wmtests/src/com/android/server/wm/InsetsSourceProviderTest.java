@@ -30,6 +30,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
@@ -112,13 +113,13 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
 
         // We must not have control or control target before we have the insets source window.
-        mProvider.updateControlForTarget(target, true /* force */);
+        mProvider.updateControlForTarget(target, true /* force */, null /* statsToken */);
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
 
         // We can have the control or the control target after we have the insets source window.
         mProvider.setWindowContainer(statusBar, null, null);
-        mProvider.updateControlForTarget(target, false /* force */);
+        mProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
         assertNotNull(mProvider.getControl(target));
         assertNotNull(mProvider.getControlTarget());
 
@@ -127,25 +128,25 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mProvider.startSeamlessRotation();
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
-        mProvider.updateControlForTarget(target, true /* force */);
+        mProvider.updateControlForTarget(target, true /* force */, null /* statsToken */);
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
 
         // We can have the control and the control target after seamless rotation.
         mProvider.finishSeamlessRotation();
-        mProvider.updateControlForTarget(target, false /* force */);
+        mProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
         assertNotNull(mProvider.getControl(target));
         assertNotNull(mProvider.getControlTarget());
 
         // We can clear the control and the control target.
-        mProvider.updateControlForTarget(null, false /* force */);
+        mProvider.updateControlForTarget(null, false /* force */, null /* statsToken */);
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
 
         // We must not have control or control target if the insets source window doesn't have a
         // surface.
         statusBar.setSurfaceControl(null);
-        mProvider.updateControlForTarget(target, true /* force */);
+        mProvider.updateControlForTarget(target, true /* force */, null /* statsToken */);
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
     }
@@ -173,7 +174,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
         // We must not have control or control target before we have the insets source window,
         // so also no leash.
-        mProvider.updateControlForTarget(target, true /* force */);
+        mProvider.updateControlForTarget(target, true /* force */, null /* statsToken */);
         assertNull(mProvider.getControl(target));
         assertNull(mProvider.getControlTarget());
         assertNull(mProvider.getLeash(target));
@@ -181,14 +182,14 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         // We can have the control or the control target after we have the insets source window,
         // but no leash as this is not yet ready for dispatching.
         mProvider.setWindowContainer(statusBar, null, null);
-        mProvider.updateControlForTarget(target, false /* force */);
+        mProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
         assertNotNull(mProvider.getControl(target));
         assertNotNull(mProvider.getControlTarget());
         assertEquals(mProvider.getControlTarget(), target);
         assertNull(mProvider.getLeash(target));
 
-        // After surface transactions are applied, the leash is ready for dispatching.
-        mProvider.onSurfaceTransactionApplied();
+        // Set the leash to be ready for dispatching.
+        mProvider.mIsLeashReadyForDispatching = true;
         assertNotNull(mProvider.getLeash(target));
 
         // We do have fake control for the fake control target, but that has no leash.
@@ -260,14 +261,35 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateInsetsControlPosition() {
+        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+
+        final WindowState ime1 = createWindow(null, TYPE_INPUT_METHOD, "ime1");
+        ime1.getFrame().set(new Rect(0, 0, 0, 0));
+        mImeProvider.setWindowContainer(ime1, null, null);
+        mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
+        ime1.getFrame().set(new Rect(0, 400, 500, 500));
+        mImeProvider.updateInsetsControlPosition(ime1);
+        assertEquals(new Point(0, 400), mImeProvider.getControl(target).getSurfacePosition());
+
+        final WindowState ime2 = createWindow(null, TYPE_INPUT_METHOD, "ime2");
+        ime2.getFrame().set(new Rect(0, 0, 0, 0));
+        mImeProvider.setWindowContainer(ime2, null, null);
+        mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
+        ime2.getFrame().set(new Rect(0, 400, 500, 500));
+        mImeProvider.updateInsetsControlPosition(ime2);
+        assertEquals(new Point(0, 400), mImeProvider.getControl(target).getSurfacePosition());
+    }
+
+    @Test
     public void testSetRequestedVisibleTypes() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
-        mProvider.updateControlForTarget(target, false /* force */);
+        mProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
         target.setRequestedVisibleTypes(0, statusBars());
-        mProvider.updateClientVisibility(target);
+        mProvider.updateClientVisibility(target, null /* statsToken */);
         assertFalse(mSource.isVisible());
     }
 
@@ -278,7 +300,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         target.setRequestedVisibleTypes(0, statusBars());
-        mProvider.updateClientVisibility(target);
+        mProvider.updateClientVisibility(target, null /* statsToken */);
         assertTrue(mSource.isVisible());
     }
 

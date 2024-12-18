@@ -54,13 +54,6 @@ public interface InsetsAnimationControlCallbacks {
     void notifyFinished(InsetsAnimationControlRunner runner, boolean shown);
 
     /**
-     * Apply the new params to the surface.
-     * @param params The {@link android.view.SyncRtSurfaceTransactionApplier.SurfaceParams} to
-     *               apply.
-     */
-    void applySurfaceParams(SyncRtSurfaceTransactionApplier.SurfaceParams... params);
-
-    /**
      * Post a message to release the Surface, guaranteed to happen after all
      * previous calls to applySurfaceParams.
      */

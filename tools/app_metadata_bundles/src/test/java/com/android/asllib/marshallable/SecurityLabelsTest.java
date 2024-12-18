@@ -16,13 +16,13 @@
 
 package com.android.asllib.marshallable;
 
-
 import com.android.asllib.testutils.TestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -60,37 +60,43 @@ public class SecurityLabelsTest {
     public void testMissingOptionalFields() throws Exception {
         for (String optField : OPTIONAL_FIELD_NAMES) {
             var ele =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(SECURITY_LABELS_HR_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            ele.get(0).removeAttribute(optField);
-            SecurityLabels securityLabels = new SecurityLabelsFactory().createFromHrElements(ele);
-            securityLabels.toOdDomElements(TestUtils.document());
+            ele.removeAttribute(optField);
+            SecurityLabels securityLabels = new SecurityLabelsFactory().createFromHrElement(ele);
+            var unused = securityLabels.toOdDomElement(TestUtils.document());
         }
         for (String optField : OPTIONAL_FIELD_NAMES_OD) {
             var ele =
-                    TestUtils.getElementsFromResource(
+                    TestUtils.getElementFromResource(
                             Paths.get(SECURITY_LABELS_OD_PATH, ALL_FIELDS_VALID_FILE_NAME));
-            TestUtils.removeOdChildEleWithName(ele.get(0), optField);
-            SecurityLabels securityLabels = new SecurityLabelsFactory().createFromOdElements(ele);
-            securityLabels.toHrDomElements(TestUtils.document());
+            TestUtils.removeOdChildEleWithName(ele, optField);
+            SecurityLabels securityLabels = new SecurityLabelsFactory().createFromOdElement(ele);
+            var unused = securityLabels.toHrDomElement(TestUtils.document());
         }
     }
 
     private void testHrToOdSecurityLabels(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new SecurityLabelsFactory(),
-                SECURITY_LABELS_HR_PATH,
-                SECURITY_LABELS_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        SecurityLabels securityLabels =
+                new SecurityLabelsFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SECURITY_LABELS_HR_PATH, fileName)));
+        Element ele = securityLabels.toOdDomElement(doc);
+        doc.appendChild(ele);
+        TestUtils.testFormatToFormat(doc, Paths.get(SECURITY_LABELS_OD_PATH, fileName));
     }
 
     private void testOdToHrSecurityLabels(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new SecurityLabelsFactory(),
-                SECURITY_LABELS_OD_PATH,
-                SECURITY_LABELS_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        SecurityLabels securityLabels =
+                new SecurityLabelsFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(SECURITY_LABELS_OD_PATH, fileName)));
+        Element ele = securityLabels.toHrDomElement(doc);
+        doc.appendChild(ele);
+        TestUtils.testFormatToFormat(doc, Paths.get(SECURITY_LABELS_HR_PATH, fileName));
     }
 }

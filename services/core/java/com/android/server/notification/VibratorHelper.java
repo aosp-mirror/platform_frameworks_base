@@ -24,6 +24,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.media.Utils;
+import android.net.Uri;
 import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -51,6 +54,7 @@ public final class VibratorHelper {
     @Nullable private final float[] mDefaultPwlePattern;
     @Nullable private final float[] mFallbackPwlePattern;
     private final int mDefaultVibrationAmplitude;
+    private final Context mContext;
 
     public VibratorHelper(Context context) {
         mVibrator = context.getSystemService(Vibrator.class);
@@ -68,6 +72,7 @@ public final class VibratorHelper {
                 com.android.internal.R.array.config_notificationFallbackVibeWaveform);
         mDefaultVibrationAmplitude = context.getResources().getInteger(
             com.android.internal.R.integer.config_defaultVibrationAmplitude);
+        mContext = context;
     }
 
     /**
@@ -184,6 +189,16 @@ public final class VibratorHelper {
      * @param insistent {@code true} if the vibration should loop until it is cancelled.
      */
     public VibrationEffect createDefaultVibration(boolean insistent) {
+        if (com.android.server.notification.Flags.notificationVibrationInSoundUri()) {
+            final Uri defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(mContext,
+                    RingtoneManager.TYPE_NOTIFICATION);
+            final VibrationEffect vibrationEffectFromSoundUri =
+                    createVibrationEffectFromSoundUri(defaultRingtoneUri);
+            if (vibrationEffectFromSoundUri != null) {
+                return vibrationEffectFromSoundUri;
+            }
+        }
+
         if (mVibrator.hasFrequencyControl()) {
             VibrationEffect effect = createPwleWaveformVibration(mDefaultPwlePattern, insistent);
             if (effect != null) {
@@ -191,6 +206,28 @@ public final class VibratorHelper {
             }
         }
         return createWaveformVibration(mDefaultPattern, insistent);
+    }
+
+    /**
+     * Safely create a {@link VibrationEffect} from given an uri {@code Uri}.
+     * with query parameter "vibration_uri"
+     *
+     * Use this function if the {@code Uri} is with a query parameter "vibration_uri" and the
+     * vibration_uri represents a valid vibration effect in xml
+     *
+     * @param uri {@code Uri} an uri including query parameter "vibraiton_uri"
+     */
+    public @Nullable VibrationEffect createVibrationEffectFromSoundUri(Uri uri) {
+        if (uri == null || uri.isOpaque()) {
+            return null;
+        }
+
+        try {
+            return Utils.parseVibrationEffect(mVibrator, Utils.getVibrationUri(uri));
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to get vibration effect: ", e);
+        }
+        return null;
     }
 
     /** Returns if a given vibration can be played by the vibrator that does notification buzz. */

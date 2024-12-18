@@ -9,3 +9,12 @@ flag {
     bug: "319292658"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "mainline_apis"
+    is_exported: true
+    namespace: "webview"
+    description: "New APIs required by WebViewBootstrap mainline module"
+    bug: "310653407"
+    is_fixed_read_only: true
+}

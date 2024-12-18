@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.res.Configuration
+import android.util.LayoutDirection
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -34,6 +36,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -77,6 +81,10 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationX() =
         testScope.runTest {
+            val config: Configuration = mock()
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(config)
+
             configurationRepository.setDimensionPixelSize(
                 R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x,
                 100
@@ -102,6 +110,10 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationX_resetsAfterCancellation() =
         testScope.runTest {
+            val config: Configuration = mock()
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(config)
+
             configurationRepository.setDimensionPixelSize(
                 R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x,
                 100

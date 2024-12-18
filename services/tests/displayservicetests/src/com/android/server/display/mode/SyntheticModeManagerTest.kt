@@ -41,7 +41,7 @@ class SyntheticModeManagerTest {
     private val mockConfig = mock<DisplayDeviceConfig>()
 
     @Test
-    fun `test app supported modes`(@TestParameter testCase: AppSupportedModesTestCase) {
+    fun testAppSupportedModes(@TestParameter testCase: AppSupportedModesTestCase) {
         whenever(mockFlags.isSynthetic60HzModesEnabled).thenReturn(testCase.syntheticModesEnabled)
         whenever(mockConfig.isVrrSupportEnabled).thenReturn(testCase.vrrSupported)
         val syntheticModeManager = SyntheticModeManager(mockFlags)

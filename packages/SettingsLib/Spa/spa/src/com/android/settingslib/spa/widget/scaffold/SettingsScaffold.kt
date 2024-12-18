@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.compose.verticalValues
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 import com.android.settingslib.spa.framework.theme.settingsBackground
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -55,6 +56,10 @@ fun SettingsScaffold(
 ) {
     ActivityTitle(title)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    if (isSpaExpressiveEnabled) {
+        LaunchedEffect(scrollBehavior.state.heightOffsetLimit) { scrollBehavior.collapse() }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { SettingsTopAppBar(title, scrollBehavior, actions) },

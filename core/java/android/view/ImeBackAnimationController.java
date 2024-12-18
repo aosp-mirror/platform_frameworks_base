@@ -27,6 +27,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.util.Log;
 import android.view.animation.BackGestureInterpolator;
@@ -137,9 +138,10 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     @Override
     public void onBackInvoked() {
         if (!isBackAnimationAllowed() || !mIsPreCommitAnimationInProgress) {
-            // play regular hide animation if back-animation is not allowed or if insets control has
-            // been cancelled by the system (this can happen in split screen for example)
-            mInsetsController.hide(ime());
+            // play regular hide animation if predictive back-animation is not allowed or if insets
+            // control has been cancelled by the system. This can happen in multi-window mode for
+            // example (i.e. split-screen or activity-embedding)
+            notifyHideIme();
             return;
         }
         startPostCommitAnim(/*hideIme*/ true);
@@ -147,15 +149,17 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private void setPreCommitProgress(float progress) {
         if (isHideAnimationInProgress()) return;
+        setInterpolatedProgress(BACK_GESTURE.getInterpolation(progress) * PEEK_FRACTION);
+    }
+
+    private void setInterpolatedProgress(float progress) {
         if (mWindowInsetsAnimationController != null) {
             float hiddenY = mWindowInsetsAnimationController.getHiddenStateInsets().bottom;
             float shownY = mWindowInsetsAnimationController.getShownStateInsets().bottom;
             float imeHeight = shownY - hiddenY;
-            float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
-            int newY = (int) (imeHeight - interpolatedProgress * (imeHeight * PEEK_FRACTION));
+            int newY = (int) (imeHeight - progress * imeHeight);
             if (mStartRootScrollY != 0) {
-                mViewRoot.setScrollY(
-                        (int) (mStartRootScrollY * (1 - interpolatedProgress * PEEK_FRACTION)));
+                mViewRoot.setScrollY((int) (mStartRootScrollY * (1 - progress)));
             }
             mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, newY), 1f,
                     progress);
@@ -169,21 +173,14 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             return;
         }
         mTriggerBack = triggerBack;
-        int currentBottomInset = mWindowInsetsAnimationController.getCurrentInsets().bottom;
-        int targetBottomInset;
-        if (triggerBack) {
-            targetBottomInset = mWindowInsetsAnimationController.getHiddenStateInsets().bottom;
-        } else {
-            targetBottomInset = mWindowInsetsAnimationController.getShownStateInsets().bottom;
-        }
-        mPostCommitAnimator = ValueAnimator.ofFloat(currentBottomInset, targetBottomInset);
+        float targetProgress = triggerBack ? 1f : 0f;
+        mPostCommitAnimator = ValueAnimator.ofFloat(
+                BACK_GESTURE.getInterpolation(mLastProgress) * PEEK_FRACTION, targetProgress);
         mPostCommitAnimator.setInterpolator(
                 triggerBack ? STANDARD_ACCELERATE : EMPHASIZED_DECELERATE);
         mPostCommitAnimator.addUpdateListener(animation -> {
-            int bottomInset = (int) ((float) animation.getAnimatedValue());
             if (mWindowInsetsAnimationController != null) {
-                mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, bottomInset),
-                        1f, animation.getAnimatedFraction());
+                setInterpolatedProgress((float) animation.getAnimatedValue());
             } else {
                 reset();
             }
@@ -209,10 +206,9 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         if (triggerBack) {
             mInsetsController.setPredictiveBackImeHideAnimInProgress(true);
             notifyHideIme();
-        }
-        if (mStartRootScrollY != 0 && !triggerBack) {
-            // This causes RootView to update its scroll back to the panned position
-            mInsetsController.getHost().notifyInsetsChanged();
+            // requesting IME as invisible during post-commit
+            mInsetsController.setRequestedVisibleTypes(0, ime());
+            mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
         }
     }
 
@@ -228,12 +224,6 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
         // the IME away
         mInsetsController.getHost().getInputMethodManager()
                 .notifyImeHidden(mInsetsController.getHost().getWindowToken(), statsToken);
-
-        // requesting IME as invisible during post-commit
-        mInsetsController.setRequestedVisibleTypes(0, ime());
-        // Changes the animation state. This also notifies RootView of changed insets, which causes
-        // it to reset its scrollY to 0f (animated) if it was panned
-        mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
     }
 
     private void reset() {
@@ -254,8 +244,18 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
     }
 
     private boolean isBackAnimationAllowed() {
-        // back animation is allowed in all cases except when softInputMode is adjust_resize AND
-        // there is no app-registered WindowInsetsAnimationCallback AND edge-to-edge is not enabled.
+
+        if (mViewRoot.mContext.getResources().getConfiguration().windowConfiguration
+                .getWindowingMode() == WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW) {
+            // TODO(b/346726115) enable predictive back animation in multi-window mode in
+            //  DisplayImeController
+            return false;
+        }
+
+        // otherwise, the predictive back animation is allowed in all cases except when
+        // 1. softInputMode is adjust_resize AND
+        // 2. there is no app-registered WindowInsetsAnimationCallback AND
+        // 3. edge-to-edge is not enabled.
         return (mViewRoot.mWindowAttributes.softInputMode & SOFT_INPUT_MASK_ADJUST)
                 != SOFT_INPUT_ADJUST_RESIZE
                 || (mViewRoot.mView != null && mViewRoot.mView.hasWindowInsetsAnimationCallback())
@@ -269,6 +269,10 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private boolean isHideAnimationInProgress() {
         return mPostCommitAnimator != null && mTriggerBack;
+    }
+
+    boolean isAnimationInProgress() {
+        return mIsPreCommitAnimationInProgress || mWindowInsetsAnimationController != null;
     }
 
     /**

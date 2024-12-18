@@ -21,14 +21,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.FakeUserTracker
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth
 import kotlin.test.Test
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -38,23 +36,18 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class KeyguardSmartspaceRepositoryImplTest : SysuiTestCase() {
 
-    private lateinit var scheduler: TestCoroutineScheduler
-    private lateinit var dispatcher: CoroutineDispatcher
-    private lateinit var scope: TestScope
+    private val kosmos = testKosmos()
+    private val scope = kosmos.testScope
+    private val fakeSettings = kosmos.fakeSettings
 
     private lateinit var underTest: KeyguardSmartspaceRepository
-    private lateinit var fakeSettings: FakeSettings
     private lateinit var fakeUserTracker: FakeUserTracker
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        fakeSettings = FakeSettings()
         fakeUserTracker = FakeUserTracker()
         fakeSettings.userId = fakeUserTracker.userId
-        scheduler = TestCoroutineScheduler()
-        dispatcher = StandardTestDispatcher(scheduler)
-        scope = TestScope(dispatcher)
         underTest =
             KeyguardSmartspaceRepositoryImpl(
                 context = context,

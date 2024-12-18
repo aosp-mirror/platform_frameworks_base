@@ -544,6 +544,14 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Settings.Secure.getIntForUser(getContentResolver(),
+                Settings.Secure.SECURE_FRP_MODE, 0,
+                getUserId()) == 1) {
+            Log.e(TAG, "Sharing disabled due to active FRP lock.");
+            super.onCreate(savedInstanceState);
+            finish();
+            return;
+        }
         final long intentReceivedTime = System.currentTimeMillis();
         mLatencyTracker.onActionStart(ACTION_LOAD_SHARE_SHEET);
 
@@ -2952,10 +2960,10 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private boolean shouldShowStickyContentPreviewNoOrientationCheck() {
-        return shouldShowTabs()
-                && (mMultiProfilePagerAdapter.getListAdapterForUserHandle(
-                        UserHandle.of(UserHandle.myUserId())).getCount() > 0
-                    || shouldShowStickyContentPreviewWhenEmpty())
+        ResolverListAdapter adapter = mMultiProfilePagerAdapter.getListAdapterForUserHandle(
+                UserHandle.of(UserHandle.myUserId()));
+        boolean isEmpty = adapter == null || adapter.getCount() == 0;
+        return shouldShowTabs() && (!isEmpty || shouldShowStickyContentPreviewWhenEmpty())
                 && shouldShowContentPreview();
     }
 

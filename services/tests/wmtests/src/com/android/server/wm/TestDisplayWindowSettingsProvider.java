@@ -22,6 +22,16 @@ import android.view.DisplayInfo;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.android.server.wm.DisplayWindowSettingsProvider.WritableSettingsStorage;
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * In-memory DisplayWindowSettingsProvider used in tests. Ensures no settings are read from or
  * written to device-specific display settings files.
@@ -29,6 +39,10 @@ import java.util.Map;
 public final class TestDisplayWindowSettingsProvider extends DisplayWindowSettingsProvider {
 
     private final Map<String, SettingsEntry> mOverrideSettingsMap = new HashMap<>();
+
+    public TestDisplayWindowSettingsProvider() {
+        super(new TestStorage(), new TestStorage());
+    }
 
     @Override
     @NonNull
@@ -75,5 +89,82 @@ public final class TestDisplayWindowSettingsProvider extends DisplayWindowSettin
      */
     private static String getIdentifier(DisplayInfo displayInfo) {
         return displayInfo.uniqueId;
+    }
+
+    /** In-memory storage implementation. */
+    public static class TestStorage implements WritableSettingsStorage {
+        private InputStream mReadStream;
+        private ByteArrayOutputStream mWriteStream;
+
+        private boolean mWasSuccessful;
+
+        /**
+         * Returns input stream for reading. By default tries forward the output stream if previous
+         * write was successful.
+         * @see #closeRead()
+         */
+        @Override
+        public InputStream openRead() throws FileNotFoundException {
+            if (mReadStream == null && mWasSuccessful) {
+                mReadStream = new ByteArrayInputStream(mWriteStream.toByteArray());
+            }
+            if (mReadStream == null) {
+                throw new FileNotFoundException();
+            }
+            if (mReadStream.markSupported()) {
+                mReadStream.mark(Integer.MAX_VALUE);
+            }
+            return mReadStream;
+        }
+
+        /** Must be called after each {@link #openRead} to reset the position in the stream. */
+        public void closeRead() throws IOException {
+            if (mReadStream == null) {
+                throw new FileNotFoundException();
+            }
+            if (mReadStream.markSupported()) {
+                mReadStream.reset();
+            }
+            mReadStream = null;
+        }
+
+        /**
+         * Creates new or resets existing output stream for write. Automatically closes previous
+         * read stream, since following reads should happen based on this new write.
+         */
+        @Override
+        public OutputStream startWrite() throws IOException {
+            if (mWriteStream == null) {
+                mWriteStream = new ByteArrayOutputStream();
+            } else {
+                mWriteStream.reset();
+            }
+            if (mReadStream != null) {
+                closeRead();
+            }
+            return mWriteStream;
+        }
+
+        @Override
+        public void finishWrite(OutputStream os, boolean success) {
+            mWasSuccessful = success;
+            try {
+                os.close();
+            } catch (IOException e) {
+                // This method can't throw IOException since the super implementation doesn't, so
+                // we just wrap it in a RuntimeException so we end up crashing the test all the
+                // same.
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Overrides the read stream of the injector. By default it uses current write stream. */
+        public void setReadStream(InputStream is) {
+            mReadStream = is;
+        }
+
+        public boolean wasWriteSuccessful() {
+            return mWasSuccessful;
+        }
     }
 }

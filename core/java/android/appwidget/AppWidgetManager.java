@@ -523,6 +523,8 @@ public class AppWidgetManager {
     private final IAppWidgetService mService;
     private final DisplayMetrics mDisplayMetrics;
 
+    private int mMaxBitmapMemory = 0;
+
     private boolean mHasPostedLegacyLists = false;
 
     /**
@@ -547,6 +549,12 @@ public class AppWidgetManager {
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         if (mService == null) {
             return;
+        }
+        // Allowing some buffer when estimating the maximum bitmap cache size
+        try {
+            mMaxBitmapMemory = (int) (mService.getMaxBitmapMemory() * 0.9);
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting the maximum bitmap memory", e);
         }
         BackgroundThread.getExecutor().execute(() -> {
             try {
@@ -576,7 +584,7 @@ public class AppWidgetManager {
             final RemoteViews viewsCopy = new RemoteViews(original);
             Runnable updateWidgetWithTask = () -> {
                 try {
-                    viewsCopy.collectAllIntents().get();
+                    viewsCopy.collectAllIntents(mMaxBitmapMemory).get();
                     action.acceptOrThrow(viewsCopy);
                 } catch (Exception e) {
                     Log.e(TAG, failureMsg, e);

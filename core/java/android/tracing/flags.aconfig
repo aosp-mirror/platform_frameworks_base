@@ -38,3 +38,35 @@ flag {
     is_fixed_read_only: true
     bug: "323166383"
 }
+
+flag {
+    name: "perfetto_wm_tracing"
+    namespace: "windowing_tools"
+    description: "Migrate WindowManager tracing to Perfetto"
+    is_fixed_read_only: true
+    bug: "323165543"
+}
+
+flag {
+    name: "perfetto_wm_dump"
+    namespace: "windowing_tools"
+    description: "Migrate WindowManager dump to Perfetto"
+    is_fixed_read_only: true
+    bug: "323165543"
+}
+
+flag {
+    name: "perfetto_wm_dump_cts"
+    namespace: "windowing_tools"
+    description: "Migrate WindowManager dump in CTS tests to Perfetto"
+    is_fixed_read_only: true
+    bug: "323165543"
+}
+
+flag {
+    name: "client_side_proto_logging"
+    namespace: "windowing_tools"
+    description: "Add support for client side protologging"
+    is_fixed_read_only: true
+    bug: "352538294"
+}

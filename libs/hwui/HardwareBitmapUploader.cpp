@@ -21,8 +21,6 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
-#include <GrDirectContext.h>
-#include <GrTypes.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
@@ -30,6 +28,8 @@
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrTypes.h>
 #include <utils/GLUtils.h>
 #include <utils/NdkUtils.h>
 #include <utils/Trace.h>
@@ -318,6 +318,11 @@ bool HardwareBitmapUploader::has1010102Support() {
     return has101012Support;
 }
 
+bool HardwareBitmapUploader::has10101010Support() {
+    static bool has1010110Support = checkSupport(AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM);
+    return has1010110Support;
+}
+
 bool HardwareBitmapUploader::hasAlpha8Support() {
     static bool hasAlpha8Support = checkSupport(AHARDWAREBUFFER_FORMAT_R8_UNORM);
     return hasAlpha8Support;
@@ -375,6 +380,19 @@ static FormatInfo determineFormat(const SkBitmap& skBitmap, bool usingGL) {
                 formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
             }
             formatInfo.format = GL_RGBA;
+            break;
+        case kRGBA_10x6_SkColorType:
+            formatInfo.isSupported = HardwareBitmapUploader::has10101010Support();
+            if (formatInfo.isSupported) {
+                formatInfo.type = 0;  // Not supported in GL
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM;
+                formatInfo.vkFormat = VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16;
+            } else {
+                formatInfo.type = GL_UNSIGNED_BYTE;
+                formatInfo.bufferFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+                formatInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+            }
+            formatInfo.format = 0;  // Not supported in GL
             break;
         case kAlpha_8_SkColorType:
             formatInfo.isSupported = HardwareBitmapUploader::hasAlpha8Support();

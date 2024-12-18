@@ -40,10 +40,7 @@ fun SettingsAlertDialogWithIcon(
     dismissButton: AlertDialogButton?,
     title: String?,
     icon: @Composable (() -> Unit)? = {
-        Icon(
-            Icons.Default.WarningAmber,
-            contentDescription = null
-        )
+        Icon(Icons.Default.WarningAmber, contentDescription = null)
     },
     text: @Composable (() -> Unit)?,
 ) {
@@ -52,43 +49,22 @@ fun SettingsAlertDialogWithIcon(
         icon = icon,
         modifier = Modifier.width(getDialogWidth()),
         confirmButton = {
-            confirmButton?.let {
-                Button(
-                    onClick = {
-                        it.onClick()
-                    },
-                ) {
-                    Text(it.text)
+            confirmButton?.let { Button(onClick = { it.onClick() }) { Text(it.text) } }
+        },
+        dismissButton =
+            dismissButton?.let { { OutlinedButton(onClick = { it.onClick() }) { Text(it.text) } } },
+        title =
+            title?.let {
+                {
+                    CenterRow {
+                        Text(it, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                    }
                 }
-            }
-        },
-        dismissButton = dismissButton?.let {
-            {
-                OutlinedButton(
-                    onClick = {
-                        it.onClick()
-                    },
-                ) {
-                    Text(it.text)
-                }
-            }
-        },
-        title = title?.let {
-            {
-                Text(
-                    it,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-        },
-        text = text?.let {
-            {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    text()
-                }
-            }
-        },
+            },
+        text =
+            text?.let {
+                { CenterRow { Column(Modifier.verticalScroll(rememberScrollState())) { text() } } }
+            },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     )
 }

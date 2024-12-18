@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.OPERATOR_NAME_VIEW;
 
 import android.annotation.NonNull;

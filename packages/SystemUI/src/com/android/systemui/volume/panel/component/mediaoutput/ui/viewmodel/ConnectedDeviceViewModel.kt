@@ -16,11 +16,15 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
+import com.android.systemui.common.shared.model.Color
+
 /**
  * Models part of the Media Session Volume Panel component that displays connected device
  * information.
  */
 data class ConnectedDeviceViewModel(
     val label: CharSequence,
+    val labelColor: Color,
     val deviceName: CharSequence?,
+    val deviceNameColor: Color,
 )

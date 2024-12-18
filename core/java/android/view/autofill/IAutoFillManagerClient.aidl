@@ -72,7 +72,8 @@ oneway interface IAutoFillManagerClient {
       */
     void setTrackedViews(int sessionId, in @nullable AutofillId[] savableIds,
             boolean saveOnAllViewsInvisible, boolean saveOnFinish,
-            in @nullable AutofillId[] fillableIds, in AutofillId saveTriggerId);
+            in @nullable AutofillId[] fillableIds, in AutofillId saveTriggerId,
+            in boolean shouldGrabViewFingerprints);
 
     /**
      * Requests showing the fill UI.

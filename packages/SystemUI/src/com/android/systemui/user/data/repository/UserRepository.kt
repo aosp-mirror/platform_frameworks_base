@@ -195,7 +195,7 @@ constructor(
 
                 val callback =
                     object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
+                        override fun onBeforeUserSwitching(newUser: Int) {
                             send(SelectionStatus.SELECTION_IN_PROGRESS)
                         }
 

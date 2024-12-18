@@ -75,7 +75,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @FlakyTest(bugId = 288341660)
     @Test
     fun navBarLayerVisibilityChanges() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.assertLayers {
             this.isInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
@@ -97,7 +97,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @FlakyTest(bugId = 293581770)
     @Test
     fun navBarWindowsVisibilityChanges() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.assertWm {
             this.isNonAppWindowInvisible(ComponentNameMatcher.NAV_BAR)
                 .then()
@@ -112,7 +112,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     fun taskBarLayerIsVisibleAtEnd() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
     }
 
@@ -170,7 +170,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.NAV_BAR) }
     }
 
@@ -184,7 +184,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     override fun appLayerBecomesVisible() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         super.appLayerBecomesVisible()
     }
 
@@ -192,11 +192,11 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     @FlakyTest(bugId = 227143265)
     @Test
     fun appLayerBecomesVisibleTablet() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         super.appLayerBecomesVisible()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 338296297)
     @Test
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()

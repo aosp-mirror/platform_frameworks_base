@@ -31,20 +31,21 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.shared.customization.data.content.FakeCustomizationProviderClient
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -58,6 +59,11 @@ import org.mockito.ArgumentMatchers.anyString
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
+
     private lateinit var underTest: KeyguardQuickAffordanceRepository
 
     private lateinit var config1: FakeKeyguardQuickAffordanceConfig
@@ -65,7 +71,6 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
     private lateinit var userTracker: FakeUserTracker
     private lateinit var client1: FakeCustomizationProviderClient
     private lateinit var client2: FakeCustomizationProviderClient
-    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
@@ -73,8 +78,6 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         context.resources.configuration.setLayoutDirection(Locale.US)
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
         userTracker = FakeUserTracker()
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -91,7 +94,6 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
-                systemSettings = FakeSettings(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         client1 = FakeCustomizationProviderClient()
@@ -129,7 +131,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = settings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 configs = setOf(config1, config2),
@@ -307,6 +309,15 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                             ),
                     )
             )
+        }
+
+    @Test
+    fun getConfig() =
+        testScope.runTest {
+            assertThat(underTest.getConfig(FakeCustomizationProviderClient.AFFORDANCE_1))
+                .isEqualTo(config1)
+            assertThat(underTest.getConfig(FakeCustomizationProviderClient.AFFORDANCE_2))
+                .isEqualTo(config2)
         }
 
     private fun assertSelections(

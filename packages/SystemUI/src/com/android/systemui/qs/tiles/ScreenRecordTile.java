@@ -47,6 +47,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -146,8 +147,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         if (isRecording) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
         } else if (isStarting) {
-            // round, since the timer isn't exact
-            int countdown = (int) Math.floorDiv(mMillisUntilFinished + 500, 1000);
+            int countdown =
+                    (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(
+                            mMillisUntilFinished);
             state.secondaryLabel = String.format("%d...", countdown);
         } else {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_start);

@@ -34,7 +34,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
@@ -73,7 +72,6 @@ public class AdaptiveAuthService extends SystemService {
     private final LockSettingsInternal mLockSettings;
     private final BiometricManager mBiometricManager;
     private final KeyguardManager mKeyguardManager;
-    private final PowerManager mPowerManager;
     private final WindowManagerInternal mWindowManager;
     private final UserManagerInternal mUserManager;
     @VisibleForTesting
@@ -93,7 +91,6 @@ public class AdaptiveAuthService extends SystemService {
         mBiometricManager = Objects.requireNonNull(
                 context.getSystemService(BiometricManager.class));
         mKeyguardManager = Objects.requireNonNull(context.getSystemService(KeyguardManager.class));
-        mPowerManager = Objects.requireNonNull(context.getSystemService(PowerManager.class));
         mWindowManager = Objects.requireNonNull(
                 LocalServices.getService(WindowManagerInternal.class));
         mUserManager = Objects.requireNonNull(LocalServices.getService(UserManagerInternal.class));
@@ -289,9 +286,6 @@ public class AdaptiveAuthService extends SystemService {
             mLockPatternUtils.requireStrongAuth(SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST,
                     parentUserId);
         }
-
-        // Power off the display
-        mPowerManager.goToSleep(SystemClock.uptimeMillis());
 
         // Lock the device
         mWindowManager.lockNow();

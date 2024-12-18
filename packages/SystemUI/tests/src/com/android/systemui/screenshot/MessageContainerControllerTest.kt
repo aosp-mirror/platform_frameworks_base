@@ -2,14 +2,12 @@ package com.android.systemui.screenshot
 
 import android.graphics.drawable.Drawable
 import android.os.UserHandle
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.message.LabeledIcon
@@ -31,7 +29,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class MessageContainerControllerTest : SysuiTestCase() {
     lateinit var messageContainer: MessageContainerController
 
@@ -90,20 +88,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_SCREENSHOT_PRIVATE_PROFILE_BEHAVIOR_FIX)
-    fun testOnScreenshotTakenUserHandle_withWorkProfileFirstRun() {
-        whenever(workProfileMessageController.onScreenshotTaken(eq(userHandle)))
-            .thenReturn(workProfileData)
-        messageContainer.onScreenshotTaken(screenshotData)
-
-        verify(workProfileMessageController)
-            .populateView(eq(workProfileFirstRunView), eq(workProfileData), any())
-        assertEquals(View.VISIBLE, workProfileFirstRunView.visibility)
-        assertEquals(View.GONE, detectionNoticeView.visibility)
-    }
-
-    @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_SCREENSHOT_PRIVATE_PROFILE_BEHAVIOR_FIX)
     fun testOnScreenshotTakenUserHandle_withProfileProfileFirstRun() = runTest {
         val profileData =
             ProfileMessageController.ProfileFirstRunData(

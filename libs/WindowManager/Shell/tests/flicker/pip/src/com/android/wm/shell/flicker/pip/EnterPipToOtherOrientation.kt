@@ -117,12 +117,10 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
-     *
-     * TODO b/197726599 Prevents all states from being checked
      */
     @Presubmit
     @Test
-    fun entireScreenCoveredAtStartAndEnd() = flicker.entireScreenCovered(allStates = false)
+    fun entireScreenCoveredAtStartAndEnd() = flicker.entireScreenCovered()
 
     /** Checks [pipApp] window remains visible and on top throughout the transition */
     @Presubmit

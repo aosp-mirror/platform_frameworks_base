@@ -44,6 +44,8 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -56,6 +58,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.utils.GestureLogParser;
 import com.android.server.testutils.OffsettableClock;
 
@@ -119,6 +122,9 @@ public class TouchExplorerTest {
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     /**
      * {@link TouchExplorer#sendDownForAllNotInjectedPointers} injecting events with the same object
      * is resulting {@link ArgumentCaptor} to capture events with last state. Before implementation
@@ -154,18 +160,43 @@ public class TouchExplorerTest {
         mHandler = new TestHandler();
         mTouchExplorer = new TouchExplorer(mContext, mMockAms, null, mHandler);
         mTouchExplorer.setNext(mCaptor);
+        // Start TouchExplorer in the state where it has already reset InputDispatcher so that
+        // all tests do not start with an irrelevant ACTION_CANCEL.
+        mTouchExplorer.setHasResetInputDispatcherState(true);
     }
 
     @Test
     public void testOneFingerMove_shouldInjectHoverEvents() {
-        goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
-        // Wait for transiting to touch exploring state.
+        triggerTouchExplorationWithOneFingerDownMoveUp();
+        assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
+        assertState(STATE_TOUCH_EXPLORING);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RESET_INPUT_DISPATCHER_BEFORE_FIRST_TOUCH_EXPLORATION)
+    public void testStartTouchExploration_shouldResetInputDispatcherStateWithActionCancel() {
+        // Start TouchExplorer in the state where it has *not yet* reset InputDispatcher.
+        mTouchExplorer.setHasResetInputDispatcherState(false);
+        // Trigger touch exploration twice, with a handler fast-forward in between so TouchExplorer
+        // treats these as two separate interactions.
+        triggerTouchExplorationWithOneFingerDownMoveUp();
+        mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
+        triggerTouchExplorationWithOneFingerDownMoveUp();
+
+        assertCapturedEvents(
+                ACTION_CANCEL, // Only one ACTION_CANCEL before the first touch exploration
+                ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT,
+                ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
+        assertState(STATE_TOUCH_EXPLORING);
+    }
+
+    private void triggerTouchExplorationWithOneFingerDownMoveUp() {
+        send(downEvent());
+        // Fast forward so that TouchExplorer's timeouts transition us to the touch exploring state.
         mHandler.fastForward(2 * USER_INTENT_TIMEOUT);
         moveEachPointers(mLastEvent, p(10, 10));
         send(mLastEvent);
-        goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
-        assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
-        assertState(STATE_TOUCH_EXPLORING);
+        send(upEvent());
     }
 
     /**

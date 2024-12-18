@@ -130,42 +130,6 @@ public abstract class ActivityTaskManagerInternal {
     }
 
     /**
-     * Sleep tokens cause the activity manager to put the top activity to sleep.
-     * They are used by components such as dreams that may hide and block interaction
-     * with underlying activities.
-     * The Acquirer provides an interface that encapsulates the underlying work, so the user does
-     * not need to handle the token by him/herself.
-     */
-    public interface SleepTokenAcquirer {
-
-        /**
-         * Acquires a sleep token.
-         * @param displayId The display to apply to.
-         */
-        void acquire(int displayId);
-
-        /**
-         * Acquires a sleep token.
-         * @param displayId The display to apply to.
-         * @param isSwappingDisplay Whether the display is swapping to another physical display.
-         */
-        void acquire(int displayId, boolean isSwappingDisplay);
-
-        /**
-         * Releases the sleep token.
-         * @param displayId The display to apply to.
-         */
-        void release(int displayId);
-    }
-
-    /**
-     * Creates a sleep token acquirer for the specified display with the specified tag.
-     *
-     * @param tag A string identifying the purpose (eg. "Dream").
-     */
-    public abstract SleepTokenAcquirer createSleepTokenAcquirer(@NonNull String tag);
-
-    /**
      * Returns home activity for the specified user.
      *
      * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}
@@ -387,7 +351,16 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onPackageAdded(String name, boolean replacing);
     public abstract void onPackageReplaced(ApplicationInfo aInfo);
 
-    public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
+    /** The data for IApplicationThread#bindApplication. */
+    public static final class PreBindInfo {
+        public final @NonNull CompatibilityInfo compatibilityInfo;
+        public final @NonNull Configuration configuration;
+
+        PreBindInfo(@NonNull CompatibilityInfo compatInfo, @NonNull Configuration config) {
+            compatibilityInfo = compatInfo;
+            configuration = config;
+        }
+    }
 
     public final class ActivityTokens {
         private final @NonNull IBinder mActivityToken;
@@ -509,7 +482,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void resumeTopActivities(boolean scheduleIdle);
 
     /** Called by AM just before it binds to an application process. */
-    public abstract void preBindApplication(WindowProcessController wpc);
+    @NonNull
+    public abstract PreBindInfo preBindApplication(@NonNull WindowProcessController wpc,
+            @NonNull ApplicationInfo info);
 
     /** Called by AM when an application process attaches. */
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
@@ -591,7 +566,7 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
-    public abstract boolean canShowErrorDialogs();
+    public abstract boolean canShowErrorDialogs(int userId);
 
     public abstract void setProfileApp(String profileApp);
     public abstract void setProfileProc(WindowProcessController wpc);

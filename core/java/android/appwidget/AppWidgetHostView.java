@@ -132,7 +132,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      * Create a host view. Uses specified animations when pushing
      * {@link #updateAppWidget(RemoteViews)}.
      *
-     * @param animationIn Resource ID of in animation to use
+     * @param animationIn  Resource ID of in animation to use
      * @param animationOut Resource ID of out animation to use
      */
     @SuppressWarnings({"UnusedDeclaration"})
@@ -148,7 +148,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      * Pass the given handler to RemoteViews when updating this widget. Unless this
      * is done immediatly after construction, a call to {@link #updateAppWidget(RemoteViews)}
      * should be made.
-     * @param handler
+     *
      * @hide
      */
     public void setInteractionHandler(InteractionHandler handler) {
@@ -206,10 +206,10 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      * order for the AppWidgetHost to account for the automatic padding when computing the number
      * of cells to allocate to a particular widget.
      *
-     * @param context the current context
+     * @param context   the current context
      * @param component the component name of the widget
-     * @param padding Rect in which to place the output, if null, a new Rect will be allocated and
-     *                returned
+     * @param padding   Rect in which to place the output, if null, a new Rect will be allocated and
+     *                  returned
      * @return default padding for this widget, in pixels
      */
     public static Rect getDefaultPaddingForWidget(Context context, ComponentName component,
@@ -291,7 +291,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
         }
         mDelayedRestoredInflationId = -1;
         mDelayedRestoredState = null;
-        try  {
+        try {
             super.dispatchRestoreInstanceState(state);
         } catch (Exception e) {
             Log.e(TAG, "failed to restoreInstanceState for widget id: " + mAppWidgetId + ", "
@@ -354,14 +354,14 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      * the framework will be accounted for automatically. This information gets embedded into the
      * AppWidget options and causes a callback to the AppWidgetProvider. In addition, the list of
      * sizes is explicitly set to an empty list.
-     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
      * @param newOptions The bundle of options, in addition to the size information,
-     *          can be null.
-     * @param minWidth The minimum width in dips that the widget will be displayed at.
-     * @param minHeight The maximum height in dips that the widget will be displayed at.
-     * @param maxWidth The maximum width in dips that the widget will be displayed at.
-     * @param maxHeight The maximum height in dips that the widget will be displayed at.
+     *                   can be null.
+     * @param minWidth   The minimum width in dips that the widget will be displayed at.
+     * @param minHeight  The maximum height in dips that the widget will be displayed at.
+     * @param maxWidth   The maximum width in dips that the widget will be displayed at.
+     * @param maxHeight  The maximum height in dips that the widget will be displayed at.
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      * @deprecated use {@link AppWidgetHostView#updateAppWidgetSize(Bundle, List)} instead.
      */
     @Deprecated
@@ -378,12 +378,14 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      * This method will update the option bundle with the list of sizes and the min/max bounds for
      * width and height.
      *
-     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
-     *
      * @param newOptions The bundle of options, in addition to the size information.
-     * @param sizes Sizes, in dips, the widget may be displayed at without calling the provider
-     *              again. Typically, this will be size of the widget in landscape and portrait.
-     *              On some foldables, this might include the size on the outer and inner screens.
+     * @param sizes      Sizes, in dips, the widget may be displayed at without calling the
+     *                   provider
+     *                   again. Typically, this will be size of the widget in landscape and
+     *                   portrait.
+     *                   On some foldables, this might include the size on the outer and inner
+     *                   screens.
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      */
     public void updateAppWidgetSize(@NonNull Bundle newOptions, @NonNull List<SizeF> sizes) {
         AppWidgetManager widgetManager = AppWidgetManager.getInstance(mContext);
@@ -470,9 +472,9 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
     /**
      * Specify some extra information for the widget provider. Causes a callback to the
      * AppWidgetProvider.
-     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      *
      * @param options The bundle of options information.
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
      */
     public void updateAppWidgetOptions(Bundle options) {
         AppWidgetManager.getInstance(mContext).updateAppWidgetOptions(mAppWidgetId, options);
@@ -507,6 +509,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
     /**
      * Sets whether the widget is being displayed on a light/white background and use an
      * alternate UI if available.
+     *
      * @see RemoteViews#setLightBackgroundLayoutId(int)
      */
     public void setOnLightBackground(boolean onLightBackground) {
@@ -620,7 +623,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
         if (content == null) {
             if (mViewMode == VIEW_MODE_ERROR) {
                 // We've already done this -- nothing to do.
-                return ;
+                return;
             }
             if (exception != null) {
                 Log.w(TAG, "Error inflating RemoteViews", exception);
@@ -733,7 +736,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
             if (adapter instanceof BaseAdapter) {
                 BaseAdapter baseAdapter = (BaseAdapter) adapter;
                 baseAdapter.notifyDataSetChanged();
-            }  else if (adapter == null && adapterView instanceof RemoteAdapterConnectionCallback) {
+            } else if (adapter == null && adapterView instanceof RemoteAdapterConnectionCallback) {
                 // If the adapter is null, it may mean that the RemoteViewsAapter has not yet
                 // connected to its associated service, and hence the adapter hasn't been set.
                 // In this case, we need to defer the notify call until it has been set.
@@ -745,6 +748,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
     /**
      * Build a {@link Context} cloned into another package name, usually for the
      * purposes of reading remote resources.
+     *
      * @hide
      */
     protected Context getRemoteContextEnsuringCorrectCachedApkPath() {
@@ -760,7 +764,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
             }
             return newContext;
         } catch (NameNotFoundException e) {
-            Log.e(TAG, "Package name " +  mInfo.providerInfo.packageName + " not found");
+            Log.e(TAG, "Package name " + mInfo.providerInfo.packageName + " not found");
             return mContext;
         } catch (NullPointerException e) {
             Log.e(TAG, "Error trying to create the remote context.", e);
@@ -774,7 +778,7 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
      */
     protected void prepareView(View view) {
         // Take requested dimensions from child, but apply default gravity.
-        FrameLayout.LayoutParams requested = (FrameLayout.LayoutParams)view.getLayoutParams();
+        FrameLayout.LayoutParams requested = (FrameLayout.LayoutParams) view.getLayoutParams();
         if (requested == null) {
             requested = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
@@ -839,7 +843,18 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
         return defaultView;
     }
 
-    private void onDefaultViewClicked(View view) {
+    /**
+     * Handles interactions on the default view of the widget. By default does not use the
+     * {@link InteractionHandler} used by other interactions. However, this can be overridden
+     * in order to customize the click behavior.
+     *
+     * @hide
+     */
+    protected void onDefaultViewClicked(@NonNull View view) {
+        final AppWidgetManager manager = AppWidgetManager.getInstance(mContext);
+        if (manager != null) {
+            manager.noteAppWidgetTapped(mAppWidgetId);
+        }
         if (mInfo != null) {
             LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
             List<LauncherActivityInfo> activities = launcherApps.getActivityList(

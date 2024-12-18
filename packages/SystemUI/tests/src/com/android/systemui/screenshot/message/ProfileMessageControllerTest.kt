@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.message
 
 import android.content.ComponentName
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.content.pm.PackageManager
 import android.graphics.Canvas
 import android.graphics.ColorFilter
@@ -27,7 +28,9 @@ import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class ProfileMessageControllerTest {
     @Test
     fun personalScreenshot() = runTest {

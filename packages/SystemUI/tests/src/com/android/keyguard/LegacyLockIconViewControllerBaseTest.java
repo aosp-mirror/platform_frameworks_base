@@ -151,6 +151,7 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
 
         if (!SceneContainerFlag.isEnabled()) {
             mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+            //TODO move this to use @DisableFlags annotation if needed
             mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
         }
 

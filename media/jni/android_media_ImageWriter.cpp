@@ -24,7 +24,6 @@
 #include <utils/String8.h>
 #include <utils/Thread.h>
 
-#include <gui/IProducerListener.h>
 #include <gui/Surface.h>
 #include <ui/PublicFormat.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -65,15 +64,18 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-class JNIImageWriterContext : public BnProducerListener {
+class JNIImageWriterContext : public SurfaceListener {
 public:
     JNIImageWriterContext(JNIEnv* env, jobject weakThiz, jclass clazz);
 
     virtual ~JNIImageWriterContext();
 
-    // Implementation of IProducerListener, used to notify the ImageWriter that the consumer
+    // Implementation of SurfaceListener, used to notify the ImageWriter that the consumer
     // has returned a buffer and it is ready for ImageWriter to dequeue.
     virtual void onBufferReleased();
+    virtual bool needsReleaseNotify() override { return true; };
+    virtual void onBuffersDiscarded(const std::vector<sp<GraphicBuffer>>& /*buffers*/) override {};
+    virtual void onBufferDetached(int /*slot*/) override {};
 
     void setProducer(const sp<Surface>& producer) { mProducer = producer; }
     Surface* getProducer() { return mProducer.get(); }
@@ -733,10 +735,15 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
 }
 
 static status_t attachAndQeueuGraphicBuffer(JNIEnv* env, JNIImageWriterContext *ctx,
-        sp<Surface> surface, sp<GraphicBuffer> gb, jlong timestampNs, jint dataSpace,
+        sp<GraphicBuffer> gb, jlong timestampNs, jint dataSpace,
         jint left, jint top, jint right, jint bottom, jint transform, jint scalingMode) {
     status_t res = OK;
     // Step 1. Attach Image
+    sp<Surface> surface = ctx->getProducer();
+    if (surface == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Producer surface is null, ImageWriter seems already closed");
+    }
     res = surface->attachBuffer(gb.get());
     if (res != OK) {
         ALOGE("Attach image failed: %s (%d)", strerror(-res), res);
@@ -833,7 +840,6 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
         return -1;
     }
 
-    sp<Surface> surface = ctx->getProducer();
     if (isFormatOpaque(ctx->getBufferFormat()) != isFormatOpaque(nativeHalFormat)) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
@@ -849,7 +855,7 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
         return -1;
     }
 
-    return attachAndQeueuGraphicBuffer(env, ctx, surface, buffer->mGraphicBuffer, timestampNs,
+    return attachAndQeueuGraphicBuffer(env, ctx, buffer->mGraphicBuffer, timestampNs,
             dataSpace, left, top, right, bottom, transform, scalingMode);
 }
 
@@ -864,7 +870,6 @@ static jint ImageWriter_attachAndQueueGraphicBuffer(JNIEnv* env, jobject thiz, j
         return -1;
     }
 
-    sp<Surface> surface = ctx->getProducer();
     if (isFormatOpaque(ctx->getBufferFormat()) != isFormatOpaque(nativeHalFormat)) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
@@ -878,7 +883,8 @@ static jint ImageWriter_attachAndQueueGraphicBuffer(JNIEnv* env, jobject thiz, j
                 "Trying to attach an invalid graphic buffer");
         return -1;
     }
-    return attachAndQeueuGraphicBuffer(env, ctx, surface, graphicBuffer, timestampNs,
+
+    return attachAndQeueuGraphicBuffer(env, ctx, graphicBuffer, timestampNs,
             dataSpace, left, top, right, bottom, transform, scalingMode);
 }
 

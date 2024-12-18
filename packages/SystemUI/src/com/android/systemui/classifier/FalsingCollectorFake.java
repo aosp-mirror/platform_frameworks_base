@@ -25,6 +25,7 @@ import javax.inject.Inject;
 public class FalsingCollectorFake implements FalsingCollector {
 
     public KeyEvent lastKeyEvent = null;
+    public boolean avoidGestureInvoked = false;
 
     @Override
     public void init() {
@@ -87,6 +88,16 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void avoidGesture() {
+        avoidGestureInvoked = true;
+    }
+
+    /**
+     * @return whether {@link #avoidGesture()} was invoked.
+     */
+    public boolean wasLastGestureAvoided() {
+        boolean wasLastGestureAvoided = avoidGestureInvoked;
+        avoidGestureInvoked = false;
+        return wasLastGestureAvoided;
     }
 
     @Override

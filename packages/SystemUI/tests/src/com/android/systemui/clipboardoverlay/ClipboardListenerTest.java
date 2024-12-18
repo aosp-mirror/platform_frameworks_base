@@ -32,6 +32,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
@@ -101,8 +102,18 @@ public class ClipboardListenerTest extends SysuiTestCase {
         when(mClipboardManager.getPrimaryClip()).thenReturn(mSampleClipData);
         when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
 
-        mClipboardListener = new ClipboardListener(getContext(), mOverlayControllerProvider,
-                mClipboardToast, mClipboardManager, mKeyguardManager, mUiEventLogger);
+        mClipboardListener = new ClipboardListener(
+                getContext(),
+                mOverlayControllerProvider,
+                mClipboardToast,
+                user -> {
+                    if (UserHandle.CURRENT.equals(user)) {
+                        return mClipboardManager;
+                    }
+                    return null;
+                },
+                mKeyguardManager,
+                mUiEventLogger);
     }
 
 

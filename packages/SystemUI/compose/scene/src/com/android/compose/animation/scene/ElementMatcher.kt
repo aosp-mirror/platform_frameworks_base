@@ -18,20 +18,23 @@ package com.android.compose.animation.scene
 
 /** An interface to match one or more elements. */
 interface ElementMatcher {
-    /** Whether the element with key [key] in scene [scene] matches this matcher. */
-    fun matches(key: ElementKey, scene: SceneKey): Boolean
+    /** Whether the element with key [key] in scene [content] matches this matcher. */
+    fun matches(key: ElementKey, content: ContentKey): Boolean
 }
 
 /**
- * Returns an [ElementMatcher] that matches elements in [scene] also matching [this]
+ * Returns an [ElementMatcher] that matches elements in [content] also matching [this]
  * [ElementMatcher].
  */
-fun ElementMatcher.inScene(scene: SceneKey): ElementMatcher {
+fun ElementMatcher.inContent(content: ContentKey): ElementMatcher {
     val delegate = this
-    val matcherScene = scene
+    val matcherScene = content
     return object : ElementMatcher {
-        override fun matches(key: ElementKey, scene: SceneKey): Boolean {
-            return scene == matcherScene && delegate.matches(key, scene)
+        override fun matches(key: ElementKey, content: ContentKey): Boolean {
+            return content == matcherScene && delegate.matches(key, content)
         }
     }
 }
+
+@Deprecated("Use inContent() instead", replaceWith = ReplaceWith("inContent(scene)"))
+fun ElementMatcher.inScene(scene: SceneKey) = inContent(scene)

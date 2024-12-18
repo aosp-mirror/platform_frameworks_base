@@ -21,11 +21,13 @@ import static android.app.Flags.systemTermsOfAddressEnabled;
 import static com.android.server.grammaticalinflection.GrammaticalInflectionUtils.checkSystemGrammaticalGenderPermission;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.GrammaticalInflectionManager;
 import android.app.IGrammaticalInflectionManager;
 import android.content.AttributionSource;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.os.Binder;
@@ -36,6 +38,7 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserManager;
 import android.permission.PermissionManager;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -269,6 +272,31 @@ public class GrammaticalInflectionService extends SystemService {
             if (!GrammaticalInflectionManager.VALID_GRAMMATICAL_GENDER_VALUES.contains(
                     grammaticalGender)) {
                 throw new IllegalArgumentException("Unknown grammatical gender");
+            }
+
+            // TODO(b/356895553): Don't allow profiles and background user to change system
+            //  grammaticalinflection
+            if (UserManager.isVisibleBackgroundUsersEnabled()
+                    && mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE)) {
+                // The check is added only for automotive devices. On automotive devices, it is
+                // possible that multiple users are visible simultaneously using visible background
+                // users. In such cases, it is desired that only the current user (not the visible
+                // background user) can change the GrammaticalInflection of the device.
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    int currentUser = ActivityManager.getCurrentUser();
+                    if (userId != currentUser) {
+                        Log.w(TAG,
+                                "Only current user is allowed to update GrammaticalInflection if "
+                                        + "visible background users are enabled. Current User"
+                                        + currentUser + ". Calling User: " + userId);
+                        throw new SecurityException("Only current user is allowed to update "
+                                + "GrammaticalInflection.");
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
             }
 
             final File file = getGrammaticalGenderFile(userId);

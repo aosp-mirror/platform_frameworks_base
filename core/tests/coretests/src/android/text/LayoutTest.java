@@ -42,8 +42,8 @@ import android.text.Layout.Alignment;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StrikethroughSpan;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.truth.Expect;
 

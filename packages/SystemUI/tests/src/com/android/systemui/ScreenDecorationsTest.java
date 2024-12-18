@@ -61,7 +61,6 @@ import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Handler;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.PathParser;
@@ -78,8 +77,11 @@ import android.view.WindowMetrics;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository;
@@ -109,6 +111,8 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import kotlin.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -121,12 +125,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ScreenDecorationsTest extends SysuiTestCase {
 
     private ScreenDecorations mScreenDecorations;
     private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private DisplayManager mDisplayManager;
     private SecureSettings mSecureSettings;
     private FakeExecutor mExecutor;
@@ -173,6 +178,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private CutoutDecorProviderFactory mCutoutFactory;
     @Mock
     private JavaAdapter mJavaAdapter;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     private FakeFacePropertyRepository mFakeFacePropertyRepository =
             new FakeFacePropertyRepository();
@@ -245,12 +252,15 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
                 mFakeFacePropertyRepository));
 
+        mViewCaptureAwareWindowManager = new ViewCaptureAwareWindowManager(mWindowManager,
+                mLazyViewCapture, false);
         mScreenDecorations = spy(new ScreenDecorations(mContext, mSecureSettings,
                 mCommandRegistry, mUserTracker, mDisplayTracker, mDotViewController,
                 mThreadFactory,
                 mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader) {
+                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader,
+                mViewCaptureAwareWindowManager) {
             @Override
             public void start() {
                 super.start();
@@ -1264,7 +1274,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mDotViewController,
                 mThreadFactory, mPrivacyDotDecorProviderFactory, mFaceScanningProviderFactory,
                 new ScreenDecorationsLogger(logcatLogBuffer("TestLogBuffer")),
-                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader);
+                mFakeFacePropertyRepository, mJavaAdapter, mCameraProtectionLoader,
+                mViewCaptureAwareWindowManager);
         screenDecorations.start();
         when(mContext.getDisplay()).thenReturn(mDisplay);
         when(mDisplay.getDisplayInfo(any())).thenAnswer(new Answer<Boolean>() {

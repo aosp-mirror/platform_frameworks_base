@@ -18,6 +18,8 @@
 
 package com.android.credentialmanager.ui.screens.single
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,15 +33,18 @@ fun SingleAccountScreen(
     headerContent: @Composable () -> Unit,
     accountContent: @Composable () -> Unit,
     columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
     content: ScalingLazyListScope.() -> Unit,
 ) {
-    ScalingLazyColumn(
-        columnState = columnState,
-        modifier = modifier.fillMaxSize(),
-    ) {
-        item { headerContent() }
-        item { accountContent() }
-        content()
+    Row {
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+        ScalingLazyColumn(
+            columnState = columnState,
+            modifier = Modifier.weight(0.896f).fillMaxSize(),
+        ) {
+            item { headerContent() }
+            item { accountContent() }
+            content()
+        }
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
     }
 }

@@ -16,6 +16,7 @@
 package com.android.wm.shell.pip2.phone;
 
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
+import static com.android.wm.shell.pip2.phone.PipTransition.ANIMATING_BOUNDS_CHANGE_DURATION;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -49,7 +50,6 @@ import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 
 import java.io.PrintWriter;
-import java.util.function.Consumer;
 
 /**
  * Helper on top of PipTouchHandler that handles inputs OUTSIDE of the PIP window, which is used to
@@ -85,8 +85,6 @@ public class PipResizeGestureHandler implements
     private final Rect mUserResizeBounds = new Rect();
     private final Rect mDownBounds = new Rect();
     private final Rect mStartBoundsAfterRelease = new Rect();
-    private final Runnable mUpdateMovementBoundsRunnable;
-    private final Consumer<Rect> mUpdateResizeBoundsCallback;
 
     private float mTouchSlop;
 
@@ -120,7 +118,6 @@ public class PipResizeGestureHandler implements
             PipTouchState pipTouchState,
             PipScheduler pipScheduler,
             PipTransitionState pipTransitionState,
-            Runnable updateMovementBoundsRunnable,
             PipUiEventLogger pipUiEventLogger,
             PhonePipMenuController menuActivityController,
             ShellExecutor mainExecutor,
@@ -137,18 +134,9 @@ public class PipResizeGestureHandler implements
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
 
-        mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
         mPinchResizingAlgorithm = new PipPinchResizingAlgorithm();
-
-        mUpdateResizeBoundsCallback = (rect) -> {
-            mUserResizeBounds.set(rect);
-            // mMotionHelper.synchronizePinnedStackBounds();
-            mUpdateMovementBoundsRunnable.run();
-            mPipBoundsState.setBounds(rect);
-            resetState();
-        };
     }
 
     void init() {
@@ -535,7 +523,8 @@ public class PipResizeGestureHandler implements
                 mWaitingForBoundsChangeTransition = true;
 
                 // Schedule PiP resize transition, but delay any config updates until very end.
-                mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds, true /* configAtEnd */);
+                mPipScheduler.scheduleAnimateResizePip(mLastResizeBounds,
+                        true /* configAtEnd */, PINCH_RESIZE_SNAP_DURATION);
                 break;
             case PipTransitionState.CHANGING_PIP_BOUNDS:
                 if (!mWaitingForBoundsChangeTransition) break;
@@ -550,19 +539,24 @@ public class PipResizeGestureHandler implements
                         PipTransition.PIP_START_TX, SurfaceControl.Transaction.class);
                 SurfaceControl.Transaction finishTx = extra.getParcelable(
                         PipTransition.PIP_FINISH_TX, SurfaceControl.Transaction.class);
+                final int duration = extra.getInt(ANIMATING_BOUNDS_CHANGE_DURATION,
+                        PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
+
                 startTx.setWindowCrop(pipLeash, mPipBoundsState.getBounds().width(),
                         mPipBoundsState.getBounds().height());
 
                 PipResizeAnimator animator = new PipResizeAnimator(mContext, pipLeash,
                         startTx, finishTx, mPipBoundsState.getBounds(), mStartBoundsAfterRelease,
-                        mLastResizeBounds, PINCH_RESIZE_SNAP_DURATION, mAngle);
+                        mLastResizeBounds, duration, mAngle);
                 animator.setAnimationEndCallback(() -> {
                     // All motion operations have actually finished, so make bounds cache updates.
-                    mUpdateResizeBoundsCallback.accept(mLastResizeBounds);
+                    mUserResizeBounds.set(mLastResizeBounds);
+                    resetState();
                     cleanUpHighPerfSessionMaybe();
 
                     // Signal that we are done with resize transition
-                    mPipScheduler.scheduleFinishResizePip(true /* configAtEnd */);
+                    mPipScheduler.scheduleFinishResizePip(
+                            mLastResizeBounds, true /* configAtEnd */);
                 });
                 animator.start();
                 break;

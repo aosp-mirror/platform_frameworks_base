@@ -20,6 +20,7 @@
     <!-- Needed to write to Settings.Secure to enable and disable the service under test. -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
+    <uses-permission android:name="android.permission.MANAGE_USERS"/>
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />

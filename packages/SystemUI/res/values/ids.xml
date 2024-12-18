@@ -132,6 +132,7 @@
 
     <!-- Status bar -->
     <item type="id" name="status_bar_dot" />
+    <item type="id" name="ongoing_activity_chip_custom_icon" />
 
     <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />
@@ -233,6 +234,7 @@
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
     <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
+    <item type="id" name="weather_clock_bc_smartspace_bottom" />
     <item type="id" name="accessibility_actions_view" />
 
     <!-- Privacy dialog -->
@@ -276,4 +278,12 @@
     <!-- Id for the udfps accessibility overlay -->
     <item type="id" name="udfps_accessibility_overlay" />
     <item type="id" name="udfps_accessibility_overlay_top_guideline" />
+
+    <!-- Ids for communal hub widgets -->
+    <item type="id" name="communal_widget_disposable_tag"/>
+
+    <!-- snapshot view-binding IDs -->
+    <item type="id" name="snapshot_view_binding" />
+    <item type="id" name="snapshot_view_binding_root" />
+
 </resources>

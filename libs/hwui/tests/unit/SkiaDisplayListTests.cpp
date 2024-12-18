@@ -101,7 +101,7 @@ TEST(SkiaDisplayList, syncContexts) {
     SkCanvas dummyCanvas;
 
     int functor1 = TestUtils::createMockFunctor();
-    auto& counts = TestUtils::countsForFunctor(functor1);
+    auto counts = TestUtils::copyCountsForFunctor(functor1);
     skiaDL.mChildFunctors.push_back(
             skiaDL.allocateDrawable<GLFunctorDrawable>(functor1, &dummyCanvas));
     WebViewFunctor_release(functor1);
@@ -118,6 +118,7 @@ TEST(SkiaDisplayList, syncContexts) {
         });
     });
 
+    counts = TestUtils::copyCountsForFunctor(functor1);
     EXPECT_EQ(counts.sync, 1);
     EXPECT_EQ(counts.destroyed, 0);
     EXPECT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);
@@ -126,6 +127,7 @@ TEST(SkiaDisplayList, syncContexts) {
     TestUtils::runOnRenderThread([](auto&) {
         // Fence
     });
+    counts = TestUtils::copyCountsForFunctor(functor1);
     EXPECT_EQ(counts.destroyed, 1);
 }
 

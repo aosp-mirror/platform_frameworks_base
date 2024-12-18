@@ -33,7 +33,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -52,10 +52,13 @@ public class PipScheduler {
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
+    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
+
+    @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
@@ -94,10 +97,12 @@ public class PipScheduler {
 
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
+        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
 
@@ -162,6 +167,18 @@ public class PipScheduler {
      * @param configAtEnd true if we are delaying config updates until the transition ends.
      */
     public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd) {
+        scheduleAnimateResizePip(toBounds, configAtEnd,
+                PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     * @param duration    the suggested duration to run the animation; the component responsible
+     *                    for running the animator will get this as an extra.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
         if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
@@ -170,16 +187,20 @@ public class PipScheduler {
         if (configAtEnd) {
             wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
         }
-        mPipTransitionController.startResizeTransition(wct);
+        mPipTransitionController.startResizeTransition(wct, duration);
     }
 
     /**
      * Signals to Core to finish the PiP resize transition.
      * Note that we do not allow any actual WM Core changes at this point.
      *
+     * @param toBounds destination bounds used only for internal state updates - not sent to Core.
      * @param configAtEnd true if we are waiting for config updates at the end of the transition.
      */
-    public void scheduleFinishResizePip(boolean configAtEnd) {
+    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
+        // Make updates to the internal state to reflect new bounds
+        onFinishingPipResize(toBounds);
+
         SurfaceControl.Transaction tx = null;
         if (configAtEnd) {
             tx = new SurfaceControl.Transaction();
@@ -225,5 +246,24 @@ public class PipScheduler {
 
         tx.setMatrix(leash, transformTensor, mMatrixTmp);
         tx.apply();
+    }
+
+    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
+        mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
+    }
+
+    private void maybeUpdateMovementBounds() {
+        if (mUpdateMovementBoundsRunnable != null)  {
+            mUpdateMovementBoundsRunnable.run();
+        }
+    }
+
+    private void onFinishingPipResize(Rect newBounds) {
+        if (mPipBoundsState.getBounds().equals(newBounds)) {
+            return;
+        }
+        mPipBoundsState.setBounds(newBounds);
+        mPipMenuController.updateMenuLayout(newBounds);
+        maybeUpdateMovementBounds();
     }
 }

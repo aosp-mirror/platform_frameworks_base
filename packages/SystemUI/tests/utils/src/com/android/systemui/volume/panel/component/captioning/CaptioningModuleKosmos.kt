@@ -17,9 +17,9 @@
 package com.android.systemui.volume.panel.component.captioning
 
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.accessibility.domain.interactor.captioningInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.view.accessibility.data.repository.captioningInteractor
 import com.android.systemui.volume.panel.component.button.ui.composable.ToggleButtonComponent
 import com.android.systemui.volume.panel.component.captioning.domain.CaptioningAvailabilityCriteria
 import com.android.systemui.volume.panel.component.captioning.ui.viewmodel.captioningViewModel

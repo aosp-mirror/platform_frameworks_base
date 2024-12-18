@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -48,6 +49,7 @@ public final class CpuInfoReaderTest extends ExpectableTestCase {
     private static final String TAG = CpuInfoReaderTest.class.getSimpleName();
     private static final String ROOT_DIR_NAME = "CpuInfoReaderTest";
     private static final String VALID_CPUSET_DIR = "valid_cpuset";
+    private static final String VALID_CPUSET_2_DIR = "valid_cpuset_2";
     private static final String VALID_CPUSET_WITH_EMPTY_CPUS = "valid_cpuset_with_empty_cpus";
     private static final String VALID_CPUFREQ_WITH_EMPTY_AFFECTED_CPUS =
             "valid_cpufreq_with_empty_affected_cpus";
@@ -88,54 +90,95 @@ public final class CpuInfoReaderTest extends ExpectableTestCase {
     }
 
     @Test
+    public void testReadCpuInfoWithUpdatedCpuset() throws Exception {
+        CpuInfoReader cpuInfoReader = newCpuInfoReader(getCacheFile(VALID_CPUSET_DIR),
+                getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_DIR), getCacheFile(VALID_PROC_STAT));
+
+        SparseArray<CpuInfoReader.CpuInfo> actualCpuInfos = cpuInfoReader.readCpuInfos();
+        SparseArray<CpuInfoReader.CpuInfo> expectedCpuInfos =
+                getFirstCpuInfosWithTimeInStateSnapshot();
+
+        compareCpuInfos("CPU infos first snapshot", expectedCpuInfos, actualCpuInfos);
+
+        cpuInfoReader.setCpusetDir(getCacheFile(VALID_CPUSET_2_DIR));
+        cpuInfoReader.setCpuFreqDir(getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_2_DIR));
+        cpuInfoReader.setProcStatFile(getCacheFile(VALID_PROC_STAT_2));
+
+        actualCpuInfos = cpuInfoReader.readCpuInfos();
+
+        IntArray cpusetCategories = new IntArray();
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        expectedCpuInfos = getSecondCpuInfosWithTimeInStateSnapshot(cpusetCategories);
+
+        compareCpuInfos("CPU infos second snapshot", expectedCpuInfos, actualCpuInfos);
+    }
+
+    @Test
+    public void testReadCpuInfoWithUpdatedCpusetBeforeStopSignal() throws Exception {
+        CpuInfoReader cpuInfoReader = newCpuInfoReader(getCacheFile(VALID_CPUSET_DIR),
+                getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_DIR), getCacheFile(VALID_PROC_STAT));
+
+        SparseArray<CpuInfoReader.CpuInfo> actualCpuInfos = cpuInfoReader.readCpuInfos();
+        SparseArray<CpuInfoReader.CpuInfo> expectedCpuInfos =
+                getFirstCpuInfosWithTimeInStateSnapshot();
+
+        compareCpuInfos("CPU infos first snapshot", expectedCpuInfos, actualCpuInfos);
+
+        cpuInfoReader.setCpusetDir(getCacheFile(VALID_CPUSET_2_DIR));
+        // When stopping the periodic cpuset reading, the reader will create a new snapshot.
+        cpuInfoReader.stopPeriodicCpusetReading();
+        // Any cpuset update after the stop signal should be ignored by the reader.
+        cpuInfoReader.setCpusetDir(getCacheFile(VALID_CPUSET_DIR));
+        cpuInfoReader.setCpuFreqDir(getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_2_DIR));
+        cpuInfoReader.setProcStatFile(getCacheFile(VALID_PROC_STAT_2));
+
+        actualCpuInfos = cpuInfoReader.readCpuInfos();
+
+        IntArray cpusetCategories = new IntArray();
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        expectedCpuInfos = getSecondCpuInfosWithTimeInStateSnapshot(cpusetCategories);
+
+        compareCpuInfos("CPU infos second snapshot", expectedCpuInfos, actualCpuInfos);
+    }
+
+
+    @Test
+    public void testReadCpuInfoWithUpdatedCpusetAfterStopSignal() throws Exception {
+        CpuInfoReader cpuInfoReader = newCpuInfoReader(getCacheFile(VALID_CPUSET_DIR),
+                getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_DIR), getCacheFile(VALID_PROC_STAT));
+
+        SparseArray<CpuInfoReader.CpuInfo> actualCpuInfos = cpuInfoReader.readCpuInfos();
+        SparseArray<CpuInfoReader.CpuInfo> expectedCpuInfos =
+                getFirstCpuInfosWithTimeInStateSnapshot();
+
+        compareCpuInfos("CPU infos first snapshot", expectedCpuInfos, actualCpuInfos);
+
+        cpuInfoReader.stopPeriodicCpusetReading();
+        // Any cpuset update after the stop signal should be ignored by the reader.
+        cpuInfoReader.setCpusetDir(getCacheFile(VALID_CPUSET_2_DIR));
+        cpuInfoReader.setCpuFreqDir(getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_2_DIR));
+        cpuInfoReader.setProcStatFile(getCacheFile(VALID_PROC_STAT_2));
+
+        actualCpuInfos = cpuInfoReader.readCpuInfos();
+
+        expectedCpuInfos = getSecondCpuInfosWithTimeInStateSnapshot();
+        compareCpuInfos("CPU infos second snapshot", expectedCpuInfos, actualCpuInfos);
+    }
+
+    @Test
     public void testReadCpuInfoWithTimeInState() throws Exception {
         CpuInfoReader cpuInfoReader = newCpuInfoReader(getCacheFile(VALID_CPUSET_DIR),
                 getCacheFile(VALID_CPUFREQ_WITH_TIME_IN_STATE_DIR), getCacheFile(VALID_PROC_STAT));
 
         SparseArray<CpuInfoReader.CpuInfo> actualCpuInfos = cpuInfoReader.readCpuInfos();
-        SparseArray<CpuInfoReader.CpuInfo> expectedCpuInfos = new SparseArray<>();
-        expectedCpuInfos.append(0, new CpuInfoReader.CpuInfo(/* cpuCore= */ 0,
-                FLAG_CPUSET_CATEGORY_TOP_APP, /* isOnline= */ true, /* curCpuFreqKHz= */ 1_230_000,
-                /* maxCpuFreqKHz= */ 2_500_000, /* avgTimeInStateCpuFreqKHz= */ 488_095,
-                /* normalizedAvailableCpuFreqKHz= */ 2_402_267,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 32_249_610,
-                        /* niceTimeMillis= */ 7_950_930, /* systemTimeMillis= */ 52_227_050,
-                        /* idleTimeMillis= */ 409_036_950, /* iowaitTimeMillis= */ 1_322_810,
-                        /* irqTimeMillis= */ 8_146_740, /* softirqTimeMillis= */ 428_970,
-                        /* stealTimeMillis= */ 81_950, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(1, new CpuInfoReader.CpuInfo(/* cpuCore= */ 1,
-                FLAG_CPUSET_CATEGORY_TOP_APP, /* isOnline= */ true, /* curCpuFreqKHz= */ 1_450_000,
-                /* maxCpuFreqKHz= */ 2_800_000, /* avgTimeInStateCpuFreqKHz= */ 502_380,
-                /* normalizedAvailableCpuFreqKHz= */ 2_693_525,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 28_949_280,
-                        /* niceTimeMillis= */ 7_799_450, /* systemTimeMillis= */ 54_004_020,
-                        /* idleTimeMillis= */ 402_707_120, /* iowaitTimeMillis= */ 1_186_960,
-                        /* irqTimeMillis= */ 14_786_940, /* softirqTimeMillis= */ 1_498_130,
-                        /* stealTimeMillis= */ 78_780, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(2, new CpuInfoReader.CpuInfo(/* cpuCore= */ 2,
-                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
-                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
-                /* maxCpuFreqKHz= */ 2_000_000, /* avgTimeInStateCpuFreqKHz= */ 464_285,
-                /* normalizedAvailableCpuFreqKHz= */ 1_901_608,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 28_959_280,
-                        /* niceTimeMillis= */ 7_789_450, /* systemTimeMillis= */ 54_014_020,
-                        /* idleTimeMillis= */ 402_717_120, /* iowaitTimeMillis= */ 1_166_960,
-                        /* irqTimeMillis= */ 14_796_940, /* softirqTimeMillis= */ 1_478_130,
-                        /* stealTimeMillis= */ 88_780, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(3, new CpuInfoReader.CpuInfo(/* cpuCore= */ 3,
-                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
-                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
-                /* maxCpuFreqKHz= */ 2_000_000, /* avgTimeInStateCpuFreqKHz= */ 464_285,
-                /* normalizedAvailableCpuFreqKHz= */ 1_907_125,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 32_349_610,
-                        /* niceTimeMillis= */ 7_850_930, /* systemTimeMillis= */ 52_127_050,
-                        /* idleTimeMillis= */ 409_136_950, /* iowaitTimeMillis= */ 1_332_810,
-                        /* irqTimeMillis= */ 8_136_740, /* softirqTimeMillis= */ 438_970,
-                        /* stealTimeMillis= */ 71_950, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
+        SparseArray<CpuInfoReader.CpuInfo> expectedCpuInfos =
+                getFirstCpuInfosWithTimeInStateSnapshot();
 
         compareCpuInfos("CPU infos first snapshot", expectedCpuInfos, actualCpuInfos);
 
@@ -144,49 +187,7 @@ public final class CpuInfoReaderTest extends ExpectableTestCase {
 
         actualCpuInfos = cpuInfoReader.readCpuInfos();
 
-        expectedCpuInfos.clear();
-        expectedCpuInfos.append(0, new CpuInfoReader.CpuInfo(/* cpuCore= */ 0,
-                FLAG_CPUSET_CATEGORY_TOP_APP, /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
-                /* maxCpuFreqKHz= */ 2_600_000, /* avgTimeInStateCpuFreqKHz= */ 419_354,
-                /* normalizedAvailableCpuFreqKHz= */ 2_525_919,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 10_000_000,
-                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 10_000_000,
-                        /* idleTimeMillis= */ 110_000_000, /* iowaitTimeMillis= */ 1_100_000,
-                        /* irqTimeMillis= */ 1_400_000, /* softirqTimeMillis= */ 80_000,
-                        /* stealTimeMillis= */ 21_000, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(1, new CpuInfoReader.CpuInfo(/* cpuCore= */ 1,
-                FLAG_CPUSET_CATEGORY_TOP_APP, /* isOnline= */ true, /* curCpuFreqKHz= */ 2_800_000,
-                /* maxCpuFreqKHz= */ 2_900_000, /* avgTimeInStateCpuFreqKHz= */ 429_032,
-                /* normalizedAvailableCpuFreqKHz= */ 2_503_009,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 900_000,
-                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 10_000_000,
-                        /* idleTimeMillis= */ 1_000_000, /* iowaitTimeMillis= */ 90_000,
-                        /* irqTimeMillis= */ 200_000, /* softirqTimeMillis= */ 100_000,
-                        /* stealTimeMillis= */ 100_000, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(2, new CpuInfoReader.CpuInfo(/* cpuCore= */ 2,
-                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
-                /* isOnline= */ true, /* curCpuFreqKHz= */ 2_000_000,
-                /* maxCpuFreqKHz= */ 2_100_000, /* avgTimeInStateCpuFreqKHz= */ 403_225,
-                /* normalizedAvailableCpuFreqKHz= */ 1_788_209,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 10_000_000,
-                        /* niceTimeMillis= */ 2_000_000, /* systemTimeMillis= */ 0,
-                        /* idleTimeMillis= */ 10_000_000, /* iowaitTimeMillis= */ 1_000_000,
-                        /* irqTimeMillis= */ 20_000_000, /* softirqTimeMillis= */ 1_000_000,
-                        /* stealTimeMillis= */ 100_000, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
-        expectedCpuInfos.append(3, new CpuInfoReader.CpuInfo(/* cpuCore= */ 3,
-                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
-                /* isOnline= */ false, /* curCpuFreqKHz= */ MISSING_FREQUENCY,
-                /* maxCpuFreqKHz= */ 2_100_000, /* avgTimeInStateCpuFreqKHz= */ MISSING_FREQUENCY,
-                /* normalizedAvailableCpuFreqKHz= */ MISSING_FREQUENCY,
-                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 2_000_000,
-                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 1_000_000,
-                        /* idleTimeMillis= */ 100_000, /* iowaitTimeMillis= */ 100_000,
-                        /* irqTimeMillis= */ 100_000, /* softirqTimeMillis= */ 1_000_000,
-                        /* stealTimeMillis= */ 1_000, /* guestTimeMillis= */ 0,
-                        /* guestNiceTimeMillis= */ 0)));
+        expectedCpuInfos = getSecondCpuInfosWithTimeInStateSnapshot();
 
         compareCpuInfos("CPU infos second snapshot", expectedCpuInfos, actualCpuInfos);
     }
@@ -592,4 +593,108 @@ public final class CpuInfoReaderTest extends ExpectableTestCase {
         }
         return rootDir.delete();
     }
+
+    private SparseArray<CpuInfoReader.CpuInfo> getFirstCpuInfosWithTimeInStateSnapshot() {
+        SparseArray<CpuInfoReader.CpuInfo> cpuInfos = new SparseArray<>();
+        cpuInfos.append(0, new CpuInfoReader.CpuInfo(/* cpuCore= */ 0, FLAG_CPUSET_CATEGORY_TOP_APP,
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_230_000,
+                /* maxCpuFreqKHz= */ 2_500_000, /* avgTimeInStateCpuFreqKHz= */ 488_095,
+                /* normalizedAvailableCpuFreqKHz= */ 2_402_267,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 32_249_610,
+                        /* niceTimeMillis= */ 7_950_930, /* systemTimeMillis= */ 52_227_050,
+                        /* idleTimeMillis= */ 409_036_950, /* iowaitTimeMillis= */ 1_322_810,
+                        /* irqTimeMillis= */ 8_146_740, /* softirqTimeMillis= */ 428_970,
+                        /* stealTimeMillis= */ 81_950, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(1, new CpuInfoReader.CpuInfo(/* cpuCore= */ 1, FLAG_CPUSET_CATEGORY_TOP_APP,
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_450_000,
+                /* maxCpuFreqKHz= */ 2_800_000, /* avgTimeInStateCpuFreqKHz= */ 502_380,
+                /* normalizedAvailableCpuFreqKHz= */ 2_693_525,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 28_949_280,
+                        /* niceTimeMillis= */ 7_799_450, /* systemTimeMillis= */ 54_004_020,
+                        /* idleTimeMillis= */ 402_707_120, /* iowaitTimeMillis= */ 1_186_960,
+                        /* irqTimeMillis= */ 14_786_940, /* softirqTimeMillis= */ 1_498_130,
+                        /* stealTimeMillis= */ 78_780, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(2, new CpuInfoReader.CpuInfo(/* cpuCore= */ 2,
+                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
+                /* maxCpuFreqKHz= */ 2_000_000, /* avgTimeInStateCpuFreqKHz= */ 464_285,
+                /* normalizedAvailableCpuFreqKHz= */ 1_901_608,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 28_959_280,
+                        /* niceTimeMillis= */ 7_789_450, /* systemTimeMillis= */ 54_014_020,
+                        /* idleTimeMillis= */ 402_717_120, /* iowaitTimeMillis= */ 1_166_960,
+                        /* irqTimeMillis= */ 14_796_940, /* softirqTimeMillis= */ 1_478_130,
+                        /* stealTimeMillis= */ 88_780, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(3, new CpuInfoReader.CpuInfo(/* cpuCore= */ 3,
+                FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND,
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
+                /* maxCpuFreqKHz= */ 2_000_000, /* avgTimeInStateCpuFreqKHz= */ 464_285,
+                /* normalizedAvailableCpuFreqKHz= */ 1_907_125,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 32_349_610,
+                        /* niceTimeMillis= */ 7_850_930, /* systemTimeMillis= */ 52_127_050,
+                        /* idleTimeMillis= */ 409_136_950, /* iowaitTimeMillis= */ 1_332_810,
+                        /* irqTimeMillis= */ 8_136_740, /* softirqTimeMillis= */ 438_970,
+                        /* stealTimeMillis= */ 71_950, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        return cpuInfos;
+    }
+
+    private SparseArray<CpuInfoReader.CpuInfo> getSecondCpuInfosWithTimeInStateSnapshot() {
+        IntArray cpusetCategories = new IntArray();
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        cpusetCategories.add(FLAG_CPUSET_CATEGORY_TOP_APP | FLAG_CPUSET_CATEGORY_BACKGROUND);
+        return getSecondCpuInfosWithTimeInStateSnapshot(cpusetCategories);
+    }
+
+    private SparseArray<CpuInfoReader.CpuInfo> getSecondCpuInfosWithTimeInStateSnapshot(
+        IntArray cpusetCategories) {
+        SparseArray<CpuInfoReader.CpuInfo> cpuInfos = new SparseArray<>();
+        cpuInfos.append(0, new CpuInfoReader.CpuInfo(/* cpuCore= */ 0, cpusetCategories.get(0),
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 1_000_000,
+                /* maxCpuFreqKHz= */ 2_600_000, /* avgTimeInStateCpuFreqKHz= */ 419_354,
+                /* normalizedAvailableCpuFreqKHz= */ 2_525_919,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 10_000_000,
+                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 10_000_000,
+                        /* idleTimeMillis= */ 110_000_000, /* iowaitTimeMillis= */ 1_100_000,
+                        /* irqTimeMillis= */ 1_400_000, /* softirqTimeMillis= */ 80_000,
+                        /* stealTimeMillis= */ 21_000, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(1, new CpuInfoReader.CpuInfo(/* cpuCore= */ 1, cpusetCategories.get(1),
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 2_800_000,
+                /* maxCpuFreqKHz= */ 2_900_000, /* avgTimeInStateCpuFreqKHz= */ 429_032,
+                /* normalizedAvailableCpuFreqKHz= */ 2_503_009,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 900_000,
+                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 10_000_000,
+                        /* idleTimeMillis= */ 1_000_000, /* iowaitTimeMillis= */ 90_000,
+                        /* irqTimeMillis= */ 200_000, /* softirqTimeMillis= */ 100_000,
+                        /* stealTimeMillis= */ 100_000, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(2, new CpuInfoReader.CpuInfo(/* cpuCore= */ 2, cpusetCategories.get(2),
+                /* isOnline= */ true, /* curCpuFreqKHz= */ 2_000_000,
+                /* maxCpuFreqKHz= */ 2_100_000, /* avgTimeInStateCpuFreqKHz= */ 403_225,
+                /* normalizedAvailableCpuFreqKHz= */ 1_788_209,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 10_000_000,
+                        /* niceTimeMillis= */ 2_000_000, /* systemTimeMillis= */ 0,
+                        /* idleTimeMillis= */ 10_000_000, /* iowaitTimeMillis= */ 1_000_000,
+                        /* irqTimeMillis= */ 20_000_000, /* softirqTimeMillis= */ 1_000_000,
+                        /* stealTimeMillis= */ 100_000, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        cpuInfos.append(3, new CpuInfoReader.CpuInfo(/* cpuCore= */ 3, cpusetCategories.get(3),
+                /* isOnline= */ false,
+                /* curCpuFreqKHz= */ MISSING_FREQUENCY, /* maxCpuFreqKHz= */ 2_100_000,
+                /* avgTimeInStateCpuFreqKHz= */ MISSING_FREQUENCY,
+                /* normalizedAvailableCpuFreqKHz= */ MISSING_FREQUENCY,
+                new CpuInfoReader.CpuUsageStats(/* userTimeMillis= */ 2_000_000,
+                        /* niceTimeMillis= */ 1_000_000, /* systemTimeMillis= */ 1_000_000,
+                        /* idleTimeMillis= */ 100_000, /* iowaitTimeMillis= */ 100_000,
+                        /* irqTimeMillis= */ 100_000, /* softirqTimeMillis= */ 1_000_000,
+                        /* stealTimeMillis= */ 1_000, /* guestTimeMillis= */ 0,
+                        /* guestNiceTimeMillis= */ 0)));
+        return cpuInfos;
+    }
+
 }

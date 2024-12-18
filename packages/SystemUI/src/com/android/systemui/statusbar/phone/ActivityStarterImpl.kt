@@ -24,6 +24,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -36,10 +37,16 @@ class ActivityStarterImpl
 constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     @Main private val mainExecutor: DelayableExecutor,
+    activityStarterInternal: Lazy<ActivityStarterInternalImpl>,
     legacyActivityStarter: Lazy<LegacyActivityStarterInternalImpl>
 ) : ActivityStarter {
 
-    private val activityStarterInternal: ActivityStarterInternal = legacyActivityStarter.get()
+    private val activityStarterInternal: ActivityStarterInternal =
+        if (SceneContainerFlag.isEnabled) {
+            activityStarterInternal.get()
+        } else {
+            legacyActivityStarter.get()
+        }
 
     override fun startPendingIntentDismissingKeyguard(intent: PendingIntent) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
@@ -126,6 +133,7 @@ constructor(
         animationController: ActivityTransitionAnimator.Controller?,
         fillInIntent: Intent?,
         extraOptions: Bundle?,
+        customMessage: String?,
     ) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
@@ -135,6 +143,7 @@ constructor(
             dismissShade = dismissShade,
             fillInIntent = fillInIntent,
             extraOptions = extraOptions,
+            customMessage = customMessage,
         )
     }
 
@@ -319,11 +328,13 @@ constructor(
         intent: Intent,
         onlyProvisioned: Boolean,
         dismissShade: Boolean,
+        customMessage: String?,
     ) {
         activityStarterInternal.startActivityDismissingKeyguard(
             intent = intent,
             onlyProvisioned = onlyProvisioned,
             dismissShade = dismissShade,
+            customMessage = customMessage,
         )
     }
 

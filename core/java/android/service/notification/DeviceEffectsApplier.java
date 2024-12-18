@@ -16,8 +16,6 @@
 
 package android.service.notification;
 
-import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
-
 /**
  * Responsible for making any service calls needed to apply the set of {@link ZenDeviceEffects} that
  * make sense for the current platform.
@@ -43,5 +41,5 @@ public interface DeviceEffectsApplier {
      *               changing as a result of an explicit user action, then it makes sense to
      *               apply them immediately regardless.
      */
-    void apply(ZenDeviceEffects effects, @ConfigChangeOrigin int source);
+    void apply(ZenDeviceEffects effects, @ZenModeConfig.ConfigOrigin int source);
 }

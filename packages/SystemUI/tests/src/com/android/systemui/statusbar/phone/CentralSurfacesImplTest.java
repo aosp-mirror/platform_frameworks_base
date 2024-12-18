@@ -53,6 +53,7 @@ import static java.util.Collections.emptySet;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
+import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -88,6 +89,7 @@ import android.view.WindowMetrics;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
@@ -149,6 +151,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -165,7 +168,7 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -293,7 +296,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Bubbles mBubbles;
     @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
-    @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private Lazy<NotificationShadeWindowViewController>
             mNotificationShadeWindowViewControllerLazy;
@@ -339,9 +341,11 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyboardShortcuts mKeyboardShortcuts;
     @Mock private KeyboardShortcutListSearch mKeyboardShortcutListSearch;
     @Mock private PackageManager mPackageManager;
+    @Mock private NotificationManager mNotificationManager;
     @Mock private GlanceableHubContainerController mGlanceableHubContainerController;
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
-
+    @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
+    @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -399,7 +403,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mAvalancheProvider,
                         mSystemSettings,
                         mPackageManager,
-                        Optional.of(mBubbles));
+                        Optional.of(mBubbles),
+                        mContext,
+                        mNotificationManager,
+                        mNotificationSettingsInteractor);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -460,13 +467,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     mDeviceProvisionedController,
                     mNotificationShadeWindowController,
                     0,
+                    () -> mNotificationShadeWindowViewController,
                     () -> mNotificationPanelViewController,
                     () -> mAssistManager,
                     () -> mNotificationGutsManager
             ));
         }
-        mShadeController.setNotificationShadeWindowViewController(
-                mNotificationShadeWindowViewController);
         mShadeController.setNotificationPresenter(mNotificationPresenter);
 
         when(mOperatorNameViewControllerFactory.create(any()))
@@ -498,7 +504,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mock(FragmentService.class),
                 mLightBarController,
                 mAutoHideController,
-                new StatusBarInitializer(
+                new StatusBarInitializerImpl(
                         mStatusBarWindowController,
                         mCollapsedStatusBarFragmentProvider,
                         emptySet()),
@@ -574,7 +580,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
                 mStatusBarTouchableRegionManager,
-                mNotificationIconAreaController,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,
@@ -599,7 +604,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
                 mGlanceableHubContainerController,
-                mEmergencyGestureIntentFactory
+                mEmergencyGestureIntentFactory,
+                mViewCaptureAwareWindowManager
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
@@ -1151,19 +1157,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagEnabled_doesNotUpdateStatusBarWindowHeight() {
+    public void updateResources_doesNotUpdateStatusBarWindowHeight() {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController, never()).refreshStatusBarHeight();
-    }
-
-    @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_TRUNCATED_STATUS_BAR_ICONS_FIX)
-    public void updateResources_flagDisabled_updatesStatusBarWindowHeight() {
-        mCentralSurfaces.updateResources();
-
-        verify(mStatusBarWindowController).refreshStatusBarHeight();
     }
 
     @Test

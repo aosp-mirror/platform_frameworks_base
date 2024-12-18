@@ -223,8 +223,8 @@ public class CompanionDeviceManagerService extends SystemService {
             // delays (even in case of the Main Thread). It may be fine overall, but would require
             // updating the tests (adding a delay there).
             mPackageMonitor.register(context, FgThread.get().getLooper(), UserHandle.ALL, true);
-            mDevicePresenceProcessor.init(context);
         } else if (phase == PHASE_BOOT_COMPLETED) {
+            mDevicePresenceProcessor.init(context);
             // Run the Inactive Association Removal job service daily.
             InactiveAssociationsRemovalService.schedule(getContext());
             mCrossDeviceSyncController.onBootCompleted();

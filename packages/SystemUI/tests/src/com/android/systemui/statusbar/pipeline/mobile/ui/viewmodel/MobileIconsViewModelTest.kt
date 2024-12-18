@@ -24,11 +24,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
@@ -36,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
@@ -58,12 +58,13 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconsViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: MobileIconsViewModel
     private val interactor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var logger: MobileViewLogger
     @Mock private lateinit var verboseLogger: VerboseMobileViewLogger
@@ -79,7 +80,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 FakeAirplaneModeRepository(),
                 FakeConnectivityRepository(),
-                FakeMobileConnectionsRepository(),
+                kosmos.fakeMobileConnectionsRepository,
             )
 
         underTest =

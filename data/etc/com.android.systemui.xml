@@ -93,5 +93,6 @@
         <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
         <permission name="android.permission.CONTROL_UI_TRACING" />
         <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
+        <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW"/>
     </privapp-permissions>
 </permissions>

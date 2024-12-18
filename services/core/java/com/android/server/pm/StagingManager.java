@@ -54,8 +54,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.rollback.ApexdRevertLogger;
 import com.android.server.rollback.RollbackManagerInternal;
-import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -762,7 +762,7 @@ public class StagingManager {
     private void logFailedApexSessionsIfNecessary() {
         synchronized (mFailedPackageNames) {
             if (!mFailedPackageNames.isEmpty()) {
-                WatchdogRollbackLogger.logApexdRevert(mContext,
+                ApexdRevertLogger.logApexdRevert(mContext,
                         mFailedPackageNames, mNativeFailureReason);
             }
         }

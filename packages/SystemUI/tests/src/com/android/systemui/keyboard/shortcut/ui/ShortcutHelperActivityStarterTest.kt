@@ -20,8 +20,15 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
 import com.android.systemui.keyboard.shortcut.fakeShortcutHelperStartActivity
 import com.android.systemui.keyboard.shortcut.shortcutHelperActivityStarter
+import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperMultiTaskingShortcutsSource
+import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity
 import com.android.systemui.kosmos.Kosmos
@@ -32,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -40,16 +48,30 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ShortcutHelperActivityStarterTest : SysuiTestCase() {
 
+    private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
+    private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
+
     private val kosmos =
         Kosmos().also {
             it.testCase = this
             it.testDispatcher = UnconfinedTestDispatcher()
+            it.shortcutHelperSystemShortcutsSource = fakeSystemSource
+            it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
+            it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
         }
 
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
     private val fakeStartActivity = kosmos.fakeShortcutHelperStartActivity
     private val starter = kosmos.shortcutHelperActivityStarter
+
+    @Before
+    fun setUp() {
+        fakeSystemSource.setGroups(TestShortcuts.systemGroups)
+        fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
+    }
 
     @Test
     fun start_doesNotStartByDefault() =
@@ -70,13 +92,30 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
         }
 
     @Test
+    fun start_onToggle_noShortcuts_doesNotStartActivity() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(emptyList())
+            fakeMultiTaskingSource.setGroups(emptyList())
+
+            starter.start()
+
+            testHelper.toggle(deviceId = 456)
+
+            assertThat(fakeStartActivity.startIntents).isEmpty()
+        }
+
+    @Test
     fun start_onToggle_multipleTimesStartsActivityOnlyWhenNotStarted() =
         testScope.runTest {
             starter.start()
 
+            // Starts
             testHelper.toggle(deviceId = 456)
+            // Stops
             testHelper.toggle(deviceId = 456)
+            // Starts again
             testHelper.toggle(deviceId = 456)
+            // Stops
             testHelper.toggle(deviceId = 456)
 
             verifyShortcutHelperActivityStarted(numTimes = 2)
@@ -90,6 +129,18 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
             testHelper.showFromActivity()
 
             verifyShortcutHelperActivityStarted()
+        }
+
+    @Test
+    fun start_onRequestShowShortcuts_noShortcuts_doesNotStartActivity() =
+        testScope.runTest {
+            fakeSystemSource.setGroups(emptyList())
+            fakeMultiTaskingSource.setGroups(emptyList())
+            starter.start()
+
+            testHelper.showFromActivity()
+
+            assertThat(fakeStartActivity.startIntents).isEmpty()
         }
 
     @Test
@@ -109,13 +160,21 @@ class ShortcutHelperActivityStarterTest : SysuiTestCase() {
         testScope.runTest {
             starter.start()
 
+            // No-op. Already hidden.
             testHelper.hideFromActivity()
+            // No-op. Already hidden.
             testHelper.hideForSystem()
+            // Show 1st time.
             testHelper.toggle(deviceId = 987)
+            // No-op. Already shown.
             testHelper.showFromActivity()
+            // Hidden.
             testHelper.hideFromActivity()
+            // No-op. Already hidden.
             testHelper.hideForSystem()
+            // Show 2nd time.
             testHelper.toggle(deviceId = 456)
+            // No-op. Already shown.
             testHelper.showFromActivity()
 
             verifyShortcutHelperActivityStarted(numTimes = 2)

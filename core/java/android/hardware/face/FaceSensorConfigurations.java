@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.biometrics.face.virtualhal.IVirtualHal;
 import android.os.Binder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -160,6 +161,41 @@ public class FaceSensorConfigurations implements Parcelable {
         dest.writeByte((byte) (mResetLockoutRequiresChallenge ? 1 : 0));
         dest.writeMap(mSensorPropsMap);
     }
+    /**
+     * Remap fqName of VHAL because the `virtual` instance is registered
+     * with IVirtulalHal now (IFace previously)
+     * @param fqName fqName to be translated
+     * @return real fqName
+     */
+    public static String remapFqName(String fqName) {
+        if (!fqName.contains(IFace.DESCRIPTOR + "/virtual")) {
+            return fqName;  //no remap needed for real hardware HAL
+        } else {
+            //new Vhal instance name
+            return fqName.replace("IFace", "virtualhal.IVirtualHal");
+        }
+    }
+    /**
+     * @param fqName aidl interface instance name
+     * @return aidl interface
+     */
+    public static IFace getIFace(String fqName) {
+        if (fqName.contains("virtual")) {
+            String fqNameMapped = remapFqName(fqName);
+            Slog.i(TAG, "getIFace fqName is mapped: " + fqName + "->" + fqNameMapped);
+            try {
+                IVirtualHal vhal = IVirtualHal.Stub.asInterface(
+                        Binder.allowBlocking(ServiceManager.waitForService(fqNameMapped)));
+                return vhal.getFaceHal();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in vhal.getFaceHal() call" + fqNameMapped);
+            }
+        }
+
+        return IFace.Stub.asInterface(
+                Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+    }
+
 
     /**
      * Returns face sensor props for the HAL {@param instance}.
@@ -173,14 +209,13 @@ public class FaceSensorConfigurations implements Parcelable {
             return props;
         }
 
-        final String fqName = IFace.DESCRIPTOR + "/" + instance;
-        IFace face = IFace.Stub.asInterface(Binder.allowBlocking(
-                ServiceManager.waitForDeclaredService(fqName)));
         try {
-            if (face != null) {
-                props = face.getSensorProps();
+            final String fqName = IFace.DESCRIPTOR + "/" + instance;
+            final IFace fp = getIFace(fqName);
+            if (fp != null) {
+                props = fp.getSensorProps();
             } else {
-                Slog.e(TAG, "Unable to get declared service: " + fqName);
+                Log.d(TAG, "IFace null for instance " + instance);
             }
         } catch (RemoteException e) {
             Log.d(TAG, "Unable to get sensor properties!");

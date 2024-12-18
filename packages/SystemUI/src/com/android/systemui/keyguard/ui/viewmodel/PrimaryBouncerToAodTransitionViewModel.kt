@@ -70,6 +70,7 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = 300.milliseconds,
                     onStep = { it },
+                    onCancel = { 1f },
                     onFinish = { 1f },
                 )
             } else {

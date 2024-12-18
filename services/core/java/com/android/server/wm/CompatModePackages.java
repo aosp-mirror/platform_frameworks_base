@@ -48,7 +48,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 

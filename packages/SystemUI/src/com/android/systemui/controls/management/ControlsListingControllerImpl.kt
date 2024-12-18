@@ -38,31 +38,35 @@ import com.android.systemui.util.ActivityTaskManagerProxy
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.indentIfPossible
 import java.io.PrintWriter
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 private fun createServiceListing(context: Context): ServiceListing {
-    return ServiceListing.Builder(context).apply {
-        setIntentAction(ControlsProviderService.SERVICE_CONTROLS)
-        setPermission("android.permission.BIND_CONTROLS")
-        setNoun("Controls Provider")
-        setSetting("controls_providers")
-        setTag("controls_providers")
-        setAddDeviceLockedFlags(true)
-    }.build()
+    return ServiceListing.Builder(context)
+        .apply {
+            setIntentAction(ControlsProviderService.SERVICE_CONTROLS)
+            setPermission("android.permission.BIND_CONTROLS")
+            setNoun("Controls Provider")
+            setSetting("controls_providers")
+            setTag("controls_providers")
+            setAddDeviceLockedFlags(true)
+        }
+        .build()
 }
 
 /**
  * Provides a listing of components to be used as ControlsServiceProvider.
  *
  * This controller keeps track of components that satisfy:
- *
  * * Has an intent-filter responding to [ControlsProviderService.CONTROLS_ACTION]
  * * Has the bind permission `android.permission.BIND_CONTROLS`
  */
 @SysUISingleton
-class ControlsListingControllerImpl @VisibleForTesting constructor(
+class ControlsListingControllerImpl
+@VisibleForTesting
+constructor(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
     private val serviceListingBuilder: (Context) -> ServiceListing,
@@ -74,12 +78,12 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     @Inject
     constructor(
-            context: Context,
-            @Background executor: Executor,
-            userTracker: UserTracker,
-            activityTaskManagerProxy: ActivityTaskManagerProxy,
-            dumpManager: DumpManager,
-            featureFlags: FeatureFlags
+        context: Context,
+        @Background executor: Executor,
+        userTracker: UserTracker,
+        activityTaskManagerProxy: ActivityTaskManagerProxy,
+        dumpManager: DumpManager,
+        featureFlags: FeatureFlags
     ) : this(
         context,
         executor,
@@ -92,7 +96,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     private var serviceListing = serviceListingBuilder(context)
     // All operations in background thread
-    private val callbacks = mutableSetOf<ControlsListingController.ControlsListingCallback>()
+    private val callbacks = CopyOnWriteArraySet<ControlsListingController.ControlsListingCallback>()
 
     companion object {
         private const val TAG = "ControlsListingControllerImpl"
@@ -104,15 +108,17 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     override var currentUserId = userTracker.userId
         private set
 
-    private val serviceListingCallback = ServiceListing.Callback { list ->
-        Log.d(TAG, "ServiceConfig reloaded, count: ${list.size}")
-        val newServices = list.map { ControlsServiceInfo(userTracker.userContext, it) }
-        // After here, `list` is not captured, so we don't risk modifying it outside of the callback
-        backgroundExecutor.execute {
-            if (userChangeInProgress.get() > 0) return@execute
-            updateServices(newServices)
+    private val serviceListingCallback =
+        ServiceListing.Callback { list ->
+            Log.d(TAG, "ServiceConfig reloaded, count: ${list.size}")
+            val newServices = list.map { ControlsServiceInfo(userTracker.userContext, it) }
+            // After here, `list` is not captured, so we don't risk modifying it outside of the
+            // callback
+            backgroundExecutor.execute {
+                if (userChangeInProgress.get() > 0) return@execute
+                updateServices(newServices)
+            }
         }
-    }
 
     init {
         Log.d(TAG, "Initializing")
@@ -124,15 +130,12 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     private fun updateServices(newServices: List<ControlsServiceInfo>) {
         if (activityTaskManagerProxy.supportsMultiWindow(context)) {
-            newServices.forEach {
-                it.resolvePanelActivity() }
+            newServices.forEach { it.resolvePanelActivity() }
         }
 
         if (newServices != availableServices) {
             availableServices = newServices
-            callbacks.forEach {
-                it.onServicesUpdated(getCurrentServices())
-            }
+            callbacks.forEach { it.onServicesUpdated(getCurrentServices()) }
         }
     }
 
@@ -155,8 +158,8 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     /**
      * Adds a callback to this controller.
      *
-     * The callback will be notified after it is added as well as any time that the valid
-     * components change.
+     * The callback will be notified after it is added as well as any time that the valid components
+     * change.
      *
      * @param listener a callback to be notified
      */
@@ -188,26 +191,29 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     }
 
     /**
-     * @return a list of components that satisfy the requirements to be a
-     *         [ControlsProviderService]
+     * @return a list of components that satisfy the requirements to be a [ControlsProviderService]
      */
     override fun getCurrentServices(): List<ControlsServiceInfo> =
-            availableServices.map(ControlsServiceInfo::copy)
+        availableServices.map(ControlsServiceInfo::copy)
 
     @WorkerThread
     override fun forceReload() {
         val packageManager = context.packageManager
         val intent = Intent(ControlsProviderService.SERVICE_CONTROLS)
         val user = userTracker.userHandle
-        val flags = PackageManager.GET_SERVICES or
+        val flags =
+            PackageManager.GET_SERVICES or
                 PackageManager.GET_META_DATA or
                 PackageManager.MATCH_DIRECT_BOOT_UNAWARE or
                 PackageManager.MATCH_DIRECT_BOOT_AWARE
-        val services = packageManager.queryIntentServicesAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(flags.toLong()),
-                user
-        ).map { ControlsServiceInfo(userTracker.userContext, it.serviceInfo) }
+        val services =
+            packageManager
+                .queryIntentServicesAsUser(
+                    intent,
+                    PackageManager.ResolveInfoFlags.of(flags.toLong()),
+                    user
+                )
+                .map { ControlsServiceInfo(userTracker.userContext, it.serviceInfo) }
         updateServices(services)
     }
 
@@ -218,8 +224,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      * @return a label as returned by [CandidateInfo.loadLabel] or `null`.
      */
     override fun getAppLabel(name: ComponentName): CharSequence? {
-        return availableServices.firstOrNull { it.componentName == name }
-                ?.loadLabel()
+        return availableServices.firstOrNull { it.componentName == name }?.loadLabel()
     }
 
     override fun dump(writer: PrintWriter, args: Array<out String>) {

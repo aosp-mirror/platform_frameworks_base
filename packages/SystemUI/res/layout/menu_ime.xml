@@ -25,7 +25,7 @@
     are placed inside a view that has a size controlled by weight. Ensure weight is large enough to
     support icon size. Use layout_width=navigation_side_padding like other navbar buttons. -->
 
-    <com.android.systemui.navigationbar.buttons.KeyButtonView
+    <com.android.systemui.navigationbar.views.buttons.KeyButtonView
         android:id="@+id/menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,7 +43,7 @@
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
         />
-    <com.android.systemui.navigationbar.buttons.KeyButtonView
+    <com.android.systemui.navigationbar.views.buttons.KeyButtonView
         android:id="@+id/rotate_suggestion"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -51,7 +51,7 @@
         android:scaleType="centerInside"
         android:contentDescription="@string/accessibility_rotate_button"
         />
-    <com.android.systemui.navigationbar.buttons.KeyButtonView
+    <com.android.systemui.navigationbar.views.buttons.KeyButtonView
         android:id="@+id/accessibility_button"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

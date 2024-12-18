@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
@@ -39,7 +40,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
@@ -48,6 +48,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,6 +58,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ClockSectionTest : SysuiTestCase() {
@@ -119,6 +121,7 @@ class ClockSectionTest : SysuiTestCase() {
                     keyguardSmartspaceViewModel,
                     { keyguardBlueprintInteractor },
                     keyguardRootViewModel,
+                    aodBurnInViewModel,
                 )
         }
     }
@@ -127,7 +130,7 @@ class ClockSectionTest : SysuiTestCase() {
     fun testApplyDefaultConstraints_LargeClock_SplitShade() =
         kosmos.testScope.runTest {
             with(kosmos) {
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
                 advanceUntilIdle()
             }
@@ -143,11 +146,11 @@ class ClockSectionTest : SysuiTestCase() {
     fun testApplyDefaultConstraints_LargeClock_NonSplitShade() =
         kosmos.testScope.runTest {
             with(kosmos) {
-                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isShadeLayoutWide by collectLastValue(shadeRepository.isShadeLayoutWide)
                 val isLargeClockVisible by
                     collectLastValue(keyguardClockViewModel.isLargeClockVisible)
 
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
                 fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -168,11 +171,11 @@ class ClockSectionTest : SysuiTestCase() {
         kosmos.testScope.runTest {
             with(kosmos) {
                 DIMENSION_BY_IDENTIFIER = listOf() // Remove Smartspace from mock
-                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isShadeLayoutWide by collectLastValue(shadeRepository.isShadeLayoutWide)
                 val isLargeClockVisible by
                     collectLastValue(keyguardClockViewModel.isLargeClockVisible)
 
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
                 fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -193,11 +196,11 @@ class ClockSectionTest : SysuiTestCase() {
         kosmos.testScope.runTest {
             with(kosmos) {
                 DIMENSION_BY_IDENTIFIER = listOf() // Remove Smartspace from mock
-                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isShadeLayoutWide by collectLastValue(shadeRepository.isShadeLayoutWide)
                 val isLargeClockVisible by
                     collectLastValue(keyguardClockViewModel.isLargeClockVisible)
 
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.LARGE)
                 fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -217,11 +220,11 @@ class ClockSectionTest : SysuiTestCase() {
     fun testApplyDefaultConstraints_SmallClock_SplitShade() =
         kosmos.testScope.runTest {
             with(kosmos) {
-                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isShadeLayoutWide by collectLastValue(shadeRepository.isShadeLayoutWide)
                 val isLargeClockVisible by
                     collectLastValue(keyguardClockViewModel.isLargeClockVisible)
 
-                shadeRepository.setShadeMode(ShadeMode.Split)
+                shadeRepository.setShadeLayoutWide(true)
                 keyguardClockInteractor.setClockSize(ClockSize.SMALL)
                 fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -241,11 +244,11 @@ class ClockSectionTest : SysuiTestCase() {
     fun testApplyDefaultConstraints_SmallClock_NonSplitShade() =
         kosmos.testScope.runTest {
             with(kosmos) {
-                val collectedShadeMode by collectLastValue(shadeRepository.shadeMode)
+                val isShadeLayoutWide by collectLastValue(shadeRepository.isShadeLayoutWide)
                 val isLargeClockVisible by
                     collectLastValue(keyguardClockViewModel.isLargeClockVisible)
 
-                shadeRepository.setShadeMode(ShadeMode.Single)
+                shadeRepository.setShadeLayoutWide(false)
                 keyguardClockInteractor.setClockSize(ClockSize.SMALL)
                 fakeKeyguardRepository.setClockShouldBeCentered(true)
                 notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
@@ -312,7 +315,7 @@ class ClockSectionTest : SysuiTestCase() {
             referencedIds.contentEquals(
                 intArrayOf(
                     com.android.systemui.shared.R.id.bc_smartspace_view,
-                    R.id.aod_notification_icon_container
+                    R.id.aod_notification_icon_container,
                 )
             )
         }
@@ -334,7 +337,7 @@ class ClockSectionTest : SysuiTestCase() {
     }
 
     companion object {
-        private val SMART_SPACE_DATE_WEATHER_HEIGHT = 10
-        private val ENHANCED_SMART_SPACE_HEIGHT = 11
+        private const val SMART_SPACE_DATE_WEATHER_HEIGHT = 10
+        private const val ENHANCED_SMART_SPACE_HEIGHT = 11
     }
 }

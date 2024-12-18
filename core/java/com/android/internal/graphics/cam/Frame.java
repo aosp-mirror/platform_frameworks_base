@@ -17,6 +17,7 @@
 package com.android.internal.graphics.cam;
 
 import android.annotation.NonNull;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -33,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * number of calculations during the color => CAM conversion process that depend only on the viewing
  * conditions. Caching those calculations in a Frame instance saves a significant amount of time.
  */
+@RavenwoodKeepWholeClass
 public final class Frame {
     // Standard viewing conditions assumed in RGB specification - Stokes, Anderson, Chandrasekar,
     // Motta - A Standard Default Color Space for the Internet: sRGB, 1996.

@@ -47,6 +47,7 @@ constructor(
     private fun QSTileUserAction.getQSEvent(): QSEvent =
         when (this) {
             is QSTileUserAction.Click -> QSEvent.QS_ACTION_CLICK
+            is QSTileUserAction.ToggleClick -> QSEvent.QS_ACTION_SECONDARY_CLICK
             is QSTileUserAction.LongClick -> QSEvent.QS_ACTION_LONG_PRESS
         }
 }

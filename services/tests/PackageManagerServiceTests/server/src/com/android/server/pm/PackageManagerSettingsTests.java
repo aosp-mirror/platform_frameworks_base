@@ -924,6 +924,54 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testSameVersions_writeReadUsesStaticLibraries() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String libOne = "one";
+        final String libTwo = "two";
+        final long versionOne = 311;
+        packageSetting.setUsesStaticLibraries(new String[] { libOne, libTwo });
+        packageSetting.setUsesStaticLibrariesVersions(new long[] { versionOne, versionOne });
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getUsesStaticLibraries()[0], is(libOne));
+        assertThat(resultSetting.getUsesStaticLibraries()[1], is(libTwo));
+        assertThat(resultSetting.getUsesStaticLibrariesVersions()[0], is(versionOne));
+        assertThat(resultSetting.getUsesStaticLibrariesVersions()[1], is(versionOne));
+    }
+
+    @Test
+    public void testSameLibNames_writeReadUsesStaticLibraries() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String libOne = "one";
+        final long versionOne = 311;
+        final long versionTwo = 330;
+        packageSetting.setUsesStaticLibraries(new String[] { libOne, libOne});
+        packageSetting.setUsesStaticLibrariesVersions(new long[] { versionOne, versionTwo });
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getUsesStaticLibraries().length, is(1));
+        assertThat(resultSetting.getUsesStaticLibrariesVersions().length, is(1));
+        assertThat(resultSetting.getUsesStaticLibraries()[0], is(libOne));
+        assertThat(resultSetting.getUsesStaticLibrariesVersions()[0], is(versionTwo));
+    }
+
+    @Test
     public void testWriteReadUsesSdkLibraries() {
         final Settings settingsUnderTest = makeSettings();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
@@ -1008,6 +1056,65 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testSameVersions_writeReadUsesSdkLibraries() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String libOne = "one";
+        final String libTwo = "two";
+        final long versionOne = 311;
+        final boolean optional = false;
+        packageSetting.setUsesSdkLibraries(new String[] { libOne, libTwo });
+        packageSetting.setUsesSdkLibrariesVersionsMajor(new long[] { versionOne, versionOne });
+        packageSetting.setUsesSdkLibrariesOptional(new boolean[] { optional, optional });
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+
+        assertThat(resultSetting.getUsesSdkLibraries()[0], is(libOne));
+        assertThat(resultSetting.getUsesSdkLibraries()[1], is(libTwo));
+        assertThat(resultSetting.getUsesSdkLibrariesVersionsMajor()[0], is(versionOne));
+        assertThat(resultSetting.getUsesSdkLibrariesVersionsMajor()[1], is(versionOne));
+        assertThat(resultSetting.getUsesSdkLibrariesOptional()[0], is(optional));
+        assertThat(resultSetting.getUsesSdkLibrariesOptional()[1], is(optional));
+    }
+
+    @Test
+    public void testSameLibNames_writeReadUsesSdkLibraries() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String libOne = "one";
+        final long versionOne = 311;
+        final long versionTwo = 330;
+        final boolean optionalOne = false;
+        final boolean optionalTwo = true;
+        packageSetting.setUsesSdkLibraries(new String[] { libOne, libOne });
+        packageSetting.setUsesSdkLibrariesVersionsMajor(new long[] { versionOne, versionTwo });
+        packageSetting.setUsesSdkLibrariesOptional(new boolean[] { optionalOne, optionalTwo });
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+
+        assertThat(resultSetting.getUsesSdkLibraries().length, is(1));
+        assertThat(resultSetting.getUsesSdkLibrariesVersionsMajor().length, is(1));
+        assertThat(resultSetting.getUsesSdkLibrariesOptional().length, is(1));
+        assertThat(resultSetting.getUsesSdkLibraries()[0], is(libOne));
+        assertThat(resultSetting.getUsesSdkLibrariesVersionsMajor()[0], is(versionTwo));
+        assertThat(resultSetting.getUsesSdkLibrariesOptional()[0], is(optionalTwo));
+    }
+
+    @Test
     public void testWriteReadPendingRestore() {
         Settings settings = makeSettings();
         PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
@@ -1024,6 +1131,144 @@ public class PackageManagerSettingsTests {
 
         assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isPendingRestore(), is(true));
+    }
+
+    @Test
+    public void testWriteReadDebuggable() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setDebuggable(true);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isDebuggable(), is(true));
+    }
+
+    @Test
+    public void testWriteReadBaseRevisionCode() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        final int revisionCode = 311;
+        packageSetting.setBaseRevisionCode(revisionCode);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).getBaseRevisionCode(), is(revisionCode));
+    }
+
+    @Test
+    public void testHasPkg_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames().length, is(0));
+        assertThat(resultSetting.getSplitRevisionCodes().length, is(0));
+    }
+
+    @Test
+    public void testNoPkgDifferentRevisions_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitNames()[1], is(splitTwo));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[1], is(revisionTwo));
+    }
+
+    @Test
+    public void testNoPkgSameRevisions_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final String splitTwo = "two";
+        final int revisionOne = 311;
+        packageSetting.setSplitNames(new String[] { splitOne, splitTwo});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionOne});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitNames()[1], is(splitTwo));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[1], is(revisionOne));
+    }
+
+    @Test
+    public void testNoPkgSameSplitNames_writeReadSplitVersions() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+
+        final String splitOne = "one";
+        final int revisionOne = 311;
+        final int revisionTwo = 330;
+        packageSetting.setSplitNames(new String[] { splitOne, splitOne});
+        packageSetting.setSplitRevisionCodes(new int[] { revisionOne, revisionTwo});
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /* sync= */ true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        PackageSetting resultSetting = settings.getPackageLPr(PACKAGE_NAME_1);
+        assertThat(resultSetting.getSplitNames().length, is(1));
+        assertThat(resultSetting.getSplitRevisionCodes().length, is(1));
+        assertThat(resultSetting.getSplitNames()[0], is(splitOne));
+        assertThat(resultSetting.getSplitRevisionCodes()[0], is(revisionTwo));
     }
 
     @Test

@@ -25,9 +25,9 @@ import android.os.Bundle;
 import android.window.RemoteTransition;
 
 import com.android.internal.logging.InstanceId;
-import com.android.wm.shell.common.split.SplitScreenConstants.PersistentSnapPosition;
-import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.shared.annotations.ExternalThread;
+import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 
 import java.util.concurrent.Executor;
 
@@ -44,13 +44,13 @@ public interface SplitScreen {
     int STAGE_TYPE_UNDEFINED = -1;
     /**
      * The main stage type.
-     * @see MainStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_MAIN = 0;
 
     /**
      * The side stage type.
-     * @see SideStage
+     * @see StageTaskListener
      */
     int STAGE_TYPE_SIDE = 1;
 
@@ -112,6 +112,9 @@ public interface SplitScreen {
 
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
+
+    /** Called when device starts going to sleep (screen off). */
+    void onStartedGoingToSleep();
 
     /** Called when requested to go to fullscreen from the current active split app. */
     void goToFullscreenFromSplit();

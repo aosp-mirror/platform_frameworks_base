@@ -19,6 +19,7 @@ package com.android.systemui.communal.ui.viewmodel
 import android.graphics.Color
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -58,9 +59,20 @@ constructor(
     dreamToGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     glanceableHubToDreamTransitionViewModel: GlanceableHubToDreamingTransitionViewModel,
     communalInteractor: CommunalInteractor,
-    communalSceneInteractor: CommunalSceneInteractor,
+    private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor
 ) {
+    /**
+     * Snaps to [CommunalScenes.Communal], showing the glanceable hub immediately without any
+     * transition.
+     */
+    fun snapToCommunal() {
+        communalSceneInteractor.snapToScene(
+            newScene = CommunalScenes.Communal,
+            loggingReason = "transition view model",
+        )
+    }
+
     // Show UMO on glanceable hub immediately on transition into glanceable hub
     private val showUmoFromOccludedToGlanceableHub: Flow<Boolean> =
         keyguardTransitionInteractor

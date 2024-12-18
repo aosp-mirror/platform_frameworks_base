@@ -24,7 +24,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import com.android.credentialmanager.ui.theme.WearCredentialSelectorTheme
 import com.android.credentialmanager.ui.WearApp
-import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint(ComponentActivity::class)
@@ -32,7 +31,6 @@ class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
 
     private val viewModel: CredentialSelectorViewModel by viewModels()
 
-    @OptIn(ExperimentalHorologistApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate, intent: $intent")
         super.onCreate(savedInstanceState)

@@ -17,7 +17,17 @@
 package com.android.systemui.qs.panels.shared.model
 
 /** Represents a tile of type [T] associated with a width */
-data class SizedTile<T>(val tile: T, val width: Int)
+interface SizedTile<T> {
+    val tile: T
+    val width: Int
+    val isIcon: Boolean
+        get() = width == 1
+}
+
+data class SizedTileImpl<T>(
+    override val tile: T,
+    override val width: Int,
+) : SizedTile<T>
 
 /** Represents a row of [SizedTile] with a maximum width of [columns] */
 class TileRow<T>(private val columns: Int) {
@@ -50,4 +60,27 @@ class TileRow<T>(private val columns: Int) {
     }
 
     fun isFull(): Boolean = availableColumns == 0
+}
+
+/**
+ * Converts a list of [SizedTile] to a sequence of rows based on the number of columns of the grid
+ */
+fun <T> splitInRowsSequence(
+    tiles: List<SizedTile<T>>,
+    columns: Int,
+): Sequence<List<SizedTile<T>>> = sequence {
+    val row = TileRow<T>(columns)
+    for (tile in tiles) {
+        check(tile.width <= columns)
+        if (!row.maybeAddTile(tile)) {
+            // Couldn't add tile to previous row, create a row with the current tiles
+            // and start a new one
+            yield(row.tiles)
+            row.clear()
+            row.maybeAddTile(tile)
+        }
+    }
+    if (row.tiles.isNotEmpty()) {
+        yield(row.tiles)
+    }
 }

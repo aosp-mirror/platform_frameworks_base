@@ -16,17 +16,26 @@
 
 package com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel
 
+import android.content.Context
 import androidx.annotation.DrawableRes
+import com.android.internal.jank.Cuj
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareToAppDialogDelegate
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
@@ -46,43 +55,79 @@ class ShareToAppChipViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    private val context: Context,
     private val mediaProjectionChipInteractor: MediaProjectionChipInteractor,
     private val systemClock: SystemClock,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
-    override val chip: StateFlow<OngoingActivityChipModel> =
+    private val internalChip =
         mediaProjectionChipInteractor.projection
             .map { projectionModel ->
                 when (projectionModel) {
-                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden
+                    is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
                     is ProjectionChipModel.Projecting -> {
                         if (projectionModel.type != ProjectionChipModel.Type.SHARE_TO_APP) {
-                            OngoingActivityChipModel.Hidden
+                            OngoingActivityChipModel.Hidden()
                         } else {
                             createShareToAppChip(projectionModel)
                         }
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            // See b/347726238 for [SharingStarted.Lazily] reasoning.
+            .stateIn(scope, SharingStarted.Lazily, OngoingActivityChipModel.Hidden())
+
+    private val chipTransitionHelper = ChipTransitionHelper(scope)
+
+    override val chip: StateFlow<OngoingActivityChipModel> =
+        chipTransitionHelper.createChipFlow(internalChip)
+
+    /**
+     * Notifies this class that the user just stopped a screen recording from the dialog that's
+     * shown when you tap the recording chip.
+     */
+    fun onRecordingStoppedFromDialog() {
+        // When a screen recording is active, share-to-app is also active (screen recording is just
+        // a special case of share-to-app, where the specific app receiving the share is System UI).
+        // When a screen recording is stopped, we immediately hide the screen recording chip in
+        // [com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel].
+        // We *also* need to immediately hide the share-to-app chip so it doesn't briefly show.
+        // See b/350891338.
+        chipTransitionHelper.onActivityStoppedFromDialog()
+    }
 
     /** Stops the currently active projection. */
-    private fun stopProjecting() {
+    private fun stopProjectingFromDialog() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop sharing requested from dialog" })
+        chipTransitionHelper.onActivityStoppedFromDialog()
         mediaProjectionChipInteractor.stopProjecting()
     }
 
     private fun createShareToAppChip(
         state: ProjectionChipModel.Projecting,
     ): OngoingActivityChipModel.Shown {
-        return OngoingActivityChipModel.Shown(
-            // TODO(b/332662551): Use the right content description.
-            icon = Icon.Resource(SHARE_TO_APP_ICON, contentDescription = null),
+        return OngoingActivityChipModel.Shown.Timer(
+            icon =
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                    Icon.Resource(
+                        SHARE_TO_APP_ICON,
+                        ContentDescription.Resource(R.string.share_to_app_chip_accessibility_label),
+                    )
+                ),
+            colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
                 createShareToAppDialogDelegate(state),
-                dialogTransitionAnimator
+                dialogTransitionAnimator,
+                DialogCuj(
+                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
+                    tag = "Share to app",
+                ),
+                logger,
+                TAG,
             ),
         )
     }
@@ -90,12 +135,13 @@ constructor(
     private fun createShareToAppDialogDelegate(state: ProjectionChipModel.Projecting) =
         EndShareToAppDialogDelegate(
             endMediaProjectionDialogHelper,
-            stopAction = this::stopProjecting,
+            context,
+            stopAction = this::stopProjectingFromDialog,
             state,
         )
 
     companion object {
-        // TODO(b/332662551): Use the right icon.
-        @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_screenshot_share
+        @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
+        private const val TAG = "ShareToAppVM"
     }
 }

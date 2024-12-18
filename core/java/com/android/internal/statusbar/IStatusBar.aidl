@@ -51,8 +51,7 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
@@ -208,11 +207,6 @@ oneway interface IStatusBar
      * Notifies System UI that the display is ready to show system decorations.
      */
     void onDisplayReady(int displayId);
-
-    /**
-     * Notifies System UI whether the recents animation is running or not.
-     */
-    void onRecentsAnimationStateChanged(boolean running);
 
     /**
      * Notifies System UI side of system bar attribute change on the specified display.

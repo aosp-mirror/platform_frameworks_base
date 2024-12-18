@@ -648,6 +648,21 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                     Slog.w(TAG, "Failed to send connected event", ex);
                                 }
                             }
+
+                            @Override
+                            public void onDisconnected(
+                                    @NonNull IOnDeviceSandboxedInferenceService service) {
+                                ensureRemoteIntelligenceServiceInitialized();
+                                mRemoteOnDeviceIntelligenceService.run(
+                                        IOnDeviceIntelligenceService::notifyInferenceServiceDisconnected);
+                            }
+
+                            @Override
+                            public void onBinderDied() {
+                                ensureRemoteIntelligenceServiceInitialized();
+                                mRemoteOnDeviceIntelligenceService.run(
+                                        IOnDeviceIntelligenceService::notifyInferenceServiceDisconnected);
+                            }
                         });
             }
         }

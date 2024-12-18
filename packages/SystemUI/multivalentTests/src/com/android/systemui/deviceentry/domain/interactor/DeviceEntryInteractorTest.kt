@@ -19,8 +19,8 @@ package com.android.systemui.deviceentry.domain.interactor
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -32,35 +32,26 @@ import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.AdaptiveAuthRequest
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.BouncerLockedOut
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.NonStrongBiometricsSecurityTimeout
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.PolicyLockdown
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.SecurityTimeout
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.TrustAgentDisabled
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.UnattendedUpdate
-import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason.UserLockdown
 import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.flags.fakeSystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.fakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeTrustRepository
-import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -81,10 +72,14 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     private val trustRepository by lazy { kosmos.fakeTrustRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val sceneBackInteractor by lazy { kosmos.sceneBackInteractor }
+    private val sceneContainerStartable by lazy { kosmos.sceneContainerStartable }
+    private val sysuiStatusBarStateController by lazy { kosmos.sysuiStatusBarStateController }
     private lateinit var underTest: DeviceEntryInteractor
 
     @Before
     fun setUp() {
+        sceneContainerStartable.start()
         underTest = kosmos.deviceEntryInteractor
     }
 
@@ -439,205 +434,36 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun deviceEntryRestrictionReason_whenFaceOrFingerprintOrTrust_alwaysNull() =
+    fun isDeviceEntered_unlockedWhileOnShade_emitsTrue() =
         testScope.runTest {
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
+            val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
+            assertThat(isDeviceEntered).isFalse()
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Navigate to shade and bouncer:
+            switchToScene(Scenes.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            // Simulating a "leave it open when the keyguard is hidden" which means the bouncer will
+            // be
+            // shown and successful authentication should take the user back to where they are, the
+            // shade scene.
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
+            switchToScene(Scenes.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
+
+            assertThat(isDeviceEntered).isFalse()
+            // Authenticate with PIN to unlock and dismiss the lockscreen:
+            authenticationInteractor.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
             runCurrent()
 
-            verifyRestrictionReasonsForAuthFlags(
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to null,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to null,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to null,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to null,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to null,
-                LockPatternUtils.StrongAuthTracker
-                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to null,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
-                    null,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    null,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to null
-            )
+            assertThat(isDeviceEntered).isTrue()
         }
 
-    @Test
-    fun deviceEntryRestrictionReason_whenFaceIsEnrolledAndEnabled_mapsToAuthFlagsState() =
-        testScope.runTest {
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
-            kosmos.fakeSystemPropertiesHelper.set(
-                DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
-            )
-            runCurrent()
-
-            verifyRestrictionReasonsForAuthFlags(
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
-                    DeviceNotUnlockedSinceReboot,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
-                    AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    BouncerLockedOut,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
-                    SecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
-                    UserLockdown,
-                LockPatternUtils.StrongAuthTracker
-                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
-                    NonStrongBiometricsSecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    UnattendedUpdate,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
-                    PolicyLockdown,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to null,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
-                    null,
-            )
-        }
-
-    @Test
-    fun deviceEntryRestrictionReason_whenFingerprintIsEnrolledAndEnabled_mapsToAuthFlagsState() =
-        testScope.runTest {
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
-            kosmos.fakeSystemPropertiesHelper.set(
-                DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
-            )
-            runCurrent()
-
-            verifyRestrictionReasonsForAuthFlags(
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
-                    DeviceNotUnlockedSinceReboot,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
-                    AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    BouncerLockedOut,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
-                    SecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
-                    UserLockdown,
-                LockPatternUtils.StrongAuthTracker
-                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
-                    NonStrongBiometricsSecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    UnattendedUpdate,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
-                    PolicyLockdown,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to null,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
-                    null,
-            )
-        }
-
-    @Test
-    fun deviceEntryRestrictionReason_whenTrustAgentIsEnabled_mapsToAuthFlagsState() =
-        testScope.runTest {
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(true)
-            kosmos.fakeTrustRepository.setCurrentUserTrustManaged(false)
-            kosmos.fakeSystemPropertiesHelper.set(
-                DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
-                "not mainline reboot"
-            )
-            runCurrent()
-
-            verifyRestrictionReasonsForAuthFlags(
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
-                    DeviceNotUnlockedSinceReboot,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
-                    AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    BouncerLockedOut,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
-                    SecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
-                    UserLockdown,
-                LockPatternUtils.StrongAuthTracker
-                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
-                    NonStrongBiometricsSecurityTimeout,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    UnattendedUpdate,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
-                    PolicyLockdown,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to
-                    TrustAgentDisabled,
-                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
-                    TrustAgentDisabled,
-            )
-        }
-
-    @Test
-    fun deviceEntryRestrictionReason_whenDeviceRebootedForMainlineUpdate_mapsToTheCorrectReason() =
-        testScope.runTest {
-            val deviceEntryRestrictionReason by
-                collectLastValue(underTest.deviceEntryRestrictionReason)
-            kosmos.fakeSystemPropertiesHelper.set(
-                DeviceEntryInteractor.SYS_BOOT_REASON_PROP,
-                DeviceEntryInteractor.REBOOT_MAINLINE_UPDATE
-            )
-            kosmos.fakeBiometricSettingsRepository.setAuthenticationFlags(
-                AuthenticationFlags(
-                    userId = 1,
-                    flag = LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
-                )
-            )
-            runCurrent()
-
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(false)
-            runCurrent()
-
-            assertThat(deviceEntryRestrictionReason).isNull()
-
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
-            runCurrent()
-
-            assertThat(deviceEntryRestrictionReason)
-                .isEqualTo(DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate)
-
-            kosmos.fakeBiometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-            runCurrent()
-
-            assertThat(deviceEntryRestrictionReason)
-                .isEqualTo(DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate)
-
-            kosmos.fakeBiometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
-            kosmos.fakeTrustRepository.setTrustUsuallyManaged(true)
-            runCurrent()
-
-            assertThat(deviceEntryRestrictionReason)
-                .isEqualTo(DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate)
-        }
-
-    private fun TestScope.verifyRestrictionReasonsForAuthFlags(
-        vararg authFlagToDeviceEntryRestriction: Pair<Int, DeviceEntryRestrictionReason?>
-    ) {
-        val deviceEntryRestrictionReason by collectLastValue(underTest.deviceEntryRestrictionReason)
-
-        authFlagToDeviceEntryRestriction.forEach { (flag, expectedReason) ->
-            kosmos.fakeBiometricSettingsRepository.setAuthenticationFlags(
-                AuthenticationFlags(userId = 1, flag = flag)
-            )
-            runCurrent()
-
-            if (expectedReason == null) {
-                assertThat(deviceEntryRestrictionReason).isNull()
-            } else {
-                assertThat(deviceEntryRestrictionReason).isEqualTo(expectedReason)
-            }
-        }
-    }
-
-    private fun switchToScene(sceneKey: SceneKey) {
+    private fun TestScope.switchToScene(sceneKey: SceneKey) {
         sceneInteractor.changeScene(sceneKey, "reason")
+        sceneInteractor.setTransitionState(flowOf(ObservableTransitionState.Idle(sceneKey)))
+        runCurrent()
     }
 
     private suspend fun givenCanShowAlternateBouncer() {

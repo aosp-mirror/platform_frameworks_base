@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Pārvietot augšpusē pa labi"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Pārvietot apakšpusē pa kreisi"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Pārvietot apakšpusē pa labi"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"izvērst izvēlni"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"sakļaut izvēlni"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Pārvietot pa kreisi"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Pārvietot pa labi"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"Izvērst “<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"Sakļaut “<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Lietotnes <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> iestatījumi"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Nerādīt burbuli"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Pārvietot uz pilnekrāna režīmu"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nerādīt sarunu burbuļos"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Tērzēšana, izmantojot burbuļus"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Jaunas sarunas tiek rādītas kā peldošas ikonas vai burbuļi. Pieskarieties, lai atvērtu burbuli. Velciet, lai to pārvietotu."</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Minimizēt"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Aizvērt"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Atpakaļ"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Turis"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Lietotnes turis"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Lietotnes ikona"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Pilnekrāna režīms"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Darbvirsmas režīms"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"Peldošs"</string>
     <string name="select_text" msgid="5139083974039906583">"Atlasīt"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Ekrānuzņēmums"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Atvērt pārlūkā"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"Jauns logs"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"Pārvaldīt logus"</string>
     <string name="close_text" msgid="4986518933445178928">"Aizvērt"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Aizvērt izvēlni"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"Atvērt izvēlni"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Atvērt izvēlni"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimizēt ekrānu"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Fiksēt ekrānu"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Šīs lietotnes loga lielumu nevar mainīt."</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maksimizēt"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Piestiprināt pa kreisi"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Piestiprināt pa labi"</string>
 </resources>

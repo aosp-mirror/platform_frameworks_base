@@ -29,8 +29,8 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Slog;
+
 import com.android.internal.compat.IPlatformCompat;
 
 /**
@@ -79,6 +79,11 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
         if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
                 || restrictAudioAttributesMedia()) {
             AudioAttributes attributes = record.getChannel().getAudioAttributes();
+            if (attributes == null) {
+                if (DBG) Slog.d(TAG, "missing AudioAttributes");
+                return null;
+            }
+
             boolean updateAttributes =  false;
             if (restrictAudioAttributesCall()
                     && !record.getNotification().isStyle(Notification.CallStyle.class)

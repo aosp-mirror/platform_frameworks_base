@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.framework.common
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.os.bundleOf
@@ -25,8 +24,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.util.genEntryId
 import com.android.settingslib.spa.framework.util.genPageId
-import com.android.settingslib.spa.slice.appendSpaParams
-import com.android.settingslib.spa.slice.getEntryId
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.createSettingsPage
 import com.google.common.truth.Truth.assertThat
@@ -76,7 +73,6 @@ class SettingsEntryTest {
         assertThat(entry.isAllowSearch).isFalse()
         assertThat(entry.isSearchDataDynamic).isFalse()
         assertThat(entry.hasMutableStatus).isFalse()
-        assertThat(entry.hasSliceSupport).isFalse()
     }
 
     @Test
@@ -137,7 +133,6 @@ class SettingsEntryTest {
                 .setIsSearchDataDynamic(false)
                 .setHasMutableStatus(true)
                 .setSearchDataFn { null }
-                .setSliceDataFn { _, _ -> null }
         val entry = entryBuilder.build()
         assertThat(entry.id).isEqualTo(genEntryId("myEntry", owner))
         assertThat(entry.label).isEqualTo("myEntryDisplay")
@@ -146,7 +141,6 @@ class SettingsEntryTest {
         assertThat(entry.isAllowSearch).isTrue()
         assertThat(entry.isSearchDataDynamic).isFalse()
         assertThat(entry.hasMutableStatus).isTrue()
-        assertThat(entry.hasSliceSupport).isTrue()
 
         // Test disabled Spp
         val ownerDisabled = createSettingsPage("SppDisabled")
@@ -156,7 +150,6 @@ class SettingsEntryTest {
                 .setIsSearchDataDynamic(false)
                 .setHasMutableStatus(true)
                 .setSearchDataFn { null }
-                .setSliceDataFn { _, _ -> null }
         val entryDisabled = entryBuilderDisabled.build()
         assertThat(entryDisabled.id).isEqualTo(genEntryId("myEntry", ownerDisabled))
         assertThat(entryDisabled.label).isEqualTo("myEntryDisplay")
@@ -165,7 +158,6 @@ class SettingsEntryTest {
         assertThat(entryDisabled.isAllowSearch).isFalse()
         assertThat(entryDisabled.isSearchDataDynamic).isFalse()
         assertThat(entryDisabled.hasMutableStatus).isTrue()
-        assertThat(entryDisabled.hasSliceSupport).isFalse()
 
         // Clear search data fn
         val entry2 = entryBuilder.clearSearchDataFn().build()
@@ -181,7 +173,6 @@ class SettingsEntryTest {
         assertThat(entry3.isAllowSearch).isFalse()
         assertThat(entry3.isSearchDataDynamic).isFalse()
         assertThat(entry3.hasMutableStatus).isTrue()
-        assertThat(entry3.hasSliceSupport).isFalse()
     }
 
     @Test
@@ -200,33 +191,11 @@ class SettingsEntryTest {
         assertThat(entry.isAllowSearch).isTrue()
         assertThat(entry.isSearchDataDynamic).isFalse()
         assertThat(entry.hasMutableStatus).isFalse()
-        assertThat(entry.hasSliceSupport).isFalse()
         val searchData = entry.getSearchData(rtArguments)
         val statusData = entry.getStatusData(rtArguments)
         assertThat(searchData?.title).isEqualTo("myTitle")
         assertThat(searchData?.keyword).isEmpty()
         assertThat(statusData?.isDisabled).isTrue()
         assertThat(statusData?.isSwitchOff).isTrue()
-    }
-
-    @Test
-    fun testSetSliceDataFn() {
-        SpaEnvironmentFactory.reset(spaEnvironment)
-        val owner = createSettingsPage("SppHome")
-        val entryId = genEntryId("myEntry", owner)
-        val emptySliceData = EntrySliceData()
-
-        val entryBuilder = SettingsEntryBuilder.create(owner, "myEntry").setSliceDataFn { uri, _ ->
-            return@setSliceDataFn if (uri.getEntryId() == entryId) emptySliceData else null
-        }
-        val entry = entryBuilder.build()
-        assertThat(entry.id).isEqualTo(entryId)
-        assertThat(entry.hasSliceSupport).isTrue()
-        assertThat(entry.getSliceData(Uri.EMPTY)).isNull()
-        assertThat(
-            entry.getSliceData(
-                Uri.Builder().scheme("content").appendSpaParams(entryId = entryId).build()
-            )
-        ).isEqualTo(emptySliceData)
     }
 }

@@ -3897,36 +3897,6 @@ public abstract class CameraMetadata<TKey> {
     public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2;
 
     //
-    // Enumeration values for CaptureRequest#EFV_STABILIZATION_MODE
-    //
-
-    /**
-     * <p>No stabilization.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_OFF = 0;
-
-    /**
-     * <p>Gimbal stabilization mode.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_GIMBAL = 1;
-
-    /**
-     * <p>Locked stabilization mode which uses the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * stabilization to directionally steady the target region.</p>
-     * @see CaptureRequest#EFV_STABILIZATION_MODE
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EFV_STABILIZATION_MODE_LOCKED = 2;
-
-    //
     // Enumeration values for CaptureResult#CONTROL_AE_STATE
     //
 

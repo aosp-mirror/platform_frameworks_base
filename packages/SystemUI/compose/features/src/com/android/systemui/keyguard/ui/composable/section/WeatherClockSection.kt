@@ -128,7 +128,7 @@ constructor(
         elementKey: ElementKey,
         modifier: Modifier = Modifier,
     ) {
-        MovableElement(key = elementKey, modifier) {
+        Element(key = elementKey, modifier) {
             content {
                 AndroidView(
                     factory = {

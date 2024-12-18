@@ -54,7 +54,6 @@ public class FallbackBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(currentBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(currentBrightness)
                         .setDisplayBrightnessStrategyName(mFallbackBrightnessStrategy.getName())
                         .setShouldUpdateScreenBrightnessSetting(true)
                         .setIsUserInitiatedChange(true)

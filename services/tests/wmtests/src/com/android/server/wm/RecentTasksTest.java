@@ -70,7 +70,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.SparseBooleanArray;
@@ -79,9 +82,12 @@ import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.launcher3.Flags;
 import com.android.server.wm.RecentTasks.Callbacks;
 
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -121,6 +127,10 @@ public class RecentTasksTest extends WindowTestsBase {
     private ArrayList<Task> mSameDocumentTasks;
 
     private CallbacksRecorder mCallbacksRecorder;
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule =
+            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Before
     public void setUp() throws Exception {
@@ -653,6 +663,34 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testTrimNonTrimmableTask_isTrimmable_returnsFalse() {
+        Task nonTrimmableTask = createTaskBuilder(".NonTrimmableTask").setFlags(
+                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).build();
+        nonTrimmableTask.mIsTrimmableFromRecents = false;
+
+        // Move home to front so the task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+
+        assertThat(mRecentTasks.isTrimmable(nonTrimmableTask)).isFalse();
+    }
+
+    @Test
+    public void testTrimNonTrimmableTask_taskNotTrimmed() {
+        Task nonTrimmableTask = createTaskBuilder(".NonTrimmableTask").setFlags(
+                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).build();
+        nonTrimmableTask.mIsTrimmableFromRecents = false;
+
+        // Move home to front so the task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(nonTrimmableTask);
+        mRecentTasks.add(mTasks.get(1));
+
+        triggerTrimAndAssertNoTasksTrimmed();
+    }
+
+    @Test
     public void testSessionDuration() {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, -1 /* max */, 50 /* ms */);
@@ -669,14 +707,31 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
     public void testVisibleTasks_excludedFromRecents() {
+        testVisibleTasks_excludedFromRecents_internal();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    public void testVisibleTasks_excludedFromRecents_withRefactorFlag() {
+        testVisibleTasks_excludedFromRecents_internal();
+    }
+
+    private void testVisibleTasks_excludedFromRecents_internal() {
         mRecentTasks.setParameters(-1 /* min */, 4 /* max */, -1 /* ms */);
 
-        Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
+        Task invisibleExcludedTask = createTaskBuilder(".ExcludedTask1")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .setCreateActivity(true)
                 .build();
-        Task excludedTask2 = createTaskBuilder(".ExcludedTask2")
+        ActivityRecord activityRecord = invisibleExcludedTask.getTopMostActivity();
+        activityRecord.setVisibleRequested(false);
+        activityRecord.setVisible(false);
+
+        Task visibleExcludedTask = createTaskBuilder(".ExcludedTask2")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .setCreateActivity(true)
                 .build();
         Task detachedExcludedTask = createTaskBuilder(".DetachedExcludedTask")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
@@ -690,18 +745,79 @@ public class RecentTasksTest extends WindowTestsBase {
         assertFalse(detachedExcludedTask.isAttached());
 
         mRecentTasks.add(detachedExcludedTask);
-        mRecentTasks.add(excludedTask1);
+        mRecentTasks.add(invisibleExcludedTask);
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.add(mTasks.get(1));
         mRecentTasks.add(mTasks.get(2));
-        mRecentTasks.add(excludedTask2);
+        mRecentTasks.add(visibleExcludedTask);
 
-        // Except the first-most excluded task, other excluded tasks should be trimmed.
-        triggerTrimAndAssertTrimmed(excludedTask1, detachedExcludedTask);
+        // Excluded tasks should be trimmed, except those with a visible activity.
+        triggerTrimAndAssertTrimmed(invisibleExcludedTask, detachedExcludedTask);
     }
 
     @Test
+    @Ignore("b/342627272")
+    @DisableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    public void testVisibleTasks_excludedFromRecents_visibleTaskNotFirstTask() {
+        testVisibleTasks_excludedFromRecents_visibleTaskNotFirstTask_internal();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    public void testVisibleTasks_excludedFromRecents_visibleTaskNotFirstTask_withRefactorFlag() {
+        testVisibleTasks_excludedFromRecents_visibleTaskNotFirstTask_internal();
+    }
+
+    private void testVisibleTasks_excludedFromRecents_visibleTaskNotFirstTask_internal() {
+        mRecentTasks.setParameters(-1 /* min */, 4 /* max */, -1 /* ms */);
+
+        Task invisibleExcludedTask = createTaskBuilder(".ExcludedTask1")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .setCreateActivity(true)
+                .build();
+        ActivityRecord activityRecord = invisibleExcludedTask.getTopMostActivity();
+        activityRecord.setVisibleRequested(false);
+        activityRecord.setVisible(false);
+
+        Task visibleExcludedTask = createTaskBuilder(".ExcludedTask2")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .setCreateActivity(true)
+                .build();
+        Task detachedExcludedTask = createTaskBuilder(".DetachedExcludedTask")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+
+        // Move home to front so other task can satisfy the condition in RecentTasks#isTrimmable.
+        mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask().moveToFront("test");
+        // Avoid Task#autoRemoveFromRecents when removing from parent.
+        detachedExcludedTask.setHasBeenVisible(true);
+        detachedExcludedTask.removeImmediately();
+        assertFalse(detachedExcludedTask.isAttached());
+
+        mRecentTasks.add(detachedExcludedTask);
+        mRecentTasks.add(visibleExcludedTask);
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        mRecentTasks.add(mTasks.get(2));
+        mRecentTasks.add(invisibleExcludedTask);
+
+        // Excluded tasks should be trimmed, except those with a visible activity.
+        triggerTrimAndAssertTrimmed(invisibleExcludedTask, detachedExcludedTask);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
     public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible() {
+        testVisibleTasks_excludedFromRecents_firstTaskNotVisible_internal();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible_withRefactorFlag() {
+        testVisibleTasks_excludedFromRecents_firstTaskNotVisible_internal();
+    }
+
+    private void testVisibleTasks_excludedFromRecents_firstTaskNotVisible_internal() {
         // Create some set of tasks, some of which are visible and some are not
         Task homeTask = createTaskBuilder("com.android.pkg1", ".HomeTask")
                 .setParentTask(mTaskContainer.getRootHomeTask())
@@ -710,11 +826,12 @@ public class RecentTasksTest extends WindowTestsBase {
         mRecentTasks.add(homeTask);
         Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
                 .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .setCreateActivity(true)
                 .build();
         excludedTask1.mUserSetupComplete = true;
         mRecentTasks.add(excludedTask1);
 
-        // Expect that the first visible excluded-from-recents task is visible
+        // Expect that the visible excluded-from-recents task is visible
         assertGetRecentTasksOrder(0 /* flags */, excludedTask1);
     }
 
@@ -1385,7 +1502,7 @@ public class RecentTasksTest extends WindowTestsBase {
                 Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
                 true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
-                false /* isTranslucent */, false /* hasImeSurface */);
+                false /* isTranslucent */, false /* hasImeSurface */, 0 /* uiMode */);
     }
 
     /**
@@ -1411,9 +1528,9 @@ public class RecentTasksTest extends WindowTestsBase {
      */
     private void assertGetRecentTasksOrder(int getRecentTaskFlags, Task... expectedTasks) {
         List<RecentTaskInfo> infos = getRecentTasks(getRecentTaskFlags);
-        assertTrue(expectedTasks.length == infos.size());
-        for (int i = 0; i < infos.size(); i++)  {
-            assertTrue(expectedTasks[i].mTaskId == infos.get(i).taskId);
+        assertEquals(expectedTasks.length, infos.size());
+        for (int i = 0; i < infos.size(); i++) {
+            assertEquals(expectedTasks[i].mTaskId, infos.get(i).taskId);
         }
     }
 
@@ -1453,9 +1570,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
         assertSecurityException(expectCallable, () -> mAtm.cancelTaskWindowTransition(0));
-        assertSecurityException(expectCallable, () -> mAtm.startRecentsActivity(null, 0,
-                null));
-        assertSecurityException(expectCallable, () -> mAtm.cancelRecentsAnimation(true));
         assertSecurityException(expectCallable, () -> mAtm.stopAppSwitches());
         assertSecurityException(expectCallable, () -> mAtm.resumeAppSwitches());
     }

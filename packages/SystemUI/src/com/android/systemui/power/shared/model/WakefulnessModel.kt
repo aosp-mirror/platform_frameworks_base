@@ -19,7 +19,7 @@ data class WakefulnessModel(
      * all use cases. If you need more granular information about a waking/sleeping transition, use
      * the [KeyguardTransitionInteractor].
      */
-    internal val internalWakefulnessState: WakefulnessState = WakefulnessState.AWAKE,
+    val internalWakefulnessState: WakefulnessState = WakefulnessState.AWAKE,
     val lastWakeReason: WakeSleepReason = WakeSleepReason.OTHER,
     val lastSleepReason: WakeSleepReason = WakeSleepReason.OTHER,
 

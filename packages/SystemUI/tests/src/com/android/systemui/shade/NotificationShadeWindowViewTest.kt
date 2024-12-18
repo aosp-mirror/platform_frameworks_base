@@ -16,10 +16,11 @@
 package com.android.systemui.shade
 
 import android.os.SystemClock
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LegacyLockIconViewController
@@ -82,7 +83,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NotificationShadeWindowViewTest : SysuiTestCase() {
@@ -208,9 +209,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testDragDownHelperCalledWhenDraggingDown() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             whenever(dragDownHelper.isDraggingDown).thenReturn(true)
             val now = SystemClock.elapsedRealtime()
             val ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0f, 0f, 0 /* meta */)

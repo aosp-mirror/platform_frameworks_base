@@ -15,3 +15,24 @@ flag {
      description: "Remove TextServiceManagerService on Wear"
      bug: "323720705"
 }
+
+flag {
+     name: "remove_wearable_sensing_service_from_wear"
+     namespace: "wear_frameworks"
+     description: "Remove WearableSensingManagerService on Wear"
+     bug: "340929916"
+}
+
+flag {
+     name: "allow_removing_vpn_service"
+     namespace: "wear_frameworks"
+     description: "Allow removing VpnManagerService"
+     bug: "340928692"
+}
+
+flag {
+    name: "allow_network_time_update_service"
+    namespace: "wear_systems"
+    description: "Allow NetworkTimeUpdateService on Wear"
+    bug: "327508176"
+}

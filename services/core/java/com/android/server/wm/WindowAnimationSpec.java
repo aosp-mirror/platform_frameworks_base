@@ -97,10 +97,10 @@ public class WindowAnimationSpec implements AnimationSpec {
 
     /**
      * @return If a window animation has outsets applied to it.
-     * @see Animation#hasExtension()
+     * @see Animation#getExtensionEdges()
      */
     public boolean hasExtension() {
-        return mAnimation.hasExtension();
+        return mAnimation.getExtensionEdges() != 0;
     }
 
     @Override

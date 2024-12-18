@@ -52,18 +52,26 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
-            onStep = { 1f - it },
-            name = "LOCKSCREEN->OCCLUDED: lockscreenAlpha",
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    name = "LOCKSCREEN->OCCLUDED: lockscreenAlpha",
+                ),
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
-            onStep = { 1 - it },
-            onFinish = { 0f },
-            onCancel = { 1f },
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    onFinish = { 0f },
+                    onCancel = { 1f },
+                ),
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     /** Lockscreen views y-translation */
@@ -83,7 +91,12 @@ constructor(
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
-            flowWhenShadeIsNotExpanded = lockscreenAlpha,
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    onCancel = { 0f },
+                ),
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 }

@@ -19,29 +19,46 @@ package com.android.systemui.communal.util
 import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Intent
+import android.util.Pair as UtilPair
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.util.component1
 import androidx.core.util.component2
 import com.android.systemui.animation.ActivityTransitionAnimator
-
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.communal.widgets.CommunalTransitionAnimatorController
+import com.android.systemui.log.core.Logger
 
 /** A delegate that can be used to launch activities from [RemoteViews] */
 class InteractionHandlerDelegate(
+    private val communalSceneInteractor: CommunalSceneInteractor,
     private val findViewToAnimate: (View) -> Boolean,
     private val intentStarter: IntentStarter,
+    private val logger: Logger,
 ) : RemoteViews.InteractionHandler {
 
-    /**
-     * Responsible for starting the pending intent for launching activities.
-     */
-    fun interface IntentStarter {
-        fun startPendingIntent(
+    interface IntentStarter {
+        /** Responsible for starting the pending intent for launching activities. */
+        fun startActivity(
             intent: PendingIntent,
             fillInIntent: Intent,
             activityOptions: ActivityOptions,
             controller: ActivityTransitionAnimator.Controller?,
         ): Boolean
+
+        /** Responsible for starting the pending intent for non-activity launches. */
+        fun startPendingIntent(
+            view: View,
+            pendingIntent: PendingIntent,
+            fillInIntent: Intent,
+            activityOptions: ActivityOptions,
+        ): Boolean {
+            return RemoteViews.startPendingIntent(
+                view,
+                pendingIntent,
+                UtilPair(fillInIntent, activityOptions),
+            )
+        }
     }
 
     override fun onInteraction(
@@ -49,7 +66,11 @@ class InteractionHandlerDelegate(
         pendingIntent: PendingIntent,
         response: RemoteViews.RemoteResponse
     ): Boolean {
-        val launchOptions = response.getLaunchOptions(view)
+        logger.i({ "Starting $str1 ($str2)" }) {
+            str1 = pendingIntent.toLoggingString()
+            str2 = pendingIntent.creatorPackage
+        }
+        val (fillInIntent, activityOptions) = response.getLaunchOptions(view)
         return when {
             pendingIntent.isActivity -> {
                 // Forward the fill-in intent and activity options retrieved from the response
@@ -57,17 +78,19 @@ class InteractionHandlerDelegate(
                 // activities.
                 val hostView = getNearestParent(view)
                 val animationController =
-                    hostView?.let(ActivityTransitionAnimator.Controller::fromView)
-                val (fillInIntent, activityOptions) = launchOptions
-                intentStarter.startPendingIntent(
+                    hostView?.let(ActivityTransitionAnimator.Controller::fromView)?.let {
+                        communalSceneInteractor.setIsLaunchingWidget(true)
+                        CommunalTransitionAnimatorController(it, communalSceneInteractor)
+                    }
+                intentStarter.startActivity(
                     pendingIntent,
                     fillInIntent,
                     activityOptions,
                     animationController
                 )
             }
-
-            else -> RemoteViews.startPendingIntent(view, pendingIntent, launchOptions)
+            else ->
+                intentStarter.startPendingIntent(view, pendingIntent, fillInIntent, activityOptions)
         }
     }
 
@@ -80,3 +103,12 @@ class InteractionHandlerDelegate(
         return null
     }
 }
+
+private fun PendingIntent.toLoggingString() =
+    when {
+        isActivity -> "activity"
+        isBroadcast -> "broadcast"
+        isForegroundService -> "fgService"
+        isService -> "service"
+        else -> "unknown"
+    }

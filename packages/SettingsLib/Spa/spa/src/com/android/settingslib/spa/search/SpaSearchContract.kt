@@ -50,7 +50,6 @@ enum class ColumnEnum(val id: String) {
     INTENT_TARGET_PACKAGE("intentTargetPackage"),
     INTENT_TARGET_CLASS("intentTargetClass"),
     INTENT_EXTRAS("intentExtras"),
-    SLICE_URI("sliceUri"),
     ENTRY_DISABLED("entryDisabled"),
 }
 
@@ -71,7 +70,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
-            ColumnEnum.SLICE_URI,
         )
     ),
     SEARCH_DYNAMIC_DATA_QUERY(
@@ -85,7 +83,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
-            ColumnEnum.SLICE_URI,
         )
     ),
     SEARCH_IMMUTABLE_STATUS_DATA_QUERY(
@@ -115,7 +112,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
-            ColumnEnum.SLICE_URI,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),
@@ -130,7 +126,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_PACKAGE,
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
-            ColumnEnum.SLICE_URI,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),

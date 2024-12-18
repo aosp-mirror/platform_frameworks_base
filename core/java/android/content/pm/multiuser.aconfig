@@ -126,7 +126,7 @@ flag {
     description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
     bug: "330835921"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -136,7 +136,7 @@ flag {
     description: "Talkback doesn't announce 'selected' after double tapping the button in the picture list in 'Choose a picture' page."
     bug: "330840549"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
 }
 
@@ -146,8 +146,110 @@ flag {
     description: "Fix potential unexpected behavior due to concurrent file writing"
     bug: "339351031"
     metadata {
-    	purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "fix_avatar_cross_user_leak"
+    namespace: "multiuser"
+    description: "Fix cross-user picture uri leak for avatar picker apps."
+    bug: "341688848"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_avatar_content_provider_null_authority"
+    namespace: "multiuser"
+    description: "Fix crash when content provider authority is null."
+    bug: "362880068"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_avatar_picker_not_responding_for_new_user"
+    namespace: "multiuser"
+    description: "Avatar picker is not responding after selecting photo for new user."
+    bug: "358407488"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_get_user_property_cache"
+    namespace: "multiuser"
+    description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
+    bug: "350416200"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_profile_parent"
+    namespace: "multiuser"
+    description: "Cache getProfileParent to avoid unnecessary binder calls"
+    bug: "350417399"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_disabling_of_mu_toggle_when_restriction_applied"
+    namespace: "multiuser"
+    description: "When no_user_switch is set but no EnforcedAdmin is present, the toggle has to be disabled"
+    bug: "356387759"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_quiet_mode_state"
+    namespace: "multiuser"
+    description: "Optimise quiet mode state retrieval"
+    bug: "350420769"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_user_serial_number"
+    namespace: "multiuser"
+    description: "Optimise user serial number retrieval"
+    bug: "340018451"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_user_serial_number_read_only"
+    namespace: "multiuser"
+    description: "Optimise user serial number retrieval. Read only flag, so that it can be used before the flags are initialized."
+    bug: "353134536"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "caches_not_invalidated_at_start_read_only"
+    namespace: "multiuser"
+    description: "PIC need to be invalidated at start in order to work properly."
+    bug: "356167673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
 }
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
@@ -216,6 +318,13 @@ flag {
 }
 
 flag {
+    name: "stop_previous_user_apps"
+    namespace: "multiuser"
+    description: "Stop the previous user apps early in a user switch"
+    bug: "323200731"
+}
+
+flag {
     name: "disable_private_space_items_on_home"
     namespace: "profile_experiences"
     description: "Disables adding items belonging to Private Space on Home Screen manually as well as automatically"
@@ -276,4 +385,64 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "modify_private_space_secondary_unlock_setup_flow"
+  namespace: "profile_experiences"
+  description: "Updates to setting up secondary unlock factor from Settings for the first time"
+  bug: "332850595"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "fix_large_display_private_space_settings"
+  namespace: "profile_experiences"
+  description: "Fix tablet and foldable specific bugs for private space"
+  bug: "342563741"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "private_space_search_illustration_config"
+  namespace: "profile_experiences"
+  description: "Check config to show/hide the private space search illustration and search tile content in Hide Private Space settings page"
+  bug: "346612477"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "show_different_creation_error_for_unsupported_devices"
+  namespace: "profile_experiences"
+  description: "On private space create error due to child account added/fully managed user show message with link to the Help Center to find out more."
+  bug: "340130375"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "unicorn_mode_refactoring_for_hsum_read_only"
+  namespace: "multiuser"
+  description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
+  bug: "339201286"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+
+flag {
+    name: "caching_development_improvements"
+    namespace: "multiuser"
+    description: "System API to simplify caching implamentations"
+    bug: "364947162"
+    is_fixed_read_only: true
 }

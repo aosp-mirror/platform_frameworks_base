@@ -37,7 +37,7 @@ class GlobalCoroutinesModule {
     @Application
     fun applicationScope(
         @Main dispatcherContext: CoroutineContext,
-    ): CoroutineScope = CoroutineScope(dispatcherContext)
+    ): CoroutineScope = CoroutineScope(dispatcherContext + createCoroutineTracingContext("ApplicationScope"))
 
     @Provides
     @Singleton
@@ -51,15 +51,7 @@ class GlobalCoroutinesModule {
     @Provides
     @Singleton
     @Main
-    fun mainCoroutineContext(@Tracing tracingCoroutineContext: CoroutineContext): CoroutineContext {
-        return Dispatchers.Main.immediate + tracingCoroutineContext
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Provides
-    @Tracing
-    @Singleton
-    fun tracingCoroutineContext(): CoroutineContext {
-        return createCoroutineTracingContext()
+    fun mainCoroutineContext(): CoroutineContext {
+        return Dispatchers.Main.immediate
     }
 }

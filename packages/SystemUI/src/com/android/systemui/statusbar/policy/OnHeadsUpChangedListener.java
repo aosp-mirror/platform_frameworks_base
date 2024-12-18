@@ -48,4 +48,9 @@ public interface OnHeadsUpChangedListener {
      * @param isHeadsUp whether the notification is now a headsUp notification
      */
     default void onHeadsUpStateChanged(@NonNull NotificationEntry entry, boolean isHeadsUp) {}
+
+    /**
+     * Called on HUN disappearing animation ends
+     */
+    default void onHeadsUpAnimatingAwayEnded(@NonNull NotificationEntry entry) {}
 }

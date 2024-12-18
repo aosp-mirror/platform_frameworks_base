@@ -25,6 +25,7 @@ import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.TransitionBuilder
 import com.android.compose.animation.scene.UserActionDistance
 import com.android.compose.animation.scene.UserActionDistanceScope
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
@@ -59,10 +60,10 @@ fun TransitionBuilder.toShadeTransition(
         fade(QuickSettings.Elements.SplitShadeQuickSettings)
         fade(QuickSettings.Elements.FooterActions)
     }
-    translate(
-        QuickSettings.Elements.QuickQuickSettings,
-        y = -ShadeHeader.Dimensions.CollapsedHeight * .66f
-    )
+
+    val qsTranslation = -ShadeHeader.Dimensions.CollapsedHeight * 0.66f
+    translate(QuickSettings.Elements.QuickQuickSettings, y = qsTranslation)
+    translate(MediaCarousel.Elements.Content, y = qsTranslation)
     translate(Notifications.Elements.NotificationScrim, Edge.Top, false)
 }
 

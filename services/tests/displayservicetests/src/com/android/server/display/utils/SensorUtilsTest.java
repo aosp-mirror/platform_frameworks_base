@@ -16,6 +16,8 @@
 
 package com.android.server.display.utils;
 
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
@@ -65,7 +67,7 @@ public class SensorUtilsTest {
 
     @Test
     public void testNoSensorManager() {
-        Sensor result = SensorUtils.findSensor(null, new SensorData(), Sensor.TYPE_LIGHT);
+        Sensor result = SensorUtils.findSensor(null, createSensorData(), Sensor.TYPE_LIGHT);
         assertNull(result);
     }
 
@@ -123,7 +125,7 @@ public class SensorUtilsTest {
         when(mSensorManager.getSensorList(Sensor.TYPE_ALL)).thenReturn(allSensors);
         when(mSensorManager.getDefaultSensor(fallbackType)).thenReturn(defaultSensor);
 
-        SensorData sensorData = new SensorData(sensorType, sensorName);
+        SensorData sensorData = createSensorData(sensorType, sensorName);
 
         Sensor result = SensorUtils.findSensor(mSensorManager, sensorData, fallbackType);
 

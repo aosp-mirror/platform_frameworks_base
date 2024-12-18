@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"移至右上角"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"移至左下角"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"移至右下角"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"展开菜单"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"收起菜单"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"左移"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"右移"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"展开“<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"收起“<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>”"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>设置"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"关闭消息气泡"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"移至全屏"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"不以消息气泡形式显示对话"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"使用消息气泡聊天"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"新对话会以浮动图标或消息气泡形式显示。点按即可打开消息气泡。拖动即可移动消息气泡。"</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"最小化"</string>
     <string name="close_button_text" msgid="2913281996024033299">"关闭"</string>
     <string name="back_button_text" msgid="1469718707134137085">"返回"</string>
-    <string name="handle_text" msgid="1766582106752184456">"处理"</string>
+    <string name="handle_text" msgid="4419667835599523257">"应用手柄"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"应用图标"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"全屏"</string>
     <string name="desktop_text" msgid="1077633567027630454">"桌面模式"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"悬浮"</string>
     <string name="select_text" msgid="5139083974039906583">"选择"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"屏幕截图"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"在浏览器中打开"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"新窗口"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"管理窗口"</string>
     <string name="close_text" msgid="4986518933445178928">"关闭"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"关闭菜单"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"打开菜单"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"打开菜单"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"最大化屏幕"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"屏幕快照"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"无法调整此应用的大小"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"最大化"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"贴靠左侧"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"贴靠右侧"</string>
 </resources>

@@ -32,7 +32,7 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.shared.animation.Interpolators;
 
 /**
  * View for the handle in the docked stack divider.

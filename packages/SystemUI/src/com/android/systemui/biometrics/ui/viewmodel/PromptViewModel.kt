@@ -35,9 +35,9 @@ import android.util.Log
 import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import com.android.keyguard.AuthInteractionProperties
 import com.android.launcher3.icons.IconProvider
-import com.android.systemui.Flags.bpTalkback
-import com.android.systemui.Flags.constraintBp
+import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.isSystem
@@ -50,10 +50,13 @@ import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.combine
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.InteractionProperties
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -132,11 +135,11 @@ constructor(
             R.dimen.biometric_prompt_landscape_medium_horizontal_padding
         )
 
+    val udfpsOverlayParams: StateFlow<UdfpsOverlayParams> =
+        udfpsOverlayInteractor.udfpsOverlayParams
+
     private val udfpsSensorBounds: Flow<Rect> =
-        combine(
-                udfpsOverlayInteractor.udfpsOverlayParams,
-                displayStateInteractor.currentRotation
-            ) { params, rotation ->
+        combine(udfpsOverlayParams, displayStateInteractor.currentRotation) { params, rotation ->
                 val rotatedBounds = Rect(params.sensorBounds)
                 RotationUtils.rotateBounds(
                     rotatedBounds,
@@ -153,31 +156,26 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val udfpsSensorWidth: Flow<Int> = udfpsOverlayParams.map { it.sensorBounds.width() }
+    private val udfpsSensorHeight: Flow<Int> = udfpsOverlayParams.map { it.sensorBounds.height() }
+
     val legacyFingerprintSensorWidth: Flow<Int> =
-        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
-            ->
+        combine(modalities, udfpsSensorWidth) { modalities, udfpsSensorWidth ->
             if (modalities.hasUdfps) {
-                overlayParams.sensorBounds.width()
+                udfpsSensorWidth
             } else {
                 fingerprintIconWidth
             }
         }
 
     val legacyFingerprintSensorHeight: Flow<Int> =
-        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
-            ->
+        combine(modalities, udfpsSensorHeight) { modalities, udfpsSensorHeight ->
             if (modalities.hasUdfps) {
-                overlayParams.sensorBounds.height()
+                udfpsSensorHeight
             } else {
                 fingerprintIconHeight
             }
         }
-
-    val fingerprintSensorWidth: Int =
-        udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.width()
-
-    val fingerprintSensorHeight: Int =
-        udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds.height()
 
     private val _accessibilityHint = MutableSharedFlow<String>()
 
@@ -251,8 +249,9 @@ constructor(
     private val _forceLargeSize = MutableStateFlow(false)
     private val _forceMediumSize = MutableStateFlow(false)
 
-    private val _hapticsToPlay =
-        MutableStateFlow(HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, /* flag= */ null))
+    private val authInteractionProperties = AuthInteractionProperties()
+    private val _hapticsToPlay: MutableStateFlow<HapticsToPlay> =
+        MutableStateFlow(HapticsToPlay.None)
 
     /** Event fired to the view indicating a [HapticsToPlay] */
     val hapticsToPlay = _hapticsToPlay.asStateFlow()
@@ -414,12 +413,7 @@ constructor(
             .distinctUntilChanged()
 
     val iconViewModel: PromptIconViewModel =
-        PromptIconViewModel(
-            this,
-            displayStateInteractor,
-            promptSelectorInteractor,
-            udfpsOverlayInteractor
-        )
+        PromptIconViewModel(this, displayStateInteractor, promptSelectorInteractor)
 
     private val _isIconViewLoaded = MutableStateFlow(false)
 
@@ -442,12 +436,16 @@ constructor(
 
     /** The size of the biometric icon */
     val iconSize: Flow<Pair<Int, Int>> =
-        combine(iconViewModel.activeAuthType, modalities) { activeAuthType, modalities ->
+        combine(iconViewModel.activeAuthType, modalities, udfpsSensorWidth, udfpsSensorHeight) {
+            activeAuthType,
+            modalities,
+            udfpsSensorWidth,
+            udfpsSensorHeight ->
             if (activeAuthType == PromptIconViewModel.AuthType.Face) {
                 Pair(faceIconWidth, faceIconHeight)
             } else {
                 if (modalities.hasUdfps) {
-                    Pair(fingerprintSensorWidth, fingerprintSensorHeight)
+                    Pair(udfpsSensorWidth, udfpsSensorHeight)
                 } else {
                     Pair(fingerprintIconWidth, fingerprintIconHeight)
                 }
@@ -471,26 +469,13 @@ constructor(
             }
         }
 
-    /** Logo for the prompt. */
-    val logo: Flow<Drawable?> =
+    /** (logoIcon, logoDescription) for the prompt. */
+    val logoInfo: Flow<Pair<Drawable?, String>> =
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !(customBiometricPrompt() && constraintBp()) || it == null -> null
-                    it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
-                    else -> context.getUserBadgedIcon(it, iconProvider, activityTaskManager)
-                }
-            }
-            .distinctUntilChanged()
-
-    /** Logo description for the prompt. */
-    val logoDescription: Flow<String> =
-        promptSelectorInteractor.prompt
-            .map {
-                when {
-                    !(customBiometricPrompt() && constraintBp()) || it == null -> ""
-                    !it.logoDescription.isNullOrEmpty() -> it.logoDescription
-                    else -> context.getUserBadgedLabel(it, activityTaskManager)
+                    !(customBiometricPrompt()) || it == null -> Pair(null, "")
+                    else -> context.getUserBadgedLogoInfo(it, iconProvider, activityTaskManager)
                 }
             }
             .distinctUntilChanged()
@@ -506,7 +491,7 @@ constructor(
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
         promptSelectorInteractor.prompt
-            .map { if (customBiometricPrompt() && constraintBp()) it?.contentView else null }
+            .map { if (customBiometricPrompt()) it?.contentView else null }
             .distinctUntilChanged()
 
     private val originalDescription =
@@ -852,7 +837,7 @@ constructor(
         messageJob?.cancel()
         messageJob = null
 
-        if (helpMessage.isNotBlank()) {
+        if (helpMessage.isNotBlank() && needsUserConfirmation) {
             showHelp(helpMessage)
         }
     }
@@ -915,19 +900,23 @@ constructor(
         event: MotionEvent,
         touchExplorationEnabled: Boolean,
     ): Boolean {
-        if (bpTalkback() && modalities.first().hasUdfps && touchExplorationEnabled) {
+        if (
+            modalities.first().hasUdfps &&
+                touchExplorationEnabled &&
+                !isAuthenticated.first().isAuthenticated
+        ) {
             // TODO(b/315184924): Remove uses of UdfpsUtils
             val scaledTouch =
                 udfpsUtils.getTouchInNativeCoordinates(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                    udfpsOverlayParams.value
                 )
             if (
                 !udfpsUtils.isWithinSensorArea(
                     event.getPointerId(0),
                     event,
-                    udfpsOverlayInteractor.udfpsOverlayParams.value
+                    udfpsOverlayParams.value
                 )
             ) {
                 _accessibilityHint.emit(
@@ -936,7 +925,7 @@ constructor(
                         context,
                         scaledTouch.x,
                         scaledTouch.y,
-                        udfpsOverlayInteractor.udfpsOverlayParams.value
+                        udfpsOverlayParams.value
                     )
                 )
             }
@@ -955,26 +944,52 @@ constructor(
     }
 
     private fun vibrateOnSuccess() {
-        _hapticsToPlay.value =
-            HapticsToPlay(
-                HapticFeedbackConstants.CONFIRM,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-            )
+        val haptics =
+            if (msdlFeedback()) {
+                HapticsToPlay.MSDL(MSDLToken.UNLOCK, authInteractionProperties)
+            } else {
+                HapticsToPlay.HapticConstant(
+                    HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                    flag = null,
+                )
+            }
+        _hapticsToPlay.value = haptics
     }
 
     private fun vibrateOnError() {
-        _hapticsToPlay.value =
-            HapticsToPlay(
-                HapticFeedbackConstants.REJECT,
-                HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-            )
+        val haptics =
+            if (msdlFeedback()) {
+                HapticsToPlay.MSDL(MSDLToken.FAILURE, authInteractionProperties)
+            } else {
+                HapticsToPlay.HapticConstant(
+                    HapticFeedbackConstants.BIOMETRIC_REJECT,
+                    flag = null,
+                )
+            }
+        _hapticsToPlay.value = haptics
     }
 
     /** Clears the [hapticsToPlay] variable by setting its constant to the NO_HAPTICS default. */
     fun clearHaptics() {
-        _hapticsToPlay.update { previous ->
-            HapticsToPlay(HapticFeedbackConstants.NO_HAPTICS, previous.flag)
-        }
+        _hapticsToPlay.update { HapticsToPlay.None }
+    }
+
+    /** The state of haptic feedback to play. */
+    sealed interface HapticsToPlay {
+        /**
+         * Haptics using [HapticFeedbackConstants]. It is composed by a [HapticFeedbackConstants]
+         * and a [HapticFeedbackConstants] flag.
+         */
+        data class HapticConstant(val constant: Int, val flag: Int?) : HapticsToPlay
+
+        /**
+         * Haptics using MSDL feedback. It is composed by a [MSDLToken] and optional
+         * [InteractionProperties]
+         */
+        data class MSDL(val token: MSDLToken, val properties: InteractionProperties?) :
+            HapticsToPlay
+
+        data object None : HapticsToPlay
     }
 
     companion object {
@@ -982,43 +997,60 @@ constructor(
     }
 }
 
-private fun Context.getUserBadgedIcon(
+/**
+ * The order of getting logo icon/description is:
+ * 1. If the app sets customized icon/description, use the passed-in value
+ * 2. If shouldShowLogoWithOverrides(), use activityInfo to get icon/description
+ * 3. Otherwise, use applicationInfo to get icon/description
+ */
+private fun Context.getUserBadgedLogoInfo(
     prompt: BiometricPromptRequest.Biometric,
     iconProvider: IconProvider,
     activityTaskManager: ActivityTaskManager
-): Drawable? {
-    var icon: Drawable? = null
-    val componentName = prompt.getComponentNameForLogo(activityTaskManager)
-    if (componentName != null && shouldShowLogoWithOverrides(componentName)) {
-        val activityInfo = getActivityInfo(componentName)
-        icon = if (activityInfo == null) null else iconProvider.getIcon(activityInfo)
+): Pair<Drawable?, String> {
+    var icon: Drawable? =
+        if (prompt.logoBitmap != null) BitmapDrawable(resources, prompt.logoBitmap) else null
+    var label = prompt.logoDescription ?: ""
+    if (icon != null && label.isNotEmpty()) {
+        return Pair(icon, label)
     }
-    if (icon == null) {
-        val appInfo = prompt.getApplicationInfoForLogo(this, componentName)
-        if (appInfo == null) {
-            Log.w(PromptViewModel.TAG, "Cannot find app logo for package $opPackageName")
-            return null
-        } else {
-            icon = packageManager.getApplicationIcon(appInfo)
+
+    // Use activityInfo if shouldUseActivityLogo() is true
+    val componentName = prompt.getComponentNameForLogo(activityTaskManager)
+    if (componentName != null && shouldUseActivityLogo(componentName)) {
+        val activityInfo = getActivityInfo(componentName)
+        if (activityInfo != null) {
+            if (icon == null) {
+                icon = iconProvider.getIcon(activityInfo)
+            }
+            if (label.isEmpty()) {
+                label = activityInfo.loadLabel(packageManager).toString()
+            }
         }
     }
-    return packageManager.getUserBadgedIcon(icon, UserHandle.of(prompt.userInfo.userId))
-}
-
-private fun Context.getUserBadgedLabel(
-    prompt: BiometricPromptRequest.Biometric,
-    activityTaskManager: ActivityTaskManager
-): String {
-    val componentName = prompt.getComponentNameForLogo(activityTaskManager)
-    val appInfo = prompt.getApplicationInfoForLogo(this, componentName)
-    return if (appInfo == null || packageManager.getApplicationLabel(appInfo).isNullOrEmpty()) {
-        Log.w(PromptViewModel.TAG, "Cannot find app logo for package $opPackageName")
-        ""
-    } else {
-        packageManager
-            .getUserBadgedLabel(packageManager.getApplicationLabel(appInfo), UserHandle.of(userId))
-            .toString()
+    if (icon != null && label.isNotEmpty()) {
+        return Pair(icon, label)
     }
+
+    // Use applicationInfo for other cases
+    val appInfo = prompt.getApplicationInfo(this, componentName)
+    if (appInfo == null) {
+        Log.w(PromptViewModel.TAG, "Cannot find app logo for package $opPackageName")
+    } else {
+        if (icon == null) {
+            icon = packageManager.getApplicationIcon(appInfo)
+        }
+        if (label.isEmpty()) {
+            label =
+                packageManager
+                    .getUserBadgedLabel(
+                        packageManager.getApplicationLabel(appInfo),
+                        UserHandle.of(userId)
+                    )
+                    .toString()
+        }
+    }
+    return Pair(icon, label)
 }
 
 private fun BiometricPromptRequest.Biometric.getComponentNameForLogo(
@@ -1036,14 +1068,14 @@ private fun BiometricPromptRequest.Biometric.getComponentNameForLogo(
     }
 }
 
-private fun BiometricPromptRequest.Biometric.getApplicationInfoForLogo(
+private fun BiometricPromptRequest.Biometric.getApplicationInfo(
     context: Context,
     componentNameForLogo: ComponentName?
 ): ApplicationInfo? {
     val packageName =
         when {
             componentNameForLogo != null -> componentNameForLogo.packageName
-            // TODO(b/339532378): We should check whether |allowBackgroundAuthentication| should be
+            // TODO(b/353597496): We should check whether |allowBackgroundAuthentication| should be
             // removed.
             // This is being consistent with the check in [AuthController.showDialog()].
             allowBackgroundAuthentication || isSystem(context, opPackageName) -> opPackageName
@@ -1053,14 +1085,22 @@ private fun BiometricPromptRequest.Biometric.getApplicationInfoForLogo(
         Log.w(PromptViewModel.TAG, "Cannot find application info for $opPackageName")
         null
     } else {
-        context.getApplicationInfo(packageName)
+        try {
+            context.packageManager.getApplicationInfo(
+                packageName,
+                PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
+            )
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(PromptViewModel.TAG, "Cannot find application info for $opPackageName", e)
+            null
+        }
     }
 }
 
-private fun Context.shouldShowLogoWithOverrides(componentName: ComponentName): Boolean {
-    return resources
-        .getStringArray(R.array.biometric_dialog_package_names_for_logo_with_overrides)
-        .find { componentName.packageName.contentEquals(it) } != null
+private fun Context.shouldUseActivityLogo(componentName: ComponentName): Boolean {
+    return resources.getStringArray(R.array.config_useActivityLogoForBiometricPrompt).find {
+        componentName.packageName.contentEquals(it)
+    } != null
 }
 
 private fun Context.getActivityInfo(componentName: ComponentName): ActivityInfo? =
@@ -1068,17 +1108,6 @@ private fun Context.getActivityInfo(componentName: ComponentName): ActivityInfo?
         packageManager.getActivityInfo(componentName, 0)
     } catch (e: PackageManager.NameNotFoundException) {
         Log.w(PromptViewModel.TAG, "Cannot find activity info for $opPackageName", e)
-        null
-    }
-
-private fun Context.getApplicationInfo(packageName: String): ApplicationInfo? =
-    try {
-        packageManager.getApplicationInfo(
-            packageName,
-            PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_ANY_USER
-        )
-    } catch (e: PackageManager.NameNotFoundException) {
-        Log.w(PromptViewModel.TAG, "Cannot find application info for $opPackageName", e)
         null
     }
 
@@ -1097,9 +1126,3 @@ enum class FingerprintStartMode {
     val isStarted: Boolean
         get() = this == Normal || this == Delayed
 }
-
-/**
- * The state of haptic feedback to play. It is composed by a [HapticFeedbackConstants] and a
- * [HapticFeedbackConstants] flag.
- */
-data class HapticsToPlay(val hapticFeedbackConstant: Int, val flag: Int?)

@@ -62,13 +62,11 @@ public class AslConverter {
                         XmlUtils.getSingleChildElement(
                                 document, XmlUtils.HR_TAG_APP_METADATA_BUNDLES, true);
 
-                return new AndroidSafetyLabelFactory()
-                        .createFromHrElements(XmlUtils.listOf(appMetadataBundles));
+                return new AndroidSafetyLabelFactory().createFromHrElement(appMetadataBundles);
             case ON_DEVICE:
                 Element bundleEle =
                         XmlUtils.getSingleChildElement(document, XmlUtils.OD_TAG_BUNDLE, true);
-                return new AndroidSafetyLabelFactory()
-                        .createFromOdElements(XmlUtils.listOf(bundleEle));
+                return new AndroidSafetyLabelFactory().createFromOdElement(bundleEle);
             default:
                 throw new IllegalStateException("Unrecognized input format.");
         }
@@ -91,14 +89,10 @@ public class AslConverter {
 
         switch (format) {
             case HUMAN_READABLE:
-                for (var child : asl.toHrDomElements(document)) {
-                    document.appendChild(child);
-                }
+                document.appendChild(asl.toHrDomElement(document));
                 break;
             case ON_DEVICE:
-                for (var child : asl.toOdDomElements(document)) {
-                    document.appendChild(child);
-                }
+                document.appendChild(asl.toOdDomElement(document));
                 break;
             default:
                 throw new IllegalStateException("Unrecognized input format.");

@@ -38,6 +38,7 @@ import com.android.systemui.dreams.homecontrols.DreamServiceDelegateImpl;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.shared.model.TileCategory;
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
@@ -196,6 +197,7 @@ public interface DreamModule {
                         R.drawable.ic_qs_screen_saver,
                         R.string.quick_settings_screensaver_label),
                 uiEventLogger.getNewInstanceId(),
+                TileCategory.UTILITIES,
                 tileSpec.getSpec(),
                 QSTilePolicy.NoRestrictions.INSTANCE
                 );

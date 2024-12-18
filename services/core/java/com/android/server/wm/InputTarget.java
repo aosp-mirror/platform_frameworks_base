@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
 /**
@@ -25,15 +24,12 @@ import android.util.proto.ProtoOutputStream;
  * Both WindowState and EmbeddedWindows can receive input. This consolidates some common properties
  * of both targets.
  */
-interface InputTarget {
+interface InputTarget extends InsetsTarget {
     /* Get the WindowState associated with the target. */
     WindowState getWindowState();
 
     /* Display id of the target. */
     int getDisplayId();
-
-    /* Client IWindow for the target. */
-    IBinder getWindowToken();
 
     /* Owning pid of the target. */
     int getPid();
@@ -65,6 +61,6 @@ interface InputTarget {
     InsetsControlTarget getImeControlTarget();
 
     void dumpProto(ProtoOutputStream proto, long fieldId,
-                   @WindowTraceLogLevel int logLevel);
+                   @WindowTracingLogLevel int logLevel);
 }
 
