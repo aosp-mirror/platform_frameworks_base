@@ -38,6 +38,7 @@ import androidx.core.util.putAll
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
@@ -236,6 +237,7 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             // Sessions is finishing, log task updates followed by an exit event
             identifyAndLogTaskUpdates(
+                transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
             )
@@ -252,12 +254,14 @@ class DesktopModeLoggerTransitionObserver(
             desktopModeEventLogger.logSessionEnter(getEnterReason(transitionInfo))
 
             identifyAndLogTaskUpdates(
+                transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
             )
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
             identifyAndLogTaskUpdates(
+                transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
             )
@@ -270,6 +274,7 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
+        transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
     ) {
@@ -304,9 +309,19 @@ class DesktopModeLoggerTransitionObserver(
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                desktopModeEventLogger.logTaskRemoved(
-                    buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size())
-                )
+                val minimizeReason =
+                    if (transitionInfo.type == Transitions.TRANSIT_MINIMIZE) {
+                        MinimizeReason.MINIMIZE_BUTTON
+                    } else {
+                        null
+                    }
+                val taskUpdate =
+                    buildTaskUpdateForTask(
+                        taskInfo,
+                        postTransitionVisibleFreeformTasks.size(),
+                        minimizeReason,
+                    )
+                desktopModeEventLogger.logTaskRemoved(taskUpdate)
                 Trace.setCounter(
                     Trace.TRACE_TAG_WINDOW_MANAGER,
                     VISIBLE_TASKS_COUNTER_NAME,
@@ -320,7 +335,11 @@ class DesktopModeLoggerTransitionObserver(
         }
     }
 
-    private fun buildTaskUpdateForTask(taskInfo: TaskInfo, visibleTasks: Int): TaskUpdate {
+    private fun buildTaskUpdateForTask(
+        taskInfo: TaskInfo,
+        visibleTasks: Int,
+        minimizeReason: MinimizeReason? = null,
+    ): TaskUpdate {
         val screenBounds = taskInfo.configuration.windowConfiguration.bounds
         val positionInParent = taskInfo.positionInParent
         return TaskUpdate(
@@ -331,6 +350,7 @@ class DesktopModeLoggerTransitionObserver(
             taskX = positionInParent.x,
             taskY = positionInParent.y,
             visibleTaskCount = visibleTasks,
+            minimizeReason = minimizeReason,
         )
     }
 
