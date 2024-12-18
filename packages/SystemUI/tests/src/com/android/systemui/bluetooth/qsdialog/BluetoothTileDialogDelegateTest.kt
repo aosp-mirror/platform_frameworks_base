@@ -16,47 +16,34 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
-import android.graphics.drawable.Drawable
 import android.testing.TestableLooper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.SysUiState
-import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -73,33 +60,31 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
+    @Mock
+    private lateinit var bluetoothDetailsContentManagerFactory:
+        BluetoothDetailsContentManager.Factory
+
+    @Mock private lateinit var bluetoothDetailsContentManager: BluetoothDetailsContentManager
 
     @Mock private lateinit var bluetoothTileDialogCallback: BluetoothTileDialogCallback
 
-    @Mock private lateinit var drawable: Drawable
-
     @Mock private lateinit var uiEventLogger: UiEventLogger
 
-    @Mock private lateinit var logger: BluetoothTileDialogLogger
+    @Mock private lateinit var sysuiDialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var dialogManager: SystemUIDialogManager
+    @Mock private lateinit var sysuiState: SysUiState
+    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
 
     private val uiProperties =
         BluetoothTileDialogViewModel.UiProperties.build(
             isBluetoothEnabled = ENABLED,
             isAutoOnToggleFeatureAvailable = ENABLED,
         )
-    @Mock private lateinit var sysuiDialogFactory: SystemUIDialog.Factory
-    @Mock private lateinit var dialogManager: SystemUIDialogManager
-    @Mock private lateinit var sysuiState: SysUiState
-    @Mock private lateinit var dialogTransitionAnimator: DialogTransitionAnimator
 
-    private val fakeSystemClock = FakeSystemClock()
-
+    private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var testScope: TestScope
-    private lateinit var icon: Pair<Drawable, String>
     private lateinit var mBluetoothTileDialogDelegate: BluetoothTileDialogDelegate
-    private lateinit var deviceItem: DeviceItem
 
     private val kosmos = testKosmos()
 
@@ -116,12 +101,10 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 CONTENT_HEIGHT,
                 bluetoothTileDialogCallback,
                 {},
-                dispatcher,
-                fakeSystemClock,
                 uiEventLogger,
-                logger,
                 sysuiDialogFactory,
                 kosmos.shadeDialogContextInteractor,
+                bluetoothDetailsContentManagerFactory,
             )
 
         whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java), any()))
@@ -138,17 +121,16 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 )
             }
 
-        icon = Pair(drawable, DEVICE_NAME)
-        deviceItem =
-            DeviceItem(
-                type = DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
-                cachedBluetoothDevice = cachedBluetoothDevice,
-                deviceName = DEVICE_NAME,
-                connectionSummary = DEVICE_CONNECTION_SUMMARY,
-                iconWithDescription = icon,
-                background = null,
+        whenever(
+                bluetoothDetailsContentManagerFactory.create(
+                    any(),
+                    anyInt(),
+                    any(),
+                    anyBoolean(),
+                    any(),
+                )
             )
-        `when`(cachedBluetoothDevice.isBusy).thenReturn(false)
+            .thenReturn(bluetoothDetailsContentManager)
     }
 
     @Test
@@ -156,287 +138,9 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
         val dialog = mBluetoothTileDialogDelegate.createDialog()
         dialog.show()
 
-        val recyclerView = dialog.requireViewById<RecyclerView>(R.id.device_list)
-
-        assertThat(recyclerView).isNotNull()
-        assertThat(recyclerView.visibility).isEqualTo(VISIBLE)
-        assertThat(recyclerView.adapter).isNotNull()
-        assertThat(recyclerView.layoutManager is LinearLayoutManager).isTrue()
+        verify(bluetoothDetailsContentManager).bind(any())
+        verify(bluetoothDetailsContentManager).start()
         dialog.dismiss()
-    }
-
-    @Test
-    fun testShowDialog_displayBluetoothDevice() {
-        testScope.runTest {
-            val dialog = mBluetoothTileDialogDelegate.createDialog()
-            dialog.show()
-            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
-            mBluetoothTileDialogDelegate.onDeviceItemUpdated(
-                dialog,
-                listOf(deviceItem),
-                showSeeAll = false,
-                showPairNewDevice = false,
-            )
-
-            val recyclerView = dialog.requireViewById<RecyclerView>(R.id.device_list)
-            val adapter = recyclerView?.adapter as BluetoothTileDialogDelegate.Adapter
-            assertThat(adapter.itemCount).isEqualTo(1)
-            assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
-            assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
-            assertThat(adapter.getItem(0).iconWithDescription).isEqualTo(icon)
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testDeviceItemViewHolder_cachedDeviceNotBusy() {
-        testScope.runTest {
-            deviceItem.isEnabled = true
-
-            val view =
-                LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-            val viewHolder = mBluetoothTileDialogDelegate.Adapter().DeviceItemViewHolder(view)
-            viewHolder.bind(deviceItem)
-            val container = view.requireViewById<View>(R.id.bluetooth_device_row)
-
-            assertThat(container).isNotNull()
-            assertThat(container.isEnabled).isTrue()
-            assertThat(container.hasOnClickListeners()).isTrue()
-            val value by collectLastValue(mBluetoothTileDialogDelegate.deviceItemClick)
-            runCurrent()
-            container.performClick()
-            runCurrent()
-            assertThat(value).isNotNull()
-            value?.let {
-                assertThat(it.target).isEqualTo(DeviceItemClick.Target.ENTIRE_ROW)
-                assertThat(it.clickedView).isEqualTo(container)
-                assertThat(it.deviceItem).isEqualTo(deviceItem)
-            }
-        }
-    }
-
-    @Test
-    fun testDeviceItemViewHolder_cachedDeviceBusy() {
-        deviceItem.isEnabled = false
-
-        val view =
-            LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-        val viewHolder =
-            BluetoothTileDialogDelegate(
-                    uiProperties,
-                    CONTENT_HEIGHT,
-                    bluetoothTileDialogCallback,
-                    {},
-                    dispatcher,
-                    fakeSystemClock,
-                    uiEventLogger,
-                    logger,
-                    sysuiDialogFactory,
-                    kosmos.shadeDialogContextInteractor,
-                )
-                .Adapter()
-                .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem)
-        val container = view.requireViewById<View>(R.id.bluetooth_device_row)
-
-        assertThat(container).isNotNull()
-        assertThat(container.isEnabled).isFalse()
-        assertThat(container.hasOnClickListeners()).isTrue()
-    }
-
-    @Test
-    fun testDeviceItemViewHolder_clickActionIcon() {
-        testScope.runTest {
-            deviceItem.isEnabled = true
-
-            val view =
-                LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-            val viewHolder = mBluetoothTileDialogDelegate.Adapter().DeviceItemViewHolder(view)
-            viewHolder.bind(deviceItem)
-            val actionIconView = view.requireViewById<View>(R.id.gear_icon)
-
-            assertThat(actionIconView).isNotNull()
-            assertThat(actionIconView.hasOnClickListeners()).isTrue()
-            val value by collectLastValue(mBluetoothTileDialogDelegate.deviceItemClick)
-            runCurrent()
-            actionIconView.performClick()
-            runCurrent()
-            assertThat(value).isNotNull()
-            value?.let {
-                assertThat(it.target).isEqualTo(DeviceItemClick.Target.ACTION_ICON)
-                assertThat(it.clickedView).isEqualTo(actionIconView)
-                assertThat(it.deviceItem).isEqualTo(deviceItem)
-            }
-        }
-    }
-
-    @Test
-    fun testOnDeviceUpdated_hideSeeAll_showPairNew() {
-        testScope.runTest {
-            val dialog = mBluetoothTileDialogDelegate.createDialog()
-            dialog.show()
-            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
-            mBluetoothTileDialogDelegate.onDeviceItemUpdated(
-                dialog,
-                listOf(deviceItem),
-                showSeeAll = false,
-                showPairNewDevice = true,
-            )
-
-            val seeAllButton = dialog.requireViewById<View>(R.id.see_all_button)
-            val pairNewButton = dialog.requireViewById<View>(R.id.pair_new_device_button)
-            val recyclerView = dialog.requireViewById<RecyclerView>(R.id.device_list)
-            val adapter = recyclerView?.adapter as BluetoothTileDialogDelegate.Adapter
-            val scrollViewContent = dialog.requireViewById<View>(R.id.scroll_view)
-
-            assertThat(seeAllButton).isNotNull()
-            assertThat(seeAllButton.visibility).isEqualTo(GONE)
-            assertThat(pairNewButton).isNotNull()
-            assertThat(pairNewButton.visibility).isEqualTo(VISIBLE)
-            assertThat(adapter.itemCount).isEqualTo(1)
-            assertThat(scrollViewContent.layoutParams.height).isEqualTo(WRAP_CONTENT)
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testShowDialog_cachedHeightLargerThanMinHeight_displayFromCachedHeight() {
-        testScope.runTest {
-            val cachedHeight = Int.MAX_VALUE
-            val dialog =
-                BluetoothTileDialogDelegate(
-                        BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
-                        cachedHeight,
-                        bluetoothTileDialogCallback,
-                        {},
-                        dispatcher,
-                        fakeSystemClock,
-                        uiEventLogger,
-                        logger,
-                        sysuiDialogFactory,
-                        kosmos.shadeDialogContextInteractor,
-                    )
-                    .createDialog()
-            dialog.show()
-            assertThat(dialog.requireViewById<View>(R.id.scroll_view).layoutParams.height)
-                .isEqualTo(cachedHeight)
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testShowDialog_cachedHeightLessThanMinHeight_displayFromUiProperties() {
-        testScope.runTest {
-            val dialog =
-                BluetoothTileDialogDelegate(
-                        BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
-                        MATCH_PARENT,
-                        bluetoothTileDialogCallback,
-                        {},
-                        dispatcher,
-                        fakeSystemClock,
-                        uiEventLogger,
-                        logger,
-                        sysuiDialogFactory,
-                        kosmos.shadeDialogContextInteractor,
-                    )
-                    .createDialog()
-            dialog.show()
-            assertThat(dialog.requireViewById<View>(R.id.scroll_view).layoutParams.height)
-                .isGreaterThan(MATCH_PARENT)
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testShowDialog_bluetoothEnabled_autoOnToggleGone() {
-        testScope.runTest {
-            val dialog =
-                BluetoothTileDialogDelegate(
-                        BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
-                        MATCH_PARENT,
-                        bluetoothTileDialogCallback,
-                        {},
-                        dispatcher,
-                        fakeSystemClock,
-                        uiEventLogger,
-                        logger,
-                        sysuiDialogFactory,
-                        kosmos.shadeDialogContextInteractor,
-                    )
-                    .createDialog()
-            dialog.show()
-            assertThat(
-                    dialog.requireViewById<View>(R.id.bluetooth_auto_on_toggle_layout).visibility
-                )
-                .isEqualTo(GONE)
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testOnAudioSharingButtonUpdated_visibleActive_activateButton() {
-        testScope.runTest {
-            val dialog = mBluetoothTileDialogDelegate.createDialog()
-            dialog.show()
-            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
-            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
-                dialog,
-                visibility = VISIBLE,
-                label = null,
-                isActive = true,
-            )
-
-            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
-
-            assertThat(audioSharingButton).isNotNull()
-            assertThat(audioSharingButton.visibility).isEqualTo(VISIBLE)
-            assertThat(audioSharingButton.isActivated).isTrue()
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testOnAudioSharingButtonUpdated_visibleNotActive_inactivateButton() {
-        testScope.runTest {
-            val dialog = mBluetoothTileDialogDelegate.createDialog()
-            dialog.show()
-            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
-            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
-                dialog,
-                visibility = VISIBLE,
-                label = null,
-                isActive = false,
-            )
-
-            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
-
-            assertThat(audioSharingButton).isNotNull()
-            assertThat(audioSharingButton.visibility).isEqualTo(VISIBLE)
-            assertThat(audioSharingButton.isActivated).isFalse()
-            dialog.dismiss()
-        }
-    }
-
-    @Test
-    fun testOnAudioSharingButtonUpdated_gone_inactivateButton() {
-        testScope.runTest {
-            val dialog = mBluetoothTileDialogDelegate.createDialog()
-            dialog.show()
-            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
-            mBluetoothTileDialogDelegate.onAudioSharingButtonUpdated(
-                dialog,
-                visibility = GONE,
-                label = null,
-                isActive = false,
-            )
-
-            val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
-
-            assertThat(audioSharingButton).isNotNull()
-            assertThat(audioSharingButton.visibility).isEqualTo(GONE)
-            assertThat(audioSharingButton.isActivated).isFalse()
-            dialog.dismiss()
-        }
+        verify(bluetoothDetailsContentManager).releaseView()
     }
 }

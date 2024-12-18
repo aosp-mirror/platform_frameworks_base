@@ -53,7 +53,7 @@ constructor(
     private val deviceItemActionInteractorImpl: DeviceItemActionInteractorImpl,
 ) : DeviceItemActionInteractor {
 
-    override suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog) {
+    override suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog?) {
         withContext(backgroundDispatcher) {
             if (!audioSharingInteractor.audioSharingAvailable()) {
                 return@withContext deviceItemActionInteractorImpl.onClick(deviceItem, dialog)
@@ -70,10 +70,18 @@ constructor(
                     DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
                     if (audioSharingInteractor.qsDialogImprovementAvailable()) {
                         withContext(mainDispatcher) {
-                            delegateFactory
-                                .create(deviceItem.cachedBluetoothDevice)
-                                .createDialog()
-                                .let { dialogTransitionAnimator.showFromDialog(it, dialog) }
+                            val audioSharingDialog =
+                                delegateFactory
+                                    .create(deviceItem.cachedBluetoothDevice)
+                                    .createDialog()
+
+                            if (dialog != null) {
+                                audioSharingDialog.let {
+                                    dialogTransitionAnimator.showFromDialog(it, dialog)
+                                }
+                            } else {
+                                audioSharingDialog.show()
+                            }
                         }
                     } else {
                         launchSettings(deviceItem.cachedBluetoothDevice.device, dialog)
@@ -141,7 +149,7 @@ constructor(
             )
     }
 
-    private fun launchSettings(device: BluetoothDevice, dialog: SystemUIDialog) {
+    private fun launchSettings(device: BluetoothDevice, dialog: SystemUIDialog?) {
         val intent =
             Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
                 putExtra(
@@ -155,7 +163,8 @@ constructor(
         activityStarter.postStartActivityDismissingKeyguard(
             intent,
             0,
-            dialogTransitionAnimator.createActivityTransitionController(dialog),
+            if (dialog == null) null
+            else dialogTransitionAnimator.createActivityTransitionController(dialog),
         )
     }
 

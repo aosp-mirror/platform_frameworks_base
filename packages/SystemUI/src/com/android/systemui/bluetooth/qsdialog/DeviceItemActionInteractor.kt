@@ -27,7 +27,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 interface DeviceItemActionInteractor {
-    suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog)
+    suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog?) {}
 
     suspend fun onActionIconClick(deviceItem: DeviceItem, onIntent: (Intent) -> Unit)
 }
@@ -40,7 +40,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
 ) : DeviceItemActionInteractor {
 
-    override suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog) {
+    override suspend fun onClick(deviceItem: DeviceItem, dialog: SystemUIDialog?) {
         withContext(backgroundDispatcher) {
             deviceItem.cachedBluetoothDevice.apply {
                 when (deviceItem.type) {
