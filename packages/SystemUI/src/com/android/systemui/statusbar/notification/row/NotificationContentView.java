@@ -207,6 +207,8 @@ public class NotificationContentView extends FrameLayout implements Notification
     private boolean mContentAnimating;
     private UiEventLogger mUiEventLogger;
 
+    private boolean mIsHUNCompact;
+
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext());
@@ -543,6 +545,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (child == null) {
             mHeadsUpChild = null;
             mHeadsUpWrapper = null;
+            mIsHUNCompact = false;
             if (mTransformationStartVisibleType == VISIBLE_TYPE_HEADSUP) {
                 mTransformationStartVisibleType = VISIBLE_TYPE_NONE;
             }
@@ -556,8 +559,9 @@ public class NotificationContentView extends FrameLayout implements Notification
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
 
-        if (Flags.compactHeadsUpNotification()
-                && mHeadsUpWrapper instanceof NotificationCompactHeadsUpTemplateViewWrapper) {
+        mIsHUNCompact = Flags.compactHeadsUpNotification()
+                && mHeadsUpWrapper instanceof NotificationCompactHeadsUpTemplateViewWrapper;
+        if (mIsHUNCompact) {
             logCompactHUNShownEvent();
         }
 
@@ -900,6 +904,10 @@ public class NotificationContentView extends FrameLayout implements Notification
                 return mSingleLineView.getHeight();
             }
         }
+    }
+
+    public boolean isHUNCompact() {
+        return mIsHUNCompact;
     }
 
     private boolean isGroupExpanded() {
