@@ -15,8 +15,6 @@
  */
 package com.android.dream.lowlight.dagger
 
-import android.app.DreamManager
-import android.content.ComponentName
 import android.content.Context
 import com.android.dream.lowlight.R
 import com.android.dream.lowlight.dagger.qualifiers.Application
@@ -35,30 +33,6 @@ import javax.inject.Named
  */
 @Module
 object LowLightDreamModule {
-    /**
-     * Provides dream manager.
-     */
-    @Provides
-    fun providesDreamManager(context: Context): DreamManager {
-        return requireNotNull(context.getSystemService(DreamManager::class.java))
-    }
-
-    /**
-     * Provides the component name of the low light dream, or null if not configured.
-     */
-    @Provides
-    @Named(LOW_LIGHT_DREAM_COMPONENT)
-    fun providesLowLightDreamComponent(context: Context): ComponentName? {
-        val lowLightDreamComponent = context.resources.getString(
-            R.string.config_lowLightDreamComponent
-        )
-        return if (lowLightDreamComponent.isEmpty()) {
-            null
-        } else {
-            ComponentName.unflattenFromString(lowLightDreamComponent)
-        }
-    }
-
     @Provides
     @Named(LOW_LIGHT_TRANSITION_TIMEOUT_MS)
     fun providesLowLightTransitionTimeout(context: Context): Long {
