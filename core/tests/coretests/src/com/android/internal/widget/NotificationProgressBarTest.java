@@ -23,9 +23,9 @@ import android.graphics.Color;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.internal.widget.NotificationProgressDrawable.Part;
-import com.android.internal.widget.NotificationProgressDrawable.Point;
-import com.android.internal.widget.NotificationProgressDrawable.Segment;
+import com.android.internal.widget.NotificationProgressBar.Part;
+import com.android.internal.widget.NotificationProgressBar.Point;
+import com.android.internal.widget.NotificationProgressBar.Segment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,20 +37,20 @@ import java.util.List;
 public class NotificationProgressBarTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_segmentsIsEmpty() {
+    public void processAndConvertToParts_segmentsIsEmpty() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         List<ProgressStyle.Point> points = new ArrayList<>();
         int progress = 50;
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_segmentsLengthNotMatchingProgressMax() {
+    public void processAndConvertToParts_segmentsLengthNotMatchingProgressMax() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(50));
         segments.add(new ProgressStyle.Segment(100));
@@ -59,13 +59,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_segmentLengthIsNegative() {
+    public void processAndConvertToParts_segmentLengthIsNegative() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(-50));
         segments.add(new ProgressStyle.Segment(150));
@@ -74,13 +74,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_segmentLengthIsZero() {
+    public void processAndConvertToParts_segmentLengthIsZero() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(0));
         segments.add(new ProgressStyle.Segment(100));
@@ -89,13 +89,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_progressIsNegative() {
+    public void processAndConvertToParts_progressIsNegative() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -103,13 +103,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_progressIsZero() {
+    public void processAndConvertToParts_progressIsZero() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100).setColor(Color.RED));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -117,19 +117,34 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
         // Colors with 40% opacity
         int fadedRed = 0x66FF0000;
 
-        List<Part> expected = new ArrayList<>(List.of(new Segment(1f, fadedRed, true)));
+        List<Part> expectedParts = new ArrayList<>(List.of(new Segment(1f, fadedRed, true)));
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 300, fadedRed, true)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_progressAtMax() {
+    public void processAndConvertToParts_progressAtMax() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100).setColor(Color.RED));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -137,16 +152,31 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        List<Part> expected = new ArrayList<>(List.of(new Segment(1f, Color.RED)));
+        List<Part> expectedParts = new ArrayList<>(List.of(new Segment(1f, Color.RED)));
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 300, Color.RED)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_progressAboveMax() {
+    public void processAndConvertToParts_progressAboveMax() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -154,12 +184,12 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax, isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_pointPositionIsNegative() {
+    public void processAndConvertToParts_pointPositionIsNegative() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -168,13 +198,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void processAndConvertToDrawableParts_pointPositionAboveMax() {
+    public void processAndConvertToParts_pointPositionAboveMax() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -183,13 +213,13 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        NotificationProgressBar.processAndConvertToDrawableParts(segments, points, progress,
+        NotificationProgressBar.processAndConvertToViewParts(segments, points, progress,
                 progressMax,
                 isStyledByProgress);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_multipleSegmentsWithoutPoints() {
+    public void processAndConvertToParts_multipleSegmentsWithoutPoints() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(50).setColor(Color.RED));
         segments.add(new ProgressStyle.Segment(50).setColor(Color.GREEN));
@@ -198,22 +228,80 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
         // Colors with 40% opacity
         int fadedGreen = 0x6600FF00;
 
-        List<Part> expected = new ArrayList<>(List.of(
+        List<Part> expectedParts = new ArrayList<>(List.of(
                 new Segment(0.50f, Color.RED),
                 new Segment(0.10f, Color.GREEN),
                 new Segment(0.40f, fadedGreen, true)));
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 146, Color.RED),
+                        new NotificationProgressDrawable.Segment(150, 180, Color.GREEN),
+                        new NotificationProgressDrawable.Segment(180, 300, fadedGreen, true)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_singleSegmentWithPoints() {
+    public void processAndConvertToParts_multipleSegmentsWithoutPoints_noTracker() {
+        List<ProgressStyle.Segment> segments = new ArrayList<>();
+        segments.add(new ProgressStyle.Segment(50).setColor(Color.RED));
+        segments.add(new ProgressStyle.Segment(50).setColor(Color.GREEN));
+        List<ProgressStyle.Point> points = new ArrayList<>();
+        int progress = 60;
+        int progressMax = 100;
+        boolean isStyledByProgress = true;
+
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
+                segments, points, progress, progressMax, isStyledByProgress);
+
+        // Colors with 40% opacity
+        int fadedGreen = 0x6600FF00;
+
+        List<Part> expectedParts = new ArrayList<>(List.of(
+                new Segment(0.50f, Color.RED),
+                new Segment(0.10f, Color.GREEN),
+                new Segment(0.40f, fadedGreen, true)));
+
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = false;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 146, Color.RED),
+                        new NotificationProgressDrawable.Segment(150, 176, Color.GREEN),
+                        new NotificationProgressDrawable.Segment(180, 300, fadedGreen, true)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
+    }
+
+    @Test
+    public void processAndConvertToParts_singleSegmentWithPoints() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(100).setColor(Color.BLUE));
         List<ProgressStyle.Point> points = new ArrayList<>();
@@ -229,25 +317,48 @@ public class NotificationProgressBarTest {
         int fadedBlue = 0x660000FF;
         int fadedYellow = 0x66FFFF00;
 
-        List<Part> expected = new ArrayList<>(List.of(
+        List<Part> expectedParts = new ArrayList<>(List.of(
                 new Segment(0.15f, Color.BLUE),
-                new Point(null, Color.RED),
+                new Point(Color.RED),
                 new Segment(0.10f, Color.BLUE),
-                new Point(null, Color.BLUE),
+                new Point(Color.BLUE),
                 new Segment(0.35f, Color.BLUE),
-                new Point(null, Color.BLUE),
+                new Point(Color.BLUE),
                 new Segment(0.15f, fadedBlue, true),
-                new Point(null, fadedYellow, true),
+                new Point(fadedYellow),
                 new Segment(0.25f, fadedBlue, true)));
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 35, Color.BLUE),
+                        new NotificationProgressDrawable.Point(39, 51, Color.RED),
+                        new NotificationProgressDrawable.Segment(55, 65, Color.BLUE),
+                        new NotificationProgressDrawable.Point(69, 81, Color.BLUE),
+                        new NotificationProgressDrawable.Segment(85, 170, Color.BLUE),
+                        new NotificationProgressDrawable.Point(174, 186, Color.BLUE),
+                        new NotificationProgressDrawable.Segment(190, 215, fadedBlue, true),
+                        new NotificationProgressDrawable.Point(219, 231, fadedYellow),
+                        new NotificationProgressDrawable.Segment(235, 300, fadedBlue, true)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_multipleSegmentsWithPoints() {
+    public void processAndConvertToParts_multipleSegmentsWithPoints() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(50).setColor(Color.RED));
         segments.add(new ProgressStyle.Segment(50).setColor(Color.GREEN));
@@ -260,30 +371,54 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
         // Colors with 40% opacity
         int fadedGreen = 0x6600FF00;
         int fadedYellow = 0x66FFFF00;
 
-        List<Part> expected = new ArrayList<>(List.of(
+        List<Part> expectedParts = new ArrayList<>(List.of(
                 new Segment(0.15f, Color.RED),
-                new Point(null, Color.RED),
+                new Point(Color.RED),
                 new Segment(0.10f, Color.RED),
-                new Point(null, Color.BLUE),
+                new Point(Color.BLUE),
                 new Segment(0.25f, Color.RED),
                 new Segment(0.10f, Color.GREEN),
-                new Point(null, Color.BLUE),
+                new Point(Color.BLUE),
                 new Segment(0.15f, fadedGreen, true),
-                new Point(null, fadedYellow, true),
+                new Point(fadedYellow),
                 new Segment(0.25f, fadedGreen, true)));
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 35, Color.RED),
+                        new NotificationProgressDrawable.Point(39, 51, Color.RED),
+                        new NotificationProgressDrawable.Segment(55, 65, Color.RED),
+                        new NotificationProgressDrawable.Point(69, 81, Color.BLUE),
+                        new NotificationProgressDrawable.Segment(85, 146, Color.RED),
+                        new NotificationProgressDrawable.Segment(150, 170, Color.GREEN),
+                        new NotificationProgressDrawable.Point(174, 186, Color.BLUE),
+                        new NotificationProgressDrawable.Segment(190, 215, fadedGreen, true),
+                        new NotificationProgressDrawable.Point(219, 231, fadedYellow),
+                        new NotificationProgressDrawable.Segment(235, 300, fadedGreen, true)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 
     @Test
-    public void processAndConvertToDrawableParts_multipleSegmentsWithPoints_notStyledByProgress() {
+    public void processAndConvertToParts_multipleSegmentsWithPoints_notStyledByProgress() {
         List<ProgressStyle.Segment> segments = new ArrayList<>();
         segments.add(new ProgressStyle.Segment(50).setColor(Color.RED));
         segments.add(new ProgressStyle.Segment(50).setColor(Color.GREEN));
@@ -295,19 +430,41 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = false;
 
-        List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
+        List<Part> parts = NotificationProgressBar.processAndConvertToViewParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        List<Part> expected = new ArrayList<>(List.of(
+        List<Part> expectedParts = new ArrayList<>(List.of(
                 new Segment(0.15f, Color.RED),
-                new Point(null, Color.RED),
+                new Point(Color.RED),
                 new Segment(0.10f, Color.RED),
-                new Point(null, Color.BLUE),
+                new Point(Color.BLUE),
                 new Segment(0.25f, Color.RED),
                 new Segment(0.25f, Color.GREEN),
-                new Point(null, Color.YELLOW),
+                new Point(Color.YELLOW),
                 new Segment(0.25f, Color.GREEN)));
 
-        assertThat(parts).isEqualTo(expected);
+        assertThat(parts).isEqualTo(expectedParts);
+
+        float drawableWidth = 300;
+        float segSegGap = 4;
+        float segPointGap = 4;
+        float pointRadius = 6;
+        boolean hasTrackerIcon = true;
+        List<NotificationProgressDrawable.Part> drawableParts =
+                NotificationProgressBar.processAndConvertToDrawableParts(parts, drawableWidth,
+                        segSegGap,
+                        segPointGap, pointRadius, hasTrackerIcon);
+
+        List<NotificationProgressDrawable.Part> expectedDrawableParts = new ArrayList<>(
+                List.of(new NotificationProgressDrawable.Segment(0, 35, Color.RED),
+                        new NotificationProgressDrawable.Point(39, 51, Color.RED),
+                        new NotificationProgressDrawable.Segment(55, 65, Color.RED),
+                        new NotificationProgressDrawable.Point(69, 81, Color.BLUE),
+                        new NotificationProgressDrawable.Segment(85, 146, Color.RED),
+                        new NotificationProgressDrawable.Segment(150, 215, Color.GREEN),
+                        new NotificationProgressDrawable.Point(219, 231, Color.YELLOW),
+                        new NotificationProgressDrawable.Segment(235, 300, Color.GREEN)));
+
+        assertThat(drawableParts).isEqualTo(expectedDrawableParts);
     }
 }

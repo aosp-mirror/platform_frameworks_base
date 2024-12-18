@@ -7590,8 +7590,6 @@
         <attr name="fadedHeight" format="dimension" />
         <!-- Corner radius of the segment rect. -->
         <attr name="cornerRadius" format="dimension" />
-        <!-- Default color of the segment. -->
-        <attr name="color" />
     </declare-styleable>
 
     <!-- Used to config the points of a NotificationProgressDrawable. -->
@@ -7602,9 +7600,7 @@
         <!-- Inset of the point icon or rect. -->
         <attr name="inset" />
         <!-- Corner radius of the point rect. -->
-        <attr name="cornerRadius" />
-        <!-- Default color of the point rect. -->
-        <attr name="color" />
+        <attr name="cornerRadius"/>
     </declare-styleable>
 
     <!-- ========================== -->

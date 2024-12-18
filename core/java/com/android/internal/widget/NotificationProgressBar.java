@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -40,14 +41,12 @@ import androidx.annotation.ColorInt;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.NotificationProgressDrawable.Part;
-import com.android.internal.widget.NotificationProgressDrawable.Point;
-import com.android.internal.widget.NotificationProgressDrawable.Segment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -56,18 +55,24 @@ import java.util.TreeSet;
  * represent Notification ProgressStyle progress, such as for ridesharing and navigation.
  */
 @RemoteViews.RemoteView
-public final class NotificationProgressBar extends ProgressBar {
+public final class NotificationProgressBar extends ProgressBar implements
+        NotificationProgressDrawable.BoundsChangeListener {
     private static final String TAG = "NotificationProgressBar";
 
     private NotificationProgressDrawable mNotificationProgressDrawable;
+    private final Rect mProgressDrawableBounds = new Rect();
 
     private NotificationProgressModel mProgressModel;
 
     @Nullable
-    private List<Part> mProgressDrawableParts = null;
+    private List<Part> mParts = null;
+
+    @Nullable
+    private List<NotificationProgressDrawable.Part> mProgressDrawableParts = null;
 
     @Nullable
     private Drawable mTracker = null;
+    private boolean mHasTrackerIcon = false;
 
     /** @see R.styleable#NotificationProgressBar_trackerHeight */
     private final int mTrackerHeight;
@@ -104,12 +109,13 @@ public final class NotificationProgressBar extends ProgressBar {
 
         try {
             mNotificationProgressDrawable = getNotificationProgressDrawable();
+            mNotificationProgressDrawable.setBoundsChangeListener(this);
         } catch (IllegalStateException ex) {
             Log.e(TAG, "Can't get NotificationProgressDrawable", ex);
         }
 
         // Supports setting the tracker in xml, but ProgressStyle notifications set/override it
-        // via {@code setProgressTrackerIcon}.
+        // via {@code #setProgressTrackerIcon}.
         final Drawable tracker = a.getDrawable(R.styleable.NotificationProgressBar_tracker);
         setTracker(tracker);
 
@@ -139,14 +145,15 @@ public final class NotificationProgressBar extends ProgressBar {
         } else {
             final int progress = mProgressModel.getProgress();
             final int progressMax = mProgressModel.getProgressMax();
-            mProgressDrawableParts = processAndConvertToDrawableParts(mProgressModel.getSegments(),
+            mParts = processAndConvertToViewParts(mProgressModel.getSegments(),
                     mProgressModel.getPoints(),
                     progress,
                     progressMax,
                     mProgressModel.isStyledByProgress());
 
-            if (mNotificationProgressDrawable != null) {
-                mNotificationProgressDrawable.setParts(mProgressDrawableParts);
+            if (mNotificationProgressDrawable != null
+                    && mNotificationProgressDrawable.getBounds().width() != 0) {
+                updateDrawableParts();
             }
 
             setMax(progressMax);
@@ -200,9 +207,7 @@ public final class NotificationProgressBar extends ProgressBar {
         } else {
             progressTrackerDrawable = null;
         }
-        return () -> {
-            setTracker(progressTrackerDrawable);
-        };
+        return () -> setTracker(progressTrackerDrawable);
     }
 
     private void setTracker(@Nullable Drawable tracker) {
@@ -226,8 +231,14 @@ public final class NotificationProgressBar extends ProgressBar {
         final boolean trackerSizeChanged = trackerSizeChanged(tracker, mTracker);
 
         mTracker = tracker;
-        if (mNotificationProgressDrawable != null) {
-            mNotificationProgressDrawable.setHasTrackerIcon(mTracker != null);
+        final boolean hasTrackerIcon = (mTracker != null);
+        if (mHasTrackerIcon != hasTrackerIcon) {
+            mHasTrackerIcon = hasTrackerIcon;
+            if (mNotificationProgressDrawable != null
+                    && mNotificationProgressDrawable.getBounds().width() != 0
+                    && mProgressModel.isStyledByProgress()) {
+                updateDrawableParts();
+            }
         }
 
         configureTrackerBounds();
@@ -293,6 +304,8 @@ public final class NotificationProgressBar extends ProgressBar {
         mTrackerDrawMatrix.postTranslate(Math.round(dx), Math.round(dy));
     }
 
+    // This updates the visual position of the progress indicator, i.e., the tracker. It doesn't
+    // update the NotificationProgressDrawable, which is updated by {@code #setProgressModel}.
     @Override
     public synchronized void setProgress(int progress) {
         super.setProgress(progress);
@@ -300,6 +313,8 @@ public final class NotificationProgressBar extends ProgressBar {
         onMaybeVisualProgressChanged();
     }
 
+    // This updates the visual position of the progress indicator, i.e., the tracker. It doesn't
+    // update the NotificationProgressDrawable, which is updated by {@code #setProgressModel}.
     @Override
     public void setProgress(int progress, boolean animate) {
         // Animation isn't supported by NotificationProgressBar.
@@ -308,6 +323,8 @@ public final class NotificationProgressBar extends ProgressBar {
         onMaybeVisualProgressChanged();
     }
 
+    // This updates the visual position of the progress indicator, i.e., the tracker. It doesn't
+    // update the NotificationProgressDrawable, which is updated by {@code #setProgressModel}.
     @Override
     public synchronized void setMin(int min) {
         super.setMin(min);
@@ -315,6 +332,8 @@ public final class NotificationProgressBar extends ProgressBar {
         onMaybeVisualProgressChanged();
     }
 
+    // This updates the visual position of the progress indicator, i.e., the tracker. It doesn't
+    // update the NotificationProgressDrawable, which is updated by {@code #setProgressModel}.
     @Override
     public synchronized void setMax(int max) {
         super.setMax(max);
@@ -370,6 +389,45 @@ public final class NotificationProgressBar extends ProgressBar {
         super.onSizeChanged(w, h, oldw, oldh);
 
         updateTrackerAndBarPos(w, h);
+    }
+
+    @Override
+    public void onDrawableBoundsChanged() {
+        final Rect progressDrawableBounds = mNotificationProgressDrawable.getBounds();
+
+        if (mProgressDrawableBounds.equals(progressDrawableBounds)) return;
+
+        if (mProgressDrawableBounds.width() != progressDrawableBounds.width()) {
+            updateDrawableParts();
+        }
+
+        mProgressDrawableBounds.set(progressDrawableBounds);
+    }
+
+    private void updateDrawableParts() {
+        Log.d(TAG, "updateDrawableParts() called. mNotificationProgressDrawable = "
+                + mNotificationProgressDrawable + ", mParts = " + mParts);
+
+        if (mNotificationProgressDrawable == null) return;
+        if (mParts == null) return;
+
+        final float width = mNotificationProgressDrawable.getBounds().width();
+        if (width == 0) {
+            if (mProgressDrawableParts != null) {
+                Log.d(TAG, "Clearing mProgressDrawableParts");
+                mProgressDrawableParts.clear();
+            }
+        } else {
+            mProgressDrawableParts = processAndConvertToDrawableParts(
+                    mParts,
+                    width,
+                    mNotificationProgressDrawable.getSegSegGap(),
+                    mNotificationProgressDrawable.getSegPointGap(),
+                    mNotificationProgressDrawable.getPointRadius(), mHasTrackerIcon);
+        }
+
+        Log.d(TAG, "Updating NotificationProgressDrawable parts");
+        mNotificationProgressDrawable.setParts(mProgressDrawableParts);
     }
 
     private void updateTrackerAndBarPos(int w, int h) {
@@ -541,11 +599,10 @@ public final class NotificationProgressBar extends ProgressBar {
     }
 
     /**
-     * Processes the ProgressStyle data and convert to list of {@code
-     * NotificationProgressDrawable.Part}.
+     * Processes the ProgressStyle data and convert to a list of {@code Part}.
      */
     @VisibleForTesting
-    public static List<Part> processAndConvertToDrawableParts(
+    public static List<Part> processAndConvertToViewParts(
             List<ProgressStyle.Segment> segments,
             List<ProgressStyle.Point> points,
             int progress,
@@ -589,7 +646,7 @@ public final class NotificationProgressBar extends ProgressBar {
                 splitSegmentsByPointsAndProgress(
                         startToSegmentMap, sortedPos, progressMax);
 
-        return convertToDrawableParts(startToSplitSegmentMap, positionToPointMap, sortedPos,
+        return convertToViewParts(startToSplitSegmentMap, positionToPointMap, sortedPos,
                 progress, progressMax,
                 isStyledByProgress);
     }
@@ -624,7 +681,7 @@ public final class NotificationProgressBar extends ProgressBar {
         return startToSegmentMap;
     }
 
-    private static List<Part> convertToDrawableParts(
+    private static List<Part> convertToViewParts(
             Map<Integer, ProgressStyle.Segment> startToSegmentMap,
             Map<Integer, ProgressStyle.Point> positionToPointMap,
             SortedSet<Integer> sortedPos,
@@ -638,7 +695,7 @@ public final class NotificationProgressBar extends ProgressBar {
             if (positionToPointMap.containsKey(pos)) {
                 final ProgressStyle.Point point = positionToPointMap.get(pos);
                 final int color = maybeGetFadedColor(point.getColor(), styleRemainingParts);
-                parts.add(new Point(null, color, styleRemainingParts));
+                parts.add(new Point(color));
             }
             // We want the Point at the current progress to be filled (not faded), but a Segment
             // starting at this progress to be faded.
@@ -660,7 +717,19 @@ public final class NotificationProgressBar extends ProgressBar {
     private static int maybeGetFadedColor(@ColorInt int color, boolean fade) {
         if (!fade) return color;
 
-        return NotificationProgressDrawable.getFadedColor(color);
+        return getFadedColor(color);
+    }
+
+    /**
+     * Get a color with an opacity that's 40% of the input color.
+     */
+    @ColorInt
+    static int getFadedColor(@ColorInt int color) {
+        return Color.argb(
+                (int) (Color.alpha(color) * 0.4f + 0.5f),
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color));
     }
 
     private static Map<Integer, ProgressStyle.Segment> generateStartToSegmentMap(
@@ -702,5 +771,191 @@ public final class NotificationProgressBar extends ProgressBar {
         }
 
         return sortedPos;
+    }
+
+    /**
+     * Processes the list of {@code Part} and convert to a list of
+     * {@code NotificationProgressDrawable.Part}.
+     */
+    @VisibleForTesting
+    public static List<NotificationProgressDrawable.Part> processAndConvertToDrawableParts(
+            List<Part> parts,
+            float totalWidth,
+            float segSegGap,
+            float segPointGap,
+            float pointRadius,
+            boolean hasTrackerIcon
+    ) {
+        List<NotificationProgressDrawable.Part> drawableParts = new ArrayList<>();
+
+        // generally, we will start drawing at (x, y) and end at (x+w, y)
+        float x = (float) 0;
+
+        final int numParts = parts.size();
+        for (int iPart = 0; iPart < numParts; iPart++) {
+            final Part part = parts.get(iPart);
+            final Part prevPart = iPart == 0 ? null : parts.get(iPart - 1);
+            final Part nextPart = iPart + 1 == numParts ? null : parts.get(iPart + 1);
+            if (part instanceof Segment segment) {
+                final float segWidth = segment.mFraction * totalWidth;
+                // Advance the start position to account for a point immediately prior.
+                final float startOffset = getSegStartOffset(prevPart, pointRadius, segPointGap, x);
+                final float start = x + startOffset;
+                // Retract the end position to account for the padding and a point immediately
+                // after.
+                final float endOffset = getSegEndOffset(segment, nextPart, pointRadius, segPointGap,
+                        segSegGap, x + segWidth, totalWidth, hasTrackerIcon);
+                final float end = x + segWidth - endOffset;
+
+                drawableParts.add(
+                        new NotificationProgressDrawable.Segment(start, end, segment.mColor,
+                                segment.mFaded));
+
+                // Advance the current position to account for the segment's fraction of the total
+                // width (ignoring offset and padding)
+                x += segWidth;
+            } else if (part instanceof Point point) {
+                final float pointWidth = 2 * pointRadius;
+                float start = x - pointRadius;
+                if (start < 0) start = 0;
+                float end = start + pointWidth;
+                if (end > totalWidth) {
+                    end = totalWidth;
+                    if (totalWidth > pointWidth) start = totalWidth - pointWidth;
+                }
+
+                drawableParts.add(
+                        new NotificationProgressDrawable.Point(start, end, point.mColor));
+            }
+        }
+
+        return drawableParts;
+    }
+
+    private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
+            float startX) {
+        if (!(prevPart instanceof Point)) return 0F;
+        final float pointOffset = (startX < pointRadius) ? (pointRadius - startX) : 0;
+        return pointOffset + pointRadius + segPointGap;
+    }
+
+    private static float getSegEndOffset(Segment seg, Part nextPart, float pointRadius,
+            float segPointGap,
+            float segSegGap, float endX, float totalWidth, boolean hasTrackerIcon) {
+        if (nextPart == null) return 0F;
+        if (nextPart instanceof Segment nextSeg) {
+            if (!seg.mFaded && nextSeg.mFaded) {
+                // @see Segment#mFaded
+                return hasTrackerIcon ? 0F : segSegGap;
+            }
+            return segSegGap;
+        }
+
+        final float pointWidth = 2 * pointRadius;
+        final float pointOffset = (endX + pointRadius > totalWidth && totalWidth > pointWidth)
+                ? (endX + pointRadius - totalWidth) : 0;
+        return segPointGap + pointRadius + pointOffset;
+    }
+
+    /**
+     * A part of the progress bar, which is either a {@link Segment} with non-zero length, or a
+     * {@link Point} with zero length.
+     */
+    // TODO: b/372908709 - maybe this should be made private? Only test the final
+    //  NotificationDrawable.Parts.
+    // TODO: b/372908709 - rename to BarPart, BarSegment, BarPoint. This avoids naming ambiguity
+    //  with the types in NotificationProgressDrawable.
+    public interface Part {
+    }
+
+    /**
+     * A segment is a part of the progress bar with non-zero length. For example, it can
+     * represent a portion in a navigation journey with certain traffic condition.
+     *
+     */
+    public static final class Segment implements Part {
+        private final float mFraction;
+        @ColorInt private final int mColor;
+        /** Whether the segment is faded or not.
+         * <p>
+         *     <pre>
+         *     When mFaded is set to true, a combination of the following is done to the segment:
+         *       1. The drawing color is mColor with opacity updated to 40%.
+         *       2. The gap between faded and non-faded segments is:
+         *          - the segment-segment gap, when there is no tracker icon
+         *          - 0, when there is tracker icon
+         *     </pre>
+         * </p>
+         */
+        private final boolean mFaded;
+
+        public Segment(float fraction, @ColorInt int color) {
+            this(fraction, color, false);
+        }
+
+        public Segment(float fraction, @ColorInt int color, boolean faded) {
+            mFraction = fraction;
+            mColor = color;
+            mFaded = faded;
+        }
+
+        @Override
+        public String toString() {
+            return "Segment(fraction=" + this.mFraction + ", color=" + this.mColor + ", faded="
+                    + this.mFaded + ')';
+        }
+
+        // Needed for unit tests
+        @Override
+        public boolean equals(@androidx.annotation.Nullable Object other) {
+            if (this == other) return true;
+
+            if (other == null || getClass() != other.getClass()) return false;
+
+            Segment that = (Segment) other;
+            if (Float.compare(this.mFraction, that.mFraction) != 0) return false;
+            if (this.mColor != that.mColor) return false;
+            return this.mFaded == that.mFaded;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFraction, mColor, mFaded);
+        }
+    }
+
+    /**
+     * A point is a part of the progress bar with zero length. Points are designated points within a
+     * progress bar to visualize distinct stages or milestones. For example, a stop in a multi-stop
+     * ride-share journey.
+     */
+    public static final class Point implements Part {
+        @ColorInt private final int mColor;
+
+        public Point(@ColorInt int color) {
+            mColor = color;
+        }
+
+        @Override
+        public String toString() {
+            return "Point(color=" + this.mColor + ")";
+        }
+
+        // Needed for unit tests.
+        @Override
+        public boolean equals(@androidx.annotation.Nullable Object other) {
+            if (this == other) return true;
+
+            if (other == null || getClass() != other.getClass()) return false;
+
+            Point that = (Point) other;
+
+            return this.mColor == that.mColor;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mColor);
+        }
     }
 }
