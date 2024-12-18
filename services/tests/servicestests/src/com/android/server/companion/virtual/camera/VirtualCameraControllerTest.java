@@ -29,6 +29,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,6 +63,7 @@ import java.util.List;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VirtualCameraControllerTest {
 
+    private static final int DEVICE_ID = 5;
     private static final String CAMERA_NAME_1 = "Virtual camera 1";
     private static final int CAMERA_WIDTH_1 = 100;
     private static final int CAMERA_HEIGHT_1 = 200;
@@ -91,8 +93,9 @@ public class VirtualCameraControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mVirtualCameraController = new VirtualCameraController(mVirtualCameraServiceMock,
-                DEVICE_POLICY_CUSTOM);
-        when(mVirtualCameraServiceMock.registerCamera(any(), any())).thenReturn(true);
+                DEVICE_POLICY_CUSTOM, DEVICE_ID);
+        when(mVirtualCameraServiceMock.registerCamera(any(), any(), anyInt())).thenReturn(true);
+        when(mVirtualCameraServiceMock.getCameraId(any())).thenReturn("0");
     }
 
     @After
@@ -109,7 +112,10 @@ public class VirtualCameraControllerTest {
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
-        verify(mVirtualCameraServiceMock).registerCamera(any(), configurationCaptor.capture());
+        ArgumentCaptor<Integer> deviceIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mVirtualCameraServiceMock).registerCamera(any(), configurationCaptor.capture(),
+                deviceIdCaptor.capture());
+        assertThat(deviceIdCaptor.getValue()).isEqualTo(DEVICE_ID);
         VirtualCameraConfiguration virtualCameraConfiguration = configurationCaptor.getValue();
         assertThat(virtualCameraConfiguration.supportedStreamConfigs.length).isEqualTo(1);
         assertVirtualCameraConfiguration(virtualCameraConfiguration, CAMERA_WIDTH_1,
@@ -146,8 +152,11 @@ public class VirtualCameraControllerTest {
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
+        ArgumentCaptor<Integer> deviceIdCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(mVirtualCameraServiceMock, times(2)).registerCamera(any(),
-                configurationCaptor.capture());
+                configurationCaptor.capture(), deviceIdCaptor.capture());
+        List<Integer> deviceIds = deviceIdCaptor.getAllValues();
+        assertThat(deviceIds).containsExactly(DEVICE_ID, DEVICE_ID);
         List<VirtualCameraConfiguration> virtualCameraConfigurations =
                 configurationCaptor.getAllValues();
         assertThat(virtualCameraConfigurations).hasSize(2);
@@ -177,8 +186,8 @@ public class VirtualCameraControllerTest {
     @Test
     public void registerCamera_withDefaultCameraPolicy_throwsException(int lensFacing) {
         mVirtualCameraController.close();
-        mVirtualCameraController = new VirtualCameraController(
-                mVirtualCameraServiceMock, DEVICE_POLICY_DEFAULT);
+        mVirtualCameraController = new VirtualCameraController(mVirtualCameraServiceMock,
+                DEVICE_POLICY_DEFAULT, DEVICE_ID);
 
         assertThrows(IllegalArgumentException.class,
                 () -> mVirtualCameraController.registerCamera(createVirtualCameraConfig(

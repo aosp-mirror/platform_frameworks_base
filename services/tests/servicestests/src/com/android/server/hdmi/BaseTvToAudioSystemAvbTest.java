@@ -17,6 +17,7 @@
 package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiCecKeycode.CEC_KEYCODE_VOLUME_UP;
+import static com.android.server.hdmi.HdmiCecFeatureAction.DELAY_GIVE_AUDIO_STATUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -223,6 +224,9 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
         );
         mTestLooper.dispatchAll();
 
+        mTestLooper.moveTimeForward(DELAY_GIVE_AUDIO_STATUS);
+        mTestLooper.dispatchAll();
+
         assertThat(mNativeWrapper.getResultMessages()).contains(
                 HdmiCecMessageBuilder.buildUserControlPressed(getLogicalAddress(),
                         getSystemAudioDeviceLogicalAddress(), CEC_KEYCODE_VOLUME_UP));
@@ -235,7 +239,7 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
     }
 
     @Test
-    public void adjustOnlyAvbEnabled_audioDeviceVolumeChanged_doesNotSendSetAudioVolumeLevel() {
+    public void adjustOnlyAvbEnabled_audioDeviceVolumeChanged_requestsAndUpdatesAudioStatus() {
         enableAdjustOnlyAbsoluteVolumeBehavior();
 
         mNativeWrapper.clearResultMessages();
@@ -250,7 +254,22 @@ public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehav
         );
         mTestLooper.dispatchAll();
 
-        assertThat(mNativeWrapper.getResultMessages()).isEmpty();
+        // We can't sent <Set Audio Volume Level> when using adjust-only AVB.
+        // Instead, we send <Give Audio Status>, to get the System Audio device's volume level.
+        // This ensures that we end up with a correct audio status in AudioService, even if it
+        // set it incorrectly because it assumed that we could send <Set Audio Volume Level>
+        assertThat(mNativeWrapper.getResultMessages().size()).isEqualTo(1);
+        assertThat(mNativeWrapper.getResultMessages()).contains(
+                HdmiCecMessageBuilder.buildGiveAudioStatus(getLogicalAddress(),
+                        getSystemAudioDeviceLogicalAddress())
+        );
+
+        // When we receive <Report Audio Status>, we notify AudioService of the volume level.
+        receiveReportAudioStatus(50,
+                true);
+        verify(mAudioManager).setStreamVolume(eq(AudioManager.STREAM_MUSIC),
+                eq(50 * STREAM_MUSIC_MAX_VOLUME / AudioStatus.MAX_VOLUME),
+                anyInt());
     }
 
     @Test

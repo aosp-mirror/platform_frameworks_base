@@ -16,23 +16,18 @@
 
 package com.android.systemui.navigationbar;
 
-import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
-import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
-import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
+import static com.android.wm.shell.Flags.enableTaskbarOnPhones;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.Trace;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -53,13 +48,14 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.views.NavigationBar;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
-import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -70,6 +66,7 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -82,7 +79,7 @@ public class NavigationBarControllerImpl implements
     private static final String TAG = NavigationBarControllerImpl.class.getSimpleName();
 
     private final Context mContext;
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
@@ -119,7 +116,7 @@ public class NavigationBarControllerImpl implements
             NavigationModeController navigationModeController,
             SysUiState sysUiFlagsContainer,
             CommandQueue commandQueue,
-            @Main Handler mainHandler,
+            @Main Executor mainExecutor,
             ConfigurationController configurationController,
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
@@ -133,7 +130,7 @@ public class NavigationBarControllerImpl implements
             SecureSettings secureSettings,
             DisplayTracker displayTracker) {
         mContext = context;
-        mHandler = mainHandler;
+        mExecutor = mainExecutor;
         mNavigationBarComponentFactory = navigationBarComponentFactory;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
@@ -160,14 +157,11 @@ public class NavigationBarControllerImpl implements
         mIsLargeScreen = isLargeScreen(mContext);
         boolean willApplyConfig = mConfigChanges.applyNewConfig(mContext.getResources());
         boolean largeScreenChanged = mIsLargeScreen != isOldConfigLargeScreen;
-        // TODO(b/243765256): Disable this logging once b/243765256 is fixed.
+        // TODO(b/332635834): Disable this logging once b/332635834 is fixed.
         Log.i(DEBUG_MISSING_GESTURE_TAG, "NavbarController: newConfig=" + newConfig
                 + " mTaskbarDelegate initialized=" + mTaskbarDelegate.isInitialized()
                 + " willApplyConfigToNavbars=" + willApplyConfig
                 + " navBarCount=" + mNavigationBars.size());
-        if (mTaskbarDelegate.isInitialized()) {
-            mTaskbarDelegate.onConfigurationChanged(newConfig);
-        }
         // If we folded/unfolded while in 3 button, show navbar in folded state, hide in unfolded
         if (largeScreenChanged && updateNavbarForTaskbar()) {
             return;
@@ -191,9 +185,8 @@ public class NavigationBarControllerImpl implements
         }
         final int oldMode = mNavMode;
         mNavMode = mode;
-        updateAccessibilityButtonModeIfNeeded();
 
-        mHandler.post(() -> {
+        mExecutor.execute(() -> {
             // create/destroy nav bar based on nav mode only in unfolded state
             if (oldMode != mNavMode) {
                 updateNavbarForTaskbar();
@@ -206,34 +199,6 @@ public class NavigationBarControllerImpl implements
                 navBar.getView().updateStates();
             }
         });
-    }
-
-    private void updateAccessibilityButtonModeIfNeeded() {
-        final int mode = mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
-
-        // ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU is compatible under gestural or non-gestural
-        // mode, so we don't need to update it.
-        if (mode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
-            return;
-        }
-
-        // ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR is incompatible under gestural mode. Need to
-        // force update to ACCESSIBILITY_BUTTON_MODE_GESTURE.
-        if (QuickStepContract.isGesturalMode(mNavMode)
-                && mode == ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR) {
-            mSecureSettings.putIntForUser(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_GESTURE,
-                    UserHandle.USER_CURRENT);
-            // ACCESSIBILITY_BUTTON_MODE_GESTURE is incompatible under non gestural mode. Need to
-            // force update to ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR.
-        } else if (!QuickStepContract.isGesturalMode(mNavMode)
-                && mode == ACCESSIBILITY_BUTTON_MODE_GESTURE) {
-            mSecureSettings.putIntForUser(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
-                    ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR, UserHandle.USER_CURRENT);
-        }
     }
 
     private boolean shouldCreateNavBarAndTaskBar(int displayId) {
@@ -287,8 +252,10 @@ public class NavigationBarControllerImpl implements
 
     @VisibleForTesting
     boolean supportsTaskbar() {
-        // Enable for tablets, unfolded state on a foldable device or (non handheld AND flag is set)
-        return mIsLargeScreen || (!mIsPhone && enableTaskbarNavbarUnification());
+        // Enable for tablets, unfolded state on a foldable device, (non handheld AND flag is set),
+        // or handheld when enableTaskbarOnPhones() returns true.
+        boolean foldedOrPhone = !mIsPhone || enableTaskbarOnPhones();
+        return mIsLargeScreen || (foldedOrPhone && enableTaskbarNavbarUnification());
     }
 
     private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
@@ -350,8 +317,6 @@ public class NavigationBarControllerImpl implements
     @Override
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
-        updateAccessibilityButtonModeIfNeeded();
-
         // Don't need to create nav bar on the default display if we initialize TaskBar.
         final boolean shouldCreateDefaultNavbar = includeDefaultDisplay
                 && !initializeTaskbarIfNecessary();
@@ -403,9 +368,8 @@ public class NavigationBarControllerImpl implements
             @Override
             public void onViewAttachedToWindow(View v) {
                 if (result != null) {
-                    navBar.setImeWindowStatus(display.getDisplayId(), result.mImeToken,
-                            result.mImeWindowVis, result.mImeBackDisposition,
-                            result.mShowImeSwitcher);
+                    navBar.setImeWindowStatus(display.getDisplayId(), result.mImeWindowVis,
+                            result.mImeBackDisposition, result.mShowImeSwitcher);
                 }
             }
 
@@ -430,6 +394,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.checkNavBarModes();
+        } else {
+            mTaskbarDelegate.checkNavBarModes();
         }
     }
 
@@ -438,6 +404,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.finishBarAnimations();
+        } else {
+            mTaskbarDelegate.finishBarAnimations();
         }
     }
 
@@ -446,6 +414,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.touchAutoDim();
+        } else {
+            mTaskbarDelegate.touchAutoDim();
         }
     }
 
@@ -454,6 +424,8 @@ public class NavigationBarControllerImpl implements
         NavigationBar navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
             navBar.transitionTo(barMode, animate);
+        } else {
+            mTaskbarDelegate.transitionTo(barMode, animate);
         }
     }
 

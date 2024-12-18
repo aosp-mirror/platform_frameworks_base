@@ -25,6 +25,8 @@ import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDeviceBatteryState;
 import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IKeyboardBacklightState;
+import android.hardware.input.IKeyGestureEventListener;
+import android.hardware.input.IKeyGestureHandler;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.KeyboardLayoutSelectionResult;
@@ -32,6 +34,7 @@ import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.InputSensorInfo;
+import android.hardware.input.KeyGlyphMap;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.os.IBinder;
@@ -55,7 +58,6 @@ interface IInputManager {
     int[] getInputDeviceIds();
 
     // Enable/disable input device.
-    boolean isInputDeviceEnabled(int deviceId);
     void enableInputDevice(int deviceId);
     void disableInputDevice(int deviceId);
 
@@ -94,33 +96,8 @@ interface IInputManager {
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
 
-    KeyboardLayout[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
-
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
 
-    String getCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void setCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    String[] getEnabledKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    // New Keyboard layout config APIs
     KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
             in InputDeviceIdentifier identifier, int userId, in InputMethodInfo imeInfo,
             in InputMethodSubtype imeSubtype);
@@ -173,8 +150,6 @@ interface IInputManager {
 
     IInputDeviceBatteryState getBatteryState(int deviceId);
 
-    void setPointerIconType(int typeId);
-    void setCustomPointerIcon(in PointerIcon icon);
     boolean setPointerIcon(in PointerIcon icon, int displayId, int deviceId, int pointerId,
             in IBinder inputToken);
 
@@ -190,10 +165,17 @@ interface IInputManager {
     // static association for the cleared input port will be restored.
     void removePortAssociation(in String inputPort);
 
-    // Add a runtime association between the input device and display.
-    void addUniqueIdAssociation(in String inputPort, in String displayUniqueId);
-    // Remove the runtime association between the input device and display.
-    void removeUniqueIdAssociation(in String inputPort);
+    // Add a runtime association between the input device and display, using device's descriptor.
+    void addUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor,
+            in String displayUniqueId);
+    // Remove the runtime association between the input device and display, using device's
+    // descriptor.
+    void removeUniqueIdAssociationByDescriptor(in String inputDeviceDescriptor);
+
+    // Add a runtime association between the input device and display, using device's port.
+    void addUniqueIdAssociationByPort(in String inputPort, in String displayUniqueId);
+    // Remove the runtime association between the input device and display, using device's port.
+    void removeUniqueIdAssociationByPort(in String inputPort);
 
     InputSensorInfo[] getSensorList(int deviceId);
 
@@ -257,4 +239,26 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MONITOR_STICKY_MODIFIER_STATE)")
     void unregisterStickyModifierStateListener(IStickyModifierStateListener listener);
+
+    KeyGlyphMap getKeyGlyphMap(int deviceId);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void registerKeyGestureEventListener(IKeyGestureEventListener listener);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void unregisterKeyGestureEventListener(IKeyGestureEventListener listener);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void registerKeyGestureHandler(IKeyGestureHandler handler);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void unregisterKeyGestureHandler(IKeyGestureHandler handler);
 }

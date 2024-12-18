@@ -18,25 +18,30 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Implementation of ShadeAnimationInteractor compatible with the scene container framework. */
 @SysUISingleton
 class ShadeAnimationInteractorSceneContainerImpl
 @Inject
+@OptIn(ExperimentalCoroutinesApi::class)
 constructor(
+    @Background scope: CoroutineScope,
     shadeAnimationRepository: ShadeAnimationRepository,
     sceneInteractor: SceneInteractor,
 ) : ShadeAnimationInteractor(shadeAnimationRepository) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val isAnyCloseAnimationRunning =
         sceneInteractor.transitionState
             .flatMapLatest { state ->
@@ -44,10 +49,10 @@ constructor(
                     is ObservableTransitionState.Idle -> flowOf(false)
                     is ObservableTransitionState.Transition ->
                         if (
-                            (state.fromScene == Scenes.Shade &&
-                                state.toScene != Scenes.QuickSettings) ||
-                                (state.fromScene == Scenes.QuickSettings &&
-                                    state.toScene != Scenes.Shade)
+                            (state.fromContent == Scenes.Shade &&
+                                state.toContent != Scenes.QuickSettings) ||
+                                (state.fromContent == Scenes.QuickSettings &&
+                                    state.toContent != Scenes.Shade)
                         ) {
                             state.isUserInputOngoing.map { !it }
                         } else {
@@ -56,4 +61,27 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    override val isAnyFlingAnimationRunning =
+        sceneInteractor.transitionState
+            .flatMapLatest { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> flowOf(false)
+                    is ObservableTransitionState.Transition ->
+                        if (
+                            state.isInitiatedByUserInput &&
+                                (state.fromContent == Scenes.Shade ||
+                                    state.toContent == Scenes.Shade ||
+                                    state.fromContent == Scenes.QuickSettings ||
+                                    state.toContent == Scenes.QuickSettings)
+                        ) {
+                            state.isUserInputOngoing.map { !it }
+                        } else {
+                            flowOf(false)
+                        }
+                }
+            }
+            .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, false)
 }

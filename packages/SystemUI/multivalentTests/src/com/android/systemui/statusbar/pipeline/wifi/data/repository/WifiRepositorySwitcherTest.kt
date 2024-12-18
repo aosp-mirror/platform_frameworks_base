@@ -16,24 +16,26 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
-import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
-import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,11 +61,13 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var demoImpl: DemoWifiRepository
 
     @Mock private lateinit var demoModeController: DemoModeController
-    @Mock private lateinit var logger: WifiInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
-    @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager
     @Mock private lateinit var demoModeWifiDataSource: DemoModeWifiDataSource
+    @Mock private lateinit var wifiPickerTrackerFactory: WifiPickerTrackerFactory
+    @Mock private lateinit var wifiPickerTracker: WifiPickerTracker
+
+    private val wifiLogBuffer = LogBuffer("wifi", maxSize = 100, logcatEchoTracker = mock())
     private val demoModelFlow = MutableStateFlow<FakeWifiEventModel?>(null)
 
     private val mainExecutor = FakeExecutor(FakeSystemClock())
@@ -78,17 +82,17 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
 
+        whenever(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
+
         realImpl =
             WifiRepositoryImpl(
-                fakeBroadcastDispatcher,
-                connectivityManager,
-                FakeConnectivityRepository(),
-                logger,
-                tableLogger,
+                testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,
-                testScope.backgroundScope,
+                wifiPickerTrackerFactory,
                 wifiManager,
+                wifiLogBuffer,
+                tableLogger,
             )
 
         whenever(demoModeWifiDataSource.wifiEvents).thenReturn(demoModelFlow)

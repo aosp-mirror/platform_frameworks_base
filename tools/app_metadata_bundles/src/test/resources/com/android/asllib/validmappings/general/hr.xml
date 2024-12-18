@@ -1,0 +1,20 @@
+<app-metadata-bundles version="2">
+    <safety-labels>
+        <data-labels>
+            <data-shared dataType="location_data_type_approx_location" isSharingOptional="false" purposes="app_functionality"/>
+            <data-shared dataType="location_data_type_precise_location" isSharingOptional="true" purposes="app_functionality|analytics"/>
+        </data-labels>
+    </safety-labels>
+    <system-app-safety-label declaration="true"/>
+    <transparency-info>
+        <app-info applicationId="app1" apsCompliant="false" developerId="dev1" privacyPolicy="www.example.com">
+            <first-party-endpoints>
+                <item>url1</item>
+            </first-party-endpoints>
+            <service-provider-endpoints>
+                <item>url55</item>
+                <item>url56</item>
+            </service-provider-endpoints>
+        </app-info>
+    </transparency-info>
+</app-metadata-bundles>

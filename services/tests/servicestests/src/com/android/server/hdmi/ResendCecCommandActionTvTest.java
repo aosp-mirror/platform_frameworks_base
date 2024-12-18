@@ -21,7 +21,9 @@ import static com.android.server.hdmi.ResendCecCommandAction.SEND_COMMAND_RETRY_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
@@ -75,6 +77,11 @@ public class ResendCecCommandActionTvTest {
             boolean verifyPhysicalAddresses(HdmiCecMessage message) {
                 return true;
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
 
         mMyLooper = mTestLooper.getLooper();
@@ -82,6 +89,8 @@ public class ResendCecCommandActionTvTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x0000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
@@ -90,8 +99,6 @@ public class ResendCecCommandActionTvTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x0000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mTvDevice = mHdmiControlService.tv();
 

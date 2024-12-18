@@ -1,0 +1,12 @@
+
+<pbundle_as_map name="transparency_info">
+    <pbundle_as_map name="developer_info">
+        <string name="name" value="max"/>
+        <string name="email" value="max@example.com"/>
+        <string name="address" value="111 blah lane"/>
+        <string name="country_region" value="US"/>
+        <long name="relationship" value="5"/>
+        <string name="website" value="example.com"/>
+        <string name="app_developer_registry_id" value="registry_id"/>
+    </pbundle_as_map>
+</pbundle_as_map>

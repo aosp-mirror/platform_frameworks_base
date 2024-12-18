@@ -21,27 +21,27 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.unconfinedTestScope
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
-import com.android.systemui.util.settings.FakeGlobalSettings
+import com.android.systemui.util.settings.unconfinedDispatcherFakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when` as whenever
@@ -49,146 +49,156 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class UserRepositoryImplTest : SysuiTestCase() {
+
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.unconfinedTestDispatcher
+    private val testScope = kosmos.unconfinedTestScope
+    private val globalSettings = kosmos.unconfinedDispatcherFakeGlobalSettings
 
     @Mock private lateinit var manager: UserManager
 
     private lateinit var underTest: UserRepositoryImpl
 
-    private lateinit var globalSettings: FakeGlobalSettings
     private lateinit var tracker: FakeUserTracker
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        globalSettings = FakeGlobalSettings()
         tracker = FakeUserTracker()
     }
 
     @Test
-    fun userSwitcherSettings() = runSelfCancelingTest {
-        setUpGlobalSettings(
-            isSimpleUserSwitcher = true,
-            isAddUsersFromLockscreen = true,
-            isUserSwitcherEnabled = true,
-        )
-        underTest = create(this)
+    fun userSwitcherSettings() =
+        testScope.runTest {
+            setUpGlobalSettings(
+                isSimpleUserSwitcher = true,
+                isAddUsersFromLockscreen = true,
+                isUserSwitcherEnabled = true,
+            )
+            underTest = create(testScope.backgroundScope)
+            var value: UserSwitcherSettingsModel? = null
+            val job = underTest.userSwitcherSettings.onEach { value = it }.launchIn(this)
 
-        var value: UserSwitcherSettingsModel? = null
-        underTest.userSwitcherSettings.onEach { value = it }.launchIn(this)
+            assertUserSwitcherSettings(
+                model = value,
+                expectedSimpleUserSwitcher = true,
+                expectedAddUsersFromLockscreen = true,
+                expectedUserSwitcherEnabled = true,
+            )
 
-        assertUserSwitcherSettings(
-            model = value,
-            expectedSimpleUserSwitcher = true,
-            expectedAddUsersFromLockscreen = true,
-            expectedUserSwitcherEnabled = true,
-        )
-
-        setUpGlobalSettings(
-            isSimpleUserSwitcher = false,
-            isAddUsersFromLockscreen = true,
-            isUserSwitcherEnabled = true,
-        )
-        assertUserSwitcherSettings(
-            model = value,
-            expectedSimpleUserSwitcher = false,
-            expectedAddUsersFromLockscreen = true,
-            expectedUserSwitcherEnabled = true,
-        )
-    }
+            setUpGlobalSettings(
+                isSimpleUserSwitcher = false,
+                isAddUsersFromLockscreen = true,
+                isUserSwitcherEnabled = true,
+            )
+            assertUserSwitcherSettings(
+                model = value,
+                expectedSimpleUserSwitcher = false,
+                expectedAddUsersFromLockscreen = true,
+                expectedUserSwitcherEnabled = true,
+            )
+            job.cancel()
+        }
 
     @Test
-    fun userSwitcherSettings_isUserSwitcherEnabled_notInitialized() = runSelfCancelingTest {
-        underTest = create(this)
+    fun userSwitcherSettings_isUserSwitcherEnabled_notInitialized() =
+        testScope.runTest {
+            underTest = create(testScope.backgroundScope)
 
-        var value: UserSwitcherSettingsModel? = null
-        underTest.userSwitcherSettings.onEach { value = it }.launchIn(this)
+            var value: UserSwitcherSettingsModel? = null
+            val job = underTest.userSwitcherSettings.onEach { value = it }.launchIn(this)
 
-        assertUserSwitcherSettings(
-            model = value,
-            expectedSimpleUserSwitcher = false,
-            expectedAddUsersFromLockscreen = false,
-            expectedUserSwitcherEnabled =
-                context.resources.getBoolean(
-                    com.android.internal.R.bool.config_showUserSwitcherByDefault
-                ),
-        )
-    }
+            assertUserSwitcherSettings(
+                model = value,
+                expectedSimpleUserSwitcher = false,
+                expectedAddUsersFromLockscreen = false,
+                expectedUserSwitcherEnabled =
+                    context.resources.getBoolean(
+                        com.android.internal.R.bool.config_showUserSwitcherByDefault
+                    ),
+            )
+            job.cancel()
+        }
 
     @Test
-    fun refreshUsers() = runSelfCancelingTest {
-        val mainUserId = 10
-        val mainUser = mock(UserHandle::class.java)
-        whenever(manager.mainUser).thenReturn(mainUser)
-        whenever(mainUser.identifier).thenReturn(mainUserId)
+    fun refreshUsers() =
+        testScope.runTest {
+            val mainUserId = 10
+            val mainUser = mock(UserHandle::class.java)
+            whenever(manager.mainUser).thenReturn(mainUser)
+            whenever(mainUser.identifier).thenReturn(mainUserId)
 
-        underTest = create(this)
-        val initialExpectedValue =
-            setUpUsers(
-                count = 3,
-                selectedIndex = 0,
-            )
-        var userInfos: List<UserInfo>? = null
-        var selectedUserInfo: UserInfo? = null
-        underTest.userInfos.onEach { userInfos = it }.launchIn(this)
-        underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
+            underTest = create(testScope.backgroundScope)
+            val initialExpectedValue =
+                setUpUsers(
+                    count = 3,
+                    selectedIndex = 0,
+                )
+            var userInfos: List<UserInfo>? = null
+            var selectedUserInfo: UserInfo? = null
+            val job1 = underTest.userInfos.onEach { userInfos = it }.launchIn(this)
+            val job2 = underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
 
-        underTest.refreshUsers()
-        assertThat(userInfos).isEqualTo(initialExpectedValue)
-        assertThat(selectedUserInfo).isEqualTo(initialExpectedValue[0])
-        assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
+            underTest.refreshUsers()
+            assertThat(userInfos).isEqualTo(initialExpectedValue)
+            assertThat(selectedUserInfo).isEqualTo(initialExpectedValue[0])
+            assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
 
-        val secondExpectedValue =
-            setUpUsers(
-                count = 4,
-                selectedIndex = 1,
-            )
-        underTest.refreshUsers()
-        assertThat(userInfos).isEqualTo(secondExpectedValue)
-        assertThat(selectedUserInfo).isEqualTo(secondExpectedValue[1])
-        assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
+            val secondExpectedValue =
+                setUpUsers(
+                    count = 4,
+                    selectedIndex = 1,
+                )
+            underTest.refreshUsers()
+            assertThat(userInfos).isEqualTo(secondExpectedValue)
+            assertThat(selectedUserInfo).isEqualTo(secondExpectedValue[1])
+            assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
 
-        val selectedNonGuestUserId = selectedUserInfo?.id
-        val thirdExpectedValue =
-            setUpUsers(
-                count = 2,
-                isLastGuestUser = true,
-                selectedIndex = 1,
-            )
-        underTest.refreshUsers()
-        assertThat(userInfos).isEqualTo(thirdExpectedValue)
-        assertThat(selectedUserInfo).isEqualTo(thirdExpectedValue[1])
-        assertThat(selectedUserInfo?.isGuest).isTrue()
-        assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedNonGuestUserId)
-        assertThat(underTest.mainUserId).isEqualTo(mainUserId)
-    }
+            val selectedNonGuestUserId = selectedUserInfo?.id
+            val thirdExpectedValue =
+                setUpUsers(
+                    count = 2,
+                    isLastGuestUser = true,
+                    selectedIndex = 1,
+                )
+            underTest.refreshUsers()
+            assertThat(userInfos).isEqualTo(thirdExpectedValue)
+            assertThat(selectedUserInfo).isEqualTo(thirdExpectedValue[1])
+            assertThat(selectedUserInfo?.isGuest).isTrue()
+            assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedNonGuestUserId)
+            assertThat(underTest.mainUserId).isEqualTo(mainUserId)
+            job1.cancel()
+            job2.cancel()
+        }
 
     @Test
-    fun refreshUsers_sortsByCreationTime_guestUserLast() = runSelfCancelingTest {
-        underTest = create(this)
-        val unsortedUsers =
-            setUpUsers(
-                count = 3,
-                selectedIndex = 0,
-                isLastGuestUser = true,
-            )
-        unsortedUsers[0].creationTime = 999
-        unsortedUsers[1].creationTime = 900
-        unsortedUsers[2].creationTime = 950
-        val expectedUsers =
-            listOf(
-                unsortedUsers[1],
-                unsortedUsers[0],
-                unsortedUsers[2], // last because this is the guest
-            )
-        var userInfos: List<UserInfo>? = null
-        underTest.userInfos.onEach { userInfos = it }.launchIn(this)
+    fun refreshUsers_sortsByCreationTime_guestUserLast() =
+        testScope.runTest {
+            underTest = create(testScope.backgroundScope)
+            val unsortedUsers =
+                setUpUsers(
+                    count = 3,
+                    selectedIndex = 0,
+                    isLastGuestUser = true,
+                )
+            unsortedUsers[0].creationTime = 999
+            unsortedUsers[1].creationTime = 900
+            unsortedUsers[2].creationTime = 950
+            val expectedUsers =
+                listOf(
+                    unsortedUsers[1],
+                    unsortedUsers[0],
+                    unsortedUsers[2], // last because this is the guest
+                )
+            var userInfos: List<UserInfo>? = null
+            val job = underTest.userInfos.onEach { userInfos = it }.launchIn(this)
 
-        underTest.refreshUsers()
-        assertThat(userInfos).isEqualTo(expectedUsers)
-    }
+            underTest.refreshUsers()
+            assertThat(userInfos).isEqualTo(expectedUsers)
+            job.cancel()
+        }
 
     private fun setUpUsers(
         count: Int,
@@ -206,58 +216,76 @@ class UserRepositoryImplTest : SysuiTestCase() {
         tracker.set(userInfos, selectedIndex)
         return userInfos
     }
-    @Test
-    fun userTrackerCallback_updatesSelectedUserInfo() = runSelfCancelingTest {
-        underTest = create(this)
-        var selectedUserInfo: UserInfo? = null
-        underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
-        setUpUsers(
-            count = 2,
-            selectedIndex = 0,
-        )
-        tracker.onProfileChanged()
-        assertThat(selectedUserInfo?.id).isEqualTo(0)
-        setUpUsers(
-            count = 2,
-            selectedIndex = 1,
-        )
-        tracker.onProfileChanged()
-        assertThat(selectedUserInfo?.id).isEqualTo(1)
-    }
 
     @Test
-    fun userTrackerCallback_updatesSelectionStatus() = runSelfCancelingTest {
-        underTest = create(this)
-        var selectedUser: SelectedUserModel? = null
-        underTest.selectedUser.onEach { selectedUser = it }.launchIn(this)
-        setUpUsers(count = 2, selectedIndex = 1)
+    fun userTrackerCallback_updatesSelectedUserInfo() =
+        testScope.runTest {
+            underTest = create(testScope.backgroundScope)
+            var selectedUserInfo: UserInfo? = null
+            val job = underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
 
-        // WHEN the user is changing
-        tracker.onUserChanging(userId = 1)
+            setUpUsers(
+                count = 2,
+                selectedIndex = 0,
+            )
+            tracker.onProfileChanged()
+            assertThat(selectedUserInfo?.id).isEqualTo(0)
+            setUpUsers(
+                count = 2,
+                selectedIndex = 1,
+            )
+            tracker.onProfileChanged()
+            assertThat(selectedUserInfo?.id).isEqualTo(1)
+            job.cancel()
+        }
 
-        // THEN the selection status is IN_PROGRESS
-        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+    @Test
+    fun userTrackerCallback_updatesSelectionStatus() =
+        testScope.runTest {
+            underTest = create(testScope.backgroundScope)
+            var selectedUser: SelectedUserModel? = null
+            val job = underTest.selectedUser.onEach { selectedUser = it }.launchIn(this)
 
-        // WHEN the user has finished changing
-        tracker.onUserChanged(userId = 1)
+            setUpUsers(count = 2, selectedIndex = 1)
 
-        // THEN the selection status is COMPLETE
-        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+            // WHEN the user switch is starting
+            tracker.onBeforeUserSwitching(userId = 1)
 
-        tracker.onProfileChanged()
-        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+            // THEN the selection status is IN_PROGRESS
+            assertThat(selectedUser!!.selectionStatus)
+                .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
 
-        setUpUsers(count = 2, selectedIndex = 0)
+            // WHEN the user is changing
+            tracker.onUserChanging(userId = 1)
 
-        tracker.onUserChanging(userId = 0)
-        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+            // THEN the selection status is still IN_PROGRESS
+            assertThat(selectedUser!!.selectionStatus)
+                .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
 
-        // WHEN a profile change occurs while a user is changing
-        tracker.onProfileChanged()
+            // WHEN the user has finished changing
+            tracker.onUserChanged(userId = 1)
 
-        // THEN the selection status remains as IN_PROGRESS
-        assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
-    }
+            // THEN the selection status is COMPLETE
+            assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+
+            tracker.onProfileChanged()
+            assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_COMPLETE)
+
+            setUpUsers(count = 2, selectedIndex = 0)
+
+            tracker.onBeforeUserSwitching(userId = 0)
+            tracker.onUserChanging(userId = 0)
+            assertThat(selectedUser!!.selectionStatus)
+                .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+
+            // WHEN a profile change occurs while a user is changing
+            tracker.onProfileChanged()
+
+            // THEN the selection status remains as IN_PROGRESS
+            assertThat(selectedUser!!.selectionStatus)
+                .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+            job.cancel()
+        }
 
     private fun createUserInfo(
         id: Int,
@@ -308,26 +336,13 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(model.isUserSwitcherEnabled).isEqualTo(expectedUserSwitcherEnabled)
     }
 
-    /**
-     * Executes the given block of execution within the scope of a dedicated [CoroutineScope] which
-     * is then automatically canceled and cleaned-up.
-     */
-    private fun runSelfCancelingTest(
-        block: suspend CoroutineScope.() -> Unit,
-    ) =
-        runBlocking(Dispatchers.Main.immediate) {
-            val scope = CoroutineScope(coroutineContext + Job())
-            block(scope)
-            scope.cancel()
-        }
-
-    private fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
+    private fun create(scope: CoroutineScope): UserRepositoryImpl {
         return UserRepositoryImpl(
             appContext = context,
             manager = manager,
             applicationScope = scope,
-            mainDispatcher = IMMEDIATE,
-            backgroundDispatcher = IMMEDIATE,
+            mainDispatcher = testDispatcher,
+            backgroundDispatcher = testDispatcher,
             globalSettings = globalSettings,
             tracker = tracker,
         )

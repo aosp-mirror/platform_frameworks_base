@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
 
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_ENABLE_HIDDEN_API_CHECKS;
@@ -53,7 +52,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
-import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -67,7 +65,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.F2fsUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
@@ -92,7 +89,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -127,12 +123,11 @@ public class PackageDexOptimizer {
     // One minute over PM WATCHDOG_TIMEOUT
     private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
 
-    private final Object mInstallLock;
+    private final PackageManagerTracedLock mInstallLock;
 
     /**
-     * This should be accessed only through {@link #getInstallerLI()} with {@link #mInstallLock}
-     * or {@link #getInstallerWithoutLock()} without the lock. Check both methods for further
-     * details on when to use each of them.
+     * This should be accessed only through {@link #getInstallerLI()} with
+     * {@link #mInstallLock}.
      */
     private final Installer mInstaller;
 
@@ -147,7 +142,7 @@ public class PackageDexOptimizer {
     private final Context mContext;
     private static final Random sRandom = new Random();
 
-    PackageDexOptimizer(Installer installer, Object installLock, Context context,
+    PackageDexOptimizer(Installer installer, PackageManagerTracedLock installLock, Context context,
             String wakeLockTag) {
         this(new Injector() {
             @Override
@@ -172,8 +167,8 @@ public class PackageDexOptimizer {
     }
 
     @VisibleForTesting
-    PackageDexOptimizer(@NonNull Injector injector, Installer installer, Object installLock,
-            Context context, String wakeLockTag) {
+    PackageDexOptimizer(@NonNull Injector injector, Installer installer,
+            PackageManagerTracedLock installLock, Context context, String wakeLockTag) {
         this.mContext = context;
         this.mInstaller = installer;
         this.mInstallLock = installLock;
@@ -236,7 +231,7 @@ public class PackageDexOptimizer {
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
-        synchronized (mInstallLock) {
+        try (PackageManagerTracedLock installLock = mInstallLock.acquireLock()) {
             final long acquireTime = acquireWakeLockLI(pkg.getUid());
             try {
                 return performDexOptLI(pkg, pkgSetting, instructionSets,
@@ -245,15 +240,6 @@ public class PackageDexOptimizer {
                 releaseWakeLockLI(acquireTime);
             }
         }
-    }
-
-    /**
-     * Cancels currently running dex optimization.
-     */
-    void controlDexOptBlocking(boolean block) throws LegacyDexoptDisabledException {
-        // This method should not hold mInstallLock as cancelling should be possible while
-        // the lock is held by other thread running performDexOpt.
-        getInstallerWithoutLock().controlDexOptBlocking(block);
     }
 
     /**
@@ -334,7 +320,7 @@ public class PackageDexOptimizer {
             final boolean isUsedByOtherApps;
             if (options.isDexoptAsSharedLibrary()) {
                 isUsedByOtherApps = true;
-            } else if (useArtService()) {
+            } else {
                 // We get here when collecting dexopt commands in OTA preopt, even when ART Service
                 // is in use. packageUseInfo isn't useful in that case since the legacy dex use
                 // database hasn't been updated. So we'd have to query ART Service instead, but it
@@ -342,8 +328,6 @@ public class PackageDexOptimizer {
                 // That means such apps will get preopted wrong, and we'll leave it to a later
                 // background dexopt after reboot instead.
                 isUsedByOtherApps = false;
-            } else {
-                isUsedByOtherApps = packageUseInfo.isUsedByOtherApps(path);
             }
 
             String compilerFilter = getRealCompilerFilter(pkg, options.getCompilerFilter());
@@ -439,12 +423,10 @@ public class PackageDexOptimizer {
                     }
                 }
             } finally {
+                // ART Service is always enabled, so we should only arrive here
+                // during OTA preopt, and there should be no cloud profile.
                 if (cloudProfileName != null) {
-                    try {
-                        mInstaller.deleteReferenceProfile(pkg.getPackageName(), cloudProfileName);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Failed to cleanup cloud profile", e);
-                    }
+                    throw new LegacyDexoptDisabledException();
                 }
             }
         }
@@ -457,30 +439,15 @@ public class PackageDexOptimizer {
      *
      * @return true on success, or false otherwise.
      */
-    @GuardedBy("mInstallLock")
     private boolean prepareCloudProfile(AndroidPackage pkg, String profileName, String path,
             @Nullable String dexMetadataPath) throws LegacyDexoptDisabledException {
         if (dexMetadataPath != null) {
-            if (mInstaller.isIsolated()) {
-                // If the installer is isolated, the two calls to it below will return immediately,
-                // so this only short-circuits that a bit. We need to do it to avoid the
-                // LegacyDexoptDisabledException getting thrown first, when we get here during OTA
-                // preopt and ART Service is enabled.
-                return true;
+            // ART Service is always enabled, so we should only arrive here
+            // during OTA preopt, i.e. when the installer is isolated.
+            if (!mInstaller.isIsolated()) {
+                throw new LegacyDexoptDisabledException();
             }
-
-            try {
-                // Make sure we don't keep any existing contents.
-                mInstaller.deleteReferenceProfile(pkg.getPackageName(), profileName);
-
-                final int appId = UserHandle.getAppId(pkg.getUid());
-                mInstaller.prepareAppProfile(pkg.getPackageName(), UserHandle.USER_NULL, appId,
-                        profileName, path, dexMetadataPath);
-                return true;
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to prepare cloud profile", e);
-                return false;
-            }
+            return true;
         } else {
             return false;
         }
@@ -554,37 +521,6 @@ public class PackageDexOptimizer {
         return getReasonName(compilationReason) + annotation;
     }
 
-    /**
-     * Performs dexopt on the secondary dex {@code path} belonging to the app {@code info}.
-     *
-     * @return
-     *      DEX_OPT_FAILED if there was any exception during dexopt
-     *      DEX_OPT_PERFORMED if dexopt was performed successfully on the given path.
-     * NOTE that DEX_OPT_PERFORMED for secondary dex files includes the case when the dex file
-     * didn't need an update. That's because at the moment we don't get more than success/failure
-     * from installd.
-     *
-     * TODO(calin): Consider adding return codes to installd dexopt invocation (rather than
-     * throwing exceptions). Or maybe make a separate call to installd to get DexOptNeeded, though
-     * that seems wasteful.
-     */
-    @DexOptResult
-    public int dexOptSecondaryDexPath(ApplicationInfo info, String path,
-            PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options)
-            throws LegacyDexoptDisabledException {
-        if (info.uid == -1) {
-            throw new IllegalArgumentException("Dexopt for path " + path + " has invalid uid.");
-        }
-        synchronized (mInstallLock) {
-            final long acquireTime = acquireWakeLockLI(info.uid);
-            try {
-                return dexOptSecondaryDexPathLI(info, path, dexUseInfo, options);
-            } finally {
-                releaseWakeLockLI(acquireTime);
-            }
-        }
-    }
-
     @GuardedBy("mInstallLock")
     private long acquireWakeLockLI(final int uid) {
         // During boot the system doesn't need to instantiate and obtain a wake lock.
@@ -618,69 +554,6 @@ public class PackageDexOptimizer {
         }
     }
 
-    @GuardedBy("mInstallLock")
-    @DexOptResult
-    private int dexOptSecondaryDexPathLI(ApplicationInfo info, String path,
-            PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options)
-            throws LegacyDexoptDisabledException {
-        String compilerFilter = getRealCompilerFilter(info, options.getCompilerFilter(),
-                dexUseInfo.isUsedByOtherApps());
-        // Get the dexopt flags after getRealCompilerFilter to make sure we get the correct flags.
-        // Secondary dex files are currently not compiled at boot.
-        int dexoptFlags = getDexFlags(info, compilerFilter, options) | DEXOPT_SECONDARY_DEX;
-        // Check the app storage and add the appropriate flags.
-        if (info.deviceProtectedDataDir != null &&
-                FileUtils.contains(info.deviceProtectedDataDir, path)) {
-            dexoptFlags |= DEXOPT_STORAGE_DE;
-        } else if (info.credentialProtectedDataDir != null &&
-                FileUtils.contains(info.credentialProtectedDataDir, path)) {
-            dexoptFlags |= DEXOPT_STORAGE_CE;
-        } else {
-            Slog.e(TAG, "Could not infer CE/DE storage for package " + info.packageName);
-            return DEX_OPT_FAILED;
-        }
-        String classLoaderContext = null;
-        if (dexUseInfo.isUnsupportedClassLoaderContext()
-                || dexUseInfo.isVariableClassLoaderContext()) {
-            // If we have an unknown (not yet set), or a variable class loader chain. Just verify
-            // the dex file.
-            compilerFilter = "verify";
-        } else {
-            classLoaderContext = dexUseInfo.getClassLoaderContext();
-        }
-
-        int reason = options.getCompilationReason();
-        Log.d(TAG, "Running dexopt on: " + path
-                + " pkg=" + info.packageName + " isa=" + dexUseInfo.getLoaderIsas()
-                + " reason=" + getReasonName(reason)
-                + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
-                + " target-filter=" + compilerFilter
-                + " class-loader-context=" + classLoaderContext);
-
-        try {
-            for (String isa : dexUseInfo.getLoaderIsas()) {
-                // Reuse the same dexopt path as for the primary apks. We don't need all the
-                // arguments as some (dexopNeeded and oatDir) will be computed by installd because
-                // system server cannot read untrusted app content.
-                // TODO(calin): maybe add a separate call.
-                boolean completed = getInstallerLI().dexopt(path, info.uid, info.packageName,
-                        isa, /* dexoptNeeded= */ 0,
-                        /* outputPath= */ null, dexoptFlags,
-                        compilerFilter, info.volumeUuid, classLoaderContext, info.seInfo,
-                        options.isDowngrade(), info.targetSdkVersion, /* profileName= */ null,
-                        /* dexMetadataPath= */ null, getReasonName(reason));
-                if (!completed) {
-                    return DEX_OPT_CANCELLED;
-                }
-            }
-
-            return DEX_OPT_PERFORMED;
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Failed to dexopt", e);
-            return DEX_OPT_FAILED;
-        }
-    }
-
     /**
      * Adjust the given dexopt-needed value. Can be overridden to influence the decision to
      * optimize or not (and in what way).
@@ -694,59 +567,6 @@ public class PackageDexOptimizer {
      */
     protected int adjustDexoptFlags(int dexoptFlags) {
         return dexoptFlags;
-    }
-
-    /**
-     * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
-     */
-    void dumpDexoptState(IndentingPrintWriter pw, AndroidPackage pkg,
-            PackageStateInternal pkgSetting, PackageDexUsage.PackageUseInfo useInfo)
-            throws LegacyDexoptDisabledException {
-        final String[] instructionSets = getAppDexInstructionSets(pkgSetting.getPrimaryCpuAbi(),
-                pkgSetting.getSecondaryCpuAbi());
-        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-
-        final List<String> paths = AndroidPackageUtils.getAllCodePathsExcludingResourceOnly(pkg);
-
-        for (String path : paths) {
-            pw.println("path: " + path);
-            pw.increaseIndent();
-
-            for (String isa : dexCodeInstructionSets) {
-                try {
-                    DexFile.OptimizationInfo info = DexFile.getDexFileOptimizationInfo(path, isa);
-                    pw.println(isa + ": [status=" + info.getStatus()
-                            +"] [reason=" + info.getReason() + "]");
-                } catch (IOException ioe) {
-                    pw.println(isa + ": [Exception]: " + ioe.getMessage());
-                }
-            }
-
-            if (useInfo.isUsedByOtherApps(path)) {
-                pw.println("used by other apps: " + useInfo.getLoadingPackages(path));
-            }
-
-            Map<String, PackageDexUsage.DexUseInfo> dexUseInfoMap = useInfo.getDexUseInfoMap();
-
-            if (!dexUseInfoMap.isEmpty()) {
-                pw.println("known secondary dex files:");
-                pw.increaseIndent();
-                for (Map.Entry<String, PackageDexUsage.DexUseInfo> e : dexUseInfoMap.entrySet()) {
-                    String dex = e.getKey();
-                    PackageDexUsage.DexUseInfo dexUseInfo = e.getValue();
-                    pw.println(dex);
-                    pw.increaseIndent();
-                    // TODO(calin): get the status of the oat file (needs installd call)
-                    pw.println("class loader context: " + dexUseInfo.getClassLoaderContext());
-                    if (dexUseInfo.isUsedByOtherApps()) {
-                        pw.println("used by other apps: " + dexUseInfo.getLoadingPackages());
-                    }
-                    pw.decreaseIndent();
-                }
-                pw.decreaseIndent();
-            }
-            pw.decreaseIndent();
-        }
     }
 
     /**
@@ -898,14 +718,13 @@ public class PackageDexOptimizer {
      * Assesses if there's a need to perform dexopt on {@code path} for the given
      * configuration (isa, compiler filter, profile).
      */
-    @GuardedBy("mInstallLock")
     private int getDexoptNeeded(String packageName, String path, String isa, String compilerFilter,
             String classLoaderContext, int profileAnalysisResult, boolean downgrade,
             int dexoptFlags, String oatDir) throws LegacyDexoptDisabledException {
         // Allow calls from OtaDexoptService even when ART Service is in use. The installer is
         // isolated in that case so later calls to it won't call into installd anyway.
         if (!mInstaller.isIsolated()) {
-            Installer.checkLegacyDexoptDisabled();
+            throw new LegacyDexoptDisabledException();
         }
 
         final boolean shouldBePublic = (dexoptFlags & DEXOPT_PUBLIC) != 0;
@@ -953,16 +772,9 @@ public class PackageDexOptimizer {
     }
 
     /** Returns true if the current artifacts of the app are private to the app itself. */
-    @GuardedBy("mInstallLock")
     private boolean isOdexPrivate(String packageName, String path, String isa, String oatDir)
             throws LegacyDexoptDisabledException {
-        try {
-            return mInstaller.getOdexVisibility(packageName, path, isa, oatDir)
-                    == Installer.ODEX_IS_PRIVATE;
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Failed to get odex visibility for " + path, e);
-            return false;
-        }
+        throw new LegacyDexoptDisabledException();
     }
 
     /**
@@ -976,22 +788,7 @@ public class PackageDexOptimizer {
      */
     private int analyseProfiles(AndroidPackage pkg, int uid, String profileName,
             String compilerFilter) throws LegacyDexoptDisabledException {
-        Installer.checkLegacyDexoptDisabled();
-
-        // Check if we are allowed to merge and if the compiler filter is profile guided.
-        if (!isProfileGuidedCompilerFilter(compilerFilter)) {
-            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
-        }
-        // Merge profiles. It returns whether or not there was an updated in the profile info.
-        try {
-            synchronized (mInstallLock) {
-                return getInstallerLI().mergeProfiles(uid, pkg.getPackageName(), profileName);
-            }
-        } catch (InstallerException e) {
-            Slog.w(TAG, "Failed to merge profiles", e);
-            // We don't need to optimize if we failed to merge.
-            return PROFILE_ANALYSIS_DONT_OPTIMIZE_SMALL_DELTA;
-        }
+        throw new LegacyDexoptDisabledException();
     }
 
     /**
@@ -1071,8 +868,8 @@ public class PackageDexOptimizer {
      */
     public static class ForcedUpdatePackageDexOptimizer extends PackageDexOptimizer {
 
-        public ForcedUpdatePackageDexOptimizer(Installer installer, Object installLock,
-                Context context, String wakeLockTag) {
+        public ForcedUpdatePackageDexOptimizer(Installer installer,
+                PackageManagerTracedLock installLock, Context context, String wakeLockTag) {
             super(installer, installLock, context, wakeLockTag);
         }
 
@@ -1101,18 +898,10 @@ public class PackageDexOptimizer {
 
     /**
      * Returns {@link #mInstaller} with {@link #mInstallLock}. This should be used for all
-     * {@link #mInstaller} access unless {@link #getInstallerWithoutLock()} is allowed.
+     * {@link #mInstaller} access.
      */
     @GuardedBy("mInstallLock")
     private Installer getInstallerLI() {
-        return mInstaller;
-    }
-
-    /**
-     * Returns {@link #mInstaller} without lock. This should be used only inside
-     * {@link #controlDexOptBlocking(boolean)}.
-     */
-    private Installer getInstallerWithoutLock() {
         return mInstaller;
     }
 

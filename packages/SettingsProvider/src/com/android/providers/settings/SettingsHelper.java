@@ -88,7 +88,7 @@ public class SettingsHelper {
     private static final ArraySet<String> sBroadcastOnRestore;
     private static final ArraySet<String> sBroadcastOnRestoreSystemUI;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(9);
+        sBroadcastOnRestore = new ArraySet<String>(12);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
@@ -98,6 +98,9 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
+        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+        sBroadcastOnRestore.add(Settings.Secure.SCREEN_RESOLUTION_MODE);
         sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);
@@ -184,9 +187,14 @@ public class SettingsHelper {
         sendBroadcast = sBroadcastOnRestore.contains(name);
         sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
 
-        if (sendBroadcast || sendBroadcastSystemUI) {
+        if (sendBroadcast) {
             // TODO: http://b/22388012
             oldValue = table.lookup(cr, name, UserHandle.USER_SYSTEM);
+        } else if (sendBroadcastSystemUI) {
+            // This is only done for broadcasts sent to system ui as the consumers are known.
+            // It would probably be correct to do it for the ones sent to the system, but consumers
+            // may be depending on the current behavior.
+            oldValue = table.lookup(cr, name, context.getUserId());
         }
 
         try {
@@ -229,6 +237,15 @@ public class SettingsHelper {
             } else if (Settings.System.ACCELEROMETER_ROTATION.equals(name)
                     && shouldSkipAutoRotateRestore()) {
                 return;
+            } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(name)) {
+                // Don't write it to setting. Let the broadcast receiver in
+                // AccessibilityManagerService handle restore/merging logic.
+                return;
+            } else if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()
+                    && Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(name)) {
+                // Don't write it to setting. Let the broadcast receiver in
+                // AccessibilityManagerService handle restore/merging logic.
+                return;
             }
 
             // Default case: write the restored value to settings
@@ -260,7 +277,7 @@ public class SettingsHelper {
                 if (sendBroadcastSystemUI) {
                     intent.setPackage(
                             context.getString(com.android.internal.R.string.config_systemUi));
-                    context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
+                    context.sendBroadcastAsUser(intent, context.getUser(), null);
                 }
             }
         }
@@ -386,6 +403,7 @@ public class SettingsHelper {
         // it means that the user has performed a global gesture to enable accessibility or set
         // these settings in the Accessibility portion of the Setup Wizard, and definitely needs
         // these features working after the restore.
+        // Note: Settings.Secure.FONT_SCALE is already handled in the caller class.
         switch (name) {
             case Settings.Secure.ACCESSIBILITY_ENABLED:
             case Settings.Secure.TOUCH_EXPLORATION_ENABLED:
@@ -405,8 +423,6 @@ public class SettingsHelper {
                 float currentScale = Settings.Secure.getFloat(
                         mContext.getContentResolver(), name, defaultScale);
                 return Math.abs(currentScale - defaultScale) >= FLOAT_TOLERANCE;
-            case Settings.System.FONT_SCALE:
-                return Settings.System.getFloat(mContext.getContentResolver(), name, 1.0f) != 1.0f;
             default:
                 return false;
         }

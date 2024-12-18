@@ -34,14 +34,15 @@ import android.os.ShellCallback;
 import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileDescriptor;
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -122,6 +123,16 @@ public class BinderDeathDispatcherTest {
         @Override
         public IBinder asBinder() {
             return this;
+        }
+
+        @Override
+        public void addFrozenStateChangeCallback(Executor e, FrozenStateChangeCallback callback)
+                throws RemoteException {
+        }
+
+        @Override
+        public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
+            return false;
         }
 
         public void die() {

@@ -25,6 +25,7 @@ import static android.view.InsetsFrameProvider.SOURCE_DISPLAY;
 import static android.view.InsetsFrameProvider.SOURCE_FRAME;
 import static android.view.ViewRootImpl.CLIENT_IMMERSIVE_CONFIRMATION;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -40,7 +41,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACK
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -116,6 +116,7 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowLayout;
@@ -127,10 +128,11 @@ import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.policy.ForceShowNavBarSettingsObserver;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
@@ -144,6 +146,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
+import com.android.wm.shell.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -585,7 +588,7 @@ public class DisplayPolicy {
                     gesturesPointerEventCallbacks);
             displayContent.registerPointerEventListener(mSystemGestures);
         }
-        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener() {
+        mAppTransitionListener = new WindowManagerInternal.AppTransitionListener(displayId) {
 
             private Runnable mAppTransitionPending = () -> {
                 StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -671,6 +674,7 @@ public class DisplayPolicy {
                 mService.mHighRefreshRateDenylist);
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(mHandler,
+                BackgroundThread.getHandler(),
                 mContext, () -> {
             synchronized (mLock) {
                 onConfigurationChanged();
@@ -777,6 +781,10 @@ public class DisplayPolicy {
         return mLidState;
     }
 
+    private void onDisplaySwitchFinished() {
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(false);
+    }
+
     public void setAwake(boolean awake) {
         synchronized (mLock) {
             if (awake == mAwake) {
@@ -795,7 +803,15 @@ public class DisplayPolicy {
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
             if (!awake) {
-                mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+                onDisplaySwitchFinished();
+                // In case PhoneWindowManager's startedGoingToSleep is called after screenTurnedOff
+                // (the source caller is in order but the methods run on different threads) and
+                // updateScreenOffSleepToken was skipped by mIsGoingToSleepDefaultDisplay. Then
+                // acquire sleep token if screen is off.
+                if (!mScreenOnEarly && !mScreenOnFully && !mDisplayContent.isSleeping()) {
+                    Slog.w(TAG, "Late acquire sleep token for " + mDisplayContent);
+                    mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+                }
             }
         }
     }
@@ -843,6 +859,7 @@ public class DisplayPolicy {
     public void screenTurningOn(ScreenOnListener screenOnListener) {
         WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
+            mService.mRoot.mDisplayOffTokenAcquirer.release(mDisplayContent.mDisplayId);
             mScreenOnEarly = true;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
@@ -864,11 +881,15 @@ public class DisplayPolicy {
 
     /** It is called after {@link #finishScreenTurningOn}. This runs on PowerManager's thread. */
     public void screenTurnedOn() {
-        mDisplayContent.mWallpaperController.onDisplaySwitchFinished();
+        onDisplaySwitchFinished();
     }
 
-    public void screenTurnedOff() {
+    /** It is called after {@link #screenTurningOn}. This runs on PowerManager's thread. */
+    public void screenTurnedOff(boolean acquireSleepToken) {
         synchronized (mLock) {
+            if (acquireSleepToken) {
+                mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+            }
             mScreenOnEarly = false;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
@@ -968,21 +989,22 @@ public class DisplayPolicy {
                 break;
 
             case TYPE_BASE_APPLICATION:
-
-                // A non-translucent main app window isn't allowed to fit insets or display cutouts,
-                // as it would create a hole on the display!
                 if (attrs.isFullscreen() && win.mActivityRecord != null
                         && win.mActivityRecord.fillsParent()
-                        && (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
-                        && (attrs.getFitInsetsTypes() != 0
-                                || (attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
-                                        && attrs.layoutInDisplayCutoutMode
-                                                != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS)) {
-                    throw new IllegalArgumentException("Illegal attributes: Main activity window"
-                            + " that isn't translucent trying to fit insets or display cutouts."
-                            + " attrs=" + attrs);
+                        && (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0) {
+                    if (attrs.getFitInsetsTypes() != 0) {
+                        // A non-translucent main app window isn't allowed to fit insets,
+                        // as it would create a hole on the display!
+                        throw new IllegalArgumentException("Illegal attributes: Main window of "
+                                + win.mActivityRecord.getName() + " that isn't translucent trying"
+                                + " to fit insets. fitInsetsTypes=" + WindowInsets.Type.toString(
+                                        attrs.getFitInsetsTypes()));
+                    }
                 }
                 break;
+        }
+        if ((attrs.insetsFlags.appearance & APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS) != 0) {
+            attrs.insetsFlags.appearance |= APPEARANCE_LIGHT_NAVIGATION_BARS;
         }
 
         if (LayoutParams.isSystemAlertWindowType(attrs.type)) {
@@ -1027,7 +1049,7 @@ public class DisplayPolicy {
     /**
      * Check if a window can be added to the system.
      *
-     * Currently enforces that two window types are singletons per display:
+     * Currently enforces that these window types are singletons per display:
      * <ul>
      * <li>{@link WindowManager.LayoutParams#TYPE_STATUS_BAR}</li>
      * <li>{@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}</li>
@@ -1049,41 +1071,39 @@ public class DisplayPolicy {
             ActivityTaskManagerService.enforceTaskPermission("DisplayPolicy");
         }
 
+        final String systemUiPermission =
+                mService.isCallerVirtualDeviceOwner(mDisplayContent.getDisplayId(), callingUid)
+                        // Allow virtual device owners to add system windows on their displays.
+                        ? android.Manifest.permission.CREATE_VIRTUAL_DEVICE
+                        : android.Manifest.permission.STATUS_BAR_SERVICE;
+
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mStatusBar != null && mStatusBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NOTIFICATION_SHADE:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
-                if (mNotificationShade != null) {
-                    if (mNotificationShade.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
+                if (mNotificationShade != null && mNotificationShade.isAlive()) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
+                        "DisplayPolicy");
                 if (mNavigationBar != null && mNavigationBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
-                break;
             case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:
@@ -1093,8 +1113,7 @@ public class DisplayPolicy {
         if (attrs.providedInsets != null) {
             // Recents component is allowed to add inset types.
             if (!mService.mAtmService.isCallerRecents(callingUid)) {
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
             }
         }
@@ -1587,7 +1606,7 @@ public class DisplayPolicy {
             final ActivityRecord currentActivity = win.getActivityRecord();
             if (currentActivity != null) {
                 final LetterboxDetails currentLetterboxDetails = currentActivity
-                        .mLetterboxUiController.getLetterboxDetails();
+                        .mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxDetails();
                 if (currentLetterboxDetails != null) {
                     mLetterboxDetails.add(currentLetterboxDetails);
                 }
@@ -1798,7 +1817,8 @@ public class DisplayPolicy {
         updateConfigurationAndScreenSizeDependentBehaviors();
 
         final boolean shouldAttach =
-                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition);
+                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition)
+                        && !Flags.enableTinyTaskbar();
         if (mShouldAttachNavBarToAppDuringTransition != shouldAttach) {
             mShouldAttachNavBarToAppDuringTransition = shouldAttach;
         }
@@ -1913,6 +1933,16 @@ public class DisplayPolicy {
              */
             final Rect mConfigInsets = new Rect();
 
+            /**
+             * Override value of mConfigInsets for app compatibility purpose.
+             */
+            final Rect mOverrideConfigInsets = new Rect();
+
+            /**
+             * Override value of mNonDecorInsets for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorInsets = new Rect();
+
             /** The display frame available after excluding {@link #mNonDecorInsets}. */
             final Rect mNonDecorFrame = new Rect();
 
@@ -1922,6 +1952,16 @@ public class DisplayPolicy {
              * to account for more transient decoration like a status bar.
              */
             final Rect mConfigFrame = new Rect();
+
+            /**
+             * Override value of mConfigFrame for app compatibility purpose.
+             */
+            final Rect mOverrideConfigFrame = new Rect();
+
+            /**
+             * Override value of mNonDecorFrame for app compatibility purpose.
+             */
+            final Rect mOverrideNonDecorFrame = new Rect();
 
             private boolean mNeedUpdate = true;
 
@@ -1933,15 +1973,35 @@ public class DisplayPolicy {
                 final Rect displayFrame = insetsState.getDisplayFrame();
                 final Insets decor = insetsState.calculateInsets(displayFrame,
                         dc.mWmService.mDecorTypes, true /* ignoreVisibility */);
-                final Insets configInsets = insetsState.calculateInsets(displayFrame,
-                        dc.mWmService.mConfigTypes, true /* ignoreVisibility */);
+                final Insets configInsets = dc.mWmService.mConfigTypes == dc.mWmService.mDecorTypes
+                        ? decor
+                        : insetsState.calculateInsets(displayFrame, dc.mWmService.mConfigTypes,
+                                true /* ignoreVisibility */);
+                final Insets overrideConfigInsets = dc.mWmService.mConfigTypes
+                        == dc.mWmService.mOverrideConfigTypes
+                        ? configInsets
+                        : insetsState.calculateInsets(displayFrame,
+                                dc.mWmService.mOverrideConfigTypes, true /* ignoreVisibility */);
+                final Insets overrideDecorInsets = dc.mWmService.mDecorTypes
+                        == dc.mWmService.mOverrideDecorTypes
+                        ? decor
+                        : insetsState.calculateInsets(displayFrame,
+                                dc.mWmService.mOverrideDecorTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
                 mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
                         configInsets.bottom);
+                mOverrideConfigInsets.set(overrideConfigInsets.left, overrideConfigInsets.top,
+                        overrideConfigInsets.right, overrideConfigInsets.bottom);
+                mOverrideNonDecorInsets.set(overrideDecorInsets.left, overrideDecorInsets.top,
+                        overrideDecorInsets.right, overrideDecorInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
                 mConfigFrame.inset(mConfigInsets);
+                mOverrideConfigFrame.set(displayFrame);
+                mOverrideConfigFrame.inset(mOverrideConfigInsets);
+                mOverrideNonDecorFrame.set(displayFrame);
+                mOverrideNonDecorFrame.inset(mOverrideNonDecorInsets);
                 mNeedUpdate = false;
                 return insetsState;
             }
@@ -1949,8 +2009,12 @@ public class DisplayPolicy {
             void set(Info other) {
                 mNonDecorInsets.set(other.mNonDecorInsets);
                 mConfigInsets.set(other.mConfigInsets);
+                mOverrideConfigInsets.set(other.mOverrideConfigInsets);
+                mOverrideNonDecorInsets.set(other.mOverrideNonDecorInsets);
                 mNonDecorFrame.set(other.mNonDecorFrame);
                 mConfigFrame.set(other.mConfigFrame);
+                mOverrideConfigFrame.set(other.mOverrideConfigFrame);
+                mOverrideNonDecorFrame.set(other.mOverrideNonDecorFrame);
                 mNeedUpdate = false;
             }
 
@@ -1958,9 +2022,14 @@ public class DisplayPolicy {
             public String toString() {
                 final StringBuilder tmpSb = new StringBuilder(32);
                 return "{nonDecorInsets=" + mNonDecorInsets.toShortString(tmpSb)
+                        + ", overrideNonDecorInsets=" + mOverrideNonDecorInsets.toShortString(tmpSb)
                         + ", configInsets=" + mConfigInsets.toShortString(tmpSb)
+                        + ", overrideConfigInsets=" + mOverrideConfigInsets.toShortString(tmpSb)
                         + ", nonDecorFrame=" + mNonDecorFrame.toShortString(tmpSb)
-                        + ", configFrame=" + mConfigFrame.toShortString(tmpSb) + '}';
+                        + ", overrideNonDecorFrame=" + mOverrideNonDecorFrame.toShortString(tmpSb)
+                        + ", configFrame=" + mConfigFrame.toShortString(tmpSb)
+                        + ", overrideConfigFrame=" + mOverrideConfigFrame.toShortString(tmpSb)
+                        + '}';
             }
         }
 
@@ -2062,7 +2131,8 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         final InsetsState newInsetsState = newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
+        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)
+                && newInfo.mOverrideConfigFrame.equals(currentInfo.mOverrideConfigFrame)) {
             // Even if the config frame is not changed in current rotation, it may change the
             // insets in other rotations if the frame of insets source is changed.
             final InsetsState currentInsetsState = mDisplayContent.mDisplayFrames.mInsetsState;
@@ -2145,6 +2215,11 @@ public class DisplayPolicy {
         }
         mCachedDecorInsets.mPreserveId =
                 mDisplayContent.mTransitionController.getCollectingTransitionId();
+    }
+
+    /** If this is called, expect that there will be an onDisplayChanged about unique id. */
+    public void onDisplaySwitchStart() {
+        mDisplayContent.mDisplayUpdater.onDisplaySwitching(true);
     }
 
     @NavigationBarPosition
@@ -2442,7 +2517,7 @@ public class DisplayPolicy {
         if (getStatusBar() != null) {
             final StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
-                statusBar.setTopAppHidesStatusBar(topAppHidesStatusBar);
+                statusBar.setTopAppHidesStatusBar(getDisplayId(), topAppHidesStatusBar);
             }
         }
 
@@ -2469,9 +2544,9 @@ public class DisplayPolicy {
                         mService.mPolicy.isUserSetupComplete(),
                         isNavBarEmpty(disableFlags));
             } else {
-                // TODO (b/277290737): Move this to the client side, instead of using a proxy.
-                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(rootDisplayAreaId,
-                        isImmersiveMode));
+                // TODO(b/277290737): Move this to the client side, instead of using a proxy.
+                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(getDisplayId(),
+                        rootDisplayAreaId, isImmersiveMode));
             }
         }
 

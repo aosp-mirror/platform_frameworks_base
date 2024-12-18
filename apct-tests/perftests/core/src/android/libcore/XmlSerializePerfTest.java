@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -36,8 +36,7 @@ import java.util.Random;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class XmlSerializePerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private Object[] getParams() {
         return new Object[][] {
@@ -109,7 +108,7 @@ public class XmlSerializePerfTest {
 
     private void internalTimeSerializer(Constructor<? extends XmlSerializer> ctor, int seed)
             throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             serializeRandomXml(ctor, seed);
         }

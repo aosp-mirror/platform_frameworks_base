@@ -72,6 +72,7 @@ constructor(
                                     // [QuickSettingsInteractor]-type class. However, that's out of
                                     // scope for the CentralSurfaces removal project.
                                     remoteInputQuickSettingsDisabler.adjustDisableFlags(state2),
+                                    animate,
                                 )
                             )
                         }
@@ -82,5 +83,5 @@ constructor(
             .distinctUntilChanged()
             .onEach { it.logChange(logBuffer, disableFlagsLogger) }
             // Use Eagerly because we always need to know about disable flags
-            .stateIn(scope, SharingStarted.Eagerly, DisableFlagsModel())
+            .stateIn(scope, SharingStarted.Eagerly, DisableFlagsModel(animate = false))
 }

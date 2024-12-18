@@ -27,11 +27,13 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.flags.Flags;
+import android.icu.text.NumberFormat;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TetheringManager;
-import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.VcnUtils;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -41,7 +43,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
@@ -65,10 +66,8 @@ import com.android.launcher3.icons.IconFactory;
 import com.android.launcher3.util.UserIconInfo;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.settingslib.utils.BuildCompatUtils;
+import com.android.settingslib.fuelgauge.BatteryUtils;
 
-import java.text.NumberFormat;
-import java.time.Duration;
 import java.util.List;
 
 public class Utils {
@@ -77,20 +76,9 @@ public class Utils {
 
     public static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
             "incompatible_charger_warning_disabled";
-    public static final String WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP =
-            "wireless_charging_notification_timestamp";
 
     @VisibleForTesting
     static final String STORAGE_MANAGER_ENABLED_PROPERTY = "ro.storage_manager.enabled";
-
-    @VisibleForTesting static final long WIRELESS_CHARGING_DEFAULT_TIMESTAMP = -1L;
-
-    @VisibleForTesting
-    static final long WIRELESS_CHARGING_NOTIFICATION_THRESHOLD_MILLIS =
-            Duration.ofDays(30).toMillis();
-
-    @VisibleForTesting
-    static final String WIRELESS_CHARGING_WARNING_ENABLED = "wireless_charging_warning_enabled";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
@@ -159,7 +147,7 @@ public class Utils {
         String name = info != null ? info.name : null;
         if (info.isManagedProfile()) {
             // We use predefined values for managed profiles
-            return BuildCompatUtils.isAtLeastT()
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                     ? getUpdatableManagedUserTitle(context)
                     : context.getString(R.string.managed_user_title);
         } else if (info.isGuest()) {
@@ -259,25 +247,23 @@ public class Utils {
         } else {
             if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                 if (compactStatus) {
-                    statusString = res.getString(R.string.battery_info_status_charging);
+                    statusString = getRegularChargingStatusString(res);
                 } else if (batteryStatus.isPluggedInWired()) {
                     switch (batteryStatus.getChargingSpeed(context)) {
                         case BatteryStatus.CHARGING_FAST:
-                            statusString =
-                                    res.getString(R.string.battery_info_status_charging_fast);
+                            statusString = getFastChargingStatusString(res);
                             break;
                         case BatteryStatus.CHARGING_SLOWLY:
-                            statusString =
-                                    res.getString(R.string.battery_info_status_charging_slow);
+                            statusString = getSlowChargingStatusString(res);
                             break;
                         default:
-                            statusString = res.getString(R.string.battery_info_status_charging);
+                            statusString = getRegularChargingStatusString(res);
                             break;
                     }
                 } else if (batteryStatus.isPluggedInDock()) {
-                    statusString = res.getString(R.string.battery_info_status_charging_dock);
+                    statusString = getDockChargingStatusString(res);
                 } else {
-                    statusString = res.getString(R.string.battery_info_status_charging_wireless);
+                    statusString = getWirelessChargingStatusString(res);
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) {
                 statusString = res.getString(R.string.battery_info_status_discharging);
@@ -287,6 +273,41 @@ public class Utils {
         }
 
         return statusString;
+    }
+
+    private static String getFastChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_fast_v2
+                        : R.string.battery_info_status_charging_fast);
+    }
+
+    private static String getSlowChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_slow);
+    }
+
+    private static String getRegularChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging);
+    }
+
+    private static String getWirelessChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_wireless);
+    }
+
+    private static String getDockChargingStatusString(Resources res) {
+        return res.getString(
+                BatteryUtils.isChargingStringV2Enabled()
+                        ? R.string.battery_info_status_charging_v2
+                        : R.string.battery_info_status_charging_dock);
     }
 
     public static ColorStateList getColorAccent(Context context) {
@@ -475,7 +496,7 @@ public class Utils {
                 || packageName.equals(sServicesSystemSharedLibPackageName)
                 || packageName.equals(sSharedSystemSharedLibPackageName)
                 || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName()))
+                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName(pm)))
                 || isDeviceProvisioningPackage(resources, packageName);
     }
 
@@ -491,7 +512,7 @@ public class Utils {
 
     /** Fetch the package name of the default WebView provider. */
     @Nullable
-    private static String getDefaultWebViewPackageName() {
+    private static String getDefaultWebViewPackageName(PackageManager pm) {
         if (sDefaultWebViewPackageName != null) {
             return sDefaultWebViewPackageName;
         }
@@ -499,9 +520,8 @@ public class Utils {
         WebViewProviderInfo provider = null;
 
         if (android.webkit.Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager != null) {
-                provider = manager.getDefaultWebViewPackage();
+            if (pm.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
+                provider = WebViewUpdateManager.getInstance().getDefaultWebViewPackage();
             }
         } else {
             try {
@@ -718,14 +738,9 @@ public class Utils {
      * @param networkCapabilities NetworkCapabilities of the network.
      */
     @Nullable
-    public static WifiInfo tryGetWifiInfoForVcn(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.getTransportInfo() == null
-                || !(networkCapabilities.getTransportInfo() instanceof VcnTransportInfo)) {
-            return null;
-        }
-        VcnTransportInfo vcnTransportInfo =
-                (VcnTransportInfo) networkCapabilities.getTransportInfo();
-        return vcnTransportInfo.getWifiInfo();
+    public static WifiInfo tryGetWifiInfoForVcn(
+            ConnectivityManager connectivityMgr, NetworkCapabilities networkCapabilities) {
+        return VcnUtils.getWifiInfoFromVcnCaps(connectivityMgr, networkCapabilities);
     }
 
     /** Whether there is any incompatible chargers in the current UsbPort? */
@@ -744,7 +759,11 @@ public class Utils {
             return false;
         }
 
-        final List<UsbPort> usbPortList = context.getSystemService(UsbManager.class).getPorts();
+        final UsbManager usbManager = context.getSystemService(UsbManager.class);
+        if (usbManager == null) {
+            return false;
+        }
+        final List<UsbPort> usbPortList = usbManager.getPorts();
         if (usbPortList == null || usbPortList.isEmpty()) {
             return false;
         }
@@ -783,87 +802,5 @@ public class Utils {
             }
         }
         return false;
-    }
-
-    /** Whether to show the wireless charging notification. */
-    public static boolean shouldShowWirelessChargingNotification(
-            @NonNull Context context, @NonNull String tag) {
-        try {
-            return shouldShowWirelessChargingNotificationInternal(context, tag);
-        } catch (Exception e) {
-            Log.e(tag, "shouldShowWirelessChargingNotification()", e);
-            return false;
-        }
-    }
-
-    /** Stores the timestamp of the wireless charging notification. */
-    public static void updateWirelessChargingNotificationTimestamp(
-            @NonNull Context context, long timestamp, @NonNull String tag) {
-        try {
-            Secure.putLong(
-                    context.getContentResolver(),
-                    WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP,
-                    timestamp);
-        } catch (Exception e) {
-            Log.e(tag, "setWirelessChargingNotificationTimestamp()", e);
-        }
-    }
-
-    /** Whether to show the wireless charging warning in Settings. */
-    public static boolean shouldShowWirelessChargingWarningTip(
-            @NonNull Context context, @NonNull String tag) {
-        try {
-            return Secure.getInt(context.getContentResolver(), WIRELESS_CHARGING_WARNING_ENABLED, 0)
-                    == 1;
-        } catch (Exception e) {
-            Log.e(tag, "shouldShowWirelessChargingWarningTip()", e);
-        }
-        return false;
-    }
-
-    /** Stores the state of whether the wireless charging warning in Settings is enabled. */
-    public static void updateWirelessChargingWarningEnabled(
-            @NonNull Context context, boolean enabled, @NonNull String tag) {
-        try {
-            Secure.putInt(
-                    context.getContentResolver(),
-                    WIRELESS_CHARGING_WARNING_ENABLED,
-                    enabled ? 1 : 0);
-        } catch (Exception e) {
-            Log.e(tag, "setWirelessChargingWarningEnabled()", e);
-        }
-    }
-
-    private static boolean shouldShowWirelessChargingNotificationInternal(
-            @NonNull Context context, @NonNull String tag) {
-        final long lastNotificationTimeMillis =
-                Secure.getLong(
-                        context.getContentResolver(),
-                        WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP,
-                        WIRELESS_CHARGING_DEFAULT_TIMESTAMP);
-        if (isWirelessChargingNotificationDisabled(lastNotificationTimeMillis)) {
-            return false;
-        }
-        if (isInitialWirelessChargingNotification(lastNotificationTimeMillis)) {
-            updateWirelessChargingNotificationTimestamp(context, System.currentTimeMillis(), tag);
-            updateWirelessChargingWarningEnabled(context, /* enabled= */ true, tag);
-            return true;
-        }
-        final long durationMillis = System.currentTimeMillis() - lastNotificationTimeMillis;
-        final boolean show = durationMillis > WIRELESS_CHARGING_NOTIFICATION_THRESHOLD_MILLIS;
-        Log.d(tag, "shouldShowWirelessChargingNotification = " + show);
-        if (show) {
-            updateWirelessChargingNotificationTimestamp(context, System.currentTimeMillis(), tag);
-            updateWirelessChargingWarningEnabled(context, /* enabled= */ true, tag);
-        }
-        return show;
-    }
-
-    private static boolean isWirelessChargingNotificationDisabled(long lastNotificationTimeMillis) {
-        return lastNotificationTimeMillis == Long.MIN_VALUE;
-    }
-
-    private static boolean isInitialWirelessChargingNotification(long lastNotificationTimeMillis) {
-        return lastNotificationTimeMillis == WIRELESS_CHARGING_DEFAULT_TIMESTAMP;
     }
 }

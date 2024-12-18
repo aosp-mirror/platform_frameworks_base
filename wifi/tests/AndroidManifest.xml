@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="android.net.wifi.nonupdatable.test">
 
-    <application>
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner"/>
         <activity android:label="WifiTestDummyLabel"
              android:name="WifiTestDummyName"

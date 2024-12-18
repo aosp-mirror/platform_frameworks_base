@@ -212,24 +212,46 @@ final class DisplayDeviceInfo {
     public static final int TOUCH_VIRTUAL = 3;
 
     /**
-     * Diff result: The {@link #state} or {@link #committedState} fields differ.
-     */
-    public static final int DIFF_STATE = 1 << 0;
-
-    /**
      * Diff result: Other fields differ.
      */
-    public static final int DIFF_OTHER = 1 << 1;
+    public static final int DIFF_OTHER = 1 << 0;
+
+    /**
+     * Diff result: The {@link #state} or {@link #committedState} fields differ.
+     */
+    public static final int DIFF_STATE = 1 << 1;
+
+    /**
+     * Diff result: The committed state differs. Note this is slightly different from the state,
+     * which is what most of the device should care about.
+     */
+    public static final int DIFF_COMMITTED_STATE = 1 << 2;
 
     /**
      * Diff result: The color mode fields differ.
      */
-    public static final int DIFF_COLOR_MODE = 1 << 2;
+    public static final int DIFF_COLOR_MODE = 1 << 3;
 
     /**
      * Diff result: The hdr/sdr ratio differs
      */
-    public static final int DIFF_HDR_SDR_RATIO = 1 << 3;
+    public static final int DIFF_HDR_SDR_RATIO = 1 << 4;
+
+    /**
+     * Diff result: The rotation differs
+     */
+    public static final int DIFF_ROTATION = 1 << 5;
+
+    /**
+     * Diff result: The render timings. Note this could be any of {@link #renderFrameRate},
+     * {@link #presentationDeadlineNanos}, or {@link #appVsyncOffsetNanos}.
+     */
+    public static final int DIFF_RENDER_TIMINGS = 1 << 6;
+
+    /**
+     * Diff result: The mode ID differs.
+     */
+    public static final int DIFF_MODE_ID = 1 << 7;
 
     /**
      * Diff result: Catch-all for "everything changed"
@@ -296,13 +318,16 @@ final class DisplayDeviceInfo {
      */
     public Display.HdrCapabilities hdrCapabilities;
 
+    /** When true, all HDR capabilities are hidden from public APIs */
+    public boolean isForceSdr;
+
     /**
      * Indicates whether this display supports Auto Low Latency Mode.
      */
     public boolean allmSupported;
 
     /**
-     * Indicates whether this display suppors Game content type.
+     * Indicates whether this display supports Game content type.
      */
     public boolean gameContentTypeSupported;
 
@@ -462,8 +487,11 @@ final class DisplayDeviceInfo {
      */
     public int diff(DisplayDeviceInfo other) {
         int diff = 0;
-        if (state != other.state || committedState != other.committedState) {
+        if (state != other.state) {
             diff |= DIFF_STATE;
+        }
+        if (committedState != other.committedState) {
+            diff |= DIFF_COMMITTED_STATE;
         }
         if (colorMode != other.colorMode) {
             diff |= DIFF_COLOR_MODE;
@@ -471,28 +499,35 @@ final class DisplayDeviceInfo {
         if (!BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)) {
             diff |= DIFF_HDR_SDR_RATIO;
         }
+        if (rotation != other.rotation) {
+            diff |= DIFF_ROTATION;
+        }
+        if (renderFrameRate != other.renderFrameRate
+                || presentationDeadlineNanos != other.presentationDeadlineNanos
+                || appVsyncOffsetNanos != other.appVsyncOffsetNanos) {
+            diff |= DIFF_RENDER_TIMINGS;
+        }
+        if (modeId != other.modeId) {
+            diff |= DIFF_MODE_ID;
+        }
         if (!Objects.equals(name, other.name)
                 || !Objects.equals(uniqueId, other.uniqueId)
                 || width != other.width
                 || height != other.height
-                || modeId != other.modeId
-                || renderFrameRate != other.renderFrameRate
                 || defaultModeId != other.defaultModeId
                 || userPreferredModeId != other.userPreferredModeId
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                || isForceSdr != other.isForceSdr
                 || allmSupported != other.allmSupported
                 || gameContentTypeSupported != other.gameContentTypeSupported
                 || densityDpi != other.densityDpi
                 || xDpi != other.xDpi
                 || yDpi != other.yDpi
-                || appVsyncOffsetNanos != other.appVsyncOffsetNanos
-                || presentationDeadlineNanos != other.presentationDeadlineNanos
                 || flags != other.flags
                 || !Objects.equals(displayCutout, other.displayCutout)
                 || touch != other.touch
-                || rotation != other.rotation
                 || type != other.type
                 || !Objects.equals(address, other.address)
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
@@ -529,6 +564,7 @@ final class DisplayDeviceInfo {
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
         hdrCapabilities = other.hdrCapabilities;
+        isForceSdr = other.isForceSdr;
         allmSupported = other.allmSupported;
         gameContentTypeSupported = other.gameContentTypeSupported;
         densityDpi = other.densityDpi;
@@ -572,6 +608,7 @@ final class DisplayDeviceInfo {
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));
         sb.append(", hdrCapabilities ").append(hdrCapabilities);
+        sb.append(", isForceSdr ").append(isForceSdr);
         sb.append(", allmSupported ").append(allmSupported);
         sb.append(", gameContentTypeSupported ").append(gameContentTypeSupported);
         sb.append(", density ").append(densityDpi);

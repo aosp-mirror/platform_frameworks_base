@@ -18,6 +18,9 @@ package android.graphics;
 
 import android.os.SystemClock;
 
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public class Interpolator {
 
     public Interpolator(int valueCount) {

@@ -23,6 +23,7 @@ import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import org.junit.FixMethodOrder
@@ -42,7 +43,7 @@ import org.junit.runners.Parameterized
  *
  * More details on b/190352379
  *
- * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToAppTest`
+ * To run this test: `atest FlickerTestsIme1:CloseImeShownOnAppStartToAppOnPressBackTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -77,6 +78,7 @@ class CloseImeShownOnAppStartToAppOnPressBackTest(flicker: LegacyFlickerTest) : 
 
     @Presubmit @Test fun imeLayerBecomesInvisible() = flicker.imeLayerBecomesInvisible()
 
+    @FlakyTest(bugId = 330486656)
     @Presubmit
     @Test
     fun imeAppLayerIsAlwaysVisible() {

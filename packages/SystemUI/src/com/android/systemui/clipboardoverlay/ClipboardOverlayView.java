@@ -25,6 +25,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.res.Resources;
@@ -36,6 +37,7 @@ import android.graphics.Region;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
@@ -57,7 +59,12 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.DraggableConstraintLayout;
 import com.android.systemui.screenshot.FloatingWindowUtil;
-import com.android.systemui.screenshot.OverlayActionChip;
+import com.android.systemui.screenshot.ui.binder.ActionButtonViewBinder;
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonAppearance;
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
 import java.util.ArrayList;
 
@@ -85,7 +92,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
 
     private final DisplayMetrics mDisplayMetrics;
     private final AccessibilityManager mAccessibilityManager;
-    private final ArrayList<OverlayActionChip> mActionChips = new ArrayList<>();
+    private final ArrayList<View> mActionChips = new ArrayList<>();
 
     private View mClipboardPreview;
     private ImageView mImagePreview;
@@ -93,11 +100,13 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     private TextView mHiddenPreview;
     private LinearLayout mMinimizedPreview;
     private View mPreviewBorder;
-    private OverlayActionChip mShareChip;
-    private OverlayActionChip mRemoteCopyChip;
+    private View mShareChip;
+    private View mRemoteCopyChip;
     private View mActionContainerBackground;
     private View mDismissButton;
     private LinearLayout mActionContainer;
+    private ClipboardOverlayCallbacks mClipboardCallbacks;
+    private ActionButtonViewBinder mActionButtonViewBinder = new ActionButtonViewBinder();
 
     public ClipboardOverlayView(Context context) {
         this(context, null);
@@ -128,17 +137,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         mRemoteCopyChip = requireViewById(R.id.remote_copy_chip);
         mDismissButton = requireViewById(R.id.dismiss_button);
 
-        mShareChip.setAlpha(1);
-        mRemoteCopyChip.setAlpha(1);
-        mShareChip.setContentDescription(mContext.getString(com.android.internal.R.string.share));
-
-        mRemoteCopyChip.setIcon(
-                Icon.createWithResource(mContext, R.drawable.ic_baseline_devices_24), true);
-        mShareChip.setIcon(
-                Icon.createWithResource(mContext, R.drawable.ic_screenshot_share), true);
-
-        mRemoteCopyChip.setContentDescription(
-                mContext.getString(R.string.clipboard_send_nearby_description));
+        bindDefaultActionChips();
 
         mTextPreview.getViewTreeObserver().addOnPreDrawListener(() -> {
             int availableHeight = mTextPreview.getHeight()
@@ -149,15 +148,52 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         super.onFinishInflate();
     }
 
+    private void bindDefaultActionChips() {
+        mActionButtonViewBinder.bind(mRemoteCopyChip,
+                ActionButtonViewModel.Companion.withNextId(
+                        new ActionButtonAppearance(
+                                Icon.createWithResource(mContext,
+                                        R.drawable.ic_baseline_devices_24).loadDrawable(
+                                        mContext),
+                                null,
+                                mContext.getString(R.string.clipboard_send_nearby_description),
+                                true),
+                        new Function0<>() {
+                            @Override
+                            public Unit invoke() {
+                                if (mClipboardCallbacks != null) {
+                                    mClipboardCallbacks.onRemoteCopyButtonTapped();
+                                }
+                                return null;
+                            }
+                        }));
+        mActionButtonViewBinder.bind(mShareChip,
+                ActionButtonViewModel.Companion.withNextId(
+                        new ActionButtonAppearance(
+                                Icon.createWithResource(mContext,
+                                        R.drawable.ic_screenshot_share).loadDrawable(mContext),
+                                null,
+                                mContext.getString(com.android.internal.R.string.share),
+                                true),
+                        new Function0<>() {
+                            @Override
+                            public Unit invoke() {
+                                if (mClipboardCallbacks != null) {
+                                    mClipboardCallbacks.onShareButtonTapped();
+                                }
+                                return null;
+                            }
+                        }));
+    }
+
     @Override
     public void setCallbacks(SwipeDismissCallbacks callbacks) {
         super.setCallbacks(callbacks);
         ClipboardOverlayCallbacks clipboardCallbacks = (ClipboardOverlayCallbacks) callbacks;
-        mShareChip.setOnClickListener(v -> clipboardCallbacks.onShareButtonTapped());
         mDismissButton.setOnClickListener(v -> clipboardCallbacks.onDismissButtonTapped());
-        mRemoteCopyChip.setOnClickListener(v -> clipboardCallbacks.onRemoteCopyButtonTapped());
         mClipboardPreview.setOnClickListener(v -> clipboardCallbacks.onPreviewTapped());
         mMinimizedPreview.setOnClickListener(v -> clipboardCallbacks.onMinimizedViewTapped());
+        mClipboardCallbacks = clipboardCallbacks;
     }
 
     void setEditAccessibilityAction(boolean editable) {
@@ -285,7 +321,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
     }
 
     void resetActionChips() {
-        for (OverlayActionChip chip : mActionChips) {
+        for (View chip : mActionChips) {
             mActionContainer.removeView(chip);
         }
         mActionChips.clear();
@@ -437,7 +473,7 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
 
     void setActionChip(RemoteAction action, Runnable onFinish) {
         mActionContainerBackground.setVisibility(View.VISIBLE);
-        OverlayActionChip chip = constructActionChip(action, onFinish);
+        View chip = constructShelfActionChip(action, onFinish);
         mActionContainer.addView(chip);
         mActionChips.add(chip);
     }
@@ -450,14 +486,24 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
         v.setVisibility(View.VISIBLE);
     }
 
-    private OverlayActionChip constructActionChip(RemoteAction action, Runnable onFinish) {
-        OverlayActionChip chip = (OverlayActionChip) LayoutInflater.from(mContext).inflate(
-                R.layout.overlay_action_chip, mActionContainer, false);
-        chip.setText(action.getTitle());
-        chip.setContentDescription(action.getTitle());
-        chip.setIcon(action.getIcon(), false);
-        chip.setPendingIntent(action.getActionIntent(), onFinish);
-        chip.setAlpha(1);
+    private View constructShelfActionChip(RemoteAction action, Runnable onFinish) {
+        View chip = LayoutInflater.from(mContext).inflate(
+                R.layout.shelf_action_chip, mActionContainer, false);
+        mActionButtonViewBinder.bind(chip, ActionButtonViewModel.Companion.withNextId(
+                new ActionButtonAppearance(action.getIcon().loadDrawable(mContext),
+                        action.getTitle(), action.getTitle(), false), new Function0<>() {
+                    @Override
+                    public Unit invoke() {
+                        try {
+                            action.getActionIntent().send();
+                            onFinish.run();
+                        } catch (PendingIntent.CanceledException e) {
+                            Log.e(TAG, "Failed to send intent");
+                        }
+                        return null;
+                    }
+                }));
+
         return chip;
     }
 

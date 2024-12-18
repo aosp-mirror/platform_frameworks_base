@@ -15,7 +15,9 @@
  */
 package com.android.systemui.shade.data.repository
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +29,7 @@ interface ShadeRepository {
      * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
      * Settings can be expanded without the full shade expansion.
      */
-    val qsExpansion: StateFlow<Float>
+    @Deprecated("Use ShadeInteractor.qsExpansion instead") val qsExpansion: StateFlow<Float>
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
@@ -100,11 +102,23 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
     val legacyExpandImmediate: StateFlow<Boolean>
 
+    /**
+     * Whether the shade layout should be wide (true) or narrow (false).
+     *
+     * In a wide layout, notifications and quick settings each take up only half the screen width
+     * (whether they are shown at the same time or not). In a narrow layout, they can each be as
+     * wide as the entire screen.
+     */
+    val isShadeLayoutWide: StateFlow<Boolean>
+
     /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
     @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
 
     /** NPVC.mClosing as a flow. */
     @Deprecated("Use ShadeAnimationInteractor instead") val legacyIsClosing: StateFlow<Boolean>
+
+    /** Sets whether the shade layout should be wide (true) or narrow (false). */
+    fun setShadeLayoutWide(isShadeLayoutWide: Boolean)
 
     /** Sets whether a closing animation is happening. */
     @Deprecated("Use ShadeAnimationInteractor instead") fun setLegacyIsClosing(isClosing: Boolean)
@@ -168,8 +182,10 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
+class ShadeRepositoryImpl @Inject constructor(@Application applicationContext: Context) :
+    ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
+    @Deprecated("Use ShadeInteractor.qsExpansion instead")
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
     private val _lockscreenShadeExpansion = MutableStateFlow(0f)
@@ -191,6 +207,7 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyShadeTracking: StateFlow<Boolean> = _legacyShadeTracking.asStateFlow()
 
+    @Deprecated("Use ShadeInteractor.isUserInteractingWithShade instead")
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
 
     private val _legacyQsTracking = MutableStateFlow(false)
@@ -214,10 +231,19 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
 
+    private val _isShadeLayoutWide = MutableStateFlow(false)
+    override val isShadeLayoutWide: StateFlow<Boolean> = _isShadeLayoutWide.asStateFlow()
+
+    override fun setShadeLayoutWide(isShadeLayoutWide: Boolean) {
+        _isShadeLayoutWide.value = isShadeLayoutWide
+    }
+
+    @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean) {
         _legacyQsFullscreen.value = legacyQsFullscreen
     }
 
+    @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyExpandImmediate(legacyExpandImmediate: Boolean) {
         _legacyExpandImmediate.value = legacyExpandImmediate
     }

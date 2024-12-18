@@ -17,7 +17,6 @@
 #include <SkFontMetrics.h>
 #include <SkRRect.h>
 #include <SkTextBlob.h>
-#include <com_android_graphics_hwui_flags.h>
 
 #include "../utils/Color.h"
 #include "Canvas.h"
@@ -30,11 +29,25 @@
 #include "hwui/PaintFilter.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 
+#ifdef __ANDROID__
+#include <com_android_graphics_hwui_flags.h>
 namespace flags = com::android::graphics::hwui::flags;
+#else
+namespace flags {
+constexpr bool high_contrast_text_luminance() {
+    return false;
+}
+constexpr bool high_contrast_text_small_text_rect() {
+    return false;
+}
+}  // namespace flags
+#endif
 
 namespace android {
 
-inline constexpr int kHighContrastTextBorderWidth = 4;
+// These should match the constants in framework/base/core/java/android/text/Layout.java
+inline constexpr float kHighContrastTextBorderWidth = 4.0f;
+inline constexpr float kHighContrastTextBorderWidthFactor = 0.2f;
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
                               const Paint& paint, Canvas* canvas) {
@@ -48,9 +61,19 @@ static void simplifyPaint(int color, Paint* paint) {
     paint->setShader(nullptr);
     paint->setColorFilter(nullptr);
     paint->setLooper(nullptr);
-    paint->setStrokeWidth(kHighContrastTextBorderWidth + 0.04 * paint->getSkFont().getSize());
+
+    if (flags::high_contrast_text_small_text_rect()) {
+        paint->setStrokeWidth(
+                std::max(kHighContrastTextBorderWidth,
+                         kHighContrastTextBorderWidthFactor * paint->getSkFont().getSize()));
+    } else {
+        auto borderWidthFactor = 0.04f;
+        paint->setStrokeWidth(kHighContrastTextBorderWidth +
+                              borderWidthFactor * paint->getSkFont().getSize());
+    }
     paint->setStrokeJoin(SkPaint::kRound_Join);
     paint->setLooper(nullptr);
+    paint->setBlendMode(SkBlendMode::kSrcOver);
 }
 
 class DrawTextFunctor {
@@ -106,36 +129,7 @@ public:
             Paint outlinePaint(paint);
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
-            if (flags::high_contrast_text_small_text_rect()) {
-                const SkFont& font = paint.getSkFont();
-                auto padding = kHighContrastTextBorderWidth + 0.1f * font.getSize();
-
-                // Draw the background only behind each glyph's bounds. We do this instead of using
-                // the bounds of the entire layout, because the layout includes alignment whitespace
-                // etc which can obscure other text from separate passes (e.g. emojis).
-                // Merge all the glyph bounds into one rect for this line, since drawing a rect for
-                // each glyph is expensive.
-                SkRect glyphBounds;
-                SkRect bgBounds;
-                for (size_t i = start; i < end; i++) {
-                    auto glyph = layout.getGlyphId(i);
-
-                    font.getBounds(reinterpret_cast<const SkGlyphID*>(&glyph), 1, &glyphBounds,
-                                   &paint);
-                    glyphBounds.offset(layout.getX(i), layout.getY(i));
-
-                    bgBounds.join(glyphBounds);
-                }
-
-                if (!bgBounds.isEmpty()) {
-                    bgBounds.offset(x, y);
-                    bgBounds.outset(padding, padding);
-                    canvas->drawRect(bgBounds.fLeft, bgBounds.fTop, bgBounds.fRight,
-                                     bgBounds.fBottom, outlinePaint);
-                }
-            } else {
-                canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, totalAdvance);
-            }
+            canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, totalAdvance);
 
             // inner
             gDrawTextBlobMode = DrawTextBlobMode::HctInner;
@@ -149,32 +143,30 @@ public:
             canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, totalAdvance);
         }
 
-        if (text_feature::fix_double_underline()) {
-            // Extract underline position and thickness.
-            if (paint.isUnderline()) {
-                SkFontMetrics metrics;
-                paint.getSkFont().getMetrics(&metrics);
-                const float textSize = paint.getSkFont().getSize();
-                SkScalar position;
-                if (!metrics.hasUnderlinePosition(&position)) {
-                    position = textSize * Paint::kStdUnderline_Top;
-                }
-                SkScalar thickness;
-                if (!metrics.hasUnderlineThickness(&thickness)) {
-                    thickness = textSize * Paint::kStdUnderline_Thickness;
-                }
-
-                // If multiple fonts are used, use the most bottom position and most thick stroke
-                // width as the underline position. This follows the CSS standard:
-                // https://www.w3.org/TR/css-text-decor-3/#text-underline-position-property
-                // <quote>
-                // The exact position and thickness of line decorations is UA-defined in this level.
-                // However, for underlines and overlines the UA must use a single thickness and
-                // position on each line for the decorations deriving from a single decorating box.
-                // </quote>
-                underlinePosition = std::max(underlinePosition, position);
-                underlineThickness = std::max(underlineThickness, thickness);
+        // Extract underline position and thickness.
+        if (paint.isUnderline()) {
+            SkFontMetrics metrics;
+            paint.getSkFont().getMetrics(&metrics);
+            const float textSize = paint.getSkFont().getSize();
+            SkScalar position;
+            if (!metrics.hasUnderlinePosition(&position)) {
+                position = textSize * Paint::kStdUnderline_Top;
             }
+            SkScalar thickness;
+            if (!metrics.hasUnderlineThickness(&thickness)) {
+                thickness = textSize * Paint::kStdUnderline_Thickness;
+            }
+
+            // If multiple fonts are used, use the most bottom position and most thick stroke
+            // width as the underline position. This follows the CSS standard:
+            // https://www.w3.org/TR/css-text-decor-3/#text-underline-position-property
+            // <quote>
+            // The exact position and thickness of line decorations is UA-defined in this level.
+            // However, for underlines and overlines the UA must use a single thickness and
+            // position on each line for the decorations deriving from a single decorating box.
+            // </quote>
+            underlinePosition = std::max(underlinePosition, position);
+            underlineThickness = std::max(underlineThickness, thickness);
         }
     }
 

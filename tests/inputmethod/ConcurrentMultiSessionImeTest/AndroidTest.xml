@@ -17,24 +17,33 @@
 <configuration description="Config for Concurrent Multi-Session IME tests">
     <object class="com.android.tradefed.testtype.suite.module.DeviceFeatureModuleController"
         type="module_controller">
-        <option name="required-feature" value="android.software.input_methods" />
+        <!-- TODO(b/323372972): require this feature once the bug is fixed. -->
+        <!-- option name="required-feature" value="android.software.input_methods" -->
 
         <!-- Currently enabled to automotive only -->
         <option name="required-feature" value="android.hardware.type.automotive" />
     </object>
     <option name="test-suite-tag" value="apct" />
 
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="force-install-mode" value="FULL" />
+        <option name="test-file-name" value="ConcurrentMultiSessionImeTest.apk" />
+        <option name="test-file-name" value="CtsMockInputMethod.apk" />
+    </target_preparer>
+
+    <!-- RunOnSecondaryUserTargetPreparer must run after SuiteApkInstaller. -->
+    <target_preparer class="com.android.tradefed.targetprep.RunOnSecondaryUserTargetPreparer">
+        <option name="start-background-user" value="true" />
+        <option name="test-package-name" value="com.android.server.inputmethod.multisessiontest" />
+        <option name="test-package-name" value="com.android.cts.mockime" />
+    </target_preparer>
+
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command" value="setprop debug.wm.disable_deprecated_abi_dialog 1" />
         <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1" />
         <option name="teardown-command"
             value="settings delete secure show_ime_with_hard_keyboard" />
-    </target_preparer>
-
-    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
-        <option name="cleanup-apks" value="true" />
-        <option name="force-install-mode" value="FULL" />
-        <option name="test-file-name" value="ConcurrentMultiSessionImeTest.apk" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">

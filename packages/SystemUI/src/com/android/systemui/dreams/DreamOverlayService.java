@@ -16,12 +16,18 @@
 
 package com.android.systemui.dreams;
 
+import static android.service.dreams.Flags.dreamWakeRedirect;
+
+import static com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
 import static com.android.systemui.dreams.dagger.DreamModule.HOME_CONTROL_PANEL_DREAM_COMPONENT;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.View;
@@ -34,25 +40,42 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.LifecycleService;
+import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.lifecycle.ViewModelStore;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.complication.Complication;
+import com.android.systemui.ambient.touch.TouchMonitor;
+import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
+import com.android.systemui.ambient.touch.scrim.ScrimManager;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.shared.log.CommunalUiEvent;
+import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
+import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import kotlinx.coroutines.Job;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.CancellationException;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,9 +85,12 @@ import javax.inject.Named;
  * dream reaches directly out to the service with a Window reference (via LayoutParams), which the
  * service uses to insert its own child Window into the dream's parent Window.
  */
-public class DreamOverlayService extends android.service.dreams.DreamOverlayService {
+public class DreamOverlayService extends android.service.dreams.DreamOverlayService implements
+        LifecycleOwner {
     private static final String TAG = "DreamOverlayService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final TaskMatcher DREAM_TYPE_MATCHER =
+            new TaskMatcher.TopActivityType(WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
     // The Context is used to construct the hosting constraint layout and child overlay views.
     private final Context mContext;
@@ -75,12 +101,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private DreamOverlayContainerViewController mDreamOverlayContainerViewController;
     private final DreamOverlayCallbackController mDreamOverlayCallbackController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final ScrimManager mScrimManager;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
     @Nullable
     private final ComponentName mHomeControlPanelDreamComponent;
     private final UiEventLogger mUiEventLogger;
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final String mWindowTitle;
 
     // A reference to the {@link Window} used to hold the dream overlay.
@@ -92,46 +119,230 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // True if the service has been destroyed.
     private boolean mDestroyed = false;
 
-    private final ComplicationComponent mComplicationComponent;
+    /**
+     * True if the notification shade is open.
+     */
+    private boolean mShadeExpanded = false;
 
-    private final com.android.systemui.dreams.complication.dagger.ComplicationComponent
-            mDreamComplicationComponent;
+    /**
+     * True if any part of the glanceable hub is visible.
+     */
+    private boolean mCommunalVisible = false;
 
-    private final DreamOverlayComponent mDreamOverlayComponent;
+    /**
+     * True if the primary bouncer is visible.
+     */
+    private boolean mBouncerShowing = false;
 
-    private final DreamOverlayLifecycleOwner mLifecycleOwner;
+    private final com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
+            mDreamComplicationComponentFactory;
+    private final ComplicationComponent.Factory mComplicationComponentFactory;
+    private final DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
+    private final AmbientTouchComponent.Factory mAmbientTouchComponentFactory;
+
+    private final TouchInsetManager mTouchInsetManager;
+    private final LifecycleOwner mLifecycleOwner;
+
+    private final ArrayList<Job> mFlows = new ArrayList<>();
+
+    /**
+     * This {@link LifecycleRegistry} controls when dream overlay functionality, like touch
+     * handling, should be active. It will automatically be paused when the dream overlay is hidden
+     * while dreaming, such as when the notification shade, bouncer, or glanceable hub are visible.
+     */
     private final LifecycleRegistry mLifecycleRegistry;
 
-    private DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+    /**
+     * Drives the lifecycle exposed by this service's {@link #getLifecycle()}.
+     * <p>
+     * Used to mimic a {@link LifecycleService}, though we do not update the lifecycle in
+     * {@link #onBind(Intent)} since it's final in the base class.
+     */
+    private final ServiceLifecycleDispatcher mDispatcher = new ServiceLifecycleDispatcher(this);
+
+    private TouchMonitor mTouchMonitor;
+
+    private final CommunalInteractor mCommunalInteractor;
+
+    private boolean mCommunalAvailable;
+
+    final Consumer<Boolean> mIsCommunalAvailableCallback =
+            isAvailable -> {
+                mCommunalAvailable = isAvailable;
+                updateRedirectWakeup();
+            };
+
+    private final SystemDialogsCloser mSystemDialogsCloser;
 
     private final KeyguardUpdateMonitorCallback mKeyguardCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
                 public void onShadeExpandedChanged(boolean expanded) {
                     mExecutor.execute(() -> {
-                        if (getCurrentStateLocked() != Lifecycle.State.RESUMED
-                                && getCurrentStateLocked() != Lifecycle.State.STARTED) {
+                        if (mShadeExpanded == expanded) {
                             return;
                         }
+                        mShadeExpanded = expanded;
 
-                        setCurrentStateLocked(
-                                expanded ? Lifecycle.State.STARTED : Lifecycle.State.RESUMED);
+                        updateLifecycleStateLocked();
+                        updateGestureBlockingLocked();
                     });
                 }
             };
 
-    private final DreamOverlayStateController.Callback mExitAnimationFinishedCallback =
-            new DreamOverlayStateController.Callback() {
-                @Override
-                public void onStateChanged() {
-                    if (!mStateController.areExitAnimationsRunning()) {
-                        mStateController.removeCallback(mExitAnimationFinishedCallback);
-                        resetCurrentDreamOverlayLocked();
-                    }
+    private final Consumer<Boolean> mCommunalVisibleConsumer = new Consumer<>() {
+        @Override
+        public void accept(Boolean communalVisible) {
+            mExecutor.execute(() -> {
+                if (mCommunalVisible == communalVisible) {
+                    return;
                 }
-            };
+
+                mCommunalVisible = communalVisible;
+
+                updateLifecycleStateLocked();
+            });
+        }
+    };
+
+    private final Consumer<Boolean> mBouncerShowingConsumer = new Consumer<>() {
+        @Override
+        public void accept(Boolean bouncerShowing) {
+            mExecutor.execute(() -> {
+                if (mBouncerShowing == bouncerShowing) {
+                    return;
+                }
+
+                mBouncerShowing = bouncerShowing;
+
+                updateLifecycleStateLocked();
+                updateGestureBlockingLocked();
+            });
+        }
+    };
+
+    /**
+     * {@link ResetHandler} protects resetting {@link DreamOverlayService} by making sure reset
+     * requests are processed before subsequent actions proceed. Requests themselves are also
+     * ordered between each other as well to ensure actions are correctly sequenced.
+     */
+    private final class ResetHandler {
+        @FunctionalInterface
+        interface Callback {
+            void onComplete();
+        }
+
+        private record Info(Callback callback, String source) {}
+
+        private final ArrayList<Info> mPendingCallbacks = new ArrayList<>();
+
+        DreamOverlayStateController.Callback mStateCallback =
+                new DreamOverlayStateController.Callback() {
+                    @Override
+                    public void onStateChanged() {
+                        process(true);
+                    }
+                };
+
+        /**
+         * Called from places where there is no need to wait for the reset to complete. This still
+         * will defer the reset until it is okay to reset and also sequences the request with
+         * others.
+         */
+        public void reset(String source) {
+            reset(() -> {}, source);
+        }
+
+        /**
+         * Invoked to request a reset with a callback that will fire after reset if it is deferred.
+         *
+         * @return {@code true} if the reset happened immediately, {@code false} if it was deferred
+         * and will fire later, invoking the callback.
+         */
+        public boolean reset(Callback callback, String source) {
+            // Always add listener pre-emptively
+            if (mPendingCallbacks.isEmpty()) {
+                mStateController.addCallback(mStateCallback);
+            }
+
+            final Info info = new Info(callback, source);
+            mPendingCallbacks.add(info);
+            process(false);
+
+            boolean processed = !mPendingCallbacks.contains(info);
+
+            if (!processed) {
+                Log.d(TAG, "delayed resetting from: " + source);
+            }
+
+            return processed;
+        }
+
+        private void resetInternal() {
+            // This ensures the container view of the current dream is removed before
+            // the controller is potentially reset.
+            removeContainerViewFromParentLocked();
+
+            if (mStarted && mWindow != null) {
+                try {
+                    mWindow.clearContentView();
+                    mWindowManager.removeView(mWindow.getDecorView());
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Error removing decor view when resetting overlay", e);
+                }
+            }
+
+            mStateController.setOverlayActive(false);
+            mStateController.setLowLightActive(false);
+            mStateController.setEntryAnimationsFinished(false);
+
+            mDreamOverlayCallbackController.onWakeUp();
+
+            if (mDreamOverlayContainerViewController != null) {
+                mDreamOverlayContainerViewController.destroy();
+                mDreamOverlayContainerViewController = null;
+            }
+
+            if (mTouchMonitor != null) {
+                mTouchMonitor.destroy();
+                mTouchMonitor = null;
+            }
+
+            mWindow = null;
+
+            // Always unregister the any set DreamActivity from being blocked from gestures.
+            mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+
+            mStarted = false;
+        }
+
+        private boolean canReset() {
+            return !mStateController.areExitAnimationsRunning();
+        }
+
+        private void process(boolean fromDelayedCallback) {
+            while (canReset() && !mPendingCallbacks.isEmpty()) {
+                final Info callbackInfo = mPendingCallbacks.removeFirst();
+                resetInternal();
+                callbackInfo.callback.onComplete();
+
+                if (fromDelayedCallback) {
+                    Log.d(TAG, "reset overlay (delayed) for " + callbackInfo.source);
+                }
+            }
+
+            if (mPendingCallbacks.isEmpty()) {
+                mStateController.removeCallback(mStateCallback);
+            }
+        }
+    }
+
+    private final ResetHandler mResetHandler = new ResetHandler();
 
     private final DreamOverlayStateController mStateController;
+
+    private final GestureInteractor mGestureInteractor;
 
     @VisibleForTesting
     public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
@@ -157,70 +368,118 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             Context context,
             DreamOverlayLifecycleOwner lifecycleOwner,
             @Main DelayableExecutor executor,
-            WindowManager windowManager,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             ComplicationComponent.Factory complicationComponentFactory,
             com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
                     dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
+            AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            ScrimManager scrimManager,
+            CommunalInteractor communalInteractor,
+            SystemDialogsCloser systemDialogsCloser,
             UiEventLogger uiEventLogger,
             @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
-                    ComponentName lowLightDreamComponent,
+            ComponentName lowLightDreamComponent,
             @Nullable @Named(HOME_CONTROL_PANEL_DREAM_COMPONENT)
-                    ComponentName homeControlPanelDreamComponent,
+            ComponentName homeControlPanelDreamComponent,
             DreamOverlayCallbackController dreamOverlayCallbackController,
+            KeyguardInteractor keyguardInteractor,
+            GestureInteractor gestureInteractor,
             @Named(DREAM_OVERLAY_WINDOW_TITLE) String windowTitle) {
         super(executor);
         mContext = context;
         mExecutor = executor;
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mScrimManager = scrimManager;
         mLowLightDreamComponent = lowLightDreamComponent;
         mHomeControlPanelDreamComponent = homeControlPanelDreamComponent;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
+        mComplicationComponentFactory = complicationComponentFactory;
+        mDreamComplicationComponentFactory = dreamComplicationComponentFactory;
         mDreamOverlayCallbackController = dreamOverlayCallbackController;
         mWindowTitle = windowTitle;
-
-        final ViewModelStore viewModelStore = new ViewModelStore();
-        final Complication.Host host =
-                () -> mExecutor.execute(DreamOverlayService.this::requestExit);
-
-        mComplicationComponent = complicationComponentFactory.create(lifecycleOwner, host,
-                viewModelStore, touchInsetManager);
-        mDreamComplicationComponent = dreamComplicationComponentFactory.create(
-                mComplicationComponent.getVisibilityController(), touchInsetManager);
-        mDreamOverlayComponent = dreamOverlayComponentFactory.create(lifecycleOwner,
-                mComplicationComponent.getComplicationHostViewController(), touchInsetManager,
-                new HashSet<>(Arrays.asList(
-                        mDreamComplicationComponent.getHideComplicationTouchHandler())));
+        mCommunalInteractor = communalInteractor;
+        mSystemDialogsCloser = systemDialogsCloser;
+        mGestureInteractor = gestureInteractor;
+        mDreamOverlayComponentFactory = dreamOverlayComponentFactory;
+        mAmbientTouchComponentFactory = ambientTouchComponentFactory;
+        mTouchInsetManager = touchInsetManager;
         mLifecycleOwner = lifecycleOwner;
-        mLifecycleRegistry = mLifecycleOwner.getRegistry();
+        mLifecycleRegistry = lifecycleOwner.getRegistry();
 
-        mExecutor.execute(() -> setCurrentStateLocked(Lifecycle.State.CREATED));
+        mExecutor.execute(() -> setLifecycleStateLocked(Lifecycle.State.CREATED));
+
+        mFlows.add(collectFlow(getLifecycle(), mCommunalInteractor.isCommunalAvailable(),
+                mIsCommunalAvailableCallback));
+        mFlows.add(collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
+                mCommunalVisibleConsumer));
+        mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
+                mBouncerShowingConsumer));
+    }
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return mDispatcher.getLifecycle();
+    }
+
+    @Override
+    public void onCreate() {
+        mDispatcher.onServicePreSuperOnCreate();
+        super.onCreate();
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        mDispatcher.onServicePreSuperOnStart();
+        super.onStart(intent, startId);
     }
 
     @Override
     public void onDestroy() {
         mKeyguardUpdateMonitor.removeCallback(mKeyguardCallback);
 
+        for (Job job : mFlows) {
+            job.cancel(new CancellationException());
+        }
+        mFlows.clear();
+
         mExecutor.execute(() -> {
-            setCurrentStateLocked(Lifecycle.State.DESTROYED);
-
-            resetCurrentDreamOverlayLocked();
-
+            setLifecycleStateLocked(Lifecycle.State.DESTROYED);
             mDestroyed = true;
+            mResetHandler.reset("destroying");
         });
 
+        mDispatcher.onServicePreSuperOnDestroy();
         super.onDestroy();
     }
 
     @Override
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
-        setCurrentStateLocked(Lifecycle.State.STARTED);
+        final ComplicationComponent complicationComponent = mComplicationComponentFactory.create(
+                mLifecycleOwner,
+                () -> mExecutor.execute(DreamOverlayService.this::requestExit),
+                new ViewModelStore(), mTouchInsetManager);
+        final com.android.systemui.dreams.complication.dagger.ComplicationComponent
+                dreamComplicationComponent = mDreamComplicationComponentFactory.create(
+                complicationComponent.getVisibilityController(), mTouchInsetManager);
+
+        final DreamOverlayComponent dreamOverlayComponent = mDreamOverlayComponentFactory.create(
+                mLifecycleOwner, complicationComponent.getComplicationHostViewController(),
+                mTouchInsetManager);
+        final AmbientTouchComponent ambientTouchComponent = mAmbientTouchComponentFactory.create(
+                mLifecycleOwner,
+                new HashSet<>(Arrays.asList(
+                        dreamComplicationComponent.getHideComplicationTouchHandler(),
+                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
+
+        setLifecycleStateLocked(Lifecycle.State.STARTED);
 
         mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_ENTER_START);
 
@@ -234,23 +493,28 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             // Reset the current dream overlay before starting a new one. This can happen
             // when two dreams overlap (briefly, for a smoother dream transition) and both
             // dreams are bound to the dream overlay service.
-            resetCurrentDreamOverlayLocked();
+            if (!mResetHandler.reset(() -> onStartDream(layoutParams),
+                    "starting with dream already started")) {
+                return;
+            }
         }
 
         mDreamOverlayContainerViewController =
-                mDreamOverlayComponent.getDreamOverlayContainerViewController();
-        mDreamOverlayTouchMonitor = mDreamOverlayComponent.getDreamOverlayTouchMonitor();
-        mDreamOverlayTouchMonitor.init();
+                dreamOverlayComponent.getDreamOverlayContainerViewController();
+        mTouchMonitor = ambientTouchComponent.getTouchMonitor();
+        mTouchMonitor.init();
 
         mStateController.setShouldShowComplications(shouldShowComplications());
 
         // If we are not able to add the overlay window, reset the overlay.
         if (!addOverlayWindowLocked(layoutParams)) {
-            resetCurrentDreamOverlayLocked();
+            mResetHandler.reset("couldn't add window while starting");
             return;
         }
 
-        setCurrentStateLocked(Lifecycle.State.RESUMED);
+        // Set lifecycle to resumed only if there's nothing covering the dream, ex. shade, bouncer,
+        // or hub. These updates can come in before onStartDream runs.
+        updateLifecycleStateLocked();
         mStateController.setOverlayActive(true);
         final ComponentName dreamComponent = getDreamComponent();
         mStateController.setLowLightActive(
@@ -263,27 +527,94 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayCallbackController.onStartDream();
         mStarted = true;
+
+        updateRedirectWakeup();
+        updateGestureBlockingLocked();
+    }
+
+    private void updateRedirectWakeup() {
+        if (!mStarted || !dreamWakeRedirect()) {
+            return;
+        }
+
+        redirectWake(mCommunalAvailable && !glanceableHubAllowKeyguardWhenDreaming());
     }
 
     @Override
     public void onEndDream() {
-        resetCurrentDreamOverlayLocked();
+        mResetHandler.reset("ending dream");
     }
 
-    private Lifecycle.State getCurrentStateLocked() {
+    @Override
+    public void onWakeRequested() {
+        mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
+        mCommunalInteractor.changeScene(CommunalScenes.Communal,
+                "dream wake requested",
+                null);
+    }
+
+    private void updateGestureBlockingLocked() {
+        final boolean shouldBlock = mStarted && !mShadeExpanded && !mBouncerShowing
+                && !isDreamInPreviewMode();
+
+        if (shouldBlock) {
+            mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+        } else {
+            mGestureInteractor.removeGestureBlockedMatcher(DREAM_TYPE_MATCHER,
+                    GestureInteractor.Scope.Global);
+        }
+    }
+
+    private Lifecycle.State getLifecycleStateLocked() {
         return mLifecycleRegistry.getCurrentState();
     }
 
-    private void setCurrentStateLocked(Lifecycle.State state) {
+    private void setLifecycleStateLocked(Lifecycle.State state) {
         mLifecycleRegistry.setCurrentState(state);
+    }
+
+    private void updateLifecycleStateLocked() {
+        if (getLifecycleStateLocked() != Lifecycle.State.RESUMED
+                && getLifecycleStateLocked() != Lifecycle.State.STARTED) {
+            return;
+        }
+
+        // If anything is on top of the dream, we should stop touch handling.
+        boolean shouldPause = mShadeExpanded || mCommunalVisible || mBouncerShowing;
+
+        setLifecycleStateLocked(
+                shouldPause ? Lifecycle.State.STARTED : Lifecycle.State.RESUMED);
     }
 
     @Override
     public void onWakeUp() {
         if (mDreamOverlayContainerViewController != null) {
             mDreamOverlayCallbackController.onWakeUp();
-            mDreamOverlayContainerViewController.wakeUp();
+            mDreamOverlayContainerViewController.onWakeUp();
         }
+    }
+
+    @Override
+    public void onComeToFront() {
+        // Make sure the bouncer is closed. Expanding the shade effectively contracts the bouncer
+        // an equal amount.
+        if (mDreamOverlayContainerViewController != null
+                && mDreamOverlayContainerViewController.isBouncerShowing()) {
+            mScrimManager.getCurrentController().expand(
+                    new ShadeExpansionChangeEvent(
+                            /* fraction= */ 1.f,
+                            /* expanded= */ false,
+                            /* tracking= */ true));
+        }
+
+        // closeSystemDialogs takes care of closing anything that responds to the
+        // {@link Intent.ACTION_CLOSE_SYSTEM_DIALOGS} broadcast (which includes the notification
+        // shade).
+        mSystemDialogsCloser.closeSystemDialogs();
+
+        // Hide glanceable hub (this is a nop if glanceable hub is not open).
+        mCommunalInteractor.changeScene(CommunalScenes.Blank, "dream come to front", null);
     }
 
     /**
@@ -295,6 +626,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      *                     into the dream window.
      */
     private boolean addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
+
         mWindow = new PhoneWindow(mContext);
         // Default to SystemUI name for TalkBack.
         mWindow.setTitle(mWindowTitle);
@@ -339,6 +671,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     }
 
     private void removeContainerViewFromParentLocked() {
+        if (mDreamOverlayContainerViewController == null) {
+            return;
+        }
+
         View containerView = mDreamOverlayContainerViewController.getContainerView();
         if (containerView == null) {
             return;
@@ -349,30 +685,5 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
         Log.w(TAG, "Removing dream overlay container view parent!");
         parentView.removeView(containerView);
-    }
-
-    private void resetCurrentDreamOverlayLocked() {
-        if (mStateController.areExitAnimationsRunning()) {
-            mStateController.addCallback(mExitAnimationFinishedCallback);
-            return;
-        }
-
-        if (mStarted && mWindow != null) {
-            try {
-                mWindowManager.removeView(mWindow.getDecorView());
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Error removing decor view when resetting overlay", e);
-            }
-        }
-
-        mStateController.setOverlayActive(false);
-        mStateController.setLowLightActive(false);
-        mStateController.setEntryAnimationsFinished(false);
-
-        mDreamOverlayContainerViewController = null;
-        mDreamOverlayTouchMonitor = null;
-
-        mWindow = null;
-        mStarted = false;
     }
 }

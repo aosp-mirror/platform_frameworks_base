@@ -88,6 +88,7 @@
 #include "nativebridge/native_bridge.h"
 
 #if defined(__BIONIC__)
+#include <android/dlext_private.h>
 extern "C" void android_reset_stack_guards();
 #endif
 
@@ -350,6 +351,7 @@ enum RuntimeFlags : uint32_t {
     NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
     DEBUG_ENABLE_PTRACE = 1 << 25,
+    ENABLE_PAGE_SIZE_APP_COMPAT = 1 << 26,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1819,10 +1821,10 @@ static void BindMountSyspropOverride(fail_fn_t fail_fn, JNIEnv* env) {
   std::string source = "/dev/__properties__/appcompat_override";
   std::string target = "/dev/__properties__";
   if (access(source.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+      return;
   }
   if (access(target.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", target.c_str(), strerror(errno)));
+      return;
   }
   BindMount(source, target, fail_fn);
   // Reload the system properties file, to ensure new values are read into memory
@@ -2117,6 +2119,12 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
                     fail_fn);
 
+    if ((runtime_flags & RuntimeFlags::ENABLE_PAGE_SIZE_APP_COMPAT) != 0) {
+        android_set_16kb_appcompat_mode(true);
+        // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
+        // runtime.
+        runtime_flags &= ~RuntimeFlags::ENABLE_PAGE_SIZE_APP_COMPAT;
+    }
     __android_log_close();
     AStatsSocket_close();
 

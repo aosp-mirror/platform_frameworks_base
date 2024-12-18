@@ -18,7 +18,7 @@ package com.android.wm.shell.onehanded;
 
 import android.os.SystemProperties;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface to engage one handed feature.

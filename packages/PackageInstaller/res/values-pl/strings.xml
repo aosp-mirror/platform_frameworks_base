@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Zachowaj <xliff:g id="SIZE">%1$s</xliff:g> danych aplikacji."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Chcesz usunąć tę aplikację?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Chcesz odinstalować tę aplikację? Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> również zostanie usunięty."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Chcesz odinstalować tę aplikację ze swojego obszaru prywatnego?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Chcesz odinstalować tę aplikację ze swojej przestrzeni prywatnej?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Aktywne odinstalowania"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nieudane odinstalowania"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odinstalowuję…"</string>

@@ -21,7 +21,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ReadOnlyComposable
+import com.android.settingslib.spa.framework.util.SystemProperties
 
 /**
  * The Material 3 Theme for Settings.
@@ -29,14 +29,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 @Composable
 fun SettingsTheme(content: @Composable () -> Unit) {
     val isDarkTheme = isSystemInDarkTheme()
-    val settingsColorScheme = settingsColorScheme(isDarkTheme)
-    val colorScheme = materialColorScheme(isDarkTheme).copy(
-        background = settingsColorScheme.background,
-    )
 
-    MaterialTheme(colorScheme = colorScheme, typography = rememberSettingsTypography()) {
+    MaterialTheme(
+        colorScheme = materialColorScheme(isDarkTheme),
+        typography = rememberSettingsTypography(),
+    ) {
         CompositionLocalProvider(
-            LocalColorScheme provides settingsColorScheme(isDarkTheme),
             LocalContentColor provides MaterialTheme.colorScheme.onSurface,
         ) {
             content()
@@ -44,9 +42,5 @@ fun SettingsTheme(content: @Composable () -> Unit) {
     }
 }
 
-object SettingsTheme {
-    val colorScheme: SettingsColorScheme
-        @Composable
-        @ReadOnlyComposable
-        get() = LocalColorScheme.current
-}
+val isSpaExpressiveEnabled
+    by lazy { SystemProperties.getBoolean("is_expressive_design_enabled", false) }

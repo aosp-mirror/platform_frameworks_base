@@ -133,9 +133,6 @@ public interface ParsingPackage {
             @Nullable SparseArray<int[]> splitDependencies
     );
 
-    /** Sets whether the apk contains a app metadata file. */
-    ParsingPackage setAppMetadataFileInApk(boolean fileInApk);
-
     ParsingPackage setMetaData(Bundle metaData);
 
     ParsingPackage setForceQueryable(boolean forceQueryable);

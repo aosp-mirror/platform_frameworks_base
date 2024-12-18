@@ -19,9 +19,8 @@ package com.android.wm.shell.back;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
-import static com.android.wm.shell.back.BackAnimationConstants.UPDATE_SYSUI_FLAGS_THRESHOLD;
-
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
@@ -45,6 +44,7 @@ public class BackAnimationBackground {
     private boolean mIsRequestingStatusBarAppearance;
     private boolean mBackgroundIsDark;
     private Rect mStartBounds;
+    private int mStatusbarHeight;
 
     public BackAnimationBackground(RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
@@ -56,9 +56,27 @@ public class BackAnimationBackground {
      * @param startRect The start bounds of the closing target.
      * @param color The background color.
      * @param transaction The animation transaction.
+     * @param statusbarHeight The height of the statusbar (in px).
      */
-    public void ensureBackground(
-            Rect startRect, int color, @NonNull SurfaceControl.Transaction transaction) {
+    public void ensureBackground(Rect startRect, int color,
+            @NonNull SurfaceControl.Transaction transaction, int statusbarHeight) {
+        ensureBackground(startRect, color, transaction, statusbarHeight,
+                null /* cropBounds */, 0 /* cornerRadius */);
+    }
+
+    /**
+     * Ensures the back animation background color layer is present.
+     *
+     * @param startRect The start bounds of the closing target.
+     * @param color The background color.
+     * @param transaction The animation transaction.
+     * @param statusbarHeight The height of the statusbar (in px).
+     * @param cropBounds The crop bounds of the surface, set to non-empty to show wallpaper.
+     * @param cornerRadius The radius of corner, only work when cropBounds is not empty.
+     */
+    public void ensureBackground(Rect startRect, int color,
+            @NonNull SurfaceControl.Transaction transaction, int statusbarHeight,
+            @Nullable Rect cropBounds, float cornerRadius) {
         if (mBackgroundSurface != null) {
             return;
         }
@@ -78,8 +96,13 @@ public class BackAnimationBackground {
         transaction.setColor(mBackgroundSurface, colorComponents)
                 .setLayer(mBackgroundSurface, BACKGROUND_LAYER)
                 .show(mBackgroundSurface);
+        if (cropBounds != null && !cropBounds.isEmpty()) {
+            transaction.setCrop(mBackgroundSurface, cropBounds)
+                    .setCornerRadius(mBackgroundSurface, cornerRadius);
+        }
         mStartBounds = startRect;
         mIsRequestingStatusBarAppearance = false;
+        mStatusbarHeight = statusbarHeight;
     }
 
     /**
@@ -111,14 +134,14 @@ public class BackAnimationBackground {
     /**
      * Update back animation background with for the progress.
      *
-     * @param progress Progress value from {@link android.window.BackProgressAnimator}
+     * @param top The top coordinate of the closing target
      */
-    public void onBackProgressed(float progress) {
+    public void customizeStatusBarAppearance(int top) {
         if (mCustomizer == null || mStartBounds.isEmpty()) {
             return;
         }
 
-        final boolean shouldCustomizeSystemBar = progress > UPDATE_SYSUI_FLAGS_THRESHOLD;
+        final boolean shouldCustomizeSystemBar = top > mStatusbarHeight / 2;
         if (shouldCustomizeSystemBar == mIsRequestingStatusBarAppearance) {
             return;
         }

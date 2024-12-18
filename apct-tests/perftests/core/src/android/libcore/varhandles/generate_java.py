@@ -21,7 +21,7 @@ Adapted to use CrystalBall from art/test/2239-varhandle-perf/util-src/generate_j
 To run use: python generate_java.py <destination_directory>
 
 And then to correct lint errors (from frameworks/base):
-../../tools/repohooks/tools/google-java-format.py --fix --sort-imports  --google-java-format-diff ../../external/google-java-format/scripts/google-java-format-diff.py
+../../tools/repohooks/tools/google-java-format.py --fix --google-java-format-diff ../../external/google-java-format/scripts/google-java-format-diff.py
 """
 
 
@@ -30,6 +30,7 @@ from pathlib import Path
 
 import io
 import sys
+
 
 class MemLoc(Enum):
     FIELD = 0
@@ -41,7 +42,7 @@ def to_camel_case(word):
     return ''.join(c for c in word.title() if not c == '_')
 
 
-LOOP ="final BenchmarkState state = mBenchmarkRule.getState();\n        while (state.keepRunning())"
+LOOP ="BenchmarkState state = mPerfStatusReporter.getBenchmarkState();\n        while (state.keepRunning())"
 
 class Benchmark:
     def __init__(self, code, static, vartype, flavour, klass, method, memloc,
@@ -157,10 +158,10 @@ BANNER = """/*
 VH_IMPORTS = """
 package android.libcore.varhandles;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
+import android.test.suitebuilder.annotation.LargeTest;
 
-import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -178,7 +179,7 @@ VH_START = BANNER + VH_IMPORTS + """
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     static final {vartype} FIELD_VALUE = {value1};
     {static_kwd}{vartype} {static_prefix}Field = FIELD_VALUE;
     VarHandle mVh;
@@ -272,7 +273,7 @@ VH_START_ARRAY = BANNER + VH_IMPORTS + """
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     static final {vartype} ELEMENT_VALUE = {value1};
     {vartype}[] mArray = {{ ELEMENT_VALUE }};
     VarHandle mVh;
@@ -323,7 +324,7 @@ import java.nio.ByteOrder;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     static final {vartype} VALUE = {value1};
     byte[] mArray1 = {value1_byte_array};
     byte[] mArray2 = {value2_byte_array};
@@ -374,7 +375,7 @@ import java.lang.reflect.Field;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     Field mField;
     {static_kwd}{vartype} {static_prefix}Value;
 
@@ -406,7 +407,7 @@ import jdk.internal.misc.Unsafe;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class {name} {{
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
     long mOffset;
     public {static_kwd}{vartype} {static_prefix}Value = {value1};
 

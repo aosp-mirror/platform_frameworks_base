@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.Flags.FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -23,6 +25,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -31,9 +35,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.complication.Complication;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
@@ -70,7 +74,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
     MotionEvent mMotionEvent;
 
     @Mock
-    DreamTouchHandler.TouchSession mSession;
+    TouchHandler.TouchSession mSession;
 
     @Mock
     DreamOverlayStateController mStateController;
@@ -90,6 +94,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
      * Ensures no actions are taken when there multiple sessions.
      */
     @Test
+    @DisableFlags(FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH)
     public void testSessionEndOnMultipleSessions() {
         final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
                 mVisibilityController,
@@ -122,6 +127,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
      * Ensures no actions are taken when the bouncer is showing.
      */
     @Test
+    @DisableFlags(FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH)
     public void testSessionEndWhenBouncerShowing() {
         final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
                 mVisibilityController,
@@ -154,6 +160,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
      * Ensures no actions are taken when there multiple sessions.
      */
     @Test
+    @DisableFlags(FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH)
     public void testSessionEndWithTouchInInset() {
         final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
                 mVisibilityController,
@@ -202,6 +209,7 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
      * Make sure visibility changes are triggered from session events.
      */
     @Test
+    @DisableFlags(FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH)
     public void testSessionLifecycle() {
         final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
                 mVisibilityController,
@@ -258,5 +266,35 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
 
         // Verify session ended.
         verify(mSession).pop();
+    }
+
+    @Test
+    @EnableFlags(FLAG_REMOVE_DREAM_OVERLAY_HIDE_ON_TOUCH)
+    public void testNoActionWhenDisabledByFlag() {
+        final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
+                mVisibilityController,
+                RESTORE_TIMEOUT,
+                HIDE_DELAY,
+                mTouchInsetManager,
+                mStatusBarKeyguardViewManager,
+                mFakeExecutor,
+                mStateController);
+
+        // Report one session.
+        when(mSession.getActiveSessionCount()).thenReturn(1);
+
+        // Bouncer is showing.
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+
+        // Start session.
+        touchHandler.onSessionStart(mSession);
+
+        // Verify session end.
+        verify(mSession).pop();
+
+        mClock.advanceTime(HIDE_DELAY);
+
+        // Verify no interaction with visibility controller.
+        verify(mVisibilityController, never()).setVisibility(anyInt());
     }
 }

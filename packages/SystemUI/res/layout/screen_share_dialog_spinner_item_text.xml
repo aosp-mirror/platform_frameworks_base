@@ -30,7 +30,7 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="?androidprv:attr/textColorOnAccent" />
+        android:textColor="@color/menu_item_text" />
 
     <TextView
         android:id="@android:id/text2"
@@ -39,6 +39,6 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?androidprv:attr/colorError" />
+        android:textColor="?androidprv:attr/materialColorError" />
 
 </LinearLayout>

@@ -190,7 +190,7 @@
     <item msgid="7464037639415220106">"256 K/medpomnilnik dnevnika"</item>
     <item msgid="8539423820514360724">"1 M/medpomnilnik dnevnika"</item>
     <item msgid="1984761927103140651">"4 M/medpomnilnik dnevnika"</item>
-    <item msgid="2983219471251787208">"8M/medpomnilnik dnevnika"</item>
+    <item msgid="2983219471251787208">"8 M/medpomnilnik dnevnika"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Izklopljeno"</item>

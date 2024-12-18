@@ -16,6 +16,8 @@
 
 package android.app.compat;
 
+import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
+
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
@@ -29,12 +31,23 @@ import com.android.internal.compat.IPlatformCompat;
  * Handles caching of calls to {@link com.android.internal.compat.IPlatformCompat}
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ChangeIdStateCache
         extends PropertyInvalidatedCache<ChangeIdStateQuery, Boolean> {
-    private static final String CACHE_KEY = "cache_key.is_compat_change_enabled";
-    private static final int MAX_ENTRIES = 64;
-    private static boolean sDisabled = false;
+    private static final String CACHE_KEY = createSystemCacheKey("is_compat_change_enabled");
+    private static final int MAX_ENTRIES = 2048;
+    private static boolean sDisabled = getDefaultDisabled();
     private volatile IPlatformCompat mPlatformCompat;
+
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean getDefaultDisabled() {
+        return false;
+    }
+
+    private static boolean getDefaultDisabled$ravenwood() {
+        return true; // TODO(b/376676753) Disable the cache for now.
+    }
 
     /** @hide */
     public ChangeIdStateCache() {

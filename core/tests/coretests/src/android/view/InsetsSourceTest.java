@@ -32,7 +32,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -285,6 +285,17 @@ public class InsetsSourceTest {
         mSource.setBoundingRects(null);
 
         final Rect[] rects = mSource.calculateBoundingRects(new Rect(0, 0, 1000, 1000), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 0, 1000, 100), rects[0]);
+    }
+
+    @Test
+    public void testCalculateBoundingRects_noBoundingRectsAndFrameNotAtOrigin_createsSingleRect() {
+        mSource.setFrame(new Rect(100, 100, 1200, 200));
+        mSource.setBoundingRects(null);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(100, 100, 1100, 1100), false);
 
         assertEquals(1, rects.length);
         assertEquals(new Rect(0, 0, 1000, 100), rects[0]);

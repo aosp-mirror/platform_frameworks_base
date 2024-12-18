@@ -66,6 +66,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -131,7 +132,7 @@ public class ScreenshotTests {
         assertTrue("Failed to wait for transaction to get committed",
                 countDownLatch.await(WAIT_TIME_S, TimeUnit.SECONDS));
         assertTrue("Failed to wait for stable geometry",
-                waitForStableWindowGeometry(WAIT_TIME_S, TimeUnit.SECONDS));
+                waitForStableWindowGeometry(Duration.ofSeconds(WAIT_TIME_S)));
 
         ScreenCapture.LayerCaptureArgs args = new ScreenCapture.LayerCaptureArgs.Builder(secureSC)
                 .setCaptureSecureLayers(true)
@@ -212,7 +213,7 @@ public class ScreenshotTests {
         assertTrue("Failed to wait for transaction to get committed",
                 countDownLatch.await(WAIT_TIME_S, TimeUnit.SECONDS));
         assertTrue("Failed to wait for stable geometry",
-                waitForStableWindowGeometry(WAIT_TIME_S, TimeUnit.SECONDS));
+                waitForStableWindowGeometry(Duration.ofSeconds(WAIT_TIME_S)));
 
         ScreenshotHardwareBuffer[] screenCapture = new ScreenshotHardwareBuffer[1];
         Bitmap screenshot = null;

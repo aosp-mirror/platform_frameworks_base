@@ -21,15 +21,13 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.systemui.DejankUtils;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -67,6 +65,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private final StatusBarWindowController mStatusBarWindowController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
+    private final Lazy<NotificationShadeWindowViewController> mNotifShadeWindowViewController;
     private final Lazy<NotificationPanelViewController> mNpvc;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
@@ -74,14 +73,12 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private boolean mExpandedVisible;
     private boolean mLockscreenOrShadeVisible;
 
-    private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private ShadeVisibilityListener mShadeVisibilityListener;
 
     @Inject
     public ShadeControllerImpl(
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
-            @ShadeTouchLog LogBuffer touchLog,
             WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
@@ -89,13 +86,13 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             StatusBarWindowController statusBarWindowController,
             DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
-            WindowManager windowManager,
+            @DisplayId int displayId,
+            Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewController,
             Lazy<NotificationPanelViewController> shadeViewControllerLazy,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<NotificationGutsManager> gutsManager
     ) {
-        super(touchLog,
-                commandQueue,
+        super(commandQueue,
                 statusBarKeyguardViewManager,
                 notificationShadeWindowController,
                 assistManagerLazy);
@@ -109,8 +106,9 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mDeviceProvisionedController = deviceProvisionedController;
         mGutsManager = gutsManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotifShadeWindowViewController = notificationShadeWindowViewController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-        mDisplayId = windowManager.getDefaultDisplay().getDisplayId();
+        mDisplayId = displayId;
         mKeyguardStateController = keyguardStateController;
         mAssistManagerLazy = assistManagerLazy;
     }
@@ -131,7 +129,9 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     @Override
     public void animateCollapseShade(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
-        if (!force && mStatusBarStateController.getState() != StatusBarState.SHADE) {
+        int statusBarState = mStatusBarStateController.getState();
+        if (!force && statusBarState != StatusBarState.SHADE
+                && statusBarState != StatusBarState.SHADE_LOCKED) {
             runPostCollapseActions();
             return;
         }
@@ -141,7 +141,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
-            mNotificationShadeWindowViewController.cancelExpandHelper();
+            mNotifShadeWindowViewController.get().cancelExpandHelper();
             getNpvc().collapse(true, delayed, speedUpFactor);
         }
     }
@@ -244,7 +244,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     @Override
     public void cancelExpansionAndCollapseShade() {
         if (getNpvc().isTracking()) {
-            mNotificationShadeWindowViewController.cancelCurrentTouch();
+            mNotifShadeWindowViewController.get().cancelCurrentTouch();
         }
         if (getNpvc().isPanelExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE) {
@@ -268,6 +268,11 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
                 animateCollapseShade();
             }
         }
+    }
+
+    @Override
+    public void performHapticFeedback(int constant) {
+        getNpvc().performHapticFeedback(constant);
     }
 
     @Override
@@ -364,14 +369,8 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mShadeVisibilityListener.expandedVisibleChanged(expandedVisible);
     }
 
-    @Override
-    public void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController controller) {
-        mNotificationShadeWindowViewController = controller;
-    }
-
     private NotificationShadeWindowView getNotificationShadeWindowView() {
-        return mNotificationShadeWindowViewController.getView();
+        return mNotifShadeWindowViewController.get().getView();
     }
 
     private NotificationPanelViewController getNpvc() {
@@ -380,7 +379,6 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
     @Override
     public void start() {
-        super.start();
         getNpvc().setTrackingStartedListener(this::runPostCollapseActions);
         getNpvc().setOpenCloseListener(
                 new OpenCloseListener() {

@@ -108,18 +108,19 @@ public class InstallSuccess extends Activity {
         mDialog = builder.create();
         mDialog.show();
         mDialog.requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
-        // Enable or disable "launch" button
-        boolean enabled = false;
+        // Show or hide "launch" button
+        boolean visible = false;
         if (mLaunchIntent != null) {
             List<ResolveInfo> list = getPackageManager().queryIntentActivities(mLaunchIntent,
                     0);
             if (list != null && list.size() > 0) {
-                enabled = true;
+                visible = true;
             }
         }
+        visible = visible && isLauncherActivityEnabled(mLaunchIntent);
 
         Button launchButton = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (enabled) {
+        if (visible) {
             launchButton.setOnClickListener(view -> {
                 try {
                     startActivity(mLaunchIntent.addFlags(
@@ -130,7 +131,15 @@ public class InstallSuccess extends Activity {
                 finish();
             });
         } else {
-            launchButton.setEnabled(false);
+            launchButton.setVisibility(View.GONE);
         }
+    }
+
+    private boolean isLauncherActivityEnabled(Intent intent) {
+        if (intent == null || intent.getComponent() == null) {
+            return false;
+        }
+        return getPackageManager().getComponentEnabledSetting(intent.getComponent())
+            != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
     }
 }

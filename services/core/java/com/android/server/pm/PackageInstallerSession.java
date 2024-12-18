@@ -33,6 +33,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
@@ -60,6 +61,7 @@ import static com.android.server.pm.PackageManagerShellCommandDataLoader.Metadat
 
 import android.Manifest;
 import android.annotation.AnyThread;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -148,6 +150,7 @@ import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
 import android.system.Int64Ref;
@@ -184,6 +187,7 @@ import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.art.ArtManagedInstallFileHelper;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -315,14 +319,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     /**
-     * If an app being installed targets {@link Build.VERSION_CODES#S API 31} and above, the app
-     * can be installed without user action.
+     * If an app being installed targets {@link Build.VERSION_CODES#TIRAMISU API 33} and above,
+     * the app can be installed without user action.
      * See {@link PackageInstaller.SessionParams#setRequireUserAction} for other conditions required
      * to be satisfied for a silent install.
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
-    private static final long SILENT_INSTALL_ALLOWED = 265131695L;
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long SILENT_INSTALL_ALLOWED = 325888262L;
 
     /**
      * The system supports pre-approval and update ownership features from
@@ -600,6 +604,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private String mSessionErrorMessage;
 
+    @GuardedBy("mLock")
+    private boolean mHasAppMetadataFile = false;
+
     @Nullable
     final StagedSession mStagedSession;
 
@@ -843,7 +850,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             if (file.getName().endsWith(V4Signature.EXT)) return false;
             if (isAppMetadata(file)) return false;
-            if (DexMetadataHelper.isDexMetadataFile(file)) return false;
+            if (com.android.art.flags.Flags.artServiceV3()) {
+                if (ArtManagedInstallFileHelper.isArtManaged(file.getPath())) return false;
+            } else {
+                if (DexMetadataHelper.isDexMetadataFile(file)) return false;
+            }
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
             if (ApkChecksums.isDigestOrDigestSignatureFile(file)) return false;
             return true;
@@ -865,6 +876,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.isDirectory()) return false;
             if (!file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             return true;
+        }
+    };
+    private static final FileFilter sArtManagedFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            return !file.isDirectory() && com.android.art.flags.Flags.artServiceV3()
+                    && ArtManagedInstallFileHelper.isArtManaged(file.getPath());
         }
     };
 
@@ -962,19 +980,29 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallSource().mInstallerPackageName, mInstallerUid);
     }
 
-    private boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot) {
+    static boolean isEmergencyInstallerEnabled(String packageName, Computer snapshot, int userId,
+            int installerUid) {
         final PackageStateInternal ps = snapshot.getPackageStateInternal(packageName);
-        if (ps == null || ps.getPkg() == null) {
+        if (ps == null || ps.getPkg() == null || !ps.isSystem()) {
             return false;
         }
+        int uid = UserHandle.getUid(userId, ps.getAppId());
         String emergencyInstaller = ps.getPkg().getEmergencyInstaller();
         if (emergencyInstaller == null || !ArrayUtils.contains(
-                snapshot.getPackagesForUid(mInstallerUid),
-                emergencyInstaller)) {
+                snapshot.getPackagesForUid(installerUid), emergencyInstaller)) {
+            return false;
+        }
+        // Only system installers can have an emergency installer
+        if (PackageManager.PERMISSION_GRANTED
+                != snapshot.checkUidPermission(Manifest.permission.INSTALL_PACKAGES, uid)
+                && PackageManager.PERMISSION_GRANTED
+                != snapshot.checkUidPermission(Manifest.permission.INSTALL_PACKAGE_UPDATES, uid)
+                && PackageManager.PERMISSION_GRANTED
+                != snapshot.checkUidPermission(Manifest.permission.INSTALL_SELF_UPDATES, uid)) {
             return false;
         }
         return (snapshot.checkUidPermission(Manifest.permission.EMERGENCY_INSTALL_PACKAGES,
-                mInstallerUid) == PackageManager.PERMISSION_GRANTED);
+                installerUid) == PackageManager.PERMISSION_GRANTED);
     }
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
@@ -1045,7 +1073,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallDpcPackagesPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
-        final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
+        // Also query the package uid for archived packages, so that the user confirmation
+        // dialog can be displayed for updating archived apps.
+        final int targetPackageUid = snapshot.getPackageUid(packageName,
+                PackageManager.MATCH_ARCHIVED_PACKAGES, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
                 ? snapshot.getInstallSourceInfo(packageName, userId)
@@ -1062,7 +1093,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isEmergencyInstall =
-                isEmergencyInstallerEnabled(packageName, snapshot);
+                isEmergencyInstallerEnabled(packageName, snapshot, userId, mInstallerUid);
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
@@ -1075,11 +1106,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isUpdateOwnershipEnforcementEnabled =
                 mPm.isUpdateOwnershipEnforcementAvailable()
                         && existingUpdateOwnerPackageName != null;
+        // For an installation that un-archives an app, if the installer doesn't have the
+        // INSTALL_PACKAGES permission, the user should have already been prompted to confirm the
+        // un-archive request. There's no need for another confirmation during the installation.
+        final boolean isInstallUnarchive =
+                (params.installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
 
         // Device owners and affiliated profile owners are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         final boolean noUserActionNecessary = isInstallerRoot || isInstallerSystem
-                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall;
+                || isInstallerDeviceOwnerOrAffiliatedProfileOwner() || isEmergencyInstall
+                || isInstallUnarchive;
 
         if (noUserActionNecessary) {
             return userActionNotTypicallyNeededResponse;
@@ -1562,6 +1599,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
+    private List<String> getArtManagedFilePathsLocked() {
+        String[] names = getNamesLocked();
+        ArrayList<String> result = new ArrayList<>(names.length);
+        for (String name : names) {
+            File file = new File(stageDir, name);
+            if (sArtManagedFilter.accept(file)) {
+                result.add(file.getPath());
+            }
+        }
+        return result;
+    }
+
+    @GuardedBy("mLock")
     private void enableFsVerityToAddedApksWithIdsig() throws PackageManagerException {
         try {
             List<File> files = getAddedApksLocked();
@@ -1798,7 +1848,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
             assertPreparedAndNotCommittedOrDestroyedLocked("getAppMetadataFd");
-            if (!getStagedAppMetadataFile().exists()) {
+            if (!mHasAppMetadataFile) {
                 return null;
             }
             try {
@@ -1811,9 +1861,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void removeAppMetadata() {
-        File file = getStagedAppMetadataFile();
-        if (file.exists()) {
-            file.delete();
+        synchronized (mLock) {
+            if (mHasAppMetadataFile) {
+                getStagedAppMetadataFile().delete();
+                mHasAppMetadataFile = false;
+            }
         }
     }
 
@@ -1834,8 +1886,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotSealedLocked("openWriteAppMetadata");
         }
         try {
-            return doWriteInternal(APP_METADATA_FILE_NAME, /* offsetBytes= */ 0,
+            ParcelFileDescriptor fd = doWriteInternal(APP_METADATA_FILE_NAME, /* offsetBytes= */ 0,
                     /* lengthBytes= */ -1, null);
+            synchronized (mLock) {
+                mHasAppMetadataFile = true;
+            }
+            return fd;
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
@@ -2129,18 +2185,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        File appMetadataFile = getStagedAppMetadataFile();
-        if (appMetadataFile.exists()) {
-            long sizeLimit = getAppMetadataSizeLimit();
-            if (appMetadataFile.length() > sizeLimit) {
-                appMetadataFile.delete();
-                throw new IllegalArgumentException(
-                        "App metadata size exceeds the maximum allowed limit of " + sizeLimit);
-            }
-            if (isIncrementalInstallation()) {
-                // Incremental requires stageDir to be empty so move the app metadata file to a
-                // temporary location and move back after commit.
-                appMetadataFile.renameTo(getTmpAppMetadataFile());
+        synchronized (mLock) {
+            if (mHasAppMetadataFile) {
+                File appMetadataFile = getStagedAppMetadataFile();
+                long sizeLimit = getAppMetadataSizeLimit();
+                if (appMetadataFile.length() > sizeLimit) {
+                    appMetadataFile.delete();
+                    mHasAppMetadataFile = false;
+                    throw new IllegalArgumentException(
+                            "App metadata size exceeds the maximum allowed limit of " + sizeLimit);
+                }
+                if (isIncrementalInstallation()) {
+                    // Incremental requires stageDir to be empty so move the app metadata file to a
+                    // temporary location and move back after commit.
+                    appMetadataFile.renameTo(getTmpAppMetadataFile());
+                }
             }
         }
 
@@ -2355,8 +2414,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotDestroyedLocked("commit of session " + sessionId);
             assertNoWriteFileTransfersOpenLocked();
 
-            final boolean isSecureFrpEnabled =
-                    Global.getInt(mContext.getContentResolver(), Global.SECURE_FRP_MODE, 0) == 1;
+            boolean isSecureFrpEnabled;
+            if (android.security.Flags.frpEnforcement()) {
+                PersistentDataBlockManager pdbManager =
+                        mContext.getSystemService(PersistentDataBlockManager.class);
+                if (pdbManager == null) {
+                    // Some devices may not support FRP. In that case, we can't block the install
+                    // accordingly.
+                    isSecureFrpEnabled = false;
+                } else {
+                    isSecureFrpEnabled = pdbManager.isFactoryResetProtectionActive();
+                }
+            } else {
+                isSecureFrpEnabled = Global.getInt(mContext.getContentResolver(),
+                        Global.SECURE_FRP_MODE, 0) == 1;
+            }
 
             if (isSecureFrpEnabled
                     && !isSecureFrpInstallAllowed(mContext, Binder.getCallingUid())) {
@@ -3178,7 +3250,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         synchronized (mLock) {
             return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
-                    user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm);
+                    user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm,
+                    mHasAppMetadataFile);
         }
     }
 
@@ -3330,7 +3403,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final File targetFile = new File(stageDir, targetName);
-        resolveAndStageFileLocked(addedFile, targetFile, null);
+        resolveAndStageFileLocked(addedFile, targetFile, null, List.of() /* artManagedFilePaths */);
         mResolvedBaseFile = targetFile;
 
         // Populate package name of the apex session
@@ -3418,11 +3491,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
-                && (removeSplitList.size() == 0 || getStagedAppMetadataFile().exists())) {
+                && (removeSplitList.size() == 0 || mHasAppMetadataFile)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     TextUtils.formatSimple("Session: %d. No packages staged in %s", sessionId,
                           stageDir.getAbsolutePath()));
         }
+        final List<String> artManagedFilePaths = getArtManagedFilePathsLocked();
 
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
@@ -3479,7 +3553,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final File targetFile = new File(stageDir, targetName);
             if (!isArchivedInstallation()) {
                 final File sourceFile = new File(apk.getPath());
-                resolveAndStageFileLocked(sourceFile, targetFile, apk.getSplitName());
+                resolveAndStageFileLocked(
+                        sourceFile, targetFile, apk.getSplitName(), artManagedFilePaths);
             }
 
             // Base is coming from session
@@ -3545,6 +3620,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        File stagedAppMetadataFile = isIncrementalInstallation()
+                ? getTmpAppMetadataFile() : getStagedAppMetadataFile();
+        if (mHasAppMetadataFile && !stagedAppMetadataFile.exists()) {
+            throw new PackageManagerException(INSTALL_FAILED_SESSION_INVALID,
+                    "App metadata file expected but not found in " + stageDir.getAbsolutePath());
+        }
+
         if (isIncrementalInstallation()) {
             if (!isIncrementalInstallationAllowed(existingPkgSetting)) {
                 throw new PackageManagerException(
@@ -3553,8 +3635,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             // Since we moved the staged app metadata file so that incfs can be initialized, lets
             // now move it back.
-            File appMetadataFile = getTmpAppMetadataFile();
-            if (appMetadataFile.exists()) {
+            if (mHasAppMetadataFile) {
+                File appMetadataFile = getTmpAppMetadataFile();
                 final IncrementalFileStorages incrementalFileStorages =
                         getIncrementalFileStorages();
                 try {
@@ -3633,7 +3715,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Inherit base if not overridden.
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                inheritFileLocked(mResolvedBaseFile);
+                inheritFileLocked(mResolvedBaseFile, artManagedFilePaths);
                 // Collect the requiredSplitTypes from base
                 CollectionUtils.addAll(requiredSplitTypes, existing.getBaseRequiredSplitTypes());
             } else if ((params.installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
@@ -3652,7 +3734,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     final boolean splitReplaced = stagedSplits.contains(splitName);
                     if (!splitReplaced && !splitRemoved) {
-                        inheritFileLocked(splitFile);
+                        inheritFileLocked(splitFile, artManagedFilePaths);
                         // Collect the requiredSplitTypes and staged splitTypes from splits
                         CollectionUtils.addAll(requiredSplitTypes,
                                 existing.getRequiredSplitTypes()[i]);
@@ -3838,6 +3920,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 DexMetadataHelper.isFsVerityRequired());
     }
 
+    @FlaggedApi(com.android.art.flags.Flags.FLAG_ART_SERVICE_V3)
+    @GuardedBy("mLock")
+    private void maybeStageArtManagedInstallFilesLocked(File origFile, File targetFile,
+            List<String> artManagedFilePaths) throws PackageManagerException {
+        for (String path : ArtManagedInstallFileHelper.filterPathsForApk(
+                     artManagedFilePaths, origFile.getPath())) {
+            File artManagedFile = new File(path);
+            if (!FileUtils.isValidExtFilename(artManagedFile.getName())) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INVALID_APK, "Invalid filename: " + artManagedFile);
+            }
+            File targetArtManagedFile = new File(
+                    ArtManagedInstallFileHelper.getTargetPathForApk(path, targetFile.getPath()));
+            stageFileLocked(artManagedFile, targetArtManagedFile);
+        }
+    }
+
     private IncrementalFileStorages getIncrementalFileStorages() {
         synchronized (mLock) {
             return mIncrementalFileStorages;
@@ -3935,8 +4034,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName)
-            throws PackageManagerException {
+    private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName,
+            List<String> artManagedFilePaths) throws PackageManagerException {
         stageFileLocked(origFile, targetFile);
 
         // Stage APK's fs-verity signature if present.
@@ -3947,8 +4046,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && VerityUtils.isFsVeritySupported()) {
             maybeStageV4SignatureLocked(origFile, targetFile);
         }
-        // Stage dex metadata (.dm) and corresponding fs-verity signature if present.
-        maybeStageDexMetadataLocked(origFile, targetFile);
+        // Stage ART managed install files (e.g., dex metadata (.dm)) and corresponding fs-verity
+        // signature if present.
+        if (com.android.art.flags.Flags.artServiceV3()) {
+            maybeStageArtManagedInstallFilesLocked(origFile, targetFile, artManagedFilePaths);
+        } else {
+            maybeStageDexMetadataLocked(origFile, targetFile);
+        }
         // Stage checksums (.digests) if present.
         maybeStageDigestsLocked(origFile, targetFile, splitName);
     }
@@ -3973,7 +4077,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void inheritFileLocked(File origFile) {
+    private void inheritFileLocked(File origFile, List<String> artManagedFilePaths) {
         mResolvedInheritedFiles.add(origFile);
 
         maybeInheritFsveritySignatureLocked(origFile);
@@ -3981,12 +4085,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             maybeInheritV4SignatureLocked(origFile);
         }
 
-        // Inherit the dex metadata if present.
-        final File dexMetadataFile =
-                DexMetadataHelper.findDexMetadataForFile(origFile);
-        if (dexMetadataFile != null) {
-            mResolvedInheritedFiles.add(dexMetadataFile);
-            maybeInheritFsveritySignatureLocked(dexMetadataFile);
+        // Inherit ART managed install files (e.g., dex metadata (.dm)) if present.
+        if (com.android.art.flags.Flags.artServiceV3()) {
+            for (String path : ArtManagedInstallFileHelper.filterPathsForApk(
+                         artManagedFilePaths, origFile.getPath())) {
+                File artManagedFile = new File(path);
+                mResolvedInheritedFiles.add(artManagedFile);
+                maybeInheritFsveritySignatureLocked(artManagedFile);
+            }
+        } else {
+            final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(origFile);
+            if (dexMetadataFile != null) {
+                mResolvedInheritedFiles.add(dexMetadataFile);
+                maybeInheritFsveritySignatureLocked(dexMetadataFile);
+            }
         }
         // Inherit the digests if present.
         final File digestsFile = ApkChecksums.findDigestsForFile(origFile);
@@ -4999,8 +5111,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(mContext, 0 /* code */, intent, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(mContext, 0 /* code */, intent,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5106,6 +5219,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         // Okay to proceed
         synchronized (mLock) {
+            assertCallerIsOwnerOrRoot();
+            assertPreparedAndNotSealedLocked("setPreVerifiedDomains");
             mPreVerifiedDomains = preVerifiedDomains;
         }
     }
@@ -5391,8 +5506,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5440,8 +5556,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5477,8 +5594,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, intent, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, intent,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }

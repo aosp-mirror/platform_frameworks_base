@@ -437,9 +437,8 @@ public final class LocalFloatingToolbarPopup implements FloatingToolbarPopup {
 
         // Initialize x ensuring that the toolbar isn't rendered behind the nav bar in
         // landscape.
-        final int x = Math.min(
-                contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
-                mViewPortOnScreen.right - mPopupWindow.getWidth());
+        final int x = Math.clamp(contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
+                mViewPortOnScreen.left, mViewPortOnScreen.right - mPopupWindow.getWidth());
 
         final int y;
 

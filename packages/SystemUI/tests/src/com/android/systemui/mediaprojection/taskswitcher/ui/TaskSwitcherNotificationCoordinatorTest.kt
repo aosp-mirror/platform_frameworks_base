@@ -18,67 +18,41 @@ package com.android.systemui.mediaprojection.taskswitcher.ui
 
 import android.app.Notification
 import android.app.NotificationManager
-import android.os.Handler
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
-import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
-import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherViewModel
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
 
     private val notificationManager = mock<NotificationManager>()
-
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
-
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
-    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
-
-    private val tasksRepo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
-
-    private val mediaRepo =
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo,
-            backgroundDispatcher = dispatcher,
-            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
-        )
-
-    private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
-    private val viewModel =
-        TaskSwitcherNotificationViewModel(interactor, backgroundDispatcher = dispatcher)
+    private val kosmos = taskSwitcherKosmos()
+    private val testScope = kosmos.testScope
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
+    private val viewModel = kosmos.taskSwitcherViewModel
 
     private lateinit var coordinator: TaskSwitcherNotificationCoordinator
 
@@ -93,6 +67,10 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
                 fakeBroadcastDispatcher,
             )
         coordinator.start()
+        // When the coordinator starts up, the view model will immediately emit a NotShowing event
+        // and hide the notification. That's fine, but we should reset the notification manager so
+        // that the initial emission isn't part of the tests.
+        reset(notificationManager)
     }
 
     @Test
@@ -109,8 +87,13 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
     @Test
     fun hideNotification() {
         testScope.runTest {
+            // First, show a notification
+            switchTask()
+
+            // WHEN the projection is stopped
             fakeMediaProjectionManager.dispatchOnStop()
 
+            // THEN the notification is hidden
             verify(notificationManager).cancel(any(), any())
         }
     }
@@ -118,13 +101,15 @@ class TaskSwitcherNotificationCoordinatorTest : SysuiTestCase() {
     @Test
     fun notificationIdIsConsistent() {
         testScope.runTest {
-            fakeMediaProjectionManager.dispatchOnStop()
-            val idCancel = argumentCaptor<Int>()
-            verify(notificationManager).cancel(any(), idCancel.capture())
-
+            // First, show a notification
             switchTask()
             val idNotify = argumentCaptor<Int>()
             verify(notificationManager).notify(any(), idNotify.capture(), any())
+
+            // Then, hide the notification
+            fakeMediaProjectionManager.dispatchOnStop()
+            val idCancel = argumentCaptor<Int>()
+            verify(notificationManager).cancel(any(), idCancel.capture())
 
             assertEquals(idCancel.value, idNotify.value)
         }

@@ -40,7 +40,7 @@
     <string name="print_dialog" msgid="32628687461331979">"ପ୍ରିଣ୍ଟ ଡାୟଲଗ୍‍"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>ରୁ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ପୃଷ୍ଠା"</string>
-    <string name="summary_template" msgid="8899734908625669193">"ସାରାଂଶ, କପୀ <xliff:g id="COPIES">%1$s</xliff:g>, କାଗଜ ଆକାର <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="summary_template" msgid="8899734908625669193">"ସାରାଂଶ, କପି <xliff:g id="COPIES">%1$s</xliff:g>, କାଗଜ ଆକାର <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"ହ୍ୟାଣ୍ଡେଲ୍ ବଡ଼ କରନ୍ତୁ"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"ହ୍ୟାଣ୍ଡେଲ୍ ଛୋଟ କରନ୍ତୁ"</string>
     <string name="print_button" msgid="645164566271246268">"ପ୍ରିଣ୍ଟ କରନ୍ତୁ"</string>

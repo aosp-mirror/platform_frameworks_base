@@ -80,9 +80,9 @@
     <string name="kg_face_locked_out" msgid="2751559491287575">"មិនអាចដោះសោដោយប្រើមុខទេ។ ព្យាយាមច្រើនដងពេក។"</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"មិនអាចដោះសោដោយប្រើស្នាមម្រាមដៃទេ។ ព្យាយាមច្រើនដងពេក។"</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"ភ្នាក់ងារទុកចិត្តមិនទំនេរទេ"</string>
-    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"ព្យាយាមច្រើនដងពេកដោយប្រើកូដ PIN មិនត្រឹមត្រូវ"</string>
-    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"ព្យាយាមច្រើនដងពេកដោយប្រើលំនាំមិនត្រឹមត្រូវ"</string>
-    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"ព្យាយាមច្រើនដងពេកដោយប្រើពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"ព្យាយាមដោយប្រើកូដ PIN មិនត្រឹមត្រូវច្រើនដងពេក"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"ព្យាយាមដោយប្រើលំនាំមិនត្រឹមត្រូវច្រើនដងពេក"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"ព្យាយាមដោយប្រើពាក្យសម្ងាត់មិនត្រឹមត្រូវច្រើនដងពេក"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{ព្យាយាមម្តងទៀតក្នុងរយៈពេល # វិនាទីទៀត។}other{ព្យាយាមម្តងទៀតក្នុងរយៈពេល # វិនាទីទៀត។}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"បញ្ចូល​កូដ PIN របស់​ស៊ីម។"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"បញ្ចូល​កូដ PIN របស់​ស៊ីម​សម្រាប់ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"។"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើលំនាំជំនួសវិញ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើកូដ PIN ជំនួសវិញ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើពាក្យសម្ងាត់ជំនួសវិញ"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"តម្រូវឱ្យបញ្ចូលកូដ PIN ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"តម្រូវឱ្យប្រើលំនាំ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"តម្រូវឱ្យបញ្ចូលពាក្យសម្ងាត់ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ឧបករណ៍​ត្រូវបាន​ចាក់សោ​ដោយអ្នក​គ្រប់គ្រង"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"មិនអាចសម្គាល់បានទេ"</string>

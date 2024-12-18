@@ -16,19 +16,32 @@
 
 package com.android.systemui.statusbar.notification.row.ui.viewbinder
 
+import com.android.systemui.statusbar.notification.row.HybridConversationNotificationView
 import com.android.systemui.statusbar.notification.row.HybridNotificationView
+import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineViewModel
 
 object SingleLineViewBinder {
     @JvmStatic
     fun bind(viewModel: SingleLineViewModel?, view: HybridNotificationView?) {
-        // bind the title and content text views
-        view?.apply {
-            bind(
-                /* title = */ viewModel?.titleText,
-                /* text = */ viewModel?.contentText,
-                /* contentView = */ null
+        if (view is HybridConversationNotificationView) {
+            if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return
+
+            viewModel?.conversationData?.avatar?.let { view.setAvatar(it) }
+            view.setText(
+                viewModel?.titleText,
+                viewModel?.contentText,
+                viewModel?.conversationData?.conversationSenderName,
             )
+        } else {
+            // bind the title and content text views
+            view?.apply {
+                bind(
+                    /* title = */ viewModel?.titleText,
+                    /* text = */ viewModel?.contentText,
+                    /* contentView = */ null,
+                )
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ public class SnapshotDrawerUtilsTest {
                 Color.RED, Color.BLUE);
 
         mSnapshotSurface = new SnapshotDrawerUtils.SnapshotSurface(
-                new SurfaceControl(), snapshot, "Test", taskBounds);
+                new SurfaceControl(), snapshot, "Test");
         mSnapshotSurface.initiateSystemBarPainter(windowFlags, 0, 0,
                 taskDescription, WindowInsets.Type.defaultVisible());
     }
@@ -93,7 +93,8 @@ public class SnapshotDrawerUtilsTest {
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                 Surface.ROTATION_0, taskSize, contentInsets, new Rect() /* letterboxInsets */,
                 false, true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN,
-                0 /* systemUiVisibility */, false /* isTranslucent */, false /* hasImeSurface */);
+                0 /* systemUiVisibility */, false /* isTranslucent */, false /* hasImeSurface */,
+                0 /* uiMode */);
     }
 
     private static TaskDescription createTaskDescription(int background,
@@ -167,14 +168,16 @@ public class SnapshotDrawerUtilsTest {
     @Test
     public void testCalculateSnapshotCrop_taskNotOnTop() {
         final Rect contentInsets = new Rect(0, 10, 0, 10);
-        setupSurface(100, 100, contentInsets, 0, new Rect(0, 50, 100, 150));
+        final Rect bounds = new Rect(0, 50, 100, 150);
+        setupSurface(100, 100, contentInsets, 0, bounds);
+        mSnapshotSurface.setFrames(bounds, contentInsets);
         assertEquals(new Rect(0, 10, 100, 90),
                 mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test
     public void testCalculateSnapshotCrop_navBarLeft() {
-        final Rect contentInsets = new Rect(0, 10, 0, 0);
+        final Rect contentInsets = new Rect(10, 0, 0, 0);
         setupSurface(100, 100, contentInsets, 0, new Rect(0, 0, 100, 100));
         assertEquals(new Rect(10, 0, 100, 100),
                 mSnapshotSurface.calculateSnapshotCrop(contentInsets));

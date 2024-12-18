@@ -16,9 +16,10 @@
 
 package com.android.systemui.communal.widgets
 
-import android.appwidget.AppWidgetManager
+import android.app.Activity
+import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.IntentSender
 import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
@@ -32,19 +33,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.ui.compose.CommunalHub
+import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
 class EditWidgetsActivity
@@ -54,20 +63,114 @@ constructor(
     private var windowManagerService: IWindowManager? = null,
     private val uiEventLogger: UiEventLogger,
     private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
+    private val widgetSection: CommunalAppWidgetSection,
     @CommunalLog logBuffer: LogBuffer,
 ) : ComponentActivity() {
     companion object {
-        private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
-        private const val EXTRA_DESIRED_WIDGET_WIDTH = "desired_widget_width"
-        private const val EXTRA_DESIRED_WIDGET_HEIGHT = "desired_widget_height"
-
         private const val TAG = "EditWidgetsActivity"
-        const val EXTRA_PRESELECTED_KEY = "preselected_key"
+        private const val EXTRA_IS_PENDING_WIDGET_DRAG = "is_pending_widget_drag"
+        const val EXTRA_OPEN_WIDGET_PICKER_ON_START = "open_widget_picker_on_start"
+    }
+
+    /**
+     * [ActivityController] handles closing the activity in the case it is backgrounded without
+     * waiting for an activity result
+     */
+    interface ActivityController {
+        /**
+         * Invoked when waiting for an activity result changes, either initiating such wait or
+         * finishing due to the return of a result.
+         */
+        fun onWaitingForResult(waitingForResult: Boolean) {}
+
+        /** Set the visibility of the activity under control. */
+        fun setActivityFullyVisible(fullyVisible: Boolean) {}
+    }
+
+    /**
+     * A nop ActivityController to be use when the communalEditWidgetsActivityFinishFix flag is
+     * false.
+     */
+    class NopActivityController : ActivityController
+
+    /**
+     * A functional ActivityController to be used when the communalEditWidgetsActivityFinishFix flag
+     * is true.
+     */
+    class ActivityControllerImpl(activity: Activity) : ActivityController {
+        companion object {
+            private const val STATE_EXTRA_IS_WAITING_FOR_RESULT = "extra_is_waiting_for_result"
+        }
+
+        private var waitingForResult = false
+        private var activityFullyVisible = false
+
+        init {
+            activity.registerActivityLifecycleCallbacks(
+                object : ActivityLifecycleCallbacks {
+                    override fun onActivityCreated(
+                        activity: Activity,
+                        savedInstanceState: Bundle?
+                    ) {
+                        waitingForResult =
+                            savedInstanceState?.getBoolean(STATE_EXTRA_IS_WAITING_FOR_RESULT)
+                                ?: false
+                    }
+
+                    override fun onActivityStarted(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityResumed(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityPaused(activity: Activity) {
+                        // Nothing to implement.
+                    }
+
+                    override fun onActivityStopped(activity: Activity) {
+                        // If we're not backgrounded due to waiting for a result (either widget
+                        // selection or configuration), and we are fully visible, then finish the
+                        // activity.
+                        if (
+                            !waitingForResult &&
+                                activityFullyVisible &&
+                                !activity.isChangingConfigurations
+                        ) {
+                            activity.finish()
+                        }
+                    }
+
+                    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+                        outState.putBoolean(STATE_EXTRA_IS_WAITING_FOR_RESULT, waitingForResult)
+                    }
+
+                    override fun onActivityDestroyed(activity: Activity) {
+                        // Nothing to implement.
+                    }
+                }
+            )
+        }
+
+        override fun onWaitingForResult(waitingForResult: Boolean) {
+            this.waitingForResult = waitingForResult
+        }
+
+        override fun setActivityFullyVisible(fullyVisible: Boolean) {
+            activityFullyVisible = fullyVisible
+        }
     }
 
     private val logger = Logger(logBuffer, "EditWidgetsActivity")
 
     private val widgetConfigurator by lazy { widgetConfiguratorFactory.create(this) }
+
+    private var shouldOpenWidgetPickerOnStart = false
+
+    private val activityController: ActivityController =
+        if (communalEditWidgetsActivityFinishFix()) ActivityControllerImpl(this)
+        else NopActivityController()
 
     private val addWidgetActivityLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(StartActivityForResult()) { result ->
@@ -84,18 +187,17 @@ constructor(
                         if (!isPendingWidgetDrag) {
                             val (componentName, user) = getWidgetExtraFromIntent(intent)
                             if (componentName != null && user != null) {
+                                // Add widget at the end.
                                 communalViewModel.onAddWidget(
                                     componentName,
                                     user,
-                                    0,
-                                    widgetConfigurator
+                                    configurator = widgetConfigurator,
                                 )
                             } else {
                                 run { Log.w(TAG, "No AppWidgetProviderInfo found in result.") }
                             }
                         }
-                    }
-                        ?: run { Log.w(TAG, "No data in result.") }
+                    } ?: run { Log.w(TAG, "No data in result.") }
                 }
                 else ->
                     Log.w(
@@ -108,80 +210,121 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        listenForTransitionAndChangeScene()
+
+        activityController.setActivityFullyVisible(false)
         communalViewModel.setEditModeOpen(true)
 
         val windowInsetsController = window.decorView.windowInsetsController
         windowInsetsController?.hide(WindowInsets.Type.systemBars())
         window.setDecorFitsSystemWindows(false)
 
-        val preselectedKey = intent.getStringExtra(EXTRA_PRESELECTED_KEY)
-        communalViewModel.setSelectedKey(preselectedKey)
+        shouldOpenWidgetPickerOnStart =
+            intent.getBooleanExtra(EXTRA_OPEN_WIDGET_PICKER_ON_START, false)
 
         setContent {
             PlatformTheme {
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.outlineVariant),
+                            .background(LocalAndroidColorScheme.current.surfaceDim),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,
                         onOpenWidgetPicker = ::onOpenWidgetPicker,
                         widgetConfigurator = widgetConfigurator,
                         onEditDone = ::onEditDone,
+                        widgetSection = widgetSection,
                     )
+                }
+            }
+        }
+    }
+
+    // Handle scene change to show the activity and animate in its content
+    private fun listenForTransitionAndChangeScene() {
+        lifecycleScope.launch {
+            communalViewModel.canShowEditMode.collect {
+                if (!SceneContainerFlag.isEnabled) {
+                    communalViewModel.changeScene(
+                        scene = CommunalScenes.Blank,
+                        loggingReason = "edit mode opening",
+                        transitionKey = CommunalTransitionKeys.ToEditMode,
+                        keyguardState = KeyguardState.GONE,
+                    )
+                    // wait till transitioned to Blank scene, then animate in communal content in
+                    // edit mode
+                    communalViewModel.currentScene.first { it == CommunalScenes.Blank }
+                }
+
+                communalViewModel.setEditModeState(EditModeState.SHOWING)
+
+                // Inform the ActivityController that we are now fully visible.
+                activityController.setActivityFullyVisible(true)
+
+                // Show the widget picker, if necessary, after the edit activity has animated in.
+                // Waiting until after the activity has appeared avoids transitions issues.
+                if (shouldOpenWidgetPickerOnStart) {
+                    onOpenWidgetPicker()
+                    shouldOpenWidgetPickerOnStart = false
                 }
             }
         }
     }
 
     private fun onOpenWidgetPicker() {
-        val intent = Intent(Intent.ACTION_MAIN).also { it.addCategory(Intent.CATEGORY_HOME) }
-        packageManager
-            .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
-            ?.activityInfo
-            ?.packageName
-            ?.let { packageName ->
-                try {
-                    addWidgetActivityLauncher.launch(
-                        Intent(Intent.ACTION_PICK).apply {
-                            setPackage(packageName)
-                            putExtra(
-                                EXTRA_DESIRED_WIDGET_WIDTH,
-                                resources.getDimensionPixelSize(
-                                    R.dimen.communal_widget_picker_desired_width
-                                )
-                            )
-                            putExtra(
-                                EXTRA_DESIRED_WIDGET_HEIGHT,
-                                resources.getDimensionPixelSize(
-                                    R.dimen.communal_widget_picker_desired_height
-                                )
-                            )
-                            putExtra(
-                                AppWidgetManager.EXTRA_CATEGORY_FILTER,
-                                communalViewModel.getCommunalWidgetCategories
-                            )
-                        }
-                    )
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to launch widget picker activity", e)
-                }
-            }
-            ?: run { Log.e(TAG, "Couldn't resolve launcher package name") }
-    }
-
-    private fun onEditDone() {
-        try {
-            communalViewModel.onSceneChanged(CommunalScenes.Communal)
-            checkNotNull(windowManagerService).lockNow(/* options */ null)
-            finish()
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
+        lifecycleScope.launch {
+            communalViewModel.onOpenWidgetPicker(resources, addWidgetActivityLauncher)
         }
     }
 
+    private fun onEditDone() {
+        lifecycleScope.launch {
+            communalViewModel.cleanupEditModeState()
+
+            communalViewModel.changeScene(
+                scene = CommunalScenes.Communal,
+                loggingReason = "edit mode closing",
+                transitionKey = CommunalTransitionKeys.FromEditMode
+            )
+
+            // Wait for the current scene to be idle on communal.
+            communalViewModel.isIdleOnCommunal.first { it }
+
+            // Lock to go back to the hub after exiting.
+            lockNow()
+            finish()
+        }
+    }
+
+    override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
+        activityController.onWaitingForResult(true)
+        super.startActivityForResult(intent, requestCode, options)
+    }
+
+    override fun startIntentSenderForResult(
+        intent: IntentSender,
+        requestCode: Int,
+        fillInIntent: Intent?,
+        flagsMask: Int,
+        flagsValues: Int,
+        extraFlags: Int,
+        options: Bundle?
+    ) {
+        activityController.onWaitingForResult(true)
+        super.startIntentSenderForResult(
+            intent,
+            requestCode,
+            fillInIntent,
+            flagsMask,
+            flagsValues,
+            extraFlags,
+            options
+        )
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        activityController.onWaitingForResult(false)
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == WidgetConfigurationController.REQUEST_CODE) {
             widgetConfigurator.setConfigurationResult(resultCode)
@@ -191,12 +334,15 @@ constructor(
     override fun onStart() {
         super.onStart()
 
+        communalViewModel.setEditActivityShowing(true)
+
         logger.i("Starting the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_SHOWN)
     }
 
     override fun onStop() {
         super.onStop()
+        communalViewModel.setEditActivityShowing(false)
 
         logger.i("Stopping the communal widget editor activity")
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_EDIT_MODE_GONE)
@@ -204,6 +350,15 @@ constructor(
 
     override fun onDestroy() {
         super.onDestroy()
+        communalViewModel.cleanupEditModeState()
         communalViewModel.setEditModeOpen(false)
+    }
+
+    private fun lockNow() {
+        try {
+            checkNotNull(windowManagerService).lockNow(/* options */ null)
+        } catch (e: RemoteException) {
+            Log.e(TAG, "Couldn't lock the device as WindowManager is dead.")
+        }
     }
 }

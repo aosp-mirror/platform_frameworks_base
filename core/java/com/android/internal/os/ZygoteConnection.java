@@ -93,6 +93,9 @@ class ZygoteConnection {
             throw ex;
         }
 
+        if (peer.getUid() != Process.SYSTEM_UID) {
+            throw new ZygoteSecurityException("Only system UID is allowed to connect to Zygote.");
+        }
         isEof = false;
     }
 
@@ -159,14 +162,6 @@ class ZygoteConnection {
 
                 if (parsedArgs.mPreloadDefault) {
                     handlePreload();
-                    return null;
-                }
-
-                if (parsedArgs.mPreloadPackage != null) {
-                    handlePreloadPackage(parsedArgs.mPreloadPackage,
-                            parsedArgs.mPreloadPackageLibs,
-                            parsedArgs.mPreloadPackageLibFileName,
-                            parsedArgs.mPreloadPackageCacheKey);
                     return null;
                 }
 
@@ -470,11 +465,6 @@ class ZygoteConnection {
 
     protected DataOutputStream getSocketOutputStream() {
         return mSocketOutStream;
-    }
-
-    protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
-            String cacheKey) {
-        throw new RuntimeException("Zygote does not support package preloading");
     }
 
     protected boolean canPreloadApp() {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Perfetto"
-
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <nativehelper/JNIHelp.h>

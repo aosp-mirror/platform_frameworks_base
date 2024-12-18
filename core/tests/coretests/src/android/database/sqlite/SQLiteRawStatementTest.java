@@ -19,6 +19,7 @@ package android.database.sqlite;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -26,12 +27,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.SystemClock;
-import android.test.AndroidTestCase;
 import android.util.Log;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -507,6 +507,12 @@ public class SQLiteRawStatementTest {
                 s.bindInt(1, 3);
                 s.step();
                 s.reset();
+                // Bind a zero-length blob
+                s.clearBindings();
+                s.bindInt(1, 4);
+                s.bindBlob(2, new byte[0]);
+                s.step();
+                s.reset();
             }
             mDatabase.setTransactionSuccessful();
         } finally {
@@ -545,6 +551,17 @@ public class SQLiteRawStatementTest {
                 for (int i = 0; i < c.length; i++) c[i] = 0;
                 s.bindInt(1, 3);
                 assertTrue(s.step());
+                assertNull(s.getColumnBlob(0));
+                assertEquals(0, s.readColumnBlob(0, c, 0, c.length, 0));
+                for (int i = 0; i < c.length; i++) assertEquals(0, c[i]);
+                s.reset();
+
+                // Fetch the zero-length blob
+                s.bindInt(1, 4);
+                assertTrue(s.step());
+                byte[] r = s.getColumnBlob(0);
+                assertNotNull(r);
+                assertEquals(0, r.length);
                 assertEquals(0, s.readColumnBlob(0, c, 0, c.length, 0));
                 for (int i = 0; i < c.length; i++) assertEquals(0, c[i]);
                 s.reset();
@@ -566,6 +583,83 @@ public class SQLiteRawStatementTest {
         } catch (AssertionError e) {
             // Pass on the fail from the try-block before the generic catch below can see it.
             throw e;
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    @Test
+    public void testText() {
+        mDatabase.beginTransaction();
+        try {
+            final String query = "CREATE TABLE t1 (i int, b text)";
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
+                assertFalse(s.step());
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Insert data into the table.
+        mDatabase.beginTransaction();
+        try {
+            final String query = "INSERT INTO t1 (i, b) VALUES (?1, ?2)";
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
+                // Bind a string
+                s.bindInt(1, 1);
+                s.bindText(2, "text");
+                s.step();
+                s.reset();
+                s.clearBindings();
+
+                // Bind a zero-length string
+                s.bindInt(1, 2);
+                s.bindText(2, "");
+                s.step();
+                s.reset();
+                s.clearBindings();
+
+                // Bind a null string
+                s.clearBindings();
+                s.bindInt(1, 3);
+                s.step();
+                s.reset();
+                s.clearBindings();
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Read back data and verify it against the reference copy.
+        mDatabase.beginTransactionReadOnly();
+        try {
+            final String query = "SELECT (b) FROM t1 WHERE i = ?1";
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(query)) {
+                // Fetch the entire reference array.
+                s.bindInt(1, 1);
+                assertTrue(s.step());
+                assertEquals(SQLiteRawStatement.SQLITE_DATA_TYPE_TEXT, s.getColumnType(0));
+
+                String a = s.getColumnText(0);
+                assertNotNull(a);
+                assertEquals(a, "text");
+                s.reset();
+
+                s.bindInt(1, 2);
+                assertTrue(s.step());
+                String b = s.getColumnText(0);
+                assertNotNull(b);
+                assertEquals(b, "");
+                s.reset();
+
+                s.bindInt(1, 3);
+                assertTrue(s.step());
+                String c = s.getColumnText(0);
+                assertNull(c);
+                s.reset();
+            }
         } finally {
             mDatabase.endTransaction();
         }
@@ -901,6 +995,33 @@ public class SQLiteRawStatementTest {
             assertTrue(s.step());
             assertEquals(2, s.getColumnInt(0));
             assertEquals(cat, s.getColumnName(0));
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * This test verifies that the JNI exception thrown because of a bad column is actually thrown
+     * and does not crash the VM.
+     */
+    @Test
+    public void testJniExceptions() {
+        // Create the t1 table.
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (i int, j int);");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            s.step();
+            s.getColumnText(5); // out-of-range column
+            fail("JNI exception not thrown");
+        } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
+            // Passing case.
         } finally {
             mDatabase.endTransaction();
         }

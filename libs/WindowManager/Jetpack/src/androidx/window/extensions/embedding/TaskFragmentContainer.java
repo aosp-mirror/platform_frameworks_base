@@ -53,14 +53,12 @@ import java.util.Objects;
 class TaskFragmentContainer {
     private static final int APPEAR_EMPTY_TIMEOUT_MS = 3000;
 
+    /** Parcelable data of this TaskFragmentContainer. */
+    @NonNull
+    private final ParcelableTaskFragmentContainerData mParcelableData;
+
     @NonNull
     private final SplitController mController;
-
-    /**
-     * Client-created token that uniquely identifies the task fragment container instance.
-     */
-    @NonNull
-    private final IBinder mToken;
 
     /** Parent leaf Task. */
     @NonNull
@@ -103,9 +101,6 @@ class TaskFragmentContainer {
      */
     private final List<IBinder> mActivitiesToFinishOnExit = new ArrayList<>();
 
-    @Nullable
-    private final String mOverlayTag;
-
     /**
      * The launch options that was used to create this container. Must not {@link Bundle#isEmpty()}
      * for {@link #isOverlay()} container.
@@ -117,13 +112,9 @@ class TaskFragmentContainer {
     private boolean mIsFinished;
 
     /**
-     * Bounds that were requested last via {@link android.window.WindowContainerTransaction}.
-     */
-    private final Rect mLastRequestedBounds = new Rect();
-
-    /**
      * Windowing mode that was requested last via {@link android.window.WindowContainerTransaction}.
      */
+    // TODO(b/289875940): review this and other field that might need to be moved in the base class.
     @WindowingMode
     private int mLastRequestedWindowingMode = WINDOWING_MODE_UNDEFINED;
 
@@ -172,23 +163,14 @@ class TaskFragmentContainer {
     private boolean mIsIsolatedNavigationEnabled;
 
     /**
+     * Whether this TaskFragment is pinned.
+     */
+    private boolean mIsPinned;
+
+    /**
      * Whether to apply dimming on the parent Task that was requested last.
      */
     private boolean mLastDimOnTask;
-
-    /**
-     * @see #TaskFragmentContainer(Activity, Intent, TaskContainer, SplitController,
-     * TaskFragmentContainer, String, Bundle)
-     */
-    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
-                          @Nullable Intent pendingAppearedIntent,
-                          @NonNull TaskContainer taskContainer,
-                          @NonNull SplitController controller,
-                          @Nullable TaskFragmentContainer pairedPrimaryContainer) {
-        this(pendingAppearedActivity, pendingAppearedIntent, taskContainer,
-                controller, pairedPrimaryContainer, null /* overlayTag */,
-                null /* launchOptions */);
-    }
 
     /**
      * Creates a container with an existing activity that will be re-parented to it in a window
@@ -197,24 +179,26 @@ class TaskFragmentContainer {
      * @param overlayTag                Sets to indicate this taskFragment is an overlay container
      * @param launchOptions             The launch options to create this container. Must not be
      *                                  {@code null} for an overlay container
+     * @param associatedActivity        the associated activity of the overlay container. Must be
+     *                                  {@code null} for a non-overlay container.
      */
-    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
+    private TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
             @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller,
             @Nullable TaskFragmentContainer pairedPrimaryContainer, @Nullable String overlayTag,
-            @Nullable Bundle launchOptions) {
+            @Nullable Bundle launchOptions, @Nullable Activity associatedActivity) {
+        mParcelableData = new ParcelableTaskFragmentContainerData(
+                new Binder("TaskFragmentContainer"), overlayTag,
+                associatedActivity != null ? associatedActivity.getActivityToken() : null);
+
         if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
                 || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
             throw new IllegalArgumentException(
                     "One and only one of pending activity and intent must be non-null");
         }
         mController = controller;
-        mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
-        mOverlayTag = overlayTag;
-        if (overlayTag != null) {
-            Objects.requireNonNull(launchOptions);
-        }
+
         if (launchOptions != null) {
             mLaunchOptions.putAll(launchOptions);
         }
@@ -249,6 +233,23 @@ class TaskFragmentContainer {
             addPendingAppearedActivity(pendingAppearedActivity);
         }
         mPendingAppearedIntent = pendingAppearedIntent;
+
+        // Save the information necessary for restoring the overlay when needed.
+        if (overlayTag != null && pendingAppearedIntent != null
+                && associatedActivity != null && !associatedActivity.isFinishing()) {
+            final IBinder associatedActivityToken = associatedActivity.getActivityToken();
+            final OverlayContainerRestoreParams params = new OverlayContainerRestoreParams(
+                    mParcelableData.mToken, launchOptions, pendingAppearedIntent);
+            mController.mOverlayRestoreParams.put(associatedActivityToken, params);
+        }
+    }
+
+    /** This is only used when restoring it from a {@link ParcelableTaskFragmentContainerData}. */
+    TaskFragmentContainer(@NonNull ParcelableTaskFragmentContainerData data,
+            @NonNull SplitController splitController, @NonNull TaskContainer taskContainer) {
+        mParcelableData = data;
+        mController = splitController;
+        mTaskContainer = taskContainer;
     }
 
     /**
@@ -256,7 +257,7 @@ class TaskFragmentContainer {
      */
     @NonNull
     IBinder getTaskFragmentToken() {
-        return mToken;
+        return mParcelableData.mToken;
     }
 
     /** List of non-finishing activities that belong to this container and live in this process. */
@@ -325,6 +326,13 @@ class TaskFragmentContainer {
         return mInfo != null && mInfo.isVisible();
     }
 
+    /**
+     * See {@link TaskFragmentInfo#isTopNonFinishingChild()}
+     */
+    boolean isTopNonFinishingChild() {
+        return mInfo != null && mInfo.isTopNonFinishingChild();
+    }
+
     /** Whether the TaskFragment is in an intermediate state waiting for the server update.*/
     boolean isInIntermediateState() {
         if (mInfo == null) {
@@ -368,7 +376,8 @@ class TaskFragmentContainer {
             return null;
         }
         return new ActivityStack(activities, isEmpty(),
-                ActivityStack.Token.createFromBinder(mToken), mOverlayTag);
+                ActivityStack.Token.createFromBinder(mParcelableData.mToken),
+                mParcelableData.mOverlayTag);
     }
 
     /** Adds the activity that will be reparented to this container. */
@@ -392,7 +401,7 @@ class TaskFragmentContainer {
         final ActivityThread.ActivityClientRecord record = ActivityThread
                 .currentActivityThread().getActivityClient(activityToken);
         if (record != null) {
-            record.mTaskFragmentToken = mToken;
+            record.mTaskFragmentToken = mParcelableData.mToken;
         }
     }
 
@@ -420,14 +429,38 @@ class TaskFragmentContainer {
         }
     }
 
+    /** Called when the activity {@link Activity#isFinishing()} and paused. */
+    void onFinishingActivityPaused(@NonNull WindowContainerTransaction wct,
+                                   @NonNull IBinder activityToken) {
+        finishSelfWithActivityIfNeeded(wct, activityToken);
+    }
+
     /** Called when the activity is destroyed. */
-    void onActivityDestroyed(@NonNull IBinder activityToken) {
+    void onActivityDestroyed(@NonNull WindowContainerTransaction wct,
+                             @NonNull IBinder activityToken) {
         removePendingAppearedActivity(activityToken);
         if (mInfo != null) {
             // Remove the activity now because there can be a delay before the server callback.
             mInfo.getActivities().remove(activityToken);
         }
         mActivitiesToFinishOnExit.remove(activityToken);
+        finishSelfWithActivityIfNeeded(wct, activityToken);
+    }
+
+    @VisibleForTesting
+    void finishSelfWithActivityIfNeeded(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder activityToken) {
+        if (mIsFinished) {
+            return;
+        }
+        // Early return if this container is not an overlay with activity association.
+        if (!isOverlayWithActivityAssociation()) {
+            return;
+        }
+        if (mParcelableData.mAssociatedActivityToken == activityToken) {
+            // If the associated activity is destroyed, also finish this overlay container.
+            mController.mPresenter.cleanupContainer(wct, this, false /* shouldFinishDependent */);
+        }
     }
 
     @Nullable
@@ -456,7 +489,7 @@ class TaskFragmentContainer {
         // sure the controller considers this container as the one containing the activity.
         // This is needed when the activity is added as pending appeared activity to one
         // TaskFragment while it is also an appeared activity in another.
-        return mController.getContainerWithActivity(activityToken) == this;
+        return mTaskContainer.getContainerWithActivity(activityToken) == this;
     }
 
     /** Whether this activity has appeared in the TaskFragment on the server side. */
@@ -731,8 +764,8 @@ class TaskFragmentContainer {
      * @see WindowContainerTransaction#setRelativeBounds
      */
     boolean areLastRequestedBoundsEqual(@Nullable Rect relBounds) {
-        return (relBounds == null && mLastRequestedBounds.isEmpty())
-                || mLastRequestedBounds.equals(relBounds);
+        return (relBounds == null && mParcelableData.mLastRequestedBounds.isEmpty())
+                || mParcelableData.mLastRequestedBounds.equals(relBounds);
     }
 
     /**
@@ -742,10 +775,14 @@ class TaskFragmentContainer {
      */
     void setLastRequestedBounds(@Nullable Rect relBounds) {
         if (relBounds == null) {
-            mLastRequestedBounds.setEmpty();
+            mParcelableData.mLastRequestedBounds.setEmpty();
         } else {
-            mLastRequestedBounds.set(relBounds);
+            mParcelableData.mLastRequestedBounds.set(relBounds);
         }
+    }
+
+    @NonNull Rect getLastRequestedBounds() {
+        return mParcelableData.mLastRequestedBounds;
     }
 
     /**
@@ -845,6 +882,34 @@ class TaskFragmentContainer {
         mIsIsolatedNavigationEnabled = isolatedNavigationEnabled;
     }
 
+    /**
+     * Returns whether this container is pinned.
+     *
+     * @see android.window.TaskFragmentOperation#OP_TYPE_SET_PINNED
+     */
+    boolean isPinned() {
+        return mIsPinned;
+    }
+
+    /**
+     * Sets whether to pin this container or not.
+     *
+     * @see #isPinned()
+     */
+    void setPinned(boolean pinned) {
+        mIsPinned = pinned;
+    }
+
+    /**
+     * Indicates to skip activity resolving if the activity is from this container.
+     *
+     * @see #isIsolatedNavigationEnabled()
+     * @see #isPinned()
+     */
+    boolean shouldSkipActivityResolving() {
+        return isIsolatedNavigationEnabled() || isPinned();
+    }
+
     /** Sets whether to apply dim on the parent Task. */
     void setLastDimOnTask(boolean lastDimOnTask) {
         mLastDimOnTask = lastDimOnTask;
@@ -886,6 +951,16 @@ class TaskFragmentContainer {
     /** Gets the parent leaf Task id. */
     int getTaskId() {
         return mTaskContainer.getTaskId();
+    }
+
+    @NonNull
+    IBinder getToken() {
+        return mParcelableData.mToken;
+    }
+
+    @NonNull
+    ParcelableTaskFragmentContainerData getParcelableData() {
+        return mParcelableData;
     }
 
     /** Gets the parent Task. */
@@ -934,7 +1009,7 @@ class TaskFragmentContainer {
 
     /** Returns whether this taskFragment container is an overlay container. */
     boolean isOverlay() {
-        return mOverlayTag != null;
+        return mParcelableData.mOverlayTag != null;
     }
 
     /**
@@ -943,7 +1018,7 @@ class TaskFragmentContainer {
      */
     @Nullable
     String getOverlayTag() {
-        return mOverlayTag;
+        return mParcelableData.mOverlayTag;
     }
 
     /**
@@ -955,6 +1030,32 @@ class TaskFragmentContainer {
     @NonNull
     Bundle getLaunchOptions() {
         return mLaunchOptions;
+    }
+
+    /**
+     * Returns the associated Activity token of this overlay container. It must be {@code null}
+     * for non-overlay container.
+     * <p>
+     * If an overlay container is associated with an activity, this overlay container will be
+     * dismissed when the associated activity is destroyed. If the overlay container is visible,
+     * activity will be launched on top of the overlay container and expanded to fill the parent
+     * container.
+     */
+    @Nullable
+    IBinder getAssociatedActivityToken() {
+        return mParcelableData.mAssociatedActivityToken;
+    }
+
+    /**
+     * Returns {@code true} if the overlay container should be always on top, which should be
+     * a non-fill-parent overlay without activity association.
+     */
+    boolean isAlwaysOnTopOverlay() {
+        return isOverlay() && mParcelableData.mAssociatedActivityToken == null;
+    }
+
+    boolean isOverlayWithActivityAssociation() {
+        return isOverlay() && mParcelableData.mAssociatedActivityToken != null;
     }
 
     @Override
@@ -971,12 +1072,13 @@ class TaskFragmentContainer {
     private String toString(boolean includeContainersToFinishOnExit) {
         return "TaskFragmentContainer{"
                 + " parentTaskId=" + getTaskId()
-                + " token=" + mToken
+                + " token=" + mParcelableData.mToken
                 + " topNonFinishingActivity=" + getTopNonFinishingActivity()
                 + " runningActivityCount=" + getRunningActivityCount()
                 + " isFinished=" + mIsFinished
-                + " overlayTag=" + mOverlayTag
-                + " lastRequestedBounds=" + mLastRequestedBounds
+                + " overlayTag=" + mParcelableData.mOverlayTag
+                + " associatedActivityToken=" + mParcelableData.mAssociatedActivityToken
+                + " lastRequestedBounds=" + mParcelableData.mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="
                 + containersToFinishOnExitToString() : "")
@@ -996,5 +1098,137 @@ class TaskFragmentContainer {
             }
         }
         return sb.append("]").toString();
+    }
+
+    static final class Builder {
+        @NonNull
+        private final SplitController mSplitController;
+
+        // The parent Task id of the new TaskFragment.
+        private final int mTaskId;
+
+        // The activity in the same Task so that we can get the Task bounds if needed.
+        @NonNull
+        private final Activity mActivityInTask;
+
+        // The activity that will be reparented to the TaskFragment.
+        @Nullable
+        private Activity mPendingAppearedActivity;
+
+        // The Intent that will be started in the TaskFragment.
+        @Nullable
+        private Intent mPendingAppearedIntent;
+
+        // The paired primary {@link TaskFragmentContainer}. When it is set, the new container
+        // will be added right above it.
+        @Nullable
+        private TaskFragmentContainer mPairedPrimaryContainer;
+
+        // The launch options bundle to create a container. Must be specified for overlay container.
+        @Nullable
+        private Bundle mLaunchOptions;
+
+        // The tag for the new created overlay container. This is required when creating an
+        // overlay container.
+        @Nullable
+        private String mOverlayTag;
+
+        // The associated activity of the overlay container. Must be {@code null} for a
+        // non-overlay container.
+        @Nullable
+        private Activity mAssociatedActivity;
+
+        Builder(@NonNull SplitController splitController, int taskId,
+                @Nullable Activity activityInTask) {
+            if (taskId <= 0) {
+                throw new IllegalArgumentException("taskId is invalid, " + taskId);
+            }
+
+            mSplitController = splitController;
+            mTaskId = taskId;
+            mActivityInTask = activityInTask;
+        }
+
+        @NonNull
+        Builder setPendingAppearedActivity(@Nullable Activity pendingAppearedActivity) {
+            mPendingAppearedActivity = pendingAppearedActivity;
+            return this;
+        }
+
+        @NonNull
+        Builder setPendingAppearedIntent(@Nullable Intent pendingAppearedIntent) {
+            mPendingAppearedIntent = pendingAppearedIntent;
+            return this;
+        }
+
+        @NonNull
+        Builder setPairedPrimaryContainer(@Nullable TaskFragmentContainer pairedPrimaryContainer) {
+            mPairedPrimaryContainer = pairedPrimaryContainer;
+            return this;
+        }
+
+        @NonNull
+        Builder setLaunchOptions(@Nullable Bundle launchOptions) {
+            mLaunchOptions = launchOptions;
+            return this;
+        }
+
+        @NonNull
+        Builder setOverlayTag(@Nullable String overlayTag) {
+            mOverlayTag = overlayTag;
+            return this;
+        }
+
+        @NonNull
+        Builder setAssociatedActivity(@Nullable Activity associatedActivity) {
+            mAssociatedActivity = associatedActivity;
+            return this;
+        }
+
+        @NonNull
+        TaskFragmentContainer build() {
+            if (mOverlayTag != null) {
+                Objects.requireNonNull(mLaunchOptions);
+            } else if (mAssociatedActivity != null) {
+                throw new IllegalArgumentException("Associated activity must be null for "
+                        + "non-overlay activity.");
+            }
+
+            TaskContainer taskContainer = mSplitController.getTaskContainer(mTaskId);
+            if (taskContainer == null && mActivityInTask == null) {
+                throw new IllegalArgumentException("mActivityInTask must be set.");
+            }
+
+            if (taskContainer == null) {
+                // Adding a TaskContainer if no existed one.
+                taskContainer = new TaskContainer(mTaskId, mActivityInTask, mSplitController);
+                mSplitController.addTaskContainer(mTaskId, taskContainer);
+            }
+
+            return new TaskFragmentContainer(mPendingAppearedActivity, mPendingAppearedIntent,
+                    taskContainer, mSplitController, mPairedPrimaryContainer, mOverlayTag,
+                    mLaunchOptions, mAssociatedActivity);
+        }
+    }
+
+    static class OverlayContainerRestoreParams {
+        /** The token of the overlay container */
+        @NonNull
+        final IBinder mOverlayToken;
+
+        /** The launch options to create this container. */
+        @NonNull
+        final Bundle mOptions;
+
+        /** The Intent that used to be started in the overlay container. */
+        @NonNull
+        final Intent mIntent;
+
+        OverlayContainerRestoreParams(@NonNull IBinder overlayToken, @NonNull Bundle options,
+                @NonNull Intent intent) {
+            mOverlayToken = overlayToken;
+            mOptions = options;
+            mIntent = intent;
+        }
     }
 }

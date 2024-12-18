@@ -17,6 +17,7 @@
 package com.android.server.locales;
 
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.UserHandle;
 
 import com.android.internal.content.PackageMonitor;
@@ -48,8 +49,8 @@ final class LocaleManagerServicePackageMonitor extends PackageMonitor {
     }
 
     @Override
-    public void onPackageAdded(String packageName, int uid) {
-        mBackupHelper.onPackageAdded(packageName, uid);
+    public void onPackageAddedWithExtras(String packageName, int uid, Bundle extras) {
+        mBackupHelper.onPackageAddedWithExtras(packageName, uid, extras);
     }
 
     @Override

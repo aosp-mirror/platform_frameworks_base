@@ -11,10 +11,7 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {"include-filter": "com.android.server"}
-      ]
+      "name": "FrameworksMockingServicesTests_android_server"
     }
   ]
 }

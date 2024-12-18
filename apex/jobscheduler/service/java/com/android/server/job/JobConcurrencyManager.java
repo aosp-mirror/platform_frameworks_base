@@ -1034,7 +1034,7 @@ class JobConcurrencyManager {
                 for (int p = preferredUidOnly.size() - 1; p >= 0; --p) {
                     final ContextAssignment assignment = preferredUidOnly.get(p);
                     final JobStatus runningJob = assignment.context.getRunningJobLocked();
-                    if (runningJob.getUid() != nextPending.getUid()) {
+                    if (runningJob == null || runningJob.getUid() != nextPending.getUid()) {
                         continue;
                     }
                     final int jobBias = mService.evaluateJobBiasLocked(runningJob);
@@ -1375,8 +1375,10 @@ class JobConcurrencyManager {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
-            if (jobStatus != null && !jsc.isWithinExecutionGuaranteeTime()
-                    && restriction.isJobRestricted(jobStatus)) {
+            if (jobStatus != null
+                    && !jsc.isWithinExecutionGuaranteeTime()
+                    && restriction.isJobRestricted(
+                            jobStatus, mService.evaluateJobBiasLocked(jobStatus))) {
                 jsc.cancelExecutingJobLocked(restriction.getStopReason(),
                         restriction.getInternalReason(),
                         JobParameters.getInternalReasonCodeDescription(
@@ -1650,6 +1652,16 @@ class JobConcurrencyManager {
                     continue;
                 }
 
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
                 if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                     Slog.w(TAG, "Already running similar job to: " + nextPending);
                 }
@@ -1732,6 +1744,16 @@ class JobConcurrencyManager {
                     Slog.wtf(TAG, "Pending queue contained a running job");
                     if (DEBUG) {
                         Slog.e(TAG, "Pending+running job: " + nextPending);
+                    }
+                    pendingJobQueue.remove(nextPending);
+                    continue;
+                }
+
+                if (Flags.countQuotaFix() && !nextPending.isReady()) {
+                    // This could happen when the constraints for the job have been marked
+                    // as unsatisfiled but hasn't been removed from the pending queue yet.
+                    if (DEBUG) {
+                        Slog.w(TAG, "Pending+not ready job: " + nextPending);
                     }
                     pendingJobQueue.remove(nextPending);
                     continue;
@@ -1894,8 +1916,9 @@ class JobConcurrencyManager {
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (jc.stopIfExecutingLocked(pkgName, userId, namespace, matchJobId, jobId,
-                    stopReason, internalStopReason)) {
+            if (js != null &&
+                    jc.stopIfExecutingLocked(pkgName, userId, namespace,
+                        matchJobId, jobId, stopReason, internalStopReason)) {
                 foundSome = true;
                 pw.print("Stopping job: ");
                 js.printUniqueId(pw);

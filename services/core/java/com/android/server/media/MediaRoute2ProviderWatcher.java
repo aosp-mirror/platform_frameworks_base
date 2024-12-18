@@ -56,6 +56,7 @@ final class MediaRoute2ProviderWatcher {
     private final PackageManager mPackageManager;
 
     private final ArrayList<MediaRoute2ProviderServiceProxy> mProxies = new ArrayList<>();
+    private final Runnable mScanPackagesRunnable = this::scanPackages;
     private boolean mRunning;
 
     MediaRoute2ProviderWatcher(Context context,
@@ -106,7 +107,7 @@ final class MediaRoute2ProviderWatcher {
             mRunning = false;
 
             mContext.unregisterReceiver(mScanPackagesReceiver);
-            mHandler.removeCallbacks(this::scanPackages);
+            mHandler.removeCallbacks(mScanPackagesRunnable);
 
             // Stop all providers.
             for (int i = mProxies.size() - 1; i >= 0; i--) {
@@ -142,9 +143,14 @@ final class MediaRoute2ProviderWatcher {
                     MediaRoute2ProviderServiceProxy proxy =
                             new MediaRoute2ProviderServiceProxy(
                                     mContext,
+                                    mHandler.getLooper(),
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     isSelfScanOnlyProvider,
                                     mUserId);
+                    Slog.i(
+                            TAG,
+                            "Enabling proxy for MediaRoute2ProviderService: "
+                                    + proxy.mComponentName);
                     proxy.start(/* rebindIfDisconnected= */ false);
                     mProxies.add(targetIndex++, proxy);
                     mCallback.onAddProviderService(proxy);
@@ -162,6 +168,9 @@ final class MediaRoute2ProviderWatcher {
         if (targetIndex < mProxies.size()) {
             for (int i = mProxies.size() - 1; i >= targetIndex; i--) {
                 MediaRoute2ProviderServiceProxy proxy = mProxies.get(i);
+                Slog.i(
+                        TAG,
+                        "Disabling proxy for MediaRoute2ProviderService: " + proxy.mComponentName);
                 mCallback.onRemoveProviderService(proxy);
                 mProxies.remove(proxy);
                 proxy.stop();
@@ -181,8 +190,8 @@ final class MediaRoute2ProviderWatcher {
     }
 
     private void postScanPackagesIfNeeded() {
-        if (!mHandler.hasCallbacks(this::scanPackages)) {
-            mHandler.post(this::scanPackages);
+        if (!mHandler.hasCallbacks(mScanPackagesRunnable)) {
+            mHandler.post(mScanPackagesRunnable);
         }
     }
 

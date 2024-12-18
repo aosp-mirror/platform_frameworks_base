@@ -251,6 +251,7 @@ public class ServiceInfo extends ComponentInfo
      * {@link android.Manifest.permission#NFC},
      * {@link android.Manifest.permission#TRANSMIT_IR},
      * {@link android.Manifest.permission#UWB_RANGING},
+     * {@link android.Manifest.permission#RANGING},
      * or has been granted the access to one of the attached USB devices/accessories.
      */
     @RequiresPermission(
@@ -267,6 +268,7 @@ public class ServiceInfo extends ComponentInfo
                 Manifest.permission.NFC,
                 Manifest.permission.TRANSMIT_IR,
                 Manifest.permission.UWB_RANGING,
+                Manifest.permission.RANGING,
             },
             conditional = true
     )

@@ -998,7 +998,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Tooltip">
         <item name="fontFamily">sans-serif</item>
-        <item name="textSize">14sp</item>
+        <item name="textSize">?android:attr/tooltipFontSize</item>
     </style>
 
     <style name="Widget.ActivityChooserView">
@@ -1497,6 +1497,60 @@ please see styles_device_defaults.xml.
     </style>
 
     <!-- @hide -->
+    <style name="PointerIconVectorStyleFillBlack">
+        <item name="pointerIconVectorFill">@color/black</item>
+        <item name="pointerIconVectorFillInverse">@color/white</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillGreen">
+        <item name="pointerIconVectorFill">#1AA64A</item>
+        <item name="pointerIconVectorFillInverse">#1AA64A</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillRed">
+        <item name="pointerIconVectorFill">#F55E57</item>
+        <item name="pointerIconVectorFillInverse">#F55E57</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillPink">
+        <item name="pointerIconVectorFill">#F94AAB</item>
+        <item name="pointerIconVectorFillInverse">#F94AAB</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillBlue">
+        <item name="pointerIconVectorFill">#009DC9</item>
+        <item name="pointerIconVectorFillInverse">#009DC9</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillPurple">
+        <item name="pointerIconVectorFill">#AD72FF</item>
+        <item name="pointerIconVectorFillInverse">#AD72FF</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeWhite">
+        <item name="pointerIconVectorStroke">@color/white</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeBlack">
+        <item name="pointerIconVectorStroke">@color/black</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeNone">
+        <item name="pointerIconVectorStroke">@color/transparent</item>
+        <item name="pointerIconVectorStrokeInverse">@color/transparent</item>
+    </style>
+
+    <!-- @hide -->
     <style name="aerr_list_item" parent="Widget.Material.Light.Button.Borderless">
         <item name="minHeight">?attr/listPreferredItemHeightSmall</item>
         <item name="textAppearance">?attr/textAppearanceListItemSmall</item>
@@ -1684,5 +1738,18 @@ please see styles_device_defaults.xml.
         <item name="android:paddingEnd">8dp</item>
         <item name="android:paddingStart">8dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="AccessibilityButtonChooserDialog"
+           parent="@style/Theme.DeviceDefault.Resolver">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <!--
+        TODO(b/309578419): Make activities go edge-to-edge properly and then remove this.
+    -->
+    <style name="GrantCredentialsPermissionActivity"
+           parent="@style/Theme.DeviceDefault.Light.DialogWhenLarge">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 </resources>

@@ -31,12 +31,13 @@ import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 
 /**
  * An {@link AlphaOptimizedImageView} that is responsible for rendering a dot. Used by
- * {@link DreamOverlayStatusBarView}.
+ * {@link AmbientStatusBarView}.
  */
 public class DreamOverlayDotImageView extends AlphaOptimizedImageView {
     private final @ColorInt int mDotColor;

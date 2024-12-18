@@ -1,11 +1,11 @@
 # Remain no owner because multiple modules may touch this file.
 per-file Context.java = *
 per-file ContextWrapper.java = *
-per-file *Content* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *Sync* = file:/services/core/java/com/android/server/am/OWNERS
+per-file *Content* = varunshah@google.com, yamasani@google.com
+per-file *Sync* = file:/apex/jobscheduler/JOB_OWNERS
 per-file IntentFilter.java = file:/PACKAGE_MANAGER_OWNERS
 per-file UriRelativeFilter* = file:/PACKAGE_MANAGER_OWNERS
-per-file IntentFilter.java = file:/services/core/java/com/android/server/am/OWNERS
+per-file IntentFilter.java = file:/INTENT_OWNERS
 per-file Intent.java = file:/INTENT_OWNERS
 per-file AutofillOptions* = file:/core/java/android/service/autofill/OWNERS
 per-file ContentCaptureOptions* = file:/core/java/android/service/contentcapture/OWNERS
@@ -14,3 +14,4 @@ per-file ComponentCallbacksController = file:/services/core/java/com/android/ser
 per-file ComponentCallbacksController = charlesccchen@google.com
 per-file AttributionSource* = file:/core/java/android/permission/OWNERS
 per-file Broadcast* = file:/BROADCASTS_OWNERS
+per-file ComponentCallbacks*.java = file:/PERFORMANCE_OWNERS

@@ -52,3 +52,11 @@ flag {
     bug: "296844513"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_increased_bmm_logging_for_restore_at_install"
+    namespace: "onboarding"
+    description: "Increase BMM logging coverage in restore at install flow."
+    bug: "331749778"
+    is_fixed_read_only: true
+}

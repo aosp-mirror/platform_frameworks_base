@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import static android.content.pm.SigningInfo.AppSigningSchemeVersion;
 import static android.media.audio.Flags.FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY;
 
 import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES;
@@ -59,9 +60,12 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -74,6 +78,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -92,6 +97,7 @@ import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.SipDelegateManager;
 import android.util.AndroidException;
 import android.util.Log;
+import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.parsing.PackageInfoCommonUtils;
@@ -144,6 +150,7 @@ public abstract class PackageManager {
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class NameNotFoundException extends AndroidException {
         public NameNotFoundException() {
         }
@@ -267,10 +274,32 @@ public abstract class PackageManager {
             "android.app.PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a app to inform the installer that a file containing the app's android
+     * safety label data is bundled into the APK as a raw resource.
+     *
+     * <p>For example:
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.content.PROPERTY_ANDROID_SAFETY_LABEL"
+     *     android:resource="@raw/app-metadata"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    public static final String PROPERTY_ANDROID_SAFETY_LABEL =
+            "android.content.PROPERTY_ANDROID_SAFETY_LABEL";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
      * the property itself.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * In android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and earlier,
+     * the {@code equals} and {@code hashCode} methods for this class may not function as expected.
      */
     public static final class Property implements Parcelable {
         private static final int TYPE_BOOLEAN = 1;
@@ -502,6 +531,40 @@ public abstract class PackageManager {
                 return new Property[size];
             }
         };
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Property)) {
+                return false;
+            }
+            final Property property = (Property) obj;
+            return mType == property.mType &&
+                    Objects.equals(mName, property.mName) &&
+                    Objects.equals(mClassName, property.mClassName) &&
+                    Objects.equals(mPackageName, property.mPackageName) &&
+                    (mType == TYPE_BOOLEAN ? mBooleanValue == property.mBooleanValue :
+                     mType == TYPE_FLOAT ? Float.compare(mFloatValue, property.mFloatValue) == 0 :
+                     mType == TYPE_INTEGER ? mIntegerValue == property.mIntegerValue :
+                     mType == TYPE_RESOURCE ? mIntegerValue == property.mIntegerValue :
+                     mStringValue.equals(property.mStringValue));
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(mName, mType, mClassName, mPackageName);
+            if (mType == TYPE_BOOLEAN) {
+                result = 31 * result + (mBooleanValue ? 1 : 0);
+            } else if (mType == TYPE_FLOAT) {
+                result = 31 * result + Float.floatToIntBits(mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_RESOURCE) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_STRING) {
+                result = 31 * result + mStringValue.hashCode();
+            }
+            return result;
+        }
     }
 
     /**
@@ -895,7 +958,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
-            MATCH_CLONE_PROFILE,
+            MATCH_CLONE_PROFILE_LONG,
             MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1235,10 +1298,11 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
@@ -3104,6 +3168,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of ranging with
+     * other devices using channel sounding via Bluetooth Low Energy radio.
+     */
+    @FlaggedApi(com.android.ranging.flags.Flags.FLAG_RANGING_CS_ENABLED)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING =
+             "android.hardware.bluetooth_le.channel_sounding";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */
@@ -4376,8 +4450,6 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device supports freeform window management.
      * Windows have title bars and can be moved and resized.
      */
-    // If this feature is present, you also need to set
-    // com.android.internal.R.config_freeformWindowManagement to true in your configuration overlay.
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FREEFORM_WINDOW_MANAGEMENT
             = "android.software.freeform_window_management";
@@ -8823,11 +8895,14 @@ public abstract class PackageManager {
 
         try {
             ParsedPackage pp = parser2.parsePackage(apkFile, parserFlags, false);
+            pp.hideAsFinal();
 
             return PackageInfoCommonUtils.generate(pp, flagsBits, UserHandle.myUserId());
         } catch (PackageParserException e) {
             Log.w(TAG, "Failure to parse package archive apkFile= " +apkFile);
             return null;
+        } finally {
+            parser2.close();
         }
     }
 
@@ -11417,7 +11492,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>
             sApplicationInfoCache =
             new PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>(
-                    32, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getApplicationInfo") {
                 @Override
                 public ApplicationInfo recompute(ApplicationInfoQuery query) {
@@ -11518,7 +11593,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
             sPackageInfoCache =
             new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
-                    64, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
                     "getPackageInfo") {
                 @Override
                 public PackageInfo recompute(PackageInfoQuery query) {
@@ -11732,5 +11807,87 @@ public abstract class PackageManager {
             @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
         throw new UnsupportedOperationException(
                 "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * Similar to {@link #parseAndroidManifest(File, Function)}, but accepting a file descriptor
+     * instead of a File object.
+     *
+     * @param apkFileDescriptor The file descriptor of an application apk.
+     * The parserFunction will be invoked with the XmlResourceParser object
+     *        after getting the AndroidManifest.xml of an application package.
+     *
+     * @return Returns the result of the {@link Function#apply(Object)}.
+     *
+     * @throws IOException if the AndroidManifest.xml of an application package cannot be
+     *             read or accessed.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO_WITH_FD)
+    @WorkerThread
+    public <T> T parseAndroidManifest(@NonNull ParcelFileDescriptor apkFileDescriptor,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        throw new UnsupportedOperationException(
+                "parseAndroidManifest not implemented in subclass");
+    }
+
+    /**
+     * @param info    The {@link ServiceInfo} to pull the attributes from.
+     * @param name    The name of the Xml metadata where the attributes are stored.
+     * @param rootTag The root tag of the attributes.
+     * @return A {@link TypedArray} of attributes if successful, {@code null} otherwise.
+     * @hide
+     */
+    public TypedArray extractPackageItemInfoAttributes(PackageItemInfo info, String name,
+            String rootTag, int[] attributes) {
+        throw new UnsupportedOperationException(
+                "parseServiceMetadata not implemented in subclass");
+    }
+
+    /**
+     * Verifies and returns the
+     * <a href="https://source.android.com/docs/security/features/apksigning">app signing</a>
+     * information of the file at the given path. This operation takes a few milliseconds.
+     *
+     * Unlike {@link #getPackageArchiveInfo(String, PackageInfoFlags)} with {@link
+     * #GET_SIGNING_CERTIFICATES}, this method does not require the file to be a package archive
+     * file.
+     *
+     * @throws SigningInfoException if the verification fails
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_CLOUD_COMPILATION_PM)
+    public static @NonNull SigningInfo getVerifiedSigningInfo(@NonNull String path,
+            @AppSigningSchemeVersion int minAppSigningSchemeVersion) throws SigningInfoException {
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        ParseResult<SigningDetails> result =
+                ApkSignatureVerifier.verify(input, path, minAppSigningSchemeVersion);
+        if (result.isError()) {
+            throw new SigningInfoException(
+                    result.getErrorCode(), result.getErrorMessage(), result.getException());
+        }
+        return new SigningInfo(result.getResult());
+    }
+
+    /**
+     * As the generated feature count is useful for classes that may not be compiled in the same
+     * annotation processing unit as PackageManager, we redeclare it here for visibility.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int SDK_FEATURE_COUNT =
+            com.android.internal.pm.SystemFeaturesMetadata.SDK_FEATURE_COUNT;
+
+    /**
+     * Returns a stable index for PackageManager-defined features.
+     *
+     * <p> Similar to {@link #SDK_FEATURE_COUNT}, we redeclare this utility method generated by the
+     * annotation processor for internal visibility.
+     *
+     * @return index in [0, {@link #SDK_FEATURECOUNT}) for PackageManager-defined features, else -1.
+     * @hide
+     */
+    @VisibleForTesting
+    public static int maybeGetSdkFeatureIndex(String featureName) {
+        return com.android.internal.pm.SystemFeaturesMetadata.maybeGetSdkFeatureIndex(featureName);
     }
 }

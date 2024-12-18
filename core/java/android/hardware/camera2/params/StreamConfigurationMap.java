@@ -747,6 +747,10 @@ public final class StreamConfigurationMap {
      * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}.
      * </p>
      *
+     * <p>This function returns an empty array if
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}
+     * is not supported.</p>
+     *
      * @return an array of supported high speed video recording sizes
      * @see #getHighSpeedVideoFpsRangesFor(Size)
      * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
@@ -835,6 +839,10 @@ public final class StreamConfigurationMap {
      * rate than the display refresh rate. Both 30fps and 60fps preview rate will not be
      * supported for the same recording rate.</li>
      * </p>
+     *
+     * <p>This function returns an empty array if
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO}
+     * is not supported.</p>
      *
      * @return an array of supported high speed video recording FPS ranges The upper bound of
      *         returned ranges is guaranteed to be larger or equal to 120.
@@ -1473,6 +1481,11 @@ public final class StreamConfigurationMap {
      * <li>ImageFormat.DEPTH_JPEG => HAL_DATASPACE_DYNAMIC_DEPTH
      * <li>ImageFormat.HEIC => HAL_DATASPACE_HEIF
      * <li>ImageFormat.JPEG_R => HAL_DATASPACE_JPEG_R
+     * <li>ImageFormat.YUV_420_888 => HAL_DATASPACE_JFIF
+     * <li>ImageFormat.RAW_SENSOR => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW_OPAQUE => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW10 => HAL_DATASPACE_ARBITRARY
+     * <li>ImageFormat.RAW12 => HAL_DATASPACE_ARBITRARY
      * <li>others => HAL_DATASPACE_UNKNOWN
      * </ul>
      * </p>
@@ -1509,6 +1522,13 @@ public final class StreamConfigurationMap {
                 return HAL_DATASPACE_HEIF;
             case ImageFormat.JPEG_R:
                 return HAL_DATASPACE_JPEG_R;
+            case ImageFormat.YUV_420_888:
+                return HAL_DATASPACE_JFIF;
+            case ImageFormat.RAW_SENSOR:
+            case ImageFormat.RAW_PRIVATE:
+            case ImageFormat.RAW10:
+            case ImageFormat.RAW12:
+                return HAL_DATASPACE_ARBITRARY;
             default:
                 return HAL_DATASPACE_UNKNOWN;
         }
@@ -2003,6 +2023,12 @@ public final class StreamConfigurationMap {
     private static final int HAL_DATASPACE_RANGE_SHIFT = 27;
 
     private static final int HAL_DATASPACE_UNKNOWN = 0x0;
+
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_ARBITRARY = 0x1;
+
     /** @hide */
     public static final int HAL_DATASPACE_V0_JFIF =
             (2 << HAL_DATASPACE_STANDARD_SHIFT) |
@@ -2025,6 +2051,10 @@ public final class StreamConfigurationMap {
      * @hide
      */
     public static final int HAL_DATASPACE_JPEG_R = 0x1005;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_JFIF = 0x8C20000;
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
      * @see #getDurations(int, int)

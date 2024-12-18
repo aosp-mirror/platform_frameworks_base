@@ -26,11 +26,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.log.LogBuffer;
@@ -48,7 +47,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final int SCREEN_HEIGHT = 2000;
     private static final int EMPTY_HEIGHT = 0;
@@ -297,27 +296,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOff_usesResource() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX);
-        int keyguardSplitShadeTopMargin = 100;
-        int largeScreenHeaderHeightResource = 70;
-        when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
-                .thenReturn(keyguardSplitShadeTopMargin);
-        when(mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height))
-                .thenReturn(largeScreenHeaderHeightResource);
-        mClockPositionAlgorithm.loadDimens(mContext, mResources);
-        givenLockScreen();
-        mIsSplitShade = true;
-        // WHEN the position algorithm is run
-        positionClock();
-        // THEN the notif padding makes up lacking margin (margin - header height).
-        int expectedPadding = keyguardSplitShadeTopMargin - largeScreenHeaderHeightResource;
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(expectedPadding);
-    }
-
-    @Test
-    public void notifPaddingMakesUpToFullMarginInSplitShade_refactorFlagOn_usesHelper() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX);
+    public void notifPaddingMakesUpToFullMarginInSplitShade_usesHelper() {
         int keyguardSplitShadeTopMargin = 100;
         int largeScreenHeaderHeightHelper = 50;
         int largeScreenHeaderHeightResource = 70;

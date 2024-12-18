@@ -23,6 +23,7 @@ import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.Manifest;
+import android.annotation.BoolRes;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -132,6 +133,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -289,7 +291,7 @@ public class TelephonyManager {
     @SystemApi
     public static final int RADIO_POWER_REASON_NEARBY_DEVICE = 3;
 
-    /** The otaspMode passed to PhoneStateListener#onOtaspChanged */
+    /** The otaspMode passed to SercvieState changes */
     /** @hide */
     static public final int OTASP_UNINITIALIZED = 0;
     /** @hide */
@@ -995,9 +997,9 @@ public class TelephonyManager {
             "android.intent.action.CALL_DISCONNECT_CAUSE";
 
     /**
-     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
-     * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
-     * containing the disconnect cause.
+     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and {@link
+     * TelephonyCallback.PreciseCallStateListener#onPreciseCallStateChanged(PreciseCallState)} for
+     * an integer containing the disconnect cause.
      *
      * @see DisconnectCause
      *
@@ -1012,9 +1014,9 @@ public class TelephonyManager {
     public static final String EXTRA_DISCONNECT_CAUSE = "disconnect_cause";
 
     /**
-     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and
-     * {@link PhoneStateListener#onPreciseCallStateChanged(PreciseCallState)} for an integer
-     * containing the disconnect cause provided by the RIL.
+     * The lookup key used with the {@link #ACTION_PRECISE_CALL_STATE_CHANGED} broadcast and {@link
+     * TelephonyCallback.PreciseCallStateListener#onPreciseCallStateChanged(PreciseCallState)} for
+     * an integer containing the disconnect cause provided by the RIL.
      *
      * @see PreciseDisconnectCause
      *
@@ -1777,8 +1779,8 @@ public class TelephonyManager {
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
-     * to indicate user to decide whether current SIM should be preferred for all
-     * data / voice / sms. {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
+     * to indicate the current SIM should be preferred for all data / voice / sms.
+     * {@link #EXTRA_SUBSCRIPTION_ID} will specified to indicate
      * which subscription should be the default subscription.
      * @hide
      */
@@ -6437,8 +6439,8 @@ public class TelephonyManager {
      * This method considers not only calls in the Telephony stack, but also calls via other
      * {@link android.telecom.ConnectionService} implementations.
      * <p>
-     * Note: The call state returned via this method may differ from what is reported by
-     * {@link PhoneStateListener#onCallStateChanged(int, String)}, as that callback only considers
+     * Note: The call state returned via this method may differ from what is reported by {@link
+     * TelephonyCallback.CallStateListener#onCallStateChanged(int)}, as that callback only considers
      * Telephony (mobile) calls.
      * <p>
      * Requires Permission:
@@ -6885,7 +6887,26 @@ public class TelephonyManager {
         }
     }
 
-    // TODO(b/316183370): replace all @code with @link in javadoc after feature is released
+    // Suppressing AndroidFrameworkCompatChange because we're querying vendor
+    // partition SDK level, not application's target SDK version.
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private boolean hasCapability(@NonNull String feature, @BoolRes int legacySetting) {
+        if (mContext == null) return true;
+
+        if (mContext.getPackageManager().hasSystemFeature(feature)) return true;
+
+        // Check SDK version of the vendor partition.
+        final int vendorApiLevel = SystemProperties.getInt(
+                "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        // Devices shipped with 2024Q2 or later are required to declare FEATURE_TELEPHONY_*
+        // for individual sub-features (calling, messaging, data), so there's no need to check
+        // the legacy setting.
+        if (vendorApiLevel < Build.VENDOR_API_2024_Q2) {
+            return mContext.getResources().getBoolean(legacySetting);
+        }
+        return false;
+    }
+
     /**
      * @return true if the current device is "voice capable".
      * <p>
@@ -6899,16 +6920,14 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * data-only.
-     * @deprecated Replaced by {@code #isDeviceVoiceCapable()}. Starting from Android 15, voice
+     * @deprecated Replaced by {@link #isDeviceVoiceCapable()}. Starting from Android 15, voice
      * capability may also be overridden by carriers for a given subscription. For voice capable
-     * device (when {@code #isDeviceVoiceCapable} return {@code true}), caller should check for
-     * subscription-level voice capability as well. See {@code #isDeviceVoiceCapable} for details.
+     * device (when {@link #isDeviceVoiceCapable} return {@code true}), caller should check for
+     * subscription-level voice capability as well. See {@link #isDeviceVoiceCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @Deprecated
     public boolean isVoiceCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_CALLING,
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -6926,12 +6945,11 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, voice capability may also be overridden by carrier for a given
      * subscription on a voice capable device. To check if a subscription is "voice capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_VOICE} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceVoiceCapable() {
         return isVoiceCapable();
@@ -6945,15 +6963,14 @@ public class TelephonyManager {
      * <p>
      * Note: Voicemail waiting sms, cell broadcasting sms, and MMS are
      *       disabled when device doesn't support sms.
-     * @deprecated Replaced by {@code #isDeviceSmsCapable()}. Starting from Android 15, SMS
+     * @deprecated Replaced by {@link #isDeviceSmsCapable()}. Starting from Android 15, SMS
      * capability may also be overridden by carriers for a given subscription. For SMS capable
-     * device (when {@code #isDeviceSmsCapable} return {@code true}), caller should check for
-     * subscription-level SMS capability as well. See {@code #isDeviceSmsCapable} for details.
+     * device (when {@link #isDeviceSmsCapable} return {@code true}), caller should check for
+     * subscription-level SMS capability as well. See {@link #isDeviceSmsCapable} for details.
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
+    @Deprecated
     public boolean isSmsCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_MESSAGING,
                 com.android.internal.R.bool.config_sms_capable);
     }
 
@@ -6968,12 +6985,11 @@ public class TelephonyManager {
      * <p>
      * Starting from Android 15, SMS capability may also be overridden by carriers for a given
      * subscription on an SMS capable device. To check if a subscription is "SMS capable",
-     * call method {@code SubscriptionInfo#getServiceCapabilities()} and check if
-     * {@code SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
+     * call method {@link SubscriptionInfo#getServiceCapabilities()} and check if
+     * {@link SubscriptionManager#SERVICE_CAPABILITY_SMS} is included.
      *
      * @see SubscriptionInfo#getServiceCapabilities()
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public boolean isDeviceSmsCapable() {
         return isSmsCapable();
@@ -6996,7 +7012,7 @@ public class TelephonyManager {
      *
      * <p>Beginning with {@link android.os.Build.VERSION_CODES#Q Android Q},
      * if this API results in a change of the cached CellInfo, that change will be reported via
-     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}.
+     * {@link TelephonyCallback.CellInfoListener#onCellInfoChanged(List) onCellInfoChanged()}.
      *
      * <p>Apps targeting {@link android.os.Build.VERSION_CODES#Q Android Q} or higher will no
      * longer trigger a refresh of the cached CellInfo by invoking this API. Instead, those apps
@@ -7109,7 +7125,7 @@ public class TelephonyManager {
      * camped/registered, serving, and neighboring cells.
      *
      * <p>Any available results from this request will be provided by calls to
-     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}
+     * {@link TelephonyCallback.CellInfoListener#onCellInfoChanged(List) onCellInfoChanged()}
      * for each active subscription.
      *
      * <p>This method returns valid data for devices with
@@ -7172,7 +7188,7 @@ public class TelephonyManager {
      * camped/registered, serving, and neighboring cells.
      *
      * <p>Any available results from this request will be provided by calls to
-     * {@link android.telephony.PhoneStateListener#onCellInfoChanged onCellInfoChanged()}
+     * {@link TelephonyCallback.CellInfoListener#onCellInfoChanged(List) onCellInfoChanged()}
      * for each active subscription.
      *
      * <p>This method returns valid data for devices with
@@ -7248,8 +7264,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets the minimum time in milli-seconds between {@link PhoneStateListener#onCellInfoChanged
-     * PhoneStateListener.onCellInfoChanged} will be invoked.
+     * Sets the minimum time in milli-seconds between {@link
+     * TelephonyCallback.CellInfoListener#onCellInfoChanged(List)} will be invoked.
      *<p>
      * The default, 0, means invoke onCellInfoChanged when any of the reported
      * information changes. Setting the value to INT_MAX(0x7fffffff) means never issue
@@ -9975,6 +9991,7 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
             ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
+            ALLOWED_NETWORK_TYPES_REASON_TEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -10011,6 +10028,14 @@ public class TelephonyManager {
      */
     @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
+
+    /**
+     * To indicate allowed network type change is requested by Testing purpose, should be default to
+     * {@link #getAllNetworkTypesBitmask} when done testing.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_TEST = 4;
 
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
@@ -10118,6 +10143,8 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
                 return true;
+            case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST:
+                return TelephonyUtils.IS_DEBUGGABLE;
         }
         return false;
     }
@@ -10586,20 +10613,31 @@ public class TelephonyManager {
         return null;
     }
 
-    /** @hide */
+    /**
+     * Get the names of packages with carrier privileges for the current subscription.
+     *
+     * @throws UnsupportedOperationException If the device does not have {@link
+     *     PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}
+     * @hide
+     */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public List<String> getPackagesWithCarrierPrivileges() {
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @NonNull
+    public Set<String> getPackagesWithCarrierPrivileges() {
+        final Set<String> result = new HashSet<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getPackagesWithCarrierPrivileges(getPhoneId());
+                result.addAll(telephony.getPackagesWithCarrierPrivileges(getPhoneId()));
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges NPE", ex);
         }
-        return Collections.EMPTY_LIST;
+        return result;
     }
 
     /**
@@ -11364,7 +11402,7 @@ public class TelephonyManager {
      * Shut down all the live radios over all the slot indexes.
      *
      * <p>To know when the radio has completed powering off, use
-     * {@link PhoneStateListener#LISTEN_SERVICE_STATE LISTEN_SERVICE_STATE}.
+     * {@link TelephonyCallback.ServiceStateListener}.
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_RADIO_ACCESS}.
@@ -13058,8 +13096,9 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
-     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
-     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     * If you want continuous updates of service state info, register a {@link TelephonyCallback}
+     * that implements {@link TelephonyCallback.ServiceStateListener} through {@link
+     * #registerTelephonyCallback}.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges})
@@ -13086,8 +13125,9 @@ public class TelephonyManager {
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
      *
-     * If you want continuous updates of service state info, register a {@link PhoneStateListener}
-     * via {@link #listen} with the {@link PhoneStateListener#LISTEN_SERVICE_STATE} event.
+     * If you want continuous updates of service state info, register a {@link TelephonyCallback}
+     * that implements {@link TelephonyCallback.ServiceStateListener} through {@link
+     * #registerTelephonyCallback}.
      *
      * There's another way to renounce permissions with a custom context
      * {@code AttributionSource.Builder#setRenouncedPermissions(Set<String>)} but only for system
@@ -13112,39 +13152,41 @@ public class TelephonyManager {
     })
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public @Nullable ServiceState getServiceState(@IncludeLocationData int includeLocationData) {
-        return getServiceStateForSubscriber(getSubId(),
+        return getServiceStateForSlot(SubscriptionManager.getSlotIndex(getSubId()),
                 includeLocationData != INCLUDE_LOCATION_DATA_FINE,
                 includeLocationData == INCLUDE_LOCATION_DATA_NONE);
     }
 
     /**
-     * Returns the service state information on specified subscription. Callers require
-     * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
+     * Returns the service state information on specified SIM slot.
      *
-     * May return {@code null} when the subscription is inactive or when there was an error
+     * May return {@code null} when the {@code slotIndex} is invalid or when there was an error
      * communicating with the phone process.
+     *
+     * @param slotIndex of phone whose service state is returned
      * @param renounceFineLocationAccess Set this to true if the caller would not like to receive
      * location related information which will be sent if the caller already possess
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and do not renounce the permission
      * @param renounceCoarseLocationAccess Set this to true if the caller would not like to
      * receive location related information which will be sent if the caller already possess
      * {@link Manifest.permission#ACCESS_COARSE_LOCATION} and do not renounce the permissions.
+     * @return Service state on specified SIM slot.
      */
-    private ServiceState getServiceStateForSubscriber(int subId,
-            boolean renounceFineLocationAccess,
+    private ServiceState getServiceStateForSlot(int slotIndex, boolean renounceFineLocationAccess,
             boolean renounceCoarseLocationAccess) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, renounceFineLocationAccess,
-                        renounceCoarseLocationAccess, getOpPackageName(), getAttributionTag());
+                return service.getServiceStateForSlot(slotIndex,
+                        renounceFineLocationAccess, renounceCoarseLocationAccess,
+                        getOpPackageName(), getAttributionTag());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
+            Log.e(TAG, "Error calling ITelephony#getServiceStateForSlot", e);
         } catch (NullPointerException e) {
             AnomalyReporter.reportAnomaly(
                     UUID.fromString("e2bed88e-def9-476e-bd71-3e572a8de6d1"),
-                    "getServiceStateForSubscriber " + subId + " NPE");
+                    "getServiceStateForSlot " + slotIndex + " NPE");
         }
         return null;
     }
@@ -13159,7 +13201,35 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
-        return getServiceStateForSubscriber(subId, false, false);
+        return getServiceStateForSlot(
+                SubscriptionManager.getSlotIndex(subId), false, false);
+    }
+
+    /**
+     * Returns the service state information on specified SIM slot.
+     *
+     * If you want continuous updates of service state info, register a {@link TelephonyCallback}
+     * that implements {@link TelephonyCallback.ServiceStateListener} through
+     * {@link #registerTelephonyCallback}.
+     *
+     * May return {@code null} when the {@code slotIndex} is invalid or when there was an error
+     * communicating with the phone process
+     *
+     * See {@link #getActiveModemCount()} to get the total number of slots
+     * that are active on the device.
+     *
+     * @param slotIndex of phone whose service state is returned
+     * @return ServiceState on specified SIM slot.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    })
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public @Nullable ServiceState getServiceStateForSlot(int slotIndex) {
+        return getServiceStateForSlot(slotIndex, false, false);
     }
 
     /**
@@ -13785,11 +13855,11 @@ public class TelephonyManager {
      * <p>This method returns valid data on devices with {@link
      * android.content.pm.PackageManager#FEATURE_TELEPHONY_CARRIERLOCK} enabled.
      *
-     * @deprecated Apps should use {@link getCarriersRestrictionRules} to retrieve the list of
+     * @deprecated Apps should use {@link #getCarrierRestrictionRules} to retrieve the list of
      * allowed and excliuded carriers, as the result of this API is valid only when the excluded
      * list is empty. This API could return an empty list, even if some restrictions are present.
      *
-     * @return List of {@link android.telephony.CarrierIdentifier}; empty list
+     * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
      * means all carriers are allowed.
      *
      * @throws UnsupportedOperationException If the device does not have
@@ -13896,7 +13966,10 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_BASIC_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public void getCarrierRestrictionStatus(@NonNull Executor executor,
             @NonNull @CarrierRestrictionStatus
                     Consumer<Integer> resultListener) {
@@ -14495,10 +14568,8 @@ public class TelephonyManager {
      * data connections over the telephony network.
      * <p>
      */
-    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
     public boolean isDataCapable() {
-        if (mContext == null) return true;
-        return mContext.getResources().getBoolean(
+        return hasCapability(PackageManager.FEATURE_TELEPHONY_DATA,
                 com.android.internal.R.bool.config_mobile_data_capable);
     }
 
@@ -15013,7 +15084,8 @@ public class TelephonyManager {
     /**
      * Get the emergency assistance package name.
      *
-     * @return the package name of the emergency assistance app.
+     * @return the package name of the emergency assistance app, or {@code null} if no app
+     * supports emergency assistance.
      * @throws IllegalStateException if emergency assistance is not enabled or the device is
      * not voice capable.
      *
@@ -15021,16 +15093,15 @@ public class TelephonyManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @FlaggedApi(android.permission.flags.Flags.FLAG_GET_EMERGENCY_ROLE_HOLDER_API_ENABLED)
-    @NonNull
+    @Nullable
     @SystemApi
     public String getEmergencyAssistancePackageName() {
         if (!isEmergencyAssistanceEnabled() || !isVoiceCapable()) {
             throw new IllegalStateException("isEmergencyAssistanceEnabled() is false or device"
                 + " not voice capable.");
         }
-        String emergencyRole = mContext.getSystemService(RoleManager.class)
+        return mContext.getSystemService(RoleManager.class)
                 .getEmergencyRoleHolder(mContext.getUserId());
-        return Objects.requireNonNull(emergencyRole, "Emergency role holder must not be null");
     }
 
     /**
@@ -17892,9 +17963,9 @@ public class TelephonyManager {
      * measurements breach the specified thresholds.
      *
      * To be notified, set the signal strength update request and then register
-     * {@link TelephonyManager#listen(PhoneStateListener, int)} with
-     * {@link PhoneStateListener#LISTEN_SIGNAL_STRENGTHS}. The notification will arrive through
-     * {@link PhoneStateListener#onSignalStrengthsChanged(SignalStrength)}.
+     * {@link TelephonyCallback} that implements {@link TelephonyCallback.SignalStrengthsListener}
+     * through {@link #registerTelephonyCallback}. The notification will arrive through
+     * {@link TelephonyCallback.SignalStrengthsListener#onSignalStrengthsChanged(SignalStrength)}.
      *
      * To stop receiving the notification over the specified thresholds, pass the same
      * {@link SignalStrengthUpdateRequest} object to
@@ -18852,7 +18923,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
-    @RequiresPermission(android.Manifest.permission.DUMP)
+    @RequiresPermission(android.Manifest.permission.READ_DROPBOX_DATA)
     public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
             @NonNull EmergencyCallDiagnosticData data) {
         try {
@@ -19256,6 +19327,26 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.isDomainSelectionSupported();
+            }
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the AOSP domain selection service is supported.
+     *
+     * @return {@code true} if the AOSP domain selection service is supported.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
+    public boolean isAospDomainSelectionService() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isAospDomainSelectionService();
             }
         } catch (RemoteException ex) {
             Rlog.w(TAG, "RemoteException", ex);

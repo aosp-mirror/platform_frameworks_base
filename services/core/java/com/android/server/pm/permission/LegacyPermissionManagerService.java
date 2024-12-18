@@ -336,8 +336,13 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
             final PermissionManagerServiceInternal permissionManagerInternal =
                     LocalServices.getService(PermissionManagerServiceInternal.class);
             for (final int userId : UserManagerService.getInstance().getUserIds()) {
-                packageManagerInternal.forEachPackage(pkg ->
-                        permissionManagerInternal.resetRuntimePermissions(pkg, userId));
+                packageManagerInternal.forEachPackage(pkg -> {
+                    // Filter out packages that don't have app IDs which means they don't have
+                    // permission states either.
+                    if (pkg.getUid() != -1) {
+                        permissionManagerInternal.resetRuntimePermissions(pkg, userId);
+                    }
+                });
             }
         }
 

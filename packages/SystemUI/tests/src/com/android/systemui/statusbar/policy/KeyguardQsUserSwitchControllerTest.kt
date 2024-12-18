@@ -16,12 +16,12 @@
 
 package com.android.systemui.statusbar.policy
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.res.R
@@ -45,7 +45,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var userSwitcherController: UserSwitcherController

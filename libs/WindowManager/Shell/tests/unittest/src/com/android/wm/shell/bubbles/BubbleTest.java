@@ -43,7 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.bubbles.BubbleInfo;
+import com.android.wm.shell.shared.bubbles.BubbleInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +61,8 @@ public class BubbleTest extends ShellTestCase {
     private StatusBarNotification mSbn;
     @Mock
     private ShellExecutor mMainExecutor;
+    @Mock
+    private ShellExecutor mBgExecutor;
 
     private BubbleEntry mBubbleEntry;
     private Bundle mExtras;
@@ -85,7 +87,8 @@ public class BubbleTest extends ShellTestCase {
         when(mNotif.getBubbleMetadata()).thenReturn(metadata);
         when(mSbn.getKey()).thenReturn("mock");
         mBubbleEntry = new BubbleEntry(mSbn, null, true, false, false, false);
-        mBubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor);
+        mBubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor,
+                mBgExecutor);
     }
 
     @Test
@@ -176,7 +179,8 @@ public class BubbleTest extends ShellTestCase {
 
     @Test
     public void testBubbleIsConversation_hasNoShortcut() {
-        Bubble bubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor);
+        Bubble bubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor,
+                mBgExecutor);
         assertThat(bubble.getShortcutInfo()).isNull();
         assertThat(bubble.isConversation()).isFalse();
     }
@@ -199,7 +203,7 @@ public class BubbleTest extends ShellTestCase {
         Intent intent = new Intent(mContext, BubblesTestActivity.class);
         intent.setPackage(mContext.getPackageName());
         Bubble bubble = Bubble.createAppBubble(intent, new UserHandle(1 /* userId */),
-                null /* icon */, mMainExecutor);
+                null /* icon */, mMainExecutor, mBgExecutor);
         BubbleInfo bubbleInfo = bubble.asBubbleBarBubble();
 
         assertThat(bubble.getShortcutInfo()).isNull();
@@ -215,6 +219,6 @@ public class BubbleTest extends ShellTestCase {
                 .build();
         return new Bubble("mockKey", shortcutInfo, 10, Resources.ID_NULL,
                 "mockTitle", 0 /* taskId */, "mockLocus", true /* isDismissible */,
-                mMainExecutor, mBubbleMetadataFlagListener);
+                mMainExecutor, mBgExecutor, mBubbleMetadataFlagListener);
     }
 }

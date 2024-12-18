@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class StaticSettingsProviderDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = StaticSettingsProviderDetector()
@@ -85,7 +84,7 @@ class StaticSettingsProviderDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(StaticSettingsProviderDetector.ISSUE)
             .run()
@@ -226,12 +225,10 @@ class StaticSettingsProviderDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(StaticSettingsProviderDetector.ISSUE)
             .run()
             .expectClean()
     }
-
-    private val stubs = androidStubs
 }

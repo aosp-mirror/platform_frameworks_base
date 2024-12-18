@@ -56,10 +56,12 @@ public class AccessibilityMenuService extends AccessibilityService
         implements View.OnTouchListener {
 
     public static final String PACKAGE_NAME = AccessibilityMenuService.class.getPackageName();
+    public static final String PACKAGE_TESTS = ".tests";
     public static final String INTENT_TOGGLE_MENU = ".toggle_menu";
     public static final String INTENT_HIDE_MENU = ".hide_menu";
     public static final String INTENT_GLOBAL_ACTION = ".global_action";
     public static final String INTENT_GLOBAL_ACTION_EXTRA = "GLOBAL_ACTION";
+    public static final String INTENT_OPEN_BLOCKED = "OPEN_BLOCKED";
 
     private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
@@ -89,25 +91,29 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
-        int mRotation;
+                int mRotation;
 
-        @Override
-        public void onDisplayAdded(int displayId) {}
+                @Override
+                public void onDisplayAdded(int displayId) {
+                }
 
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            // TODO(b/136716947): Need to reset A11yMenuOverlayLayout by display id.
-        }
+                @Override
+                public void onDisplayRemoved(int displayId) {
+                    // TODO(b/136716947): Need to reset A11yMenuOverlayLayout by display id.
+                }
 
-        @Override
-        public void onDisplayChanged(int displayId) {
-            Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-            if (mRotation != display.getRotation()) {
-                mRotation = display.getRotation();
-                mA11yMenuLayout.updateViewLayout();
-            }
-        }
-    };
+                @Override
+                public void onDisplayChanged(int displayId) {
+                    if (mA11yMenuLayout == null) {
+                        return;
+                    }
+                    Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+                    if (mRotation != display.getRotation()) {
+                        mRotation = display.getRotation();
+                        mA11yMenuLayout.updateViewLayout();
+                    }
+                }
+            };
 
     private final BroadcastReceiver mHideMenuReceiver = new BroadcastReceiver() {
         @Override
@@ -192,7 +198,7 @@ public class AccessibilityMenuService extends AccessibilityService
 
         IntentFilter hideMenuFilter = new IntentFilter();
         hideMenuFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        hideMenuFilter.addAction(PACKAGE_NAME + INTENT_HIDE_MENU);
+        hideMenuFilter.addAction(INTENT_HIDE_MENU);
 
         // Including WRITE_SECURE_SETTINGS enforces that we only listen to apps
         // with the restricted WRITE_SECURE_SETTINGS permission who broadcast this intent.
@@ -200,7 +206,7 @@ public class AccessibilityMenuService extends AccessibilityService
                 Manifest.permission.WRITE_SECURE_SETTINGS, null,
                 Context.RECEIVER_EXPORTED);
         registerReceiver(mToggleMenuReceiver,
-                new IntentFilter(PACKAGE_NAME + INTENT_TOGGLE_MENU),
+                new IntentFilter(INTENT_TOGGLE_MENU),
                 Manifest.permission.WRITE_SECURE_SETTINGS, null,
                 Context.RECEIVER_EXPORTED);
 
@@ -245,8 +251,9 @@ public class AccessibilityMenuService extends AccessibilityService
      * @return {@code true} if successful, {@code false} otherwise.
      */
     private boolean performGlobalActionInternal(int globalAction) {
-        Intent intent = new Intent(PACKAGE_NAME + INTENT_GLOBAL_ACTION);
+        Intent intent = new Intent(INTENT_GLOBAL_ACTION);
         intent.putExtra(INTENT_GLOBAL_ACTION_EXTRA, globalAction);
+        intent.setPackage(PACKAGE_NAME + PACKAGE_TESTS);
         sendBroadcast(intent);
         Log.i("A11yMenuService", "Broadcasting global action " + globalAction);
         return performGlobalAction(globalAction);
@@ -277,10 +284,8 @@ public class AccessibilityMenuService extends AccessibilityService
             return;
         }
 
-        if (Flags.a11yMenuHideBeforeTakingAction()) {
-            // Hide the a11y menu UI before performing the following shortcut actions.
-            mA11yMenuLayout.hideMenu();
-        }
+        // Hide the a11y menu UI before performing the following shortcut actions.
+        mA11yMenuLayout.hideMenu();
 
         if (viewTag == ShortcutId.ID_ASSISTANT_VALUE.ordinal()) {
             // Always restart the voice command activity, so that the UI is reloaded.
@@ -296,31 +301,18 @@ public class AccessibilityMenuService extends AccessibilityService
         } else if (viewTag == ShortcutId.ID_RECENT_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_RECENTS);
         } else if (viewTag == ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()) {
-            if (Flags.a11yMenuHideBeforeTakingAction()) {
-                // Delay before locking the screen to give time for the UI to close.
-                mHandler.postDelayed(
-                        () -> performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN),
-                        HIDE_UI_DELAY_MS);
-            } else {
-                performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN);
-            }
+            // Delay before locking the screen to give time for the UI to close.
+            mHandler.postDelayed(
+                    () -> performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN),
+                    HIDE_UI_DELAY_MS);
         } else if (viewTag == ShortcutId.ID_QUICKSETTING_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_QUICK_SETTINGS);
         } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
-            if (Flags.a11yMenuHideBeforeTakingAction()) {
-                // Delay before taking a screenshot to give time for the UI to close.
-                mHandler.postDelayed(
-                        () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
-                        HIDE_UI_DELAY_MS);
-            } else {
-                performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
-            }
-        }
-
-        if (!Flags.a11yMenuHideBeforeTakingAction()) {
-            mA11yMenuLayout.hideMenu();
+            mHandler.postDelayed(
+                    () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
+                    HIDE_UI_DELAY_MS);
         }
     }
 
@@ -385,6 +377,7 @@ public class AccessibilityMenuService extends AccessibilityService
     public boolean onUnbind(Intent intent) {
         unregisterReceiver(mHideMenuReceiver);
         unregisterReceiver(mToggleMenuReceiver);
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
         mPrefs.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
         sInitialized = false;
         if (mA11yMenuLayout != null) {
@@ -414,9 +407,16 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private void toggleVisibility() {
         boolean locked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
-        if (!locked && SystemClock.uptimeMillis() - mLastTimeTouchedOutside
-                        > BUTTON_CLICK_TIMEOUT) {
-            mA11yMenuLayout.toggleVisibility();
+        if (!locked) {
+            if (SystemClock.uptimeMillis() - mLastTimeTouchedOutside
+                    > BUTTON_CLICK_TIMEOUT) {
+                mA11yMenuLayout.toggleVisibility();
+            }
+        } else {
+            // Broadcast for testing.
+            Intent intent = new Intent(INTENT_OPEN_BLOCKED);
+            intent.setPackage(PACKAGE_NAME + PACKAGE_TESTS);
+            sendBroadcast(intent);
         }
     }
 }

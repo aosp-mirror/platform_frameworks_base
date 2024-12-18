@@ -405,11 +405,12 @@ public class RootTaskTests extends WindowTestsBase {
 
         final RootWindowContainer.FindTaskResult result =
                 new RootWindowContainer.FindTaskResult();
-        result.init(r.getActivityType(), r.taskAffinity, r.intent, r.info);
+        result.init(r.getActivityType(), r.taskAffinity, r.intent, r.info, true);
         result.process(task);
 
-        assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
-        assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
+        assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */, true));
+        assertEquals(
+                taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */, true));
         assertNotNull(result.mIdealRecord);
     }
 
@@ -432,7 +433,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord r1 = new ActivityBuilder(mAtm).setComponent(
                 target).setTargetActivity(targetActivity).build();
         RootWindowContainer.FindTaskResult result = new RootWindowContainer.FindTaskResult();
-        result.init(r1.getActivityType(), r1.taskAffinity, r1.intent, r1.info);
+        result.init(r1.getActivityType(), r1.taskAffinity, r1.intent, r1.info, true);
         result.process(parentTask);
         assertThat(result.mIdealRecord).isNotNull();
 
@@ -440,7 +441,7 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord r2 = new ActivityBuilder(mAtm).setComponent(
                 alias).setTargetActivity(targetActivity).build();
         result = new RootWindowContainer.FindTaskResult();
-        result.init(r2.getActivityType(), r2.taskAffinity, r2.intent, r2.info);
+        result.init(r2.getActivityType(), r2.taskAffinity, r2.intent, r2.info, true);
         result.process(parentTask);
         assertThat(result.mIdealRecord).isNotNull();
     }
@@ -1234,12 +1235,18 @@ public class RootTaskTests extends WindowTestsBase {
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);
 
+        registerTestTransitionPlayer();
+        final Transition transition = display.mTransitionController
+                .requestCloseTransitionIfNeeded(rootTask1);
+        transition.collectClose(rootTask1);
         // The display becomes empty. Since there is no next activity to be idle, the activity
         // should be destroyed immediately with updating configuration to restore original state.
         final ActivityRecord activity1 = finishTopActivity(rootTask1);
         assertEquals(DESTROYING, activity1.getState());
         verify(mRootWindowContainer).ensureVisibilityAndConfig(eq(null) /* starting */,
-                eq(display.mDisplayId), anyBoolean());
+                eq(display), anyBoolean());
+        assertTrue("Transition must be ready if there is no next running activity",
+                transition.allReady());
     }
 
     private ActivityRecord finishTopActivity(Task task) {
@@ -1253,68 +1260,38 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testShouldSleepActivities() {
+        final Task task = new TaskBuilder(mSupervisor).build();
+        task.mDisplayContent = mock(DisplayContent.class);
         // When focused activity and keyguard is going away, we should not sleep regardless
         // of the display state, but keyguard-going-away should only take effects on default
-        // display since there is no keyguard on secondary displays (yet).
-        verifyShouldSleepActivities(true /* focusedRootTask */, true /*keyguardGoingAway*/,
+        // display because the keyguard-going-away state of secondary displays are already the
+        // same as default display.
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
-        verifyShouldSleepActivities(true /* focusedRootTask */, true /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, false /* isDefaultDisplay */, true /* expected */);
 
         // When not the focused root task, defer to display sleeping state.
-        verifyShouldSleepActivities(false /* focusedRootTask */, true /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, false /* isVisibleTask */, true /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
 
         // If keyguard is going away, defer to the display sleeping state.
-        verifyShouldSleepActivities(true /* focusedRootTask */, false /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, false /* keyguardGoingAway */,
                 true /* displaySleeping */, true /* isDefaultDisplay */, true /* expected */);
-        verifyShouldSleepActivities(true /* focusedRootTask */, false /*keyguardGoingAway*/,
+        verifyShouldSleepActivities(task, true /* isVisibleTask */, false /* keyguardGoingAway */,
                 false /* displaySleeping */, true /* isDefaultDisplay */, false /* expected */);
     }
 
-    @Test
-    public void testRootTaskOrderChangedOnRemoveRootTask() {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-        try {
-            mDefaultTaskDisplayArea.removeRootTask(task);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
-    }
+    private static void verifyShouldSleepActivities(Task task, boolean isVisibleTask,
+            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
+            boolean expected) {
+        final DisplayContent display = task.mDisplayContent;
+        display.isDefaultDisplay = isDefaultDisplay;
+        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
+        doReturn(displaySleeping).when(display).isSleeping();
+        doReturn(isVisibleTask).when(task).shouldBeVisible(null /* starting */);
 
-    @Test
-    public void testRootTaskOrderChangedOnAddPositionRootTask() {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        mDefaultTaskDisplayArea.removeRootTask(task);
-
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-        try {
-            task.mReparenting = true;
-            mDefaultTaskDisplayArea.addChild(task, 0);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
-    }
-
-    @Test
-    public void testRootTaskOrderChangedOnPositionRootTask() {
-        RootTaskOrderChangedListener listener = new RootTaskOrderChangedListener();
-        try {
-            final Task fullscreenRootTask1 = createTaskForShouldBeVisibleTest(
-                    mDefaultTaskDisplayArea, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
-                    true /* onTop */);
-            mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(listener);
-            mDefaultTaskDisplayArea.positionChildAt(POSITION_BOTTOM, fullscreenRootTask1,
-                    false /*includingParents*/);
-        } finally {
-            mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(listener);
-        }
-        assertTrue(listener.mChanged);
+        assertEquals(expected, task.shouldSleepActivities());
     }
 
     @Test
@@ -1442,36 +1419,5 @@ public class RootTaskTests extends WindowTestsBase {
         task.ensureActivitiesVisible(null /* starting */);
         verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
-    }
-
-    private boolean isAssistantOnTop() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_assistantOnTopOfDream);
-    }
-
-    private void verifyShouldSleepActivities(boolean focusedRootTask,
-            boolean keyguardGoingAway, boolean displaySleeping, boolean isDefaultDisplay,
-            boolean expected) {
-        final Task task = new TaskBuilder(mSupervisor).build();
-        final DisplayContent display = mock(DisplayContent.class);
-        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
-        display.isDefaultDisplay = isDefaultDisplay;
-
-        task.mDisplayContent = display;
-        doReturn(keyguardGoingAway).when(display).isKeyguardGoingAway();
-        doReturn(displaySleeping).when(display).isSleeping();
-        doReturn(focusedRootTask).when(task).isFocusedRootTaskOnDisplay();
-
-        assertEquals(expected, task.shouldSleepActivities());
-    }
-
-    private static class RootTaskOrderChangedListener
-            implements TaskDisplayArea.OnRootTaskOrderChangedListener {
-        public boolean mChanged = false;
-
-        @Override
-        public void onRootTaskOrderChanged(Task rootTask) {
-            mChanged = true;
-        }
     }
 }

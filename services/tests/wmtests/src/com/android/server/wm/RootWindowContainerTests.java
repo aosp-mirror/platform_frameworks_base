@@ -54,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -74,6 +75,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
@@ -146,6 +148,40 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFindTask_includeLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                true /* includeLaunchedFromBubble */));
+    }
+
+    @Test
+    public void testFindTask_ignoreLaunchedFromBubbled() {
+        final ComponentName component = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".BubbledActivity");
+        final ActivityOptions opts = ActivityOptions.makeBasic();
+        opts.setTaskAlwaysOnTop(true);
+        opts.setLaunchedFromBubble(true);
+        final ActivityRecord activity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(component)
+                .setActivityOptions(opts)
+                .setCreateTask(true)
+                .build();
+
+        assertNull(mWm.mRoot.findTask(activity, activity.getTaskDisplayArea(),
+                false /* includeLaunchedFromBubble */));
+    }
+
+    @Test
     public void testAllPausedActivitiesComplete() {
         DisplayContent displayContent = mWm.mRoot.getDisplayContent(DEFAULT_DISPLAY);
         ActivityRecord activity = createActivityRecord(displayContent);
@@ -166,6 +202,44 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         activity.setState(FINISHING, "test FINISHING");
         assertThat(mWm.mRoot.allPausedActivitiesComplete()).isTrue();
+    }
+
+    @Test
+    public void testAllResumedActivitiesIdle() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowProcessController proc2 = activity2.app;
+        activity1.setState(RESUMED, "test");
+        activity2.detachFromProcess();
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity1.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.setProcess(proc2);
+        activity2.setState(RESUMED, "test");
+        activity2.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity1.idle = false;
+        activity1.setVisibleRequested(false);
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(activity2.getTask()).build();
+        final ActivityRecord activity3 = new ActivityBuilder(mAtm).build();
+        taskFragment.addChild(activity3);
+        taskFragment.setVisibleRequested(true);
+        activity3.setState(RESUMED, "test");
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isTrue();
+
+        activity3.idle = false;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
+
+        activity2.idle = false;
+        activity3.idle = true;
+        assertThat(mWm.mRoot.allResumedActivitiesIdle()).isFalse();
     }
 
     @Test
@@ -237,6 +311,45 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertFalse(wpc.hasActivities());
     }
 
+    @Test
+    public void testAttachApplication() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setCreateTask(true).build();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setProcessName("testAttach")
+                .setUseProcess(activity.app).setTask(activity.getTask()).build();
+        activity.detachFromProcess();
+        topActivity.detachFromProcess();
+        mAtm.startProcessAsync(topActivity, false /* knownToBeDead */,
+                true /* isTop */, "test" /* hostingType */);
+        // Even if the activity is added after topActivity, the start order should still follow
+        // z-order, i.e. the topActivity will be started first.
+        mAtm.startProcessAsync(activity, false /* knownToBeDead */,
+                false /* isTop */, "test" /* hostingType */);
+        assertEquals(2, mAtm.mStartingProcessActivities.size());
+        assertEquals("Top record must be at the tail to start first",
+                topActivity, mAtm.mStartingProcessActivities.get(1));
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(
+                activity.packageName, activity.processName,
+                6789 /* pid */, activity.info.applicationInfo.uid);
+        assertFalse(proc.mHasEverAttached);
+        try {
+            mRootWindowContainer.attachApplication(proc);
+            verify(mSupervisor).realStartActivityLocked(eq(topActivity), eq(proc),
+                    anyBoolean(), anyBoolean());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+
+        // Verify that onProcessRemoved won't clear the launching activities if an attached process
+        // is died. Because in real case, it should be handled from WindowProcessController's
+        // and ActivityRecord's handleAppDied to decide whether to remove the activities.
+        assertTrue(proc.mHasEverAttached);
+        assertTrue(mAtm.mStartingProcessActivities.isEmpty());
+        mAtm.mStartingProcessActivities.add(activity);
+        mAtm.mInternal.onProcessRemoved(proc.mName, proc.mUid);
+        assertFalse(mAtm.mStartingProcessActivities.isEmpty());
+    }
+
     /**
      * This test ensures that we do not try to restore a task based off an invalid task id. We
      * should expect {@code null} to be returned in this case.
@@ -268,8 +381,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, firstActivity, secondActivity);
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
-                null /* launchIntoPipHostActivity */, "initialMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity, "initialMove");
 
         final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
         Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -278,8 +390,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
 
         // Move second activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity,
-                null /* launchIntoPipHostActivity */, "secondMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity, "secondMove");
 
         // Need to get root tasks again as a new instance might have been created.
         pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -310,8 +421,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity,
-                null /* launchIntoPipHostActivity */, "initialMove");
+        mRootWindowContainer.moveActivityToPinnedRootTask(secondActivity, "initialMove");
 
         assertTrue(firstActivity.mRequestForceTransition);
     }
@@ -331,14 +441,15 @@ public class RootWindowContainerTests extends WindowTestsBase {
         transientActivity.setState(RESUMED, "test");
         transientActivity.getTask().moveToFront("test");
 
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity2,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity2, "test");
         assertEquals("Created PiP task must not change focus", transientActivity.getTask(),
                 mRootWindowContainer.getTopDisplayFocusedRootTask());
         final Task newPipTask = activity2.getTask();
         assertEquals(newPipTask, mDisplayContent.getDefaultTaskDisplayArea().getRootPinnedTask());
         assertNotEquals(newPipTask, activity1.getTask());
         assertFalse("Created PiP task must not be in recents", newPipTask.inRecents);
+        assertThat(newPipTask.autoRemoveRecents).isTrue();
+        assertThat(activity1.getTask().autoRemoveRecents).isFalse();
     }
 
     /**
@@ -355,8 +466,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Task task = activity.getTask();
 
         // Move activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
 
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
@@ -373,7 +483,9 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Rect bounds = new Rect(task.getBounds());
         bounds.scale(0.5f);
         task.setBounds(bounds);
-        assertFalse(activity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -392,12 +504,12 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final Task task = activity.getTask();
 
         // Move activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(activity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(activity, "test");
 
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertThat(task.autoRemoveRecents).isFalse();
     }
 
     /**
@@ -416,8 +528,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final ActivityRecord secondActivity = taskFragment.getBottomMostActivity();
 
         // Move first activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(firstActivity, "test");
 
         final TaskDisplayArea taskDisplayArea = fullscreenTask.getDisplayArea();
         final Task pinnedRootTask = taskDisplayArea.getRootPinnedTask();
@@ -427,6 +538,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         ensureTaskPlacement(fullscreenTask, secondActivity);
         assertTrue(pinnedRootTask.inPinnedWindowingMode());
         assertEquals(WINDOWING_MODE_FULLSCREEN, fullscreenTask.getWindowingMode());
+        assertThat(pinnedRootTask.autoRemoveRecents).isTrue();
+        assertThat(secondActivity.getTask().autoRemoveRecents).isFalse();
     }
 
     @Test
@@ -446,8 +559,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final ActivityRecord topActivity = taskFragment.getTopMostActivity();
 
         // Move the top activity to pinned root task.
-        mRootWindowContainer.moveActivityToPinnedRootTask(topActivity,
-                null /* launchIntoPipHostActivity */, "test");
+        mRootWindowContainer.moveActivityToPinnedRootTask(topActivity, "test");
 
         final Task pinnedRootTask = task.getDisplayArea().getRootPinnedTask();
 
@@ -527,7 +639,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
         verify(task, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleeping();
         verify(task, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
-                null /* target */, null /* targetOptions */);
+                isNull() /* target */, isNull() /* targetOptions */, eq(false) /* deferPause */);
     }
 
     @Test
@@ -554,7 +666,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
 
         // The display orientation should be changed by the activity so there is no relaunch.
-        verify(activity, never()).relaunchActivityLocked(anyBoolean());
+        verify(activity, never()).relaunchActivityLocked(anyBoolean(), anyInt());
         assertEquals(rotatedConfig.orientation, display.getConfiguration().orientation);
     }
 
@@ -719,8 +831,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         doReturn(rootTask).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
         // Use the task as target to resume.
-        mRootWindowContainer.resumeFocusedTasksTopActivities(rootTask, activity,
-                null /* targetOptions */);
+        mRootWindowContainer.resumeFocusedTasksTopActivities(rootTask, activity);
 
         // Verify the target task should resume its activity.
         verify(rootTask, times(1)).resumeTopActivityUncheckedLocked(
@@ -813,7 +924,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Assume the task is at the topmost position
         assertFalse(rootTask.isTopRootTaskInDisplayArea());
-        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity();
+        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity(
+                anyBoolean());
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -835,8 +947,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        doReturn(true).when(mRootWindowContainer)
-                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean());
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
                 anyBoolean());
 
@@ -886,6 +996,24 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertTrue(mRootWindowContainer.canStartHomeOnDisplayArea(info, defaultTaskDisplayArea,
                 true /* allowInstrumenting*/));
     }
+
+    /**
+     * Tests whether home can be started if it's not allowed by policy.
+     */
+    @Test
+    public void testCanStartHome_returnsFalse_ifDisallowedByPolicy() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        final WindowProcessController app = mock(WindowProcessController.class);
+        doReturn(app).when(mAtm).getProcessController(any(), anyInt());
+        doReturn(false).when(app).isInstrumenting();
+        final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
+        doReturn(false).when(taskDisplayArea).canHostHomeTask();
+
+        assertFalse(mRootWindowContainer.canStartHomeOnDisplayArea(info, taskDisplayArea,
+                false /* allowInstrumenting*/));
+    }
+
 
     /**
      * Tests that secondary home activity should not be resolved if device is still locked.

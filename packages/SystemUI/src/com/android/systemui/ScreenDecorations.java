@@ -66,6 +66,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository;
@@ -121,6 +122,9 @@ public class ScreenDecorations implements
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
+
+    private static final boolean sToolkitSetFrameRateReadOnly =
+            android.view.flags.Flags.toolkitSetFrameRateReadOnly();
     private boolean mDebug = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
     private int mDebugColor = Color.RED;
 
@@ -165,7 +169,7 @@ public class ScreenDecorations implements
     ViewGroup mScreenDecorHwcWindow;
     @VisibleForTesting
     ScreenDecorHwcLayer mScreenDecorHwcLayer;
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     private int mRotation;
     private UserSettingObserver mColorInversionSetting;
     @Nullable
@@ -335,7 +339,8 @@ public class ScreenDecorations implements
             ScreenDecorationsLogger logger,
             FacePropertyRepository facePropertyRepository,
             JavaAdapter javaAdapter,
-            CameraProtectionLoader cameraProtectionLoader) {
+            CameraProtectionLoader cameraProtectionLoader,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
         mContext = context;
         mSecureSettings = secureSettings;
         mCommandRegistry = commandRegistry;
@@ -350,6 +355,7 @@ public class ScreenDecorations implements
         mLogger = logger;
         mFacePropertyRepository = facePropertyRepository;
         mJavaAdapter = javaAdapter;
+        mWindowManager = viewCaptureAwareWindowManager;
     }
 
     private final ScreenDecorCommand.Callback mScreenDecorCommandCallback = (cmd, pw) -> {
@@ -401,8 +407,6 @@ public class ScreenDecorations implements
         mExecutor = mThreadFactory.buildDelayableExecutorOnHandler(mHandler);
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
-        mJavaAdapter.alwaysCollectFlow(mFacePropertyRepository.getSensorLocation(),
-                this::onFaceSensorLocationChanged);
         mCommandRegistry.registerCommand(ScreenDecorCommand.SCREEN_DECOR_CMD_NAME,
                 () -> new ScreenDecorCommand(mScreenDecorCommandCallback));
     }
@@ -483,7 +487,6 @@ public class ScreenDecorations implements
 
     private void startOnScreenDecorationsThread() {
         Trace.beginSection("ScreenDecorations#startOnScreenDecorationsThread");
-        mWindowManager = mContext.getSystemService(WindowManager.class);
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
         mRotation = mDisplayInfo.rotation;
         mDisplaySize.x = mDisplayInfo.getNaturalWidth();
@@ -579,6 +582,8 @@ public class ScreenDecorations implements
         };
         mDisplayTracker.addDisplayChangeCallback(mDisplayListener, new HandlerExecutor(mHandler));
         updateConfiguration();
+        mJavaAdapter.alwaysCollectFlow(mFacePropertyRepository.getSensorLocation(),
+                this::onFaceSensorLocationChanged);
         Trace.endSection();
     }
 
@@ -892,6 +897,10 @@ public class ScreenDecorations implements
         lp.width = MATCH_PARENT;
         lp.height = MATCH_PARENT;
         lp.setTitle("ScreenDecorHwcOverlay");
+        if (sToolkitSetFrameRateReadOnly) {
+            lp.setFrameRateBoostOnTouchEnabled(false);
+            lp.setFrameRatePowerSavingsBalanced(false);
+        }
         lp.gravity = Gravity.TOP | Gravity.START;
         if (!mDebug) {
             lp.setColorMode(ActivityInfo.COLOR_MODE_A8);
@@ -1243,6 +1252,11 @@ public class ScreenDecorations implements
         if (mOverlays == null) {
             return;
         }
+        if (mPendingConfigChange) {
+            // Let RestartingPreDrawListener's onPreDraw call updateConfiguration
+            // -> updateOverlayProviderViews to redraw with display change synchronously.
+            return;
+        }
         ++mProviderRefreshToken;
         for (final OverlayWindow overlay: mOverlays) {
             if (overlay == null) {
@@ -1320,10 +1334,18 @@ public class ScreenDecorations implements
     @VisibleForTesting
     void onFaceSensorLocationChanged(Point location) {
         mLogger.onSensorLocationChanged();
+
         if (mExecutor != null) {
             mExecutor.execute(
-                    () -> updateOverlayProviderViews(
-                            new Integer[]{mFaceScanningViewId}));
+                    () -> {
+                        if (getOverlayView(mFaceScanningViewId) == null) {
+                            // face sensor location was just initialized
+                            setupDecorations();
+                        } else {
+                            updateOverlayProviderViews(new Integer[]{mFaceScanningViewId});
+                        }
+                    }
+            );
         }
     }
 

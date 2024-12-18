@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.FlaggedApi;
-import android.annotation.NonNull;
 
 import java.util.Objects;
 
@@ -29,24 +28,11 @@ import java.util.Objects;
  * All timings should be in {@link SystemClock#uptimeNanos()} and measured in wall time.
  */
 @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
-public final class WorkDuration implements Parcelable {
-    long mWorkPeriodStartTimestampNanos = 0;
+public final class WorkDuration {
     long mActualTotalDurationNanos = 0;
+    long mWorkPeriodStartTimestampNanos = 0;
     long mActualCpuDurationNanos = 0;
     long mActualGpuDurationNanos = 0;
-    long mTimestampNanos = 0;
-
-    public static final @NonNull Creator<WorkDuration> CREATOR = new Creator<>() {
-        @Override
-        public WorkDuration createFromParcel(Parcel in) {
-            return new WorkDuration(in);
-        }
-
-        @Override
-        public WorkDuration[] newArray(int size) {
-            return new WorkDuration[size];
-        }
-    };
 
     public WorkDuration() {}
 
@@ -58,34 +44,11 @@ public final class WorkDuration implements Parcelable {
     public WorkDuration(long workPeriodStartTimestampNanos,
                       long actualTotalDurationNanos,
                       long actualCpuDurationNanos,
-                      long actualGpuDurationNanos,
-                      long timestampNanos) {
-        mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
+                      long actualGpuDurationNanos) {
         mActualTotalDurationNanos = actualTotalDurationNanos;
+        mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
         mActualCpuDurationNanos = actualCpuDurationNanos;
         mActualGpuDurationNanos = actualGpuDurationNanos;
-        mTimestampNanos = timestampNanos;
-    }
-
-    WorkDuration(@NonNull Parcel in) {
-        mWorkPeriodStartTimestampNanos = in.readLong();
-        mActualTotalDurationNanos = in.readLong();
-        mActualCpuDurationNanos = in.readLong();
-        mActualGpuDurationNanos = in.readLong();
-        mTimestampNanos = in.readLong();
-    }
-
-    /**
-     * Sets the work period start timestamp in nanoseconds.
-     *
-     * All timings should be in {@link SystemClock#uptimeNanos()}.
-     */
-    public void setWorkPeriodStartTimestampNanos(long workPeriodStartTimestampNanos) {
-        if (workPeriodStartTimestampNanos <= 0) {
-            throw new IllegalArgumentException(
-                "the work period start timestamp should be greater than zero.");
-        }
-        mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
     }
 
     /**
@@ -99,6 +62,19 @@ public final class WorkDuration implements Parcelable {
                 "the actual total duration should be greater than zero.");
         }
         mActualTotalDurationNanos = actualTotalDurationNanos;
+    }
+
+    /**
+     * Sets the work period start timestamp in nanoseconds.
+     *
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
+     */
+    public void setWorkPeriodStartTimestampNanos(long workPeriodStartTimestampNanos) {
+        if (workPeriodStartTimestampNanos <= 0) {
+            throw new IllegalArgumentException(
+                "the work period start timestamp should be greater than zero.");
+        }
+        mWorkPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
     }
 
     /**
@@ -128,21 +104,21 @@ public final class WorkDuration implements Parcelable {
     }
 
     /**
-     * Returns the work period start timestamp based in nanoseconds.
-     *
-     * All timings should be in {@link SystemClock#uptimeNanos()}.
-     */
-    public long getWorkPeriodStartTimestampNanos() {
-        return mWorkPeriodStartTimestampNanos;
-    }
-
-    /**
      * Returns the actual total duration in nanoseconds.
      *
      * All timings should be in {@link SystemClock#uptimeNanos()}.
      */
     public long getActualTotalDurationNanos() {
         return mActualTotalDurationNanos;
+    }
+
+    /**
+     * Returns the work period start timestamp based in nanoseconds.
+     *
+     * All timings should be in {@link SystemClock#uptimeNanos()}.
+     */
+    public long getWorkPeriodStartTimestampNanos() {
+        return mWorkPeriodStartTimestampNanos;
     }
 
     /**
@@ -163,27 +139,6 @@ public final class WorkDuration implements Parcelable {
         return mActualGpuDurationNanos;
     }
 
-    /**
-     * @hide
-     */
-    public long getTimestampNanos() {
-        return mTimestampNanos;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeLong(mWorkPeriodStartTimestampNanos);
-        dest.writeLong(mActualTotalDurationNanos);
-        dest.writeLong(mActualCpuDurationNanos);
-        dest.writeLong(mActualGpuDurationNanos);
-        dest.writeLong(mTimestampNanos);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -193,9 +148,8 @@ public final class WorkDuration implements Parcelable {
             return false;
         }
         WorkDuration workDuration = (WorkDuration) obj;
-        return workDuration.mTimestampNanos == this.mTimestampNanos
+        return workDuration.mActualTotalDurationNanos == this.mActualTotalDurationNanos
             && workDuration.mWorkPeriodStartTimestampNanos == this.mWorkPeriodStartTimestampNanos
-            && workDuration.mActualTotalDurationNanos == this.mActualTotalDurationNanos
             && workDuration.mActualCpuDurationNanos == this.mActualCpuDurationNanos
             && workDuration.mActualGpuDurationNanos == this.mActualGpuDurationNanos;
     }
@@ -203,6 +157,6 @@ public final class WorkDuration implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mWorkPeriodStartTimestampNanos, mActualTotalDurationNanos,
-                            mActualCpuDurationNanos, mActualGpuDurationNanos, mTimestampNanos);
+                            mActualCpuDurationNanos, mActualGpuDurationNanos);
     }
 }

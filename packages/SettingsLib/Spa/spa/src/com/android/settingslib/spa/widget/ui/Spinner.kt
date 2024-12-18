@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -45,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
 data class SpinnerOption(
     val id: Int,
@@ -69,13 +71,16 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             )
             .selectableGroup(),
     ) {
-        val contentPadding = PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
+        val contentPadding = if (isSpaExpressiveEnabled) PaddingValues(
+            horizontal = SettingsDimension.spinnerHorizontalPadding,
+            vertical = SettingsDimension.spinnerVerticalPadding
+        ) else PaddingValues(horizontal = SettingsDimension.itemPaddingEnd)
         Button(
             modifier = Modifier.semantics { role = Role.DropdownList },
             onClick = { expanded = true },
             colors = ButtonDefaults.buttonColors(
-                containerColor = SettingsTheme.colorScheme.spinnerHeaderContainer,
-                contentColor = SettingsTheme.colorScheme.onSpinnerHeaderContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
             contentPadding = contentPadding,
         ) {
@@ -85,7 +90,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(SettingsTheme.colorScheme.spinnerItemContainer),
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer),
         ) {
             for (option in options) {
                 DropdownMenuItem(
@@ -93,7 +98,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
                         SpinnerText(
                             option = option,
                             modifier = Modifier.padding(end = 24.dp),
-                            color = SettingsTheme.colorScheme.onSpinnerItemContainer,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     },
                     onClick = {
@@ -128,7 +133,11 @@ private fun SpinnerText(
         text = option?.text ?: "",
         modifier = modifier
             .padding(end = SettingsDimension.itemPaddingEnd)
-            .padding(vertical = SettingsDimension.itemPaddingAround),
+            .then(
+                if (!isSpaExpressiveEnabled)
+                    Modifier.padding(vertical = SettingsDimension.itemPaddingAround)
+                else Modifier
+            ),
         color = color,
         style = MaterialTheme.typography.labelLarge,
     )
@@ -138,7 +147,7 @@ private fun SpinnerText(
 @Composable
 private fun SpinnerPreview() {
     SettingsTheme {
-        var selectedId by rememberSaveable { mutableStateOf(1) }
+        var selectedId by rememberSaveable { mutableIntStateOf(1) }
         Spinner(
             options = (1..3).map { SpinnerOption(id = it, text = "Option $it") },
             selectedId = selectedId,

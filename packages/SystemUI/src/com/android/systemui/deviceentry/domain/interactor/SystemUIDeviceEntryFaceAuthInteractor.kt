@@ -21,7 +21,6 @@ import android.content.Context
 import android.hardware.biometrics.BiometricFaceConstants
 import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
@@ -37,10 +36,19 @@ import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStat
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
@@ -51,6 +59,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
@@ -84,7 +94,9 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val trustManager: TrustManager,
-) : CoreStartable, DeviceEntryFaceAuthInteractor {
+    private val sceneInteractor: Lazy<SceneInteractor>,
+    deviceEntryFaceAuthStatusInteractor: DeviceEntryFaceAuthStatusInteractor,
+) : DeviceEntryFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
 
@@ -96,9 +108,7 @@ constructor(
         keyguardUpdateMonitor.setFaceAuthInteractor(this)
         observeFaceAuthStateUpdates()
         faceAuthenticationLogger.interactorStarted()
-        primaryBouncerInteractor
-            .get()
-            .isShowing
+        isBouncerVisible
             .whenItFlipsToTrue()
             .onEach {
                 faceAuthenticationLogger.bouncerVisibilityChanged()
@@ -121,9 +131,9 @@ constructor(
             .launchIn(applicationScope)
 
         merge(
-                keyguardTransitionInteractor.aodToLockscreenTransition,
-                keyguardTransitionInteractor.offToLockscreenTransition,
-                keyguardTransitionInteractor.dozingToLockscreenTransition
+                keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(OFF, LOCKSCREEN)),
+                keyguardTransitionInteractor.transition(Edge.create(DOZING, LOCKSCREEN)),
             )
             .filter { it.transitionState == TransitionState.STARTED }
             .sample(powerInteractor.detailedWakefulness)
@@ -174,19 +184,23 @@ constructor(
         // auth so that the switched user can unlock the device with face auth.
         userRepository.selectedUser
             .pairwise()
-            .onEach { (previous, curr) ->
+            .filter { (previous, curr) ->
                 val wasSwitching = previous.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 val isSwitching = curr.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
-                if (wasSwitching && !isSwitching) {
-                    resetLockedOutState(curr.userInfo.id)
-                    yield()
-                    runFaceAuth(
-                        FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
-                        // Fallback to detection if bouncer is not showing so that we can detect a
-                        // face and then show the bouncer to the user if face auth can't run
-                        fallbackToDetect = !primaryBouncerInteractor.get().isBouncerShowing()
-                    )
-                }
+                // User switching was in progress and is complete now.
+                wasSwitching && !isSwitching
+            }
+            .map { (_, curr) -> curr.userInfo.id }
+            .sample(isBouncerVisible, ::Pair)
+            .onEach { (userId, isBouncerCurrentlyVisible) ->
+                resetLockedOutState(userId)
+                yield()
+                runFaceAuth(
+                    FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
+                    // Fallback to detection if bouncer is not showing so that we can detect a
+                    // face and then show the bouncer to the user if face auth can't run
+                    fallbackToDetect = !isBouncerCurrentlyVisible
+                )
             }
             .launchIn(applicationScope)
 
@@ -201,6 +215,24 @@ constructor(
                 }
             }
             .launchIn(applicationScope)
+
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor
+                .get()
+                .transitionState
+                .filter { it.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade) }
+                .distinctUntilChanged()
+                .onEach { onShadeExpansionStarted() }
+                .launchIn(applicationScope)
+        }
+    }
+
+    private val isBouncerVisible: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.get().transitionState.map { it.isIdle(Scenes.Bouncer) }
+        } else {
+            primaryBouncerInteractor.get().isShowing
+        }
     }
 
     private suspend fun resetLockedOutState(currentUserId: Int) {
@@ -218,8 +250,8 @@ constructor(
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED, true)
     }
 
-    override fun onQsExpansionStared() {
-        runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, true)
+    override fun onShadeExpansionStarted() {
+        runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED, false)
     }
 
     override fun onDeviceLifted() {
@@ -244,6 +276,12 @@ constructor(
         }
     }
 
+    override fun onDeviceUnfolded() {
+        if (facePropertyRepository.supportedPostures.contains(DevicePosture.OPENED)) {
+            runFaceAuth(FaceAuthUiEvent.FACE_AUTH_UPDATED_POSTURE_CHANGED, true)
+        }
+    }
+
     override fun registerListener(listener: FaceAuthenticationListener) {
         listeners.add(listener)
     }
@@ -251,8 +289,6 @@ constructor(
     override fun unregisterListener(listener: FaceAuthenticationListener) {
         listeners.remove(listener)
     }
-
-    override fun isLockedOut(): Boolean = repository.isLockedOut.value
 
     override fun isRunning(): Boolean = repository.isAuthRunning.value
 
@@ -266,12 +302,19 @@ constructor(
     }
 
     private val faceAuthenticationStatusOverride = MutableStateFlow<FaceAuthenticationStatus?>(null)
+
     /** Provide the status of face authentication */
     override val authenticationStatus =
-        merge(faceAuthenticationStatusOverride.filterNotNull(), repository.authenticationStatus)
+        merge(
+            faceAuthenticationStatusOverride.filterNotNull(),
+            deviceEntryFaceAuthStatusInteractor.authenticationStatus.filterNotNull(),
+        )
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus
+    override val isLockedOut: StateFlow<Boolean> = repository.isLockedOut
+    override val isAuthenticated: StateFlow<Boolean> = repository.isAuthenticated
+    override val isBypassEnabled: Flow<Boolean> = repository.isBypassEnabled
 
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
         if (repository.isLockedOut.value) {
@@ -289,8 +332,6 @@ constructor(
 
     override fun isFaceAuthEnabledAndEnrolled(): Boolean =
         biometricSettingsRepository.isFaceAuthEnrolledAndEnabled.value
-
-    override fun isAuthenticated(): Boolean = repository.isAuthenticated.value
 
     private fun observeFaceAuthStateUpdates() {
         authenticationStatus

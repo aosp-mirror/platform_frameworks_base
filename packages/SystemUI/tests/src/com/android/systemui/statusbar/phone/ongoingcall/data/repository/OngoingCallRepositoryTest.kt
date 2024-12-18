@@ -16,23 +16,31 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class OngoingCallRepositoryTest : SysuiTestCase() {
-    private val underTest = OngoingCallRepository()
+    private val kosmos = Kosmos()
+    private val underTest = kosmos.ongoingCallRepository
 
     @Test
     fun hasOngoingCall_matchesSet() {
-        underTest.setHasOngoingCall(true)
+        val inCallModel = inCallModel(startTimeMs = 654)
+        underTest.setOngoingCallState(inCallModel)
 
-        assertThat(underTest.hasOngoingCall.value).isTrue()
+        assertThat(underTest.ongoingCallState.value).isEqualTo(inCallModel)
 
-        underTest.setHasOngoingCall(false)
+        underTest.setOngoingCallState(OngoingCallModel.NoCall)
 
-        assertThat(underTest.hasOngoingCall.value).isFalse()
+        assertThat(underTest.ongoingCallState.value).isEqualTo(OngoingCallModel.NoCall)
     }
 }

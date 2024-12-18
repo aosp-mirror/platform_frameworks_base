@@ -205,8 +205,8 @@ final class OverrideRequestController {
         }
 
         if (mRequest != null && mRequest.getPid() == pid) {
-            if (mRequest.getRequestedDeviceState().hasFlag(
-                    DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)) {
+            if (mRequest.getRequestedDeviceState().hasProperty(
+                    DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)) {
                 cancelCurrentRequestLocked();
                 return;
             }

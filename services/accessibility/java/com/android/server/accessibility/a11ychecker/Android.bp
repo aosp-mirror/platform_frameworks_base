@@ -1,0 +1,31 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// TODO(http://b/364326163): a11ychecker depends on aatf which currently can't be used in the system
+// server as it pulls in test deps. We moved a11ychecker sources from services.accessibility to an
+// isolated library while this is resolved.
+java_library_static {
+    name: "a11ychecker",
+    srcs: [
+        "*.java",
+        ":statslog-accessibility-java-gen",
+    ],
+    libs: [
+        "aatf",
+        "androidx.annotation_annotation",
+    ],
+    static_libs: [
+        "accessibility_protos_lite",
+        "com_android_server_accessibility_flags_lib",
+    ],
+}
+
+genrule {
+    name: "statslog-accessibility-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module accessibility" +
+        " --javaPackage com.android.server.accessibility.a11ychecker" +
+        " --javaClass AccessibilityCheckerStatsLog --minApiLevel 34",
+    out: ["java/com/android/server/accessibility/a11ychecker/AccessibilityCheckerStatsLog.java"],
+}

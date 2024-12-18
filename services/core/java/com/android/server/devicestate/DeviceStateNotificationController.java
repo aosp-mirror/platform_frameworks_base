@@ -323,7 +323,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
 
             for (int i = 0; i < stateIdentifiers.length; i++) {
                 int identifier = stateIdentifiers[i];
-                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
+                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER) {
                     continue;
                 }
 

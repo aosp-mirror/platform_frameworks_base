@@ -25,6 +25,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +52,12 @@ public class DozeBrightnessStrategyTest {
                 new DisplayBrightnessState.Builder()
                         .setBrightness(dozeScreenBrightness)
                         .setBrightnessReason(brightnessReason)
-                        .setSdrBrightness(dozeScreenBrightness)
                         .setDisplayBrightnessStrategyName(mDozeBrightnessModeStrategy.getName())
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
-                mDozeBrightnessModeStrategy.updateBrightness(displayPowerRequest);
+                mDozeBrightnessModeStrategy.updateBrightness(
+                        new StrategyExecutionRequest(displayPowerRequest, 0.2f,
+                                /* userSetBrightnessChanged= */ false));
         assertEquals(updatedDisplayBrightnessState, expectedDisplayBrightnessState);
     }
 }

@@ -33,6 +33,9 @@ data class SettingsPage(
     // The name of the page provider, who creates this page. It is used to compute the unique id.
     val sppName: String,
 
+    // The category id of the page provider which is the PageId at SettingsEnums.
+    val metricsCategory: Int = 0,
+
     // The display name of the page, for better readability.
     val displayName: String,
 
@@ -46,6 +49,7 @@ data class SettingsPage(
         // TODO: cleanup it once all its usage in Settings are switched to Spp.createSettingsPage
         fun create(
             name: String,
+            metricsCategory: Int = 0,
             displayName: String? = null,
             parameter: List<NamedNavArgument> = emptyList(),
             arguments: Bundle? = null
@@ -53,6 +57,7 @@ data class SettingsPage(
             return SettingsPage(
                 id = genPageId(name, parameter, arguments),
                 sppName = name,
+                metricsCategory = metricsCategory,
                 displayName = displayName ?: name,
                 parameter = parameter,
                 arguments = arguments

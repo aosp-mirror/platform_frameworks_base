@@ -49,6 +49,7 @@ namespace android {
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_CanvasProperty(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
+extern int register_android_graphics_Color(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_FontFamily(JNIEnv* env);
@@ -70,7 +71,6 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfEditor(JNIEnv* env);
-extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_graphics_text_TextShaper(JNIEnv *env);
@@ -99,6 +99,7 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 
     static const RegJNIRec gRegJNI[] = {
             REG_JNI(register_android_graphics_Canvas),
+            REG_JNI(register_android_graphics_Color),
             // This needs to be before register_android_graphics_Graphics, or the latter
             // will not be able to find the jmethodID for ColorSpace.get().
             REG_JNI(register_android_graphics_ColorSpace),
@@ -142,7 +143,6 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_fonts_FontFamily),
             REG_JNI(register_android_graphics_pdf_PdfDocument),
             REG_JNI(register_android_graphics_pdf_PdfEditor),
-            REG_JNI(register_android_graphics_pdf_PdfRenderer),
             REG_JNI(register_android_graphics_text_MeasuredText),
             REG_JNI(register_android_graphics_text_LineBreaker),
             REG_JNI(register_android_graphics_text_TextShaper),
@@ -192,5 +192,14 @@ void zygote_preload_graphics() {
         // Preload Vulkan driver if HWUI renders with Vulkan backend.
         uint32_t apiVersion;
         vkEnumerateInstanceVersion(&apiVersion);
+
+        if (Properties::initializeGlAlways()) {
+            // Even though HWUI is rendering with Vulkan, some apps still use
+            // GL. Preload GL driver just in case. Since this happens prior to
+            // forking from the zygote, apps that do not use GL are unaffected.
+            // Any memory that (E)GL uses for this call is in shared memory,
+            // and this call only happens once.
+            eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        }
     }
 }

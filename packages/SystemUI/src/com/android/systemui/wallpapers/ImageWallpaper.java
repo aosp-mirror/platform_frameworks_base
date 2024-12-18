@@ -20,8 +20,14 @@ import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.SetWallpaperFlags;
 
+import static com.android.systemui.Flags.fixImageWallpaperCrashSurfaceAlreadyReleased;
+import static com.android.window.flags.Flags.multiCrop;
+import static com.android.window.flags.Flags.offloadColorExtraction;
+
+import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
@@ -124,7 +130,16 @@ public class ImageWallpaper extends WallpaperService {
          * and if the count is 0, unload the bitmap
          */
         private int mBitmapUsages = 0;
+
+        /**
+         * Main lock for long operations (loading the bitmap or processing colors).
+         */
         private final Object mLock = new Object();
+
+        /**
+         * Lock for SurfaceHolder operations. Should only be acquired after the main lock.
+         */
+        private final Object mSurfaceLock = new Object();
 
         CanvasEngine() {
             super();
@@ -134,6 +149,12 @@ public class ImageWallpaper extends WallpaperService {
                     mLongExecutor,
                     mLock,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
+
+                        @Override
+                        public void onColorsProcessed() {
+                            CanvasEngine.this.notifyColorsChanged();
+                        }
+
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
                                 List<WallpaperColors> colors) {
@@ -170,7 +191,10 @@ public class ImageWallpaper extends WallpaperService {
             }
             mWallpaperManager = getDisplayContext().getSystemService(WallpaperManager.class);
             mSurfaceHolder = surfaceHolder;
-            Rect dimensions = mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true);
+            Rect dimensions = !multiCrop()
+                    ? mWallpaperManager.peekBitmapDimensions(getSourceFlag(), true)
+                    : mWallpaperManager.peekBitmapDimensionsAsUser(getSourceFlag(), true,
+                    mUserTracker.getUserId());
             int width = Math.max(MIN_SURFACE_WIDTH, dimensions.width());
             int height = Math.max(MIN_SURFACE_HEIGHT, dimensions.height());
             mSurfaceHolder.setFixedSize(width, height);
@@ -183,8 +207,11 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDestroy() {
-            getDisplayContext().getSystemService(DisplayManager.class)
-                    .unregisterDisplayListener(this);
+            Context context = getDisplayContext();
+            if (context != null) {
+                DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+                if (displayManager != null) displayManager.unregisterDisplayListener(this);
+            }
             mWallpaperLocalColorExtractor.cleanUp();
         }
 
@@ -209,6 +236,12 @@ public class ImageWallpaper extends WallpaperService {
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             if (DEBUG) {
                 Log.i(TAG, "onSurfaceDestroyed");
+            }
+            if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                synchronized (mSurfaceLock) {
+                    mSurfaceHolder = null;
+                }
+                return;
             }
             mLongExecutor.execute(this::onSurfaceDestroyedSynchronized);
         }
@@ -246,7 +279,7 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void drawFrameInternal() {
-            if (mSurfaceHolder == null) {
+            if (mSurfaceHolder == null && !fixImageWallpaperCrashSurfaceAlreadyReleased()) {
                 Log.i(TAG, "attempt to draw a frame without a valid surface");
                 return;
             }
@@ -255,6 +288,19 @@ public class ImageWallpaper extends WallpaperService {
             if (!isBitmapLoaded()) {
                 loadWallpaperAndDrawFrameInternal();
             } else {
+                if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                    synchronized (mSurfaceLock) {
+                        if (mSurfaceHolder == null) {
+                            Log.i(TAG, "Surface released before the image could be drawn");
+                            return;
+                        }
+                        mBitmapUsages++;
+                        drawFrameOnCanvas(mBitmap);
+                        reportEngineShown(false);
+                        unloadBitmapIfNotUsedInternal();
+                        return;
+                    }
+                }
                 mBitmapUsages++;
                 drawFrameOnCanvas(mBitmap);
                 reportEngineShown(false);
@@ -315,9 +361,14 @@ public class ImageWallpaper extends WallpaperService {
                 mBitmap.recycle();
             }
             mBitmap = null;
-
-            final Surface surface = getSurfaceHolder().getSurface();
-            surface.hwuiDestroy();
+            if (fixImageWallpaperCrashSurfaceAlreadyReleased()) {
+                synchronized (mSurfaceLock) {
+                    if (mSurfaceHolder != null) mSurfaceHolder.getSurface().hwuiDestroy();
+                }
+            } else {
+                final Surface surface = getSurfaceHolder().getSurface();
+                surface.hwuiDestroy();
+            }
             mWallpaperManager.forgetLoadedWallpaper();
             Trace.endSection();
         }
@@ -429,6 +480,12 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @Override
+        public @Nullable WallpaperColors onComputeColors() {
+            if (!offloadColorExtraction()) return null;
+            return mWallpaperLocalColorExtractor.onComputeColors();
+        }
+
+        @Override
         public boolean supportsLocalColorExtraction() {
             return true;
         }
@@ -462,6 +519,12 @@ public class ImageWallpaper extends WallpaperService {
                 mPagesComputed = true;
                 mWallpaperLocalColorExtractor.onPageChanged(mPages);
             }
+        }
+
+        @Override
+        public void onDimAmountChanged(float dimAmount) {
+            if (!offloadColorExtraction()) return;
+            mWallpaperLocalColorExtractor.onDimAmountChanged(dimAmount);
         }
 
         @Override

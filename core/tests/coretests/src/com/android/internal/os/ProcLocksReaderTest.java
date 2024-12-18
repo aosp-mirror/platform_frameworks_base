@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
 import android.os.FileUtils;
 import android.util.IntArray;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

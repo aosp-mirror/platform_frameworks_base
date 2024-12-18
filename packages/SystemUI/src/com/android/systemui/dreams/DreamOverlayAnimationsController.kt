@@ -27,13 +27,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.dream.lowlight.util.TruncatedInterpolator
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.complication.ComplicationLayoutParams.Position
+import com.android.systemui.dreams.dagger.DreamOverlayComponent.DreamOverlayScope
 import com.android.systemui.dreams.dagger.DreamOverlayModule
-import com.android.systemui.dreams.ui.viewmodel.DreamOverlayViewModel
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -42,18 +44,20 @@ import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
 /** Controller for dream overlay animations. */
+@DreamOverlayScope
 class DreamOverlayAnimationsController
 @Inject
 constructor(
     private val mBlurUtils: BlurUtils,
     private val mComplicationHostViewController: ComplicationHostViewController,
-    private val mStatusBarViewController: DreamOverlayStatusBarViewController,
+    private val mStatusBarViewController: AmbientStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
-    private val dreamOverlayViewModel: DreamOverlayViewModel,
+    private val dreamViewModel: DreamViewModel,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
     private val mDreamInBlurAnimDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
@@ -81,51 +85,62 @@ constructor(
 
     private var mCurrentBlurRadius: Float = 0f
 
+    private var mLifecycleFlowHandle: DisposableHandle? = null
+
     fun init(view: View) {
         this.view = view
 
-        view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    dreamOverlayViewModel.dreamOverlayTranslationY.collect { px ->
-                        ComplicationLayoutParams.iteratePositions(
-                            { position: Int -> setElementsTranslationYAtPosition(px, position) },
-                            POSITION_TOP or POSITION_BOTTOM
-                        )
+        mLifecycleFlowHandle =
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch {
+                        dreamViewModel.dreamOverlayTranslationY.collect { px ->
+                            ComplicationLayoutParams.iteratePositions(
+                                { position: Int ->
+                                    setElementsTranslationYAtPosition(px, position)
+                                },
+                                POSITION_TOP or POSITION_BOTTOM
+                            )
+                        }
                     }
-                }
 
-                launch {
-                    dreamOverlayViewModel.dreamOverlayTranslationX.collect { px ->
-                        ComplicationLayoutParams.iteratePositions(
-                            { position: Int -> setElementsTranslationXAtPosition(px, position) },
-                            POSITION_TOP or POSITION_BOTTOM
-                        )
+                    launch {
+                        dreamViewModel.dreamOverlayTranslationX.collect { px ->
+                            ComplicationLayoutParams.iteratePositions(
+                                { position: Int ->
+                                    setElementsTranslationXAtPosition(px, position)
+                                },
+                                POSITION_TOP or POSITION_BOTTOM
+                            )
+                        }
                     }
-                }
 
-                launch {
-                    dreamOverlayViewModel.dreamOverlayAlpha.collect { alpha ->
-                        ComplicationLayoutParams.iteratePositions(
-                            { position: Int ->
-                                setElementsAlphaAtPosition(
-                                    alpha = alpha,
-                                    position = position,
-                                    fadingOut = true,
-                                )
-                            },
-                            POSITION_TOP or POSITION_BOTTOM
-                        )
+                    launch {
+                        dreamViewModel.dreamOverlayAlpha.collect { alpha ->
+                            ComplicationLayoutParams.iteratePositions(
+                                { position: Int ->
+                                    setElementsAlphaAtPosition(
+                                        alpha = alpha,
+                                        position = position,
+                                        fadingOut = true,
+                                    )
+                                },
+                                POSITION_TOP or POSITION_BOTTOM
+                            )
+                        }
                     }
-                }
 
-                launch {
-                    dreamOverlayViewModel.transitionEnded.collect { _ ->
-                        mOverlayStateController.setExitAnimationsRunning(false)
+                    launch {
+                        dreamViewModel.transitionEnded.collect { _ ->
+                            mOverlayStateController.setExitAnimationsRunning(false)
+                        }
                     }
                 }
             }
-        }
+    }
+
+    fun destroy() {
+        mLifecycleFlowHandle?.dispose()
     }
 
     /**
@@ -240,10 +255,8 @@ constructor(
         return mAnimator as AnimatorSet
     }
 
-    /** Starts the dream content and dream overlay exit animations. */
-    fun wakeUp() {
+    fun onWakeUp() {
         cancelAnimations()
-        mOverlayStateController.setExitAnimationsRunning(true)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */
@@ -253,6 +266,7 @@ constructor(
                 it.cancel()
                 null
             }
+        mOverlayStateController.setExitAnimationsRunning(false)
     }
 
     private fun blurAnimator(

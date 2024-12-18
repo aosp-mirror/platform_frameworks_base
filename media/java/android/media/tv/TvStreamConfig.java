@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.util.Objects;
+
 /**
  * @hide
  */
@@ -176,5 +178,10 @@ public class TvStreamConfig implements Parcelable {
             && config.mType == mType
             && config.mMaxWidth == mMaxWidth
             && config.mMaxHeight == mMaxHeight;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mGeneration, mStreamId, mType, mMaxWidth, mMaxHeight);
     }
 }

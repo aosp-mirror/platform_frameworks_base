@@ -53,6 +53,8 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mTintColor;
     @Nullable private Integer mRippleColor;
     private final float[] mCornerRadii = new float[8];
+    private final float[] mFocusOverlayCornerRadii = new float[8];
+    private float mFocusOverlayStroke = 0;
     private boolean mBottomIsRounded;
     private boolean mBottomAmountClips = true;
     private int mActualHeight = -1;
@@ -74,6 +76,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
                 R.color.notification_state_color_dark);
         mNormalColor = Utils.getColorAttrDefaultColor(mContext,
                 com.android.internal.R.attr.materialColorSurfaceContainerHigh);
+        mFocusOverlayStroke = getResources().getDimension(R.dimen.notification_focus_stroke_width);
     }
 
     @Override
@@ -290,14 +293,28 @@ public class NotificationBackgroundView extends View implements Dumpable {
         if (mDontModifyCorners) {
             return;
         }
-        if (mBackground instanceof LayerDrawable) {
-            int numberOfLayers = ((LayerDrawable) mBackground).getNumberOfLayers();
+        if (mBackground instanceof LayerDrawable layerDrawable) {
+            int numberOfLayers = layerDrawable.getNumberOfLayers();
             for (int i = 0; i < numberOfLayers; i++) {
-                GradientDrawable gradientDrawable =
-                        (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(i);
+                GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.getDrawable(i);
                 gradientDrawable.setCornerRadii(mCornerRadii);
             }
+            updateFocusOverlayRadii(layerDrawable);
         }
+    }
+
+    private void updateFocusOverlayRadii(LayerDrawable background) {
+        GradientDrawable overlay =
+                (GradientDrawable) background.findDrawableByLayerId(
+                        R.id.notification_focus_overlay);
+        for (int i = 0; i < mCornerRadii.length; i++) {
+            // in theory subtracting mFocusOverlayStroke/2 should be enough but notification
+            // background is still peeking a bit from below - probably due to antialiasing or
+            // overlay uneven scaling. So let's subtract full mFocusOverlayStroke to make sure the
+            // radius is a bit smaller and covers background corners fully
+            mFocusOverlayCornerRadii[i] = Math.max(0, mCornerRadii[i] - mFocusOverlayStroke);
+        }
+        overlay.setCornerRadii(mFocusOverlayCornerRadii);
     }
 
     /** Set the current expand animation size. */

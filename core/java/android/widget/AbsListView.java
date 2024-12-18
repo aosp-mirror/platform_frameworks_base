@@ -16,6 +16,10 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.enableTouchScrollFeedback;
+import static android.view.flags.Flags.scrollFeedbackApi;
+import static android.view.flags.Flags.viewVelocityApi;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -80,7 +84,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
-import android.view.flags.Flags;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -3701,7 +3704,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // If it's non-null, we're already in a scroll.
                 mScrollStrictSpan = StrictMode.enterCriticalSpan("AbsListView-scroll");
             }
-
             if (y != mLastY) {
                 // We may be here after stopping a fling and continuing to scroll.
                 // If so, we haven't disallowed intercepting touch events yet.
@@ -3733,8 +3735,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 boolean atEdge = false;
                 if (incrementalDeltaY != 0) {
                     atEdge = trackMotionScroll(deltaY, incrementalDeltaY);
-                }
 
+                    // TODO: b/360198915 - Add unit testing for using ScrollFeedbackProvider
+                    if (enableTouchScrollFeedback()) {
+                        initHapticScrollFeedbackProviderIfNotExists();
+                        mHapticScrollFeedbackProvider.onScrollProgress(
+                                vtev.getDeviceId(), vtev.getSource(), MotionEvent.AXIS_Y,
+                                incrementalDeltaY);
+                    }
+                }
                 // Check to see if we have bumped into the scroll limit
                 motionView = this.getChildAt(motionIndex);
                 if (motionView != null) {
@@ -3743,7 +3752,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int motionViewRealTop = motionView.getTop();
                     if (atEdge) {
                         // Apply overscroll
-
                         int overscroll = -incrementalDeltaY -
                                 (motionViewRealTop - motionViewPrevTop);
                         if (dispatchNestedScroll(0, overscroll - incrementalDeltaY, 0, overscroll,
@@ -3770,6 +3778,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mDirection = 0; // Reset when entering overscroll.
                                     mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 }
+
+                                if (enableTouchScrollFeedback()) {
+                                    initHapticScrollFeedbackProviderIfNotExists();
+                                    mHapticScrollFeedbackProvider.onScrollLimit(
+                                            vtev.getDeviceId(), vtev.getSource(),
+                                            MotionEvent.AXIS_Y,
+                                            /* isStart= */ incrementalDeltaY > 0);
+                                }
+
                                 if (incrementalDeltaY > 0) {
                                     mEdgeGlowTop.onPullDistance((float) -overscroll / getHeight(),
                                             (float) x / getWidth());
@@ -3979,7 +3996,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mFastScroll != null && mFastScroll.onTouchEvent(ev)) {
             return true;
         }
-
         initVelocityTrackerIfNotExists();
         final MotionEvent vtev = MotionEvent.obtain(ev);
 
@@ -4518,7 +4534,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
-                        if (Flags.scrollFeedbackApi()) {
+                        if (scrollFeedbackApi()) {
                             initHapticScrollFeedbackProviderIfNotExists();
                             mHapticScrollFeedbackProvider.onScrollProgress(
                                     event.getDeviceId(), event.getSource(), axis, delta);
@@ -4534,7 +4550,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
                                 / ((float) getHeight());
                         boolean hitTopLimit = delta > 0;
-                        if (Flags.scrollFeedbackApi()) {
+                        if (scrollFeedbackApi()) {
                             initHapticScrollFeedbackProviderIfNotExists();
                             mHapticScrollFeedbackProvider.onScrollLimit(
                                     event.getDeviceId(), event.getSource(), axis,
@@ -5098,6 +5114,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 boolean more = scroller.computeScrollOffset();
                 final int y = scroller.getCurrY();
 
+                // For variable refresh rate project to track the current velocity of this View
+                if (viewVelocityApi()) {
+                    setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
+                }
+
                 // Flip sign to convert finger direction to list items direction
                 // (e.g. finger moving down means list is moving towards the top)
                 int delta = consumeFlingInStretch(mLastFlingY - y);
@@ -5191,6 +5212,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     } else {
                         invalidate();
                         postOnAnimation(this);
+                    }
+                    // For variable refresh rate project to track the current velocity of this View
+                    if (viewVelocityApi()) {
+                        setFrameContentVelocity(Math.abs(mScroller.getCurrVelocity()));
                     }
                 } else {
                     endFling();

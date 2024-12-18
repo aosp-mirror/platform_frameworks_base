@@ -1,0 +1,8 @@
+<data-labels>
+    <data-shared dataType="audio_data_type_sound_recordings"
+        purposes="analytics" />
+    <data-shared dataType="audio_data_type_music_files"
+        purposes="analytics" />
+    <data-shared dataType="audio_data_type_other"
+        purposes="analytics" />
+</data-labels>

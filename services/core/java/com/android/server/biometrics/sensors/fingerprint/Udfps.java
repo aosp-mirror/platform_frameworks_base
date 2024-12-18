@@ -31,4 +31,5 @@ public interface Udfps {
     void onPointerUp(PointerContext pc);
     void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event);
     boolean isPointerDown();
+    void setIgnoreDisplayTouches(boolean ignoreTouches);
 }

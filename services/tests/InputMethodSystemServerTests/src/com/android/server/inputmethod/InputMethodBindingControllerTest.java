@@ -77,9 +77,11 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         mCountDownLatch = new CountDownLatch(1);
         // Remove flag Context.BIND_SCHEDULE_LIKE_TOP_APP because in tests we are not calling
         // from system.
-        mBindingController =
-                new InputMethodBindingController(
-                        mInputMethodManagerService, mImeConnectionBindFlags, mCountDownLatch);
+        synchronized (ImfLock.class) {
+            mBindingController =
+                    new InputMethodBindingController(mUserId, mInputMethodManagerService,
+                            mImeConnectionBindFlags, mCountDownLatch);
+        }
     }
 
     @Test
@@ -136,7 +138,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
-            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
+            info = InputMethodSettingsRepository.get(mUserId).getMethodMap().get(TEST_IME_ID);
         }
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);

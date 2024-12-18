@@ -27,9 +27,11 @@ import com.android.server.LocalServices
 import com.android.server.SystemConfig
 import com.android.server.SystemService
 import com.android.server.appop.AppOpsCheckingServiceInterface
+import com.android.server.permission.PermissionManagerLocal
 import com.android.server.permission.access.appop.AppOpService
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.permission.PermissionManagerLocalImpl
 import com.android.server.permission.access.permission.PermissionService
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.PackageManagerLocal
@@ -63,6 +65,11 @@ class AccessCheckingService(context: Context) : SystemService(context) {
 
         LocalServices.addService(AppOpsCheckingServiceInterface::class.java, appOpService)
         LocalServices.addService(PermissionManagerServiceInterface::class.java, permissionService)
+
+        LocalManagerRegistry.addManager(
+            PermissionManagerLocal::class.java,
+            PermissionManagerLocalImpl(this)
+        )
     }
 
     fun initialize() {
@@ -98,8 +105,6 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         persistence.initialize()
         persistence.read(state)
         this.state = state
-
-        mutateState { with(policy) { onInitialized() } }
 
         appOpService.initialize()
         permissionService.initialize()

@@ -17,7 +17,7 @@
 
 package android.os;
 
-import android.os.WorkDuration;
+import android.hardware.power.WorkDuration;
 
 /** {@hide} */
 oneway interface IHintSession {

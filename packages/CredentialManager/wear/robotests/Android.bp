@@ -1,0 +1,29 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_robolectric_test {
+    name: "CredentialSelectorTests",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    // Include test libraries.
+    instrumentation_for: "ClockworkCredentialManager",
+    libs: [
+        "androidx.test.runner",
+        "androidx.test.ext.junit",
+        "kotlinx_coroutines_android",
+        "kotlinx_coroutines",
+        "kotlinx-coroutines-core",
+        "kotlinx_coroutines_test",
+        "mockito-robolectric-prebuilt",
+        "mockito-kotlin2",
+        "CredentialManagerShared",
+        "ClockworkCredentialManager",
+        "framework_graphics_flags_java_lib",
+    ],
+    java_resource_dirs: ["config"],
+    upstream: true,
+    strict_mode: false,
+}

@@ -17,13 +17,14 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
+import com.android.systemui.CoreStartable
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
-import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 
 @Module
@@ -41,30 +42,16 @@ abstract class KeyguardBlueprintModule {
     ): KeyguardBlueprint
 
     @Binds
-    @IntoSet
-    abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
-        shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
-    ): KeyguardBlueprint
+    @IntoMap
+    @ClassKey(KeyguardBlueprintInteractor::class)
+    abstract fun bindsKeyguardBlueprintInteractor(
+        keyguardBlueprintInteractor: KeyguardBlueprintInteractor
+    ): CoreStartable
 
-    companion object {
-        /** This is a place holder for weather clock in compose. */
-        @Provides
-        @IntoSet
-        fun bindWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
-            return object : KeyguardBlueprint {
-                override val id: String = WEATHER_CLOCK_BLUEPRINT_ID
-                override val sections: List<KeyguardSection> = listOf()
-            }
-        }
-
-        /** This is a place holder for weather clock in compose. */
-        @Provides
-        @IntoSet
-        fun bindSplitShadeWeatherClockBlueprintPlaceHolder(): KeyguardBlueprint {
-            return object : KeyguardBlueprint {
-                override val id: String = SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-                override val sections: List<KeyguardSection> = listOf()
-            }
-        }
-    }
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardBlueprintCommandListener::class)
+    abstract fun bindsKeyguardBlueprintCommandListener(
+        keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener
+    ): CoreStartable
 }

@@ -16,6 +16,8 @@
 
 package com.android.server.usb;
 
+import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
+
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 
 import android.Manifest;
@@ -43,6 +45,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.usb.UsbProfileGroupSettingsManagerProto;
 import android.service.usb.UsbSettingsAccessoryPreferenceProto;
 import android.service.usb.UsbSettingsDevicePreferenceProto;
@@ -939,12 +942,23 @@ public class UsbProfileGroupSettingsManager {
     }
 
     /**
-     * @return true if any application in foreground have set restrict_usb_overlay_activities as
-     * true in manifest file. The application needs to have MANAGE_USB permission.
+     * @return true if the user has not finished the setup process or if there are any
+     * foreground applications with MANAGE_USB permission and restrict_usb_overlay_activities
+     * enabled in the manifest file.
      */
     private boolean shouldRestrictOverlayActivities() {
 
         if (!Flags.allowRestrictionOfOverlayActivities()) return false;
+
+        if (Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                USER_SETUP_COMPLETE,
+                /* defaultValue= */ 1,
+                UserHandle.CURRENT.getIdentifier())
+                == 0) {
+            Slog.d(TAG, "restricting usb overlay activities as setup is not complete");
+            return true;
+        }
 
         List<ActivityManager.RunningAppProcessInfo> appProcessInfos = mActivityManager
                 .getRunningAppProcesses();
@@ -978,8 +992,14 @@ public class UsbProfileGroupSettingsManager {
 
         shouldRestrictOverlayActivities = filteredAppProcessInfos.stream().anyMatch(pkg -> {
             try {
-                return mPackageManager.getProperty(PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES, pkg)
-                        .getBoolean();
+                boolean restrictUsbOverlayActivitiesForPackage = mPackageManager
+                        .getProperty(PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES, pkg).getBoolean();
+
+                if (restrictUsbOverlayActivitiesForPackage) {
+                    Slog.d(TAG, "restricting usb overlay activities as package " + pkg
+                            + " is in foreground");
+                }
+                return restrictUsbOverlayActivitiesForPackage;
             } catch (NameNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "property PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES "
@@ -989,8 +1009,8 @@ public class UsbProfileGroupSettingsManager {
             }
         });
 
-        if (shouldRestrictOverlayActivities) {
-            Slog.d(TAG, "restricting starting of usb overlay activities");
+        if (!shouldRestrictOverlayActivities) {
+            Slog.d(TAG, "starting of usb overlay activities");
         }
         return shouldRestrictOverlayActivities;
     }

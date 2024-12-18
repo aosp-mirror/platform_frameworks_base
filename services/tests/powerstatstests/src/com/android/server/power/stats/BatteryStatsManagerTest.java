@@ -25,14 +25,20 @@ import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
  * Test BatteryStatsManager and CellularBatteryStats to ensure that valid data is being reported
  * and that invalid data is not reported.
  */
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Integration test")
 public class BatteryStatsManagerTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void testBatteryUsageStatsDataConsistency() {

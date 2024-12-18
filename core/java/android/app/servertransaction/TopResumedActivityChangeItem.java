@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
@@ -28,11 +29,17 @@ import android.os.Trace;
 
 /**
  * Top resumed activity changed callback.
+ *
  * @hide
  */
 public class TopResumedActivityChangeItem extends ActivityTransactionItem {
 
-    private boolean mOnTop;
+    private final boolean mOnTop;
+
+    public TopResumedActivityChangeItem(@NonNull IBinder activityToken, boolean onTop) {
+        super(activityToken);
+        mOnTop = onTop;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -58,42 +65,16 @@ public class TopResumedActivityChangeItem extends ActivityTransactionItem {
         ActivityClient.getInstance().activityTopResumedStateLost();
     }
 
-    // ObjectPoolItem implementation
-
-    private TopResumedActivityChangeItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static TopResumedActivityChangeItem obtain(@NonNull IBinder activityToken,
-            boolean onTop) {
-        TopResumedActivityChangeItem instance =
-                ObjectPool.obtain(TopResumedActivityChangeItem.class);
-        if (instance == null) {
-            instance = new TopResumedActivityChangeItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mOnTop = onTop;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mOnTop = false;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mOnTop);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private TopResumedActivityChangeItem(@NonNull Parcel in) {
         super(in);
         mOnTop = in.readBoolean();
@@ -131,7 +112,6 @@ public class TopResumedActivityChangeItem extends ActivityTransactionItem {
 
     @Override
     public String toString() {
-        return "TopResumedActivityChangeItem{" + super.toString()
-                + ",onTop=" + mOnTop + "}";
+        return "TopResumedActivityChangeItem{" + super.toString() + ",onTop=" + mOnTop + "}";
     }
 }

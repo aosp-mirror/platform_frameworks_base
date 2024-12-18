@@ -83,6 +83,10 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
 
+import dalvik.annotation.optimization.NeverCompile;
+
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -96,9 +100,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-import dalvik.annotation.optimization.NeverCompile;
-import kotlin.Unit;
 
 /** Platform implementation of the network controller. **/
 @SysUISingleton
@@ -464,7 +465,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
             });
         };
 
-        mDemoModeController.addCallback(this);
+        // TODO(b/336357360): Until we can remove this class entirely, disable its handling of ALL
+        // demo mode commands, due to the fact that the mobile command handler has an infinite
+        // loop bug if you use any slot other than 1.
+        // mDemoModeController.addCallback(this);
 
         mDumpManager.registerNormalDumpable(TAG, this);
     }
@@ -592,7 +596,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             // NetworkCapabilities, but we need to convert it into TRANSPORT_WIFI in order to
             // distinguish it from VCN over Cellular.
             if (transportTypes[i] == NetworkCapabilities.TRANSPORT_CELLULAR
-                    && Utils.tryGetWifiInfoForVcn(networkCapabilities) != null) {
+                    && Utils.tryGetWifiInfoForVcn(mConnectivityManager, networkCapabilities)
+                            != null) {
                 transportTypes[i] = NetworkCapabilities.TRANSPORT_WIFI;
                 break;
             }
@@ -1108,7 +1113,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     continue;
                 }
                 if (transportType == NetworkCapabilities.TRANSPORT_CELLULAR
-                        && Utils.tryGetWifiInfoForVcn(mLastDefaultNetworkCapabilities) != null) {
+                        && Utils.tryGetWifiInfoForVcn(
+                                        mConnectivityManager, mLastDefaultNetworkCapabilities)
+                                != null) {
                     mConnectedTransports.set(NetworkCapabilities.TRANSPORT_WIFI);
                     if (mLastDefaultNetworkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                         mValidatedTransports.set(NetworkCapabilities.TRANSPORT_WIFI);
@@ -1317,6 +1324,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             int carrierId = TextUtils.isEmpty(carrierIdString) ? 0
                     : Integer.parseInt(carrierIdString);
             // Ensure we have enough sim slots
+            // TODO(b/336357360): This is the origination of the infinite loop bug, for those
+            // following along at home.
             List<SubscriptionInfo> subs = new ArrayList<>();
             while (mMobileSignalControllers.size() <= slot) {
                 int nextSlot = mMobileSignalControllers.size();

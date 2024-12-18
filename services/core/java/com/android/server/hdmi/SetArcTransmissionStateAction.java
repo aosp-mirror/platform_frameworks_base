@@ -47,8 +47,11 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     SetArcTransmissionStateAction(HdmiCecLocalDevice source, int avrAddress,
             boolean enabled) {
         super(source);
-        HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV);
-        HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        if (!HdmiUtils.verifyAddressType(getSourceAddress(), HdmiDeviceInfo.DEVICE_TV) ||
+                !HdmiUtils.verifyAddressType(avrAddress, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)) {
+            Slog.w(TAG, "Device type mismatch, stop the action.");
+            finish();
+        }
         mAvrAddress = avrAddress;
         mEnabled = enabled;
     }
@@ -57,6 +60,12 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     boolean start() {
         // Seq #37.
         if (mEnabled) {
+            // Avoid triggering duplicate RequestSadAction events.
+            // This could lead to unexpected responses from the AVR and cause the TV to receive data
+            // out of order. The SAD report does not provide information about the order of events.
+            if ((tv().hasAction(RequestSadAction.class))) {
+                return true;
+            }
             // Request SADs before enabling ARC
             RequestSadAction action = new RequestSadAction(
                     localDevice(), Constants.ADDR_AUDIO_SYSTEM,

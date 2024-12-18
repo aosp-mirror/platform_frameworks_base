@@ -541,7 +541,7 @@ final class ProcessServiceRecord {
     private void removeSdkSandboxConnectionIfNecessary(ConnectionRecord connection) {
         final ProcessRecord attributedClient = connection.binding.attributedClient;
         if (attributedClient != null && connection.binding.service.isSdkSandbox) {
-            if (attributedClient.mServices.mSdkSandboxConnections == null) {
+            if (attributedClient.mServices.mSdkSandboxConnections != null) {
                 attributedClient.mServices.mSdkSandboxConnections.remove(connection);
             }
         }
@@ -674,14 +674,16 @@ final class ProcessServiceRecord {
         return mScheduleServiceTimeoutPending;
     }
 
-    @GuardedBy("mService")
     void onProcessUnfrozen() {
-        scheduleServiceTimeoutIfNeededLocked();
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
     }
 
-    @GuardedBy("mService")
     void onProcessFrozenCancelled() {
-        scheduleServiceTimeoutIfNeededLocked();
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
     }
 
     @GuardedBy("mService")

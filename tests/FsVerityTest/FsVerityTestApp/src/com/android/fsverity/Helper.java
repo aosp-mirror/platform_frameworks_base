@@ -27,6 +27,9 @@ import android.util.Log;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.compatibility.common.util.AdoptShellPermissionsRule;
+
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.FileOutputStream;
@@ -45,6 +48,12 @@ public class Helper {
     private static final String FILENAME = "test.file";
 
     private static final long BLOCK_SIZE = 4096;
+
+    @Rule
+    public final AdoptShellPermissionsRule mAdoptShellPermissionsRule =
+            new AdoptShellPermissionsRule(
+                    InstrumentationRegistry.getInstrumentation().getUiAutomation(),
+                    android.Manifest.permission.SETUP_FSVERITY);
 
     @Test
     public void prepareTest() throws Exception {

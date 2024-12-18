@@ -20,9 +20,9 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.view.View
 import android.widget.Switch
 import com.android.internal.logging.MetricsLogger
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -34,6 +34,7 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
+import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.InternetTileBinder
@@ -44,18 +45,19 @@ import javax.inject.Inject
 class InternetTileNewImpl
 @Inject
 constructor(
-        host: QSHost,
-        uiEventLogger: QsEventLogger,
-        @Background backgroundLooper: Looper,
-        @Main private val mainHandler: Handler,
-        falsingManager: FalsingManager,
-        metricsLogger: MetricsLogger,
-        statusBarStateController: StatusBarStateController,
-        activityStarter: ActivityStarter,
-        qsLogger: QSLogger,
-        viewModel: InternetTileViewModel,
-        private val internetDialogManager: InternetDialogManager,
-        private val accessPointController: AccessPointController,
+    host: QSHost,
+    uiEventLogger: QsEventLogger,
+    @Background backgroundLooper: Looper,
+    @Main private val mainHandler: Handler,
+    falsingManager: FalsingManager,
+    metricsLogger: MetricsLogger,
+    statusBarStateController: StatusBarStateController,
+    activityStarter: ActivityStarter,
+    qsLogger: QSLogger,
+    viewModel: InternetTileViewModel,
+    private val internetDialogManager: InternetDialogManager,
+    private val wifiStateWorker: WifiStateWorker,
+    private val accessPointController: AccessPointController,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -81,18 +83,27 @@ constructor(
         mContext.getString(R.string.quick_settings_internet_label)
 
     override fun newTileState(): QSTile.BooleanState {
-        return QSTile.BooleanState().also { it.forceExpandIcon = true }
+        return QSTile.BooleanState().also {
+            it.forceExpandIcon = true
+            it.handlesSecondaryClick = true
+        }
     }
 
-    override fun handleClick(view: View?) {
+    override fun handleClick(expandable: Expandable?) {
         mainHandler.post {
             internetDialogManager.create(
                 aboveStatusBar = true,
                 accessPointController.canConfigMobileData(),
                 accessPointController.canConfigWifi(),
-                view,
+                expandable,
             )
         }
+    }
+
+    override fun secondaryClick(expandable: Expandable?) {
+        // TODO(b/358352265): Figure out the correct action for the secondary click
+        // Toggle wifi
+        wifiStateWorker.isWifiEnabled = !wifiStateWorker.isWifiEnabled
     }
 
     override fun handleUpdateState(state: QSTile.BooleanState, arg: Any?) {

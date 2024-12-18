@@ -93,10 +93,16 @@ interface IWindowOrganizerController {
     ITaskFragmentOrganizerController getTaskFragmentOrganizerController();
 
     /**
-     * Registers a transition player with Core. There is only one of these at a time and calling
-     * this will replace the existing one if set.
+     * Registers a transition player with Core. There is only one of these active at a time so
+     * calling this will replace the existing one (if set) until it is unregistered.
      */
     void registerTransitionPlayer(in ITransitionPlayer player);
+
+    /**
+     * Un-registers a transition player from Core. This will restore whichever player was active
+     * prior to registering this one.
+     */
+    void unregisterTransitionPlayer(in ITransitionPlayer player);
 
     /** @return An interface enabling the transition players to report its metrics. */
     ITransitionMetricsReporter getTransitionMetricsReporter();

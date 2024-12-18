@@ -206,7 +206,7 @@ public final class MovePackageHelper {
         }
 
         final PackageStats stats = new PackageStats(null, -1);
-        synchronized (mPm.mInstallLock) {
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
             for (int userId : installedUserIds) {
                 if (!getPackageSizeInfoLI(packageName, userId, stats)) {
                     freezer.close();

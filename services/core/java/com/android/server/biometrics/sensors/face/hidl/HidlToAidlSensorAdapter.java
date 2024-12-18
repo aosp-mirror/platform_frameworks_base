@@ -159,6 +159,11 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     @Override
+    public FaceUtils getFaceUtilsInstance() {
+        return FaceUtils.getLegacyInstance(getSensorProperties().sensorId);
+    }
+
+    @Override
     protected LockoutTracker getLockoutTracker(boolean forAuth) {
         return mLockoutTracker;
     }
@@ -173,9 +178,15 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
     }
 
     private AidlResponseHandler getAidlResponseHandler() {
-        return new AidlResponseHandler(getContext(), getScheduler(), getSensorProperties().sensorId,
-                mCurrentUserId, mLockoutTracker, mLockoutResetDispatcher,
-                mAuthSessionCoordinator, () -> {}, mAidlResponseHandlerCallback);
+        return new AidlResponseHandler(getContext(),
+                getScheduler(),
+                getSensorProperties().sensorId,
+                mCurrentUserId,
+                mLockoutTracker,
+                mLockoutResetDispatcher,
+                mAuthSessionCoordinator,
+                mAidlResponseHandlerCallback,
+                getFaceUtilsInstance());
     }
 
     private IBiometricsFace getIBiometricsFace() {
@@ -242,8 +253,7 @@ public class HidlToAidlSensorAdapter extends Sensor implements IHwBinder.DeathRe
         return new FaceUpdateActiveUserClient(getContext(), this::getIBiometricsFace,
                 mUserStartedCallback, userId, TAG, getSensorProperties().sensorId,
                 BiometricLogger.ofUnknown(getContext()), getBiometricContext(),
-                !FaceUtils.getInstance(getSensorProperties().sensorId).getBiometricsForUser(
-                        getContext(), userId).isEmpty(),
+                !getFaceUtilsInstance().getBiometricsForUser(getContext(), userId).isEmpty(),
                 getAuthenticatorIds());
     }
 }

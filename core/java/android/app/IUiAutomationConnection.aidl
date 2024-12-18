@@ -45,7 +45,7 @@ interface IUiAutomationConnection {
     void injectInputEventToInputFilter(in InputEvent event);
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
-    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener);
+    boolean takeScreenshot(in Rect crop, in ScreenCaptureListener listener, int displayId);
     boolean takeSurfaceControlScreenshot(in SurfaceControl surfaceControl, in ScreenCaptureListener listener);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
@@ -61,5 +61,11 @@ interface IUiAutomationConnection {
     oneway void shutdown();
     void executeShellCommandWithStderr(String command, in ParcelFileDescriptor sink,
                 in ParcelFileDescriptor source, in ParcelFileDescriptor stderrSink);
+    void executeShellCommandArrayWithStderr(in String[] command, in ParcelFileDescriptor sink,
+                in ParcelFileDescriptor source, in ParcelFileDescriptor stderrSink);
     List<String> getAdoptedShellPermissions();
+    void addOverridePermissionState(int uid, String permission, int result);
+    void removeOverridePermissionState(int uid, String permission);
+    void clearOverridePermissionStates(int uid);
+    void clearAllOverridePermissionStates();
 }

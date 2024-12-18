@@ -38,8 +38,11 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
-            { int1 = numSubs },
-            { "updateCarrierText: location=${location ?: "(unknown)"} numSubs=$int1" },
+            {
+                int1 = numSubs
+                str1 = location
+            },
+            { "updateCarrierText: location=${str1 ?: "(unknown)"} numSubs=$int1" },
         )
     }
 
@@ -74,6 +77,24 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                 str2 = spn
             },
             { "┣ updateCarrierText: getting PLMN/SPN sticky brdcst. plmn=$str1, spn=$str1" },
+        )
+    }
+
+    fun logNewSatelliteCarrierText(newSatelliteText: String?) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = newSatelliteText },
+            { "New satellite text = $str1" },
+        )
+    }
+
+    fun logUsingSatelliteText(satelliteText: String) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = satelliteText },
+            { "┣ updateCarrierText: using satellite text. text=$str1" },
         )
     }
 
@@ -116,10 +137,37 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         buffer.log(
             TAG,
             LogLevel.DEBUG,
-            { int1 = reason },
+            {
+                int1 = reason
+                str1 = location
+            },
             {
                 "refreshing carrier info for reason: ${reason.reasonMessage()}" +
-                    " location=${location ?: "(unknown)"}"
+                    " location=${str1 ?: "(unknown)"}"
+            }
+        )
+    }
+
+    fun logStartListeningForSatelliteCarrierText() {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = location },
+            { "Start listening for satellite carrier text. Location=${str1 ?: "(unknown)"}" }
+        )
+    }
+
+    fun logStopListeningForSatelliteCarrierText(reason: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = location
+                str2 = reason
+            },
+            {
+                "Stop listening for satellite carrier text. " +
+                    "Location=${str1 ?: "(unknown)"} Reason=$str2"
             }
         )
     }
@@ -129,6 +177,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         const val REASON_ON_TELEPHONY_CAPABLE = 2
         const val REASON_SIM_ERROR_STATE_CHANGED = 3
         const val REASON_ACTIVE_DATA_SUB_CHANGED = 4
+        const val REASON_SATELLITE_CHANGED = 5
 
         @Retention(AnnotationRetention.SOURCE)
         @IntDef(
@@ -138,6 +187,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                     REASON_ON_TELEPHONY_CAPABLE,
                     REASON_SIM_ERROR_STATE_CHANGED,
                     REASON_ACTIVE_DATA_SUB_CHANGED,
+                    REASON_SATELLITE_CHANGED,
                 ]
         )
         annotation class CarrierTextRefreshReason
@@ -148,6 +198,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                 REASON_ON_TELEPHONY_CAPABLE -> "ON_TELEPHONY_CAPABLE"
                 REASON_SIM_ERROR_STATE_CHANGED -> "SIM_ERROR_STATE_CHANGED"
                 REASON_ACTIVE_DATA_SUB_CHANGED -> "ACTIVE_DATA_SUB_CHANGED"
+                REASON_SATELLITE_CHANGED -> "SATELLITE_CHANGED"
                 else -> "unknown"
             }
     }

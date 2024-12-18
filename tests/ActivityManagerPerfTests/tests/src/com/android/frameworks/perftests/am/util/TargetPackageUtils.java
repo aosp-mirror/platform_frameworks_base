@@ -175,6 +175,7 @@ public class TargetPackageUtils {
             context.startService(intent);
             Assert.assertTrue("Timeout when waiting for starting package " +  pkgName,
                     pair.second.await(AWAIT_SERVICE_CONNECT_MS, TimeUnit.MILLISECONDS));
+            Utils.runShellCommand("am unfreeze --sticky " + pkgName);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

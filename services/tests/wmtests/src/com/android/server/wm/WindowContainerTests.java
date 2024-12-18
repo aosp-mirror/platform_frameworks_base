@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.WindowInsets.Type.systemOverlays;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -77,6 +78,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
@@ -90,6 +92,8 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -163,7 +167,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testAddChildSetsSurfacePosition() {
         reset(mTransaction);
-        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mDisplayContent)) {
             WindowContainer child = new WindowContainer(mWm);
             child.setBounds(1, 1, 10, 10);
 
@@ -266,7 +270,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testRemoveImmediatelyClearsLastSurfacePosition() {
         reset(mTransaction);
-        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mDisplayContent)) {
             final WindowContainer<WindowContainer> child1 = new WindowContainer(mWm);
             child1.setBounds(1, 1, 10, 10);
 
@@ -565,36 +569,17 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testGetOrientation_childSpecified() {
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
-                SCREEN_ORIENTATION_LANDSCAPE);
-        testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
-                SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
-            int expectedOrientation) {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer root = builder.build();
         root.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        builder.setIsVisible(childVisible);
+        final TestWindowContainer child = root.addChildWindow();
+        child.setFillsParent(true);
+        assertEquals(SCREEN_ORIENTATION_UNSET, root.getOrientation());
 
-        if (childOrientation != SCREEN_ORIENTATION_UNSET) {
-            builder.setOrientation(childOrientation);
-        }
-
-        final TestWindowContainer child1 = root.addChildWindow(builder);
-        child1.setFillsParent(true);
-
-        assertEquals(expectedOrientation, root.getOrientation());
-    }
-
-    @Test
-    public void testGetOrientation_Unset() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
-        // Unspecified well because we didn't specify anything...
-        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
+        child.setOverrideOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
     }
 
     @Test
@@ -820,17 +805,10 @@ public class WindowContainerTests extends WindowTestsBase {
 
         final TestWindowContainer root2 = builder.setLayer(0).build();
 
+        assertEquals("Roots have the same z-order", 0, root.compareTo(root2));
         assertEquals(0, root.compareTo(root));
         assertEquals(-1, child1.compareTo(child2));
         assertEquals(1, child2.compareTo(child1));
-
-        boolean inTheSameTree = true;
-        try {
-            root.compareTo(root2);
-        } catch (IllegalArgumentException e) {
-            inTheSameTree = false;
-        }
-        assertFalse(inTheSameTree);
 
         assertEquals(-1, child1.compareTo(child11));
         assertEquals(1, child21.compareTo(root));
@@ -980,9 +958,38 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION)
+    public void testAddLocalInsets_addsFlagsFromProvider() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+
+        final Binder owner = new Binder();
+        Rect insetsRect = new Rect(0, 200, 1080, 700);
+        final int flags = FLAG_FORCE_CONSUMING;
+        final InsetsFrameProvider provider =
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.captionBar())
+                        .setArbitraryRectangle(insetsRect)
+                        .setFlags(flags);
+        task.addLocalInsetsFrameProvider(provider, owner);
+
+        final int sourceFlags = task.mLocalInsetsSources.get(provider.getId()).getFlags();
+        assertEquals(flags, sourceFlags);
+    }
+
+    private static void addLocalInsets(WindowContainer wc) {
+        final Binder owner = new Binder();
+        Rect genericOverlayInsetsRect1 = new Rect(0, 200, 1080, 700);
+        final InsetsFrameProvider provider1 =
+                new InsetsFrameProvider(owner, 1, WindowInsets.Type.systemOverlays())
+                        .setArbitraryRectangle(genericOverlayInsetsRect1);
+        wc.addLocalInsetsFrameProvider(provider1, owner);
+    }
+
+    @Test
     public void testOnDisplayChanged() {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        addLocalInsets(task);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
 
         final DisplayContent newDc = createNewDisplay();
@@ -991,6 +998,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         verify(rootTask).onDisplayChanged(newDc);
         verify(task).onDisplayChanged(newDc);
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         verify(activity).onDisplayChanged(newDc);
         assertEquals(newDc, rootTask.mDisplayContent);
         assertEquals(newDc, task.mDisplayContent);
@@ -1000,6 +1008,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testOnDisplayChanged_cleanupChanging() {
         final Task task = createTask(mDisplayContent);
+        addLocalInsets(task);
         spyOn(task.mSurfaceFreezer);
         mDisplayContent.mChangingContainers.add(task);
 
@@ -1007,6 +1016,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // This happens on display info changed.
         task.onDisplayChanged(mDisplayContent);
 
+        assertTrue(task.mLocalInsetsSources.size() == 1);
         assertTrue(mDisplayContent.mChangingContainers.contains(task));
         verify(task.mSurfaceFreezer, never()).unfreeze(any());
 
@@ -1833,8 +1843,9 @@ public class WindowContainerTests extends WindowTestsBase {
             implements AutoCloseable {
         private final SurfaceSession mSession = new SurfaceSession();
 
-        MockSurfaceBuildingContainer(WindowManagerService wm) {
-            super(wm);
+        MockSurfaceBuildingContainer(DisplayContent dc) {
+            super(dc.mWmService);
+            onDisplayChanged(dc);
         }
 
         static class MockSurfaceBuilder extends SurfaceControl.Builder {

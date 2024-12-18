@@ -151,7 +151,19 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
             return;
         }
-        mService.addSource(sink, metadata, isGroupOp);
+        try {
+            mService.addSource(sink, metadata, isGroupOp);
+        } catch (IllegalStateException e) {
+            // BT will check callback registration before add source.
+            // If it throw callback exception when bt is disabled, then the failure is intended,
+            // just catch it here.
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            if (adapter != null && adapter.isEnabled()) {
+                throw e;
+            } else {
+                Log.d(TAG, "Catch addSource failure when bt is disabled: " + e);
+            }
+        }
     }
 
     /**
@@ -379,6 +391,22 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
                     BluetoothProfile.STATE_CONNECTING,
                     BluetoothProfile.STATE_DISCONNECTING
                 });
+    }
+
+    /** Gets devices with matched connection states. */
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[] states) {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(states);
+    }
+
+    /** Gets all connected devices on assistant profile. */
+    public List<BluetoothDevice> getAllConnectedDevices() {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getConnectedDevices();
     }
 
     public boolean isEnabled(BluetoothDevice device) {

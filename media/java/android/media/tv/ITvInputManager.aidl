@@ -70,6 +70,7 @@ interface ITvInputManager {
     void releaseSession(in IBinder sessionToken, int userId);
     int getClientPid(in String sessionId);
     int getClientPriority(int useCase, in String sessionId);
+    int getClientUserId(in String sessionId);
 
     void setMainSession(in IBinder sessionToken, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);

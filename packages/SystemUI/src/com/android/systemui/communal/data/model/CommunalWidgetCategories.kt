@@ -23,9 +23,14 @@ import android.appwidget.AppWidgetProviderInfo
  * match those in {@link AppWidgetProviderInfo}).
  */
 @JvmInline
-value class CommunalWidgetCategories(
-    // The default is keyguard widgets.
-    val categories: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-) {
+value class CommunalWidgetCategories(val categories: Int = defaultCategories) {
     fun contains(category: Int) = (categories and category) == category
+
+    companion object {
+        val defaultCategories: Int
+            get() {
+                return AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD or
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+            }
+    }
 }

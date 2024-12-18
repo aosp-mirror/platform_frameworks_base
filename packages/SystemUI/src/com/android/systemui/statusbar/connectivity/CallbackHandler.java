@@ -32,7 +32,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-
 /**
  * Implements network listeners and forwards the calls along onto other listeners but on
  * the current or specified Looper.

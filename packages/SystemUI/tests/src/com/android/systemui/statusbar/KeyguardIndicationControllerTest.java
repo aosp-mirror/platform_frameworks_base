@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIME
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ADAPTIVE_AUTH;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
@@ -65,9 +66,9 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.BatteryManager;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
@@ -88,8 +89,8 @@ import java.util.List;
 import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class KeyguardIndicationControllerTest extends KeyguardIndicationControllerBaseTest {
     @Test
     public void afterFaceLockout_skipShowingFaceNotRecognized() {
@@ -131,14 +132,11 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_showsSlowChargingIndication() {
-        mInstrumentation.runOnMainSync(() -> {
-            createController();
-            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-            mController.setVisible(true);
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
 
-            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
-        });
-        mInstrumentation.waitForIdleSync();
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
         mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
@@ -149,14 +147,11 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_showsNotChargingIndication() {
-        mInstrumentation.runOnMainSync(() -> {
-            createController();
-            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-            mController.setVisible(true);
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
 
-            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
-        });
-        mInstrumentation.waitForIdleSync();
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
         mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
@@ -168,15 +163,12 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     @FlakyTest(bugId = 279944472)
     @Test
     public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
-        mInstrumentation.runOnMainSync(() -> {
-            createController();
-            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-            mController.setVisible(true);
-            mStatusBarStateListener.onDozingChanged(true);
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mStatusBarStateListener.onDozingChanged(true);
 
-            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
-        });
-        mInstrumentation.waitForIdleSync();
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
         mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
@@ -187,15 +179,12 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     @Test
     public void onAlignmentStateChanged_whileDozing_showsNotChargingIndication() {
-        mInstrumentation.runOnMainSync(() -> {
-            createController();
-            verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
-            mController.setVisible(true);
-            mStatusBarStateListener.onDozingChanged(true);
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mStatusBarStateListener.onDozingChanged(true);
 
-            mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
-        });
-        mInstrumentation.waitForIdleSync();
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
         mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
@@ -642,6 +631,12 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     @Test
     public void sendFaceHelpMessages_fingerprintEnrolled() {
         createController();
+        mController.mCoExAcquisitionMsgIdsToShowCallback.accept(
+                Set.of(
+                        BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED,
+                        BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED
+                )
+        );
 
         // GIVEN unlocking with fingerprint is possible and allowed
         fingerprintUnlockIsPossibleAndAllowed();
@@ -1520,19 +1515,6 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
     }
 
     @Test
-    public void onTrustAgentErrorMessageDroppedBecauseFingerprintMessageShowing() {
-        createController();
-        mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
-                "fp not recognized", BiometricSourceType.FINGERPRINT);
-        clearInvocations(mRotateTextViewController);
-
-        mKeyguardUpdateMonitorCallback.onTrustAgentErrorMessage("testMessage");
-        verifyNoMessage(INDICATION_TYPE_TRUST);
-        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
-    }
-
-    @Test
     public void trustGrantedMessageShowsEvenWhenFingerprintMessageShowing() {
         createController();
         mController.setVisible(true);
@@ -1552,6 +1534,48 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         verifyIndicationMessage(
                 INDICATION_TYPE_TRUST,
                 trustGrantedMsg);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenNotLockedByAdaptiveAuth_doesNotShowMsg() {
+        // When the device is not locked by adaptive auth
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // Verify that the adaptive auth message does not show
+        verifyNoMessage(INDICATION_TYPE_ADAPTIVE_AUTH);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenLockedByAdaptiveAuth_cannotSkipBouncer_showsMsg() {
+        // When the device is locked by adaptive auth, and the user cannot skip bouncer
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser())).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // Verify that the adaptive auth message shows
+        String message = mContext.getString(R.string.keyguard_indication_after_adaptive_auth_lock);
+        verifyIndicationMessage(INDICATION_TYPE_ADAPTIVE_AUTH, message);
+    }
+
+    @Test
+    public void updateAdaptiveAuthMessage_whenLockedByAdaptiveAuth_canSkipBouncer_doesNotShowMsg() {
+        createController();
+        mController.setVisible(true);
+
+        // When the device is locked by adaptive auth, but the device unlocked state changes and the
+        // user can skip bouncer
+        when(mKeyguardUpdateMonitor.isDeviceLockedByAdaptiveAuth(getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser())).thenReturn(true);
+        mKeyguardStateControllerCallback.onUnlockedChanged();
+
+        // Verify that the adaptive auth message does not show
+        verifyNoMessage(INDICATION_TYPE_ADAPTIVE_AUTH);
     }
 
     private void screenIsTurningOn() {
@@ -1595,24 +1619,6 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
 
     private void verifyTransientMessage(String message) {
         verify(mRotateTextViewController).showTransient(eq(message));
-    }
-
-    private void verifyNoMessage(int type) {
-        if (type == INDICATION_TYPE_TRANSIENT) {
-            verify(mRotateTextViewController, never()).showTransient(anyString());
-        } else {
-            verify(mRotateTextViewController, never()).updateIndication(eq(type),
-                    anyObject(), anyBoolean());
-        }
-    }
-
-    private void verifyIndicationShown(int indicationType, String message) {
-        verify(mRotateTextViewController)
-                .updateIndication(eq(indicationType),
-                        mKeyguardIndicationCaptor.capture(),
-                        eq(true));
-        assertThat(mKeyguardIndicationCaptor.getValue().getMessage().toString())
-                .isEqualTo(message);
     }
 
     private void fingerprintUnlockIsNotPossible() {

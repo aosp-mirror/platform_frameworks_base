@@ -39,11 +39,7 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:PropertyInvalidatedCacheTests
  */
 @SmallTest
-@IgnoreUnderRavenwood(blockedBy = PropertyInvalidatedCache.class)
 public class PropertyInvalidatedCacheTests {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     // Configuration for creating caches
     private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;
     private static final String API = "testApi";
@@ -374,21 +370,5 @@ public class PropertyInvalidatedCacheTests {
         n1 = PropertyInvalidatedCache.createPropertyName(
             PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
         assertEquals(n1, "cache_key.bluetooth.get_state");
-    }
-
-    @Test
-    public void testOnTrimMemory() {
-        TestCache cache = new TestCache(MODULE, "trimMemoryTest");
-        // The cache is not active until it has been invalidated once.
-        cache.invalidateCache();
-        // Populate the cache with six entries.
-        for (int i = 0; i < 6; i++) {
-            cache.query(i);
-        }
-        // The maximum number of entries in TestCache is 4, so even though six entries were
-        // created, only four are retained.
-        assertEquals(4, cache.size());
-        PropertyInvalidatedCache.onTrimMemory();
-        assertEquals(0, cache.size());
     }
 }

@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.Display.TYPE_EXTERNAL;
+import static android.view.Display.TYPE_OVERLAY;
+import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
@@ -77,8 +80,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.LocalServices;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -133,7 +135,6 @@ public class DisplayRotation {
     private final RotationLockHistory mRotationLockHistory = new RotationLockHistory();
 
     private OrientationListener mOrientationListener;
-    private StatusBarManagerInternal mStatusBarManagerInternal;
     private SettingsObserver mSettingsObserver;
     @NonNull
     private final DeviceStateController mDeviceStateController;
@@ -323,7 +324,7 @@ public class DisplayRotation {
     DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                 WindowManagerService service, DisplayContent displayContent) {
         return DisplayRotationImmersiveAppCompatPolicy.createIfNeeded(
-                service.mLetterboxConfiguration, this, displayContent);
+                service.mAppCompatConfiguration, this, displayContent);
     }
 
     // Change the default value to the value specified in the sysprop
@@ -608,34 +609,29 @@ public class DisplayRotation {
             mDisplayRotationCoordinator.onDefaultDisplayRotationChanged(rotation);
         }
 
-        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
-        // case properly since the signals it receives all happen post-change. We do this earlier
-        // in the rotation flow, since DisplayContent.updateDisplayOverrideConfigurationLocked seems
-        // to happen too late.
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
-        if (recentsAnimationController != null) {
-            recentsAnimationController.cancelAnimationForDisplayChange();
-        }
-
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
                         displayId, rotation, oldRotation, lastOrientation);
 
         mRotation = rotation;
 
+        mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded();
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.mWaitingForConfig = true;
 
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             final boolean wasCollecting = mDisplayContent.mTransitionController.isCollecting();
-            final TransitionRequestInfo.DisplayChange change = wasCollecting ? null
-                    : new TransitionRequestInfo.DisplayChange(mDisplayContent.getDisplayId(),
-                            oldRotation, mRotation);
-
-            mDisplayContent.requestChangeTransitionIfNeeded(
-                    ActivityInfo.CONFIG_WINDOW_CONFIGURATION, change);
-            if (wasCollecting) {
+            if (!wasCollecting) {
+                if (mDisplayContent.getLastHasContent()) {
+                    final TransitionRequestInfo.DisplayChange change =
+                            new TransitionRequestInfo.DisplayChange(mDisplayContent.getDisplayId(),
+                                    oldRotation, mRotation);
+                    mDisplayContent.requestChangeTransition(
+                            ActivityInfo.CONFIG_WINDOW_CONFIGURATION, change);
+                }
+            } else {
+                mDisplayContent.collectDisplayChange(
+                        mDisplayContent.mTransitionController.getCollectingTransition());
                 // Use remote-rotation infra since the transition has already been requested
                 // TODO(shell-transitions): Remove this once lifecycle management can cover all
                 //                          rotation cases.
@@ -911,6 +907,11 @@ public class DisplayRotation {
                     + " for " + mDisplayContent);
             userRotation = Surface.ROTATION_0;
         }
+        final int userRotationOverride = getUserRotationOverride();
+        if (userRotationOverride != 0) {
+            userRotationMode = WindowManagerPolicy.USER_ROTATION_LOCKED;
+            userRotation = userRotationOverride;
+        }
         mUserRotationMode = userRotationMode;
         mUserRotation = userRotation;
     }
@@ -961,6 +962,13 @@ public class DisplayRotation {
         if (changed) {
             mService.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
+            // ContentRecorder.onConfigurationChanged and Device.setProjectionLocked are called
+            // during updateRotation above. But onConfigurationChanged is called before
+            // Device.setProjectionLocked, which means that the onConfigurationChanged will
+            // not have the new rotation when it calls getDisplaySurfaceDefaultSize.
+            // To make sure that mirroring takes the new rotation of the output surface
+            // into account we need to call onConfigurationChanged again.
+            mDisplayContent.onMirrorOutputSurfaceOrientationChanged();
         }
     }
 
@@ -1219,7 +1227,6 @@ public class DisplayRotation {
      * @param lastRotation The most recently used rotation.
      * @return The surface rotation to use.
      */
-    @VisibleForTesting
     @Surface.Rotation
     int rotationForOrientation(@ScreenOrientation int orientation,
             @Surface.Rotation int lastRotation) {
@@ -1550,11 +1557,9 @@ public class DisplayRotation {
 
     /** Notify the StatusBar that system rotation suggestion has changed. */
     private void sendProposedRotationChangeToStatusBarInternal(int rotation, boolean isValid) {
-        if (mStatusBarManagerInternal == null) {
-            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
-        }
-        if (mStatusBarManagerInternal != null) {
-            mStatusBarManagerInternal.onProposedRotationChanged(rotation, isValid);
+        final StatusBarManagerInternal bar = mDisplayPolicy.getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.onProposedRotationChanged(mDisplayContent.getDisplayId(), rotation, isValid);
         }
     }
 
@@ -1774,6 +1779,39 @@ public class DisplayRotation {
         if (mFoldController != null) {
             mFoldController.onPhysicalDisplayChanged();
         }
+    }
+
+    @VisibleForTesting
+    int getDemoUserRotationOverride() {
+        return SystemProperties.getInt("persist.demo.userrotation", Surface.ROTATION_0);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    String getDemoUserRotationPackage() {
+        return SystemProperties.get("persist.demo.userrotation.package_name");
+    }
+
+    @Surface.Rotation
+    private int getUserRotationOverride() {
+        final int userRotationOverride = getDemoUserRotationOverride();
+        if (userRotationOverride == Surface.ROTATION_0) {
+            return userRotationOverride;
+        }
+
+        final var display = mDisplayContent.getDisplay();
+        if (display.getType() == TYPE_EXTERNAL || display.getType() == TYPE_OVERLAY) {
+            return userRotationOverride;
+        }
+
+        if (display.getType() == TYPE_VIRTUAL) {
+            final var packageName = getDemoUserRotationPackage();
+            if (!packageName.isEmpty() && packageName.equals(display.getOwnerPackageName())) {
+                return userRotationOverride;
+            }
+        }
+
+        return Surface.ROTATION_0;
     }
 
     @VisibleForTesting
@@ -2242,10 +2280,8 @@ public class DisplayRotation {
                     mInHalfFoldTransition = false;
                     mDeviceState = DeviceStateController.DeviceState.UNKNOWN;
                 }
-                mDisplayRotationCompatPolicySummary = dc.mDisplayRotationCompatPolicy == null
-                        ? null
-                        : dc.mDisplayRotationCompatPolicy
-                                .getSummaryForDisplayRotationHistoryRecord();
+                mDisplayRotationCompatPolicySummary = dc.mAppCompatCameraPolicy
+                        .getSummaryForDisplayRotationHistoryRecord();
                 mRotationReversionSlots =
                         dr.mDisplayContent.getRotationReversionController().getSlotsCopy();
             }

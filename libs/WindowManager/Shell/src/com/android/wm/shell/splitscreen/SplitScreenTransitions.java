@@ -21,12 +21,12 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FADE_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
@@ -46,15 +46,16 @@ import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 /** Manages transition animations for split-screen. */
 class SplitScreenTransitions {
@@ -67,6 +68,7 @@ class SplitScreenTransitions {
     DismissSession mPendingDismiss = null;
     EnterSession mPendingEnter = null;
     TransitSession mPendingResize = null;
+    TransitSession mPendingRemotePassthrough = null;
 
     private IBinder mAnimatingTransition = null;
     private OneShotRemoteHandler mActiveRemoteHandler = null;
@@ -79,6 +81,8 @@ class SplitScreenTransitions {
 
     private Transitions.TransitionFinishCallback mFinishCallback = null;
     private SurfaceControl.Transaction mFinishTransaction;
+    private SplitScreen.SplitInvocationListener mSplitInvocationListener;
+    private Executor mSplitInvocationListenerExecutor;
 
     SplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
             @NonNull Runnable onFinishCallback, StageCoordinator stageCoordinator) {
@@ -317,6 +321,11 @@ class SplitScreenTransitions {
         return mPendingResize != null && mPendingResize.mTransition == transition;
     }
 
+    boolean isPendingPassThrough(IBinder transition) {
+        return mPendingRemotePassthrough != null &&
+                mPendingRemotePassthrough.mTransition == transition;
+    }
+
     @Nullable
     private TransitSession getPendingTransition(IBinder transition) {
         if (isPendingEnter(transition)) {
@@ -328,6 +337,9 @@ class SplitScreenTransitions {
         } else if (isPendingResize(transition)) {
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "\tresolved resize transition");
             return mPendingResize;
+        } else if (isPendingPassThrough(transition)) {
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "\tresolved passThrough transition");
+            return mPendingRemotePassthrough;
         }
         return null;
     }
@@ -353,6 +365,10 @@ class SplitScreenTransitions {
                     + " skip to start enter split transition since it already exist. ");
             return null;
         }
+        if (mSplitInvocationListenerExecutor != null && mSplitInvocationListener != null) {
+            mSplitInvocationListenerExecutor.execute(() -> mSplitInvocationListener
+                    .onSplitAnimationInvoked(true /*animationRunning*/));
+        }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
         setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
@@ -369,6 +385,19 @@ class SplitScreenTransitions {
                 + " deduced Enter split screen");
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setEnterTransition: transitType=%d resize=%b",
                 extraTransitType, resizeAnim);
+    }
+
+    /** Sets a transition to enter split. */
+    void setRemotePassThroughTransition(@NonNull IBinder transition,
+            @Nullable RemoteTransition remoteTransition) {
+        mPendingRemotePassthrough = new TransitSession(
+                transition, null, null,
+                remoteTransition, Transitions.TRANSIT_SPLIT_PASSTHROUGH);
+
+        ProtoLog.v(WM_SHELL_TRANSITIONS, "  splitTransition "
+                + " deduced remote passthrough split screen");
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setRemotePassThrough: transitType=%d remote=%s",
+                Transitions.TRANSIT_SPLIT_PASSTHROUGH, remoteTransition);
     }
 
     /** Starts a transition to dismiss split. */
@@ -410,9 +439,9 @@ class SplitScreenTransitions {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
                 mPendingResize != null);
         if (mPendingResize != null) {
+            mPendingResize.cancel(null);
             mainDecor.cancelRunningAnimations();
             sideDecor.cancelRunningAnimations();
-            mPendingResize.cancel(null);
             mAnimations.clear();
             onFinish(null /* wct */);
         }
@@ -457,6 +486,7 @@ class SplitScreenTransitions {
 
             mPendingEnter.onConsumed(aborted);
             mPendingEnter = null;
+            mStageCoordinator.notifySplitAnimationFinished();
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTransitionConsumed for enter transition");
         } else if (isPendingDismiss(transition)) {
             mPendingDismiss.onConsumed(aborted);
@@ -466,9 +496,17 @@ class SplitScreenTransitions {
             mPendingResize.onConsumed(aborted);
             mPendingResize = null;
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTransitionConsumed for resize transition");
+        } else if (isPendingPassThrough(transition)) {
+            mPendingRemotePassthrough.onConsumed(aborted);
+            mPendingRemotePassthrough.mRemoteHandler.onTransitionConsumed(transition, aborted,
+                    finishT);
+            mPendingRemotePassthrough = null;
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTransitionConsumed for passThrough transition");
         }
 
-        // TODO: handle transition consumed for active remote handler
+        if (mActiveRemoteHandler != null) {
+            mActiveRemoteHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
     }
 
     void onFinish(WindowContainerTransaction wct) {
@@ -487,16 +525,21 @@ class SplitScreenTransitions {
             mPendingResize.onFinished(wct, mFinishTransaction);
             mPendingResize = null;
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onFinish for resize transition");
+        } else if (isPendingPassThrough(mAnimatingTransition)) {
+            mPendingRemotePassthrough.onFinished(wct, mFinishTransaction);
+            mPendingRemotePassthrough = null;
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onFinish for passThrough transition");
         }
 
         mActiveRemoteHandler = null;
         mAnimatingTransition = null;
 
         mOnFinish.run();
-        if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct /* wct */);
-            mFinishCallback = null;
-        }
+         if (mFinishCallback != null) {
+             Transitions.TransitionFinishCallback currentFinishCallback = mFinishCallback;
+             mFinishCallback = null;
+             currentFinishCallback.onTransitionFinished(wct /* wct */);
+         }
     }
 
     private void startFadeAnimation(@NonNull SurfaceControl leash, boolean show) {
@@ -527,6 +570,12 @@ class SplitScreenTransitions {
         });
         mAnimations.add(va);
         mTransitions.getAnimExecutor().execute(va::start);
+    }
+
+    public void registerSplitAnimListener(@NonNull SplitScreen.SplitInvocationListener listener,
+            @NonNull Executor executor) {
+        mSplitInvocationListener = listener;
+        mSplitInvocationListenerExecutor = executor;
     }
 
     /** Calls when the transition got consumed. */

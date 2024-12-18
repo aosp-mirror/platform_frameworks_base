@@ -67,6 +67,11 @@ public interface NotificationInterruptStateProvider {
          */
         NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false),
         /**
+         * Notification should not FSI due to being explicitly silent.
+         * see {@link android.app.Notification#isSilent}
+         */
+        NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION(false),
+        /**
          * Device screen is off, so the FSI should launch.
          */
         FSI_DEVICE_NOT_INTERACTIVE(true),
@@ -104,7 +109,11 @@ public interface NotificationInterruptStateProvider {
         /**
          * The device is not provisioned, launch FSI.
          */
-        FSI_NOT_PROVISIONED(true);
+        FSI_NOT_PROVISIONED(true),
+        /**
+         * The current user has not completed setup, launch FSI.
+         */
+        FSI_USER_SETUP_INCOMPLETE(true);
 
         public final boolean shouldLaunch;
 

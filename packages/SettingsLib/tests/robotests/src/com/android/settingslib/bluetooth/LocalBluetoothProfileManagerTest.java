@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothPan;
@@ -55,8 +56,11 @@ import java.util.List;
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalBluetoothProfileManagerTest {
-    private final static long HISYNCID = 10;
+    private static final long HISYNCID = 10;
 
+    private static final int GROUP_ID = 1;
+    @Mock
+    private LocalBluetoothManager mBtManager;
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
@@ -77,13 +81,21 @@ public class LocalBluetoothProfileManagerTest {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         mLocalBluetoothAdapter = LocalBluetoothAdapter.getInstance();
-        mEventManager = spy(new BluetoothEventManager(mLocalBluetoothAdapter, mDeviceManager,
-                mContext, /* handler= */ null, /* userHandle= */ null));
+        mEventManager =
+                spy(
+                        new BluetoothEventManager(
+                                mLocalBluetoothAdapter,
+                                mBtManager,
+                                mDeviceManager,
+                                mContext,
+                                /* handler= */ null,
+                                /* userHandle= */ null));
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDeviceManager.findDevice(mDevice)).thenReturn(mCachedBluetoothDevice);
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mDevice);
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
+        mProfileManager =
+                new LocalBluetoothProfileManager(
+                        mContext, mLocalBluetoothAdapter, mDeviceManager, mEventManager);
     }
 
     /**
@@ -192,7 +204,8 @@ public class LocalBluetoothProfileManagerTest {
      * CachedBluetoothDeviceManager method
      */
     @Test
-    public void stateChangedHandler_receiveHAPConnectionStateChanged_shouldDispatchDeviceManager() {
+    public void
+            stateChangedHandler_receiveHearingAidConnectionStateChanged_dispatchDeviceManager() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HEARING_AID}));
         mProfileManager.updateLocalProfiles();
@@ -207,6 +220,28 @@ public class LocalBluetoothProfileManagerTest {
 
         verify(mDeviceManager).onProfileConnectionStateChangedIfProcessed(mCachedBluetoothDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
+    }
+
+    /**
+     * Verify BluetoothHapClient.ACTION_HAP_CONNECTION_STATE_CHANGED with uuid intent will dispatch
+     * to {@link CachedBluetoothDeviceManager} method
+     */
+    @Test
+    public void stateChangedHandler_receiveHapClientConnectionStateChanged_dispatchDeviceManager() {
+        mShadowBluetoothAdapter.setSupportedProfiles(generateList(
+                new int[] {BluetoothProfile.HAP_CLIENT}));
+        mProfileManager.updateLocalProfiles();
+        when(mCachedBluetoothDevice.getGroupId()).thenReturn(GROUP_ID);
+
+        mIntent = new Intent(BluetoothHapClient.ACTION_HAP_CONNECTION_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
+        mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
+        mIntent.putExtra(BluetoothProfile.EXTRA_STATE, BluetoothProfile.STATE_CONNECTED);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mDeviceManager).syncDeviceWithinHearingAidSetIfNeeded(mCachedBluetoothDevice,
+                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HAP_CLIENT);
     }
 
     /**

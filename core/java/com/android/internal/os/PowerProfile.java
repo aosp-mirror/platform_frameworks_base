@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 
 import android.annotation.LongDef;
+import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.XmlRes;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -352,19 +353,39 @@ public class PowerProfile {
      * WARNING: use only for testing!
      */
     @VisibleForTesting
-    public void forceInitForTesting(Context context, @XmlRes int xmlId) {
+    public void initForTesting(XmlPullParser parser) {
+        initForTesting(parser, null);
+    }
+
+    /**
+     * Reinitialize the PowerProfile with the provided XML, using optional Resources for fallback
+     * configuration settings.
+     * WARNING: use only for testing!
+     */
+    @VisibleForTesting
+    public void initForTesting(XmlPullParser parser, @Nullable Resources resources) {
         synchronized (sLock) {
             sPowerItemMap.clear();
             sPowerArrayMap.clear();
             sModemPowerProfile.clear();
-            initLocked(context, xmlId);
+
+            try {
+                readPowerValuesFromXml(parser, resources);
+            } finally {
+                if (parser instanceof XmlResourceParser) {
+                    ((XmlResourceParser) parser).close();
+                }
+            }
+            initLocked();
         }
     }
 
     @GuardedBy("sLock")
     private void initLocked(Context context, @XmlRes int xmlId) {
         if (sPowerItemMap.size() == 0 && sPowerArrayMap.size() == 0) {
-            readPowerValuesFromXml(context, xmlId);
+            final Resources resources = context.getResources();
+            XmlResourceParser parser = resources.getXml(xmlId);
+            readPowerValuesFromXml(parser, resources);
         }
         initLocked();
     }
@@ -377,9 +398,8 @@ public class PowerProfile {
         initModem();
     }
 
-    private void readPowerValuesFromXml(Context context, @XmlRes int xmlId) {
-        final Resources resources = context.getResources();
-        XmlResourceParser parser = resources.getXml(xmlId);
+    private static void readPowerValuesFromXml(XmlPullParser parser,
+            @Nullable Resources resources) {
         boolean parsingArray = false;
         ArrayList<Double> array = new ArrayList<>();
         String arrayName = null;
@@ -430,9 +450,17 @@ public class PowerProfile {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            parser.close();
+            if (parser instanceof XmlResourceParser) {
+                ((XmlResourceParser) parser).close();
+            }
         }
 
+        if (resources != null) {
+            getDefaultValuesFromConfig(resources);
+        }
+    }
+
+    private static void getDefaultValuesFromConfig(Resources resources) {
         // Now collect other config variables.
         int[] configResIds = new int[]{
                 com.android.internal.R.integer.config_bluetooth_idle_cur_ma,

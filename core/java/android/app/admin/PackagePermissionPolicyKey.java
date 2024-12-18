@@ -20,7 +20,6 @@ import static android.app.admin.PolicyUpdateReceiver.EXTRA_PACKAGE_NAME;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_PERMISSION_NAME;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_BUNDLE_KEY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,10 +58,8 @@ public final class PackagePermissionPolicyKey extends PolicyKey {
     public PackagePermissionPolicyKey(@NonNull String identifier, @NonNull String packageName,
             @NonNull String permissionName) {
         super(identifier);
-        if (devicePolicySizeTrackingEnabled()) {
-            PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
-            PolicySizeVerifier.enforceMaxStringLength(permissionName, "permissionName");
-        }
+        PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
+        PolicySizeVerifier.enforceMaxStringLength(permissionName, "permissionName");
         mPackageName = Objects.requireNonNull((packageName));
         mPermissionName = Objects.requireNonNull((permissionName));
     }

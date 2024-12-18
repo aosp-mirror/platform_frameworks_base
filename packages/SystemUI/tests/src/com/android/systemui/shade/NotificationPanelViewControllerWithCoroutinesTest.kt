@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewStub
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
+import com.android.systemui.Flags
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
+import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -48,9 +54,10 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class NotificationPanelViewControllerWithCoroutinesTest :
     NotificationPanelViewControllerBaseTest() {
 
@@ -72,10 +79,9 @@ class NotificationPanelViewControllerWithCoroutinesTest :
 
         verify(mView, atLeastOnce()).addView(viewCaptor.capture(), anyInt())
         val userSwitcherStub =
-            CollectionUtils.find(
-                viewCaptor.getAllValues(),
-                { view -> view.getId() == R.id.keyguard_user_switcher_stub }
-            )
+            CollectionUtils.find(viewCaptor.allValues) { view ->
+                view.id == R.id.keyguard_user_switcher_stub
+            }
         assertThat(userSwitcherStub).isNotNull()
         assertThat(userSwitcherStub).isInstanceOf(ViewStub::class.java)
     }

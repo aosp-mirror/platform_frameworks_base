@@ -140,7 +140,7 @@ class LockSettingsStorage {
         try {
             db.delete(TABLE, COLUMN_KEY + "=? AND " + COLUMN_USERID + "=?",
                     new String[] {key, Integer.toString(userId)});
-            db.insert(TABLE, null, cv);
+            db.insertOrThrow(TABLE, null, cv);
             db.setTransactionSuccessful();
             mCache.putKeyValue(key, value, userId);
         } finally {

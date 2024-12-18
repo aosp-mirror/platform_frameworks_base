@@ -26,7 +26,7 @@ import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.backup.BackupHelper
@@ -74,7 +74,7 @@ import java.util.Optional
 import java.util.function.Consumer
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlsControllerImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 

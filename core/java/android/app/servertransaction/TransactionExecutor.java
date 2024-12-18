@@ -16,7 +16,6 @@
 
 package android.app.servertransaction;
 
-import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_DESTROY;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
@@ -27,22 +26,16 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 import static android.app.servertransaction.TransactionExecutorHelper.getShortActivityName;
 import static android.app.servertransaction.TransactionExecutorHelper.getStateName;
-import static android.app.servertransaction.TransactionExecutorHelper.lastCallbackRequestingState;
 import static android.app.servertransaction.TransactionExecutorHelper.shouldExcludeLastLifecycleState;
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
-
-import static com.android.window.flags.Flags.bundleClientTransactionFlag;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Trace;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -52,6 +45,7 @@ import java.util.List;
 
 /**
  * Class that manages transaction execution in the correct order.
+ *
  * @hide
  */
 public class TransactionExecutor {
@@ -62,12 +56,6 @@ public class TransactionExecutor {
     private final ClientTransactionHandler mTransactionHandler;
     private final PendingTransactionActions mPendingActions = new PendingTransactionActions();
     private final TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
-
-    /**
-     * Keeps track of the Context whose Configuration got updated within a transaction, mapping to
-     * the config before the transaction.
-     */
-    private final ArrayMap<Context, Configuration> mContextToPreChangedConfigMap = new ArrayMap<>();
 
     /** Initialize an instance with transaction handler, that will execute all requested actions. */
     public TransactionExecutor(@NonNull ClientTransactionHandler clientTransactionHandler) {
@@ -89,50 +77,13 @@ public class TransactionExecutor {
 
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionExecuted");
         try {
-            if (transaction.getTransactionItems() != null) {
-                executeTransactionItems(transaction);
-            } else {
-                // TODO(b/260873529): cleanup after launch.
-                executeCallbacks(transaction);
-                executeLifecycleState(transaction);
-            }
+            executeTransactionItems(transaction);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to execute the transaction: "
                     + transactionToString(transaction, mTransactionHandler));
             throw e;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        }
-
-        if (!mContextToPreChangedConfigMap.isEmpty()) {
-            // Whether this transaction should trigger DisplayListener#onDisplayChanged.
-            try {
-                // Calculate display ids that have config changed.
-                final ArraySet<Integer> configUpdatedDisplayIds = new ArraySet<>();
-                final int contextCount = mContextToPreChangedConfigMap.size();
-                for (int i = 0; i < contextCount; i++) {
-                    final Context context = mContextToPreChangedConfigMap.keyAt(i);
-                    final Configuration preTransactionConfig =
-                            mContextToPreChangedConfigMap.valueAt(i);
-                    final Configuration postTransactionConfig = context.getResources()
-                            .getConfiguration();
-                    if (!areConfigurationsEqualForDisplay(
-                            postTransactionConfig, preTransactionConfig)) {
-                        configUpdatedDisplayIds.add(context.getDisplayId());
-                    }
-                }
-
-                // Dispatch the display changed callbacks.
-                final ClientTransactionListenerController controller =
-                        ClientTransactionListenerController.getInstance();
-                final int displayCount = configUpdatedDisplayIds.size();
-                for (int i = 0; i < displayCount; i++) {
-                    final int displayId = configUpdatedDisplayIds.valueAt(i);
-                    controller.onDisplayChanged(displayId);
-                }
-            } finally {
-                mContextToPreChangedConfigMap.clear();
-            }
         }
 
         mPendingActions.clear();
@@ -152,41 +103,6 @@ public class TransactionExecutor {
                 executeNonLifecycleItem(transaction, item,
                         shouldExcludeLastLifecycleState(items, i));
             }
-        }
-    }
-
-    /**
-     * Cycle through all states requested by callbacks and execute them at proper times.
-     * @deprecated use {@link #executeTransactionItems} instead.
-     */
-    @VisibleForTesting
-    @Deprecated
-    public void executeCallbacks(@NonNull ClientTransaction transaction) {
-        final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null || callbacks.isEmpty()) {
-            // No callbacks to execute, return early.
-            return;
-        }
-        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callbacks in transaction");
-
-        // In case when post-execution state of the last callback matches the final state requested
-        // for the activity in this transaction, we won't do the last transition here and do it when
-        // moving to final state instead (because it may contain additional parameters from server).
-        final ActivityLifecycleItem finalStateRequest = transaction.getLifecycleStateRequest();
-        final int finalState = finalStateRequest != null ? finalStateRequest.getTargetState()
-                : UNDEFINED;
-        // Index of the last callback that requests some post-execution state.
-        final int lastCallbackRequestingState = lastCallbackRequestingState(transaction);
-
-        final int size = callbacks.size();
-        for (int i = 0; i < size; ++i) {
-            final ClientTransactionItem item = callbacks.get(i);
-
-            // Skip the very last transition and perform it by explicit state request instead.
-            final int postExecutionState = item.getPostExecutionState();
-            final boolean shouldExcludeLastLifecycleState = postExecutionState != UNDEFINED
-                    && i == lastCallbackRequestingState && finalState == postExecutionState;
-            executeNonLifecycleItem(transaction, item, shouldExcludeLastLifecycleState);
         }
     }
 
@@ -214,20 +130,6 @@ public class TransactionExecutor {
             }
         }
 
-        final boolean shouldTrackConfigUpdatedContext =
-                // No configuration change for local transaction.
-                !mTransactionHandler.isExecutingLocalTransaction()
-                        && bundleClientTransactionFlag();
-        final Context configUpdatedContext = shouldTrackConfigUpdatedContext
-                ? item.getContextToUpdate(mTransactionHandler)
-                : null;
-        if (configUpdatedContext != null
-                && !mContextToPreChangedConfigMap.containsKey(configUpdatedContext)) {
-            // Keep track of the first pre-executed config of each changed Context.
-            mContextToPreChangedConfigMap.put(configUpdatedContext,
-                    new Configuration(configUpdatedContext.getResources().getConfiguration()));
-        }
-
         item.execute(mTransactionHandler, mPendingActions);
 
         item.postExecute(mTransactionHandler, mPendingActions);
@@ -239,21 +141,6 @@ public class TransactionExecutor {
         if (postExecutionState != UNDEFINED && r != null) {
             cycleToPath(r, postExecutionState, shouldExcludeLastLifecycleState, transaction);
         }
-    }
-
-    /**
-     * Transition to the final state if requested by the transaction.
-     * @deprecated use {@link #executeTransactionItems} instead
-     */
-    @Deprecated
-    private void executeLifecycleState(@NonNull ClientTransaction transaction) {
-        final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
-        if (lifecycleItem == null) {
-            // No lifecycle request, return early.
-            return;
-        }
-
-        executeLifecycleItem(transaction, lifecycleItem);
     }
 
     private void executeLifecycleItem(@NonNull ClientTransaction transaction,
@@ -334,18 +221,18 @@ public class TransactionExecutor {
                     break;
                 case ON_PAUSE:
                     mTransactionHandler.handlePauseActivity(r, false /* finished */,
-                            false /* userLeaving */, 0 /* configChanges */,
+                            false /* userLeaving */,
                             false /* autoEnteringPip */, mPendingActions,
                             "LIFECYCLER_PAUSE_ACTIVITY");
                     break;
                 case ON_STOP:
-                    mTransactionHandler.handleStopActivity(r, 0 /* configChanges */,
+                    mTransactionHandler.handleStopActivity(r,
                             mPendingActions, false /* finalStateRequest */,
                             "LIFECYCLER_STOP_ACTIVITY");
                     break;
                 case ON_DESTROY:
                     mTransactionHandler.handleDestroyActivity(r, false /* finishing */,
-                            0 /* configChanges */, false /* getNonConfigInstance */,
+                            false /* getNonConfigInstance */,
                             "performLifecycleSequence. cycling to:" + path.get(size - 1));
                     break;
                 case ON_RESTART:

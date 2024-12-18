@@ -31,6 +31,8 @@ import android.content.res.Resources
 import android.os.BadParcelableException
 import android.os.DeadObjectException
 import android.os.UserManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -76,9 +78,7 @@ class AppListRepositoryTest {
     }
 
     private val mockUserManager = mock<UserManager> {
-        on { getUserInfo(ADMIN_USER_ID) } doReturn UserInfo().apply {
-            flags = UserInfo.FLAG_ADMIN
-        }
+        on { getUserInfo(ADMIN_USER_ID) } doReturn UserInfo(0, "admin", UserInfo.FLAG_ADMIN)
         on { getProfileIdsWithDisabled(ADMIN_USER_ID) } doReturn
             intArrayOf(ADMIN_USER_ID, MANAGED_PROFILE_USER_ID)
     }
@@ -281,9 +281,9 @@ class AppListRepositoryTest {
         )
     }
 
+    @EnableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
     @Test
     fun loadApps_hasApkInApexInfo_shouldNotIncludeAllHiddenApps() = runTest {
-        mSetFlagsRule.enableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
         packageManager.stub {
             on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
         }
@@ -297,9 +297,9 @@ class AppListRepositoryTest {
         assertThat(appList).containsExactly(NORMAL_APP)
     }
 
+    @DisableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
     @Test
     fun loadApps_noApkInApexInfo_shouldNotIncludeHiddenSystemModule() = runTest {
-        mSetFlagsRule.disableFlags(Flags.FLAG_PROVIDE_INFO_OF_APK_IN_APEX)
         packageManager.stub {
             on { getInstalledModules(any()) } doReturn listOf(HIDDEN_MODULE)
         }

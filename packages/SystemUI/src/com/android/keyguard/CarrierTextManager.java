@@ -19,6 +19,7 @@ package com.android.keyguard;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ACTIVE_DATA_SUB_CHANGED;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_ON_TELEPHONY_CAPABLE;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_REFRESH_CARRIER_INFO;
+import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_SATELLITE_CHANGED;
 import static com.android.keyguard.logging.CarrierTextManagerLogger.REASON_SIM_ERROR_STATE_CHANGED;
 
 import android.content.Context;
@@ -43,12 +44,17 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository;
 import com.android.systemui.telephony.TelephonyListenerManager;
+import com.android.systemui.util.kotlin.JavaAdapter;
+
+import kotlinx.coroutines.Job;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,10 +83,17 @@ public class CarrierTextManager {
     protected KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final CarrierTextManagerLogger mLogger;
     private final WifiRepository mWifiRepository;
+    private final DeviceBasedSatelliteViewModel mDeviceBasedSatelliteViewModel;
+    private final JavaAdapter mJavaAdapter;
     private final boolean[] mSimErrorState;
     private final int mSimSlotsNumber;
     @Nullable // Check for nullability before dispatching
     private CarrierTextCallback mCarrierTextCallback;
+    @Nullable
+    private Job mSatelliteConnectionJob;
+
+    @Nullable private String mSatelliteCarrierText;
+
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
     private final CharSequence mSeparator;
@@ -178,6 +191,8 @@ public class CarrierTextManager {
             boolean showAirplaneMode,
             boolean showMissingSim,
             WifiRepository wifiRepository,
+            DeviceBasedSatelliteViewModel deviceBasedSatelliteViewModel,
+            JavaAdapter javaAdapter,
             TelephonyManager telephonyManager,
             TelephonyListenerManager telephonyListenerManager,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -192,6 +207,8 @@ public class CarrierTextManager {
         mShowAirplaneMode = showAirplaneMode;
         mShowMissingSim = showMissingSim;
         mWifiRepository = wifiRepository;
+        mDeviceBasedSatelliteViewModel = deviceBasedSatelliteViewModel;
+        mJavaAdapter = javaAdapter;
         mTelephonyManager = telephonyManager;
         mSeparator = separator;
         mTelephonyListenerManager = telephonyListenerManager;
@@ -282,10 +299,22 @@ public class CarrierTextManager {
                     mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 });
                 mTelephonyListenerManager.addActiveDataSubscriptionIdListener(mPhoneStateListener);
+                cancelSatelliteCollectionJob(/* reason= */ "Starting new job");
+                mLogger.logStartListeningForSatelliteCarrierText();
+                mSatelliteConnectionJob =
+                    mJavaAdapter.alwaysCollectFlow(
+                        mDeviceBasedSatelliteViewModel.getCarrierText(),
+                        this::onSatelliteCarrierTextChanged);
             } else {
                 // Don't listen and clear out the text when the device isn't a phone.
                 mMainExecutor.execute(() -> callback.updateCarrierInfo(
-                        new CarrierTextCallbackInfo("", null, false, null)
+                        new CarrierTextCallbackInfo(
+                                /* carrierText= */ "",
+                                /* listOfCarriers= */ null,
+                                /* anySimReady= */ false,
+                                /* isInSatelliteMode= */ false,
+                                /* subscriptionIds= */ null,
+                                /* airplaneMode= */ false)
                 ));
             }
         } else {
@@ -294,6 +323,7 @@ public class CarrierTextManager {
                 mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             });
             mTelephonyListenerManager.removeActiveDataSubscriptionIdListener(mPhoneStateListener);
+            cancelSatelliteCollectionJob(/* reason= */ "#handleSetListening has null callback");
         }
     }
 
@@ -309,6 +339,13 @@ public class CarrierTextManager {
 
     protected List<SubscriptionInfo> getSubscriptionInfo() {
         return mKeyguardUpdateMonitor.getFilteredSubscriptionInfo();
+    }
+
+    private void onSatelliteCarrierTextChanged(@Nullable String text) {
+        mLogger.logUpdateCarrierTextForReason(REASON_SATELLITE_CHANGED);
+        mLogger.logNewSatelliteCarrierText(text);
+        mSatelliteCarrierText = text;
+        updateCarrierText();
     }
 
     protected void updateCarrierText() {
@@ -411,10 +448,18 @@ public class CarrierTextManager {
             airplaneMode = true;
         }
 
+        String currentSatelliteText = mSatelliteCarrierText;
+        if (currentSatelliteText != null) {
+            mLogger.logUsingSatelliteText(currentSatelliteText);
+            displayText = currentSatelliteText;
+        }
+
+        boolean isInSatelliteMode = mSatelliteCarrierText != null;
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
                 carrierNames,
                 !allSimsMissing,
+                isInSatelliteMode,
                 subsIds,
                 airplaneMode);
         mLogger.logCallbackSentFromUpdate(info);
@@ -616,11 +661,21 @@ public class CarrierTextManager {
         return list;
     }
 
+    private void cancelSatelliteCollectionJob(String reason) {
+        Job job = mSatelliteConnectionJob;
+        if (job != null) {
+            mLogger.logStopListeningForSatelliteCarrierText(reason);
+            job.cancel(new CancellationException(reason));
+        }
+    }
+
     /** Injectable Buildeer for {@#link CarrierTextManager}. */
     public static class Builder {
         private final Context mContext;
         private final String mSeparator;
         private final WifiRepository mWifiRepository;
+        private final DeviceBasedSatelliteViewModel mDeviceBasedSatelliteViewModel;
+        private final JavaAdapter mJavaAdapter;
         private final TelephonyManager mTelephonyManager;
         private final TelephonyListenerManager mTelephonyListenerManager;
         private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -637,6 +692,8 @@ public class CarrierTextManager {
                 Context context,
                 @Main Resources resources,
                 @Nullable WifiRepository wifiRepository,
+                DeviceBasedSatelliteViewModel deviceBasedSatelliteViewModel,
+                JavaAdapter javaAdapter,
                 TelephonyManager telephonyManager,
                 TelephonyListenerManager telephonyListenerManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
@@ -648,6 +705,8 @@ public class CarrierTextManager {
             mSeparator = resources.getString(
                     com.android.internal.R.string.kg_text_message_separator);
             mWifiRepository = wifiRepository;
+            mDeviceBasedSatelliteViewModel = deviceBasedSatelliteViewModel;
+            mJavaAdapter = javaAdapter;
             mTelephonyManager = telephonyManager;
             mTelephonyListenerManager = telephonyListenerManager;
             mWakefulnessLifecycle = wakefulnessLifecycle;
@@ -682,9 +741,20 @@ public class CarrierTextManager {
         public CarrierTextManager build() {
             mLogger.setLocation(mDebugLocation);
             return new CarrierTextManager(
-                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim, mWifiRepository,
-                    mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle,
-                    mMainExecutor, mBgExecutor, mKeyguardUpdateMonitor, mLogger);
+                    mContext,
+                    mSeparator,
+                    mShowAirplaneMode,
+                    mShowMissingSim,
+                    mWifiRepository,
+                    mDeviceBasedSatelliteViewModel,
+                    mJavaAdapter,
+                    mTelephonyManager,
+                    mTelephonyListenerManager,
+                    mWakefulnessLifecycle,
+                    mMainExecutor,
+                    mBgExecutor,
+                    mKeyguardUpdateMonitor,
+                    mLogger);
         }
     }
 
@@ -695,21 +765,35 @@ public class CarrierTextManager {
         public final CharSequence carrierText;
         public final CharSequence[] listOfCarriers;
         public final boolean anySimReady;
+        public final boolean isInSatelliteMode;
         public final int[] subscriptionIds;
         public boolean airplaneMode;
 
         @VisibleForTesting
-        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
-                boolean anySimReady, int[] subscriptionIds) {
-            this(carrierText, listOfCarriers, anySimReady, subscriptionIds, false);
+        public CarrierTextCallbackInfo(
+                CharSequence carrierText,
+                CharSequence[] listOfCarriers,
+                boolean anySimReady,
+                int[] subscriptionIds) {
+            this(carrierText,
+                    listOfCarriers,
+                    anySimReady,
+                    /* isInSatelliteMode= */ false,
+                    subscriptionIds,
+                    /* airplaneMode= */ false);
         }
 
-        @VisibleForTesting
-        public CarrierTextCallbackInfo(CharSequence carrierText, CharSequence[] listOfCarriers,
-                boolean anySimReady, int[] subscriptionIds, boolean airplaneMode) {
+        public CarrierTextCallbackInfo(
+                CharSequence carrierText,
+                CharSequence[] listOfCarriers,
+                boolean anySimReady,
+                boolean isInSatelliteMode,
+                int[] subscriptionIds,
+                boolean airplaneMode) {
             this.carrierText = carrierText;
             this.listOfCarriers = listOfCarriers;
             this.anySimReady = anySimReady;
+            this.isInSatelliteMode = isInSatelliteMode;
             this.subscriptionIds = subscriptionIds;
             this.airplaneMode = airplaneMode;
         }
@@ -720,6 +804,7 @@ public class CarrierTextManager {
                     + "carrierText=" + carrierText
                     + ", listOfCarriers=" + Arrays.toString(listOfCarriers)
                     + ", anySimReady=" + anySimReady
+                    + ", isInSatelliteMode=" + isInSatelliteMode
                     + ", subscriptionIds=" + Arrays.toString(subscriptionIds)
                     + ", airplaneMode=" + airplaneMode
                     + '}';

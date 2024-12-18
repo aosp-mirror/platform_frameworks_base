@@ -52,9 +52,8 @@ public final class BrightnessUtils {
      * A utility to construct the DisplayBrightnessState
      */
     public static DisplayBrightnessState constructDisplayBrightnessState(
-            int brightnessChangeReason, float brightness, float sdrBrightness,
-            String displayBrightnessStrategyName) {
-        return constructDisplayBrightnessState(brightnessChangeReason, brightness, sdrBrightness,
+            int brightnessChangeReason, float brightness, String displayBrightnessStrategyName) {
+        return constructDisplayBrightnessState(brightnessChangeReason, brightness,
                 displayBrightnessStrategyName, /* slowChange= */ false);
     }
 
@@ -62,13 +61,12 @@ public final class BrightnessUtils {
      * A utility to construct the DisplayBrightnessState
      */
     public static DisplayBrightnessState constructDisplayBrightnessState(
-            int brightnessChangeReason, float brightness, float sdrBrightness,
+            int brightnessChangeReason, float brightness,
             String displayBrightnessStrategyName, boolean slowChange) {
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(brightnessChangeReason);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(brightness)
-                .setSdrBrightness(sdrBrightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(displayBrightnessStrategyName)
                 .setIsSlowChange(slowChange)

@@ -30,11 +30,13 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowRelayoutResult;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -47,6 +49,7 @@ import java.util.List;
  * {@hide}
  */
 interface IWindowSession {
+
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
             out InputChannel outInputChannel, out InsetsState insetsState,
@@ -85,22 +88,12 @@ interface IWindowSession {
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
      * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
      * @param lastSyncSeqId The last SyncSeqId that the client applied.
-     * @param outFrames The window frames used by the client side for layout.
-     * @param outMergedConfiguration New config container that holds global, override and merged
-     *                               config for window, if it is now becoming visible and the merged
-     *                               config has changed since it was last displayed.
-     * @param outSurfaceControl Object in which is placed the new display surface.
-     * @param insetsState The current insets state in the system.
-     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
-     * @param bundle A temporary object to obtain the latest SyncSeqId.
+     * @param outRelayoutResult Data object contains the info to be returned from server side.
      * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
-    int relayout(IWindow window, in WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
-            out Bundle bundle);
+    int relayout(IWindow window, in WindowManager.LayoutParams attrs, int requestedWidth,
+            int requestedHeight, int viewVisibility, int flags, int seq, int lastSyncSeqId,
+            out @nullable WindowRelayoutResult outRelayoutResult);
 
     /**
      * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.
@@ -146,15 +139,6 @@ interface IWindowSession {
     @UnsupportedAppUsage
     oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
             int seqId);
-
-    @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
-
-    /**
-     * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
-     * permission.
-     */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
 
     /**
      * Initiate the drag operation itself
@@ -274,8 +258,6 @@ interface IWindowSession {
 
     oneway void finishMovingTask(IWindow window);
 
-    oneway void updatePointerIcon(IWindow window);
-
     /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
@@ -286,7 +268,8 @@ interface IWindowSession {
     /**
      * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes,
+            in @nullable ImeTracker.Token imeStatsToken);
 
     /**
      * Called when the system gesture exclusion has changed.
@@ -379,4 +362,14 @@ interface IWindowSession {
      * @return {@code true} if the focus changes. Otherwise, {@code false}.
      */
     boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
+
+    /**
+     * Notifies the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param window The window that is used to get the ImeInsetsSourceProvider.
+     * @param visible {@code true} to make it visible, {@code false} to hide it.
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            in ImeTracker.Token statsToken);
 }

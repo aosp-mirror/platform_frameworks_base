@@ -22,42 +22,45 @@ intent.
 <br/>
 Commands are sent as string extras with key ```command``` (required). Possible values are:
 
-| Command              | Subcommand                 | Argument       | Description
-| ---                  | ---                        | ---            | ---
-| ```enter```          |                            |                | Enters demo mode, bar state allowed to be modified (for convenience, any of the other non-exit commands will automatically flip demo mode on, no need to call this explicitly in practice)
-| ```exit```           |                            |                | Exits demo mode, bars back to their system-driven state
-| ```battery```        |                            |                | Control the battery display
-|                      | ```level```                |                | Sets the battery level (0 - 100)
-|                      | ```plugged```              |                | Sets charging state (```true```, ```false```)
-|                      | ```powersave```            |                | Sets power save mode (```true```, ```anything else```)
-| ```network```        |                            |                | Control the RSSI display
-|                      | ```airplane```             |                | ```show``` to show icon, any other value to hide
-|                      | ```fully```                |                | Sets MCS state to fully connected (```true```, ```false```)
-|                      | ```wifi```                 |                | ```show``` to show icon, any other value to hide
-|                      |                            | ```level```    | Sets wifi level (null or 0-4)
-|                      | ```mobile```               |                | ```show``` to show icon, any other value to hide
-|                      |                            | ```datatype``` | Values: ```1x```, ```3g```, ```4g```, ```e```, ```g```, ```h```, ```lte```, ```roam```, any other value to hide
-|                      |                            | ```level```    | Sets mobile signal strength level (null or 0-4)
-|                      | ```carriernetworkchange``` |                | Sets mobile signal icon to carrier network change UX when disconnected (```show``` to show icon, any other value to hide)
-|                      | ```sims```                 |                | Sets the number of sims (1-8)
-|                      | ```nosim```                |                | ```show``` to show icon, any other value to hide
-| ```bars```           |                            |                | Control the visual style of the bars (opaque, translucent, etc)
-|                      | ```mode```                 |                | Sets the bars visual style (opaque, translucent, semi-transparent)
-| ```status```         |                            |                | Control the system status icons
-|                      | ```volume```               |                | Sets the icon in the volume slot (```silent```, ```vibrate```, any other value to hide)
-|                      | ```bluetooth```            |                | Sets the icon in the bluetooth slot (```connected```, ```disconnected```, any other value to hide)
-|                      | ```location```             |                | Sets the icon in the location slot (```show```, any other value to hide)
-|                      | ```alarm```                |                | Sets the icon in the alarm_clock slot (```show```, any other value to hide)
-|                      | ```sync```                 |                | Sets the icon in the sync_active slot (```show```, any other value to hide)
-|                      | ```tty```                  |                | Sets the icon in the tty slot (```show```, any other value to hide)
-|                      | ```eri```                  |                | Sets the icon in the cdma_eri slot (```show```, any other value to hide)
-|                      | ```mute```                 |                | Sets the icon in the mute slot (```show```, any other value to hide)
-|                      | ```speakerphone```         |                | Sets the icon in the speakerphone slot (```show```, any other value to hide)
-| ```notifications```  |                            |                | Control the notification icons
-|                      | ```visible```              |                | ```false``` to hide the notification icons, any other value to show
-| ```clock```          |                            |                | Control the clock display
-|                      | ```millis```               |                | Sets the time in millis
-|                      | ```hhmm```                 |                | Sets the time in hh:mm
+| Command              | Subcommand                 | Argument         | Description
+| ---                  |----------------------------|------------------| ---
+| ```enter```          |                            |                  | Enters demo mode, bar state allowed to be modified (for convenience, any of the other non-exit commands will automatically flip demo mode on, no need to call this explicitly in practice)
+| ```exit```           |                            |                  | Exits demo mode, bars back to their system-driven state
+| ```battery```        |                            |                  | Control the battery display
+|                      | ```level```                |                  | Sets the battery level (0 - 100)
+|                      | ```plugged```              |                  | Sets charging state (```true```, ```false```)
+|                      | ```powersave```            |                  | Sets power save mode (```true```, ```anything else```)
+| ```network```        |                            |                  | Control the RSSI display
+|                      | ```airplane```             |                  | ```show``` to show icon, any other value to hide
+|                      | ```fully```                |                  | Sets MCS state to fully connected (```true```, ```false```)
+|                      | ```wifi```                 |                  | ```show``` to show icon, any other value to hide
+|                      |                            | ```level```      | Sets wifi level (null or 0-4)
+|                      | ```mobile```               |                  | ```show``` to show icon, any other value to hide
+|                      |                            | ```datatype```   | Values: ```1x```, ```3g```, ```4g```, ```e```, ```g```, ```h```, ```lte```, ```roam```, any other value to hide
+|                      |                            | ```level```      | Sets mobile signal strength level (null or 0-4)
+|                      | ```satellite```            |                  | ```show``` to show icon, any other value to hide
+|                      |                            | ```connection``` | ```connected```, ```off```, ```on```, or ```unknown``` (matches SatelliteConnectionState enum)
+|                      |                            | ```level```      | Sets satellite signal strength level (0-4)
+|                      | ```carriernetworkchange``` |                  | Sets mobile signal icon to carrier network change UX when disconnected (```show``` to show icon, any other value to hide)
+|                      | ```sims```                 |                  | Sets the number of sims (1-8)
+|                      | ```nosim```                |                  | ```show``` to show icon, any other value to hide
+| ```bars```           |                            |                  | Control the visual style of the bars (opaque, translucent, etc)
+|                      | ```mode```                 |                  | Sets the bars visual style (opaque, translucent, semi-transparent)
+| ```status```         |                            |                  | Control the system status icons
+|                      | ```volume```               |                  | Sets the icon in the volume slot (```silent```, ```vibrate```, any other value to hide)
+|                      | ```bluetooth```            |                  | Sets the icon in the bluetooth slot (```connected```, ```disconnected```, any other value to hide)
+|                      | ```location```             |                  | Sets the icon in the location slot (```show```, any other value to hide)
+|                      | ```alarm```                |                  | Sets the icon in the alarm_clock slot (```show```, any other value to hide)
+|                      | ```sync```                 |                  | Sets the icon in the sync_active slot (```show```, any other value to hide)
+|                      | ```tty```                  |                  | Sets the icon in the tty slot (```show```, any other value to hide)
+|                      | ```eri```                  |                  | Sets the icon in the cdma_eri slot (```show```, any other value to hide)
+|                      | ```mute```                 |                  | Sets the icon in the mute slot (```show```, any other value to hide)
+|                      | ```speakerphone```         |                  | Sets the icon in the speakerphone slot (```show```, any other value to hide)
+| ```notifications```  |                            |                  | Control the notification icons
+|                      | ```visible```              |                  | ```false``` to hide the notification icons, any other value to show
+| ```clock```          |                            |                  | Control the clock display
+|                      | ```millis```               |                  | Sets the time in millis
+|                      | ```hhmm```                 |                  | Sets the time in hh:mm
 
 ## Examples
 Enter demo mode
@@ -89,6 +92,15 @@ adb shell am broadcast -a com.android.systemui.demo -e command network -e wifi
 show -e level 4
 ```
 
+
+Show the satellite icon
+
+```
+# Sets mobile to be out-of-service, which is required for satellite to show
+adb shell am broadcast -a com.android.systemui.demo -e command network -e mobile show -e level 0
+# Sets satellite to be connected
+adb shell am broadcast -a com.android.systemui.demo -e command network -e satellite show -e level 4 -e connection connected
+```
 
 Show the silent volume icon
 

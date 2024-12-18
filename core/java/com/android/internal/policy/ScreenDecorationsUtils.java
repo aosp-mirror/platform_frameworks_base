@@ -18,6 +18,9 @@ package com.android.internal.policy;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.DisplayUtils;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.RoundedCorners;
 
 import com.android.internal.R;
@@ -34,6 +37,8 @@ public class ScreenDecorationsUtils {
      *
      * Note that if the context is not an UI context(not associated with Display), it will use
      * default display.
+     *
+     * If the associated display is not internal, will return 0.
      */
     public static float getWindowCornerRadius(Context context) {
         final Resources resources = context.getResources();
@@ -41,7 +46,13 @@ public class ScreenDecorationsUtils {
             return 0f;
         }
         // Use Context#getDisplayNoVerify() in case the context is not an UI context.
-        final String displayUniqueId = context.getDisplayNoVerify().getUniqueId();
+        final Display display = context.getDisplayNoVerify();
+        // The radius is only valid for internal displays, since the corner radius of external or
+        // virtual displays is not known when window corners are configured or are not supported.
+        if (display.getType() != Display.TYPE_INTERNAL) {
+            return 0f;
+        }
+        final String displayUniqueId = display.getUniqueId();
         // Radius that should be used in case top or bottom aren't defined.
         float defaultRadius = RoundedCorners.getRoundedCornerRadius(resources, displayUniqueId)
                 - RoundedCorners.getRoundedCornerRadiusAdjustment(resources, displayUniqueId);
@@ -57,9 +68,29 @@ public class ScreenDecorationsUtils {
             bottomRadius = defaultRadius;
         }
 
+        // If the physical pixels are scaled, apply it here
+        float scale = getPhysicalPixelDisplaySizeRatio(context);
+        if (scale != 1f) {
+            topRadius = topRadius * scale;
+            bottomRadius = bottomRadius * scale;
+        }
+
         // Always use the smallest radius to make sure the rounded corners will
         // completely cover the display.
         return Math.min(topRadius, bottomRadius);
+    }
+
+    static float getPhysicalPixelDisplaySizeRatio(Context context) {
+        DisplayInfo displayInfo = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(displayInfo);
+        final Display.Mode maxDisplayMode =
+                DisplayUtils.getMaximumResolutionDisplayMode(displayInfo.supportedModes);
+        if (maxDisplayMode == null) {
+            return 1f;
+        }
+        return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
+                maxDisplayMode.getPhysicalWidth(), maxDisplayMode.getPhysicalHeight(),
+                displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight());
     }
 
     /**

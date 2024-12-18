@@ -26,7 +26,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -75,7 +75,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ControlsStartableTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()

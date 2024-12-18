@@ -20,6 +20,7 @@ import com.android.systemui.res.R
 /** Return the subtitle resource Id of the given tile. */
 object SubtitleArrayMapping {
     private val subtitleIdsMap: HashMap<String, Int> = HashMap()
+
     init {
         subtitleIdsMap["internet"] = R.array.tile_states_internet
         subtitleIdsMap["wifi"] = R.array.tile_states_wifi
@@ -52,6 +53,7 @@ object SubtitleArrayMapping {
         subtitleIdsMap["color_correction"] = R.array.tile_states_color_correction
         subtitleIdsMap["dream"] = R.array.tile_states_dream
         subtitleIdsMap["font_scaling"] = R.array.tile_states_font_scaling
+        subtitleIdsMap["hearing_devices"] = R.array.tile_states_hearing_devices
     }
 
     /** Get the subtitle resource id of the given tile */

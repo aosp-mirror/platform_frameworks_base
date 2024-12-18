@@ -20,8 +20,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.net.Uri
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.NotificationDrawableConsumer
 import com.android.systemui.SysuiTestCase
@@ -50,7 +50,7 @@ private const val MAX_IMAGE_SIZE = 512 // size of the test drawables in pixels
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class BigPictureIconManagerTest : SysuiTestCase() {
 
     private val testDispatcher = StandardTestDispatcher()

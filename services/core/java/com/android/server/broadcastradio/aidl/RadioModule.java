@@ -42,6 +42,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioEventLogger;
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
@@ -59,8 +60,9 @@ final class RadioModule {
 
     private final Object mLock = new Object();
     private final Handler mHandler;
-    private final RadioLogger mLogger;
+    private final RadioEventLogger mLogger;
     private final RadioManager.ModuleProperties mProperties;
+    private final RadioServiceUserController mUserController;
 
     /**
      * Tracks antenna state reported by HAL (if any).
@@ -120,7 +122,7 @@ final class RadioModule {
         public void onCurrentProgramInfoChanged(ProgramInfo halProgramInfo) {
             fireLater(() -> {
                 RadioManager.ProgramInfo currentProgramInfo =
-                        ConversionUtils.programInfoFromHalProgramInfo(halProgramInfo);
+                        ConversionUtils.tunedProgramInfoFromHalProgramInfo(halProgramInfo);
                 Objects.requireNonNull(currentProgramInfo,
                         "Program info from AIDL HAL is invalid");
                 synchronized (mLock) {
@@ -193,15 +195,18 @@ final class RadioModule {
     };
 
     @VisibleForTesting
-    RadioModule(IBroadcastRadio service, RadioManager.ModuleProperties properties) {
+    RadioModule(IBroadcastRadio service, RadioManager.ModuleProperties properties,
+            RadioServiceUserController userController) {
         mProperties = Objects.requireNonNull(properties, "properties cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
         mHandler = new Handler(Looper.getMainLooper());
-        mLogger = new RadioLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
+        mLogger = new RadioEventLogger(TAG, RADIO_EVENT_LOGGER_QUEUE_SIZE);
     }
 
     @Nullable
-    static RadioModule tryLoadingModule(int moduleId, String moduleName, IBinder serviceBinder) {
+    static RadioModule tryLoadingModule(int moduleId, String moduleName, IBinder serviceBinder,
+            RadioServiceUserController userController) {
         try {
             Slogf.i(TAG, "Try loading module for module id = %d, module name = %s",
                     moduleId, moduleName);
@@ -231,7 +236,7 @@ final class RadioModule {
             RadioManager.ModuleProperties prop = ConversionUtils.propertiesFromHalProperties(
                     moduleId, moduleName, service.getProperties(), amfmConfig, dabConfig);
 
-            return new RadioModule(service, prop);
+            return new RadioModule(service, prop, userController);
         } catch (RemoteException ex) {
             Slogf.e(TAG, ex, "Failed to load module %s", moduleName);
             return null;
@@ -246,10 +251,7 @@ final class RadioModule {
         return mProperties;
     }
 
-    void setInternalHalCallback() throws RemoteException {
-        mService.setTunerCallback(mHalTunerCallback);
-    }
-
+    @Nullable
     TunerSession openSession(android.hardware.radio.ITunerCallback userCb)
             throws RemoteException {
         mLogger.logRadioEvent("Open TunerSession");
@@ -257,10 +259,20 @@ final class RadioModule {
         Boolean antennaConnected;
         RadioManager.ProgramInfo currentProgramInfo;
         synchronized (mLock) {
-            tunerSession = new TunerSession(this, mService, userCb);
+            boolean isFirstTunerSession = mAidlTunerSessions.isEmpty();
+            tunerSession = new TunerSession(this, mService, userCb, mUserController);
             mAidlTunerSessions.add(tunerSession);
             antennaConnected = mAntennaConnected;
             currentProgramInfo = mCurrentProgramInfo;
+            if (isFirstTunerSession) {
+                try {
+                    mService.setTunerCallback(mHalTunerCallback);
+                } catch (RemoteException ex) {
+                    Slogf.wtf(TAG, ex, "Failed to register HAL callback for module %d",
+                            mProperties.getId());
+                    return null;
+                }
+            }
         }
         // Propagate state to new client.
         // Note: These callbacks are invoked while holding mLock to prevent race conditions
@@ -284,7 +296,6 @@ final class RadioModule {
         synchronized (mLock) {
             tunerSessions = new TunerSession[mAidlTunerSessions.size()];
             mAidlTunerSessions.toArray(tunerSessions);
-            mAidlTunerSessions.clear();
         }
 
         for (TunerSession tunerSession : tunerSessions) {
@@ -402,6 +413,14 @@ final class RadioModule {
             mAidlTunerSessions.remove(tunerSession);
         }
         onTunerSessionProgramListFilterChanged(null);
+        if (mAidlTunerSessions.isEmpty()) {
+            try {
+                mService.unsetTunerCallback();
+            } catch (RemoteException ex) {
+                Slogf.wtf(TAG, ex, "Failed to unregister HAL callback for module %d",
+                        mProperties.getId());
+            }
+        }
     }
 
     // add to mHandler queue
@@ -425,7 +444,7 @@ final class RadioModule {
 
     @GuardedBy("mLock")
     private void fanoutAidlCallbackLocked(AidlCallbackRunnable runnable) {
-        int currentUserId = RadioServiceUserController.getCurrentUser();
+        int currentUserId = mUserController.getCurrentUser();
         List<TunerSession> deadSessions = null;
         for (int i = 0; i < mAidlTunerSessions.size(); i++) {
             if (mAidlTunerSessions.valueAt(i).mUserId != currentUserId

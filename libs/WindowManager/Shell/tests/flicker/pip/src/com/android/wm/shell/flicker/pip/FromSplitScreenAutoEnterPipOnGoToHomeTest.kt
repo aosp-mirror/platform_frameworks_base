@@ -24,6 +24,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
 import android.tools.traces.parsers.toFlickerComponent
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -38,7 +39,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app via auto-enter property when navigating to home from split screen.
  *
- * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:FromSplitScreenAutoEnterPipOnGoToHomeTest`
  *
  * Actions:
  * ```
@@ -142,6 +143,10 @@ class FromSplitScreenAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
             }
         }
     }
+
+    @FlakyTest(bugId = 293133362)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

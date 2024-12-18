@@ -93,8 +93,7 @@ public class ActionBarContainer extends FrameLayout {
         if (bg != null) {
             bg.setCallback(this);
             if (mActionBarView != null) {
-                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                        mActionBarView.getRight(), mActionBarView.getBottom());
+                bg.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
             }
         }
         setWillNotDraw(mIsSplit ? mSplitBackground == null :
@@ -293,6 +292,7 @@ public class ActionBarContainer extends FrameLayout {
         if (mActionBarView == null) return;
 
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
+            final int verticalPadding = getPaddingTop() + getPaddingBottom();
             int nonTabMaxHeight = 0;
             final int childCount = getChildCount();
             for (int i = 0; i < childCount; i++) {
@@ -307,7 +307,9 @@ public class ActionBarContainer extends FrameLayout {
             final int maxHeight = mode == MeasureSpec.AT_MOST ?
                     MeasureSpec.getSize(heightMeasureSpec) : Integer.MAX_VALUE;
             setMeasuredDimension(getMeasuredWidth(),
-                    Math.min(nonTabMaxHeight + getMeasuredHeightWithMargins(mTabContainer),
+                    Math.min(
+                            verticalPadding + nonTabMaxHeight
+                                    + getMeasuredHeightWithMargins(mTabContainer),
                             maxHeight));
         }
     }
@@ -335,13 +337,9 @@ public class ActionBarContainer extends FrameLayout {
             }
         } else {
             if (mBackground != null) {
-                if (mActionBarView.getVisibility() == View.VISIBLE) {
-                    mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
-                            mActionBarView.getRight(), mActionBarView.getBottom());
-                } else if (mActionContextView != null &&
-                        mActionContextView.getVisibility() == View.VISIBLE) {
-                    mBackground.setBounds(mActionContextView.getLeft(), mActionContextView.getTop(),
-                            mActionContextView.getRight(), mActionContextView.getBottom());
+                if ((mActionBarView.getVisibility() == View.VISIBLE) || (mActionContextView != null
+                        && mActionContextView.getVisibility() == View.VISIBLE)) {
+                    mBackground.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
                 } else {
                     mBackground.setBounds(0, 0, 0, 0);
                 }

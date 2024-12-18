@@ -19,19 +19,23 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -44,17 +48,21 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTouchHandlingInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.pulsingGestureListener
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -63,28 +71,32 @@ import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(JUnit4::class)
-class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
+    private val settings = kosmos.fakeSettings
 
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
@@ -94,13 +106,13 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var accessibilityManager: AccessibilityManagerWrapper
 
     private lateinit var underTest: KeyguardBottomAreaViewModel
 
-    private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
@@ -108,7 +120,9 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
-    private val kosmos = testKosmos()
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -141,10 +155,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
-                set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
-            }
+            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         val keyguardInteractor = withDeps.keyguardInteractor
@@ -153,8 +164,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
@@ -190,7 +199,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = settings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 configs =
@@ -202,8 +211,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        val keyguardLongPressInteractor =
-            KeyguardLongPressInteractor(
+        val keyguardTouchHandlingInteractor =
+            KeyguardTouchHandlingInteractor(
                 appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
@@ -212,6 +221,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 broadcastDispatcher = broadcastDispatcher,
                 accessibilityManager = accessibilityManager,
+                pulsingGestureListener = kosmos.pulsingGestureListener,
+                faceAuthInteractor = kosmos.deviceEntryFaceAuthInteractor,
             )
         underTest =
             KeyguardBottomAreaViewModel(
@@ -228,21 +239,23 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                         logger = logger,
+                        metricsLogger = metricsLogger,
                         devicePolicyManager = devicePolicyManager,
                         dockManager = dockManager,
                         biometricSettingsRepository = biometricSettingsRepository,
                         backgroundDispatcher = testDispatcher,
                         appContext = mContext,
+                        sceneInteractor = { kosmos.sceneInteractor },
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
-                longPressViewModel =
-                    KeyguardLongPressViewModel(
-                        interactor = keyguardLongPressInteractor,
+                keyguardTouchHandlingViewModel =
+                    KeyguardTouchHandlingViewModel(
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
                 settingsMenuViewModel =
                     KeyguardSettingsMenuViewModel(
-                        interactor = keyguardLongPressInteractor,
+                        interactor = keyguardTouchHandlingInteractor,
                     ),
             )
     }
@@ -748,5 +761,11 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     companion object {
         private const val DEFAULT_BURN_IN_OFFSET = 5
         private const val RETURNED_BURN_IN_OFFSET = 3
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
     }
 }

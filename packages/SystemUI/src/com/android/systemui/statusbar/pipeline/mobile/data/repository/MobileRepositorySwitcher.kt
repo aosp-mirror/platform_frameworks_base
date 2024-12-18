@@ -151,7 +151,17 @@ constructor(
     override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
+    override val isDeviceEmergencyCallCapable: StateFlow<Boolean> =
+        activeRepo
+            .flatMapLatest { it.isDeviceEmergencyCallCapable }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                realRepository.isDeviceEmergencyCallCapable.value
+            )
+
     override val isAnySimSecure: Flow<Boolean> = activeRepo.flatMapLatest { it.isAnySimSecure }
+
     override fun getIsAnySimSecure(): Boolean = activeRepo.value.getIsAnySimSecure()
 
     override val defaultDataSubId: StateFlow<Int> =

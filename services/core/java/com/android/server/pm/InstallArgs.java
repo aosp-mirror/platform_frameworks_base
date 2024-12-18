@@ -58,6 +58,8 @@ final class InstallArgs {
     final int mDataLoaderType;
     final int mPackageSource;
     final boolean mApplicationEnabledSettingPersistent;
+    @Nullable
+    final String mDexoptCompilerFilter;
 
     // The list of instruction sets supported by this app. This is currently
     // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -73,7 +75,7 @@ final class InstallArgs {
             int autoRevokePermissionsMode, String traceMethod, int traceCookie,
             SigningDetails signingDetails, int installReason, int installScenario,
             boolean forceQueryableOverride, int dataLoaderType, int packageSource,
-            boolean applicationEnabledSettingPersistent) {
+            boolean applicationEnabledSettingPersistent, String dexoptCompilerFilter) {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
@@ -96,5 +98,6 @@ final class InstallArgs {
         mDataLoaderType = dataLoaderType;
         mPackageSource = packageSource;
         mApplicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
+        mDexoptCompilerFilter = dexoptCompilerFilter;
     }
 }

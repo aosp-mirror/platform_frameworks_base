@@ -6,7 +6,7 @@ import android.util.MathUtils
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeLockscreenInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted

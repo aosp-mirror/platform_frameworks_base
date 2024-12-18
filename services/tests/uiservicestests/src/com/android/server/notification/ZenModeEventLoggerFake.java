@@ -137,4 +137,9 @@ public class ZenModeEventLoggerFake extends ZenModeEventLogger {
         checkInRange(i);
         return mChanges.get(i).getActiveRuleTypes();
     }
+
+    public int getChangeOrigin(int i) throws IllegalArgumentException {
+        checkInRange(i);
+        return mChanges.get(i).getChangeOrigin();
+    }
 }

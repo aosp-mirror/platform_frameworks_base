@@ -16,17 +16,14 @@
 
 package com.android.systemui.communal.widgets
 
-import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
-import android.os.UserHandle
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_ENABLED
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -37,7 +34,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
@@ -60,6 +56,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
+    @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
 
     private lateinit var appWidgetIdToRemove: MutableSharedFlow<Int>
 
@@ -78,6 +75,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
         underTest =
             CommunalAppWidgetHostStartable(
                 appWidgetHost,
+                communalWidgetHost,
                 kosmos.communalInteractor,
                 kosmos.fakeUserTracker,
                 kosmos.applicationCoroutineScope,
@@ -143,24 +141,49 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun observeHostWhenCommunalIsAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                setCommunalAvailable(true)
+                communalInteractor.setEditModeOpen(false)
+                verify(communalWidgetHost, never()).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                underTest.start()
+                runCurrent()
+
+                verify(communalWidgetHost).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                setCommunalAvailable(false)
+                runCurrent()
+
+                verify(communalWidgetHost).stopObservingHost()
+            }
+        }
+
+    @Test
     fun removeAppWidgetReportedByHost() =
         with(kosmos) {
             testScope.runTest {
                 // Set up communal widgets
-                val widget1 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(1) }
-                val widget2 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(2) }
-                val widget3 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(3) }
-                fakeCommunalWidgetRepository.setCommunalWidgets(listOf(widget1, widget2, widget3))
+                fakeCommunalWidgetRepository.addWidget(appWidgetId = 1)
+                fakeCommunalWidgetRepository.addWidget(appWidgetId = 2)
+                fakeCommunalWidgetRepository.addWidget(appWidgetId = 3)
 
                 underTest.start()
 
                 // Assert communal widgets has 3
                 val communalWidgets by
                     collectLastValue(fakeCommunalWidgetRepository.communalWidgets)
-                assertThat(communalWidgets).containsExactly(widget1, widget2, widget3)
+                assertThat(communalWidgets).hasSize(3)
+
+                val widget1 = communalWidgets!![0]
+                val widget2 = communalWidgets!![1]
+                val widget3 = communalWidgets!![2]
+                assertThat(widget1.appWidgetId).isEqualTo(1)
+                assertThat(widget2.appWidgetId).isEqualTo(2)
+                assertThat(widget3.appWidgetId).isEqualTo(3)
 
                 // Report app widget 1 to remove and assert widget removed
                 appWidgetIdToRemove.emit(1)
@@ -184,18 +207,27 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
                     userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK),
                     selectedUserIndex = 0,
                 )
-                val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-                val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
-                val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
-                val widgets = listOf(widget1, widget2, widget3)
-                fakeCommunalWidgetRepository.setCommunalWidgets(widgets)
+                // One work widget, one pending work widget, and one personal widget.
+                fakeCommunalWidgetRepository.addWidget(appWidgetId = 1, userId = USER_INFO_WORK.id)
+                fakeCommunalWidgetRepository.addPendingWidget(
+                    appWidgetId = 2,
+                    userId = USER_INFO_WORK.id
+                )
+                fakeCommunalWidgetRepository.addWidget(appWidgetId = 3, userId = MAIN_USER_INFO.id)
 
                 underTest.start()
                 runCurrent()
 
                 val communalWidgets by
                     collectLastValue(fakeCommunalWidgetRepository.communalWidgets)
-                assertThat(communalWidgets).containsExactly(widget1, widget2, widget3)
+                assertThat(communalWidgets).hasSize(3)
+
+                val widget1 = communalWidgets!![0]
+                val widget2 = communalWidgets!![1]
+                val widget3 = communalWidgets!![2]
+                assertThat(widget1.appWidgetId).isEqualTo(1)
+                assertThat(widget2.appWidgetId).isEqualTo(2)
+                assertThat(widget3.appWidgetId).isEqualTo(3)
 
                 // Unlock the device and remove work profile.
                 fakeKeyguardRepository.setKeyguardShowing(false)
@@ -209,8 +241,8 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
                 fakeKeyguardRepository.setKeyguardShowing(true)
                 runCurrent()
 
-                // Widget created for work profile is removed.
-                assertThat(communalWidgets).containsExactly(widget2, widget3)
+                // Both work widgets are removed.
+                assertThat(communalWidgets).containsExactly(widget3)
             }
         }
 
@@ -220,15 +252,11 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
             fakeKeyguardRepository.setKeyguardShowing(true)
             val settingsValue = if (available) 1 else 0
-            fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, settingsValue, MAIN_USER_INFO.id)
-        }
-
-    private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel> {
-            whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo = mock<AppWidgetProviderInfo>()
-            whenever(providerInfo.profile).thenReturn(UserHandle(userId))
-            whenever(this.providerInfo).thenReturn(providerInfo)
+            fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                settingsValue,
+                MAIN_USER_INFO.id
+            )
         }
 
     private companion object {

@@ -21,10 +21,10 @@ import android.graphics.Rect;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.DarkIconDispatcher;
 
+import kotlinx.coroutines.flow.StateFlow;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import kotlinx.coroutines.flow.StateFlow;
 
 /**
  * Dispatches events to {@link DarkReceiver}s about changes in darkness, tint area

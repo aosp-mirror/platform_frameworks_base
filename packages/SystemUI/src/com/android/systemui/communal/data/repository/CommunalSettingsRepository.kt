@@ -18,18 +18,19 @@ package com.android.systemui.communal.data.repository
 
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
-import android.appwidget.AppWidgetProviderInfo
 import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.os.UserHandle
+import android.provider.Settings
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalEnabledState
-import com.android.systemui.communal.data.model.CommunalWidgetCategories
 import com.android.systemui.communal.data.model.DisabledReason
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_DEVICE_POLICY
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_FLAG
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_INVALID_USER
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_USER_SETTING
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -52,10 +53,18 @@ interface CommunalSettingsRepository {
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
 
     /**
-     * A flow that reports the widget categories to show on the hub as selected by the user in
-     * Settings.
+     * Returns true if both the communal trunk-stable flag and resource flag are enabled.
+     *
+     * The trunk-stable flag is controlled by server rollout and is on all devices. The resource
+     * flag is enabled via resource overlay only on products we want the hub to be present on.
      */
-    fun getWidgetCategories(user: UserInfo): Flow<CommunalWidgetCategories>
+    fun getFlagEnabled(): Boolean
+
+    /** Keyguard widgets enabled state by Device Policy Manager for the specified user. */
+    fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean>
+
+    /** The type of background to use for the hub. Used to experiment with different backgrounds. */
+    fun getBackground(user: UserInfo): Flow<CommunalBackgroundType>
 }
 
 @SysUISingleton
@@ -69,15 +78,15 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
 ) : CommunalSettingsRepository {
 
-    private val flagEnabled: Boolean by lazy {
-        featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
+    override fun getFlagEnabled(): Boolean {
+        return featureFlagsClassic.isEnabled(Flags.COMMUNAL_SERVICE_ENABLED) && communalHub()
     }
 
     override fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState> {
         if (!user.isMain) {
             return flowOf(CommunalEnabledState(DISABLED_REASON_INVALID_USER))
         }
-        if (!flagEnabled) {
+        if (!getFlagEnabled()) {
             return flowOf(CommunalEnabledState(DISABLED_REASON_FLAG))
         }
         return combine(
@@ -97,49 +106,49 @@ constructor(
             .flowOn(bgDispatcher)
     }
 
-    override fun getWidgetCategories(user: UserInfo): Flow<CommunalWidgetCategories> =
+    override fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
+        broadcastDispatcher
+            .broadcastFlow(
+                filter =
+                    IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                // In COPE management mode, the restriction from the managed profile may
+                // propagate to the main profile. Therefore listen to this broadcast across
+                // all users and update the state each time it changes.
+                user = UserHandle.ALL,
+            )
+            .emitOnStart()
+            .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
+
+    override fun getBackground(user: UserInfo): Flow<CommunalBackgroundType> =
         secureSettings
-            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_CONTENT_SETTING))
-            // Force an update
-            .onStart { emit(Unit) }
+            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_BACKGROUND_SETTING))
+            .emitOnStart()
             .map {
-                CommunalWidgetCategories(
-                    // The default is to show only keyguard widgets.
+                val intType =
                     secureSettings.getIntForUser(
-                        GLANCEABLE_HUB_CONTENT_SETTING,
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                        GLANCEABLE_HUB_BACKGROUND_SETTING,
+                        CommunalBackgroundType.ANIMATED.value,
                         user.id
                     )
-                )
+                CommunalBackgroundType.entries.find { type -> type.value == intType }
+                    ?: CommunalBackgroundType.ANIMATED
             }
-            .flowOn(bgDispatcher)
 
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =
         secureSettings
-            .observerFlow(userId = user.id, names = arrayOf(GLANCEABLE_HUB_ENABLED))
+            .observerFlow(userId = user.id, names = arrayOf(Settings.Secure.GLANCEABLE_HUB_ENABLED))
             // Force an update
             .onStart { emit(Unit) }
             .map {
                 secureSettings.getIntForUser(
-                    GLANCEABLE_HUB_ENABLED,
+                    Settings.Secure.GLANCEABLE_HUB_ENABLED,
                     ENABLED_SETTING_DEFAULT,
                     user.id,
                 ) == 1
             }
 
-    private fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
-        broadcastDispatcher
-            .broadcastFlow(
-                filter =
-                    IntentFilter(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                user = user.userHandle
-            )
-            .emitOnStart()
-            .map { devicePolicyManager.areKeyguardWidgetsAllowed(user.id) }
-
     companion object {
-        const val GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled"
-        const val GLANCEABLE_HUB_CONTENT_SETTING = "glanceable_hub_content_setting"
+        const val GLANCEABLE_HUB_BACKGROUND_SETTING = "glanceable_hub_background"
         private const val ENABLED_SETTING_DEFAULT = 1
     }
 }

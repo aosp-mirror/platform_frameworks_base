@@ -24,9 +24,9 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PatternMatcher
 import android.os.UserHandle
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
@@ -40,8 +40,9 @@ import java.util.concurrent.Executor
 import junit.framework.Assert.assertSame
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,39 +69,28 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         val DEFAULT_PERMISSION: String? = null
 
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+
         const val TEST_ACTION = "TEST_ACTION"
         const val TEST_SCHEME = "TEST_SCHEME"
         const val TEST_PATH = "TEST_PATH"
         const val TEST_TYPE = "test/type"
     }
 
-    @Mock
-    private lateinit var mockContext: Context
-    @Mock
-    private lateinit var mockUBRUser0: UserBroadcastDispatcher
-    @Mock
-    private lateinit var mockUBRUser1: UserBroadcastDispatcher
-    @Mock
-    private lateinit var broadcastReceiver: BroadcastReceiver
-    @Mock
-    private lateinit var broadcastReceiverOther: BroadcastReceiver
-    @Mock
-    private lateinit var intentFilter: IntentFilter
-    @Mock
-    private lateinit var intentFilterOther: IntentFilter
-    @Mock
-    private lateinit var mockHandler: Handler
-    @Mock
-    private lateinit var logger: BroadcastDispatcherLogger
-    @Mock
-    private lateinit var userTracker: UserTracker
-    @Mock
-    private lateinit var removalPendingStore: PendingRemovalStore
+    @Mock private lateinit var mockContext: Context
+    @Mock private lateinit var mockUBRUser0: UserBroadcastDispatcher
+    @Mock private lateinit var mockUBRUser1: UserBroadcastDispatcher
+    @Mock private lateinit var broadcastReceiver: BroadcastReceiver
+    @Mock private lateinit var broadcastReceiverOther: BroadcastReceiver
+    @Mock private lateinit var intentFilter: IntentFilter
+    @Mock private lateinit var intentFilterOther: IntentFilter
+    @Mock private lateinit var mockHandler: Handler
+    @Mock private lateinit var logger: BroadcastDispatcherLogger
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var removalPendingStore: PendingRemovalStore
 
     private lateinit var mainExecutor: Executor
 
-    @Captor
-    private lateinit var argumentCaptor: ArgumentCaptor<ReceiverData>
+    @Captor private lateinit var argumentCaptor: ArgumentCaptor<ReceiverData>
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var broadcastDispatcher: BroadcastDispatcher
@@ -112,7 +102,8 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         mainExecutor = FakeExecutor(FakeSystemClock())
         `when`(mockContext.mainExecutor).thenReturn(mainExecutor)
 
-        broadcastDispatcher = TestBroadcastDispatcher(
+        broadcastDispatcher =
+            TestBroadcastDispatcher(
                 mockContext,
                 mainExecutor,
                 testableLooper.looper,
@@ -121,7 +112,8 @@ class BroadcastDispatcherTest : SysuiTestCase() {
                 logger,
                 userTracker,
                 removalPendingStore,
-                mapOf(0 to mockUBRUser0, 1 to mockUBRUser1))
+                mapOf(0 to mockUBRUser0, 1 to mockUBRUser1),
+            )
 
         // These should be valid filters
         `when`(intentFilter.countActions()).thenReturn(1)
@@ -131,10 +123,18 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testAddingReceiverToCorrectUBR() {
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, user0)
         broadcastDispatcher.registerReceiverWithHandler(
-                broadcastReceiverOther, intentFilterOther, mockHandler, user1)
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            user0,
+        )
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiverOther,
+            intentFilterOther,
+            mockHandler,
+            user1,
+        )
 
         testableLooper.processAllMessages()
 
@@ -152,7 +152,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     fun testAddingReceiverToCorrectUBR_executor() {
         broadcastDispatcher.registerReceiver(broadcastReceiver, intentFilter, mainExecutor, user0)
         broadcastDispatcher.registerReceiver(
-                broadcastReceiverOther, intentFilterOther, mainExecutor, user1)
+            broadcastReceiverOther,
+            intentFilterOther,
+            mainExecutor,
+            user1,
+        )
 
         testableLooper.processAllMessages()
 
@@ -169,7 +173,10 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     @Test
     fun testAddReceiverDefaultFlag_handler() {
         broadcastDispatcher.registerReceiverWithHandler(
-                broadcastReceiver, intentFilter, mockHandler)
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+        )
         testableLooper.processAllMessages()
 
         verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
@@ -183,7 +190,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         val flag = 3
 
         broadcastDispatcher.registerReceiverWithHandler(
-                broadcastReceiver, intentFilter, mockHandler, flags = flag)
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            flags = flag,
+        )
         testableLooper.processAllMessages()
 
         verify(mockUBRUser0).registerReceiver(capture(argumentCaptor), eq(flag))
@@ -212,7 +223,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
             broadcastReceiver,
             intentFilter,
             flags = flag,
-            permission = permission
+            permission = permission,
         )
         testableLooper.processAllMessages()
 
@@ -250,10 +261,18 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testRemovingReceiversRemovesFromAllUBR() {
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, user0)
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, user1)
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            user0,
+        )
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            user1,
+        )
 
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
 
@@ -265,10 +284,18 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testRemoveReceiverFromUser() {
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, user0)
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, user1)
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            user0,
+        )
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            user1,
+        )
 
         broadcastDispatcher.unregisterReceiverForUser(broadcastReceiver, user0)
 
@@ -282,13 +309,17 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     fun testRegisterCurrentAsActualUser() {
         `when`(userTracker.userId).thenReturn(user1.identifier)
 
-        broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
-                mockHandler, UserHandle.CURRENT)
+        broadcastDispatcher.registerReceiverWithHandler(
+            broadcastReceiver,
+            intentFilter,
+            mockHandler,
+            UserHandle.CURRENT,
+        )
 
         testableLooper.processAllMessages()
 
-        verify(mockUBRUser1).registerReceiver(
-                capture(argumentCaptor), eq(Context.RECEIVER_EXPORTED))
+        verify(mockUBRUser1)
+            .registerReceiver(capture(argumentCaptor), eq(Context.RECEIVER_EXPORTED))
         assertSame(broadcastReceiver, argumentCaptor.value.receiver)
     }
 
@@ -300,41 +331,38 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustNotContainDataScheme() {
-        val testFilter = IntentFilter(TEST_ACTION).apply {
-            addDataScheme(TEST_SCHEME)
-        }
+        val testFilter = IntentFilter(TEST_ACTION).apply { addDataScheme(TEST_SCHEME) }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustNotContainDataAuthority() {
-        val testFilter = IntentFilter(TEST_ACTION).apply {
-            addDataAuthority(mock(IntentFilter.AuthorityEntry::class.java))
-        }
+        val testFilter =
+            IntentFilter(TEST_ACTION).apply {
+                addDataAuthority(mock(IntentFilter.AuthorityEntry::class.java))
+            }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustNotContainDataPath() {
-        val testFilter = IntentFilter(TEST_ACTION).apply {
-            addDataPath(TEST_PATH, PatternMatcher.PATTERN_LITERAL)
-        }
+        val testFilter =
+            IntentFilter(TEST_ACTION).apply {
+                addDataPath(TEST_PATH, PatternMatcher.PATTERN_LITERAL)
+            }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustNotContainDataType() {
-        val testFilter = IntentFilter(TEST_ACTION).apply {
-            addDataType(TEST_TYPE)
-        }
+        val testFilter = IntentFilter(TEST_ACTION).apply { addDataType(TEST_TYPE) }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun testFilterMustNotSetPriority() {
-        val testFilter = IntentFilter(TEST_ACTION).apply {
-            priority = IntentFilter.SYSTEM_HIGH_PRIORITY
-        }
+        val testFilter =
+            IntentFilter(TEST_ACTION).apply { priority = IntentFilter.SYSTEM_HIGH_PRIORITY }
         broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
@@ -366,12 +394,14 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         val inOrderUser0 = inOrder(mockUBRUser0, removalPendingStore)
         inOrderUser0.verify(mockUBRUser0).unregisterReceiver(broadcastReceiver)
-        inOrderUser0.verify(removalPendingStore)
+        inOrderUser0
+            .verify(removalPendingStore)
             .clearPendingRemoval(broadcastReceiver, UserHandle.USER_ALL)
 
         val inOrderUser1 = inOrder(mockUBRUser1, removalPendingStore)
         inOrderUser1.verify(mockUBRUser1).unregisterReceiver(broadcastReceiver)
-        inOrderUser1.verify(removalPendingStore)
+        inOrderUser1
+            .verify(removalPendingStore)
             .clearPendingRemoval(broadcastReceiver, UserHandle.USER_ALL)
     }
 
@@ -385,21 +415,21 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         val inOrderUser1 = inOrder(mockUBRUser1, removalPendingStore)
         inOrderUser1.verify(mockUBRUser1).unregisterReceiver(broadcastReceiver)
-        inOrderUser1.verify(removalPendingStore)
+        inOrderUser1
+            .verify(removalPendingStore)
             .clearPendingRemoval(broadcastReceiver, user1.identifier)
     }
 
     @Test
-    fun testBroadcastFlow() = runBlockingTest {
-        val flow = broadcastDispatcher.broadcastFlow(intentFilter, user1) { intent, receiver ->
-            intent to receiver
-        }
+    fun testBroadcastFlow() = runTest(UnconfinedTestDispatcher()) {
+        val flow =
+            broadcastDispatcher.broadcastFlow(intentFilter, user1) { intent, receiver ->
+                intent to receiver
+            }
 
         // Collect the values into collectedValues.
         val collectedValues = mutableListOf<Pair<Intent, BroadcastReceiver>>()
-        val job = launch {
-            flow.collect { collectedValues.add(it) }
-        }
+        val job = launch { flow.collect { collectedValues.add(it) } }
 
         testableLooper.processAllMessages()
         verify(mockUBRUser1).registerReceiver(capture(argumentCaptor), eq(DEFAULT_FLAG))
@@ -436,17 +466,18 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         logger: BroadcastDispatcherLogger,
         userTracker: UserTracker,
         removalPendingStore: PendingRemovalStore,
-        var mockUBRMap: Map<Int, UserBroadcastDispatcher>
-    ) : BroadcastDispatcher(
-        context,
-        mainExecutor,
-        backgroundRunningLooper,
-        backgroundRunningExecutor,
-        dumpManager,
-        logger,
-        userTracker,
-        removalPendingStore
-    ) {
+        var mockUBRMap: Map<Int, UserBroadcastDispatcher>,
+    ) :
+        BroadcastDispatcher(
+            context,
+            mainExecutor,
+            backgroundRunningLooper,
+            backgroundRunningExecutor,
+            dumpManager,
+            logger,
+            userTracker,
+            removalPendingStore,
+        ) {
         override fun createUBRForUser(userId: Int): UserBroadcastDispatcher {
             return mockUBRMap.getOrDefault(userId, mock(UserBroadcastDispatcher::class.java))
         }

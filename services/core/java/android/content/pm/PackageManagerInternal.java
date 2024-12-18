@@ -45,7 +45,6 @@ import android.util.SparseArray;
 
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.PackageList;
@@ -91,6 +90,7 @@ public abstract class PackageManagerInternal {
      */
     public static final int RESOLVE_NON_RESOLVER_ONLY = 0x00000002;
 
+    @Deprecated
     @IntDef(value = {
             INTEGRITY_VERIFICATION_ALLOW,
             INTEGRITY_VERIFICATION_REJECT,
@@ -98,18 +98,10 @@ public abstract class PackageManagerInternal {
     @Retention(RetentionPolicy.SOURCE)
     public @interface IntegrityVerificationResult {}
 
-    /**
-     * Used as the {@code verificationCode} argument for
-     * {@link PackageManagerInternal#setIntegrityVerificationResult(int, int)} to indicate that the
-     * integrity component allows the install to proceed.
-     */
+    @Deprecated
     public static final int INTEGRITY_VERIFICATION_ALLOW = 1;
 
-    /**
-     * Used as the {@code verificationCode} argument for
-     * {@link PackageManagerInternal#setIntegrityVerificationResult(int, int)} to indicate that the
-     * integrity component does not allow install to proceed.
-     */
+    @Deprecated
     public static final int INTEGRITY_VERIFICATION_REJECT = 0;
 
     /**
@@ -369,17 +361,17 @@ public abstract class PackageManagerInternal {
             Intent intent, @Nullable String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId);
 
-
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
+     *
      * @param filterCallingUid The results will be filtered in the context of this UID instead
      *                         of the calling UID.
-     * @param forSend true if the invocation is intended for sending broadcasts. The value
-     *                of this parameter affects how packages are filtered.
+     * @param forSend          true if the invocation is intended for sending broadcasts. The value
+     *                         of this parameter affects how packages are filtered.
      */
-    public abstract List<ResolveInfo> queryIntentReceivers(Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int filterCallingUid, int userId, boolean forSend);
+    public abstract List<ResolveInfo> queryIntentReceivers(
+            Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
+            int filterCallingUid, int callingPid, int userId, boolean forSend);
 
     /**
      * Retrieve all services that can be performed for the given intent.
@@ -612,17 +604,9 @@ public abstract class PackageManagerInternal {
             @NonNull Set<String> outInvalidPackageNames);
 
     /**
-     * Resolves an activity intent, allowing instant apps to be resolved.
-     */
-    public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlagsBits long flags,
-            @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
-            int filterCallingUid);
-
-    /**
      * Resolves an exported activity intent, allowing instant apps to be resolved.
      */
-    public abstract ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
+    public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
             int filterCallingUid, int callingPid);
@@ -632,6 +616,15 @@ public abstract class PackageManagerInternal {
     */
     public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags, int userId, int callingUid);
+
+
+    /**
+     * Resolves a service intent for start.
+     */
+    public abstract ResolveInfo resolveService(
+            Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId,
+            int callingUid, int callingPid);
 
     /**
     * Resolves a content provider intent.
@@ -1131,17 +1124,13 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPermissionUpgradeNeeded(@UserIdInt int userId);
 
     /**
-     * Allows the integrity component to respond to the
-     * {@link Intent#ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
-     * broadcast} to respond to the package manager. The response must include
-     * the {@code verificationCode} which is one of
-     * {@link #INTEGRITY_VERIFICATION_ALLOW} and {@link #INTEGRITY_VERIFICATION_REJECT}.
+     * Used to allow the integrity component to respond to the
+     * ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION package verification
+     * broadcast to respond to the package manager.
      *
-     * @param verificationId pending package identifier as passed via the
-     *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra.
-     * @param verificationResult either {@link #INTEGRITY_VERIFICATION_ALLOW}
-     *            or {@link #INTEGRITY_VERIFICATION_REJECT}.
+     * Deprecated.
      */
+    @Deprecated
     public abstract void setIntegrityVerificationResult(int verificationId,
             @IntegrityVerificationResult int verificationResult);
 
@@ -1395,21 +1384,6 @@ public abstract class PackageManagerInternal {
     public abstract void notifyComponentUsed(@NonNull String packageName,
             @UserIdInt int userId, @Nullable String recentCallingPackage,
             @NonNull String debugInfo);
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyDumpProfiles(@NonNull String packageName,
-            boolean dumpClassesAndMethods) throws LegacyDexoptDisabledException;
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyForceDexOpt(@NonNull String packageName)
-            throws LegacyDexoptDisabledException;
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyReconcileSecondaryDexFiles(String packageName)
-            throws LegacyDexoptDisabledException;
 
     /**
      * Gets {@link PackageManager.DistractionRestriction restrictions} of the given

@@ -17,12 +17,17 @@
 package com.android.systemui.biometrics.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.app.activityTaskManager
+import com.android.launcher3.icons.IconProvider
+import com.android.systemui.biometrics.domain.interactor.biometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.displayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.promptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
 import com.android.systemui.biometrics.udfpsUtils
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.util.mockito.mock
+import org.mockito.Mockito.mock
 
 val Kosmos.promptViewModel by Fixture {
     PromptViewModel(
@@ -30,6 +35,11 @@ val Kosmos.promptViewModel by Fixture {
         promptSelectorInteractor = promptSelectorInteractor,
         context = applicationContext,
         udfpsOverlayInteractor = udfpsOverlayInteractor,
-        udfpsUtils = udfpsUtils
+        biometricStatusInteractor = biometricStatusInteractor,
+        udfpsUtils = udfpsUtils,
+        iconProvider = iconProvider,
+        activityTaskManager = activityTaskManager,
     )
 }
+
+val Kosmos.iconProvider by Fixture { mock<IconProvider>() }

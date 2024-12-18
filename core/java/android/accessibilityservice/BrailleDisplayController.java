@@ -305,4 +305,6 @@ public interface BrailleDisplayController {
     @FlaggedApi(Flags.FLAG_BRAILLE_DISPLAY_HID)
     @TestApi
     String TEST_BRAILLE_DISPLAY_UNIQUE_ID = "UNIQUE_ID";
+    /** @hide */
+    String TEST_BRAILLE_DISPLAY_NAME = "NAME";
 }

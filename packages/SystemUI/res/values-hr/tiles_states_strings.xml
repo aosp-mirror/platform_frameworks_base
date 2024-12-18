@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"Isključeno"</item>
     <item msgid="5137565285664080143">"Uključeno"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"Nedostupno"</item>
+    <item msgid="3079622119444911877">"Isključeno"</item>
+    <item msgid="3028994095749238254">"Uključeno"</item>
+  </string-array>
 </resources>

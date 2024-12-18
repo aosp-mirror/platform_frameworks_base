@@ -29,7 +29,11 @@ import android.hardware.vibrator.IVibrator;
 import android.os.Parcel;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -37,6 +41,9 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class RampSegmentTest {
     private static final float TOLERANCE = 1e-2f;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testCreation() {
@@ -97,14 +104,18 @@ public class RampSegmentTest {
     }
 
     @Test
-    public void testScale() {
-        RampSegment initial = new RampSegment(0, 1, 0, 0, 0);
+    @DisableFlags(Flags.FLAG_HAPTICS_SCALE_V2_ENABLED)
+    public void testScale_withLegacyScaling_halfAndFullAmplitudes() {
+        RampSegment initial = new RampSegment(0.5f, 1, 0, 0, 0);
 
-        assertEquals(0f, initial.scale(1).getStartAmplitude(), TOLERANCE);
-        assertEquals(0f, initial.scale(0.5f).getStartAmplitude(), TOLERANCE);
-        assertEquals(0f, initial.scale(1.5f).getStartAmplitude(), TOLERANCE);
-        assertEquals(0f, initial.scale(1.5f).scale(2 / 3f).getStartAmplitude(), TOLERANCE);
-        assertEquals(0f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.5f, initial.scale(1).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.17f, initial.scale(0.5f).getStartAmplitude(), TOLERANCE);
+        // The original value was not scaled up, so this only scales it down.
+        assertEquals(0.86f, initial.scale(1.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.47f, initial.scale(1.5f).scale(2 / 3f).getStartAmplitude(), TOLERANCE);
+        // Does not restore to the exact original value because scale up is a bit offset.
+        assertEquals(0.35f, initial.scale(0.8f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.5f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
 
         assertEquals(1f, initial.scale(1).getEndAmplitude(), TOLERANCE);
         assertEquals(0.34f, initial.scale(0.5f).getEndAmplitude(), TOLERANCE);
@@ -117,17 +128,38 @@ public class RampSegmentTest {
     }
 
     @Test
-    public void testScale_halfPrimitiveScaleValue() {
+    @EnableFlags(Flags.FLAG_HAPTICS_SCALE_V2_ENABLED)
+    public void testScale_withScalingV2_halfAndFullAmplitudes() {
         RampSegment initial = new RampSegment(0.5f, 1, 0, 0, 0);
 
         assertEquals(0.5f, initial.scale(1).getStartAmplitude(), TOLERANCE);
-        assertEquals(0.17f, initial.scale(0.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.25f, initial.scale(0.5f).getStartAmplitude(), TOLERANCE);
+        // The original value was not scaled up, so this only scales it down.
+        assertEquals(0.66f, initial.scale(1.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.44f, initial.scale(1.5f).scale(2 / 3f).getStartAmplitude(), TOLERANCE);
         // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(0.86f, initial.scale(1.5f).getStartAmplitude(), TOLERANCE);
-        assertEquals(0.47f, initial.scale(1.5f).scale(2 / 3f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.4f, initial.scale(0.8f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.48f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
+
+        assertEquals(1f, initial.scale(1).getEndAmplitude(), TOLERANCE);
+        assertEquals(0.5f, initial.scale(0.5f).getEndAmplitude(), TOLERANCE);
+        // The original value was not scaled up, so this only scales it down.
+        assertEquals(1f, initial.scale(1.5f).getEndAmplitude(), TOLERANCE);
+        assertEquals(2 / 3f, initial.scale(1.5f).scale(2 / 3f).getEndAmplitude(), TOLERANCE);
         // Does not restore to the exact original value because scale up is a bit offset.
-        assertEquals(0.35f, initial.scale(0.8f).getStartAmplitude(), TOLERANCE);
-        assertEquals(0.5f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0.81f, initial.scale(0.8f).getEndAmplitude(), TOLERANCE);
+        assertEquals(0.86f, initial.scale(0.8f).scale(1.25f).getEndAmplitude(), TOLERANCE);
+    }
+
+    @Test
+    public void testScale_zeroAmplitude() {
+        RampSegment initial = new RampSegment(0, 1, 0, 0, 0);
+
+        assertEquals(0f, initial.scale(1).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scale(0.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scale(1.5f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scale(1.5f).scale(2 / 3f).getStartAmplitude(), TOLERANCE);
+        assertEquals(0f, initial.scale(0.8f).scale(1.25f).getStartAmplitude(), TOLERANCE);
     }
 
     @Test

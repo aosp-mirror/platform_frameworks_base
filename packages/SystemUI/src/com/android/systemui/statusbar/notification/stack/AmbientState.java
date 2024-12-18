@@ -29,6 +29,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AvalancheController;
 
 import java.io.PrintWriter;
 
@@ -56,12 +58,17 @@ public class AmbientState implements Dumpable {
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final AvalancheController mAvalancheController;
+
     /**
      *  Used to read bouncer states.
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private float mStackTop;
+    private float mStackCutoff;
+    private float mHeadsUpTop;
+    private float mHeadsUpBottom;
     private int mScrollY;
-    private boolean mDimmed;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -87,7 +94,6 @@ public class AmbientState implements Dumpable {
     private boolean mIsSmallScreen;
     private boolean mPulsing;
     private float mHideAmount;
-    private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
     /**
@@ -126,13 +132,16 @@ public class AmbientState implements Dumpable {
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
 
-    /** Height of notifications panel. */
+    /** Height of notifications panel interpolated by the expansion fraction. */
     private float mStackHeight = 0;
 
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
-    /** Height of the notifications panel without top padding when expansion completes. */
+    /** Fraction of QS expansion. 0 when in shade, 1 when in QS. */
+    private float mQsExpansionFraction;
+
+    /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
     /** Whether we are swiping up. */
@@ -164,15 +173,15 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @return Height of the notifications panel without top padding when expansion completes.
+     * @return Height of the available space for the notification content, when the shade
+     * expansion completes.
      */
     public float getStackEndHeight() {
         return mStackEndHeight;
     }
 
     /**
-     * @param stackEndHeight Height of the notifications panel without top padding
-     *                       when expansion completes.
+     * @see #getStackEndHeight()
      */
     public void setStackEndHeight(float stackEndHeight) {
         mStackEndHeight = stackEndHeight;
@@ -182,6 +191,7 @@ public class AmbientState implements Dumpable {
      * @param stackY Distance of top of notifications panel from top of screen.
      */
     public void setStackY(float stackY) {
+        SceneContainerFlag.assertInLegacyMode();
         mStackY = stackY;
     }
 
@@ -189,6 +199,7 @@ public class AmbientState implements Dumpable {
      * @return Distance of top of notifications panel from top of screen.
      */
     public float getStackY() {
+        SceneContainerFlag.assertInLegacyMode();
         return mStackY;
     }
 
@@ -197,6 +208,14 @@ public class AmbientState implements Dumpable {
      */
     public void setExpansionFraction(float expansionFraction) {
         mExpansionFraction = expansionFraction;
+    }
+
+    /**
+     * @param expansionFraction Fraction of QS expansion.
+     */
+    public void setQsExpansionFraction(float expansionFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mQsExpansionFraction = expansionFraction;
     }
 
     /**
@@ -250,21 +269,27 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param stackHeight Height of notifications panel.
+     * @return Fraction of QS expansion.
      */
-    public void setStackHeight(float stackHeight) {
-        mStackHeight = stackHeight;
+    public float getQsExpansionFraction() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mQsExpansionFraction;
     }
 
     /**
-     * @return Height of notifications panel.
+     * @return Height of the notification content returned by {@link #getStackEndHeight()}, but
+     * interpolated by the shade expansion fraction.
      */
-    public float getStackHeight() {
+    public float getInterpolatedStackHeight() {
         return mStackHeight;
     }
 
-    /** Tracks the state from HeadsUpManager#hasNotifications() */
-    private boolean mHasHeadsUpEntries;
+    /**
+     * @see #getInterpolatedStackHeight()
+     */
+    public void setInterpolatedStackHeight(float stackHeight) {
+        mStackHeight = stackHeight;
+    }
 
     @Inject
     public AmbientState(
@@ -273,12 +298,14 @@ public class AmbientState implements Dumpable {
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
             @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            AvalancheController avalancheController
     ) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mAvalancheController = avalancheController;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -291,11 +318,26 @@ public class AmbientState implements Dumpable {
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
     }
 
+    String getAvalancheShowingHunKey() {
+        // If we don't have a previous showing hun, we don't consider the showing hun as avalanche
+        if (isNullAvalancheKey(getAvalanchePreviousHunKey())) return "";
+        return mAvalancheController.getShowingHunKey();
+    }
+
+    String getAvalanchePreviousHunKey() {
+        return mAvalancheController.getPreviousHunKey();
+    }
+
+    boolean isNullAvalancheKey(String key) {
+        if (key == null || key.isEmpty()) return true;
+        return key.equals("HeadsUpEntry null") || key.equals("HeadsUpEntry.mEntry null");
+    }
+
     void setOverExpansion(float overExpansion) {
         mOverExpansion = overExpansion;
     }
 
-    float getOverExpansion() {
+    public float getOverExpansion() {
         return mOverExpansion;
     }
 
@@ -330,6 +372,57 @@ public class AmbientState implements Dumpable {
         return mZDistanceBetweenElements;
     }
 
+    /** Y coordinate in view pixels of the top of the notification stack */
+    public float getStackTop() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mStackTop;
+    }
+
+    /** @see #getStackTop() */
+    public void setStackTop(float mStackTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mStackTop = mStackTop;
+    }
+
+    /**
+     * Y coordinate in view pixels above which the bottom of the notification stack / shelf / footer
+     * must be.
+     */
+    public float getStackCutoff() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mStackCutoff;
+    }
+
+    /** @see #getStackCutoff() */
+    public void setStackCutoff(float stackCutoff) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mStackCutoff = stackCutoff;
+    }
+
+    /** y coordinate of the top position of a pinned HUN */
+    public float getHeadsUpTop() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mHeadsUpTop;
+    }
+
+    /** @see #getHeadsUpTop() */
+    public void setHeadsUpTop(float mHeadsUpTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        this.mHeadsUpTop = mHeadsUpTop;
+    }
+
+    /** the bottom-most y position where we can draw pinned HUNs  */
+    public float getHeadsUpBottom() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mHeadsUpBottom;
+    }
+
+    /** @see #getHeadsUpBottom() */
+    public void setHeadsUpBottom(float headsUpBottom) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mHeadsUpBottom = headsUpBottom;
+    }
+
     public int getScrollY() {
         return mScrollY;
     }
@@ -342,14 +435,6 @@ public class AmbientState implements Dumpable {
         // 0. However this is only for internal purposes and the scroll position when read
         // should never be smaller than 0, otherwise it can lead to flickers.
         this.mScrollY = Math.max(scrollY, 0);
-    }
-
-    /**
-     * @param dimmed Whether we are in a dimmed state (on the lockscreen), where the backgrounds are
-     *               translucent and everything is scaled back a bit.
-     */
-    public void setDimmed(boolean dimmed) {
-        mDimmed = dimmed;
     }
 
     /** While dozing, we draw as little as possible, assuming a black background */
@@ -373,12 +458,6 @@ public class AmbientState implements Dumpable {
 
     public void setHideSensitive(boolean hideSensitive) {
         mHideSensitive = hideSensitive;
-    }
-
-    public boolean isDimmed() {
-        // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
-        // you'd see the difference to the pulsing notification
-        return mDimmed && !(isPulseExpanding() && mDozeAmount == 1.0f);
     }
 
     public boolean isDozing() {
@@ -432,11 +511,13 @@ public class AmbientState implements Dumpable {
         return mLayoutMaxHeight;
     }
 
-    public float getTopPadding() {
+    public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPadding;
     }
 
     public void setTopPadding(int topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mTopPadding = topPadding;
     }
 
@@ -452,8 +533,15 @@ public class AmbientState implements Dumpable {
         if (mDozeAmount == 1.0f && !isPulseExpanding()) {
             return mShelf.getHeight();
         }
-        int height = (int) Math.max(mLayoutMinHeight,
-                Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        int height;
+        if (SceneContainerFlag.isEnabled()) {
+            // TODO(b/192348384): This is probably incorrect as mContentHeight is not up to date.
+            //  Consider removing usages of getInnerHeight in flexiglass if possible.
+            height = (int) Math.min(mLayoutHeight, mContentHeight) - mTopPadding;
+        } else {
+            height = (int) Math.max(mLayoutMinHeight,
+                    Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        }
         if (ignorePulseHeight) {
             return height;
         }
@@ -490,6 +578,7 @@ public class AmbientState implements Dumpable {
     }
 
     public void setLayoutMinHeight(int layoutMinHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mLayoutMinHeight = layoutMinHeight;
     }
 
@@ -560,10 +649,6 @@ public class AmbientState implements Dumpable {
 
     public void setPanelTracking(boolean panelTracking) {
         mPanelTracking = panelTracking;
-    }
-
-    public boolean hasPulsingNotifications() {
-        return mPulsing && mHasHeadsUpEntries;
     }
 
     public void setPulsing(boolean hasPulsing) {
@@ -642,14 +727,6 @@ public class AmbientState implements Dumpable {
         return mHideAmount != 0;
     }
 
-    public void setAppearing(boolean appearing) {
-        mAppearing = appearing;
-    }
-
-    public boolean isAppearing() {
-        return mAppearing;
-    }
-
     public void setPulseHeight(float height) {
         if (height != mPulseHeight) {
             mPulseHeight = height;
@@ -716,10 +793,6 @@ public class AmbientState implements Dumpable {
         return mAppearFraction;
     }
 
-    public void setHasHeadsUpEntries(boolean hasHeadsUpEntries) {
-        mHasHeadsUpEntries = hasHeadsUpEntries;
-    }
-
     public void setStackTopMargin(int stackTopMargin) {
         mStackTopMargin = stackTopMargin;
     }
@@ -758,6 +831,10 @@ public class AmbientState implements Dumpable {
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
+        pw.println("mStackTop=" + mStackTop);
+        pw.println("mStackCutoff=" + mStackCutoff);
+        pw.println("mHeadsUpTop=" + mHeadsUpTop);
+        pw.println("mHeadsUpBottom=" + mHeadsUpBottom);
         pw.println("mTopPadding=" + mTopPadding);
         pw.println("mStackTopMargin=" + mStackTopMargin);
         pw.println("mStackTranslation=" + mStackTranslation);
@@ -768,8 +845,7 @@ public class AmbientState implements Dumpable {
         pw.println("mHideSensitive=" + mHideSensitive);
         pw.println("mShadeExpanded=" + mShadeExpanded);
         pw.println("mClearAllInProgress=" + mClearAllInProgress);
-        pw.println("mDimmed=" + mDimmed);
-        pw.println("mStatusBarState=" + mStatusBarState);
+        pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));
         pw.println("mExpansionChanging=" + mExpansionChanging);
         pw.println("mPanelFullWidth=" + mIsSmallScreen);
         pw.println("mPulsing=" + mPulsing);
@@ -781,8 +857,8 @@ public class AmbientState implements Dumpable {
         pw.println("mFractionToShade=" + mFractionToShade);
         pw.println("mHideAmount=" + mHideAmount);
         pw.println("mAppearFraction=" + mAppearFraction);
-        pw.println("mAppearing=" + mAppearing);
         pw.println("mExpansionFraction=" + mExpansionFraction);
+        pw.println("mQsExpansionFraction=" + mQsExpansionFraction);
         pw.println("mExpandingVelocity=" + mExpandingVelocity);
         pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
         pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);

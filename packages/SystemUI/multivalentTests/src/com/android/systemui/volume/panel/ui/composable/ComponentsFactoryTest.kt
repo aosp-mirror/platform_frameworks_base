@@ -20,9 +20,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.panel.componentByKey
-import com.android.systemui.volume.panel.mockVolumePanelUiComponentProvider
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.mockVolumePanelUiComponentProvider
 import com.google.common.truth.Truth
 import org.junit.Test
 import org.junit.runner.RunWith

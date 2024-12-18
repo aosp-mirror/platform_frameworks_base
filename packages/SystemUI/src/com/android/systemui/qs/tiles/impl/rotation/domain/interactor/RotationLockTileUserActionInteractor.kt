@@ -42,10 +42,11 @@ constructor(
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_AUTO_ROTATE_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
     }

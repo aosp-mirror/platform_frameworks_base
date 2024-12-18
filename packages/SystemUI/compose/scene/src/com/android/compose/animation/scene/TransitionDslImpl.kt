@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.DurationBasedAnimationSpec
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.VectorConverter
@@ -31,6 +32,7 @@ import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
+import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
@@ -39,66 +41,94 @@ import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.android.compose.animation.scene.transformation.Translate
 
-internal fun transitionsImpl(
-    builder: SceneTransitionsBuilder.() -> Unit,
-): SceneTransitions {
+internal fun transitionsImpl(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
     return SceneTransitions(
         impl.defaultSwipeSpec,
         impl.transitionSpecs,
-        impl.transitionOverscrollSpecs
+        impl.transitionOverscrollSpecs,
+        impl.interruptionHandler,
+        impl.defaultOverscrollProgressConverter,
     )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
+    override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
+    override var defaultOverscrollProgressConverter: ProgressConverter = ProgressConverter.Default
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
     val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
 
     override fun to(
-        to: SceneKey,
+        to: ContentKey,
         key: TransitionKey?,
-        builder: TransitionBuilder.() -> Unit
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
+        builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        return transition(from = null, to = to, key = key, builder)
+        return transition(from = null, to = to, key = key, preview, reversePreview, builder)
     }
 
     override fun from(
-        from: SceneKey,
-        to: SceneKey?,
+        from: ContentKey,
+        to: ContentKey?,
         key: TransitionKey?,
-        builder: TransitionBuilder.() -> Unit
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
+        builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        return transition(from = from, to = to, key = key, builder)
+        return transition(from = from, to = to, key = key, preview, reversePreview, builder)
     }
 
     override fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
-        builder: OverscrollBuilder.() -> Unit
+        builder: OverscrollBuilder.() -> Unit,
     ): OverscrollSpec {
-        fun transformationSpec(): TransformationSpecImpl {
-            val impl = OverscrollBuilderImpl().apply(builder)
-            return TransformationSpecImpl(
-                progressSpec = snap(),
-                swipeSpec = null,
-                distance = impl.distance,
-                transformations = impl.transformations,
-            )
+        val impl = OverscrollBuilderImpl().apply(builder)
+        check(impl.transformations.isNotEmpty()) {
+            "This method does not allow empty transformations. " +
+                "Use overscrollDisabled($content, $orientation) instead."
         }
-        val spec = OverscrollSpecImpl(scene, orientation, transformationSpec())
+        return overscrollSpec(content, orientation, impl)
+    }
+
+    override fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec {
+        return overscrollSpec(content, orientation, OverscrollBuilderImpl())
+    }
+
+    private fun overscrollSpec(
+        content: ContentKey,
+        orientation: Orientation,
+        impl: OverscrollBuilderImpl,
+    ): OverscrollSpec {
+        val spec =
+            OverscrollSpecImpl(
+                content = content,
+                orientation = orientation,
+                transformationSpec =
+                    TransformationSpecImpl(
+                        progressSpec = snap(),
+                        swipeSpec = null,
+                        distance = impl.distance,
+                        transformations = impl.transformations,
+                    ),
+                progressConverter = impl.progressConverter,
+            )
         transitionOverscrollSpecs.add(spec)
         return spec
     }
 
     private fun transition(
-        from: SceneKey?,
-        to: SceneKey?,
+        from: ContentKey?,
+        to: ContentKey?,
         key: TransitionKey?,
+        preview: (TransitionBuilder.() -> Unit)?,
+        reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
     ): TransitionSpec {
-        fun transformationSpec(): TransformationSpecImpl {
+        fun transformationSpec(builder: TransitionBuilder.() -> Unit): TransformationSpecImpl {
             val impl = TransitionBuilderImpl().apply(builder)
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
@@ -108,13 +138,24 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             )
         }
 
-        val spec = TransitionSpecImpl(key, from, to, ::transformationSpec)
+        val previewTransformationSpec = preview?.let { { transformationSpec(it) } }
+        val reversePreviewTransformationSpec = reversePreview?.let { { transformationSpec(it) } }
+        val transformationSpec = { transformationSpec(builder) }
+        val spec =
+            TransitionSpecImpl(
+                key,
+                from,
+                to,
+                previewTransformationSpec,
+                reversePreviewTransformationSpec,
+                transformationSpec,
+            )
         transitionSpecs.add(spec)
         return spec
     }
 }
 
-internal open class OverscrollBuilderImpl : OverscrollBuilder {
+internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
     val transformations = mutableListOf<Transformation>()
     private var range: TransformationRange? = null
     protected var reversed = false
@@ -123,14 +164,15 @@ internal open class OverscrollBuilderImpl : OverscrollBuilder {
     override fun fractionRange(
         start: Float?,
         end: Float?,
-        builder: PropertyTransformationBuilder.() -> Unit
+        easing: Easing,
+        builder: PropertyTransformationBuilder.() -> Unit,
     ) {
-        range = TransformationRange(start, end)
+        range = TransformationRange(start, end, easing)
         builder()
         range = null
     }
 
-    private fun transformation(transformation: PropertyTransformation<*>) {
+    protected fun transformation(transformation: PropertyTransformation<*>) {
         val transformation =
             if (range != null) {
                 RangedPropertyTransformation(transformation, range!!)
@@ -158,7 +200,7 @@ internal open class OverscrollBuilderImpl : OverscrollBuilder {
     override fun translate(
         matcher: ElementMatcher,
         edge: Edge,
-        startsOutsideLayoutBounds: Boolean
+        startsOutsideLayoutBounds: Boolean,
     ) {
         transformation(EdgeTranslate(matcher, edge, startsOutsideLayoutBounds))
     }
@@ -185,7 +227,7 @@ internal open class OverscrollBuilderImpl : OverscrollBuilder {
     }
 }
 
-internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilder {
+internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
     override var swipeSpec: SpringSpec<Float>? = null
     override var distance: UserActionDistance? = null
@@ -211,7 +253,8 @@ internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilde
     override fun timestampRange(
         startMillis: Int?,
         endMillis: Int?,
-        builder: PropertyTransformationBuilder.() -> Unit
+        easing: Easing,
+        builder: PropertyTransformationBuilder.() -> Unit,
     ) {
         if (startMillis != null && (startMillis < 0 || startMillis > durationMillis)) {
             error("invalid start value: startMillis=$startMillis durationMillis=$durationMillis")
@@ -223,6 +266,18 @@ internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilde
 
         val start = startMillis?.let { it.toFloat() / durationMillis }
         val end = endMillis?.let { it.toFloat() / durationMillis }
-        fractionRange(start, end, builder)
+        fractionRange(start, end, easing, builder)
+    }
+}
+
+internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
+    override var progressConverter: ProgressConverter? = null
+
+    override fun translate(
+        matcher: ElementMatcher,
+        x: OverscrollScope.() -> Float,
+        y: OverscrollScope.() -> Float,
+    ) {
+        transformation(OverscrollTranslate(matcher, x, y))
     }
 }

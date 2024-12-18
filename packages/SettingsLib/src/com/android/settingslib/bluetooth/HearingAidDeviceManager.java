@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothCsipSetCoordinator;
+import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
@@ -98,6 +100,7 @@ public class HearingAidDeviceManager {
             // device.
             if (hearingAidDevice != null) {
                 hearingAidDevice.setSubDevice(newDevice);
+                newDevice.setName(hearingAidDevice.getName());
                 return true;
             }
         }
@@ -106,6 +109,10 @@ public class HearingAidDeviceManager {
 
     private boolean isValidHiSyncId(long hiSyncId) {
         return hiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
+    private boolean isValidGroupId(int groupId) {
+        return groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
     private CachedBluetoothDevice getCachedDevice(long hiSyncId) {
@@ -202,49 +209,62 @@ public class HearingAidDeviceManager {
                 CachedBluetoothDevice mainDevice = findMainDevice(cachedDevice);
                 if (mainDevice != null) {
                     if (mainDevice.isConnected()) {
-                        // When main device exists and in connected state, receiving sub device
-                        // connection. To refresh main device UI
+                        // Sub/member device is connected and main device is connected
+                        // To refresh main device UI
                         mainDevice.refresh();
                     } else {
-                        // When both Hearing Aid devices are disconnected, receiving sub device
-                        // connection. To switch content and dispatch to notify UI change
-                        mBtManager.getEventManager().dispatchDeviceRemoved(mainDevice);
-                        mainDevice.switchSubDeviceContent();
-                        mainDevice.refresh();
-                        // It is necessary to do remove and add for updating the mapping on
-                        // preference and device
-                        mBtManager.getEventManager().dispatchDeviceAdded(mainDevice);
+                        // Sub/member device is connected and main device is disconnected
+                        // To switch content and dispatch to notify UI change
+                        switchDeviceContent(mainDevice, cachedDevice);
                     }
                     return true;
                 }
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
-                mainDevice = findMainDevice(cachedDevice);
                 if (cachedDevice.getUnpairing()) {
                     return true;
                 }
+                mainDevice = findMainDevice(cachedDevice);
                 if (mainDevice != null) {
-                    // When main device exists, receiving sub device disconnection
+                    // Sub/member device is disconnected and main device exists
                     // To update main device UI
                     mainDevice.refresh();
                     return true;
                 }
-                CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
-                if (subDevice != null && subDevice.isConnected()) {
-                    // Main device is disconnected and sub device is connected
-                    // To copy data from sub device to main device
-                    mBtManager.getEventManager().dispatchDeviceRemoved(cachedDevice);
-                    cachedDevice.switchSubDeviceContent();
-                    cachedDevice.refresh();
-                    // It is necessary to do remove and add for updating the mapping on
-                    // preference and device
-                    mBtManager.getEventManager().dispatchDeviceAdded(cachedDevice);
-
+                CachedBluetoothDevice connectedSecondaryDevice = getConnectedSecondaryDevice(
+                        cachedDevice);
+                if (connectedSecondaryDevice != null) {
+                    // Main device is disconnected and sub/member device is connected
+                    // To switch content and dispatch to notify UI change
+                    switchDeviceContent(cachedDevice, connectedSecondaryDevice);
                     return true;
                 }
                 break;
         }
         return false;
+    }
+
+    private void switchDeviceContent(CachedBluetoothDevice mainDevice,
+            CachedBluetoothDevice secondaryDevice) {
+        mBtManager.getEventManager().dispatchDeviceRemoved(mainDevice);
+        if (mainDevice.getSubDevice() != null
+                && mainDevice.getSubDevice().equals(secondaryDevice)) {
+            mainDevice.switchSubDeviceContent();
+        } else {
+            mainDevice.switchMemberDeviceContent(secondaryDevice);
+        }
+        mainDevice.refresh();
+        // It is necessary to do remove and add for updating the mapping on
+        // preference and device
+        mBtManager.getEventManager().dispatchDeviceAdded(mainDevice);
+    }
+
+    private CachedBluetoothDevice getConnectedSecondaryDevice(CachedBluetoothDevice cachedDevice) {
+        if (cachedDevice.getSubDevice() != null && cachedDevice.getSubDevice().isConnected()) {
+            return cachedDevice.getSubDevice();
+        }
+        return cachedDevice.getMemberDevice().stream().filter(
+                CachedBluetoothDevice::isConnected).findAny().orElse(null);
     }
 
     void onActiveDeviceChanged(CachedBluetoothDevice device) {
@@ -254,6 +274,27 @@ public class HearingAidDeviceManager {
                 setAudioRoutingConfig(device);
             } else {
                 clearAudioRoutingConfig();
+            }
+        }
+    }
+
+    void syncDeviceIfNeeded(CachedBluetoothDevice device) {
+        final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
+        final HapClientProfile hap = profileManager.getHapClientProfile();
+        // Sync preset if device doesn't support synchronization on the remote side
+        if (hap != null && !hap.supportsSynchronizedPresets(device.getDevice())) {
+            final CachedBluetoothDevice mainDevice = findMainDevice(device);
+            if (mainDevice != null) {
+                int mainPresetIndex = hap.getActivePresetIndex(mainDevice.getDevice());
+                int presetIndex = hap.getActivePresetIndex(device.getDevice());
+                if (mainPresetIndex != BluetoothHapClient.PRESET_INDEX_UNAVAILABLE
+                        && mainPresetIndex != presetIndex) {
+                    if (DEBUG) {
+                        Log.d(TAG, "syncing preset from " + presetIndex + "->"
+                                + mainPresetIndex + ", device=" + device);
+                    }
+                    hap.selectPreset(device.getDevice(), mainPresetIndex);
+                }
             }
         }
     }
@@ -326,7 +367,19 @@ public class HearingAidDeviceManager {
     }
 
     CachedBluetoothDevice findMainDevice(CachedBluetoothDevice device) {
+        if (device == null || mCachedDevices == null) {
+            return null;
+        }
+
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
+            if (isValidGroupId(cachedDevice.getGroupId())) {
+                Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
+                for (CachedBluetoothDevice memberDevice : memberSet) {
+                    if (memberDevice != null && memberDevice.equals(device)) {
+                        return cachedDevice;
+                    }
+                }
+            }
             if (isValidHiSyncId(cachedDevice.getHiSyncId())) {
                 CachedBluetoothDevice subDevice = cachedDevice.getSubDevice();
                 if (subDevice != null && subDevice.equals(device)) {

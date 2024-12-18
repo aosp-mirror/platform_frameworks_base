@@ -20,7 +20,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.window.BackEvent;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface for external process to get access to the Back animation related methods.
@@ -49,9 +49,9 @@ public interface BackAnimation {
             @BackEvent.SwipeEdge int swipeEdge);
 
     /**
-     * Called when the input pointers are pilfered.
+     * Called when the back swipe threshold is crossed.
      */
-    void onPilferPointers();
+    void onThresholdCrossed();
 
     /**
      * Sets whether the back gesture is past the trigger threshold or not.
@@ -101,4 +101,30 @@ public interface BackAnimation {
      * @param customizer the controller to control system bar color.
      */
     void setStatusBarCustomizer(StatusBarCustomizer customizer);
+
+    /**
+     * Set a callback to pilfer pointers.
+     * @param pilferCallback the callback to pilfer pointers.
+     */
+    void setPilferPointerCallback(Runnable pilferCallback);
+
+    /**
+     * Set a callback to requestTopUi.
+     * @param topUiRequest the callback to requestTopUi.
+     */
+    void setTopUiRequestCallback(TopUiRequest topUiRequest);
+
+    /**
+     * Callback to request SysUi to call
+     * {@link android.app.IActivityManager#setHasTopUi(boolean)}.
+     */
+    interface TopUiRequest {
+
+        /**
+         * Request {@link android.app.IActivityManager#setHasTopUi(boolean)} to be called.
+         * @param requestTopUi  whether topUi should be requested or not
+         * @param tag           tag of the request-source
+         */
+        void requestTopUi(boolean requestTopUi, String tag);
+    }
 }

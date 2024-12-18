@@ -16,22 +16,14 @@
 
 package com.android.internal.accessibility.dialog;
 
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
-
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
-import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
-import static com.android.internal.accessibility.util.ShortcutUtils.isComponentIdExistingInSettings;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.UserHandle;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
-import android.view.accessibility.Flags;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -45,7 +37,7 @@ import java.util.Set;
 public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
 
     public InvisibleToggleAccessibilityServiceTarget(
-            Context context, @ShortcutType int shortcutType,
+            Context context, @UserShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
         super(context,
                 shortcutType,
@@ -55,31 +47,9 @@ public class InvisibleToggleAccessibilityServiceTarget extends AccessibilityServ
 
     @Override
     public void onCheckedChanged(boolean isChecked) {
+        super.onCheckedChanged(isChecked);
         final ComponentName componentName = ComponentName.unflattenFromString(getId());
-
-        if (Flags.updateAlwaysOnA11yService()) {
-            super.onCheckedChanged(isChecked);
-            ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                    getContext(), Set.of(componentName.flattenToString()), UserHandle.myUserId());
-        } else {
-            if (!isComponentIdExistingInOtherShortcut()) {
-                setAccessibilityServiceState(getContext(), componentName, isChecked);
-            }
-
-            super.onCheckedChanged(isChecked);
-        }
-    }
-
-    private boolean isComponentIdExistingInOtherShortcut() {
-        switch (getShortcutType()) {
-            case ACCESSIBILITY_BUTTON:
-                return isComponentIdExistingInSettings(getContext(), UserShortcutType.HARDWARE,
-                        getId());
-            case ACCESSIBILITY_SHORTCUT_KEY:
-                return isComponentIdExistingInSettings(getContext(), UserShortcutType.SOFTWARE,
-                        getId());
-            default:
-                throw new IllegalStateException("Unexpected shortcut type");
-        }
+        ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                getContext(), Set.of(componentName.flattenToString()), UserHandle.myUserId());
     }
 }

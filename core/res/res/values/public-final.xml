@@ -3741,4 +3741,185 @@
     <!-- @hide @SystemApi -->
   <public type="bool" name="config_enableDefaultNotesForWorkProfile" id="0x0111000b" />
 
+  <!-- ===============================================================
+    Resources added in version NEXT of the platform
+
+    NOTE: After this version of the platform is forked, changes cannot be made to the root
+    branch's groups for that release. Only merge changes to the forked platform branch.
+    =============================================================== -->
+  <eat-comment/>
+
+  <staging-public-group-final type="attr" first-id="0x01bd0000">
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+    <public name="defaultLocale"/>
+    <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime")
+         @hide @SystemApi -->
+    <public name="isVirtualDeviceOnly"/>
+    <!-- Marking this entry as removed since it's not being finalized -->
+    <public name="removed_optional" />
+    <!-- Marking this entry as removed since it's not being finalized -->
+    <public name="removed_adServiceTypes" />
+    <!-- @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
+    <public name="featureFlag"/>
+    <!-- @FlaggedApi("android.multiuser.enable_system_user_only_for_services_and_providers") -->
+    <public name="systemUserOnly"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="allow"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="query"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryPrefix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="queryAdvancedPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="querySuffix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentPrefix"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentAdvancedPattern"/>
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+    <public name="fragmentSuffix"/>
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+    <public name="useBoundsForWidth"/>
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+    <public name="autoTransact"/>
+    <!-- @FlaggedApi("com.android.window.flags.enforce_edge_to_edge") -->
+    <public name="windowOptOutEdgeToEdgeEnforcement"/>
+    <!-- @FlaggedApi("android.security.content_uri_permission_apis") -->
+    <public name="requireContentUriPermissionFromCaller" />
+    <!-- Marking this entry as removed since it's not being finalized -->
+    <public name="removed_languageSettingsActivity" />
+    <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
+    <public name="useLocalePreferredLineHeightForMinimum"/>
+    <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+    <public name="contentSensitivity" />
+    <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
+    <public name="supportsConnectionlessStylusHandwriting" />
+    <!-- @FlaggedApi("android.nfc.nfc_observe_mode") -->
+    <public name="shouldDefaultToObserveMode"/>
+    <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+    <public name="allowCrossUidActivitySwitchFromBelow"/>
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+    <public name="shiftDrawingOffsetForStartOverhang" />
+    <!-- @FlaggedApi("android.view.flags.toolkit_set_frame_rate_read_only") -->
+    <public name="windowIsFrameRatePowerSavingsBalanced"/>
+    <!-- Marking this entry as removed since it's not being finalized -->
+    <public name="removed_dreamCategory" />
+  </staging-public-group-final>
+
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+  <public type="attr" name="defaultLocale" id="0x01010688" />
+    <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime")
+         @hide @SystemApi -->
+  <public type="attr" name="isVirtualDeviceOnly" id="0x01010689" />
+    <!-- @hide @SystemApi @FlaggedApi("android.content.res.manifest_flagging") -->
+  <public type="attr" name="featureFlag" id="0x0101068c" />
+    <!-- @FlaggedApi("android.multiuser.enable_system_user_only_for_services_and_providers") -->
+  <public type="attr" name="systemUserOnly" id="0x0101068d" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="allow" id="0x0101068e" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="query" id="0x0101068f" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="queryPrefix" id="0x01010690" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="queryPattern" id="0x01010691" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="queryAdvancedPattern" id="0x01010692" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="querySuffix" id="0x01010693" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="fragmentPrefix" id="0x01010694" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="fragmentPattern" id="0x01010695" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="fragmentAdvancedPattern" id="0x01010696" />
+    <!-- @FlaggedApi("android.content.pm.relative_reference_intent_filters") -->
+  <public type="attr" name="fragmentSuffix" id="0x01010697" />
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+  <public type="attr" name="useBoundsForWidth" id="0x01010698" />
+    <!-- @FlaggedApi("android.nfc.nfc_read_polling_loop") -->
+  <public type="attr" name="autoTransact" id="0x01010699" />
+    <!-- @FlaggedApi("com.android.window.flags.enforce_edge_to_edge") -->
+  <public type="attr" name="windowOptOutEdgeToEdgeEnforcement" id="0x0101069a" />
+    <!-- @FlaggedApi("android.security.content_uri_permission_apis") -->
+  <public type="attr" name="requireContentUriPermissionFromCaller" id="0x0101069b" />
+    <!-- @FlaggedApi("com.android.text.flags.fix_line_height_for_locale") -->
+  <public type="attr" name="useLocalePreferredLineHeightForMinimum" id="0x0101069d" />
+    <!-- @FlaggedApi("android.view.flags.sensitive_content_app_protection_api") -->
+  <public type="attr" name="contentSensitivity" id="0x0101069e" />
+    <!-- @FlaggedApi("android.view.inputmethod.connectionless_handwriting") -->
+  <public type="attr" name="supportsConnectionlessStylusHandwriting" id="0x0101069f" />
+    <!-- @FlaggedApi("android.nfc.nfc_observe_mode") -->
+  <public type="attr" name="shouldDefaultToObserveMode" id="0x010106a0" />
+    <!-- @FlaggedApi("android.security.asm_restrictions_enabled") -->
+  <public type="attr" name="allowCrossUidActivitySwitchFromBelow" id="0x010106a1" />
+    <!-- @FlaggedApi("com.android.text.flags.use_bounds_for_width") -->
+  <public type="attr" name="shiftDrawingOffsetForStartOverhang" id="0x010106a2" />
+    <!-- @FlaggedApi("android.view.flags.toolkit_set_frame_rate_read_only") -->
+  <public type="attr" name="windowIsFrameRatePowerSavingsBalanced" id="0x010106a3" />
+
+  <staging-public-group-final type="string" first-id="0x01ba0000">
+    <!-- @hide @SystemApi @FlaggedApi("android.permission.flags.retail_demo_role_enabled") -->
+    <public name="config_defaultRetailDemo" />
+    <!-- @hide @SystemApi @FlaggedApi("android.permission.flags.wallet_role_enabled") -->
+    <public name="config_defaultWallet" />
+  </staging-public-group-final>
+
+    <!-- @hide @SystemApi @FlaggedApi("android.permission.flags.retail_demo_role_enabled") -->
+  <public type="string" name="config_defaultRetailDemo" id="0x01040048" />
+    <!-- @hide @SystemApi @FlaggedApi("android.permission.flags.wallet_role_enabled") -->
+  <public type="string" name="config_defaultWallet" id="0x01040049" />
+
+  <staging-public-group-final type="dimen" first-id="0x01b90000">
+    <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
+    <public name="removed_system_corner_radius_xsmall" />
+    <public name="removed_system_corner_radius_small" />
+    <public name="removed_system_corner_radius_medium" />
+    <public name="removed_system_corner_radius_large" />
+    <public name="removed_system_corner_radius_xlarge" />
+  </staging-public-group-final>
+
+    <!-- System corner radius baseline sizes. Used by Material styling of rounded corner shapes-->
+
+  <staging-public-group-final type="color" first-id="0x01b80000">
+    <public name="system_surface_disabled"/>
+    <public name="system_on_surface_disabled"/>
+    <public name="system_outline_disabled"/>
+    <public name="system_error_0"/>
+    <public name="system_error_10"/>
+    <public name="system_error_50"/>
+    <public name="system_error_100"/>
+    <public name="system_error_200"/>
+    <public name="system_error_300"/>
+    <public name="system_error_400"/>
+    <public name="system_error_500"/>
+    <public name="system_error_600"/>
+    <public name="system_error_700"/>
+    <public name="system_error_800"/>
+    <public name="system_error_900"/>
+    <public name="system_error_1000"/>
+  </staging-public-group-final>
+
+  <public type="color" name="system_surface_disabled" id="0x010600c2" />
+  <public type="color" name="system_on_surface_disabled" id="0x010600c3" />
+  <public type="color" name="system_outline_disabled" id="0x010600c4" />
+  <public type="color" name="system_error_0" id="0x010600c5" />
+  <public type="color" name="system_error_10" id="0x010600c6" />
+  <public type="color" name="system_error_50" id="0x010600c7" />
+  <public type="color" name="system_error_100" id="0x010600c8" />
+  <public type="color" name="system_error_200" id="0x010600c9" />
+  <public type="color" name="system_error_300" id="0x010600ca" />
+  <public type="color" name="system_error_400" id="0x010600cb" />
+  <public type="color" name="system_error_500" id="0x010600cc" />
+  <public type="color" name="system_error_600" id="0x010600cd" />
+  <public type="color" name="system_error_700" id="0x010600ce" />
+  <public type="color" name="system_error_800" id="0x010600cf" />
+  <public type="color" name="system_error_900" id="0x010600d0" />
+  <public type="color" name="system_error_1000" id="0x010600d1" />
+
 </resources>

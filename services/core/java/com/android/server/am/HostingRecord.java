@@ -325,4 +325,15 @@ public final class HostingRecord {
                 return PROCESS_START_TIME__TRIGGER_TYPE__TRIGGER_TYPE_UNKNOWN;
         }
     }
+
+    private static boolean isTypeActivity(String hostingType) {
+        return HOSTING_TYPE_ACTIVITY.equals(hostingType)
+                || HOSTING_TYPE_NEXT_ACTIVITY.equals(hostingType)
+                || HOSTING_TYPE_NEXT_TOP_ACTIVITY.equals(hostingType)
+                || HOSTING_TYPE_TOP_ACTIVITY.equals(hostingType);
+    }
+
+    public boolean isTypeActivity() {
+        return isTypeActivity(mHostingType);
+    }
 }

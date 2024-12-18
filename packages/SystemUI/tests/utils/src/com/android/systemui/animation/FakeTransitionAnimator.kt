@@ -15,10 +15,12 @@
 package com.android.systemui.animation
 
 import com.android.app.animation.Interpolators
+import com.android.systemui.dagger.qualifiers.Main
+import java.util.concurrent.Executor
 
 /** A [TransitionAnimator] to be used in tests. */
-fun fakeTransitionAnimator(): TransitionAnimator {
-    return TransitionAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
+fun fakeTransitionAnimator(@Main mainExecutor: Executor): TransitionAnimator {
+    return TransitionAnimator(mainExecutor, TEST_TIMINGS, TEST_INTERPOLATORS)
 }
 
 /**

@@ -19,6 +19,9 @@ package dalvik.system;
 // The original is here:
 // $ANDROID_BUILD_TOP/libcore/libart/src/main/java/dalvik/system/VMRuntime.java
 
+import com.android.ravenwood.RavenwoodRuntimeState;
+import com.android.ravenwood.common.JvmWorkaround;
+
 import java.lang.reflect.Array;
 
 public class VMRuntime {
@@ -32,14 +35,26 @@ public class VMRuntime {
     }
 
     public boolean is64Bit() {
-        return true;
+        return "amd64".equals(System.getProperty("os.arch"));
     }
 
     public static boolean is64BitAbi(String abi) {
-        return true;
+        return abi.contains("64");
     }
 
     public Object newUnpaddedArray(Class<?> componentType, int minLength) {
         return Array.newInstance(componentType, minLength);
+    }
+
+    public Object newNonMovableArray(Class<?> componentType, int length) {
+        return Array.newInstance(componentType, length);
+    }
+
+    public long addressOf(Object obj) {
+        return JvmWorkaround.getInstance().addressOf(obj);
+    }
+
+    public int getTargetSdkVersion() {
+        return RavenwoodRuntimeState.sTargetSdkLevel;
     }
 }

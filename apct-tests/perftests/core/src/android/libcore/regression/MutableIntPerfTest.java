@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class MutableIntPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     enum Kind {
         ARRAY() {
@@ -105,21 +105,21 @@ public final class MutableIntPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeCreate(Kind kind) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         kind.timeCreate(state);
     }
 
     @Test
     @Parameters(method = "getData")
     public void timeIncrement(Kind kind) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         kind.timeIncrement(state);
     }
 
     @Test
     @Parameters(method = "getData")
     public void timeGet(Kind kind) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         kind.timeGet(state);
     }
 }

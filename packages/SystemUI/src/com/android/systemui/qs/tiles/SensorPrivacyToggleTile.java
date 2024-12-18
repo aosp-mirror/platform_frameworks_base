@@ -25,13 +25,14 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.safetycenter.SafetyCenterManager;
 import android.service.quicksettings.Tile;
-import android.view.View;
+import android.text.TextUtils;
 import android.widget.Switch;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -99,7 +100,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         boolean blocked = mSensorPrivacyController.isSensorBlocked(getSensorId());
         if (mSensorPrivacyController.requiresAuthentication()
                 && mKeyguard.isMethodSecure()
@@ -127,7 +128,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
         } else {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_camera_mic_available);
         }
-        state.contentDescription = state.label;
+        state.contentDescription = TextUtils.concat(state.label, ", ", state.secondaryLabel);
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 

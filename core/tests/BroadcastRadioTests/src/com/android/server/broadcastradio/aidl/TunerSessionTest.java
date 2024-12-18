@@ -49,11 +49,10 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
 import android.hardware.radio.UniqueProgramIdentifier;
-import android.os.Binder;
+import android.os.DeadObjectException;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
-import android.os.UserHandle;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -72,6 +71,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.verification.VerificationWithTimeout;
 
 import java.util.ArrayList;
@@ -146,10 +146,10 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     // Mocks
     @Mock
-    private UserHandle mUserHandleMock;
-    @Mock
     private IBroadcastRadio mBroadcastRadioMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     // RadioModule under test
     private RadioModule mRadioModule;
@@ -168,8 +168,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioServiceUserController.class).spyStatic(CompatChanges.class)
-                .spyStatic(Binder.class);
+        builder.spyStatic(CompatChanges.class);
     }
 
     @Before
@@ -180,78 +179,17 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         doReturn(true).when(() -> CompatChanges.isChangeEnabled(
                 eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
-        doReturn(USER_ID_1).when(mUserHandleMock).getIdentifier();
-        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
-        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
-        doReturn(USER_ID_1).when(() -> RadioServiceUserController.getCurrentUser());
+        doReturn(USER_ID_1).when(mUserControllerMock).getCallingUserId();
+        doReturn(true).when(mUserControllerMock).isCurrentOrSystemUser();
+        doReturn(USER_ID_1).when(mUserControllerMock).getCurrentUser();
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
-                AidlTestUtils.makeDefaultModuleProperties());
+                AidlTestUtils.makeDefaultModuleProperties(), mUserControllerMock);
 
         doAnswer(invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];
             return null;
         }).when(mBroadcastRadioMock).setTunerCallback(any());
-        mRadioModule.setInternalHalCallback();
-
-        doAnswer(invocation -> {
-            android.hardware.broadcastradio.ProgramSelector halSel =
-                    (android.hardware.broadcastradio.ProgramSelector) invocation.getArguments()[0];
-            mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(halSel, SIGNAL_QUALITY);
-            if (halSel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).tune(any());
-
-        doAnswer(invocation -> {
-            if ((boolean) invocation.getArguments()[0]) {
-                mHalCurrentInfo.selector.primaryId.value += AM_FM_FREQUENCY_SPACING;
-            } else {
-                mHalCurrentInfo.selector.primaryId.value -= AM_FM_FREQUENCY_SPACING;
-            }
-            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).step(anyBoolean());
-
-        doAnswer(invocation -> {
-            if (mHalCurrentInfo == null) {
-                android.hardware.broadcastradio.ProgramSelector placeHolderSelector =
-                        AidlTestUtils.makeHalFmSelector(/* freq= */ 97300);
-
-                mHalTunerCallback.onTuneFailed(Result.TIMEOUT, placeHolderSelector);
-                return Result.OK;
-            }
-            mHalCurrentInfo.selector.primaryId.value = getSeekFrequency(
-                    mHalCurrentInfo.selector.primaryId.value,
-                    !(boolean) invocation.getArguments()[0]);
-            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
-
-        doReturn(null).when(mBroadcastRadioMock).getImage(anyInt());
-
-        doAnswer(invocation -> {
-            int configFlag = (int) invocation.getArguments()[0];
-            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            return mHalConfigMap.getOrDefault(configFlag, false);
-        }).when(mBroadcastRadioMock).isConfigFlagSet(anyInt());
-
-        doAnswer(invocation -> {
-            int configFlag = (int) invocation.getArguments()[0];
-            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
-            return null;
-        }).when(mBroadcastRadioMock).setConfigFlag(anyInt(), anyBoolean());
     }
 
     @After
@@ -272,6 +210,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void openSession_whenHalThrowsRemoteException() throws Exception {
+        android.hardware.radio.ITunerCallback tunerCallbackMock =
+                mock(android.hardware.radio.ITunerCallback.class);
+        Mockito.doThrow(new RemoteException("HAL service died")).when(mBroadcastRadioMock)
+                .setTunerCallback(any());
+
+        expect.withMessage("Null tuner session with HAL throwing remote exception")
+                .that(mRadioModule.openSession(tunerCallbackMock)).isNull();
+
+    }
+
+    @Test
     public void setConfiguration() throws Exception {
         openAidlClients(/* numClients= */ 1);
 
@@ -283,7 +233,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void setConfiguration_forNonCurrentUser_doesNotInvokesCallback() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].setConfiguration(FM_BAND_CONFIG);
 
@@ -330,6 +280,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         expect.withMessage("Close state of broadcast radio service session")
                 .that(mTunerSessions[0].isClosed()).isTrue();
+        verify(mBroadcastRadioMock).unsetTunerCallback();
     }
 
     @Test
@@ -351,6 +302,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                         .that(mTunerSessions[index].isClosed()).isFalse();
             }
         }
+        verify(mBroadcastRadioMock, never()).unsetTunerCallback();
     }
 
     @Test
@@ -362,6 +314,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
         expect.withMessage("Close state of broadcast radio service session")
+                .that(mTunerSessions[0].isClosed()).isTrue();
+    }
+
+    @Test
+    public void close_forMultipleTimes() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        int errorCode = RadioTuner.ERROR_SERVER_DIED;
+        mTunerSessions[0].close(errorCode);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+
+        mTunerSessions[0].close(errorCode);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onError(errorCode);
+        expect.withMessage("Close state of broadcast radio service session for multiple times")
                 .that(mTunerSessions[0].isClosed()).isTrue();
     }
 
@@ -378,6 +344,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             expect.withMessage("Close state of broadcast radio service session of index %s", index)
                     .that(mTunerSessions[index].isClosed()).isTrue();
         }
+        verify(mBroadcastRadioMock).unsetTunerCallback();
     }
 
     @Test
@@ -423,6 +390,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
+    public void tune_withDeadTunerCallback_removesDeadSession() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        doThrow(new DeadObjectException()).when(mAidlTunerCallbackMocks[0])
+                .onCurrentProgramInfoChanged(any());
+
+        mTunerSessions[0].tune(sel);
+
+        verify(mBroadcastRadioMock, CALLBACK_TIMEOUT).unsetTunerCallback();
+    }
+
+    @Test
     public void tune_withUnsupportedSelector_throwsException() throws Exception {
         openAidlClients(/* numClients= */ 1);
 
@@ -451,7 +430,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void tune_forNonCurrentUser_doesNotTune() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
         ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
         RadioManager.ProgramInfo tuneInfo =
                 AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
@@ -475,6 +454,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         expect.withMessage("Unknown error HAL exception when tuning")
                 .that(thrown).hasMessageThat().contains("UNKNOWN_ERROR");
+    }
+
+    @Test
+    public void tune_withClosedTuner_fails() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        mTunerSessions[0].close();
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> mTunerSessions[0].tune(sel));
+
+        expect.withMessage("Exception for tuning on closed tuner").that(thrown).hasMessageThat()
+                .contains("Tuner is closed");
     }
 
     @Test
@@ -518,7 +510,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(
                 ConversionUtils.programSelectorToHalProgramSelector(initialSel), SIGNAL_QUALITY);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].step(/* directionDown= */ true, /* skipSubChannel= */ false);
 
@@ -597,7 +589,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(/* numClients= */ 1);
         mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(
                 ConversionUtils.programSelectorToHalProgramSelector(initialSel), SIGNAL_QUALITY);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].seek(/* directionDown= */ true, /* skipSubChannel= */ false);
 
@@ -631,7 +623,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void cancel_forNonCurrentUser_doesNotCancel() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].cancel();
 
@@ -702,7 +694,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Test
     public void startBackgroundScan_forNonCurrentUser_doesNotInvokesCallback() throws Exception {
         openAidlClients(/* numClients= */ 1);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].startBackgroundScan();
 
@@ -972,7 +964,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(/* numClients= */ 1);
         ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
                 /* includeCategories= */ true, /* excludeModifications= */ false);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].startProgramListUpdates(filter);
 
@@ -1011,7 +1003,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         ProgramList.Filter filter = new ProgramList.Filter(new ArraySet<>(), new ArraySet<>(),
                 /* includeCategories= */ true, /* excludeModifications= */ false);
         mTunerSessions[0].startProgramListUpdates(filter);
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].stopProgramListUpdates();
 
@@ -1077,7 +1069,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     public void setConfigFlag_forNonCurrentUser_doesNotSetConfigFlag() throws Exception {
         openAidlClients(/* numClients= */ 1);
         int flag = UNSUPPORTED_CONFIG_FLAG + 1;
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].setConfigFlag(flag, /* value= */ true);
 
@@ -1142,7 +1134,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         openAidlClients(/* numClients= */ 1);
         Map<String, String> parametersSet = Map.of("mockParam1", "mockValue1",
                 "mockParam2", "mockValue2");
-        doReturn(false).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(false).when(mUserControllerMock).isCurrentOrSystemUser();
 
         mTunerSessions[0].setParameters(parametersSet);
 
@@ -1196,12 +1188,26 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     public void onCurrentProgramInfoChanged_withNonCurrentUser_doesNotInvokeCallback()
             throws Exception {
         openAidlClients(1);
-        doReturn(USER_ID_2).when(() -> RadioServiceUserController.getCurrentUser());
+        doReturn(USER_ID_2).when(mUserControllerMock).getCurrentUser();
 
         mHalTunerCallback.onCurrentProgramInfoChanged(AidlTestUtils.makeHalProgramInfo(
                 AidlTestUtils.makeHalFmSelector(AM_FM_FREQUENCY_LIST[1]), SIGNAL_QUALITY));
 
         verify(mAidlTunerCallbackMocks[0], after(CALLBACK_TIMEOUT_MS).times(0))
+                .onCurrentProgramInfoChanged(any());
+    }
+
+    @Test
+    public void onCurrentProgramInfoChanged_withLowerSdkVersion_doesNotInvokesCallback()
+            throws Exception {
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
+        openAidlClients(/* numClients= */ 1);
+
+        mHalTunerCallback.onCurrentProgramInfoChanged(
+                AidlTestUtils.programInfoToHalProgramInfo(TEST_DAB_INFO));
+
+        verify(mAidlTunerCallbackMocks[0], after(CALLBACK_TIMEOUT_MS).never())
                 .onCurrentProgramInfoChanged(any());
     }
 
@@ -1219,6 +1225,20 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
                     .onTuneFailed(RadioTuner.TUNER_RESULT_CANCELED, sel);
         }
+    }
+
+    @Test
+    public void onTuneFailed_withLowerSdkVersion_doesNotInvokesCallback()
+            throws Exception {
+        doReturn(false).when(() -> CompatChanges.isChangeEnabled(
+                eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
+        openAidlClients(/* numClients= */ 1);
+
+        mHalTunerCallback.onTuneFailed(Result.CANCELED,
+                ConversionUtils.programSelectorToHalProgramSelector(TEST_DAB_SELECTOR));
+
+        verify(mAidlTunerCallbackMocks[0], after(CALLBACK_TIMEOUT_MS).never())
+                .onTuneFailed(anyInt(), any());
     }
 
     @Test
@@ -1288,6 +1308,36 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         }
     }
 
+    @Test
+    public void openSession_withNonNullAntennaState() throws Exception {
+        boolean antennaConnected = false;
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+        openAidlClients(/* numClients= */ 1);
+        mHalTunerCallback.onAntennaStateChange(antennaConnected);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onAntennaState(antennaConnected);
+    }
+
+    @Test
+    public void openSession_withNonNullCurrentProgramInfo() throws Exception {
+        openAidlClients(/* numClients= */ 1);
+        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo = AidlTestUtils.makeProgramInfo(initialSel,
+                SIGNAL_QUALITY);
+        mTunerSessions[0].tune(initialSel);
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
+        android.hardware.radio.ITunerCallback callback =
+                mock(android.hardware.radio.ITunerCallback.class);
+
+        mRadioModule.openSession(callback);
+
+        verify(callback, CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
+    }
+
     private void openAidlClients(int numClients) throws Exception {
         mAidlTunerCallbackMocks = new android.hardware.radio.ITunerCallback[numClients];
         mTunerSessions = new TunerSession[numClients];
@@ -1295,6 +1345,71 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             mAidlTunerCallbackMocks[index] = mock(android.hardware.radio.ITunerCallback.class);
             mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index]);
         }
+        setupMockedHalTunerSession();
+    }
+
+    private void setupMockedHalTunerSession() throws Exception {
+        expect.withMessage("Registered HAL tuner callback").that(mHalTunerCallback)
+                .isNotNull();
+
+        doAnswer(invocation -> {
+            android.hardware.broadcastradio.ProgramSelector halSel =
+                    (android.hardware.broadcastradio.ProgramSelector) invocation.getArguments()[0];
+            mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(halSel, SIGNAL_QUALITY);
+            if (halSel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).tune(any());
+
+        doAnswer(invocation -> {
+            if ((boolean) invocation.getArguments()[0]) {
+                mHalCurrentInfo.selector.primaryId.value += AM_FM_FREQUENCY_SPACING;
+            } else {
+                mHalCurrentInfo.selector.primaryId.value -= AM_FM_FREQUENCY_SPACING;
+            }
+            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).step(anyBoolean());
+
+        doAnswer(invocation -> {
+            if (mHalCurrentInfo == null) {
+                android.hardware.broadcastradio.ProgramSelector placeHolderSelector =
+                        AidlTestUtils.makeHalFmSelector(/* freq= */ 97300);
+
+                mHalTunerCallback.onTuneFailed(Result.TIMEOUT, placeHolderSelector);
+                return Result.OK;
+            }
+            mHalCurrentInfo.selector.primaryId.value = getSeekFrequency(
+                    mHalCurrentInfo.selector.primaryId.value,
+                    !(boolean) invocation.getArguments()[0]);
+            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
+
+        doReturn(null).when(mBroadcastRadioMock).getImage(anyInt());
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            return mHalConfigMap.getOrDefault(configFlag, false);
+        }).when(mBroadcastRadioMock).isConfigFlagSet(anyInt());
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
+            return null;
+        }).when(mBroadcastRadioMock).setConfigFlag(anyInt(), anyBoolean());
     }
 
     private long getSeekFrequency(long currentFrequency, boolean seekDown) {

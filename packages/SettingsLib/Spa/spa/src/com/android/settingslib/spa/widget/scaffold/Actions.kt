@@ -17,15 +17,24 @@
 package com.android.settingslib.spa.widget.scaffold
 
 import androidx.appcompat.R
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.FindInPage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import com.android.settingslib.spa.framework.compose.LocalNavController
+import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsShape
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
 /** Action that navigates back to last page. */
 @Composable
@@ -50,6 +59,11 @@ private fun BackAction(contentDescription: String, onClick: () -> Unit) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = contentDescription,
+            modifier = if (isSpaExpressiveEnabled) Modifier
+                .size(SettingsDimension.actionIconWidth, SettingsDimension.actionIconHeight)
+                .clip(SettingsShape.CornerExtraLarge)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .padding(SettingsDimension.actionIconPadding) else Modifier
         )
     }
 }

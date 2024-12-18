@@ -18,9 +18,11 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,34 +30,46 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.TelephonyManager;
 
 import com.android.settingslib.R;
+import com.android.settingslib.flags.Flags;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class BluetoothEventManagerTest {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final String DEVICE_NAME = "test_device_name";
 
     @Mock
     private LocalBluetoothAdapter mLocalAdapter;
+    @Mock
+    private LocalBluetoothManager mBtManager;
     @Mock
     private CachedBluetoothDeviceManager mCachedDeviceManager;
     @Mock
@@ -95,8 +109,15 @@ public class BluetoothEventManagerTest {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
 
-        mBluetoothEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, mContext, /* handler= */ null, /* userHandle= */ null);
+        mBluetoothEventManager =
+                new BluetoothEventManager(
+                        mLocalAdapter,
+                        mBtManager,
+                        mCachedDeviceManager,
+                        mContext,
+                        /* handler= */ null,
+                        /* userHandle= */ null);
+        when(mBtManager.getProfileManager()).thenReturn(mLocalProfileManager);
         when(mCachedDeviceManager.findDevice(mBluetoothDevice)).thenReturn(mCachedBluetoothDevice);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
@@ -112,8 +133,13 @@ public class BluetoothEventManagerTest {
     public void ifUserHandleIsNull_registerReceiverIsCalled() {
         Context mockContext = mock(Context.class);
         BluetoothEventManager eventManager =
-                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
-                        /* handler= */ null, /* userHandle= */ null);
+                new BluetoothEventManager(
+                        mLocalAdapter,
+                        mBtManager,
+                        mCachedDeviceManager,
+                        mockContext,
+                        /* handler= */ null,
+                        /* userHandle= */ null);
 
         verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
                 eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
@@ -123,8 +149,13 @@ public class BluetoothEventManagerTest {
     public void ifUserHandleSpecified_registerReceiverAsUserIsCalled() {
         Context mockContext = mock(Context.class);
         BluetoothEventManager eventManager =
-                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
-                        /* handler= */ null, UserHandle.ALL);
+                new BluetoothEventManager(
+                        mLocalAdapter,
+                        mBtManager,
+                        mCachedDeviceManager,
+                        mockContext,
+                        /* handler= */ null,
+                        UserHandle.ALL);
 
         verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
                 any(IntentFilter.class), eq(null), eq(null), eq(Context.RECEIVER_EXPORTED));
@@ -169,6 +200,160 @@ public class BluetoothEventManagerTest {
 
         verify(mBluetoothCallback).onProfileConnectionStateChanged(mCachedBluetoothDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should not call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when audio sharing flag is off.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_flagOff_noUpdateFallbackDevice() {
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
+        when(broadcast.isProfileReady()).thenReturn(true);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(true);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+
+        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should not call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when the device does not
+     * support audio sharing.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_notSupport_noUpdateFallbackDevice() {
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_NOT_SUPPORTED);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
+        when(broadcast.isProfileReady()).thenReturn(true);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(true);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+
+        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should not call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when audio sharing profile is
+     * not ready.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_profileNotReady_noUpdateFallbackDevice() {
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
+        when(broadcast.isProfileReady()).thenReturn(false);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(true);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+
+        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should not call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when triggered for profile
+     * other than LE_AUDIO_BROADCAST_ASSISTANT or state other than STATE_DISCONNECTED.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_notAssistantProfile_noUpdateFallbackDevice() {
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
+        when(broadcast.isProfileReady()).thenReturn(true);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(true);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO);
+
+        verify(broadcast, times(0)).updateFallbackActiveDeviceIfNeeded();
+    }
+
+    /**
+     * dispatchProfileConnectionStateChanged should call {@link
+     * LocalBluetoothLeBroadcast}#updateFallbackActiveDeviceIfNeeded when assistant profile is
+     * disconnected and audio sharing is enabled.
+     */
+    @Test
+    public void dispatchProfileConnectionStateChanged_audioSharing_updateFallbackDevice() {
+        ShadowBluetoothAdapter shadowBluetoothAdapter =
+                Shadow.extract(BluetoothAdapter.getDefaultAdapter());
+        shadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        shadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        LocalBluetoothLeBroadcast broadcast = mock(LocalBluetoothLeBroadcast.class);
+        when(broadcast.isProfileReady()).thenReturn(true);
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mock(LocalBluetoothLeBroadcastAssistant.class);
+        when(assistant.isProfileReady()).thenReturn(true);
+        LocalBluetoothProfileManager profileManager = mock(LocalBluetoothProfileManager.class);
+        when(profileManager.getLeAudioBroadcastProfile()).thenReturn(broadcast);
+        when(profileManager.getLeAudioBroadcastAssistantProfile()).thenReturn(assistant);
+        when(mBtManager.getProfileManager()).thenReturn(profileManager);
+        mBluetoothEventManager.dispatchProfileConnectionStateChanged(
+                mCachedBluetoothDevice,
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+
+        verify(broadcast).updateFallbackActiveDeviceIfNeeded();
     }
 
     @Test
@@ -488,5 +673,18 @@ public class BluetoothEventManagerTest {
 
         verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
                 eq(R.string.bluetooth_pairing_pin_error_message));
+    }
+
+    /**
+     * Intent ACTION_AUTO_ON_STATE_CHANGED should dispatch to callback.
+     */
+    @Test
+    public void intentWithExtraState_autoOnStateChangedShouldDispatchToRegisterCallback() {
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothAdapter.ACTION_AUTO_ON_STATE_CHANGED);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback).onAutoOnStateChanged(anyInt());
     }
 }

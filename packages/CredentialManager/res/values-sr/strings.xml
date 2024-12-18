@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Како се крећемо ка будућности без лозинки, лозинке ће и даље бити доступне уз приступне кодове."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Одаберите где ћете сачувати: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изаберите менаџера лозинки да бисте сачували податке и брже се пријавили следећи пут"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Желите да направите приступни кључ да бисте се пријавили у <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Желите да сачувате лозинку да бисте се пријавили у <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Желите да сачувате податке за пријављивање за: <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Желите да направите приступни кључ да бисте се пријавили у <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Желите да сачувате лозинку да бисте се пријавили у <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Желите да сачувате податке за пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"приступни кôд"</string>
     <string name="password" msgid="6738570945182936667">"лозинка"</string>
     <string name="passkeys" msgid="5733880786866559847">"приступни кодови"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Вратите се на претходну страницу"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Затворите"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Одбаци"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Желите да користите сачувани приступни кôд за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Желите да користите сачувану лозинку за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Желите ли да користите своје податке за пријављивање за апликацију <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Желите да откључате опције пријављивања за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Користите сачувани приступни кључ за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Користите сачувану лозинку за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Користите налог за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Користите откључавање екрана да бисте се пријавили у апликацију <xliff:g id="APP_NAME">%1$s</xliff:g> као <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Откључајте опције пријављивања за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Изаберите сачуван приступни кључ за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Изаберите сачувану лозинку за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Изаберите сачуване податке за пријављивање за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Одаберите податке за пријављивање за апликацију <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Одаберите налог за: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Желите да одаберете опцију за апликацију <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Желите да користите те податке у апликацији <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Пријавите се на други начин"</string>

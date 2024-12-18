@@ -1651,7 +1651,7 @@ public final class ContentService extends IContentService.Stub {
                 return AppBackgroundRestrictionsInfo.LEVEL_RESTRICTED_BUCKET;
             case ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
                 return AppBackgroundRestrictionsInfo.LEVEL_BACKGROUND_RESTRICTED;
-            case ActivityManager.RESTRICTION_LEVEL_HIBERNATION:
+            case ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED:
                 return AppBackgroundRestrictionsInfo.LEVEL_HIBERNATION;
             default:
                 return AppBackgroundRestrictionsInfo.LEVEL_UNKNOWN;

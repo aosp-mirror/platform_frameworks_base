@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.Postsubmit
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.filters.FlakyTest
@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:OpenActivityFromBubbleOnLocksreenTest`
+ * To run this test: `atest WMShellFlickerTestsBubbles:OpenActivityFromBubbleOnLocksreenTest`
  *
  * Actions:
  * ```
@@ -100,14 +100,14 @@ class OpenActivityFromBubbleOnLocksreenTest(flicker: LegacyFlickerTest) :
     @Postsubmit
     @Test
     fun navBarLayerIsVisibleAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarLayerIsVisibleAtEnd()
     }
 
     @Postsubmit
     @Test
     fun navBarLayerPositionAtEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         flicker.navBarLayerPositionAtEnd()
     }
 
@@ -154,7 +154,7 @@ class OpenActivityFromBubbleOnLocksreenTest(flicker: LegacyFlickerTest) :
     @Postsubmit
     @Test
     fun taskBarLayerIsVisibleAtEnd() {
-        Assume.assumeTrue(flicker.scenario.isTablet)
+        Assume.assumeTrue(usesTaskbar)
         flicker.assertLayersEnd { this.isVisible(ComponentNameMatcher.TASK_BAR) }
     }
 }

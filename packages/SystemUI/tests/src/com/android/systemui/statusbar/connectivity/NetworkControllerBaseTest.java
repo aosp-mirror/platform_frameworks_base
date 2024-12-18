@@ -95,6 +95,7 @@ import org.mockito.MockitoSession;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NetworkControllerBaseTest extends SysuiTestCase {
@@ -332,10 +333,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallbackInNetworkControllerForVcn(
-            int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
+            int networkType,
+            boolean validated,
+            boolean isConnected,
+            VcnTransportInfo info,
+            Network underlyingNetwork) {
         final NetworkCapabilities.Builder builder =
                 new NetworkCapabilities.Builder(mNetCapabilities);
-        builder.setTransportInfo(info);
+        builder.setTransportInfo(info)
+                .setUnderlyingNetworks(Collections.singletonList(underlyingNetwork));
         setConnectivityCommon(builder, networkType, validated, isConnected);
         mDefaultCallbackInNetworkController.onCapabilitiesChanged(
                 mock(Network.class), builder.build());
@@ -385,10 +391,15 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setConnectivityViaCallbackInWifiTrackerForVcn(
-            int networkType, boolean validated, boolean isConnected, VcnTransportInfo info) {
+            int networkType,
+            boolean validated,
+            boolean isConnected,
+            VcnTransportInfo info,
+            Network underlyingNetwork) {
         final NetworkCapabilities.Builder builder =
                 new NetworkCapabilities.Builder(mNetCapabilities);
-        builder.setTransportInfo(info);
+        builder.setTransportInfo(info)
+                .setUnderlyingNetworks(Collections.singletonList(underlyingNetwork));
         setConnectivityCommon(builder, networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {

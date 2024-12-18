@@ -691,6 +691,40 @@ public class SystemConfigTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    /**
+     * Tests that readPermissions works correctly for the tags:
+     * disabled-in-sku, enabled-in-sku-override.
+     * I.e. that disabled-in-sku add package to block list and
+     * enabled-in-sku-override removes package from the list.
+     */
+    @Test
+    public void testDisablePackageInSku() throws Exception {
+        final String disable_in_sku =
+                "<config>\n"
+                        + "    <disabled-in-sku package=\"com.sony.product1.app\"/>\n"
+                        + "    <disabled-in-sku package=\"com.sony.product2.app\"/>\n"
+                        + "</config>\n";
+
+        final String enable_in_sku_override =
+                "<config>\n"
+                        + "    <enabled-in-sku-override package=\"com.sony.product2.app\"/>\n"
+                        + "</config>\n";
+
+        final File folder1 = createTempSubfolder("folder1");
+        createTempFile(folder1, "permissionFile1.xml", disable_in_sku);
+
+        final File folder2 = createTempSubfolder("folder2");
+        createTempFile(folder2, "permissionFile2.xml", enable_in_sku_override);
+
+        readPermissions(folder1, /* Grant all permission flags */ ~0);
+        readPermissions(folder2, /* Grant all permission flags */ ~0);
+
+        final ArraySet<String> blocklist = mSysConfig.getDisabledUntilUsedPreinstalledCarrierApps();
+
+        assertThat(blocklist).contains("com.sony.product1.app");
+        assertThat(blocklist).doesNotContain("com.sony.product2.app");
+    }
+
     private void parseSharedLibraries(String contents) throws IOException {
         File folder = createTempSubfolder("permissions_folder");
         createTempFile(folder, "permissions.xml", contents);

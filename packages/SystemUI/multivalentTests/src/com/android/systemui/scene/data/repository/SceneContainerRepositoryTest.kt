@@ -23,10 +23,11 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.overlayKeys
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -39,26 +40,16 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
+@EnableSceneContainer
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     @Test
-    fun allSceneKeys() {
+    fun allContentKeys() {
         val underTest = kosmos.sceneContainerRepository
-        assertThat(underTest.allSceneKeys())
-            .isEqualTo(
-                listOf(
-                    Scenes.QuickSettings,
-                    Scenes.Shade,
-                    Scenes.Lockscreen,
-                    Scenes.Bouncer,
-                    Scenes.Gone,
-                    Scenes.Communal,
-                )
-            )
+        assertThat(underTest.allContentKeys).isEqualTo(kosmos.sceneKeys + kosmos.overlayKeys)
     }
 
     @Test
@@ -70,6 +61,21 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
             underTest.changeScene(Scenes.Shade)
             assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            underTest.snapToScene(Scenes.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+        }
+
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
+    @Test
+    fun currentOverlays() =
+        testScope.runTest {
+            val underTest = kosmos.sceneContainerRepository
+            val currentOverlays by collectLastValue(underTest.currentOverlays)
+            assertThat(currentOverlays).isEmpty()
+
+            // TODO(b/356596436): When we have a first overlay, add it here and assert contains.
         }
 
     @Test(expected = IllegalStateException::class)
@@ -77,6 +83,13 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
         val underTest = kosmos.sceneContainerRepository
         underTest.changeScene(Scenes.Shade)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun snapToScene_noSuchSceneInContainer_throws() {
+        kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
+        val underTest = kosmos.sceneContainerRepository
+        underTest.snapToScene(Scenes.Shade)
     }
 
     @Test
@@ -122,6 +135,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Lockscreen,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

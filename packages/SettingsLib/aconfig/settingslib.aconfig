@@ -9,16 +9,6 @@ flag {
 }
 
 flag {
-    name: "enable_cached_bluetooth_device_dedup"
-    namespace: "bluetooth"
-    description: "Enable dedup in CachedBluetoothDevice"
-    bug: "319197962"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
    name: "bluetooth_qs_tile_dialog_auto_on_toggle"
    namespace: "bluetooth"
    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
@@ -36,14 +26,14 @@ flag {
   name: "enable_le_audio_sharing"
   namespace: "pixel_cross_device_control"
   description: "Gates whether to enable LE audio sharing"
-  bug: "305620450"
+  bug: "323125723"
 }
 
 flag {
   name: "enable_le_audio_qr_code_private_broadcast_sharing"
   namespace: "pixel_cross_device_control"
   description: "Gates whether to enable LE audio private broadcast sharing via QR code"
-  bug: "308368124"
+  bug: "323125723"
 }
 
 flag {
@@ -51,4 +41,111 @@ flag {
   namespace: "dck_framework"
   description: "Hide exclusively managed Bluetooth devices in BT settings menu."
   bug: "324475542"
+}
+
+flag {
+    name: "enable_set_preferred_transport_for_le_audio_device"
+    namespace: "bluetooth"
+    description: "Enable setting preferred transport for Le Audio device"
+    bug: "330581926"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_determining_advanced_details_header_with_metadata"
+    namespace: "pixel_cross_device_control"
+    description: "Use metadata instead of device type to determine whether a bluetooth device should use advanced details header."
+    bug: "328556903"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_determining_spatial_audio_attributes_by_profile"
+    namespace: "cross_device_experiences"
+    description: "Use bluetooth profile connection policy to determine spatial audio attributes"
+    bug: "341005211"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "volume_panel_broadcast_fix"
+    namespace: "systemui"
+    description: "Make the volume panel's repository listen for the new ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED broadcast instead of ACTION_NOTIFICATION_POLICY_CHANGED"
+    bug: "347707024"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "volume_dialog_audio_sharing_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to show separate volume bars during audio sharing"
+    bug: "336716411"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "extreme_power_low_state_vulnerability"
+    namespace: "pixel_energizer"
+    description: "the battery saver can pause all non-essential apps and their corresponding notification when device is in locked state to introduce the security vulnerability"
+    bug: "346513692"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "settings_catalyst"
+    namespace: "android_settings"
+    description: "Settings catalyst project migration"
+    bug: "323791114"
+}
+
+flag {
+  name: "asha_profile_access_profile_enabled_true"
+  namespace: "accessibility"
+  description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
+  bug: "356530795"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "audio_sharing_hysteresis_mode_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for hysteresis mode"
+    bug: "355222285"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "member_device_lea_active_state_sync_fix"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable fix for member device active state sync on lea profile"
+    bug: "364201289"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "audio_sharing_qs_dialog_improvement"
+    namespace: "cross_device_experiences"
+    description: "Gates whether to enable audio sharing qs dialog improvement"
+    bug: "360759048"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

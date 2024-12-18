@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
+import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -26,6 +27,9 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +37,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -48,6 +54,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
+    private val sceneInteractor: SceneInteractor,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -65,17 +72,39 @@ constructor(
         }
     }
 
+    private val isSideFpsIndicatorOnPrimaryBouncerEnabled: Boolean
+        get() = context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
+
+    private val isBouncerSceneActive: Flow<Boolean> =
+        if (SceneContainerFlag.isEnabled) {
+            sceneInteractor.currentScene.map { it == Scenes.Bouncer }.distinctUntilChanged()
+        } else {
+            flowOf(false)
+        }
+
     private val showIndicatorForPrimaryBouncer: Flow<Boolean> =
         merge(
+                // Legacy bouncer visibility changes.
                 primaryBouncerInteractor.isShowing,
                 primaryBouncerInteractor.startingToHide,
                 primaryBouncerInteractor.startingDisappearAnimation.filterNotNull(),
+                // Bouncer scene visibility changes.
+                isBouncerSceneActive,
                 deviceEntryFingerprintAuthRepository.shouldUpdateIndicatorVisibility.filter { it }
             )
-            .map { shouldShowIndicatorForPrimaryBouncer() }
+            .map {
+                isBouncerActive() &&
+                    isSideFpsIndicatorOnPrimaryBouncerEnabled &&
+                    keyguardUpdateMonitor.isFingerprintDetectionRunning &&
+                    keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
+            }
+            .onEach { Log.d(TAG, "showIndicatorForPrimaryBouncer updated: $it") }
 
     private val showIndicatorForAlternateBouncer: Flow<Boolean> =
-        alternateBouncerInteractor.isVisible
+        // Note: this interactor internally verifies that SideFPS is enabled and running.
+        alternateBouncerInteractor.isVisible.onEach {
+            Log.d(TAG, "showIndicatorForAlternateBouncer updated: $it")
+        }
 
     /**
      * Indicates whether the primary or alternate bouncers request showing the side fingerprint
@@ -88,17 +117,13 @@ constructor(
                 showForPrimaryBouncer || showForAlternateBouncer
             }
             .distinctUntilChanged()
+            .onEach { Log.d(TAG, "showIndicatorForDeviceEntry updated: $it") }
 
-    private fun shouldShowIndicatorForPrimaryBouncer(): Boolean {
-        val sfpsEnabled: Boolean =
-            context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
-        val sfpsDetectionRunning = keyguardUpdateMonitor.isFingerprintDetectionRunning
-        val isUnlockingWithFpAllowed = keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
-
+    private fun isBouncerActive(): Boolean {
+        if (SceneContainerFlag.isEnabled) {
+            return sceneInteractor.currentScene.value == Scenes.Bouncer
+        }
         return primaryBouncerInteractor.isBouncerShowing() &&
-            sfpsEnabled &&
-            sfpsDetectionRunning &&
-            isUnlockingWithFpAllowed &&
             !primaryBouncerInteractor.isAnimatingAway()
     }
 

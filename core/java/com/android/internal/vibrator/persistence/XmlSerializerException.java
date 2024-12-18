@@ -19,7 +19,6 @@ package com.android.internal.vibrator.persistence;
 /**
  * Represents an error while serializing a vibration input.
  *
- * @see XmlSerializer
  * @hide
  */
 public final class XmlSerializerException extends Exception {

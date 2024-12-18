@@ -110,7 +110,7 @@ public class TestInjector implements Injector {
     }
 
     @Override
-    public EmergencyHelper getEmergencyHelper() {
+    public FakeEmergencyHelper getEmergencyHelper() {
         return mEmergencyHelper;
     }
 

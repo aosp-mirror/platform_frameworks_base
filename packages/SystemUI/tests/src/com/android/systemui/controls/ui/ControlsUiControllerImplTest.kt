@@ -26,13 +26,13 @@ import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsMetricsLogger
@@ -83,7 +83,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ControlsUiControllerImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()

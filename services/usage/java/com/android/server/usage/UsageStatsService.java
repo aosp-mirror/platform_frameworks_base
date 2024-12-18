@@ -113,6 +113,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.AlarmQueue;
 
@@ -151,6 +152,10 @@ public class UsageStatsService extends SystemService implements
     static final String TAG = "UsageStatsService";
     public static final boolean ENABLE_TIME_CHANGE_CORRECTION
             = SystemProperties.getBoolean("persist.debug.time_correction", true);
+
+    private static final boolean USE_DEDICATED_HANDLER_THREAD =
+            SystemProperties.getBoolean("persist.debug.use_dedicated_handler_thread",
+            Flags.useDedicatedHandlerThread());
 
     static final boolean DEBUG = false; // Never submit with true
     static final boolean DEBUG_RESPONSE_STATS = DEBUG || Log.isLoggable(TAG, Log.DEBUG);
@@ -399,16 +404,18 @@ public class UsageStatsService extends SystemService implements
 
         mAppStandby.addListener(mStandbyChangeListener);
 
-        mPackageMonitor.register(getContext(), null, UserHandle.ALL, true);
+        mPackageMonitor.register(getContext(),
+                /* thread= */ USE_DEDICATED_HANDLER_THREAD ? mHandler.getLooper() : null,
+                UserHandle.ALL, true);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
-                null, /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
+                null, /* scheduler= */ USE_DEDICATED_HANDLER_THREAD ? mHandler : null);
 
         getContext().registerReceiverAsUser(new UidRemovedReceiver(), UserHandle.ALL,
                 new IntentFilter(ACTION_UID_REMOVED), null,
-                /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
+                /* scheduler= */ USE_DEDICATED_HANDLER_THREAD ? mHandler : null);
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
@@ -497,7 +504,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     private Handler getUsageEventProcessingHandler() {
-        if (Flags.useDedicatedHandlerThread()) {
+        if (USE_DEDICATED_HANDLER_THREAD) {
             return new H(UsageStatsHandlerThread.get().getLooper());
         } else {
             return new H(BackgroundThread.get().getLooper());
@@ -650,7 +657,10 @@ public class UsageStatsService extends SystemService implements
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >= 0) {
-                    mHandler.obtainMessage(MSG_USER_STARTED, userId, 0).sendToTarget();
+                    if (!Flags.disableIdleCheck() || userId > 0) {
+                        // Don't check idle state for USER_SYSTEM during the boot up.
+                        mHandler.obtainMessage(MSG_USER_STARTED, userId, 0).sendToTarget();
+                    }
                 }
             }
         }
@@ -1054,6 +1064,16 @@ public class UsageStatsService extends SystemService implements
         synchronized (mReportedEvents) {
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
+                // Callers of this API should verify that the userId passed to this method exists.
+                // The logic below should only remain as a last-resort catch-all fix.
+                final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+                if (umi == null || (umi != null && !umi.exists(userId))) {
+                    // The userId passed is a non-existent user so don't report the event.
+                    Slog.wtf(TAG, "Attempted to report event for non-existent user " + userId
+                            + " (" + event.mPackage + "/" + event.mClass
+                            + " eventType:" + event.mEventType + ")");
+                    return;
+                }
                 events = new LinkedList<>();
                 mReportedEvents.put(userId, events);
             }
@@ -1237,7 +1257,7 @@ public class UsageStatsService extends SystemService implements
                     break;
                 case Event.SHORTCUT_INVOCATION:
                 case Event.CHOOSER_ACTION:
-                case Event.STANDBY_BUCKET_CHANGED:
+                // case Event.STANDBY_BUCKET_CHANGED:
                 case Event.FOREGROUND_SERVICE_START:
                 case Event.FOREGROUND_SERVICE_STOP:
                     logAppUsageEventReportedAtomLocked(event.mEventType, uid, event.mPackage);
@@ -2009,6 +2029,8 @@ public class UsageStatsService extends SystemService implements
                 + ": " + Flags.useParceledList());
         pw.println("    " + Flags.FLAG_FILTER_BASED_EVENT_QUERY_API
                 + ": " + Flags.filterBasedEventQueryApi());
+        pw.println("    " + Flags.FLAG_DISABLE_IDLE_CHECK
+                + ": " + Flags.disableIdleCheck());
 
         final int[] userIds;
         synchronized (mLock) {
@@ -3212,6 +3234,18 @@ public class UsageStatsService extends SystemService implements
             Event event = new Event(eventType, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
+        }
+
+        @Override
+        public void reportEventForAllUsers(String packageName, int eventType) {
+            if (packageName == null) {
+                Slog.w(TAG, "Event reported without a package name, eventType:" + eventType);
+                return;
+            }
+
+            Event event = new Event(eventType, SystemClock.elapsedRealtime());
+            event.mPackage = packageName;
+            reportEventToAllUserId(event);
         }
 
         @Override

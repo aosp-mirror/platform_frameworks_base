@@ -363,9 +363,11 @@ public abstract class HotwordDetectionService extends Service
      * {@link HotwordDetector#startRecognition(ParcelFileDescriptor, AudioFormat,
      * PersistableBundle)} run} hotword recognition on audio coming from an external connected
      * microphone.
-     * <p>
-     * Upon invoking the {@code callback}, the system closes {@code audioStream} and sends the
-     * detection result to the {@link HotwordDetector.Callback hotword detector}.
+     *
+     * <p>Upon invoking the {@code callback}, the system will send the detection result to
+     * the {@link HotwordDetector}'s callback. If {@code
+     * options.getBoolean(KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK, true)} returns true,
+     * the system will also close the {@code audioStream} after {@code callback} is invoked.
      *
      * @param audioStream Stream containing audio bytes returned from a microphone
      * @param audioFormat Format of the supplied audio
@@ -375,11 +377,6 @@ public abstract class HotwordDetectionService extends Service
      * PersistableBundle)}.
      * @param callback The callback to use for responding to the detection request.
      */
-    // TODO(b/324635656): Update Javadoc for 24Q3 release. Change the last paragraph to:
-    // <p>Upon invoking the {@code callback}, the system will send the detection result to
-    // the {@link HotwordDetector}'s callback. If {@code
-    // options.getBoolean(KEY_SYSTEM_WILL_CLOSE_AUDIO_STREAM_AFTER_CALLBACK, true)} returns true,
-    // the system will also close the {@code audioStream} after {@code callback} is invoked.
     public void onDetect(
             @NonNull ParcelFileDescriptor audioStream,
             @NonNull AudioFormat audioFormat,

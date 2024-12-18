@@ -16,13 +16,21 @@
 
 package com.android.server.rollback;
 
+import static android.content.pm.Flags.provideInfoOfApkInApex;
+
+import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
+
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -37,6 +45,7 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -72,6 +81,8 @@ import java.util.function.Consumer;
 public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
+    private static final String CLASS_NAME = RollbackPackageHealthObserver.class.getName();
+
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
 
@@ -230,7 +241,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
 
     @Override
-    public String getName() {
+    public String getUniqueIdentifier() {
         return NAME;
     }
 
@@ -486,19 +497,36 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      */
     @AnyThread
     private boolean isModule(String packageName) {
-        // Check if the package is an APK inside an APEX. If it is, use the parent APEX package when
-        // querying PackageManager.
-        String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
-                packageName);
-        if (apexPackageName != null) {
-            packageName = apexPackageName;
-        }
-
         PackageManager pm = mContext.getPackageManager();
-        try {
-            return pm.getModuleInfo(packageName, 0) != null;
-        } catch (PackageManager.NameNotFoundException ignore) {
-            return false;
+
+        if (Flags.refactorCrashrecovery() && provideInfoOfApkInApex()) {
+            // Check if the package is listed among the system modules or is an
+            // APK inside an updatable APEX.
+            try {
+                final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+                String apexPackageName = pkg.getApexPackageName();
+                if (apexPackageName != null) {
+                    packageName = apexPackageName;
+                }
+
+                return pm.getModuleInfo(packageName, 0 /* flags */) != null;
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        } else {
+            // Check if the package is an APK inside an APEX. If it is, use the parent APEX package
+            // when querying PackageManager.
+            String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
+                    packageName);
+            if (apexPackageName != null) {
+                packageName = apexPackageName;
+            }
+
+            try {
+                return pm.getModuleInfo(packageName, 0) != null;
+            } catch (PackageManager.NameNotFoundException ignore) {
+                return false;
+            }
         }
     }
 
@@ -512,11 +540,13 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private void rollbackPackage(RollbackInfo rollback, VersionedPackage failedPackage,
             @FailureReasons int rollbackReason) {
         assertInWorkerThread();
+        String failedPackageName = (failedPackage == null ? null : failedPackage.getPackageName());
 
         Slog.i(TAG, "Rolling back package. RollbackId: " + rollback.getRollbackId()
-                + " failedPackage: "
-                + (failedPackage == null ? null : failedPackage.getPackageName())
+                + " failedPackage: " + failedPackageName
                 + " rollbackReason: " + rollbackReason);
+        logCrashRecoveryEvent(Log.DEBUG, String.format("Rolling back %s. Reason: %s",
+                failedPackageName, rollbackReason));
         final RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         int reasonToLog = WatchdogRollbackLogger.mapFailureReasonToMetric(rollbackReason);
         final String failedPackageToLog;
@@ -571,12 +601,42 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             }
         };
 
-        final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver(result -> {
-            mHandler.post(() -> onResult.accept(result));
-        });
+        if (Flags.refactorCrashrecovery()) {
+            // Define a BroadcastReceiver to handle the result
+            BroadcastReceiver rollbackReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent result) {
+                    mHandler.post(() -> onResult.accept(result));
+                }
+            };
 
-        rollbackManager.commitRollback(rollback.getRollbackId(),
-                Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+            String intentActionName = CLASS_NAME + rollback.getRollbackId();
+            // Register the BroadcastReceiver
+            mContext.registerReceiver(rollbackReceiver,
+                    new IntentFilter(intentActionName),
+                    Context.RECEIVER_NOT_EXPORTED);
+
+            Intent intentReceiver = new Intent(intentActionName);
+            intentReceiver.putExtra("rollbackId", rollback.getRollbackId());
+            intentReceiver.setPackage(mContext.getPackageName());
+            intentReceiver.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+
+            PendingIntent rollbackPendingIntent = PendingIntent.getBroadcast(mContext,
+                    rollback.getRollbackId(),
+                    intentReceiver,
+                    PendingIntent.FLAG_MUTABLE);
+
+            rollbackManager.commitRollback(rollback.getRollbackId(),
+                    Collections.singletonList(failedPackage),
+                    rollbackPendingIntent.getIntentSender());
+        } else {
+            final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver(result -> {
+                mHandler.post(() -> onResult.accept(result));
+            });
+
+            rollbackManager.commitRollback(rollback.getRollbackId(),
+                    Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+        }
     }
 
     /**
@@ -704,6 +764,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         Slog.i(TAG, "Rolling back all available low impact rollbacks");
+        logCrashRecoveryEvent(Log.DEBUG, "Rolling back all available. Reason: " + rollbackReason);
         // Add all rollback ids to mPendingStagedRollbackIds, so that we do not reboot before all
         // pending staged rollbacks are handled.
         for (RollbackInfo rollback : lowImpactRollbacks) {

@@ -45,6 +45,7 @@ import android.window.SplashScreenView;
 
 import com.android.internal.R;
 
+import java.io.Closeable;
 import java.util.function.LongConsumer;
 
 /**
@@ -100,7 +101,7 @@ public class SplashscreenIconDrawableFactory {
      * Drawable pre-drawing the scaled icon in a separate thread to increase the speed of the
      * final drawing.
      */
-    private static class ImmobileIconDrawable extends Drawable {
+    private static class ImmobileIconDrawable extends Drawable implements Closeable {
         private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG
                 | Paint.FILTER_BITMAP_FLAG);
         private final Matrix mMatrix = new Matrix();
@@ -153,6 +154,16 @@ public class SplashscreenIconDrawableFactory {
         @Override
         public int getOpacity() {
             return 1;
+        }
+
+        @Override
+        public void close() {
+            synchronized (mPaint) {
+                if (mIconBitmap != null) {
+                    mIconBitmap.recycle();
+                    mIconBitmap = null;
+                }
+            }
         }
     }
 

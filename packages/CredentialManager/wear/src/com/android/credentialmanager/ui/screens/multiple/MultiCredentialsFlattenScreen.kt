@@ -15,156 +15,159 @@
  */
 package com.android.credentialmanager.ui.screens.multiple
 
-import android.graphics.drawable.Drawable
-import com.android.credentialmanager.ui.screens.UiState
-import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import com.android.credentialmanager.ui.components.CredentialsScreenChip
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
-import com.android.credentialmanager.ui.components.SignInHeader
+import androidx.compose.ui.Alignment
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
+import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
-import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.ui.components.LockedProviderChip
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.ui.components.CredentialsScreenChip
+import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
-import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-
+import com.google.android.horologist.compose.layout.rememberColumnState
+import com.google.android.horologist.compose.layout.ScalingLazyColumnDefaults
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 /**
  * Screen that shows multiple credentials to select from, grouped by accounts
  *
  * @param credentialSelectorUiState The app bar view model.
- * @param screenIcon The view model corresponding to the home page.
- * @param columnState ScalingLazyColumn configuration to be be applied
  * @param modifier styling for composable
- * @param viewModel ViewModel that updates ui state for this screen
- * @param navController handles navigation events from this screen
+ * @param flowEngine [FlowEngine] that updates ui state for this screen
  */
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MultiCredentialsFlattenScreen(
     credentialSelectorUiState: MultipleEntry,
-    screenIcon: Drawable?,
-    columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
-    viewModel: MultiCredentialsFlattenViewModel = hiltViewModel(),
-    navController: NavHostController = rememberNavController(),
+    flowEngine: FlowEngine,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectEntry = flowEngine.getEntrySelector()
+    Row {
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+        ScalingLazyColumn(
+            columnState = rememberColumnState(
+                ScalingLazyColumnDefaults.belowTimeText(horizontalAlignment = Alignment.Start),
+            ),
+            modifier = Modifier.weight(0.896f).fillMaxSize(), // 5.2% side margin
+        ) {
 
-    when (val state = uiState) {
-        UiState.CredentialScreen -> {
-            MultiCredentialsFlattenScreen(
-                state = credentialSelectorUiState,
-                columnState = columnState,
-                screenIcon = screenIcon,
-                onActionEntryClicked = viewModel::onActionEntryClicked,
-                onCredentialClicked = viewModel::onCredentialClicked,
-                modifier = modifier,
-            )
-        }
-
-        is UiState.CredentialSelected -> {
-            val launcher = rememberLauncherForActivityResult(
-                StartBalIntentSenderForResultContract()
-            ) {
-                viewModel.onInfoRetrieved(it.resultCode, null)
-            }
-
-            SideEffect {
-                state.intentSenderRequest?.let {
-                    launcher.launch(it)
-                }
-            }
-        }
-
-        UiState.Cancel -> {
-            navController.popBackStack()
-        }
-    }
-}
-
-@OptIn(ExperimentalHorologistApi::class)
-@Composable
-fun MultiCredentialsFlattenScreen(
-    state: MultipleEntry,
-    columnState: ScalingLazyColumnState,
-    screenIcon: Drawable?,
-    onActionEntryClicked: (entryInfo: ActionEntryInfo) -> Unit,
-    onCredentialClicked: (entryInfo: CredentialEntryInfo) -> Unit,
-    modifier: Modifier,
-) {
-    ScalingLazyColumn(
-        columnState = columnState,
-        modifier = modifier.fillMaxSize(),
-    ) {
         item {
-            // make this credential specific if all credentials are same
-            SignInHeader(
-                icon = screenIcon,
-                title = stringResource(R.string.sign_in_options_title),
-            )
+            Row {
+                Spacer(Modifier.weight(0.073f)) // 7.3% side margin
+                WearButtonText(
+                    text = stringResource(R.string.sign_in_options_title),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.854f).fillMaxSize(),
+                    maxLines = 2,
+                )
+                Spacer(Modifier.weight(0.073f)) // 7.3% side margin
+            }
         }
 
-        state.accounts.forEach { userNameEntries ->
+        credentialSelectorUiState.accounts.forEach { userNameEntries ->
             item {
-                Text(
-                    text = userNameEntries.userName,
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .padding(horizontal = 10.dp),
-                    style = MaterialTheme.typography.title3
-                )
+                Row {
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                    WearSecondaryLabel(
+                        text = userNameEntries.name,
+                        modifier = Modifier.padding(
+                            top = 12.dp,
+                            bottom = 4.dp,
+                            start = 0.dp,
+                            end = 0.dp
+                        ).fillMaxWidth(0.87f)
+                    )
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                }
             }
 
             userNameEntries.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
                 item {
                     CredentialsScreenChip(
-                        label = credential.userName,
-                        onClick = { onCredentialClicked(credential) },
-                        secondaryLabel = credential.userName,
+                        primaryText = {
+                            WearButtonText(
+                                text = credential.userName,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2,
+                            )
+                        },
+                        onClick = { selectEntry(credential, false) },
+                        secondaryText =
+                        {
+                            WearSecondaryLabel(
+                                text = credential.credentialTypeDisplayName.ifEmpty {
+                                    credential.providerDisplayName
+                                },
+                                color = WearMaterialTheme.colors.onSurfaceVariant,
+                                maxLines = 2
+                            )
+                        },
                         icon = credential.icon,
-                        modifier = modifier,
                     )
+
+                    CredentialsScreenChipSpacer()
+                }
+            }
+
+            credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
+                item {
+                    LockedProviderChip(authenticationEntryInfo, secondaryMaxLines = 2) {
+                        selectEntry(authenticationEntryInfo, false)
+                    }
+                    CredentialsScreenChipSpacer()
                 }
             }
         }
-        item {
-            Text(
-                text = "Manage Sign-ins",
-                modifier = Modifier
-                    .padding(top = 6.dp)
-                    .padding(horizontal = 10.dp),
-                style = MaterialTheme.typography.title3
-            )
-        }
 
-        state.actionEntryList.forEach {
+        if (credentialSelectorUiState.actionEntryList.isNotEmpty()) {
             item {
+                Row {
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                    WearSecondaryLabel(
+                        text = stringResource(R.string.provider_list_title),
+                        modifier = Modifier.padding(
+                            top = 12.dp,
+                            bottom = 4.dp,
+                            start = 0.dp,
+                            end = 0.dp
+                        ).fillMaxWidth(0.87f),
+                        maxLines = 2
+                )
+                    Spacer(Modifier.weight(0.0624f)) // 6.24% side margin
+                }
+            }
+            credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
+                item {
                     CredentialsScreenChip(
-                        label = it.title,
-                        onClick = { onActionEntryClicked(it) },
-                        secondaryLabel = null,
-                        icon = it.icon,
-                        modifier = modifier,
+                        primaryText = {
+                            WearButtonText(
+                                text = actionEntry.title,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2
+                            )
+                        },
+                        onClick = { selectEntry(actionEntry, false) },
+                        secondaryText = null,
+                        icon = actionEntry.icon,
                     )
+                    CredentialsScreenChipSpacer()
+                }
             }
         }
     }
+    Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+    }
 }
-
-

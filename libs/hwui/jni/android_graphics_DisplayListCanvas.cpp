@@ -16,22 +16,19 @@
 
 #include "GraphicsJNI.h"
 
-#ifdef __ANDROID__ // Layoutlib does not support Looper and device properties
+#ifdef __ANDROID__  // Layoutlib does not support Looper
 #include <utils/Looper.h>
 #endif
 
-#include <SkRegion.h>
-#include <SkRuntimeEffect.h>
-
+#include <CanvasProperty.h>
 #include <Rect.h>
 #include <RenderNode.h>
-#include <CanvasProperty.h>
+#include <SkRegion.h>
+#include <SkRuntimeEffect.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
-#ifdef __ANDROID__ // Layoutlib does not support RenderThread
 #include <renderthread/RenderProxy.h>
-#endif
 
 namespace android {
 
@@ -85,11 +82,7 @@ static void android_view_DisplayListCanvas_resetDisplayListCanvas(CRITICAL_JNI_P
 }
 
 static jint android_view_DisplayListCanvas_getMaxTextureSize(JNIEnv*, jobject) {
-#ifdef __ANDROID__ // Layoutlib does not support RenderProxy (RenderThread)
     return android::uirenderer::renderthread::RenderProxy::maxTextureSize();
-#else
-    return 4096;
-#endif
 }
 
 static void android_view_DisplayListCanvas_enableZ(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr,

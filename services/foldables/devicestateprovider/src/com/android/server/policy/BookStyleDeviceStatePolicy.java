@@ -16,29 +16,43 @@
 
 package com.android.server.policy;
 
-import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
-import static android.hardware.devicestate.DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
-import static android.hardware.devicestate.DeviceState.FLAG_EMULATED_ONLY;
-import static android.hardware.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
-import static android.hardware.devicestate.DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
+import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE;
 
 import static com.android.server.policy.BookStyleStateTransitions.DEFAULT_STATE_TRANSITIONS;
-import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createConfig;
-import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createTentModeClosedState;
+import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStatePredicateWrapper.createConfig;
+import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStatePredicateWrapper.createTentModeClosedState;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.display.DisplayManager;
 
 import com.android.server.devicestate.DeviceStatePolicy;
 import com.android.server.devicestate.DeviceStateProvider;
-import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
+import com.android.server.policy.FoldableDeviceStateProvider.DeviceStatePredicateWrapper;
 import com.android.server.policy.feature.flags.FeatureFlags;
 
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -55,9 +69,8 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
     private static final int DEVICE_STATE_CLOSED = 0;
     private static final int DEVICE_STATE_HALF_OPENED = 1;
     private static final int DEVICE_STATE_OPENED = 2;
-    private static final int DEVICE_STATE_REAR_DISPLAY_STATE = 3;
+    private static final int DEVICE_STATE_REAR_DISPLAY = 3;
     private static final int DEVICE_STATE_CONCURRENT_INNER_DEFAULT = 4;
-
     private static final int TENT_MODE_SWITCH_ANGLE_DEGREES = 90;
     private static final int TABLE_TOP_MODE_SWITCH_ANGLE_DEGREES = 125;
     private static final int MIN_CLOSED_ANGLE_DEGREES = 0;
@@ -90,83 +103,68 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
 
         mEnablePostureBasedClosedState = featureFlags.enableFoldablesPostureBasedClosedState();
+        if (mEnablePostureBasedClosedState) {
+            // This configuration doesn't require listening to hall sensor, it solely relies
+            // on the fused hinge angle sensor
+            hallSensor = null;
+        }
+
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
-        final DeviceStateConfiguration[] configuration = createConfiguration(
+        final DeviceStatePredicateWrapper[] configuration = createConfiguration(
                 leftAccelerometerSensor, rightAccelerometerSensor, closeAngleDegrees);
 
-        mProvider = new FoldableDeviceStateProvider(mContext, sensorManager,
-                hingeAngleSensor, hallSensor, displayManager, configuration);
+        mProvider = new FoldableDeviceStateProvider(mContext, sensorManager, hingeAngleSensor,
+                hallSensor, displayManager, configuration);
     }
 
-    private DeviceStateConfiguration[] createConfiguration(@Nullable Sensor leftAccelerometerSensor,
-            @Nullable Sensor rightAccelerometerSensor, Integer closeAngleDegrees) {
-        return new DeviceStateConfiguration[]{
+    private DeviceStatePredicateWrapper[] createConfiguration(
+            @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
+            Integer closeAngleDegrees) {
+        return new DeviceStatePredicateWrapper[]{
                 createClosedConfiguration(leftAccelerometerSensor, rightAccelerometerSensor,
                         closeAngleDegrees),
-                createConfig(DEVICE_STATE_HALF_OPENED,
-                        /* name= */ "HALF_OPENED",
-                        /* activeStatePredicate= */ (provider) -> {
+                createConfig(getHalfOpenedDeviceState(), /* activeStatePredicate= */
+                        (provider) -> {
                             final float hingeAngle = provider.getHingeAngle();
                             return hingeAngle >= MAX_CLOSED_ANGLE_DEGREES
                                     && hingeAngle <= TABLE_TOP_MODE_SWITCH_ANGLE_DEGREES;
                         }),
-                createConfig(DEVICE_STATE_OPENED,
-                        /* name= */ "OPENED",
-                        /* activeStatePredicate= */ ALLOWED),
-                createConfig(DEVICE_STATE_REAR_DISPLAY_STATE,
-                        /* name= */ "REAR_DISPLAY_STATE",
-                        /* flags= */ FLAG_EMULATED_ONLY,
-                        /* activeStatePredicate= */ NOT_ALLOWED),
-                createConfig(DEVICE_STATE_CONCURRENT_INNER_DEFAULT,
-                        /* name= */ "CONCURRENT_INNER_DEFAULT",
-                        /* flags= */ FLAG_EMULATED_ONLY | FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP
-                                | FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
-                                | FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
-                        /* activeStatePredicate= */ NOT_ALLOWED,
-                        /* availabilityPredicate= */
+                createConfig(getOpenedDeviceState(), /* activeStatePredicate= */
+                        ALLOWED),
+                createConfig(getRearDisplayDeviceState(), /* activeStatePredicate= */
+                        NOT_ALLOWED),
+                createConfig(getDualDisplayDeviceState(), /* activeStatePredicate= */
+                        NOT_ALLOWED, /* availabilityPredicate= */
                         provider -> !mIsDualDisplayBlockingEnabled
-                                || provider.hasNoConnectedExternalDisplay())
-        };
+                                || provider.hasNoConnectedExternalDisplay())};
     }
 
-    private DeviceStateConfiguration createClosedConfiguration(
+    private DeviceStatePredicateWrapper createClosedConfiguration(
             @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
             @Nullable Integer closeAngleDegrees) {
+
         if (closeAngleDegrees != null) {
             // Switch displays at closeAngleDegrees in both ways (folding and unfolding)
-            return createConfig(
-                    DEVICE_STATE_CLOSED,
-                    /* name= */ "CLOSED",
-                    /* flags= */ FLAG_CANCEL_OVERRIDE_REQUESTS,
-                    /* activeStatePredicate= */ (provider) -> {
+            return createConfig(getClosedDeviceState(), /* activeStatePredicate= */
+                    (provider) -> {
                         final float hingeAngle = provider.getHingeAngle();
                         return hingeAngle <= closeAngleDegrees;
-                    }
-            );
+                    });
         }
 
         if (mEnablePostureBasedClosedState) {
             // Use smart closed state predicate that will use different switch angles
             // based on the device posture (e.g. wedge mode, tent mode, reverse wedge mode)
-            return createConfig(
-                    DEVICE_STATE_CLOSED,
-                    /* name= */ "CLOSED",
-                    /* flags= */ FLAG_CANCEL_OVERRIDE_REQUESTS,
-                    /* activeStatePredicate= */ new BookStyleClosedStatePredicate(mContext,
-                            this, leftAccelerometerSensor, rightAccelerometerSensor,
-                            DEFAULT_STATE_TRANSITIONS)
-            );
+            return createConfig(getClosedDeviceState(), /* activeStatePredicate= */
+                    new BookStyleClosedStatePredicate(mContext, this, leftAccelerometerSensor,
+                            rightAccelerometerSensor, DEFAULT_STATE_TRANSITIONS));
         }
 
         // Switch to the outer display only at 0 degrees but use TENT_MODE_SWITCH_ANGLE_DEGREES
         // angle when switching to the inner display
-        return createTentModeClosedState(DEVICE_STATE_CLOSED,
-                /* name= */ "CLOSED",
-                /* flags= */ FLAG_CANCEL_OVERRIDE_REQUESTS,
-                MIN_CLOSED_ANGLE_DEGREES,
-                MAX_CLOSED_ANGLE_DEGREES,
-                TENT_MODE_SWITCH_ANGLE_DEGREES);
+        return createTentModeClosedState(getClosedDeviceState(),
+                MIN_CLOSED_ANGLE_DEGREES, MAX_CLOSED_ANGLE_DEGREES, TENT_MODE_SWITCH_ANGLE_DEGREES);
     }
 
     @Override
@@ -187,5 +185,85 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
     @Override
     public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
         mProvider.dump(writer, args);
+    }
+
+    /** Returns the {@link DeviceState.Configuration} that represents the closed state. */
+    @NonNull
+    private DeviceState getClosedDeviceState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP));
+
+        Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties = new HashSet<>(
+                List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED));
+
+        return new DeviceState(new  DeviceState.Configuration.Builder(DEVICE_STATE_CLOSED, "CLOSED")
+                .setSystemProperties(systemProperties)
+                .setPhysicalProperties(physicalProperties)
+                .build());
+    }
+
+    /** Returns the {@link DeviceState.Configuration} that represents the half_opened state. */
+    @NonNull
+    private DeviceState getHalfOpenedDeviceState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE));
+
+        Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties = new HashSet<>(
+                List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN));
+
+        return new DeviceState(new DeviceState.Configuration.Builder(DEVICE_STATE_HALF_OPENED,
+                "HALF_OPENED")
+                .setSystemProperties(systemProperties)
+                .setPhysicalProperties(physicalProperties)
+                .build());
+    }
+
+    /** Returns the {@link DeviceState.Configuration} that represents the opened state */
+    @NonNull
+    private DeviceState getOpenedDeviceState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                        PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE));
+        Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties = new HashSet<>(
+                List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN));
+
+        return new DeviceState(new DeviceState.Configuration.Builder(DEVICE_STATE_OPENED, "OPENED")
+                .setSystemProperties(systemProperties)
+                .setPhysicalProperties(physicalProperties)
+                .build());
+    }
+
+    /** Returns the {@link DeviceState.Configuration} that represents the rear display state. */
+    @NonNull
+    private DeviceState getRearDisplayDeviceState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_EMULATED_ONLY,
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                        PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST, PROPERTY_FEATURE_REAR_DISPLAY));
+
+        return new DeviceState(new DeviceState.Configuration.Builder(DEVICE_STATE_REAR_DISPLAY,
+                "REAR_DISPLAY_STATE")
+                .setSystemProperties(systemProperties)
+                .build());
+    }
+
+    /** Returns the {@link DeviceState.Configuration} that represents the dual display state. */
+    @NonNull
+    private DeviceState getDualDisplayDeviceState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_EMULATED_ONLY, PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+                        PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST,
+                        PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+                        PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                        PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT));
+
+        return new DeviceState(new DeviceState.Configuration.Builder(
+                DEVICE_STATE_CONCURRENT_INNER_DEFAULT, "CONCURRENT_INNER_DEFAULT")
+                .setSystemProperties(systemProperties)
+                .build());
     }
 }

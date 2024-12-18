@@ -133,4 +133,7 @@ interface ILauncherApps {
     void setArchiveCompatibilityOptions(boolean enableIconOverlay, boolean enableUnarchivalConfirmation);
 
     List<UserHandle> getUserProfiles();
+
+    /** Saves view capture data to the wm trace directory. */
+    void saveViewCaptureData();
 }

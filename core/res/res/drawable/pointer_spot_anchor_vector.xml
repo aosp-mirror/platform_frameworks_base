@@ -22,4 +22,8 @@
         <path android:fillColor="#ADC6E7" android:pathData="M12 3c-4.963 0-9 4.038-9 9 0 4.963 4.037 9 9 9s9-4.037 9-9c0-4.962-4.037-9-9-9m0 17c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8" />
         <path android:fillColor="#ADC6E7" android:pathData="M12 5c-3.859 0-7 3.14-7 7s3.141 7 7 7 7-3.141 7-7-3.141-7-7-7m0 13c-3.309 0-6-2.691-6-6s2.691-6 6-6 6 2.691 6 6-2.691 6-6 6" />
     </group>
+    <path
+        android:pathData="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0 -16m0 15a7 7 0 1 1 0 -14 7 7 0 0 1 0 14"
+        android:fillColor="#99FFFFFF"
+        android:fillType="evenOdd"/>
 </vector>

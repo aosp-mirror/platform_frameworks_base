@@ -223,7 +223,9 @@ final class UriPermission {
             if (mWriteOwners != null && includingOwners) {
                 ownedModeFlags &= ~Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
                 for (UriPermissionOwner r : mWriteOwners) {
-                    r.removeWritePermission(this);
+                    if (r != null) {
+                        r.removeWritePermission(this);
+                    }
                 }
                 mWriteOwners = null;
             }
@@ -348,7 +350,7 @@ final class UriPermission {
         if (mWriteOwners != null) {
             pw.print(prefix);
             pw.println("writeOwners:");
-            for (UriPermissionOwner owner : mReadOwners) {
+            for (UriPermissionOwner owner : mWriteOwners) {
                 pw.print(prefix);
                 pw.println("  * " + owner);
             }

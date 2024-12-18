@@ -20,7 +20,6 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
@@ -49,9 +48,8 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
-import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ViewHierarchyAnimator;
-import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
@@ -70,15 +68,12 @@ import com.android.systemui.util.ViewController;
 import kotlin.coroutines.CoroutineContext;
 import kotlin.coroutines.EmptyCoroutineContext;
 
-import java.io.PrintWriter;
-
 import javax.inject.Inject;
 
 /**
  * Injectable controller for {@link KeyguardStatusView}.
  */
-public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> implements
-        Dumpable {
+public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     @VisibleForTesting static final String TAG = "KeyguardStatusViewController";
     private static final long STATUS_AREA_HEIGHT_ANIMATION_MILLIS = 133;
@@ -108,7 +103,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     private Boolean mSplitShadeEnabled = false;
     private Boolean mStatusViewCentered = true;
-    private DumpManager mDumpManager;
 
     private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
             new TransitionListenerAdapter() {
@@ -176,7 +170,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardLogger logger,
             InteractionJankMonitor interactionJankMonitor,
             KeyguardInteractor keyguardInteractor,
-            DumpManager dumpManager,
             PowerInteractor powerInteractor) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
@@ -188,7 +181,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
                 logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
-        mDumpManager = dumpManager;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
     }
@@ -222,8 +214,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     });
         }
 
-        mDumpManager.registerDumpable(getInstanceName(), this);
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             startCoroutines(EmptyCoroutineContext.INSTANCE);
             mView.setVisibility(View.GONE);
         }
@@ -250,6 +241,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     @Override
     protected void onViewAttached() {
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            return;
+        }
+
         mStatusArea.addOnLayoutChangeListener(mStatusAreaLayoutChangeListener);
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mConfigurationController.addCallback(mConfigurationListener);
@@ -257,6 +252,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     @Override
     protected void onViewDetached() {
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            return;
+        }
+
         mStatusArea.removeOnLayoutChangeListener(mStatusAreaLayoutChangeListener);
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
@@ -265,13 +264,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     /** Sets the StatusView as shown on an external display. */
     public void setDisplayedOnSecondaryDisplay() {
         mKeyguardClockSwitchController.setShownOnSecondaryDisplay(true);
-    }
-
-    /**
-     * Called in notificationPanelViewController to avoid leak
-     */
-    public void onDestroy() {
-        mDumpManager.unregisterDumpable(getInstanceName());
     }
 
     /**
@@ -477,7 +469,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
         } else {
             mKeyguardClockSwitchController.setSplitShadeCentered(
@@ -495,7 +487,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
         int guideline;
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             guideline = R.id.split_shade_guideline;
         } else {
             guideline = R.id.qs_edge_guideline;
@@ -540,7 +532,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 && clock.getLargeClock().getConfig().getHasCustomPositionUpdatedAnimation();
         // When migrateClocksToBlueprint is on, customized clock animation is conducted in
         // KeyguardClockViewBinder
-        if (customClockAnimation && !migrateClocksToBlueprint()) {
+        if (customClockAnimation && !MigrateClocksToBlueprint.isEnabled()) {
             // Find the clock, so we can exclude it from this transition.
             FrameLayout clockContainerView = mView.findViewById(R.id.lockscreen_clock_view_large);
 
@@ -594,11 +586,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     public ClockController getClockController() {
         return mKeyguardClockSwitchController.getClock();
-    }
-
-    @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        mView.dump(pw, args);
     }
 
     String getInstanceName() {

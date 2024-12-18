@@ -23,6 +23,7 @@ import static android.media.projection.IMediaProjectionManager.EXTRA_USER_REVIEW
 import static android.media.projection.MediaProjectionManager.OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static com.android.systemui.mediaprojection.permission.ScreenShareOptionKt.ENTIRE_SCREEN;
@@ -31,9 +32,9 @@ import static com.android.systemui.mediaprojection.permission.ScreenShareOptionK
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.StatusBarManager;
 import android.app.compat.CompatChanges;
 import android.content.Context;
@@ -41,7 +42,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
@@ -50,10 +50,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.BidiFormatter;
-import android.text.SpannableString;
 import android.text.TextPaint;
 import android.text.TextUtils;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 
@@ -61,21 +59,22 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.MediaProjectionServiceHelper;
+import com.android.systemui.mediaprojection.MediaProjectionUtils;
 import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.util.Utils;
 
-import dagger.Lazy;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-public class MediaProjectionPermissionActivity extends Activity
-        implements DialogInterface.OnClickListener {
+import dagger.Lazy;
+
+public class MediaProjectionPermissionActivity extends Activity {
     private static final String TAG = "MediaProjectionPermissionActivity";
     private static final float MAX_APP_NAME_SIZE_PX = 500f;
     private static final String ELLIPSIS = "\u2026";
@@ -84,6 +83,8 @@ public class MediaProjectionPermissionActivity extends Activity
     private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
     private final StatusBarManager mStatusBarManager;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
+    private final KeyguardManager mKeyguardManager;
 
     private String mPackageName;
     private int mUid;
@@ -98,14 +99,19 @@ public class MediaProjectionPermissionActivity extends Activity
     private boolean mUserSelectingTask = false;
 
     @Inject
-    public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
+    public MediaProjectionPermissionActivity(
+            FeatureFlags featureFlags,
             Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
             StatusBarManager statusBarManager,
-            MediaProjectionMetricsLogger mediaProjectionMetricsLogger) {
+            KeyguardManager keyguardManager,
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
+            ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate) {
         mFeatureFlags = featureFlags;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
         mStatusBarManager = statusBarManager;
+        mKeyguardManager = keyguardManager;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
+        mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
     }
 
     @Override
@@ -183,105 +189,120 @@ public class MediaProjectionPermissionActivity extends Activity
             }
         }
 
-        TextPaint paint = new TextPaint();
-        paint.setTextSize(42);
-
-        CharSequence dialogText = null;
-        CharSequence dialogTitle = null;
-        String appName = null;
-        if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
-            dialogText = getString(R.string.media_projection_sys_service_dialog_warning);
-            dialogTitle = getString(R.string.media_projection_sys_service_dialog_title);
-        } else {
-            String label = aInfo.loadLabel(packageManager).toString();
-
-            // If the label contains new line characters it may push the security
-            // message below the fold of the dialog. Labels shouldn't have new line
-            // characters anyways, so just truncate the message the first time one
-            // is seen.
-            final int labelLength = label.length();
-            int offset = 0;
-            while (offset < labelLength) {
-                final int codePoint = label.codePointAt(offset);
-                final int type = Character.getType(codePoint);
-                if (type == Character.LINE_SEPARATOR
-                        || type == Character.CONTROL
-                        || type == Character.PARAGRAPH_SEPARATOR) {
-                    label = label.substring(0, offset) + ELLIPSIS;
-                    break;
-                }
-                offset += Character.charCount(codePoint);
-            }
-
-            if (label.isEmpty()) {
-                label = mPackageName;
-            }
-
-            String unsanitizedAppName = TextUtils.ellipsize(label,
-                    paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
-            appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
-
-            String actionText = getString(R.string.media_projection_dialog_warning, appName);
-            SpannableString message = new SpannableString(actionText);
-
-            int appNameIndex = actionText.indexOf(appName);
-            if (appNameIndex >= 0) {
-                message.setSpan(new StyleSpan(Typeface.BOLD),
-                        appNameIndex, appNameIndex + appName.length(), 0);
-            }
-            dialogText = message;
-            dialogTitle = getString(R.string.media_projection_dialog_title, appName);
-        }
+        final String appName = extractAppName(aInfo, packageManager);
+        final boolean hasCastingCapabilities =
+                MediaProjectionUtils.INSTANCE.packageHasCastingCapabilities(
+                        packageManager, mPackageName);
 
         // Using application context for the dialog, instead of the activity context, so we get
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
-        if (isPartialScreenSharingEnabled()) {
-            final boolean overrideDisableSingleAppOption =
-                    CompatChanges.isChangeEnabled(
-                            OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
-                            mPackageName, getHostUserHandle());
-            MediaProjectionPermissionDialogDelegate delegate =
-                    new MediaProjectionPermissionDialogDelegate(
-                            dialogContext,
-                            getMediaProjectionConfig(),
-                            dialog -> {
-                                ScreenShareOption selectedOption =
-                                        dialog.getSelectedScreenShareOption();
-                                grantMediaProjectionPermission(selectedOption.getMode());
-                            },
-                            () -> finish(RECORD_CANCEL, /* projection= */ null),
-                            appName,
-                            overrideDisableSingleAppOption,
-                            mUid,
-                            mMediaProjectionMetricsLogger);
-            mDialog =
-                    new AlertDialogWithDelegate(
-                            dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
-        } else {
-            AlertDialog.Builder dialogBuilder =
-                    new AlertDialog.Builder(dialogContext, R.style.Theme_SystemUI_Dialog)
-                            .setTitle(dialogTitle)
-                            .setIcon(R.drawable.ic_media_projection_permission)
-                            .setMessage(dialogText)
-                            .setPositiveButton(R.string.media_projection_action_text, this)
-                            .setNeutralButton(android.R.string.cancel, this);
-            mDialog = dialogBuilder.create();
-        }
+        BaseMediaProjectionPermissionDialogDelegate<AlertDialog> delegate =
+                createPermissionDialogDelegate(appName, hasCastingCapabilities, dialogContext);
+        mDialog =
+                new AlertDialogWithDelegate(
+                        dialogContext, R.style.Theme_SystemUI_Dialog, delegate);
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyProjectionInitiated(
                     mUid,
-                    appName == null
+                    hasCastingCapabilities
                             ? SessionCreationSource.CAST
                             : SessionCreationSource.APP);
         }
 
         setUpDialog(mDialog);
-        mDialog.show();
+
+        boolean shouldDismissKeyguard =
+                com.android.systemui.Flags.mediaProjectionDialogBehindLockscreen();
+        if (shouldDismissKeyguard && mKeyguardManager.isDeviceLocked()) {
+            requestDeviceUnlock();
+        } else {
+            mDialog.show();
+        }
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(mUid);
+        }
+    }
+
+    private String extractAppName(ApplicationInfo applicationInfo, PackageManager packageManager) {
+        String label = applicationInfo.loadLabel(packageManager).toString();
+
+        // If the label contains new line characters it may push the security
+        // message below the fold of the dialog. Labels shouldn't have new line
+        // characters anyways, so just truncate the message the first time one
+        // is seen.
+        final int labelLength = label.length();
+        int offset = 0;
+        while (offset < labelLength) {
+            final int codePoint = label.codePointAt(offset);
+            final int type = Character.getType(codePoint);
+            if (type == Character.LINE_SEPARATOR
+                    || type == Character.CONTROL
+                    || type == Character.PARAGRAPH_SEPARATOR) {
+                label = label.substring(0, offset) + ELLIPSIS;
+                break;
+            }
+            offset += Character.charCount(codePoint);
+        }
+
+        if (label.isEmpty()) {
+            label = mPackageName;
+        }
+
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(42);
+
+        String unsanitizedAppName = TextUtils.ellipsize(label,
+                paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
+        String appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
+
+        // Have app name be the package name as a default fallback, if specific app name can't be
+        // extracted
+        if (appName == null || appName.isEmpty()) {
+            return mPackageName;
+        }
+
+        return appName;
+    }
+
+    private BaseMediaProjectionPermissionDialogDelegate<AlertDialog> createPermissionDialogDelegate(
+            String appName,
+            boolean hasCastingCapabilities,
+            Context dialogContext) {
+        final boolean overrideDisableSingleAppOption =
+                CompatChanges.isChangeEnabled(
+                        OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION,
+                        mPackageName, getHostUserHandle());
+        MediaProjectionConfig mediaProjectionConfig = getMediaProjectionConfig();
+        Consumer<BaseMediaProjectionPermissionDialogDelegate<AlertDialog>> onStartRecordingClicked =
+                dialog -> {
+                    ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
+                    grantMediaProjectionPermission(
+                            selectedOption.getMode(), hasCastingCapabilities);
+                };
+        Runnable onCancelClicked = () -> finish(RECORD_CANCEL, /* projection= */ null);
+        if (hasCastingCapabilities) {
+            return new SystemCastPermissionDialogDelegate(
+                    dialogContext,
+                    mediaProjectionConfig,
+                    onStartRecordingClicked,
+                    onCancelClicked,
+                    appName,
+                    overrideDisableSingleAppOption,
+                    mUid,
+                    mMediaProjectionMetricsLogger);
+        } else {
+            return new ShareToAppPermissionDialogDelegate(
+                    dialogContext,
+                    mediaProjectionConfig,
+                    onStartRecordingClicked,
+                    onCancelClicked,
+                    appName,
+                    overrideDisableSingleAppOption,
+                    mUid,
+                    mMediaProjectionMetricsLogger);
         }
     }
 
@@ -295,22 +316,9 @@ public class MediaProjectionPermissionActivity extends Activity
         }
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == AlertDialog.BUTTON_POSITIVE) {
-            grantMediaProjectionPermission(ENTIRE_SCREEN);
-        } else {
-            if (mDialog != null) {
-                mDialog.dismiss();
-            }
-            setResult(RESULT_CANCELED);
-            finish(RECORD_CANCEL, /* projection= */ null);
-        }
-    }
-
     private void setUpDialog(AlertDialog dialog) {
         SystemUIDialog.registerDismissListener(dialog);
-        SystemUIDialog.applyFlags(dialog);
+        SystemUIDialog.applyFlags(dialog, /* showWhenLocked= */ false);
         SystemUIDialog.setDialogSize(dialog);
 
         dialog.setOnCancelListener(this::onDialogDismissedOrCancelled);
@@ -326,10 +334,7 @@ public class MediaProjectionPermissionActivity extends Activity
         final UserHandle hostUserHandle = getHostUserHandle();
         if (mScreenCaptureDevicePolicyResolver.get()
                 .isScreenCaptureCompletelyDisabled(hostUserHandle)) {
-            // Using application context for the dialog, instead of the activity context, so we get
-            // the correct screen width when in split screen.
-            Context dialogContext = getApplicationContext();
-            AlertDialog dialog = new ScreenCaptureDisabledDialog(dialogContext);
+            AlertDialog dialog = mScreenCaptureDisabledDialogDelegate.createPlainDialog();
             setUpDialog(dialog);
             dialog.show();
             return true;
@@ -338,25 +343,31 @@ public class MediaProjectionPermissionActivity extends Activity
         return false;
     }
 
-    private void grantMediaProjectionPermission(int screenShareMode) {
+    private void requestDeviceUnlock() {
+        mKeyguardManager.requestDismissKeyguard(this,
+                new KeyguardManager.KeyguardDismissCallback() {
+                    @Override
+                    public void onDismissSucceeded() {
+                        mDialog.show();
+                    }
+                });
+    }
+
+    private void grantMediaProjectionPermission(
+            int screenShareMode, boolean hasCastingCapabilities) {
         try {
+            IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
+                    mUid, mPackageName, mReviewGrantedConsentRequired);
             if (screenShareMode == ENTIRE_SCREEN) {
-                final IMediaProjection projection =
-                        MediaProjectionServiceHelper.createOrReuseProjection(mUid, mPackageName,
-                                mReviewGrantedConsentRequired);
                 final Intent intent = new Intent();
-                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
-                        projection.asBinder());
+                setCommonIntentExtras(intent, hasCastingCapabilities, projection);
                 setResult(RESULT_OK, intent);
                 finish(RECORD_CONTENT_DISPLAY, projection);
             }
-            if (isPartialScreenSharingEnabled() && screenShareMode == SINGLE_APP) {
-                IMediaProjection projection = MediaProjectionServiceHelper.createOrReuseProjection(
-                        mUid, mPackageName, mReviewGrantedConsentRequired);
+            if (screenShareMode == SINGLE_APP) {
                 final Intent intent = new Intent(this,
                         MediaProjectionAppSelectorActivity.class);
-                intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
-                        projection.asBinder());
+                setCommonIntentExtras(intent, hasCastingCapabilities, projection);
                 intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
                         getHostUserHandle());
                 intent.putExtra(
@@ -365,11 +376,11 @@ public class MediaProjectionPermissionActivity extends Activity
                 intent.putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, mReviewGrantedConsentRequired);
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
 
-                // Start activity from the current foreground user to avoid creating a separate
-                // SystemUI process without access to recent tasks because it won't have
-                // WM Shell running inside.
+                // Start activity as system user and manually show app selector to all users to
+                // avoid creating a separate SystemUI process without access to recent tasks
+                // because it won't have WM Shell running inside.
                 mUserSelectingTask = true;
-                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                startActivityAsUser(intent, UserHandle.of(USER_SYSTEM));
                 // close shade if it's open
                 mStatusBarManager.collapsePanels();
             }
@@ -382,6 +393,19 @@ public class MediaProjectionPermissionActivity extends Activity
                 mDialog.dismiss();
             }
         }
+    }
+
+    private void setCommonIntentExtras(
+            Intent intent,
+            boolean hasCastingCapabilities,
+            IMediaProjection projection) throws RemoteException {
+        intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
+                projection.asBinder());
+        intent.putExtra(
+                MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
+                hasCastingCapabilities
+                        ? MediaProjectionAppSelectorActivity.ScreenShareType.SystemCast.name()
+                        : MediaProjectionAppSelectorActivity.ScreenShareType.ShareToApp.name());
     }
 
     private UserHandle getHostUserHandle() {
@@ -420,9 +444,5 @@ public class MediaProjectionPermissionActivity extends Activity
         }
         return intent.getParcelableExtra(
                 MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG);
-    }
-
-    private boolean isPartialScreenSharingEnabled() {
-        return mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
     }
 }

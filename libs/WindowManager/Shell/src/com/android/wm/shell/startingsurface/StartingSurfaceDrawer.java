@@ -18,10 +18,12 @@ package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -31,7 +33,6 @@ import android.hardware.display.DisplayManager;
 import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.SplashScreenView;
@@ -41,12 +42,12 @@ import android.window.StartingWindowRemovalInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransactionPool;
+import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 
 /**
  * A class which able to draw splash screen or snapshot as the starting window for a task.
@@ -202,7 +203,7 @@ public class StartingSurfaceDrawer {
         @Override
         protected SurfaceControl getParentSurface(IWindow window,
                 WindowManager.LayoutParams attrs) {
-            final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+            final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                     .setContainerLayer()
                     .setName("Windowless window")
                     .setHidden(false)
@@ -269,21 +270,18 @@ public class StartingSurfaceDrawer {
 
         @Override
         public final boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
-            if (immediately) {
+            if (immediately
+                    // Show the latest content as soon as possible for unlocking to home.
+                    || mActivityType == ACTIVITY_TYPE_HOME
+                    || info.deferRemoveMode == DEFER_MODE_NONE) {
                 removeImmediately();
-            } else {
-                scheduleRemove(info.deferRemoveForImeMode);
-                return false;
+                return true;
             }
-            return true;
+            scheduleRemove(info.deferRemoveMode);
+            return false;
         }
 
         void scheduleRemove(@StartingWindowRemovalInfo.DeferMode int deferRemoveForImeMode) {
-            // Show the latest content as soon as possible for unlocking to home.
-            if (mActivityType == ACTIVITY_TYPE_HOME) {
-                removeImmediately();
-                return;
-            }
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
             final long delayRemovalTime;
             switch (deferRemoveForImeMode) {
@@ -306,7 +304,7 @@ public class StartingSurfaceDrawer {
         @CallSuper
         protected void removeImmediately() {
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
-            mRecordManager.onRecordRemoved(mTaskId);
+            mRecordManager.onRecordRemoved(this, mTaskId);
         }
     }
 
@@ -327,6 +325,11 @@ public class StartingSurfaceDrawer {
         }
 
         void addRecord(int taskId, StartingWindowRecord record) {
+            final StartingWindowRecord original = mStartingWindowRecords.get(taskId);
+            if (original != null) {
+                mTmpRemovalInfo.taskId = taskId;
+                original.removeIfPossible(mTmpRemovalInfo, true /* immediately */);
+            }
             mStartingWindowRecords.put(taskId, record);
         }
 
@@ -346,8 +349,11 @@ public class StartingSurfaceDrawer {
             removeWindow(mTmpRemovalInfo, true/* immediately */);
         }
 
-        void onRecordRemoved(int taskId) {
-            mStartingWindowRecords.remove(taskId);
+        void onRecordRemoved(@NonNull StartingWindowRecord record, int taskId) {
+            final StartingWindowRecord currentRecord = mStartingWindowRecords.get(taskId);
+            if (currentRecord == record) {
+                mStartingWindowRecords.remove(taskId);
+            }
         }
 
         StartingWindowRecord getRecord(int taskId) {

@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -404,6 +405,11 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
                 return;
             }
             break;
+        case SP_FOREGROUND_WINDOW:
+            if (!CgroupGetAttributePath("HighCapacityWICPUs", &filename)) {
+                return;
+            }
+            break;
         case SP_TOP_APP:
             if (!CgroupGetAttributePath("MaxCapacityCPUs", &filename)) {
                 return;
@@ -583,32 +589,6 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     return pri;
 }
 
-jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
-                                          jint pid, jboolean is_increased)
-{
-    char text[64];
-
-    if (is_increased) {
-        strcpy(text, "/sys/fs/cgroup/memory/sw/tasks");
-    } else {
-        strcpy(text, "/sys/fs/cgroup/memory/tasks");
-    }
-
-    struct stat st;
-    if (stat(text, &st) || !S_ISREG(st.st_mode)) {
-        return false;
-    }
-
-    int fd = open(text, O_WRONLY | O_CLOEXEC);
-    if (fd >= 0) {
-        sprintf(text, "%" PRId32, pid);
-        write(fd, text, strlen(text));
-        close(fd);
-    }
-
-    return true;
-}
-
 void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
@@ -656,9 +636,8 @@ static int pid_compare(const void* v1, const void* v2)
 
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
-    std::array<std::string_view, 2> memFreeTags = {
-        ::android::meminfo::SysMemInfo::kMemFree,
-        ::android::meminfo::SysMemInfo::kMemCached,
+    std::array<std::string_view, 1> memFreeTags = {
+            ::android::meminfo::SysMemInfo::kMemAvailable,
     };
     std::vector<uint64_t> mem(memFreeTags.size());
     ::android::meminfo::SysMemInfo smi;
@@ -1004,6 +983,8 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
                 }
             }
             if ((mode&PROC_OUT_STRING) != 0 && di < NS) {
+                std::replace_if(buffer+start, buffer+end,
+                                [](unsigned char c){ return !std::isprint(c); }, '?');
                 jstring str = env->NewStringUTF(buffer+start);
                 env->SetObjectArrayElement(outStrings, di, str);
             }
@@ -1137,6 +1118,41 @@ void android_os_Process_sendSignalQuiet(JNIEnv* env, jobject clazz, jint pid, ji
 {
     if (pid > 0) {
         kill(pid, sig);
+    }
+}
+
+void android_os_Process_sendSignalThrows(JNIEnv* env, jobject clazz, jint pid, jint sig) {
+    if (pid <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", "Invalid argument: pid(%d)",
+                             pid);
+        return;
+    }
+    int ret = kill(pid, sig);
+    if (ret < 0) {
+        if (errno == ESRCH) {
+            jniThrowExceptionFmt(env, "java/util/NoSuchElementException",
+                                 "Process with pid %d not found", pid);
+        } else {
+            signalExceptionForError(env, errno, pid);
+        }
+    }
+}
+
+void android_os_Process_sendTgSignalThrows(JNIEnv* env, jobject clazz, jint tgid, jint tid,
+                                           jint sig) {
+    if (tgid <= 0 || tid <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Invalid argument: tgid(%d), tid(%d)", tid, tgid);
+        return;
+    }
+    int ret = tgkill(tgid, tid, sig);
+    if (ret < 0) {
+        if (errno == ESRCH) {
+            jniThrowExceptionFmt(env, "java/util/NoSuchElementException",
+                                 "Process with tid %d and tgid %d not found", tid, tgid);
+        } else {
+            signalExceptionForError(env, errno, tid);
+        }
     }
 }
 
@@ -1354,12 +1370,13 @@ static const JNINativeMethod methods[] = {
         {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
         {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
-        {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
         {"setArgV0Native", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
         {"setUid", "(I)I", (void*)android_os_Process_setUid},
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
         {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
         {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
+        {"sendSignalThrows", "(II)V", (void*)android_os_Process_sendSignalThrows},
+        {"sendTgSignalThrows", "(III)V", (void*)android_os_Process_sendTgSignalThrows},
         {"setProcessFrozen", "(IIZ)V", (void*)android_os_Process_setProcessFrozen},
         {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
         {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},

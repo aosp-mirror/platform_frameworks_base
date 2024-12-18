@@ -60,22 +60,27 @@ public class ColorizedFgsCoordinator implements Coordinator {
         public boolean isInSection(ListEntry entry) {
             NotificationEntry notificationEntry = entry.getRepresentativeEntry();
             if (notificationEntry != null) {
-                return isColorizedForegroundService(notificationEntry) || isCall(notificationEntry);
+                return isRichOngoing(notificationEntry);
             }
             return false;
         }
-
-        private boolean isColorizedForegroundService(NotificationEntry entry) {
-            Notification notification = entry.getSbn().getNotification();
-            return notification.isForegroundService()
-                    && notification.isColorized()
-                    && entry.getImportance() > IMPORTANCE_MIN;
-        }
-
-        private boolean isCall(NotificationEntry entry) {
-            Notification notification = entry.getSbn().getNotification();
-            return entry.getImportance() > IMPORTANCE_MIN
-                    && notification.isStyle(Notification.CallStyle.class);
-        }
     };
+
+    /** Determines if the given notification is a colorized or call notification */
+    public static boolean isRichOngoing(NotificationEntry entry) {
+        return isColorizedForegroundService(entry) || isCall(entry);
+    }
+
+    private static boolean isColorizedForegroundService(NotificationEntry entry) {
+        Notification notification = entry.getSbn().getNotification();
+        return notification.isForegroundService()
+                && notification.isColorized()
+                && entry.getImportance() > IMPORTANCE_MIN;
+    }
+
+    private static boolean isCall(NotificationEntry entry) {
+        Notification notification = entry.getSbn().getNotification();
+        return entry.getImportance() > IMPORTANCE_MIN
+                && notification.isStyle(Notification.CallStyle.class);
+    }
 }

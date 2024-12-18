@@ -21,8 +21,8 @@ import android.graphics.Color
 import android.graphics.LightingColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.SysuiTestCase
@@ -40,7 +40,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SquigglyProgressTest : SysuiTestCase() {
 

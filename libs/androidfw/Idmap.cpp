@@ -121,7 +121,7 @@ OverlayDynamicRefTable::OverlayDynamicRefTable(const Idmap_data_header* data_hea
                                                uint8_t target_assigned_package_id)
     : data_header_(data_header),
       entries_(entries),
-      target_assigned_package_id_(target_assigned_package_id) { };
+      target_assigned_package_id_(target_assigned_package_id) {}
 
 status_t OverlayDynamicRefTable::lookupResourceId(uint32_t* resId) const {
   const Idmap_overlay_entry* first_entry = entries_;

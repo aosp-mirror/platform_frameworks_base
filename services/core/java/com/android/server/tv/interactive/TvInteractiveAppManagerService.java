@@ -349,7 +349,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             }
         }
 
-        userState.mIAppMap.clear();
+        userState.mAdServiceMap.clear();
         userState.mAdServiceMap = adServiceMap;
     }
 
@@ -519,7 +519,7 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     private void registerBroadcastReceivers() {
-        PackageMonitor monitor = new PackageMonitor() {
+        PackageMonitor monitor = new PackageMonitor(/* supportsPackageRestartQuery */ true) {
             private void buildTvInteractiveAppServiceList(String[] packages) {
                 int userId = getChangingUserId();
                 synchronized (mLock) {
@@ -989,7 +989,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                         return;
                     }
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    TvAdServiceState adState = userState.mAdMap.get(serviceId);
+                    TvAdServiceState adState = userState.mAdServiceMap.get(serviceId);
                     if (adState == null) {
                         Slogf.w(TAG, "Failed to find state for serviceId=" + serviceId);
                         sendAdSessionTokenToClientLocked(client, serviceId, null, null, seq);
@@ -2124,7 +2124,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         @Override
         public void setTeletextAppEnabled(IBinder sessionToken, boolean enable, int userId) {
             if (DEBUG) {
-                Slogf.d(TAG, "setTeletextAppEnabled(enable=%d)", enable);
+                Slogf.d(TAG, "setTeletextAppEnabled(enable=%b)", enable);
             }
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -3032,6 +3032,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             ITvAdService service, IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         AdSessionState sessionState = userState.mAdSessionStateMap.get(sessionToken);
+
         if (DEBUG) {
             Slogf.d(TAG, "createAdSessionInternalLocked(iAppServiceId="
                     + sessionState.mAdServiceId + ")");
@@ -3301,8 +3302,6 @@ public class TvInteractiveAppManagerService extends SystemService {
 
     private static final class UserState {
         private final int mUserId;
-        // A mapping from the TV AD service ID to its TvAdServiceState.
-        private Map<String, TvAdServiceState> mAdMap = new HashMap<>();
         // A mapping from the name of a TV Interactive App service to its state.
         private final Map<ComponentName, AdServiceState> mAdServiceStateMap = new HashMap<>();
         // A mapping from the token of a TV Interactive App session to its state.

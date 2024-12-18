@@ -1,0 +1,38 @@
+<pbundle_as_map name="data_labels">
+    <pbundle_as_map name="data_collected">
+        <pbundle_as_map name="photo_video">
+            <pbundle_as_map name="photos">
+                <int-array name="purposes" num="1">
+                    <item value="1"/>
+                </int-array>
+                <boolean name="is_collection_optional" value="true"/>
+                <boolean name="ephemeral" value="false"/>
+            </pbundle_as_map>
+        </pbundle_as_map>
+        <pbundle_as_map name="location">
+            <pbundle_as_map name="precise_location">
+                <int-array name="purposes" num="1">
+                    <item value="1"/>
+                </int-array>
+                <boolean name="is_collection_optional" value="true"/>
+                <boolean name="ephemeral" value="false"/>
+            </pbundle_as_map>
+            <pbundle_as_map name="approx_location">
+                <int-array name="purposes" num="1">
+                    <item value="1"/>
+                </int-array>
+                <boolean name="is_collection_optional" value="false"/>
+                <boolean name="ephemeral" value="true"/>
+            </pbundle_as_map>
+        </pbundle_as_map>
+        <pbundle_as_map name="contacts">
+            <pbundle_as_map name="contacts">
+                <int-array name="purposes" num="1">
+                    <item value="1"/>
+                </int-array>
+                <boolean name="is_collection_optional" value="true"/>
+                <boolean name="ephemeral" value="true"/>
+            </pbundle_as_map>
+        </pbundle_as_map>
+    </pbundle_as_map>
+</pbundle_as_map>

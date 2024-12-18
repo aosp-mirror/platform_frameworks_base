@@ -27,7 +27,7 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -161,7 +161,7 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Fullscreen Task Vanished: #%d",
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
-
+        mWindowDecorViewModelOptional.ifPresent(v -> v.onTaskVanished(taskInfo));
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (mWindowDecorViewModelOptional.isPresent()) {
             mWindowDecorViewModelOptional.get().destroyWindowDecoration(taskInfo);

@@ -654,6 +654,33 @@ public final class PictureInPictureParams implements Parcelable {
                 && !hasSetSubtitle() && mIsLaunchIntoPip == null;
     }
 
+    /**
+     * Compare a given {@link Rect} against the aspect ratio, with rounding error tolerance.
+     * @param bounds The {@link Rect} represents the source rect hint, this check is not needed
+     *               if app provides a null source rect hint.
+     * @param aspectRatio {@link Rational} representation of aspect ratio, this check is not needed
+     *                    if app provides a null aspect ratio.
+     * @return {@code true} if the given {@link Rect} matches the aspect ratio.
+     * @hide
+     */
+    @SuppressWarnings("UnflaggedApi")
+    @TestApi
+    public static boolean isSameAspectRatio(@NonNull Rect bounds, @NonNull Rational aspectRatio) {
+        // Validations
+        if (bounds.isEmpty() || aspectRatio.floatValue() <= 0) {
+            return false;
+        }
+        // Check against both the width and height.
+        final int exactWidth = (aspectRatio.getNumerator() * bounds.height())
+                / aspectRatio.getDenominator();
+        if (Math.abs(exactWidth - bounds.width()) <= 1) {
+            return true;
+        }
+        final int exactHeight = (aspectRatio.getDenominator() * bounds.width())
+                / aspectRatio.getNumerator();
+        return Math.abs(exactHeight - bounds.height()) <= 1;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

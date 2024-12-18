@@ -94,14 +94,14 @@ namespace android {
 int ADisplay_acquirePhysicalDisplays(ADisplay*** outDisplays) {
     // This is running on host, so there are no physical displays available.
     // Create 1 fake display instead.
-    DisplayImpl** const impls = reinterpret_cast<DisplayImpl**>(
-            malloc(sizeof(DisplayImpl*) + sizeof(DisplayImpl)));
+    DisplayImpl** const impls =
+            reinterpret_cast<DisplayImpl**>(malloc(sizeof(DisplayImpl*) + sizeof(DisplayImpl)));
     DisplayImpl* const displayData = reinterpret_cast<DisplayImpl*>(impls + 1);
 
-    displayData[0] = DisplayImpl{ADisplayType::DISPLAY_TYPE_INTERNAL,
-                                 ADataSpace::ADATASPACE_UNKNOWN,
-                                 AHardwareBuffer_Format::AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
-                                 DisplayConfigImpl()};
+    displayData[0] =
+            DisplayImpl{ADisplayType::DISPLAY_TYPE_INTERNAL, ADataSpace::ADATASPACE_UNKNOWN,
+                        AHardwareBuffer_Format::AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+                        DisplayConfigImpl()};
     impls[0] = displayData;
     *outDisplays = reinterpret_cast<ADisplay**>(impls);
     return 1;

@@ -1,0 +1,7 @@
+{
+    "presubmit": [
+        {
+            "name": "FrameworksServicesTests_people_data"
+        }
+    ]
+}

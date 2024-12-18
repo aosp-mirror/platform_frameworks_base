@@ -16,12 +16,17 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.flow.Flow
 
 /** Breaks down AOD->OCCLUDED transition into discrete steps for corresponding views to consume. */
 @SysUISingleton
@@ -33,9 +38,26 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
-            from = KeyguardState.AOD,
-            to = KeyguardState.OCCLUDED,
+            edge = Edge.create(from = AOD, to = OCCLUDED),
         )
+
+    /**
+     * Fade out the lockscreen during a transition to OCCLUDED.
+     *
+     * This happens when pressing the power button while a SHOW_WHEN_LOCKED activity is on the top
+     * of the task stack, as well as when the power button is double tapped on the LOCKSCREEN (the
+     * first tap transitions to AOD, the second cancels that transition and starts AOD -> OCCLUDED.
+     */
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var currentAlpha = 0f
+        return transitionAnimation.sharedFlow(
+            duration = 250.milliseconds,
+            startTime = 100.milliseconds, // Wait for the light reveal to "hit" the LS elements.
+            onStart = { currentAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(currentAlpha, 0f, it) },
+            onCancel = { 0f },
+        )
+    }
 
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)
 }

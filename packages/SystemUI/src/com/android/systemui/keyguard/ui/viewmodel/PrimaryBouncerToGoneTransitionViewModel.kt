@@ -17,11 +17,11 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
@@ -46,19 +46,25 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
-    featureFlags: FeatureFlagsClassic,
     bouncerToGoneFlows: BouncerToGoneFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_GONE_DURATION,
-            from = PRIMARY_BOUNCER,
-            to = GONE,
-        )
+        animationFlow
+            .setup(
+                duration = TO_GONE_DURATION,
+                edge = Edge.INVALID,
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = PRIMARY_BOUNCER, to = GONE),
+            )
 
     private var leaveShadeOpen: Boolean = false
     private var willRunDismissFromKeyguard: Boolean = false
+
+    /** See [BouncerToGoneFlows#showAllNotifications] */
+    val showAllNotifications: Flow<Boolean> =
+        bouncerToGoneFlows.showAllNotifications(TO_GONE_DURATION, PRIMARY_BOUNCER)
 
     val notificationAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
@@ -74,11 +80,12 @@ constructor(
                     1f - it
                 }
             },
+            onFinish = { 1f },
         )
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
-        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen
@@ -86,6 +93,7 @@ constructor(
         } else {
             createBouncerAlphaFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
+
     private fun createBouncerAlphaFlow(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
         return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
@@ -102,7 +110,7 @@ constructor(
 
     /** Lockscreen alpha */
     val lockscreenAlpha: Flow<Float> =
-        if (featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen

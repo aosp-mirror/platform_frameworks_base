@@ -275,7 +275,7 @@ class RefreshRatePolicy {
         if (refreshRateSwitchingType != SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY) {
             final int preferredModeId = w.mAttrs.preferredDisplayModeId;
             if (preferredModeId > 0) {
-                for (Display.Mode mode : mDisplayInfo.supportedModes) {
+                for (Display.Mode mode : mDisplayInfo.appsSupportedModes) {
                     if (preferredModeId == mode.getModeId()) {
                         return w.mFrameRateVote.update(mode.getRefreshRate(),
                                 Surface.FRAME_RATE_COMPATIBILITY_EXACT,

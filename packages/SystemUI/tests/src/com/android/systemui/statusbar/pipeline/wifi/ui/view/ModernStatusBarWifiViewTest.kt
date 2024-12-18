@@ -26,7 +26,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
@@ -36,7 +36,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,10 +62,11 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 class ModernStatusBarWifiViewTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private lateinit var testableLooper: TestableLooper
 
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "ModernStatusBarWifiViewTest")
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
@@ -91,7 +93,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     airplaneModeRepository,
                     connectivityRepository,
-                    FakeMobileConnectionsRepository(),
+                    kosmos.fakeMobileConnectionsRepository,
                 ),
                 tableLogBuffer,
                 scope,
@@ -193,9 +195,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_notEnabled_outputsFalse() {
         wifiRepository.setIsWifiEnabled(false)
-        wifiRepository.setWifiNetwork(
-            WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
-        )
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(isValidated = true, level = 2))
 
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
@@ -210,9 +210,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     @Test
     fun isIconVisible_enabled_outputsTrue() {
         wifiRepository.setIsWifiEnabled(true)
-        wifiRepository.setWifiNetwork(
-            WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
-        )
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(isValidated = true, level = 2))
 
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
@@ -270,4 +268,3 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 }
 
 private const val SLOT_NAME = "TestSlotName"
-private const val NETWORK_ID = 200

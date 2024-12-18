@@ -41,7 +41,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -49,12 +49,13 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -66,8 +67,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected final ShellTaskOrganizer mShellTaskOrganizer;
     protected final PipMenuController mPipMenuController;
     protected final Transitions mTransitions;
-    private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
+    private final Map<PipTransitionCallback, Executor> mPipTransitionCallbacks = new HashMap<>();
     protected PipTaskOrganizer mPipOrganizer;
+    protected DefaultMixedHandler mMixedHandler;
 
     protected final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
@@ -126,11 +128,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
      *
-     * @param onFinishResizeCallback callback guaranteed to execute when animation ends and
-     *                               client completes any potential draws upon WM state updates.
+     * @param duration the suggested duration for resize animation.
      */
-    public void startResizeTransition(WindowContainerTransaction wct,
-            Consumer<Rect> onFinishResizeCallback) {
+    public void startResizeTransition(WindowContainerTransaction wct, int duration) {
         // Default implementation does nothing.
     }
 
@@ -173,21 +173,60 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         mPipOrganizer = pto;
     }
 
+    public void setMixedHandler(DefaultMixedHandler mixedHandler) {
+        mMixedHandler = mixedHandler;
+    }
+
+    public void applyTransaction(WindowContainerTransaction wct) {
+        mShellTaskOrganizer.applyTransaction(wct);
+    }
+
     /**
      * Registers {@link PipTransitionCallback} to receive transition callbacks.
      */
-    public void registerPipTransitionCallback(PipTransitionCallback callback) {
-        mPipTransitionCallbacks.add(callback);
+    public void registerPipTransitionCallback(
+            @NonNull PipTransitionCallback callback, @NonNull Executor executor) {
+        mPipTransitionCallbacks.put(callback, executor);
+    }
+
+    protected void onStartSwipePipToHome() {
+        if (Flags.enablePipUiStateCallbackOnEntering()) {
+            try {
+                ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
+                        new PictureInPictureUiState.Builder()
+                                .setTransitioningToPip(true)
+                                .build());
+            } catch (RemoteException | IllegalStateException e) {
+                ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Failed to set alert PiP state change.");
+            }
+        }
+    }
+
+    /**
+     * Used in {@link #sendOnPipTransitionStarted(int)} to decide whether we should send the
+     * PictureInPictureUiState change callback on transition start.
+     * For instance, in auto-enter-pip case, {@link #onStartSwipePipToHome()} should have signaled
+     * the app, and we can return {@code true} here to avoid double callback.
+     *
+     * @return {@code true} if there is a ongoing swipe pip to home transition.
+     */
+    protected boolean isInSwipePipToHomeTransition() {
+        return false;
     }
 
     protected void sendOnPipTransitionStarted(
             @PipAnimationController.TransitionDirection int direction) {
         final Rect pipBounds = mPipBoundsState.getBounds();
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionStarted(direction, pipBounds);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionStarted direction=%d, bounds=%s", direction, pipBounds);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionStarted(direction, pipBounds));
         }
-        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
+        if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()
+                && !isInSwipePipToHomeTransition()) {
             try {
                 ActivityTaskManager.getService().onPictureInPictureUiStateChanged(
                         new PictureInPictureUiState.Builder()
@@ -202,9 +241,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionFinished(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionFinished(direction);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionFinished direction=%d", direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionFinished(direction));
         }
         if (isInPipDirection(direction) && Flags.enablePipUiStateCallbackOnEntering()) {
             try {
@@ -221,9 +263,12 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     protected void sendOnPipTransitionCancelled(
             @PipAnimationController.TransitionDirection int direction) {
-        for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-            final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-            callback.onPipTransitionCanceled(direction);
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "sendOnPipTransitionCancelled direction=%d", direction);
+        for (Map.Entry<PipTransitionCallback, Executor> entry
+                : mPipTransitionCallbacks.entrySet()) {
+            entry.getValue().execute(
+                    () -> entry.getKey().onPipTransitionCanceled(direction));
         }
     }
 
@@ -266,9 +311,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Whether a particular package is same as current pip package. */
-    public boolean isInPipPackage(String packageName) {
+    public boolean isPackageActiveInPip(String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
                 && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 
@@ -303,6 +348,22 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /** End the currently-playing PiP animation. */
     public void end() {
+    }
+
+    /**
+     * Finish the current transition if possible.
+     *
+     * @param tx transaction to be applied with a potentially new draw after finishing.
+     */
+    public void finishTransition(@Nullable SurfaceControl.Transaction tx) {
+    }
+
+    /**
+     * End the currently-playing PiP animation.
+     *
+     * @param onTransitionEnd callback to run upon finishing the playing transition.
+     */
+    public void end(@Nullable Runnable onTransitionEnd) {
     }
 
     /** Starts the {@link android.window.SystemPerformanceHinter.HighPerfSession}. */

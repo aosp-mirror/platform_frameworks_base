@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -31,6 +30,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.View.FocusDirection;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -351,10 +351,35 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
+        final ClientWindowFrames outFrames;
+        final MergedConfiguration outMergedConfiguration;
+        final SurfaceControl outSurfaceControl;
+        final InsetsState outInsetsState;
+        final InsetsSourceControl.Array outActiveControls;
+        if (outRelayoutResult != null) {
+            outFrames = outRelayoutResult.frames;
+            outMergedConfiguration = outRelayoutResult.mergedConfiguration;
+            outSurfaceControl = outRelayoutResult.surfaceControl;
+            outInsetsState = outRelayoutResult.insetsState;
+            outActiveControls = outRelayoutResult.activeControls;
+        } else {
+            outFrames = null;
+            outMergedConfiguration = null;
+            outSurfaceControl = null;
+            outInsetsState = null;
+            outActiveControls = null;
+        }
+        return relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags,
+                seq, lastSyncSeqId, outFrames, outMergedConfiguration, outSurfaceControl,
+                outInsetsState, outActiveControls);
+    }
+
+    private int relayoutInner(IWindow window, WindowManager.LayoutParams inAttrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
-            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncSeqIdBundle) {
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -439,10 +464,10 @@ public class WindowlessWindowManager implements IWindowSession {
     public void relayoutAsync(IWindow window, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
             int lastSyncSeqId) {
-        relayout(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+        relayoutInner(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
                 lastSyncSeqId, null /* outFrames */, null /* outMergedConfiguration */,
                 null /* outSurfaceControl */, null /* outInsetsState */,
-                null /* outActiveControls */, null /* outSyncSeqIdBundle */);
+                null /* outActiveControls */);
     }
 
     @Override
@@ -476,16 +501,6 @@ public class WindowlessWindowManager implements IWindowSession {
             c.finished(postDrawTransaction);
             mResizeCompletionForWindow.remove(window.asBinder());
         }
-    }
-
-    @Override
-    public boolean performHapticFeedback(int effectId, boolean always, boolean fromIme) {
-        return false;
-    }
-
-    @Override
-    public void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme) {
-        performHapticFeedback(effectId, always, fromIme);
     }
 
     @Override
@@ -566,17 +581,20 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updatePointerIcon(android.view.IWindow window) {
-    }
-
-    @Override
     public void updateTapExcludeRegion(android.view.IWindow window,
             android.graphics.Region region) {
     }
 
     @Override
     public void updateRequestedVisibleTypes(IWindow window,
-            @InsetsType int requestedVisibleTypes)  {
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token imeStatsToken)
+            throws RemoteException {
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // Embedded windows do not control insets (except for IME). The host window is
+            // responsible for controlling the insets.
+            mRealWm.updateRequestedVisibleTypes(window,
+                    requestedVisibleTypes & WindowInsets.Type.ime(), imeStatsToken);
+        }
     }
 
     @Override
@@ -638,7 +656,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
                 s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
                         false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
-                        Integer.MAX_VALUE, false /* dragResizing */);
+                        Integer.MAX_VALUE, false /* dragResizing */, null /* activityWindowInfo */);
             } catch (RemoteException e) {
                 // Too bad
             }
@@ -655,6 +673,11 @@ public class WindowlessWindowManager implements IWindowSession {
         Log.e(TAG, "Received request to moveFocusToAdjacentWindow on"
                 + " WindowlessWindowManager. We shouldn't get here!");
         return false;
+    }
+
+    @Override
+    public void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
     }
 
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {

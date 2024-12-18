@@ -16,13 +16,16 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.Nullable;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 final class VoteSummary {
     private static final float FLOAT_TOLERANCE = SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
@@ -37,9 +40,20 @@ final class VoteSummary {
     public int minWidth;
     public int minHeight;
     public boolean disableRefreshRateSwitching;
+    /**
+     *  available modes should have mode with specific refresh rate
+     */
     public float appRequestBaseModeRefreshRate;
+    /**
+     * requestRefreshRate should be within [minRenderFrameRate, maxRenderFrameRate] range
+     */
+    public Set<Float> requestedRefreshRates = new HashSet<>();
 
-    public List<SupportedModesVote.SupportedMode> supportedModes;
+    @Nullable
+    public List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates;
+
+    @Nullable
+    public List<Integer> supportedModeIds;
 
     final boolean mIsDisplayResolutionRangeVotingEnabled;
 
@@ -112,6 +126,9 @@ final class VoteSummary {
         boolean missingBaseModeRefreshRate = appRequestBaseModeRefreshRate > 0f;
 
         for (Display.Mode mode : modes) {
+            if (!validateRefreshRatesSupported(mode)) {
+                continue;
+            }
             if (!validateModeSupported(mode)) {
                 continue;
             }
@@ -253,21 +270,37 @@ final class VoteSummary {
     }
 
     private boolean validateModeSupported(Display.Mode mode) {
-        if (supportedModes == null || !mSupportedModesVoteEnabled) {
+        if (supportedModeIds == null || !mSupportedModesVoteEnabled) {
             return true;
         }
-        for (SupportedModesVote.SupportedMode supportedMode : supportedModes) {
-            if (equalsWithinFloatTolerance(mode.getRefreshRate(), supportedMode.mPeakRefreshRate)
-                    && equalsWithinFloatTolerance(mode.getVsyncRate(), supportedMode.mVsyncRate)) {
+        if (supportedModeIds.contains(mode.getModeId())) {
+            return true;
+        }
+        if (mLoggingEnabled) {
+            Slog.w(TAG, "Discarding mode " + mode.getModeId()
+                    + ", supportedMode not found"
+                    + ": mode.modeId=" + mode.getModeId()
+                    + ", supportedModeIds=" + supportedModeIds);
+        }
+        return false;
+    }
+
+    private boolean validateRefreshRatesSupported(Display.Mode mode) {
+        if (supportedRefreshRates == null || !mSupportedModesVoteEnabled) {
+            return true;
+        }
+        for (SupportedRefreshRatesVote.RefreshRates refreshRates : this.supportedRefreshRates) {
+            if (equalsWithinFloatTolerance(mode.getRefreshRate(), refreshRates.mPeakRefreshRate)
+                    && equalsWithinFloatTolerance(mode.getVsyncRate(), refreshRates.mVsyncRate)) {
                 return true;
             }
         }
         if (mLoggingEnabled) {
             Slog.w(TAG, "Discarding mode " + mode.getModeId()
-                    + ", supportedMode not found"
+                    + ", supportedRefreshRates not found"
                     + ": mode.refreshRate=" + mode.getRefreshRate()
                     + ", mode.vsyncRate=" + mode.getVsyncRate()
-                    + ", supportedModes=" + supportedModes);
+                    + ", supportedRefreshRates=" + supportedRefreshRates);
         }
         return false;
     }
@@ -298,12 +331,28 @@ final class VoteSummary {
             return false;
         }
 
-        if (supportedModes != null && mSupportedModesVoteEnabled && supportedModes.isEmpty()) {
+        if (supportedRefreshRates != null && mSupportedModesVoteEnabled
+                && supportedRefreshRates.isEmpty()) {
             if (mLoggingEnabled) {
                 Slog.w(TAG, "Vote summary resulted in empty set (empty supportedModes)");
             }
             return false;
         }
+
+        for (Float requestedRefreshRate : requestedRefreshRates) {
+            if (requestedRefreshRate < minRenderFrameRate
+                    || requestedRefreshRate > maxRenderFrameRate) {
+                if (mLoggingEnabled) {
+                    Slog.w(TAG, "Requested refreshRate is outside frame rate range"
+                            + ": requestedRefreshRates=" + requestedRefreshRates
+                            + ", requestedRefreshRate=" + requestedRefreshRate
+                            + ", minRenderFrameRate=" + minRenderFrameRate
+                            + ", maxRenderFrameRate=" + maxRenderFrameRate);
+                }
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -345,7 +394,9 @@ final class VoteSummary {
         minHeight = 0;
         disableRefreshRateSwitching = false;
         appRequestBaseModeRefreshRate = 0f;
-        supportedModes = null;
+        requestedRefreshRates.clear();
+        supportedRefreshRates = null;
+        supportedModeIds = null;
         if (mLoggingEnabled) {
             Slog.i(TAG, "Summary reset: " + this);
         }
@@ -367,7 +418,9 @@ final class VoteSummary {
                 + ", minHeight=" + minHeight
                 + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
                 + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate
-                + ", supportedModes=" + supportedModes
+                + ", requestRefreshRates=" + requestedRefreshRates
+                + ", supportedRefreshRates=" + supportedRefreshRates
+                + ", supportedModeIds=" + supportedModeIds
                 + ", mIsDisplayResolutionRangeVotingEnabled="
                 + mIsDisplayResolutionRangeVotingEnabled
                 + ", mSupportedModesVoteEnabled=" + mSupportedModesVoteEnabled

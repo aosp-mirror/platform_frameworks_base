@@ -20,13 +20,13 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Context
 import android.content.IntentFilter
 import android.content.SharedPreferences
-import com.android.systemui.res.R
 import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject

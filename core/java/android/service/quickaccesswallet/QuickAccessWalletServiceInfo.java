@@ -71,9 +71,11 @@ class QuickAccessWalletServiceInfo {
 
     @Nullable
     static QuickAccessWalletServiceInfo tryCreate(@NonNull Context context) {
-        String defaultAppPackageName = getDefaultWalletApp(context);
+        String defaultAppPackageName = null;
 
-        if (defaultAppPackageName == null) {
+        if (isWalletRoleAvailable(context)) {
+            defaultAppPackageName = getDefaultWalletApp(context);
+        } else {
             ComponentName defaultPaymentApp = getDefaultPaymentApp(context);
             if (defaultPaymentApp == null) {
                 return null;
@@ -103,14 +105,21 @@ class QuickAccessWalletServiceInfo {
         final long token = Binder.clearCallingIdentity();
         try {
             RoleManager roleManager = context.getSystemService(RoleManager.class);
-            if (roleManager.isRoleAvailable(RoleManager.ROLE_WALLET)) {
-                List<String> roleHolders = roleManager.getRoleHolders(RoleManager.ROLE_WALLET);
-                return roleHolders.isEmpty() ? null : roleHolders.get(0);
-            }
+            List<String> roleHolders = roleManager.getRoleHolders(RoleManager.ROLE_WALLET);
+            return roleHolders.isEmpty() ? null : roleHolders.get(0);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        return null;
+    }
+
+    private static boolean isWalletRoleAvailable(Context context) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            RoleManager roleManager = context.getSystemService(RoleManager.class);
+            return roleManager.isRoleAvailable(RoleManager.ROLE_WALLET);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private static ComponentName getDefaultPaymentApp(Context context) {

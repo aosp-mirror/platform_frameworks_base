@@ -789,7 +789,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         private @NonNull AudioRecord buildAudioPlaybackCaptureRecord() {
             AudioMix audioMix = mAudioPlaybackCaptureConfiguration.createAudioMix(mFormat);
             MediaProjection projection = mAudioPlaybackCaptureConfiguration.getMediaProjection();
-            AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ null)
+            AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ mContext)
                     .setMediaProjection(projection)
                     .addMix(audioMix).build();
 
@@ -853,7 +853,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
                     .setFormat(mFormat)
                     .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
                     .build();
-            AudioPolicy audioPolicy = new AudioPolicy.Builder(null).addMix(audioMix).build();
+            AudioPolicy audioPolicy = new AudioPolicy.Builder(mContext).addMix(audioMix).build();
             if (AudioManager.registerAudioPolicyStatic(audioPolicy) != 0) {
                 throw new UnsupportedOperationException("Error: could not register audio policy");
             }

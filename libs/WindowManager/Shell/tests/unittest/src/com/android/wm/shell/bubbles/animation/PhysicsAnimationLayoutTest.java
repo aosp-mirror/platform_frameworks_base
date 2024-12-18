@@ -69,7 +69,8 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         // to animate child views out before actually removing them).
         mTestableController.setAnimatedProperties(Sets.newHashSet(
                 DynamicAnimation.TRANSLATION_X,
-                DynamicAnimation.TRANSLATION_Y));
+                DynamicAnimation.TRANSLATION_Y,
+                DynamicAnimation.TRANSLATION_Z));
         mTestableController.setChainedProperties(Sets.newHashSet(DynamicAnimation.TRANSLATION_X));
         mTestableController.setOffsetForProperty(
                 DynamicAnimation.TRANSLATION_X, TEST_TRANSLATION_X_OFFSET);
@@ -282,10 +283,13 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         addOneMoreThanBubbleLimitBubbles();
 
         assertFalse(mLayout.arePropertiesAnimating(
-                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y));
+                DynamicAnimation.TRANSLATION_X,
+                DynamicAnimation.TRANSLATION_Y,
+                DynamicAnimation.TRANSLATION_Z));
 
         mTestableController.animationForChildAtIndex(0)
                 .translationX(100f)
+                .translationZ(100f)
                 .start();
 
         // Wait for the animations to get underway.
@@ -293,11 +297,13 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
         assertTrue(mLayout.arePropertiesAnimating(DynamicAnimation.TRANSLATION_X));
         assertFalse(mLayout.arePropertiesAnimating(DynamicAnimation.TRANSLATION_Y));
+        assertTrue(mLayout.arePropertiesAnimating(DynamicAnimation.TRANSLATION_Z));
 
-        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X);
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Z);
 
         assertFalse(mLayout.arePropertiesAnimating(
-                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y));
+                DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y,
+                DynamicAnimation.TRANSLATION_Z));
     }
 
     @Test
@@ -307,7 +313,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         addOneMoreThanBubbleLimitBubbles();
 
         mTestableController.animationForChildAtIndex(0)
-                .position(1000, 1000)
+                .position(1000, 1000, 1000)
                 .start();
 
         mLayout.cancelAllAnimations();
@@ -315,6 +321,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         // Animations should be somewhere before their end point.
         assertTrue(mViews.get(0).getTranslationX() < 1000);
         assertTrue(mViews.get(0).getTranslationY() < 1000);
+        assertTrue(mViews.get(0).getZ() < 10000);
     }
 
     /** Standard test of chained translation animations. */

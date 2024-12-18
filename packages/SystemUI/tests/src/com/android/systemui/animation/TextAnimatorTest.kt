@@ -19,10 +19,10 @@ package com.android.systemui.animation
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Typeface
-import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -38,7 +38,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TextAnimatorTest : SysuiTestCase() {
 

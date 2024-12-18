@@ -50,7 +50,6 @@ public class IntMap<T> {
         return insert(key, value);
     }
 
-
     public  T get(int key) {
         int index = findKey(key);
         if (index == -1) {

@@ -16,10 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.content.ClipDescription.EXTRA_HIDE_DRAG_SOURCE_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -44,11 +46,12 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -56,16 +59,14 @@ import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
-import android.view.InputDevice;
 import android.view.InputWindowHandle;
-import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
@@ -108,7 +109,6 @@ class DragState {
     boolean mCrossProfileCopyAllowed;
     ClipData mData;
     ClipDescription mDataDescription;
-    int mTouchSource;
     boolean mDragResult;
     boolean mRelinquishDragSurfaceToDropTarget;
     float mAnimatedScale = 1.0f;
@@ -119,6 +119,8 @@ class DragState {
     InputInterceptor mInputInterceptor;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
+    // Set to non -1 value if a valid app requests DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START
+    int mCallingTaskIdToHide;
     /**
      * Whether if animation is completed. Needs to be volatile to update from the animation thread
      * without having a WM lock.
@@ -173,7 +175,7 @@ class DragState {
      */
     private CompletableFuture<Void> showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
+            mInputSurface = mService.makeSurfaceBuilder()
                     .setContainerLayer()
                     .setName("Drag and Drop Input Consumer")
                     .setCallsite("DragState.showInputSurface")
@@ -241,8 +243,8 @@ class DragState {
                         dragSurface = mSurfaceControl;
                     }
                 }
-                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, dragSurface, null,
+                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED, x, y,
+                        mThumbOffsetX, mThumbOffsetY, mFlags, null, null, null, dragSurface, null,
                         mDragResult);
                 try {
                     if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DRAG_ENDED to " + ws);
@@ -258,12 +260,7 @@ class DragState {
             }
             mNotifiedWindows.clear();
             mDragInProgress = false;
-        }
-
-        // Take the cursor back if it has been changed.
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
-            mTouchSource = 0;
+            Trace.instant(TRACE_TAG_WINDOW_MANAGER, "DragDropController#DRAG_ENDED");
         }
 
         // Clear the internal variables.
@@ -305,7 +302,7 @@ class DragState {
      * as a part of the dispatched event.
      */
     private DragEvent createDropEvent(float x, float y, @Nullable WindowState touchedWin,
-            boolean includeDragSurface) {
+            boolean includePrivateInfo) {
         if (touchedWin != null) {
             final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
             final DragAndDropPermissionsHandler dragAndDropPermissions;
@@ -326,11 +323,16 @@ class DragState {
                     mData.fixUris(mSourceUserId);
                 }
             }
-            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
-                    targetInterceptsGlobalDrag(touchedWin), dragAndDropPermissions);
+            final boolean targetInterceptsGlobalDrag = targetInterceptsGlobalDrag(touchedWin);
+            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mDataDescription, mData,
+                    /* includeDragSurface= */ targetInterceptsGlobalDrag,
+                    /* includeDragFlags= */ targetInterceptsGlobalDrag,
+                    dragAndDropPermissions);
         } else {
-            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
-                    includeDragSurface /* includeDragSurface */, null /* dragAndDropPermissions */);
+            return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mDataDescription, mData,
+                    /* includeDragSurface= */ includePrivateInfo,
+                    /* includeDragFlags= */ includePrivateInfo,
+                    null /* dragAndDropPermissions */);
         }
     }
 
@@ -340,6 +342,18 @@ class DragState {
      * handle the drop.
      */
     boolean reportDropWindowLock(IBinder token, float x, float y) {
+        if (mAnimator != null) {
+            return false;
+        }
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "DragDropController#DROP");
+            return reportDropWindowLockInner(token, x, y);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    private boolean reportDropWindowLockInner(IBinder token, float x, float y) {
         if (mAnimator != null) {
             return false;
         }
@@ -355,10 +369,12 @@ class DragState {
                 return true;
             }
 
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "DragDropController#noWindow");
             // "drop" outside a valid window -- no recipient to apply a timeout to, and we can send
             // the drag-ended message immediately.
             endDragLocked(false /* consumed */, false /* relinquishDragSurfaceToDropTarget */);
             if (DEBUG_DRAG) Slog.d(TAG_WM, "Drop outside a valid window " + touchedWin);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return false;
         }
 
@@ -367,6 +383,7 @@ class DragState {
         final IBinder clientToken = touchedWin.mClient.asBinder();
         final DragEvent event = createDropEvent(x, y, touchedWin, false /* includePrivateInfo */);
         try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "DragDropController#dispatchDrop");
             touchedWin.mClient.dispatchDragEvent(event);
 
             // 5 second timeout for this window to respond to the drop
@@ -380,6 +397,7 @@ class DragState {
             if (MY_PID != touchedWin.mSession.mPid) {
                 event.recycle();
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
         mToken = clientToken;
         mUnhandledDropEvent = unhandledDropEvent;
@@ -438,10 +456,6 @@ class DragState {
         }
     }
 
-    InputChannel getInputChannel() {
-        return mInputInterceptor == null ? null : mInputInterceptor.mClientChannel;
-    }
-
     InputWindowHandle getInputWindowHandle() {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
     }
@@ -471,6 +485,7 @@ class DragState {
     /* call out to each visible window/session informing it about the drag
      */
     void broadcastDragStartedLocked(final float touchX, final float touchY) {
+        Trace.instant(TRACE_TAG_WINDOW_MANAGER, "DragDropController#DRAG_STARTED");
         mOriginalX = mCurrentX = touchX;
         mOriginalY = mCurrentY = touchY;
 
@@ -512,11 +527,24 @@ class DragState {
                 Slog.d(TAG_WM, "Sending DRAG_STARTED to new window " + newWin);
             }
             // Only allow the extras to be dispatched to a global-intercepting drag target
-            ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
+            ClipData data = null;
+            if (interceptsGlobalDrag) {
+                data = mData.copyForTransferWithActivityInfo();
+                PersistableBundle extras = data.getDescription().getExtras() != null
+                        ? data.getDescription().getExtras()
+                        : new PersistableBundle();
+                extras.putInt(EXTRA_HIDE_DRAG_SOURCE_TASK_ID, mCallingTaskIdToHide);
+                // Note that setting extras always copies the bundle
+                data.getDescription().setExtras(extras);
+                if (DEBUG_DRAG) {
+                    Slog.d(TAG_WM, "Adding EXTRA_HIDE_DRAG_SOURCE_TASK_ID=" + mCallingTaskIdToHide);
+                }
+            }
+            ClipDescription description = data != null ? data.getDescription() : mDataDescription;
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
                     newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
-                    data, false /* includeDragSurface */,
-                    null /* dragAndDropPermission */);
+                    description, data, false /* includeDragSurface */,
+                    true /* includeDragFlags */, null /* dragAndDropPermission */);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
@@ -685,35 +713,51 @@ class DragState {
         return mDragInProgress;
     }
 
-    private DragEvent obtainDragEvent(int action, float x, float y, ClipData data,
-            boolean includeDragSurface, IDragAndDropPermissions dragAndDropPermissions) {
+    private DragEvent obtainDragEvent(int action, float x, float y, ClipDescription description,
+            ClipData data, boolean includeDragSurface, boolean includeDragFlags,
+            IDragAndDropPermissions dragAndDropPermissions) {
         return DragEvent.obtain(action, x, y, mThumbOffsetX, mThumbOffsetY,
-                null  /* localState */, mDataDescription, data,
+                includeDragFlags ? mFlags : 0,
+                null  /* localState */, description, data,
                 includeDragSurface ? mSurfaceControl : null,
                 dragAndDropPermissions, false /* result */);
     }
 
     private ValueAnimator createReturnAnimationLocked() {
-        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX,
-                        mOriginalX - mThumbOffsetX),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
-                        mOriginalY - mThumbOffsetY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
-                        mAnimatedScale),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
+        final ValueAnimator animator;
+        final long duration;
+        if (mCallingTaskIdToHide != -1) {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X, mCurrentX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y, mCurrentY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+            duration = MIN_ANIMATION_DURATION_MS;
+        } else {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX,
+                            mOriginalX - mThumbOffsetX),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
+                            mOriginalY - mThumbOffsetY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
 
-        final float translateX = mOriginalX - mCurrentX;
-        final float translateY = mOriginalY - mCurrentY;
-        // Adjust the duration to the travel distance.
-        final double travelDistance = Math.sqrt(translateX * translateX + translateY * translateY);
-        final double displayDiagonal =
-                Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
-        final long duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
-                * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+            final float translateX = mOriginalX - mCurrentX;
+            final float translateY = mOriginalY - mCurrentY;
+            // Adjust the duration to the travel distance.
+            final double travelDistance = Math.sqrt(
+                    translateX * translateX + translateY * translateY);
+            final double displayDiagonal =
+                    Math.sqrt(mDisplaySize.x * mDisplaySize.x + mDisplaySize.y * mDisplaySize.y);
+            duration = MIN_ANIMATION_DURATION_MS + (long) (travelDistance / displayDiagonal
+                    * (MAX_ANIMATION_DURATION_MS - MIN_ANIMATION_DURATION_MS));
+        }
+
         final AnimationListener listener = new AnimationListener();
         animator.setDuration(duration);
         animator.setInterpolator(mCubicEaseOutInterpolator);
@@ -725,13 +769,24 @@ class DragState {
     }
 
     private ValueAnimator createCancelAnimationLocked() {
-        final ValueAnimator animator = ValueAnimator.ofPropertyValuesHolder(
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
-                PropertyValuesHolder.ofFloat(
-                        ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+        final ValueAnimator animator;
+        if (mCallingTaskIdToHide != -1) {
+             animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X, mCurrentX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y, mCurrentY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+        } else {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
+                    PropertyValuesHolder.ofFloat(
+                            ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+        }
+
         final AnimationListener listener = new AnimationListener();
         animator.setDuration(MIN_ANIMATION_DURATION_MS);
         animator.setInterpolator(mCubicEaseOutInterpolator);
@@ -740,18 +795,6 @@ class DragState {
 
         mService.mAnimationHandler.post(() -> animator.start());
         return animator;
-    }
-
-    private boolean isFromSource(int source) {
-        return (mTouchSource & source) == source;
-    }
-
-    void overridePointerIconLocked(int touchSource) {
-        mTouchSource = touchSource;
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
-            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
-        }
     }
 
     private class AnimationListener

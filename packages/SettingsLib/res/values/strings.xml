@@ -197,30 +197,64 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
 
     <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <string name="bluetooth_active_battery_level">Active. <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery.</string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_active_battery_level_untethered">Active, L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <string name="bluetooth_active_battery_level_untethered">Active. L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g>, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level_untethered_left">Active. L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level  for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level_untethered_right">Active. R: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery.</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message on TV when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="tv_bluetooth_battery_level">Battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery</string>
+    <string name="bluetooth_battery_level_untethered">L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g>, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery.</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_battery_level_untethered_left">Left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <string name="bluetooth_battery_level_untethered_left">Left: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery</string>
     <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_battery_level_untethered_right">Right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <string name="bluetooth_battery_level_untethered_right">Right: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected, showing remote device battery level for the left part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level_untethered_left">Left <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
+    <!-- Connected devices settings. Message when Bluetooth is connected, showing remote device battery level for the right part of the untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="tv_bluetooth_battery_level_untethered_right">Right <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g></string>
     <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_active_no_battery_level">Active</string>
     <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device [CHAR LIMIT=NONE] -->
     <string name="bluetooth_saved_device">Saved</string>
 
     <!-- Connected device settings. Message when the left-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_active">Active, left only</string>
+    <string name="bluetooth_hearing_aid_left_active">Active (left only)</string>
     <!-- Connected device settings. Message when the right-side hearing aid device is active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_right_active">Active, right only</string>
+    <string name="bluetooth_hearing_aid_right_active">Active (right only)</string>
     <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_hearing_aid_left_and_right_active">Active, left and right</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active">Active (left and right)</string>
+
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level">Active (media only). <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only, showing remote device status and battery level for untethered headset. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_battery_level_untethered">Active (media only). L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g>, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_lea_support">Connected (supports audio sharing). <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_lea_support">Connected (supports audio sharing). L: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g>, R: <xliff:g id="battery_level_as_percentage" example="25%">%2$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the left part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_left_lea_support">Connected (supports audio sharing). Left: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level for the right part of the untethered headset, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level_untethered_right_lea_support">Connected (supports audio sharing). Right: <xliff:g id="battery_level_as_percentage" example="25%">%1$s</xliff:g> battery.</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing no battery information, supports audio sharing. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_no_battery_level_lea_support">Connected (supports audio sharing)</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active for media only but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_media_only_no_battery_level">Active (media only)</string>
+    <!-- Connected devices settings. Message shown when bluetooth device is disconnected but is a known, previously connected device, supports audio sharing [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_saved_device_lea_support">Supports audio sharing</string>
+
+    <!-- Connected device settings. Message when the left-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_active">Active (media only), left only</string>
+    <!-- Connected device settings. Message when the right-side hearing aid device is active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_right_active">Active (media only), right only</string>
+    <!-- Connected device settings. Message when the left-side and right-side hearing aids device are active for media only. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active">Active (media only), left and right</string>
 
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
@@ -785,6 +819,13 @@
     <!-- Summary of checkbox setting that enables the terminal app. [CHAR LIMIT=64] -->
     <string name="enable_terminal_summary">Enable terminal app that offers local shell access</string>
 
+    <!-- Title of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=32] -->
+    <string name="enable_linux_terminal_title">Linux development environment</string>
+    <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=none] -->
+    <string name="enable_linux_terminal_summary">(Experimental) Run Linux terminal on Android</string>
+    <!-- Disclaimer below the checkbox that disabling the Linux terminal app would clear its data. [CHAR LIMIT=none] -->
+    <string name="disable_linux_terminal_disclaimer">If you disable, Linux terminal data will be cleared</string>
+
     <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
     <string name="hdcp_checking_title">HDCP checking</string>
     <!-- HDCP checking dialog title, used for debug purposes only. [CHAR LIMIT=25] -->
@@ -846,6 +887,11 @@
     <string name="show_key_presses">Show key presses</string>
     <!-- UI debug setting: show physical key presses summary [CHAR LIMIT=150] -->
     <string name="show_key_presses_summary">Show visual feedback for physical key presses</string>
+
+    <!-- UI debug setting: Title text for a debug setting that enables a visualization of touchpad input in a window on the screen  [CHAR LIMIT=50] -->
+    <string name="touchpad_visualizer">Show touchpad input</string>
+    <!-- UI debug setting: Summary text for a debug setting that enables a visualization of touchpad input in a window on the screen [CHAR LIMIT=150] -->
+    <string name="touchpad_visualizer_summary">Screen overlay displaying touchpad input data and recognized gestures</string>
 
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>
@@ -919,6 +965,18 @@
     <string name="enable_verbose_vendor_logging">Enable verbose vendor logging</string>
     <!-- UI debug setting: enable verbose vendor logging summary [CHAR LIMIT=NONE] -->
     <string name="enable_verbose_vendor_logging_summary">Include additional device-specific vendor logs in bug reports, which may contain private information, use more battery, and/or use more storage.</string>
+    <!-- UI debug setting: checkbox text to disable verbose vendor logging after one day [CHAR LIMIT=50] -->
+    <string name="enable_verbose_vendor_logging_checkbox">Disable after one day</string>
+    <!-- UI debug setting: verbose vendor logging notification title [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_title">Verbose vendor logging has ended</string>
+    <!-- UI debug setting: verbose vendor logging notification summary [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_summary">Enabled for one day</string>
+    <!-- UI debug setting: verbose vendor logging notification action text [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_notification_action">Enable for one more day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for disabling after one day [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_will_disable">Disables after one day</string>
+    <!-- UI debug setting: verbose vendor logging preference summary for leaving setting enabled indefinitely [CHAR LIMIT=60] -->
+    <string name="verbose_vendor_logging_preference_summary_on">Enabled indefinitely</string>
 
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
@@ -964,10 +1022,8 @@
     <!-- UI debug setting: force allow on external summary [CHAR LIMIT=150] -->
     <string name="force_resizable_activities_summary">Make all activities resizable for multi-window, regardless of manifest values.</string>
 
-    <!-- UI debug setting: enable freeform window support [CHAR LIMIT=50] -->
+    <!-- Title for a toggle that enables support for windows to be in freeform. Freeform windows enables users to freely arrange and resize overlapping apps. [CHAR LIMIT=50] -->
     <string name="enable_freeform_support">Enable freeform windows</string>
-    <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
-    <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
@@ -1029,13 +1085,6 @@
 
     <!-- Settings item title to select whether to disable cache for transcoding. [CHAR LIMIT=85] -->
     <string name="transcode_disable_cache">Disable transcoding cache</string>
-
-    <!-- Developer settings title: widevine settings screen. [CHAR LIMIT=50] -->
-    <string name="widevine_settings_title">Widevine settings</string>
-     <!-- Developer settings title: select whether to enable Force L3 fallback. [CHAR LIMIT=50] -->
-    <string name="force_l3_fallback_title">Force L3 fallback</string>
-     <!-- Developer settings summary: select whether to enable Force L3 fallback.[CHAR LIMIT=NONE] -->
-    <string name="force_l3_fallback_summary">Select to force L3 fallback</string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
@@ -1127,9 +1176,19 @@
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> left until full</string>
     <!-- [CHAR_LIMIT=80] Label for battery level chart when charge been limited -->
-    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging optimized</string>
+    <string name="power_charging_limited"><xliff:g id="level">%1$s</xliff:g> - Charging on hold to protect battery</string>
     <!-- [CHAR_LIMIT=80] Label for battery charging future pause -->
     <string name="power_charging_future_paused"><xliff:g id="level">%1$s</xliff:g> - Charging</string>
+
+    <!-- [CHAR_LIMIT=40] Label for battery level when fast charging with duration. -->
+    <string name="power_fast_charging_duration_v2"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="status">%2$s</xliff:g> - Full by <xliff:g id="time">%3$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for battery level when non-fast charging with duration. -->
+    <string name="power_charging_duration_v2"><xliff:g id="level">%1$s</xliff:g> - Fully charged by <xliff:g id="time">%2$s</xliff:g></string>
+
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging. -->
+    <string name="power_remaining_charging_duration_only_v2">Fully charged by <xliff:g id="time">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging. -->
+    <string name="power_remaining_fast_charging_duration_only_v2">Full by <xliff:g id="time">%1$s</xliff:g></string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -1153,6 +1212,11 @@
     <string name="battery_info_status_full_charged">Fully Charged</string>
     <!-- [CHAR_LIMIT=None] Battery Info screen. Value for a status item. A state which device charging on hold -->
     <string name="battery_info_status_charging_on_hold">Charging on hold</string>
+
+    <!-- [CHAR_LIMIT=20] Battery use screen. Battery status shown in chart label when charging isn't fast. -->
+    <string name="battery_info_status_charging_v2">Charging</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen. Battery status shown in chart label when charging speed is fast. -->
+    <string name="battery_info_status_charging_fast_v2">Fast charging</string>
 
     <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
     <string name="disabled_by_admin_summary_text">Controlled by admin</string>
@@ -1307,6 +1371,12 @@
     <!-- Keywords for setting screen for controlling apps that can schedule alarms [CHAR LIMIT=100] -->
     <string name="keywords_alarms_and_reminders">schedule, alarm, reminder, clock</string>
 
+    <!-- Priority Modes: Name of the "manual" Do Not Disturb mode. [CHAR LIMIT=50] -->
+    <string name="zen_mode_do_not_disturb_name">Do Not Disturb</string>
+
+    <!-- Sound: Title for the Do not Disturb option and associated settings page. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_title">Do Not Disturb</string>
+
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
     <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
@@ -1333,6 +1403,9 @@
     <!-- Do not disturb: Duration option to always have DND on until it is manually turned off [CHAR LIMIT=60] -->
     <string name="zen_mode_forever">Until you turn off</string>
 
+    <!-- [CHAR LIMIT=50] Zen mode settings: placeholder for a Contact name when the name is empty -->
+    <string name="zen_mode_starred_contacts_empty_name">(No name)</string>
+
     <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
     <string name="time_unit_just_now">Just now</string>
 
@@ -1343,8 +1416,12 @@
     <string name="media_transfer_this_device_name">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tablet">This tablet</string>
+    <!-- Name of the internal speaker. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name_desktop">This computer (internal)</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
+    <!-- Name of the internal mic. [CHAR LIMIT=30] -->
+    <string name="media_transfer_internal_mic">Microphone (internal)</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1485,7 +1562,7 @@
     <string name="user_nickname">Nickname</string>
 
     <!-- Confirmation message on dialog for editing user name and profile picture. Inform user on who will be able to see the changes [CHAR LIMIT=NONE]-->
-    <string name="edit_user_info_message">Your name and picture will be visible to anyone that uses this device.</string>
+    <string name="edit_user_info_message">The name and picture you choose will be visible to anyone who uses this device.</string>
 
     <!-- Label for adding a new user in the user switcher [CHAR LIMIT=35] -->
     <string name="user_add_user">Add user</string>
@@ -1547,10 +1624,6 @@
     <string name="guest_notification_non_ephemeral_non_first_login">Reset to delete session
         activity now, or you can save or delete activity on exit</string>
 
-    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
-    <string name="user_image_take_photo">Take a photo</string>
-    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
-    <string name="user_image_choose_photo">Choose an image</string>
     <!-- Accessibility message for the photo selector which is a button/popup with the current photo [CHAR LIMIT=50] -->
     <string name="user_image_photo_selector">Select photo</string>
 
@@ -1573,7 +1646,19 @@
     <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
 
     <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
-    <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
+    <string name="media_transfer_wired_headphone_name">Wired headphone</string>
+
+    <!-- Name of the 3.5mm headphone, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_headphone_name">Headphone</string>
+
+    <!-- Name of the usb audio device speaker, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_usb_speaker_name">USB speaker</string>
+
+    <!-- Name of the 3.5mm audio device mic. [CHAR LIMIT=50] -->
+    <string name="media_transfer_wired_device_mic_name">Mic jack</string>
+
+    <!-- Name of the usb audio device mic. [CHAR LIMIT=50] -->
+    <string name="media_transfer_usb_device_mic_name">USB mic</string>
 
     <!-- Label for Wifi hotspot switch on. Toggles hotspot on [CHAR LIMIT=30] -->
     <string name="wifi_hotspot_switch_on_text">On</string>
@@ -1670,12 +1755,6 @@
     <string name="accessibility_no_calling">No calling.</string>
 
 
-    <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
-    <string name="avatar_picker_title">Choose a profile picture</string>
-
-    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
-    <string name="default_user_icon_description">Default user icon</string>
-
     <!-- Title for the 'physical keyboard' settings screen. [CHAR LIMIT=35] -->
     <string name="physical_keyboard_title">Physical keyboard</string>
     <!-- Title for the keyboard layout preference dialog. [CHAR LIMIT=35] -->
@@ -1684,7 +1763,7 @@
     <string name="keyboard_layout_default_label">Default</string>
 
     <!-- Special access > Title for managing turn screen on settings. [CHAR LIMIT=50] -->
-    <string name="turn_screen_on_title">Turn screen on</string>
+    <string name="turn_screen_on_title">Screen turn-on control</string>
     <!-- Label for a setting which controls whether an app can turn the screen on [CHAR LIMIT=45] -->
     <string name="allow_turn_screen_on">Allow turning the screen on</string>
     <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
@@ -1717,4 +1796,7 @@
     <string name="feminine">Feminine</string>
     <!-- List entry in developer settings to set the grammatical gender to Masculine [CHAR LIMIT=30]-->
     <string name="masculine">Masculine</string>
+
+    <!-- The name of the screen for seeing and installing system updates. [CHAR LIMIT=40]-->
+    <string name="system_update_settings_list_item_title">System Updates</string>
 </resources>

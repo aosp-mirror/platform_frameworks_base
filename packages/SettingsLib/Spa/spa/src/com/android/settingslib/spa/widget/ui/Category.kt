@@ -46,7 +46,7 @@ fun CategoryTitle(title: String) {
             end = SettingsDimension.itemPaddingEnd,
             bottom = 8.dp,
         ),
-        color = SettingsTheme.colorScheme.categoryTitle,
+        color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.labelMedium,
     )
 }

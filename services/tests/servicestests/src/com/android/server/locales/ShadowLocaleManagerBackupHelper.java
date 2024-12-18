@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.HandlerThread;
 import android.util.SparseArray;
 
+import java.io.File;
 import java.time.Clock;
 
 /**
@@ -33,9 +34,9 @@ public class ShadowLocaleManagerBackupHelper extends LocaleManagerBackupHelper {
     ShadowLocaleManagerBackupHelper(Context context,
             LocaleManagerService localeManagerService,
             PackageManager packageManager, Clock clock,
-            SparseArray<LocaleManagerBackupHelper.StagedData> stagedData,
-            HandlerThread broadcastHandlerThread, SharedPreferences delegateAppLocalePackages) {
-        super(context, localeManagerService, packageManager, clock, stagedData,
-                broadcastHandlerThread, delegateAppLocalePackages);
+            HandlerThread broadcastHandlerThread, SparseArray<File> stagedDataFiles,
+            File archivedPackagesFile, SharedPreferences delegateAppLocalePackages) {
+        super(context, localeManagerService, packageManager, clock, broadcastHandlerThread,
+                stagedDataFiles, archivedPackagesFile, delegateAppLocalePackages);
     }
 }

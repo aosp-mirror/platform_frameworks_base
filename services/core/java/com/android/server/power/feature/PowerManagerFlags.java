@@ -16,6 +16,8 @@
 
 package com.android.server.power.feature;
 
+import android.os.Build;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -35,9 +37,21 @@ public class PowerManagerFlags {
             Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR,
             Flags::enableEarlyScreenTimeoutDetector);
 
+    private final FlagState mImproveWakelockLatency = new FlagState(
+            Flags.FLAG_IMPROVE_WAKELOCK_LATENCY,
+            Flags::improveWakelockLatency
+    );
+
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
+    }
+
+    /**
+     * @return Whether to improve the wakelock acquire/release latency or not
+     */
+    public boolean improveWakelockLatency() {
+        return mImproveWakelockLatency.isEnabled();
     }
 
     /**
@@ -47,6 +61,7 @@ public class PowerManagerFlags {
     public void dump(PrintWriter pw) {
         pw.println("PowerManagerFlags:");
         pw.println(" " + mEarlyScreenTimeoutDetectorFlagState);
+        pw.println(" " + mImproveWakelockLatency);
     }
 
     private static class FlagState {
@@ -69,12 +84,21 @@ public class PowerManagerFlags {
                 }
                 return mEnabled;
             }
-            mEnabled = mFlagFunction.get();
+            mEnabled = flagOrSystemProperty(mFlagFunction, mName);
             if (DEBUG) {
                 Slog.d(TAG, mName + ": mEnabled. Flag value = " + mEnabled);
             }
             mEnabledSet = true;
             return mEnabled;
+        }
+
+        private boolean flagOrSystemProperty(Supplier<Boolean> flagFunction, String flagName) {
+            boolean flagValue = flagFunction.get();
+            if (Build.IS_ENG || Build.IS_USERDEBUG) {
+                return SystemProperties.getBoolean("persist.sys." + flagName + "-override",
+                        flagValue);
+            }
+            return flagValue;
         }
 
         @Override

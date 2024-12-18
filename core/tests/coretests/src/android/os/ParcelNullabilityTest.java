@@ -20,12 +20,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArrayMap;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public final class ParcelNullabilityTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    @DisabledOnRavenwood(blockedBy = android.text.Spanned.class)
     public void nullCharSequence() {
         Parcel p = Parcel.obtain();
         p.writeCharSequence(null);
@@ -76,7 +76,6 @@ public final class ParcelNullabilityTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void nullStrongBinder() {
         Parcel p = Parcel.obtain();
         p.writeStrongBinder(null);
@@ -85,7 +84,6 @@ public final class ParcelNullabilityTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void nullStringInterface() {
         Parcel p = Parcel.obtain();
         p.writeStrongInterface(null);

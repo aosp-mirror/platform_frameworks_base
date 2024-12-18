@@ -20,11 +20,11 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 import android.os.Parcel;
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.base.Strings;
 
@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class NotificationChannelGroupTest {
     private final String CLASS = "android.app.NotificationChannelGroup";
 

@@ -23,6 +23,10 @@ import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationChannel.ALLOW_BUBBLE_ON;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationChannel.DEFAULT_ALLOW_BUBBLE;
+import static android.app.NotificationChannel.NEWS_ID;
+import static android.app.NotificationChannel.PROMOTIONS_ID;
+import static android.app.NotificationChannel.RECS_ID;
+import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationChannel.USER_LOCKED_LIGHTS;
@@ -46,10 +50,16 @@ import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
 
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION;
+import static android.service.notification.Flags.notificationClassification;
+
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+import static com.android.server.notification.Flags.FLAG_ALL_NOTIFS_NEED_TTL;
+import static com.android.server.notification.Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA;
 import static com.android.server.notification.NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_UPDATED_BY_USER;
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
@@ -110,6 +120,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -140,6 +154,9 @@ import com.android.os.AtomsProto.PackageNotificationPreferences;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -148,6 +165,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -160,6 +178,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -168,16 +188,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
+@EnableFlags(FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
 public class PreferencesHelperTest extends UiServiceTestCase {
-    private static final int UID_N_MR1 = 0;
     private static final int UID_HEADLESS = 1000000;
     private static final UserHandle USER = UserHandle.of(0);
-    private static final int UID_O = 1111;
-    private static final int UID_P = 2222;
     private static final String SYSTEM_PKG = "android";
     private static final int SYSTEM_UID = 1000;
     private static final UserHandle USER2 = UserHandle.of(10);
@@ -214,6 +233,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private PreferencesHelper mXmlHelper;
     private AudioAttributes mAudioAttributes;
     private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    @Mock
+    Clock mClock;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                FLAG_NOTIFICATION_CLASSIFICATION);
+    }
+
+    public PreferencesHelperTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -324,14 +359,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
                 .thenReturn(appPermissions);
 
-        when(mUserProfiles.getCurrentProfileIds()).thenReturn(IntArray.wrap(new int[] {0}));
+        IntArray currentProfileIds = IntArray.wrap(new int[]{0});
+        if (UserManager.isHeadlessSystemUserMode()) {
+            currentProfileIds.add(UserHandle.getUserId(UID_HEADLESS));
+        }
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(currentProfileIds);
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
 
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         resetZenModeHelper();
 
         mAudioAttributes = new AudioAttributes.Builder()
@@ -450,6 +490,45 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPm.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
     }
 
+    private static void testThreadSafety(Runnable operationToTest, int nThreads,
+            int nRunsPerThread) throws Exception {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Runnable threadRunnable = () -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < nRunsPerThread; j++) {
+                        operationToTest.run();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+            new Thread(threadRunnable, "Test Thread #" + i).start();
+        }
+
+        // Ready set go
+        startLatch.countDown();
+
+        // Wait for all test threads to be done.
+        doneLatch.await();
+    }
+
+    private static NotificationChannel cloneChannel(NotificationChannel original) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            original.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            return NotificationChannel.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
+    }
+
     @Test
     public void testWriteXml_onlyBackupsTargetUser() throws Exception {
         // Setup package notifications.
@@ -552,7 +631,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2, false, false,
                 UID_N_MR1, false));
 
+        NotificationChannel updateNews = null;
+        if (notificationClassification()) {
+            // change one of the reserved bundle channels to ensure changes are persisted across
+            // boot
+            updateNews = mHelper.getNotificationChannel(
+                    PKG_N_MR1, UID_N_MR1, NEWS_ID, false).copy();
+            updateNews.setImportance(IMPORTANCE_NONE);
+            mHelper.updateNotificationChannel(PKG_N_MR1, UID_N_MR1, updateNews, true, 1000, true);
+        }
+
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        if (android.app.Flags.uiRichOngoing()) {
+            mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, true);
+        }
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
                 UserHandle.USER_ALL, channel1.getId(), channel2.getId(),
@@ -563,10 +655,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertTrue(mXmlHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+        if (android.app.Flags.uiRichOngoing()) {
+            assertThat(mXmlHelper.canBePromoted(PKG_N_MR1, UID_N_MR1)).isTrue();
+        }
         assertEquals(channel1,
                 mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
                 mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel2.getId(), false));
+        if (notificationClassification()) {
+            assertThat(mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, updateNews.getId(),
+                    false)).isNotNull();
+            assertThat(mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, updateNews.getId(),
+                            false)).isEqualTo(updateNews);
+        }
 
         List<NotificationChannelGroup> actualGroups = mXmlHelper.getNotificationChannelGroups(
                 PKG_N_MR1, UID_N_MR1, false, true, false, true, null).getList();
@@ -679,7 +780,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_oldXml_migrates() throws Exception {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"2\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" uid=\"" + UID_N_MR1
@@ -815,7 +916,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_noMigration_showPermissionNotification() throws Exception {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"3\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -874,7 +975,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_permissionNotificationOff() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ false);
+                /* showReviewPermissionsNotification= */ false, mClock);
 
         String xml = "<ranking version=\"3\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -933,7 +1034,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testReadXml_newXml_noMigration_noPermissionNotification() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                /* showReviewPermissionsNotification= */ true);
+                /* showReviewPermissionsNotification= */ true, mClock);
 
         String xml = "<ranking version=\"4\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"
@@ -1009,7 +1110,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
         final ApplicationInfo app = new ApplicationInfo();
         app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
-        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+        when(mPm.getApplicationInfoAsUser(
+                eq("something"), anyInt(), eq(USER_SYSTEM))).thenReturn(app);
 
         mXmlHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
 
@@ -1098,20 +1200,34 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "<package name=\"com.example.o\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"1111\">\n"
+                + "=\"false\" uid=\"10002\">\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id\" name=\"name\" importance=\"2\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "</package>\n"
-                + "<package name=\"com.example.p\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"2222\" />\n"
                 + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
-                + "=\"false\" uid=\"0\">\n"
+                + "=\"false\" uid=\"10001\">\n"
                 + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
                 + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
@@ -1121,11 +1237,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
-                + "</ranking>";
+                + "<package name=\"com.example.p\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" uid=\"10003\"";
         assertThat(baos.toString()).contains(expected);
     }
 
@@ -1185,14 +1312,23 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
                 + "=\"false\">\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id\" name=\"name\" importance=\"2\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "</package>\n"
-                // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
                 // Importance default because on in permission helper
                 + "<package name=\"com.example.n_mr1\" importance=\"3\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
@@ -1200,6 +1336,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "=\"false\">\n"
                 + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
                 + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
@@ -1209,15 +1349,27 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
-                // Packages that exist solely in permissionhelper
-                + "<package name=\"first\" importance=\"3\" />\n"
-                + "<package name=\"third\" importance=\"0\" />\n"
-                + "</ranking>";
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\"";
         assertThat(baos.toString()).contains(expected);
+        // Packages that exist solely in permissionhelper
+        assertThat(baos.toString()).contains("<package name=\"first\" importance=\"3\"");
+        assertThat(baos.toString()).contains("<package name=\"third\" importance=\"0\"");
     }
 
     @Test
@@ -1272,21 +1424,34 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
                 + "=\"false\">\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id\" name=\"name\" importance=\"2\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" orig_imp=\"2\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "</package>\n"
-                // Importance default because on in permission helper
-                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
-                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
-                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\" />\n"
-                // Importance missing because missing from permission helper
-                + "<package name=\"com.example.n_mr1\" show_badge=\"true\" "
+                // Importance 0 because missing from permission helper
+                + "<package name=\"com.example.n_mr1\" importance=\"0\" show_badge=\"true\" "
                 + "app_user_locked_fields=\"0\" sent_invalid_msg=\"false\" "
                 + "sent_valid_msg=\"false\" user_demote_msg_app=\"false\" sent_valid_bubble"
                 + "=\"false\">\n"
                 + "<channelGroup id=\"1\" name=\"bye\" blocked=\"false\" locked=\"0\" />\n"
                 + "<channelGroup id=\"2\" name=\"hello\" blocked=\"false\" locked=\"0\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.social\" "
+                + "name=\"Social\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"id1\" name=\"name1\" importance=\"4\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
                 + "<channel id=\"id2\" name=\"name2\" desc=\"descriptions for all\" "
@@ -1296,11 +1461,23 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" vibration_enabled=\"true\" show_badge=\"true\" "
                 + "orig_imp=\"4\" />\n"
+                + (notificationClassification() ? "<channel id=\"android.app.news\" name=\"News\" "
+                + "importance=\"2\" sound=\"content://settings/system/notification_sound\" "
+                + "usage=\"5\" content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.recs\" name=\"Recommendations\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
+                + "<channel id=\"android.app.promotions\" name=\"Promotions\" importance=\"2\" "
+                + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
+                + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n" : "")
                 + "<channel id=\"miscellaneous\" name=\"Uncategorized\" "
                 + "sound=\"content://settings/system/notification_sound\" usage=\"5\" "
                 + "content_type=\"4\" flags=\"0\" show_badge=\"true\" />\n"
                 + "</package>\n"
-                + "</ranking>";
+                // Importance default because on in permission helper
+                + "<package name=\"com.example.p\" importance=\"3\" show_badge=\"true\" "
+                + "app_user_locked_fields=\"0\" sent_invalid_msg=\"true\" sent_valid_msg=\"true\""
+                + " user_demote_msg_app=\"true\" sent_valid_bubble=\"false\"";
         assertThat(baos.toString()).contains(expected);
     }
 
@@ -1451,6 +1628,149 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(actualChannel.isSoundRestored());
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore() throws Exception {
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // settings are not available with real uid because pkg is not installed
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UID_P, id, false)).isNull();
+        // but the settings are in memory with unknown_uid
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id, false)).isNotNull();
+
+        // package is "installed"
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_P);
+
+        // Trigger 2nd restore pass
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_P});
+
+        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_P, id,
+                false);
+        assertThat(channel.getImportance()).isEqualTo(2);
+        assertThat(channel.canShowBadge()).isTrue();
+        assertThat(channel.canBypassDnd()).isFalse();
+
+        // removed from 'pending install' set
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id,false)).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore_afterReboot() throws Exception {
+        // load restore data
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair<>(UID_R, PKG_R), new Pair<>(true, false));
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // simulate write to disk
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mXmlHelper.writeXml(serializer, false, USER_SYSTEM);
+        serializer.endDocument();
+        serializer.flush();
+
+        // simulate load after reboot
+        mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
+                false, mClock);
+        loadByteArrayXml(baos.toByteArray(), false, USER_ALL);
+
+        // Trigger 2nd restore pass
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_R);
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_R});
+
+        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_R, id,
+                false);
+        assertThat(channel.getImportance()).isEqualTo(2);
+        assertThat(channel.canShowBadge()).isTrue();
+        assertThat(channel.canBypassDnd()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA)
+    public void testRestoreXml_delayedRestore_packageMissingAfterTwoDays() throws Exception {
+        // load restore data
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> appPermissions = new ArrayMap<>();
+        appPermissions.put(new Pair<>(UID_R, PKG_R), new Pair<>(true, false));
+        when(mPermissionHelper.getNotificationPermissionValues(USER_SYSTEM))
+                .thenReturn(appPermissions);
+
+        // simulate package not installed
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(eq(PKG_R), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+
+        String id = "id";
+        String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_R + "\" show_badge=\"true\">\n"
+                + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                + "show_badge=\"true\" />\n"
+                + "</package>\n"
+                + "</ranking>\n";
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        // simulate write to disk
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mXmlHelper.writeXml(serializer, false, USER_SYSTEM);
+        serializer.endDocument();
+        serializer.flush();
+
+        // advance time by 2 days
+        when(mClock.millis()).thenReturn(
+                Duration.ofDays(2).toMillis() + System.currentTimeMillis());
+
+        // simulate load after reboot
+        mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
+                false, mClock);
+        loadByteArrayXml(xml.getBytes(), false, USER_ALL);
+
+        // Trigger 2nd restore pass
+        mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
+                new int[]{UID_P});
+
+        // verify the 2nd restore pass failed because the restore data had been removed
+        assertThat(mXmlHelper.getNotificationChannel(PKG_R, UNKNOWN_UID, id, false)).isNull();
+    }
 
     /**
      * Although we don't make backups with uncanonicalized uris anymore, we used to, so we have to
@@ -1519,10 +1839,10 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         mHelper = new PreferencesHelper(mContext, mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
         mXmlHelper = new PreferencesHelper(mContext, mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
-                false);
+                false, mClock);
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -1677,8 +1997,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         parser.nextTag();
         mHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        final NotificationChannel updated1 =
-            mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, NotificationChannel.DEFAULT_CHANNEL_ID, false);
+        final NotificationChannel updated1 = mHelper.getNotificationChannel(
+                PKG_N_MR1, UID_N_MR1, NotificationChannel.DEFAULT_CHANNEL_ID, false);
         assertEquals(NotificationManager.IMPORTANCE_HIGH, updated1.getImportance());
         assertTrue(updated1.canBypassDnd());
         assertEquals(VISIBILITY_SECRET, updated1.getLockscreenVisibility());
@@ -1854,6 +2174,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
     public void testUpdate_preUpgrade_updatesAppFields() throws Exception {
         assertTrue(mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG_N_MR1, UID_N_MR1));
@@ -2218,18 +2539,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // Returns only non-deleted channels
         List<NotificationChannel> channels =
                 mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList();
-        assertEquals(2, channels.size());   // Default channel + non-deleted channel
+        // Default channel + non-deleted channel + system defaults
+        assertEquals(notificationClassification() ? 6 : 2, channels.size());
         for (NotificationChannel nc : channels) {
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(nc.getId())) {
+            if (channel2.getId().equals(nc.getId())) {
                 compareChannels(channel2, nc);
             }
         }
 
         // Returns deleted channels too
         channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, true).getList();
-        assertEquals(3, channels.size());               // Includes default channel
+        // Includes system channel(s)
+        assertEquals(notificationClassification() ? 7 : 3, channels.size());
         for (NotificationChannel nc : channels) {
-            if (!NotificationChannel.DEFAULT_CHANNEL_ID.equals(nc.getId())) {
+            if (channel2.getId().equals(nc.getId())) {
                 compareChannels(channelMap.get(nc.getId()), nc);
             }
         }
@@ -2632,6 +2955,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
     public void testOnlyHasDefaultChannel() throws Exception {
         assertTrue(mHelper.onlyHasDefaultChannel(PKG_N_MR1, UID_N_MR1));
         assertFalse(mHelper.onlyHasDefaultChannel(PKG_O, UID_O));
@@ -2839,7 +3163,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
             final ApplicationInfo legacy = new ApplicationInfo();
             legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
-            when(mPm.getApplicationInfoAsUser(eq(PKG_N_MR1), anyInt(), anyInt())).thenReturn(legacy);
+            when(mPm.getApplicationInfoAsUser(eq(PKG_N_MR1), anyInt(), anyInt()))
+                    .thenReturn(legacy);
 
             // create records with the default channel for all user 0 and user 1 uids
             mHelper.canShowBadge(PKG_N_MR1, user0Uids[i]);
@@ -2850,13 +3175,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // user 0 records remain
         for (int i = 0; i < user0Uids.length; i++) {
-            assertEquals(1,
-                    mHelper.getNotificationChannels(PKG_N_MR1, user0Uids[i], false).getList().size());
+            assertEquals(notificationClassification() ? 5 : 1,
+                    mHelper.getNotificationChannels(PKG_N_MR1, user0Uids[i], false)
+                            .getList().size());
         }
         // user 1 records are gone
         for (int i = 0; i < user1Uids.length; i++) {
-            assertEquals(0,
-                    mHelper.getNotificationChannels(PKG_N_MR1, user1Uids[i], false).getList().size());
+            assertEquals(0, mHelper.getNotificationChannels(PKG_N_MR1, user1Uids[i], false)
+                    .getList().size());
         }
     }
 
@@ -2880,7 +3206,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertFalse(mHelper.onPackagesChanged(false, USER_SYSTEM,
                 new String[]{PKG_N_MR1}, new int[]{UID_N_MR1}));
-        assertEquals(2, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
+        assertEquals(notificationClassification() ? 6 : 2,
+                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
     }
 
     @Test
@@ -2952,7 +3279,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testRecordDefaults() throws Exception {
         assertEquals(true, mHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
-        assertEquals(1, mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
+        assertEquals(notificationClassification() ? 5 : 1,
+                mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false).getList().size());
     }
 
     @Test
@@ -3038,7 +3366,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(3, actual.size());
         for (NotificationChannelGroup group : actual) {
             if (group.getId() == null) {
-                assertEquals(2, group.getChannels().size()); // misc channel too
+                assertEquals(2, group.getChannels().size());
                 assertTrue(channel3.getId().equals(group.getChannels().get(0).getId())
                         || channel3.getId().equals(group.getChannels().get(1).getId()));
             } else if (group.getId().equals(ncg.getId())) {
@@ -3188,6 +3516,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 mHelper.createNotificationChannel(pkgName, UID_N_MR1,
                         new NotificationChannel("" + j, "a", IMPORTANCE_HIGH), true, false,
                         UID_N_MR1, false);
+            }
+            if (notificationClassification()) {
+                numChannels += 4;
             }
             expectedChannels.put(pkgName, numChannels);
         }
@@ -3958,6 +4289,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_existingPackage_bubblePrefsRestored() throws Exception {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_ALL);
+        assertEquals(BUBBLE_PREFERENCE_ALL, mHelper.getBubblePreference(PKG_O, UID_O));
+
+        mXmlHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_NONE);
+        assertEquals(BUBBLE_PREFERENCE_NONE, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+
+        ByteArrayOutputStream stream = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
+        loadStreamXml(stream, true, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_ALL, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+    }
+
+    @Test
     public void testUpdateNotificationChannel_fixedPermission() {
         List<UserInfo> users = ImmutableList.of(new UserInfo(UserHandle.USER_SYSTEM, "user0", 0));
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);
@@ -3966,7 +4311,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), anyInt())).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(eq(0), anyInt())).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
@@ -4082,7 +4427,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -4105,7 +4450,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
@@ -4294,7 +4639,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         ArraySet<String> toRemove = new ArraySet<>();
@@ -4326,7 +4671,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         pm.applicationInfo = new ApplicationInfo();
         pm.applicationInfo.uid = UID_O;
         List<PackageInfo> packages = ImmutableList.of(pm);
-        when(mPm.getInstalledPackagesAsUser(any(), eq(0))).thenReturn(packages);
+        when(mPm.getInstalledPackagesAsUser(0, 0)).thenReturn(packages);
         mHelper.updateFixedImportance(users);
 
         assertTrue(mHelper.isImportanceLocked(PKG_O, UID_O));
@@ -4395,7 +4740,12 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testTooManyChannels() {
-        for (int i = 0; i < NOTIFICATION_CHANNEL_COUNT_LIMIT; i++) {
+        int numToCreate = NOTIFICATION_CHANNEL_COUNT_LIMIT;
+        if (notificationClassification()) {
+            // reserved channels lower limit
+            numToCreate -= 4;
+        }
+        for (int i = 0; i < numToCreate; i++) {
             NotificationChannel channel = new NotificationChannel(String.valueOf(i),
                     String.valueOf(i), NotificationManager.IMPORTANCE_HIGH);
             mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, true, UID_O, false);
@@ -4414,11 +4764,16 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testTooManyChannels_xml() throws Exception {
+        int numToCreate = NOTIFICATION_CHANNEL_COUNT_LIMIT;
+        if (notificationClassification()) {
+            // reserved channels lower limit
+            numToCreate -= 4;
+        }
         String extraChannel = "EXTRA";
         String extraChannel1 = "EXTRA1";
 
         // create first... many... directly so we don't need a big xml blob in this test
-        for (int i = 0; i < NOTIFICATION_CHANNEL_COUNT_LIMIT; i++) {
+        for (int i = 0; i < numToCreate; i++) {
             NotificationChannel channel = new NotificationChannel(String.valueOf(i),
                     String.valueOf(i), NotificationManager.IMPORTANCE_HIGH);
             mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, true, UID_O, false);
@@ -5431,8 +5786,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackageChannelPreferencesStats(events);
 
-        // number of channels with preferences should be 3 total
-        assertEquals("expected number of events", 3, events.size());
+        assertEquals("expected number of events",
+                notificationClassification() ? 7 : 3,
+                events.size());
         for (StatsEvent ev : events) {
             // all of these events should be of PackageNotificationChannelPreferences type,
             // and therefore we expect the atom to have this field.
@@ -5455,7 +5811,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             } else if (eventChannelId.equals("a")) {
                 assertEquals("channel name", "a", p.getChannelName());
                 assertEquals("importance", IMPORTANCE_LOW, p.getImportance());
-            } else { // b
+            } else if (eventChannelId.equals("b")){ // b
                 assertEquals("channel name", "b", p.getChannelName());
                 assertEquals("importance", IMPORTANCE_HIGH, p.getImportance());
             }
@@ -5473,11 +5829,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, channelC, true, false, UID_O, false);
 
         List<String> channels = new LinkedList<>(Arrays.asList("a", "b", "c"));
+        if (notificationClassification()) {
+            channels.add(NEWS_ID);
+            channels.add(PROMOTIONS_ID);
+            channels.add(SOCIAL_MEDIA_ID);
+            channels.add(RECS_ID);
+        }
 
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackageChannelPreferencesStats(events);
 
-        assertEquals("total events", 3, events.size());
+        assertEquals("total events", notificationClassification() ? 7 : 3, events.size());
         for (StatsEvent ev : events) {
             AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
             assertTrue(atom.hasPackageNotificationChannelPreferences());
@@ -5511,7 +5873,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.pullPackageChannelPreferencesStats(events);
 
         // In this case, we want to check the properties of the conversation channel (not parent)
-        assertEquals("total events", 2, events.size());
+        assertEquals("total events", notificationClassification() ? 6 : 2, events.size());
         for (StatsEvent ev : events) {
             AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
             assertTrue(atom.hasPackageNotificationChannelPreferences());
@@ -5543,7 +5905,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackageChannelPreferencesStats(events);
 
-        assertEquals("total events", 2, events.size());
+        assertEquals("total events",
+                notificationClassification() ? 6 : 2,
+                events.size());
         for (StatsEvent ev : events) {
             AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
             assertTrue(atom.hasPackageNotificationChannelPreferences());
@@ -5574,7 +5938,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackageChannelPreferencesStats(events);
 
-        assertEquals("total events", 2, events.size());
+        assertEquals("total events",
+                notificationClassification() ? 6 : 2,
+                events.size());
         for (StatsEvent ev : events) {
             AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
             assertTrue(atom.hasPackageNotificationChannelPreferences());
@@ -5856,14 +6222,109 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(0, actual.getChannels().stream().filter(c -> c.getId().equals("id2")).count());
     }
 
-    private static NotificationChannel cloneChannel(NotificationChannel original) {
-        Parcel parcel = Parcel.obtain();
-        try {
-            original.writeToParcel(parcel, 0);
-            parcel.setDataPosition(0);
-            return NotificationChannel.CREATOR.createFromParcel(parcel);
-        } finally {
-            parcel.recycle();
-        }
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        // verify 4 reserved channels are created
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, NEWS_ID, false).getImportance())
+                .isEqualTo(IMPORTANCE_LOW);
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, PROMOTIONS_ID, false)
+                .getImportance()).isEqualTo(IMPORTANCE_LOW);
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, SOCIAL_MEDIA_ID, false)
+                .getImportance()).isEqualTo(IMPORTANCE_LOW);
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, RECS_ID, false).getImportance())
+                .isEqualTo(IMPORTANCE_LOW);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles_appsCannotUpdate() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        NotificationChannel fromApp =
+                new NotificationChannel(NEWS_ID, "The best channel", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fromApp, true, false, UID_O, false);
+
+        assertThat(mHelper.getNotificationChannel(PKG_O, UID_O, NEWS_ID, false).getImportance())
+                .isEqualTo(IMPORTANCE_LOW);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testNotificationBundles_osCanAllowToBypassDnd() {
+        // do something that triggers settings creation for an app
+        mHelper.setShowBadge(PKG_O, UID_O, true);
+
+        NotificationChannel fromApp =
+                new NotificationChannel(NEWS_ID, "The best channel", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fromApp, true, false, UID_O, false);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testUnDeleteBundleChannelsOnLoadIfNotUserChange() throws Exception {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        // the public create/update methods should prevent this, so take advantage of the fact that
+        // the object is in the same process
+        mHelper.getNotificationChannel(PKG_P, UID_P, SOCIAL_MEDIA_ID, true).setDeleted(true);
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
+                UserHandle.USER_ALL, SOCIAL_MEDIA_ID);
+
+        loadStreamXml(baos, false, UserHandle.USER_ALL);
+
+        assertThat(mXmlHelper.getNotificationChannel(PKG_P, UID_P, SOCIAL_MEDIA_ID, true).
+                isDeleted()).isFalse();
+    }
+
+    @Test
+    public void testRestoredWithoutUid_threadSafety() throws Exception {
+        when(mPm.getPackageUidAsUser(anyString(), anyInt())).thenReturn(UNKNOWN_UID);
+        when(mPm.getApplicationInfoAsUser(anyString(), anyInt(), anyInt())).thenThrow(
+                new PackageManager.NameNotFoundException());
+        when(mClock.millis()).thenReturn(System.currentTimeMillis());
+        testThreadSafety(() -> {
+            String id = "id";
+            String xml = "<ranking version=\"1\">\n"
+                    + "<package name=\"" + Thread.currentThread()+ "\" show_badge=\"true\">\n"
+                    + "<channel id=\"" + id + "\" name=\"name\" importance=\"2\" "
+                    + "show_badge=\"true\" />\n"
+                    + "</package>\n"
+                    + "<package name=\"" + PKG_P + "\" show_badge=\"true\">\n"
+                    + "</package>\n"
+                    + "</ranking>\n";
+
+            try {
+                loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            // trigger a removal from the list
+            mXmlHelper.onPackagesChanged(true, USER_SYSTEM, new String[]{PKG_P},
+                    new int[]{UNKNOWN_UID});
+        }, 20, 50);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public void testNoAppHasPermissionToPromoteByDefault() {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public void testSetCanBePromoted() {
+        mHelper.setCanBePromoted(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
+
+        mHelper.setCanBePromoted(PKG_P, UID_P, false);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+        verify(mHandler, never()).requestSort();
     }
 }

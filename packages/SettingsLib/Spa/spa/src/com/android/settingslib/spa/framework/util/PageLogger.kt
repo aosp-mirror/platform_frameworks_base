@@ -19,6 +19,7 @@ package com.android.settingslib.spa.framework.util
 import androidx.compose.runtime.Composable
 import androidx.core.os.bundleOf
 import com.android.settingslib.spa.framework.common.LOG_DATA_DISPLAY_NAME
+import com.android.settingslib.spa.framework.common.LOG_DATA_METRICS_CATEGORY
 import com.android.settingslib.spa.framework.common.LOG_DATA_SESSION_NAME
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
@@ -45,6 +46,7 @@ private fun SettingsPage.logPageEvent(event: LogEvent, navController: NavControl
         extraData = bundleOf(
             LOG_DATA_DISPLAY_NAME to displayName,
             LOG_DATA_SESSION_NAME to navController.sessionSourceName,
+            LOG_DATA_METRICS_CATEGORY to metricsCategory,
         ).apply {
             val normArguments = parameter.normalize(arguments)
             if (normArguments != null) putAll(normArguments)

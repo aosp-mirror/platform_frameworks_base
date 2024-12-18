@@ -18,7 +18,9 @@ package com.android.server.location.gnss.hal;
 
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.location.GnssAntennaInfo;
 import android.location.GnssCapabilities;
@@ -29,6 +31,7 @@ import android.location.GnssSignalType;
 import android.location.GnssStatus;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -46,9 +49,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Entry point for most GNSS HAL commands and callbacks.
@@ -139,6 +146,8 @@ public class GnssNative {
     public static final int AGPS_SETID_TYPE_NONE = 0;
     public static final int AGPS_SETID_TYPE_IMSI = 1;
     public static final int AGPS_SETID_TYPE_MSISDN = 2;
+
+    private static final int POWER_STATS_REQUEST_TIMEOUT_MILLIS = 100;
 
     @IntDef(prefix = "AGPS_SETID_TYPE_", value = {AGPS_SETID_TYPE_NONE, AGPS_SETID_TYPE_IMSI,
             AGPS_SETID_TYPE_MSISDN})
@@ -289,6 +298,15 @@ public class GnssNative {
                 byte responseType, boolean inEmergencyMode, boolean isCachedLocation);
     }
 
+    /** Callback for reporting {@link GnssPowerStats} */
+    public interface PowerStatsCallback {
+        /**
+         * Called when power stats are reported.
+         * @param powerStats non-null value when power stats are available, {@code null} otherwise.
+         */
+        void onReportPowerStats(@Nullable GnssPowerStats powerStats);
+    }
+
     // set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
     // stops output right at 600m/s, depriving this of the information of a device that reaches
     // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
@@ -310,6 +328,8 @@ public class GnssNative {
 
     @GuardedBy("GnssNative.class")
     private static GnssNative sInstance;
+
+    private final Handler mHandler;
 
     /**
      * Sets GnssHal instance to use for testing.
@@ -367,6 +387,14 @@ public class GnssNative {
     private NavigationMessageCallbacks[] mNavigationMessageCallbacks =
             new NavigationMessageCallbacks[0];
 
+    private @Nullable GnssPowerStats mLastKnownPowerStats = null;
+    private final Object mPowerStatsLock = new Object();
+    private final Runnable mPowerStatsTimeoutCallback = () -> {
+        Log.d(TAG, "Request for power stats timed out");
+        reportGnssPowerStats(null);
+    };
+    private final List<PowerStatsCallback> mPendingPowerStatsCallbacks = new ArrayList<>();
+
     // these callbacks may only have a single implementation
     private GeofenceCallbacks mGeofenceCallbacks;
     private TimeCallbacks mTimeCallbacks;
@@ -381,7 +409,6 @@ public class GnssNative {
 
     private GnssCapabilities mCapabilities = new GnssCapabilities.Builder().build();
     private @GnssCapabilities.TopHalCapabilityFlags int mTopFlags;
-    private @Nullable GnssPowerStats mPowerStats = null;
     private int mHardwareYear = 0;
     private @Nullable String mHardwareModelName = null;
     private long mStartRealtimeMs = 0;
@@ -391,6 +418,7 @@ public class GnssNative {
         mGnssHal = Objects.requireNonNull(gnssHal);
         mEmergencyHelper = injector.getEmergencyHelper();
         mConfiguration = configuration;
+        mHandler = FgThread.getHandler();
     }
 
     public void addBaseCallbacks(BaseCallbacks callbacks) {
@@ -532,8 +560,8 @@ public class GnssNative {
     /**
      * Returns the latest power stats from the GNSS HAL.
      */
-    public @Nullable GnssPowerStats getPowerStats() {
-        return mPowerStats;
+    public @Nullable GnssPowerStats getLastKnownPowerStats() {
+        return mLastKnownPowerStats;
     }
 
     /**
@@ -931,10 +959,49 @@ public class GnssNative {
 
     /**
      * Request an eventual update of GNSS power statistics.
+     *
+     * @param executor Executor that will run {@code callback}
+     * @param callback Called with non-null power stats if they were obtained in time, called with
+     *                 {@code null} if stats could not be obtained in time.
      */
-    public void requestPowerStats() {
+    public void requestPowerStats(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull PowerStatsCallback callback) {
         Preconditions.checkState(mRegistered);
-        mGnssHal.requestPowerStats();
+        synchronized (mPowerStatsLock) {
+            mPendingPowerStatsCallbacks.add(powerStats -> {
+                Binder.withCleanCallingIdentity(
+                        () -> executor.execute(() -> callback.onReportPowerStats(powerStats)));
+            });
+            if (mPendingPowerStatsCallbacks.size() == 1) {
+                mGnssHal.requestPowerStats();
+                mHandler.postDelayed(mPowerStatsTimeoutCallback,
+                        POWER_STATS_REQUEST_TIMEOUT_MILLIS);
+            }
+        }
+    }
+
+    /**
+     * Request GNSS power statistics and blocks for a short time waiting for the result.
+     *
+     * @return non-null power stats, or {@code null} if stats could not be obtained in time.
+     */
+    public @Nullable GnssPowerStats requestPowerStatsBlocking() {
+        AtomicReference<GnssPowerStats> statsWrapper = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        requestPowerStats(Runnable::run, powerStats -> {
+            statsWrapper.set(powerStats);
+            latch.countDown();
+        });
+
+        try {
+            latch.await(POWER_STATS_REQUEST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Log.d(TAG, "Interrupted while waiting for power stats");
+            Thread.currentThread().interrupt();
+        }
+
+        return statsWrapper.get();
     }
 
     /**
@@ -1167,7 +1234,14 @@ public class GnssNative {
 
     @NativeEntryPoint
     void reportGnssPowerStats(GnssPowerStats powerStats) {
-        mPowerStats = powerStats;
+        synchronized (mPowerStatsLock) {
+            mHandler.removeCallbacks(mPowerStatsTimeoutCallback);
+            if (powerStats != null) {
+                mLastKnownPowerStats = powerStats;
+            }
+            mPendingPowerStatsCallbacks.forEach(cb -> cb.onReportPowerStats(powerStats));
+            mPendingPowerStatsCallbacks.clear();
+        }
     }
 
     @NativeEntryPoint

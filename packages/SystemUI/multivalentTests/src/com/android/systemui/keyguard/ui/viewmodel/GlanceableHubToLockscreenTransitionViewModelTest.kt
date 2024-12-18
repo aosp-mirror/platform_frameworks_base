@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.res.Configuration
+import android.util.LayoutDirection
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -34,6 +36,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -50,7 +54,7 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenFadeIn() =
         testScope.runTest {
             val values by collectValues(underTest.keyguardAlpha)
-            assertThat(values).containsExactly(0f)
+            assertThat(values).isEmpty()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -70,13 +74,17 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values).hasSize(5)
+            assertThat(values).hasSize(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
     @Test
     fun lockscreenTranslationX() =
         testScope.runTest {
+            val config: Configuration = mock()
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(config)
+
             configurationRepository.setDimensionPixelSize(
                 R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x,
                 100
@@ -97,6 +105,35 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values).hasSize(5)
             values.forEach { assertThat(it.value).isIn(Range.closed(-100f, 0f)) }
+        }
+
+    @Test
+    fun lockscreenTranslationX_resetsAfterCancellation() =
+        testScope.runTest {
+            val config: Configuration = mock()
+            whenever(config.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(config)
+
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.hub_to_lockscreen_transition_lockscreen_translation_x,
+                100
+            )
+            val values by collectValues(underTest.keyguardTranslationX)
+            assertThat(values).isEmpty()
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.3f),
+                    step(0.5f),
+                    step(0.9f, TransitionState.CANCELED)
+                ),
+                testScope,
+            )
+
+            assertThat(values).hasSize(4)
+            values.forEach { assertThat(it.value).isIn(Range.closed(-100f, 0f)) }
+            assertThat(values.last().value).isEqualTo(0f)
         }
 
     private fun step(

@@ -31,9 +31,9 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.navigationbar.NavigationBar;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.navigationbar.NavigationBarTransitions;
+import com.android.systemui.navigationbar.views.NavigationBar;
+import com.android.systemui.navigationbar.views.NavigationBarTransitions;
 import com.android.systemui.res.R;
 
 import java.util.ArrayList;

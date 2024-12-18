@@ -475,8 +475,8 @@ public class IconTest {
         final Icon ic = Icon.createWithBitmap(bm);
         final Drawable drawable = ic.loadDrawable(mContext);
 
-        assertThat(drawable.getIntrinsicWidth()).isEqualTo(maxWidth);
-        assertThat(drawable.getIntrinsicHeight()).isEqualTo(maxHeight);
+        assertThat(Math.abs(drawable.getIntrinsicWidth() - maxWidth)).isLessThan(2);
+        assertThat(Math.abs(drawable.getIntrinsicHeight() - maxHeight)).isLessThan(2);
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package com.android.server.grammaticalinflection;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 
@@ -41,7 +40,7 @@ public abstract class GrammaticalInflectionManagerInternal {
     public abstract void stageAndApplyRestoredPayload(byte[] payload, int userId);
 
     /**
-     * Get the current system grammatical gender of privileged application.
+     * Get the current system grammatical gender for the particular user.
      *
      * @return the value of grammatical gender
      *
@@ -50,17 +49,34 @@ public abstract class GrammaticalInflectionManagerInternal {
     public abstract @Configuration.GrammaticalGender int getSystemGrammaticalGender(int userId);
 
     /**
-     * Retrieve the system grammatical gender.
+     * Get the final merged value of the global grammatical gender, user- or devsettings-set.
      *
      * @return the value of grammatical gender
      *
      */
-    public abstract @Configuration.GrammaticalGender int retrieveSystemGrammaticalGender(
-            @NonNull Configuration configuration);
+    public abstract @Configuration.GrammaticalGender int mergedFinalSystemGrammaticalGender();
+
+    /**
+     * Get the grammatical gender from developer settings global override.
+     *
+     * @return the value of grammatical gender
+     */
+    public abstract
+            @Configuration.GrammaticalGender int getGrammaticalGenderFromDeveloperSettings();
 
     /**
      * Whether the package can get the system grammatical gender or not.
      */
-    public abstract boolean canGetSystemGrammaticalGender(int uid, @Nullable String packageName);
-}
+    public abstract boolean canGetSystemGrammaticalGender(int uid);
 
+
+    /**
+     * Returns the system-gender to be backed up as a data-blob.
+     */
+    public abstract @Nullable byte[] getSystemBackupPayload(int userId);
+
+    /**
+     * Restores the system-gender that were previously backed up.
+     */
+    public abstract void applyRestoredSystemPayload(byte[] payload, int userId);
+}

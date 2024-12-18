@@ -17,17 +17,20 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.content.applicationContext
+import android.hardware.fingerprint.FingerprintManager
 import com.android.systemui.biometrics.authController
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.udfpsOverlayInteractor by Fixture {
     UdfpsOverlayInteractor(
         context = applicationContext,
         authController = authController,
         selectedUserInteractor = selectedUserInteractor,
+        fingerprintManager = mock<FingerprintManager>(),
         scope = applicationCoroutineScope,
     )
 }

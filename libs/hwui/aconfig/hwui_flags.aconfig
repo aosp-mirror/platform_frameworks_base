@@ -2,7 +2,15 @@ package: "com.android.graphics.hwui.flags"
 container: "system"
 
 flag {
+  name: "runtime_color_filters_blenders"
+  namespace: "core_graphics"
+  description: "API for AGSL authored runtime color filters and blenders"
+  bug: "358126864"
+}
+
+flag {
   name: "clip_shader"
+  is_exported: true
   namespace: "core_graphics"
   description: "API for canvas shader clipping operations"
   bug: "280116960"
@@ -10,6 +18,7 @@ flag {
 
 flag {
   name: "matrix_44"
+  is_exported: true
   namespace: "core_graphics"
   description: "API for 4x4 matrix and related canvas functions"
   bug: "280116960"
@@ -17,6 +26,7 @@ flag {
 
 flag {
   name: "limited_hdr"
+  is_exported: true
   namespace: "core_graphics"
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
   bug: "234181960"
@@ -45,6 +55,7 @@ flag {
 
 flag {
   name: "gainmap_animations"
+  is_exported: true
   namespace: "core_graphics"
   description: "APIs to help enable animations involving gainmaps"
   bug: "296482289"
@@ -52,6 +63,7 @@ flag {
 
 flag {
   name: "gainmap_constructor_with_metadata"
+  is_exported: true
   namespace: "core_graphics"
   description: "APIs to create a new gainmap with a bitmap for metadata."
   bug: "304478551"
@@ -66,6 +78,7 @@ flag {
 
 flag {
   name: "requested_formats_v"
+  is_exported: true
   namespace: "core_graphics"
   description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
   bug: "292545615"
@@ -76,4 +89,43 @@ flag {
   namespace: "core_graphics"
   description: "Automatically animate all changes in HDR headroom"
   bug: "314810174"
+}
+
+flag {
+  name: "draw_region"
+  namespace: "core_graphics"
+  description: "Add canvas#drawRegion API"
+  bug: "318612129"
+}
+
+flag {
+  name: "initialize_gl_always"
+  namespace: "core_graphics"
+  description: "Initialize GL even when HWUI is set to use Vulkan. This improves app startup time for apps using GL."
+  bug: "335172671"
+}
+
+flag {
+  name: "skip_eglmanager_telemetry"
+  namespace: "core_graphics"
+  description: "Skip telemetry in EglManager's calls to eglCreateContext to avoid polluting telemetry"
+  bug: "347911216"
+}
+
+flag {
+  name: "resample_gainmap_regions"
+  namespace: "core_graphics"
+  description: "Resample gainmaps when decoding regions, to improve visual quality"
+  bug: "352847821"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "iso_gainmap_apis"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "APIs that expose gainmap metadata corresponding to those defined in ISO 21496-1"
+  bug: "349357636"
 }

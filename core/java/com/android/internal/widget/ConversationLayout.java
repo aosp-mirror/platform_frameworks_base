@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import static android.widget.flags.Flags.conversationLayoutUseMaximumChildHeight;
+
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
 
@@ -37,7 +39,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.Spannable;
@@ -163,6 +164,8 @@ public class ConversationLayout extends FrameLayout
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
     private boolean mPrecomputedTextEnabled = false;
+    @Nullable
+    private ConversationHeaderData mConversationHeaderData;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -652,6 +655,7 @@ public class ConversationLayout extends FrameLayout
 
     private void setConversationAvatarAndNameFromData(
             ConversationHeaderData conversationHeaderData) {
+        mConversationHeaderData = conversationHeaderData;
         final OneToOneConversationAvatarData oneToOneConversationDrawable;
         final GroupConversationAvatarData groupConversationAvatarData;
         final ConversationAvatarData conversationAvatar =
@@ -805,7 +809,10 @@ public class ConversationLayout extends FrameLayout
         bottomBackground.setLayoutParams(layoutParams);
     }
 
-    private void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
+    /**
+     * Binds group avatar drawables to face pile.
+     */
+    public void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
             ImageView topView, GroupConversationAvatarData groupConversationAvatarData) {
         applyNotificationBackgroundColor(bottomBackground);
         bottomView.setImageDrawable(groupConversationAvatarData.mLastIcon);
@@ -1207,6 +1214,10 @@ public class ConversationLayout extends FrameLayout
                 }
             }
         }
+        if (android.app.Flags.cleanUpSpansAndNewLines() && conversationText != null) {
+            // remove formatting from title.
+            conversationText = conversationText.toString();
+        }
 
         if (conversationIcon == null) {
             conversationIcon = largeIcon;
@@ -1216,7 +1227,7 @@ public class ConversationLayout extends FrameLayout
             return new ConversationHeaderData(
                     conversationText,
                     new OneToOneConversationAvatarData(
-                            resolveAvatarImage(conversationIcon)));
+                            resolveAvatarImageForOneToOne(conversationIcon)));
         }
 
         final List<List<Notification.MessagingStyle.Message>> groupMessages = new ArrayList<>();
@@ -1283,18 +1294,45 @@ public class ConversationLayout extends FrameLayout
 
         return new ConversationHeaderData(
                 conversationText,
-                new GroupConversationAvatarData(resolveAvatarImage(lastIcon),
-                        resolveAvatarImage(secondLastIcon)));
+                new GroupConversationAvatarData(resolveAvatarImageForFacePile(lastIcon),
+                        resolveAvatarImageForFacePile(secondLastIcon)));
     }
 
     /**
-     * {@link ImageResolver#loadImage(Uri)} accepts Uri to load images. However Conversation Avatars
-     * are received as Icon. So, we can't make use of ImageResolver.
+     * One To One Conversation Avatars is loaded by CachingIconView(conversation icon view).
      */
     @Nullable
-    private Drawable resolveAvatarImage(Icon conversationIcon) {
+    private Drawable resolveAvatarImageForOneToOne(Icon conversationIcon) {
+        final Drawable conversationIconDrawable =
+                tryLoadingSizeRestrictedIconForOneToOne(conversationIcon);
+        if (conversationIconDrawable != null) {
+            return conversationIconDrawable;
+        }
+        // when size restricted icon loading fails, we fallback to icons load drawable.
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable tryLoadingSizeRestrictedIconForOneToOne(Icon conversationIcon) {
         try {
-            return LocalImageResolver.resolveImage(conversationIcon, getContext());
+            return mConversationIconView.loadSizeRestrictedIcon(conversationIcon);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Group Avatar drawables are loaded by Icon.
+     */
+    @Nullable
+    private Drawable resolveAvatarImageForFacePile(Icon conversationIcon) {
+        return loadDrawableFromIcon(conversationIcon);
+    }
+
+    @Nullable
+    private Drawable loadDrawableFromIcon(Icon conversationIcon) {
+        try {
+            return conversationIcon.loadDrawable(getContext());
         } catch (Exception ex) {
             return null;
         }
@@ -1367,6 +1405,38 @@ public class ConversationLayout extends FrameLayout
                 group.setVisibility(VISIBLE);
             } else if (visibleChildren == 0 && group.getVisibility() != GONE) {
                 group.setVisibility(GONE);
+            }
+        }
+    }
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        // ConversationLayout needs to set its height to its biggest child to show the content
+        // properly.
+        // FrameLayout measures its match_parent children twice when any of FLs dimension is not
+        // specified. However, its sets its own dimensions before the second measurement pass.
+        // Content CutOff happens when children have bigger height on its second measurement.
+        if (conversationLayoutUseMaximumChildHeight()) {
+            int maxHeight = getMeasuredHeight();
+            final int count = getChildCount();
+
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child == null || child.getVisibility() == GONE) {
+                    continue;
+                }
+
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                maxHeight = Math.max(maxHeight,
+                        child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+            }
+
+            maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
+            if (maxHeight != getMeasuredHeight()) {
+                setMeasuredDimension(getMeasuredWidth(), maxHeight);
             }
         }
     }
@@ -1561,6 +1631,11 @@ public class ConversationLayout extends FrameLayout
     @Nullable
     public Icon getConversationIcon() {
         return mConversationIcon;
+    }
+
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
     }
 
     private static class TouchDelegateComposite extends TouchDelegate {

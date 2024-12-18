@@ -16,6 +16,7 @@
 
 package com.android.systemui.classifier
 
+import android.view.KeyEvent
 import android.view.MotionEvent
 import com.android.systemui.classifier.FalsingCollectorImpl.logDebug
 import com.android.systemui.dagger.SysUISingleton
@@ -59,8 +60,12 @@ class FalsingCollectorNoOp @Inject constructor() : FalsingCollector {
         logDebug("NOOP: onBouncerHidden")
     }
 
+    override fun onKeyEvent(ev: KeyEvent) {
+        logDebug("NOOP: onKeyEvent(${KeyEvent.actionToString(ev.action)}")
+    }
+
     override fun onTouchEvent(ev: MotionEvent) {
-        logDebug("NOOP: onTouchEvent(${ev.actionMasked})")
+        logDebug("NOOP: onTouchEvent(${MotionEvent.actionToString(ev.actionMasked)})")
     }
 
     override fun onMotionEventComplete() {

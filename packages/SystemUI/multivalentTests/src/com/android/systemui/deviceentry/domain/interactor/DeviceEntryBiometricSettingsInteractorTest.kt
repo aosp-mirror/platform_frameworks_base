@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,6 +36,7 @@ class DeviceEntryBiometricSettingsInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val biometricSettingsRepository = kosmos.biometricSettingsRepository
     private val underTest = kosmos.deviceEntryBiometricSettingsInteractor
+    private val testScope = kosmos.testScope
 
     @Test
     fun isCoex_true() = runTest {
@@ -59,4 +61,25 @@ class DeviceEntryBiometricSettingsInteractorTest : SysuiTestCase() {
         biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         assertThat(isCoex).isFalse()
     }
+
+    @Test
+    fun authenticationFlags_providesAuthFlagsFromRepository() =
+        testScope.runTest {
+            assertThat(underTest.authenticationFlags)
+                .isSameInstanceAs(biometricSettingsRepository.authenticationFlags)
+        }
+
+    @Test
+    fun isFaceAuthEnrolledAndEnabled_providesValueFromRepository() =
+        testScope.runTest {
+            assertThat(underTest.isFaceAuthEnrolledAndEnabled)
+                .isSameInstanceAs(biometricSettingsRepository.isFaceAuthEnrolledAndEnabled)
+        }
+
+    @Test
+    fun isFingerprintAuthEnrolledAndEnabled_providesValueFromRepository() =
+        testScope.runTest {
+            assertThat(underTest.isFingerprintAuthEnrolledAndEnabled)
+                .isSameInstanceAs(biometricSettingsRepository.isFingerprintEnrolledAndEnabled)
+        }
 }

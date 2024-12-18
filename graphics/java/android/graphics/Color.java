@@ -289,6 +289,9 @@ import java.util.function.DoubleUnaryOperator;
  */
 @AnyThread
 @SuppressAutoDoc
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public class Color {
     @ColorInt public static final int BLACK       = 0xFF000000;
     @ColorInt public static final int DKGRAY      = 0xFF444444;

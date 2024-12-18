@@ -71,16 +71,32 @@ public interface ImeTracker {
     /** The type of the IME request. */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_SHOW,
-            TYPE_HIDE
+            TYPE_HIDE,
+            TYPE_USER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Type {}
 
-    /** IME show request type. */
+    /**
+     * IME show request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_SHOW
+     */
     int TYPE_SHOW = ImeProtoEnums.TYPE_SHOW;
 
-    /** IME hide request type. */
+    /**
+     * IME hide request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_HIDE
+     */
     int TYPE_HIDE = ImeProtoEnums.TYPE_HIDE;
+
+    /**
+     * IME user-controlled animation request type.
+     *
+     * @see android.view.InsetsController#ANIMATION_TYPE_USER
+     */
+    int TYPE_USER = ImeProtoEnums.TYPE_USER;
 
     /** The status of the IME request. */
     @IntDef(prefix = { "STATUS_" }, value = {
@@ -88,7 +104,7 @@ public interface ImeTracker {
             STATUS_CANCEL,
             STATUS_FAIL,
             STATUS_SUCCESS,
-            STATUS_TIMEOUT
+            STATUS_TIMEOUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Status {}
@@ -117,7 +133,7 @@ public interface ImeTracker {
     @IntDef(prefix = { "ORIGIN_" }, value = {
             ORIGIN_CLIENT,
             ORIGIN_SERVER,
-            ORIGIN_IME
+            ORIGIN_IME,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
@@ -182,11 +198,28 @@ public interface ImeTracker {
             PHASE_CLIENT_ANIMATION_FINISHED_SHOW,
             PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
             PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT,
-            PHASE_CLIENT_ANIMATION_FINISHED_HIDE,
             PHASE_IME_SHOW_WINDOW,
             PHASE_IME_HIDE_WINDOW,
             PHASE_IME_PRIVILEGED_OPERATIONS,
             PHASE_SERVER_CURRENT_ACTIVE_IME,
+            PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES,
+            PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY,
+            PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED,
+            PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED,
+            PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED,
+            PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES,
+            PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY,
+            PHASE_WM_GET_CONTROL_WITH_LEASH,
+            PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES,
+            PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW,
+            PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY,
+            PHASE_CLIENT_SET_IME_VISIBILITY,
+            PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED,
+            PHASE_CLIENT_NO_ONGOING_USER_ANIMATION,
+            PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT,
+            PHASE_WM_POSTING_CHANGED_IME_VISIBILITY,
+            PHASE_WM_INVOKING_IME_REQUESTED_LISTENER,
+            PHASE_CLIENT_ALREADY_HIDDEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -336,6 +369,62 @@ public interface ImeTracker {
     /** Checked that the calling IME is the currently active IME. */
     int PHASE_SERVER_CURRENT_ACTIVE_IME = ImeProtoEnums.PHASE_SERVER_CURRENT_ACTIVE_IME;
 
+    /** Reporting the new requested visible types. */
+    int PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES;
+    /** Setting the IME visibility for the RemoteInsetsControlTarget. */
+    int PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY;
+    /** IME has no insets pending and is server visible. Notify about changed controls. */
+    int PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED =
+            ImeProtoEnums.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED;
+    /** Handling the dispatch of the IME visibility change. */
+    int PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED =
+            ImeProtoEnums.PHASE_CLIENT_HANDLE_DISPATCH_IME_VISIBILITY_CHANGED;
+    /** Dispatching the IME visibility change. */
+    int PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED =
+            ImeProtoEnums.PHASE_CLIENT_NOTIFY_IME_VISIBILITY_CHANGED;
+    /** Updating the requested visible types. */
+    int PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES;
+    /** Reached the remote insets control target's setImeInputTargetRequestedVisibility method. */
+    int PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SET_REQUESTED_VISIBILITY;
+    /** Received a new insets source control with a leash. */
+    int PHASE_WM_GET_CONTROL_WITH_LEASH =
+            ImeProtoEnums.PHASE_WM_GET_CONTROL_WITH_LEASH;
+    /**
+     * Updating the requested visible types in the WindowState and sending them to state
+     * controller.
+     */
+    int PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES;
+    /** Setting the requested IME visibility of a window. */
+    int PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW =
+            ImeProtoEnums.PHASE_SERVER_SET_VISIBILITY_ON_FOCUSED_WINDOW;
+    /** Reached the redirect of InputMethodManager to InsetsController show/hide. */
+    int PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_CLIENT_HANDLE_SET_IME_VISIBILITY;
+    /** Reached the InputMethodManager Handler call to send the visibility. */
+    int PHASE_CLIENT_SET_IME_VISIBILITY = ImeProtoEnums.PHASE_CLIENT_SET_IME_VISIBILITY;
+    /** Calling into the listener to show/hide the IME from the ImeInsetsSourceProvider. */
+    int PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED =
+            ImeProtoEnums.PHASE_WM_DISPATCH_IME_REQUESTED_CHANGED;
+    /** An ongoing user animation will not be interrupted by a IMM#showSoftInput. */
+    int PHASE_CLIENT_NO_ONGOING_USER_ANIMATION =
+            ImeProtoEnums.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION;
+    /** Dispatching the token to the ImeInsetsSourceProvider. */
+    int PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT =
+            ImeProtoEnums.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT;
+    /** Now posting the IME visibility to the WMS handler. */
+    int PHASE_WM_POSTING_CHANGED_IME_VISIBILITY =
+            ImeProtoEnums.PHASE_WM_POSTING_CHANGED_IME_VISIBILITY;
+    /** Inside the WMS handler calling into the listener that calls into IMMS show/hide. */
+    int PHASE_WM_INVOKING_IME_REQUESTED_LISTENER =
+            ImeProtoEnums.PHASE_WM_INVOKING_IME_REQUESTED_LISTENER;
+    /** IME is requested to be hidden, but already hidden. Don't hide to avoid another animation. */
+    int PHASE_CLIENT_ALREADY_HIDDEN = ImeProtoEnums.PHASE_CLIENT_ALREADY_HIDDEN;
+
     /**
      * Called when an IME request is started.
      *
@@ -401,18 +490,34 @@ public interface ImeTracker {
     void onCancelled(@Nullable Token token, @Phase int phase);
 
     /**
-     * Called when the IME show request is successful.
+     * Called when the show IME request is successful.
      *
      * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onShown(@Nullable Token token);
 
     /**
-     * Called when the IME hide request is successful.
+     * Called when the hide IME request is successful.
      *
      * @param token the token tracking the current IME request or {@code null} otherwise.
      */
     void onHidden(@Nullable Token token);
+
+    /**
+     * Called when the user-controlled IME request was dispatched to the requesting app. The
+     * user animation can take an undetermined amount of time, so it shouldn't be tracked.
+     *
+     * @param token the token tracking the current IME request or {@code null} otherwise.
+     */
+    void onDispatched(@Nullable Token token);
+
+    /**
+     * Called when the animation of the user-controlled IME request finished.
+     *
+     * @param token the token tracking the current IME request or {@code null} otherwise.
+     * @param shown whether the end state of the animation was shown or hidden.
+     */
+    void onUserFinished(@Nullable Token token, boolean shown);
 
     /**
      * Returns whether the current IME request was created due to a user interaction. This can
@@ -483,13 +588,6 @@ public interface ImeTracker {
         /** Whether the stack trace at the request call site should be logged. */
         private boolean mLogStackTrace;
 
-        private void reloadSystemProperties() {
-            mLogProgress = SystemProperties.getBoolean(
-                    "persist.debug.imetracker", false);
-            mLogStackTrace = SystemProperties.getBoolean(
-                    "persist.debug.imerequest.logstacktrace", false);
-        }
-
         @NonNull
         @Override
         public Token onStart(@NonNull String component, int uid, @Type int type, @Origin int origin,
@@ -498,7 +596,7 @@ public interface ImeTracker {
             final var token = IInputMethodManagerGlobalInvoker.onStart(tag, uid, type,
                     origin, reason, fromUser);
 
-            Log.i(TAG, token.mTag + ": onRequest" + (type == TYPE_SHOW ? "Show" : "Hide")
+            Log.i(TAG, token.mTag + ": " + getOnStartPrefix(type)
                     + " at " + Debug.originToString(origin)
                     + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason)
                     + " fromUser " + fromUser,
@@ -552,6 +650,45 @@ public interface ImeTracker {
             IInputMethodManagerGlobalInvoker.onHidden(token);
 
             Log.i(TAG, token.mTag + ": onHidden");
+        }
+
+        @Override
+        public void onDispatched(@Nullable Token token) {
+            if (token == null) return;
+            IInputMethodManagerGlobalInvoker.onDispatched(token);
+
+            Log.i(TAG, token.mTag + ": onDispatched");
+        }
+
+        @Override
+        public void onUserFinished(@Nullable Token token, boolean shown) {
+            if (token == null) return;
+            // This is already sent to ImeTrackerService to mark it finished during onDispatched.
+
+            Log.i(TAG, token.mTag + ": onUserFinished " + (shown ? "shown" : "hidden"));
+        }
+
+        /**
+         * Gets the prefix string for {@link #onStart} based on the given request type.
+         *
+         * @param type request type for which to create the prefix string with.
+         */
+        @NonNull
+        private static String getOnStartPrefix(@Type int type) {
+            return switch (type) {
+                case TYPE_SHOW -> "onRequestShow";
+                case TYPE_HIDE -> "onRequestHide";
+                case TYPE_USER -> "onRequestUser";
+                default -> "onRequestUnknown";
+            };
+        }
+
+        /** Reloads the system properties related to this class. */
+        private void reloadSystemProperties() {
+            mLogProgress = SystemProperties.getBoolean(
+                    "persist.debug.imetracker", false);
+            mLogStackTrace = SystemProperties.getBoolean(
+                    "persist.debug.imerequest.logstacktrace", false);
         }
     };
 
@@ -783,7 +920,8 @@ public interface ImeTracker {
             final Configuration.Builder builder = Configuration.Builder.withSurface(
                             cujType,
                             jankContext.getDisplayContext(),
-                            jankContext.getTargetSurfaceControl())
+                            jankContext.getTargetSurfaceControl(),
+                            jankContext.getDisplayContext().getMainThreadHandler())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
                             useSeparatedThread ? 0 : 1, jankContext.getHostPackageName()));
             InteractionJankMonitor.getInstance().begin(builder);

@@ -21,19 +21,18 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
-import static android.view.InsetsController.AnimationType;
+import static android.view.InsetsController.ANIMATION_TYPE_USER;
+import static android.view.InsetsSource.FLAG_ANIMATE_RESIZING;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSourceConsumer.ShowResult.IME_SHOW_DELAYED;
 import static android.view.InsetsSourceConsumer.ShowResult.SHOW_IMMEDIATELY;
-import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
-import static android.view.WindowInsets.Type.SIZE;
 import static android.view.WindowInsets.Type.all;
-import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.defaultVisible;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
+import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -50,23 +49,26 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.LinearInterpolator;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.widget.TextView;
 
@@ -83,6 +85,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -132,9 +136,8 @@ public class InsetsControllerTest {
             mTestHandler = new TestHandler(null, mTestClock);
             mTestHost = spy(new TestHost(mViewRoot));
             mController = new InsetsController(mTestHost, (controller, id, type) -> {
-                if (type == ime()) {
-                    return new InsetsSourceConsumer(id, type, controller.getState(),
-                            Transaction::new, controller) {
+                if (!Flags.refactorInsetsController() && type == ime()) {
+                    return new InsetsSourceConsumer(id, type, controller.getState(), controller) {
 
                         private boolean mImeRequestedShow;
 
@@ -150,8 +153,7 @@ public class InsetsControllerTest {
                         }
                     };
                 } else {
-                    return new InsetsSourceConsumer(id, type, controller.getState(),
-                            Transaction::new, controller);
+                    return new InsetsSourceConsumer(id, type, controller.getState(), controller);
                 }
             }, mTestHandler);
             final Rect rect = new Rect(5, 5, 5, 5);
@@ -256,7 +258,11 @@ public class InsetsControllerTest {
             mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
             mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
             // When using the animation thread, this must not invoke onReady()
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
         });
@@ -273,7 +279,12 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                InsetsSourceControl ime = createControl(ID_IME, ime());
+                mController.onControlsChanged(new InsetsSourceControl[]{ime});
+            }
             mController.show(all());
             // quickly jump to final state by cancelling it.
             mController.cancelExistingAnimations();
@@ -295,7 +306,11 @@ public class InsetsControllerTest {
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ID_IME, ime()).onWindowFocusGained(true);
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
             mController.cancelExistingAnimations();
             assertTrue(isRequestedVisible(mController, ime()));
             mController.hide(ime(), true /* fromIme */, ImeTracker.Token.empty());
@@ -465,7 +480,12 @@ public class InsetsControllerTest {
             assertFalse(mController.getState().peekSource(ID_IME).isVisible());
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                InsetsSourceControl ime = createControl(ID_IME, ime());
+                mController.onControlsChanged(new InsetsSourceControl[]{ime});
+            }
 
             // Gaining control shortly after
             mController.onControlsChanged(createSingletonControl(ID_IME, ime()));
@@ -489,7 +509,12 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ID_IME, ime()));
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                InsetsSourceControl ime = createControl(ID_IME, ime());
+                mController.onControlsChanged(new InsetsSourceControl[]{ime});
+            }
 
             assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ime()));
             mController.cancelExistingAnimations();
@@ -554,7 +579,13 @@ public class InsetsControllerTest {
 
     @Test
     public void testControlImeNotReady() {
-        prepareControls();
+        if (!Flags.refactorInsetsController()) {
+            prepareControls();
+        } else {
+            // With the flag on, the IME control should not contain a leash, otherwise the custom
+            // animation will start immediately.
+            prepareControls(false /* imeControlHasLeash */);
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
@@ -567,7 +598,13 @@ public class InsetsControllerTest {
             verify(listener, never()).onReady(any(), anyInt());
 
             // Pretend that IME is calling.
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                // Send the IME control with leash, so that the animation can start
+                InsetsSourceControl ime = createControl(ID_IME, ime(), true /* hasLeash */);
+                mController.onControlsChanged(new InsetsSourceControl[]{ime});
+            }
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -579,7 +616,13 @@ public class InsetsControllerTest {
 
     @Test
     public void testControlImeNotReady_controlRevoked() {
-        prepareControls();
+        if (!Flags.refactorInsetsController()) {
+            prepareControls();
+        } else {
+            // With the flag on, the IME control should not contain a leash, otherwise the custom
+            // animation will start immediately.
+            prepareControls(false /* imeControlHasLeash */);
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
@@ -600,7 +643,13 @@ public class InsetsControllerTest {
 
     @Test
     public void testControlImeNotReady_timeout() {
-        prepareControls();
+        if (!Flags.refactorInsetsController()) {
+            prepareControls();
+        } else {
+            // With the flag on, the IME control should not contain a leash, otherwise the custom
+            // animation will start immediately.
+            prepareControls(false /* imeControlHasLeash */);
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
@@ -651,7 +700,11 @@ public class InsetsControllerTest {
             mController.onControlsChanged(createSingletonControl(ID_IME, ime()));
 
             // Pretend IME is calling
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
 
             InsetsState copy = new InsetsState(mController.getState(), true /* copySources */);
             copy.peekSource(ID_IME).setFrame(0, 1, 2, 3);
@@ -671,36 +724,109 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testResizeAnimation_insetsTypes() {
-        for (int i = 0; i < SIZE; i++) {
-            final @InsetsType int type = 1 << i;
-            final @AnimationType int expectedAnimationType = (type & systemBars()) != 0
-                            ? ANIMATION_TYPE_RESIZE
-                            : ANIMATION_TYPE_NONE;
-            doTestResizeAnimation_insetsTypes(type, expectedAnimationType);
-        }
-    }
-
-    private void doTestResizeAnimation_insetsTypes(@InsetsType int type,
-            @AnimationType int expectedAnimationType) {
-        final int id = type;
+    public void testResizeAnimation_withFlagAnimateResizing() throws InterruptedException {
+        final int id = ID_NAVIGATION_BAR;
+        final @InsetsType int type = navigationBars();
+        final int fromInsetsHeight = 50;
+        final int toInsetsHeight = 60;
+        final ArrayList<WindowInsets> progressList = new ArrayList<>();
+        final CountDownLatch animationEndLatch = new CountDownLatch(1);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             final InsetsState state1 = new InsetsState();
-            state1.getOrCreateSource(id, type).setVisible(true).setFrame(0, 0, 500, 50);
+            state1.getOrCreateSource(id, type)
+                    .setVisible(true)
+                    .setFrame(0, 0, 500, fromInsetsHeight)
+                    .setFlags(FLAG_ANIMATE_RESIZING, FLAG_ANIMATE_RESIZING);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.peekSource(id).setFrame(0, 0, 500, toInsetsHeight);
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals("There must not be resize animation.", ANIMATION_TYPE_NONE,
+                    mController.getAnimationType(type));
+
+            mViewRoot.getView().setWindowInsetsAnimationCallback(
+                    new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                        @Override
+                        public WindowInsets onProgress(
+                                @NonNull WindowInsets insets,
+                                @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                            progressList.add(insets);
+                            return insets;
+                        }
+
+                        @Override
+                        public void onEnd(@NonNull WindowInsetsAnimation animation) {
+                            animationEndLatch.countDown();
+                        }
+                    });
+
+            // Changing frame of the source with FLAG_ANIMATE_RESIZING will cause the resize
+            // animation.
+            mController.onStateChanged(state2);
+            assertEquals("There must be resize animation.", ANIMATION_TYPE_RESIZE,
+                    mController.getAnimationType(type));
+
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        assertTrue("Animation must be ended.", animationEndLatch.await(3, SECONDS));
+        assertEquals("The first insets height must be the same as `fromInsetsHeight`",
+                fromInsetsHeight, progressList.get(0).getInsets(type).top);
+        assertEquals("The last insets height must be the same as `toInsetsHeight`",
+                toInsetsHeight, progressList.get(progressList.size() - 1).getInsets(type).top);
+    }
+
+    @Test
+    public void testResizeAnimation_withoutFlagAnimateResizing() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final int id = ID_STATUS_BAR;
+            final @InsetsType int type = statusBars();
+            final InsetsState state1 = new InsetsState();
+            state1.getOrCreateSource(id, type)
+                    .setVisible(true)
+                    .setFrame(0, 0, 500, 50)
+                    .setFlags(0, FLAG_ANIMATE_RESIZING);
             final InsetsState state2 = new InsetsState(state1, true /* copySources */);
             state2.peekSource(id).setFrame(0, 0, 500, 60);
-            final String message = "Animation type of " + WindowInsets.Type.toString(type) + ":";
+            final String message = "There must not be resize animation.";
 
             // New insets source won't cause the resize animation.
             mController.onStateChanged(state1);
             assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
 
-            // Changing frame might cause the resize animation. This depends on the insets type.
+            // Changing frame of the source without FLAG_ANIMATE_RESIZING must not cause the resize
+            // animation.
             mController.onStateChanged(state2);
-            assertEquals(message, expectedAnimationType, mController.getAnimationType(type));
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
 
-            // Cancel the existing animations for the next iteration.
-            mController.cancelExistingAnimations();
+    @Test
+    public void testResizeAnimation_sourceFrame() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            final int id = ID_STATUS_BAR;
+            final @InsetsType int type = statusBars();
+            final InsetsState state1 = new InsetsState();
+            state1.setDisplayFrame(new Rect(0, 0, 500, 1000));
+            state1.getOrCreateSource(id, type).setFrame(0, 0, 500, 50);
+            final InsetsState state2 = new InsetsState(state1, true /* copySources */);
+            state2.setDisplayFrame(state1.getDisplayFrame());
+            state2.peekSource(id).setFrame(0, 0, 500, 0);
+            final String message = "There must not be resize animation.";
+
+            // New insets source won't cause the resize animation.
+            mController.onStateChanged(state1);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame won't cause the resize animation if the new frame is empty.
+            mController.onStateChanged(state2);
+            assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
+
+            // Changing frame won't cause the resize animation if the existing frame is empty.
+            mController.onStateChanged(state1);
             assertEquals(message, ANIMATION_TYPE_NONE, mController.getAnimationType(type));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -761,48 +887,6 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testCaptionInsetsStateAssemble() {
-        if (CAPTION_ON_SHELL) {
-            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
-            // test can be removed after the caption is moved to shell completely.
-            return;
-        }
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            final Rect frame = new Rect(0, 0, 100, 300);
-            final int captionBarHeight = 100;
-            final InsetsState state = mController.getState();
-            mController.onFrameChanged(frame);
-            mController.setCaptionInsetsHeight(captionBarHeight);
-            // The caption bar insets height should be the same as the caption bar height.
-            assertEquals(captionBarHeight, state.calculateInsets(frame, captionBar(), false).top);
-            // Test update to remove the caption bar
-            mController.setCaptionInsetsHeight(0);
-            // The caption bar source should not be there at all, because we don't add empty
-            // caption to the state from the server.
-            for (int i = state.sourceSize() - 1; i >= 0; i--) {
-                assertNotEquals(captionBar(), state.sourceAt(i).getType());
-            }
-        });
-    }
-
-    @Test
-    public void testNotifyCaptionInsetsOnlyChange() {
-        if (CAPTION_ON_SHELL) {
-            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
-            // test can be removed after the caption is moved to shell completely.
-            return;
-        }
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            reset(mTestHost);
-            mController.setCaptionInsetsHeight(100);
-            verify(mTestHost).notifyInsetsChanged();
-            reset(mTestHost);
-            mController.setCaptionInsetsHeight(0);
-            verify(mTestHost).notifyInsetsChanged();
-        });
-    }
-
-    @Test
     public void testRequestedState() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.hide(statusBars() | navigationBars());
@@ -851,7 +935,11 @@ public class InsetsControllerTest {
 
             // Showing invisible ime should only causes insets change once.
             clearInvocations(mTestHost);
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
             verify(mTestHost, times(1)).notifyInsetsChanged();
 
             // Sending the same insets state should not cause insets change.
@@ -918,11 +1006,192 @@ public class InsetsControllerTest {
             assertNull(imeInsetsConsumer.getControl());
 
             // Verify IME requested visibility should be updated to IME consumer from controller.
-            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
             assertTrue(isRequestedVisible(mController, ime()));
 
             mController.hide(ime());
             assertFalse(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeRequestedVisibleDuringPredictiveBackAnimWithoutCallback() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
+            mController.cancelExistingAnimations(); // fast forward show animation
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // Verify that onReady is called (after next predraw)
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            verify(listener).onReady(notNull(), eq(ime()));
+
+            // verify that insets are requested visible during animation
+            assertTrue(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeRequestedInvisibleDuringPredictiveBackAnimWithCallback() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // set WindowInsetsAnimationCallback on ViewRoot
+            mViewRoot.getView().setWindowInsetsAnimationCallback(
+                    new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+                        @Override
+                        public WindowInsets onProgress(
+                                @NonNull WindowInsets insets,
+                                @NonNull List<WindowInsetsAnimation> runningAnimations) {
+                            return insets;
+                        }
+                    });
+
+            // show ime as initial state
+            mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            mController.cancelExistingAnimations(); // fast forward show animation
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // Verify that onReady is called (after next predraw)
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            verify(listener).onReady(notNull(), eq(ime()));
+
+            // verify that insets are requested invisible during animation
+            assertFalse(isRequestedVisible(mController, ime()));
+        });
+    }
+
+    @Test
+    public void testImeShowRequestCancelsPredictiveBackPostCommitAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            InsetsSourceControl ime = createControl(ID_IME, ime());
+            // show ime as initial state
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that controller
+            // has ANIMATION_TYPE_USER set for ime()
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify show request is ignored during pre commit phase of predictive back anim
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            } else {
+                mController.onControlsChanged(new InsetsSourceControl[]{ime});
+            }
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify show request is applied during post commit phase of predictive back anim
+            mController.setPredictiveBackImeHideAnimInProgress(true);
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, null /* statsToken */);
+            } else {
+                mController.show(ime(), false /* fromIme */, null /* statsToken */);
+            }
+            assertEquals(ANIMATION_TYPE_SHOW, mController.getAnimationType(ime()));
+
+            // additionally verify that IME ends up visible
+            mController.cancelExistingAnimations();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+        });
+    }
+
+    @Test
+    public void testImeHideRequestIgnoredDuringPredictiveBackPostCommitAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that controller has ANIMATION_TYPE_USER set for ime()
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+
+            // verify hide request is ignored during post commit phase of predictive back anim
+            // since IME is already animating away
+            mController.setPredictiveBackImeHideAnimInProgress(true);
+            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_USER, mController.getAnimationType(ime()));
+        });
+    }
+
+    @Test
+    public void testPredictiveBackControlRequestCancelledDuringImeHideAnim() {
+        prepareControls();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // show ime as initial state
+            if (!Flags.refactorInsetsController()) {
+                mController.show(ime(), true /* fromIme */, ImeTracker.Token.empty());
+            } else {
+                mController.show(ime(), false /* fromIme */, ImeTracker.Token.empty());
+            }
+            mController.cancelExistingAnimations(); // fast forward show animation
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
+            assertTrue(mController.getState().peekSource(ID_IME).isVisible());
+
+            // start IME hide animation
+            mController.hide(ime(), true /* fromIme */, null /* statsToken */);
+            assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ime()));
+
+            // start control request (for predictive back animation)
+            WindowInsetsAnimationControlListener listener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(ime(), /*cancellationSignal*/ null,
+                    listener, /*fromIme*/ false, /*duration*/ -1, /*interpolator*/ null,
+                    ANIMATION_TYPE_USER, /*fromPredictiveBack*/ true);
+
+            // verify that control request is cancelled and animation type remains HIDE
+            verify(listener).onCancelled(any());
+            assertEquals(ANIMATION_TYPE_HIDE, mController.getAnimationType(ime()));
         });
     }
 
@@ -934,11 +1203,15 @@ public class InsetsControllerTest {
     }
 
     private InsetsSourceControl createControl(int id, @InsetsType int type) {
+        return createControl(id, type, true);
+    }
+
+    private InsetsSourceControl createControl(int id, @InsetsType int type, boolean hasLeash) {
 
         // Simulate binder behavior by copying SurfaceControl. Otherwise, InsetsController will
         // attempt to release mLeash directly.
         SurfaceControl copy = new SurfaceControl(mLeash, "InsetsControllerTest.createControl");
-        return new InsetsSourceControl(id, type, copy,
+        return new InsetsSourceControl(id, type, hasLeash ? copy : null,
                 (type & WindowInsets.Type.defaultVisible()) != 0, new Point(), Insets.NONE);
     }
 
@@ -947,9 +1220,13 @@ public class InsetsControllerTest {
     }
 
     private InsetsSourceControl[] prepareControls() {
+        return prepareControls(true);
+    }
+
+    private InsetsSourceControl[] prepareControls(boolean imeControlHasLeash) {
         final InsetsSourceControl navBar = createControl(ID_NAVIGATION_BAR, navigationBars());
         final InsetsSourceControl statusBar = createControl(ID_STATUS_BAR, statusBars());
-        final InsetsSourceControl ime = createControl(ID_IME, ime());
+        final InsetsSourceControl ime = createControl(ID_IME, ime(), imeControlHasLeash);
 
         InsetsSourceControl[] controls = new InsetsSourceControl[3];
         controls[0] = navBar;
@@ -972,9 +1249,10 @@ public class InsetsControllerTest {
         }
 
         @Override
-        public void updateRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
+        public void updateRequestedVisibleTypes(@InsetsType int requestedVisibleTypes,
+                @Nullable ImeTracker.Token statsToken) {
             mRequestedVisibleTypes = requestedVisibleTypes;
-            super.updateRequestedVisibleTypes(requestedVisibleTypes);
+            super.updateRequestedVisibleTypes(requestedVisibleTypes, statsToken);
         }
 
         public boolean isRequestedVisible(@InsetsType int types) {

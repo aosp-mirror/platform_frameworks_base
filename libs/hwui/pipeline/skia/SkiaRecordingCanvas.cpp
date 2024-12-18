@@ -342,7 +342,7 @@ double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedIma
 }
 
 void SkiaRecordingCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) {
-    mDisplayList->mMeshes.push_back(&mesh);
+    mDisplayList->mMeshBufferData.push_back(mesh.refBufferData());
     mRecorder.drawMesh(mesh, blender, paint);
 }
 

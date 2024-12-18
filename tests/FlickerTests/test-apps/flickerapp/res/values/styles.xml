@@ -16,7 +16,19 @@
   -->
 
 <resources>
-    <style name="DefaultTheme" parent="@android:style/Theme.DeviceDefault">
+    <style name="OptOutEdgeToEdge" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <style name="OptOutEdgeToEdge.NoTitleBar" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <style name="OptOutEdgeToEdge.AppCompatTheme" parent="@style/Theme.AppCompat.Light">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
+    <style name="DefaultTheme" parent="@style/OptOutEdgeToEdge">
         <item name="android:windowBackground">@android:color/darker_gray</item>
     </style>
 
@@ -32,7 +44,7 @@
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
 
-    <style name="DialogTheme" parent="@android:style/Theme.DeviceDefault">
+    <style name="DialogTheme" parent="@style/OptOutEdgeToEdge">
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@null</item>
@@ -43,18 +55,18 @@
         <item name="android:windowSoftInputMode">stateUnchanged</item>
     </style>
 
-    <style name="TransparentTheme" parent="@android:style/Theme.DeviceDefault">
+    <style name="TransparentTheme" parent="@style/OptOutEdgeToEdge">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="no_starting_window" parent="@android:style/Theme.DeviceDefault">
+    <style name="no_starting_window" parent="@style/OptOutEdgeToEdge">
         <item name="android:windowDisablePreview">true</item>
     </style>
 
-    <style name="SplashscreenAppTheme" parent="@android:style/Theme.DeviceDefault">
+    <style name="SplashscreenAppTheme" parent="@style/OptOutEdgeToEdge">
         <!-- Splashscreen Attributes -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/avd_anim</item>
         <!-- Here we want to match the duration of our AVD -->

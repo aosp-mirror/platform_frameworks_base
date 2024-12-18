@@ -1,0 +1,4 @@
+<pbundle_as_map name="security_labels">
+    <boolean name="is_data_deletable" value="true" />
+    <boolean name="is_data_encrypted" value="false" />
+</pbundle_as_map>

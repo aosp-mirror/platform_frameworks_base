@@ -16,9 +16,9 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput
 
-import com.android.systemui.volume.panel.component.mediaoutput.domain.MediaOutputAvailabilityCriteria
 import com.android.systemui.volume.panel.component.mediaoutput.ui.composable.MediaOutputComponent
 import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
+import com.android.systemui.volume.panel.domain.AlwaysAvailableCriteria
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 import dagger.Binds
@@ -39,6 +39,6 @@ interface MediaOutputModule {
     @IntoMap
     @StringKey(VolumePanelComponents.MEDIA_OUTPUT)
     fun bindComponentAvailabilityCriteria(
-        criteria: MediaOutputAvailabilityCriteria
+        criteria: AlwaysAvailableCriteria
     ): ComponentAvailabilityCriteria
 }

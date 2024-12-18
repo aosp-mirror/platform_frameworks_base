@@ -126,7 +126,7 @@ public class GnssPowerCalculator extends PowerCalculator {
         long totalTime = 0;
         double totalPower = 0;
         for (int i = 0; i < GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS; i++) {
-            long timePerLevel = stats.getGpsSignalQualityTime(i, rawRealtimeUs, statsType);
+            long timePerLevel = stats.getGpsSignalQualityTime(i, rawRealtimeUs, statsType) / 1000;
             totalTime += timePerLevel;
             totalPower += mAveragePowerPerSignalQuality[i] * timePerLevel;
         }

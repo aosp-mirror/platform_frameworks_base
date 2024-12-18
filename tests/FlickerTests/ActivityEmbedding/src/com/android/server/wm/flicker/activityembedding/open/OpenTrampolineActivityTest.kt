@@ -16,14 +16,13 @@
 
 package com.android.server.wm.flicker.activityembedding.open
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.flicker.subject.region.RegionSubject
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
@@ -41,7 +40,7 @@ import org.junit.runners.Parameterized
  * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and finishes
  * itself, end up in split A|B.
  *
- * To run this test: `atest FlickerTestsOther:OpenTrampolineActivityTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:OpenTrampolineActivityTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -156,11 +155,11 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
                             it.timestamp
                         )
                     check { "height" }
-                        .that(mainActivityRegion.region.height)
-                        .isEqual(secondaryActivityRegion.region.height)
+                        .that(mainActivityRegion.region.bounds.height())
+                        .isEqual(secondaryActivityRegion.region.bounds.height())
                     check { "width" }
-                        .that(mainActivityRegion.region.width)
-                        .isEqual(secondaryActivityRegion.region.width)
+                        .that(mainActivityRegion.region.bounds.width())
+                        .isEqual(secondaryActivityRegion.region.bounds.width())
                     mainActivityRegion
                         .plus(secondaryActivityRegion.region)
                         .coversExactly(startDisplayBounds)
@@ -168,7 +167,6 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         }
     }
 
-    @FlakyTest(bugId = 290736037)
     /** Main activity should go from fullscreen to being a split with secondary activity. */
     @Test
     fun mainActivityLayerGoesFromFullscreenToSplit() {
@@ -192,18 +190,17 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
             // Compare dimensions of two splits, given we're using default split attributes,
             // both activities take up the same visible size on the display.
             check { "height" }
-                .that(leftLayerRegion.region.height)
-                .isEqual(rightLayerRegion.region.height)
+                .that(leftLayerRegion.region.bounds.height())
+                .isEqual(rightLayerRegion.region.bounds.height())
             check { "width" }
-                .that(leftLayerRegion.region.width)
-                .isEqual(rightLayerRegion.region.width)
+                .that(leftLayerRegion.region.bounds.width())
+                .isEqual(rightLayerRegion.region.bounds.width())
             leftLayerRegion.notOverlaps(rightLayerRegion.region)
             // Layers of two activities sum to be fullscreen size on display.
             leftLayerRegion.plus(rightLayerRegion.region).coversExactly(startDisplayBounds)
         }
     }
 
-    @FlakyTest(bugId = 288591571)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
@@ -211,7 +208,7 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
 
     companion object {
         /** {@inheritDoc} */
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
 
         /**
          * Creates the test configurations.

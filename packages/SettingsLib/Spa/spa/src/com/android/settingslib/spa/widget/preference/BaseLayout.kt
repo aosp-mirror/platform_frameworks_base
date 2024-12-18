@@ -28,6 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,8 @@ internal fun BaseLayout(
     title: String,
     subTitle: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    icon: (@Composable () -> Unit)? = null,
+    titleContentDescription: String? = null,
+    icon: @Composable (() -> Unit)? = null,
     enabled: () -> Boolean = { true },
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
@@ -51,6 +53,7 @@ internal fun BaseLayout(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {}
             .padding(end = paddingEnd),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -58,6 +61,7 @@ internal fun BaseLayout(
         BaseIcon(icon, alphaModifier, paddingStart)
         Titles(
             title = title,
+            titleContentDescription = titleContentDescription,
             subTitle = subTitle,
             modifier = alphaModifier
                 .weight(1f)
@@ -87,9 +91,14 @@ internal fun BaseIcon(
 
 // Extracts a scope to avoid frequent recompose outside scope.
 @Composable
-private fun Titles(title: String, subTitle: @Composable () -> Unit, modifier: Modifier) {
+private fun Titles(
+    title: String,
+    titleContentDescription: String?,
+    subTitle: @Composable () -> Unit,
+    modifier: Modifier,
+) {
     Column(modifier) {
-        SettingsTitle(title)
+        SettingsTitle(title, titleContentDescription)
         subTitle()
     }
 }

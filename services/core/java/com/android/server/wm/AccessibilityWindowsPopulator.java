@@ -150,7 +150,11 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
-        mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        if (com.android.server.accessibility.Flags.removeOnWindowInfosChangedHandler()) {
+            onWindowInfosChangedInternal(windowHandles, displayInfos);
+        } else {
+            mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
+        }
     }
 
     private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,
@@ -655,7 +659,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
         private boolean mIsPIPMenu;
         private boolean mIsFocused;
         private boolean mShouldMagnify;
-        private boolean mIgnoreDuetoRecentsAnimation;
         private final Region mTouchableRegionInScreen = new Region();
         private final Region mTouchableRegionInWindow = new Region();
         private WindowInfo mWindowInfo;
@@ -687,10 +690,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             // TODO (b/199358208) : using new way to implement the focused window.
             instance.mIsFocused = windowState != null && windowState.isFocused();
             instance.mShouldMagnify = windowState == null || windowState.shouldMagnify();
-
-            final RecentsAnimationController controller = service.getRecentsAnimationController();
-            instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
-                    && controller.shouldIgnoreForAccessibility(windowState);
 
             final Rect windowFrame = new Rect(inputWindowHandle.frame);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
@@ -725,7 +724,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
 
             // Compute system bar insets frame if needed.
-            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11y()
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()
                     && windowState != null && instance.isUntouchableNavigationBar()) {
                 final InsetsSourceProvider provider =
                         windowState.getControllableInsetProvider();
@@ -786,13 +785,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
          */
         public boolean isFocused() {
             return mIsFocused;
-        }
-
-        /**
-         * @return true if it's running the recent animation but not the target app.
-         */
-        public boolean ignoreRecentsAnimationForAccessibility() {
-            return mIgnoreDuetoRecentsAnimation;
         }
 
         /**
@@ -905,7 +897,6 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
                     + ", privateFlag=0x" + Integer.toHexString(mPrivateFlags)
                     + ", focused=" + mIsFocused
                     + ", shouldMagnify=" + mShouldMagnify
-                    + ", ignoreDuetoRecentsAnimation=" + mIgnoreDuetoRecentsAnimation
                     + ", isTrustedOverlay=" + isTrustedOverlay()
                     + ", regionInScreen=" + mTouchableRegionInScreen
                     + ", touchableRegion=" + mTouchableRegionInWindow

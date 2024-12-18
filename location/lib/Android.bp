@@ -29,6 +29,10 @@ java_sdk_library {
     libs: [
         "androidx.annotation_annotation",
     ],
+    stub_only_libs: [
+        // Needed for javadoc references.
+        "framework-location.stubs.system",
+    ],
     api_packages: [
         "android.location",
         "com.android.location.provider",

@@ -42,7 +42,6 @@ interface CameraUsageTracker {
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public abstract class CameraExtensionService extends Service {
     private static final String TAG = "CameraExtensionService";
     private CameraUsageTracker mCameraUsageTracker;
@@ -87,10 +86,8 @@ public abstract class CameraExtensionService extends Service {
         }
     };
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     protected CameraExtensionService() { }
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @Override
     @NonNull
     public final IBinder onBind(@Nullable Intent intent) {
@@ -186,7 +183,6 @@ public abstract class CameraExtensionService extends Service {
      *                           unexpectedly.
      * @return true if the registration is successful, false otherwise
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract boolean onRegisterClient(@NonNull IBinder token);
 
     /**
@@ -194,7 +190,6 @@ public abstract class CameraExtensionService extends Service {
      *
      * @param token              Binder token
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void onUnregisterClient(@NonNull IBinder token);
 
     /**
@@ -204,7 +199,6 @@ public abstract class CameraExtensionService extends Service {
      *                      extension type
      * @return Valid advanced extender of the requested type
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract AdvancedExtender onInitializeAdvancedExtension(@Extension int extensionType);
 }

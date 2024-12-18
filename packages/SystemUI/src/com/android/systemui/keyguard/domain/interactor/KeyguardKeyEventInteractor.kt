@@ -23,6 +23,7 @@ import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler.Companion.handleAction
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeController
@@ -74,6 +75,14 @@ constructor(
      * exit bouncer.
      */
     fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
+        when (event.action) {
+            KeyEvent.ACTION_DOWN -> {
+                val device = event.getDevice()
+                if (device != null && device.isFullKeyboard() && device.isExternal()) {
+                    powerInteractor.onUserTouch()
+                }
+            }
+        }
         when (event.keyCode) {
             KeyEvent.KEYCODE_BACK ->
                 if (
@@ -97,7 +106,15 @@ constructor(
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
-            shadeController.animateCollapseShadeForced()
+            statusBarKeyguardViewManager.dismissWithAction(
+                object : OnDismissAction {
+                    override fun onDismiss(): Boolean {
+                        return false
+                    }
+                },
+                null,
+                false,
+            )
             return true
         }
         return false

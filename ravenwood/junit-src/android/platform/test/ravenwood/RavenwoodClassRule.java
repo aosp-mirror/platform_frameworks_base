@@ -16,52 +16,20 @@
 
 package android.platform.test.ravenwood;
 
-import static android.platform.test.ravenwood.RavenwoodRule.ENABLE_PROBE_IGNORED;
-import static android.platform.test.ravenwood.RavenwoodRule.IS_ON_RAVENWOOD;
-import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnDevice;
-import static android.platform.test.ravenwood.RavenwoodRule.shouldEnableOnRavenwood;
-import static android.platform.test.ravenwood.RavenwoodRule.shouldStillIgnoreInProbeIgnoreMode;
-
-import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.annotations.EnabledOnRavenwood;
-
-import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * {@code @ClassRule} that respects Ravenwood-specific class annotations. This rule has no effect
- * when tests are run on non-Ravenwood test environments.
+ * No longer needed.
  *
- * By default, all tests are executed on Ravenwood, but annotations such as
- * {@link DisabledOnRavenwood} and {@link EnabledOnRavenwood} can be used at both the method
- * and class level to "ignore" tests that may not be ready.
+ * @deprecated this class used to be used to handle the class level annotation, which
+ * is now done by the test runner, so this class is not needed.
  */
+@Deprecated
 public class RavenwoodClassRule implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
-        // No special treatment when running outside Ravenwood; run tests as-is
-        if (!IS_ON_RAVENWOOD) {
-            Assume.assumeTrue(shouldEnableOnDevice(description));
-            return base;
-        }
-
-        if (ENABLE_PROBE_IGNORED) {
-            Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
-            // Pass through to possible underlying RavenwoodRule for both environment
-            // configuration and handling method-level annotations
-            return base;
-        } else {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    Assume.assumeTrue(shouldEnableOnRavenwood(description));
-                    // Pass through to possible underlying RavenwoodRule for both environment
-                    // configuration and handling method-level annotations
-                    base.evaluate();
-                }
-            };
-        }
+        return base;
     }
 }

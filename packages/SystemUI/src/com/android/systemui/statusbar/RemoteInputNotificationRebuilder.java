@@ -71,6 +71,15 @@ public class RemoteInputNotificationRebuilder {
     @NonNull
     public StatusBarNotification rebuildForCanceledSmartReplies(
             NotificationEntry entry) {
+        return rebuildWithExistingReplies(entry);
+    }
+
+    /**
+     * Rebuilds to include any previously-added remote input replies.
+     * For when the app cancels a notification that has already been lifetime extended.
+     */
+    @NonNull
+    public StatusBarNotification rebuildWithExistingReplies(NotificationEntry entry) {
         return rebuildWithRemoteInputInserted(entry, null /* remoteInputText */,
                 false /* showSpinner */, null /* mimeType */, null /* uri */);
     }

@@ -19,12 +19,12 @@ package com.android.systemui.controls.ui
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.drawable.ShapeDrawable
-import android.testing.AndroidTestingRunner
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow.OnDismissListener
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -43,7 +43,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 open class ControlsPopupMenuTest : SysuiTestCase() {
 
     private companion object {

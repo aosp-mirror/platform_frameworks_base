@@ -53,6 +53,10 @@ abstract class HdmiCecFeatureAction {
     // Default state used in common by all the feature actions.
     protected static final int STATE_NONE = 0;
 
+    // Delay to query avr's audio status, some avrs could report the old volume first. It could
+    // show inverse mute state on TV.
+    protected static final long DELAY_GIVE_AUDIO_STATUS = 500;
+
     // Internal state indicating the progress of action.
     protected int mState = STATE_NONE;
 
@@ -229,7 +233,13 @@ abstract class HdmiCecFeatureAction {
 
     protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
             int retryCount) {
-        mService.pollDevices(callback, getSourceAddress(), pickStrategy, retryCount);
+        pollDevices(callback, pickStrategy, retryCount, 0);
+    }
+
+    protected final void pollDevices(DevicePollingCallback callback, int pickStrategy,
+            int retryCount, long pollingMessageInterval) {
+        mService.pollDevices(
+                callback, getSourceAddress(), pickStrategy, retryCount, pollingMessageInterval);
     }
 
     /**

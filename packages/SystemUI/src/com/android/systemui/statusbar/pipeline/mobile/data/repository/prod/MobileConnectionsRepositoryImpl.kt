@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
@@ -26,17 +27,20 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
+import android.util.IndentingPrintWriter
 import androidx.annotation.VisibleForTesting
 import com.android.internal.telephony.PhoneConstants
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings.Config
+import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.res.R
@@ -52,6 +56,9 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.io.PrintWriter
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -90,6 +97,7 @@ constructor(
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     airplaneModeRepository: AirplaneModeRepository,
     // Some "wifi networks" should be rendered as a mobile connection, which is why the wifi
     // repository is an input to the mobile repository.
@@ -97,8 +105,12 @@ constructor(
     wifiRepository: WifiRepository,
     private val fullMobileRepoFactory: FullMobileConnectionRepository.Factory,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-) : MobileConnectionsRepository {
-    private var subIdRepositoryCache: MutableMap<Int, FullMobileConnectionRepository> =
+    private val dumpManager: DumpManager,
+) : MobileConnectionsRepository, Dumpable {
+
+    // TODO(b/333912012): for now, we are never invalidating the cache. We can do better though
+    private var subIdRepositoryCache:
+        MutableMap<Int, WeakReference<FullMobileConnectionRepository>> =
         mutableMapOf()
 
     private val defaultNetworkName =
@@ -108,6 +120,10 @@ constructor(
 
     private val networkNameSeparator: String =
         context.getString(R.string.status_bar_network_name_separator)
+
+    init {
+        dumpManager.registerNormalDumpable("MobileConnectionsRepository", this)
+    }
 
     private val carrierMergedSubId: StateFlow<Int?> =
         combine(
@@ -155,6 +171,45 @@ constructor(
                 awaitClose { subscriptionManager.removeOnSubscriptionsChangedListener(callback) }
             }
             .flowOn(bgDispatcher)
+
+    /** Turn ACTION_SERVICE_STATE (for subId = -1) into an event */
+    private val serviceStateChangedEvent: Flow<Unit> =
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(Intent.ACTION_SERVICE_STATE)) { intent, _ ->
+                val subId =
+                    intent.getIntExtra(
+                        SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                        INVALID_SUBSCRIPTION_ID
+                    )
+
+                // Only emit if the subId is not associated with an active subscription
+                if (subId == INVALID_SUBSCRIPTION_ID) {
+                    Unit
+                }
+            }
+            // Emit on start so that we always check the state at least once
+            .onStart { emit(Unit) }
+
+    /** Eager flow to determine the device-based emergency calls only state */
+    override val isDeviceEmergencyCallCapable: StateFlow<Boolean> =
+        serviceStateChangedEvent
+            .mapLatest {
+                val modems = telephonyManager.activeModemCount
+                // Check the service state for every modem. If any state reports emergency calling
+                // capable, then consider the device to have emergency call capabilities
+                (0..<modems)
+                    .map { telephonyManager.getServiceStateForSlot(it) }
+                    .any { it?.isEmergencyOnly == true }
+            }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = LOGGING_PREFIX,
+                columnName = "deviceEmergencyOnly",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     /**
      * State flow that emits the set of mobile data subscriptions, each represented by its own
@@ -269,6 +324,7 @@ constructor(
                 trySend(false)
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
+            .flowOn(mainDispatcher)
             .logDiffsForTable(
                 tableLogger,
                 LOGGING_PREFIX,
@@ -283,8 +339,10 @@ constructor(
         getOrCreateRepoForSubId(subId)
 
     private fun getOrCreateRepoForSubId(subId: Int) =
-        subIdRepositoryCache[subId]
-            ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
+        subIdRepositoryCache[subId]?.get()
+            ?: createRepositoryForSubId(subId).also {
+                subIdRepositoryCache[subId] = WeakReference(it)
+            }
 
     override val mobileIsDefault: StateFlow<Boolean> =
         connectivityRepository.defaultConnections
@@ -374,21 +432,13 @@ constructor(
     }
 
     private fun updateRepos(newInfos: List<SubscriptionModel>) {
-        dropUnusedReposFromCache(newInfos)
         subIdRepositoryCache.forEach { (subId, repo) ->
-            repo.setIsCarrierMerged(isCarrierMerged(subId))
+            repo.get()?.setIsCarrierMerged(isCarrierMerged(subId))
         }
     }
 
     private fun isCarrierMerged(subId: Int): Boolean {
         return subId == carrierMergedSubId.value
-    }
-
-    private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
-        // Remove any connection repository from the cache that isn't in the new set of IDs. They
-        // will get garbage collected once their subscribers go away
-        subIdRepositoryCache =
-            subIdRepositoryCache.filter { checkSub(it.key, newInfos) }.toMutableMap()
     }
 
     /**
@@ -417,10 +467,27 @@ constructor(
         SubscriptionModel(
             subscriptionId = subscriptionId,
             isOpportunistic = isOpportunistic,
+            isExclusivelyNonTerrestrial = isOnlyNonTerrestrialNetwork,
             groupUuid = groupUuid,
             carrierName = carrierName.toString(),
             profileClass = profileClass,
         )
+
+    override fun dump(pw: PrintWriter, args: Array<String>) {
+        val ipw = IndentingPrintWriter(pw, " ")
+        ipw.println("Connection cache:")
+
+        ipw.increaseIndent()
+        subIdRepositoryCache.entries.forEach { (subId, repo) ->
+            ipw.println("$subId: ${repo.get()}")
+        }
+        ipw.decreaseIndent()
+
+        ipw.println("Connections (${subIdRepositoryCache.size} total):")
+        ipw.increaseIndent()
+        subIdRepositoryCache.values.forEach { it.get()?.dump(ipw) }
+        ipw.decreaseIndent()
+    }
 
     companion object {
         private const val LOGGING_PREFIX = "Repo"

@@ -23,6 +23,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,14 +38,15 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticInOrder;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
@@ -71,7 +74,7 @@ public class BatteryControllerTest extends SysuiTestCase {
     @Mock private PowerManager mPowerManager;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private DemoModeController mDemoModeController;
-    @Mock private View mView;
+    @Mock private Expandable mExpandable;
     @Mock private UsbPort mUsbPort;
     @Mock private UsbManager mUsbManager;
     @Mock private UsbPortStatus mUsbPortStatus;
@@ -174,8 +177,8 @@ public class BatteryControllerTest extends SysuiTestCase {
 
     @Test
     public void testBatteryUtilsCalledOnSetPowerSaveMode() {
-        mBatteryController.setPowerSaveMode(true, mView);
-        mBatteryController.setPowerSaveMode(false, mView);
+        mBatteryController.setPowerSaveMode(true, mExpandable);
+        mBatteryController.setPowerSaveMode(false, mExpandable);
 
         StaticInOrder inOrder = inOrder(staticMockMarker(BatterySaverUtils.class));
         inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), true, true,
@@ -186,21 +189,21 @@ public class BatteryControllerTest extends SysuiTestCase {
 
     @Test
     public void testSaveViewReferenceWhenSettingPowerSaveMode() {
-        mBatteryController.setPowerSaveMode(false, mView);
+        mBatteryController.setPowerSaveMode(false, mExpandable);
 
-        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartExpandable());
 
-        mBatteryController.setPowerSaveMode(true, mView);
+        mBatteryController.setPowerSaveMode(true, mExpandable);
 
-        Assert.assertSame(mView, mBatteryController.getLastPowerSaverStartView().get());
+        Assert.assertSame(mExpandable, mBatteryController.getLastPowerSaverStartExpandable().get());
     }
 
     @Test
     public void testClearViewReference() {
-        mBatteryController.setPowerSaveMode(true, mView);
-        mBatteryController.clearLastPowerSaverStartView();
+        mBatteryController.setPowerSaveMode(true, mExpandable);
+        mBatteryController.clearLastPowerSaverStartExpandable();
 
-        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartExpandable());
     }
 
     @Test
@@ -307,6 +310,52 @@ public class BatteryControllerTest extends SysuiTestCase {
         mBatteryController.fireBatteryLevelChanged();
     }
 
+    @Test
+    public void plugAndUnplugWhenInBatterySaver_stateUpdatedWithoutBatterySaverBroadcast() {
+        PowerSaveState state = new PowerSaveState.Builder()
+                .setBatterySaverEnabled(false)
+                .build();
+        when(mPowerManager.getPowerSaveState(PowerManager.ServiceType.AOD)).thenReturn(state);
+
+        // Set up on power save and not charging
+        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
+        mBatteryController.onReceive(
+                getContext(), new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
+        mBatteryController.onReceive(getContext(), createChargingIntent(false));
+
+        TestCallback callback = new TestCallback();
+        mBatteryController.addCallback(callback);
+
+        assertThat(callback.pluggedIn).isFalse();
+        assertThat(callback.powerSaverOn).isTrue();
+
+        // Plug in (battery saver turns off)
+        when(mPowerManager.isPowerSaveMode()).thenReturn(false);
+        mBatteryController.onReceive(getContext(), createChargingIntent(true));
+
+        assertThat(callback.pluggedIn).isTrue();
+        assertThat(callback.powerSaverOn).isFalse();
+
+        // Unplug (battery saver turns back on)
+        when(mPowerManager.isPowerSaveMode()).thenReturn(true);
+        mBatteryController.onReceive(getContext(), createChargingIntent(false));
+
+        assertThat(callback.pluggedIn).isFalse();
+        assertThat(callback.powerSaverOn).isTrue();
+    }
+
+    private Intent createChargingIntent(boolean charging) {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        if (charging) {
+            return intent
+                .putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING)
+                .putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_AC);
+        } else {
+            return intent
+                .putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING);
+        }
+    }
+
     private void setupIncompatibleCharging() {
         final List<UsbPort> usbPorts = new ArrayList<>();
         usbPorts.add(mUsbPort);
@@ -316,5 +365,20 @@ public class BatteryControllerTest extends SysuiTestCase {
         when(mUsbPortStatus.isConnected()).thenReturn(true);
         when(mUsbPortStatus.getComplianceWarnings())
                 .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY});
+    }
+
+    private static class TestCallback
+        implements BatteryController.BatteryStateChangeCallback {
+        boolean pluggedIn = false;
+        boolean powerSaverOn = false;
+        @Override
+        public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+            this.pluggedIn = pluggedIn;
+        }
+
+        @Override
+        public void onPowerSaveChanged(boolean isPowerSave) {
+            this.powerSaverOn = isPowerSave;
+        }
     }
 }

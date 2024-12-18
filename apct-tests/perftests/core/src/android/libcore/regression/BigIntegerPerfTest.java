@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,14 +32,14 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class BigIntegerPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeRandomDivision() throws Exception {
         Random r = new Random();
         BigInteger x = new BigInteger(1024, r);
         BigInteger y = new BigInteger(1024, r);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             x.divide(y);
         }
@@ -50,7 +50,7 @@ public class BigIntegerPerfTest {
         Random r = new Random();
         BigInteger x = new BigInteger(1024, r);
         BigInteger y = new BigInteger(1024, r);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             x.gcd(y);
         }
@@ -61,7 +61,7 @@ public class BigIntegerPerfTest {
         Random r = new Random();
         BigInteger x = new BigInteger(1024, r);
         BigInteger y = new BigInteger(1024, r);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             x.multiply(y);
         }

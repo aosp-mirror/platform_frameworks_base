@@ -47,3 +47,7 @@ val ColorScheme.divider: Color
 
 val ColorScheme.surfaceTone: Color
     get() = primary.copy(SettingsOpacity.SurfaceTone)
+
+/** The overall background color in Settings. */
+val ColorScheme.settingsBackground: Color
+    get() = surfaceContainer

@@ -74,7 +74,6 @@ private:
     void detachVectorDrawableAnimator(PropertyValuesAnimatorSet* anim);
 };
 
-#ifdef __ANDROID__ // Layoutlib does not support Animations
 class ContextFactoryImpl : public IContextFactory {
 public:
     explicit ContextFactoryImpl(RootRenderNode* rootNode) : mRootNode(rootNode) {}
@@ -84,6 +83,5 @@ public:
 private:
     RootRenderNode* mRootNode;
 };
-#endif
 
 }  // namespace android::uirenderer

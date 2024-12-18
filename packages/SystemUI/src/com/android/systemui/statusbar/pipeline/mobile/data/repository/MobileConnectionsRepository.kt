@@ -92,6 +92,17 @@ interface MobileConnectionsRepository {
     val defaultMobileIconGroup: Flow<MobileIconGroup>
 
     /**
+     * Can the device make emergency calls using the device-based service state? This field is only
+     * useful when all known active subscriptions are OOS and not emergency call capable.
+     *
+     * Specifically, this checks every [ServiceState] of the device, and looks for any that report
+     * [ServiceState.isEmergencyOnly].
+     *
+     * This is an eager flow, and re-evaluates whenever ACTION_SERVICE_STATE is sent for subId = -1.
+     */
+    val isDeviceEmergencyCallCapable: StateFlow<Boolean>
+
+    /**
      * If any active SIM on the device is in
      * [android.telephony.TelephonyManager.SIM_STATE_PIN_REQUIRED] or
      * [android.telephony.TelephonyManager.SIM_STATE_PUK_REQUIRED] or

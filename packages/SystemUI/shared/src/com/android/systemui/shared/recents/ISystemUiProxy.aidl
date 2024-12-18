@@ -120,7 +120,7 @@ interface ISystemUiProxy {
     oneway void notifyTaskbarAutohideSuspend(boolean suspend) = 48;
 
     /**
-     * Notifies SystemUI to invoke IME Switcher.
+     * Notifies that the IME switcher button has been pressed.
      */
     oneway void onImeSwitcherPressed() = 49;
 
@@ -155,5 +155,27 @@ interface ISystemUiProxy {
      */
     oneway void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) = 54;
 
-    // Next id = 55
+    /**
+     * Set the override value for home button long press duration in ms and slop multiplier and
+     * haptic.
+     */
+    oneway void setOverrideHomeButtonLongPress(long duration, float slopMultiplier, boolean haptic)
+            = 55;
+
+    /**
+     * Notifies to toggle quick settings panel.
+     */
+    oneway void toggleQuickSettingsPanel() = 56;
+
+    /**
+     * Notifies that the IME Switcher button has been long pressed.
+     */
+    oneway void onImeSwitcherLongPress() = 57;
+
+    /**
+     * Updates contextual education stats when target gesture type is triggered.
+     */
+    oneway void updateContextualEduStats(boolean isTrackpadGesture, String gestureType) = 58;
+
+    // Next id = 59
 }

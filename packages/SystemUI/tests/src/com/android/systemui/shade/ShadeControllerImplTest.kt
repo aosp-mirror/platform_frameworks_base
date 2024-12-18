@@ -16,10 +16,10 @@
 
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
@@ -33,7 +33,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
@@ -60,7 +59,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
@@ -95,7 +94,6 @@ class ShadeControllerImplTest : SysuiTestCase() {
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
             ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher),
-            kosmos.sceneContainerFlags,
             kosmos::sceneInteractor,
         )
     }
@@ -111,7 +109,6 @@ class ShadeControllerImplTest : SysuiTestCase() {
             ShadeControllerImpl(
                 commandQueue,
                 FakeExecutor(FakeSystemClock()),
-                touchLog,
                 windowRootViewVisibilityInteractor,
                 keyguardStateController,
                 statusBarStateController,
@@ -119,12 +116,12 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 statusBarWindowController,
                 deviceProvisionedController,
                 notificationShadeWindowController,
-                windowManager,
+                0,
+                Lazy { nswvc },
                 Lazy { npvc },
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
-        shadeController.setNotificationShadeWindowViewController(nswvc)
         shadeController.setVisibilityListener(mock())
     }
 

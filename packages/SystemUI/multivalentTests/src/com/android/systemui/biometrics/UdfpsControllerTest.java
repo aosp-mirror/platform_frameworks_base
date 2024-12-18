@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -65,12 +66,12 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -87,6 +88,7 @@ import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayView
 import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.camera.CameraGestureHelper;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -118,6 +120,10 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
+import javax.inject.Provider;
+
+import kotlinx.coroutines.CoroutineScope;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -131,8 +137,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -152,7 +156,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private FingerprintManager mFingerprintManager;
     @Mock
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -256,13 +260,13 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private ViewRootImpl mViewRootImpl;
     @Mock
-    private FpsUnlockTracker mFpsUnlockTracker;
-    @Mock
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock
     private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
     @Mock
     private Lazy<DefaultUdfpsTouchOverlayViewModel> mDefaultUdfpsTouchOverlayViewModel;
+    @Mock
+    private Provider<CameraGestureHelper> mCameraGestureHelper;
 
     @Before
     public void setUp() {
@@ -271,7 +275,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mPowerRepository,
                 mock(FalsingCollector.class),
                 mock(ScreenOffAnimationController.class),
-                mStatusBarStateController
+                mStatusBarStateController,
+                mCameraGestureHelper
         );
         mPowerRepository.updateWakefulness(
                 WakefulnessState.AWAKE,
@@ -368,7 +373,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mock(DeviceEntryFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
                 mSelectedUserInteractor,
-                mFpsUnlockTracker,
                 mKeyguardTransitionInteractor,
                 mDeviceEntryUdfpsTouchOverlayViewModel,
                 mDefaultUdfpsTouchOverlayViewModel,
@@ -1287,6 +1291,41 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onAodDownAndDownTouchReceived() throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        -1 /* pointerId */, touchData);
+
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN fingerprint is requested because of AOD interrupt
+        // GIVEN there's been an AoD interrupt
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
+        mScreenObserver.onScreenTurnedOn();
+        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
+        mFgExecutor.runAllReady();
+
+        // and an ACTION_DOWN is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent firstDownEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, firstDownEvent);
+        mBiometricExecutor.runAllReady();
+        firstDownEvent.recycle();
+
+        // THEN the touch is only processed once
+        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
+    }
+
+    @Test
     public void onTouch_pilferPointerWhenAltBouncerShowing()
             throws RemoteException {
         final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =
@@ -1398,5 +1437,39 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN vibrate is used
         verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
+    }
+
+    @Test
+    public void onAcquiredCalbacks() {
+        runWithAllParams(
+                this::ultrasonicCallbackOnAcquired);
+    }
+
+    public void ultrasonicCallbackOnAcquired(TestParams testParams) throws RemoteException{
+        if (testParams.sensorProps.sensorType
+                == FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC) {
+            reset(mUdfpsView);
+
+            UdfpsController.Callback callbackMock = mock(UdfpsController.Callback.class);
+            mUdfpsController.addCallback(callbackMock);
+
+            // GIVEN UDFPS overlay is showing
+            mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD,
+                    mUdfpsOverlayControllerCallback);
+            mFgExecutor.runAllReady();
+
+            verify(mFingerprintManager).setUdfpsOverlayController(
+                    mUdfpsOverlayControllerCaptor.capture());
+            mUdfpsOverlayControllerCaptor.getValue().onAcquired(0, FINGERPRINT_ACQUIRED_START);
+            mFgExecutor.runAllReady();
+
+            verify(callbackMock).onFingerDown();
+
+            mUdfpsOverlayControllerCaptor.getValue().onAcquired(0, FINGERPRINT_ACQUIRED_GOOD);
+            mFgExecutor.runAllReady();
+
+            verify(callbackMock).onFingerUp();
+        }
     }
 }

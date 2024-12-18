@@ -19,9 +19,79 @@ filegroup {
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":systemfeatures-gen-srcs",
         ":framework-nfc-non-updatable-sources",
+        ":messagequeue-gen",
+        ":ranging_stack_mock_initializer",
+    ],
+    // Exactly one MessageQueue.java will be added to srcs by messagequeue-gen
+    exclude_srcs: [
+        "android/os/*MessageQueue/**/*.java",
+        "android/ranging/**/*.java",
     ],
     visibility: ["//frameworks/base"],
+}
+
+//Mock to allow service registry for ranging stack.
+//TODO(b/331206299): Remove this after RELEASE_RANGING_STACK is ramped up to next.
+soong_config_module_type {
+    name: "ranging_stack_framework_mock_init",
+    module_type: "genrule",
+    config_namespace: "bootclasspath",
+    bool_variables: [
+        "release_ranging_stack",
+    ],
+    properties: [
+        "srcs",
+        "cmd",
+        "out",
+    ],
+}
+
+// The actual RangingFrameworkInitializer is present in packages/modules/Uwb/ranging/framework.
+// Mock RangingFrameworkInitializer does nothing and allows to successfully build
+// SystemServiceRegistry after registering for system service in SystemServiceRegistry both with
+// and without build flag RELEASE_RANGING_STACK enabled.
+ranging_stack_framework_mock_init {
+    name: "ranging_stack_mock_initializer",
+    soong_config_variables: {
+        release_ranging_stack: {
+            cmd: "touch $(out)",
+            // Adding an empty file as out is mandatory.
+            out: ["android/ranging/empty_ranging_fw.txt"],
+            conditions_default: {
+                srcs: ["android/ranging/mock/RangingFrameworkInitializer.java"],
+                cmd: "mkdir -p android/ranging/; cp $(in) $(out);",
+                out: ["android/ranging/RangingFrameworkInitializer.java"],
+            },
+        },
+    },
+}
+
+// Add selected MessageQueue.java implementation to srcs
+soong_config_module_type {
+    name: "release_package_messagequeue_implementation_srcs",
+    module_type: "genrule",
+    config_namespace: "messagequeue",
+    value_variables: ["release_package_messagequeue_implementation"],
+    properties: [
+        "srcs",
+    ],
+}
+
+// Output the selected android/os/MessageQueue.java implementation
+release_package_messagequeue_implementation_srcs {
+    name: "messagequeue-gen",
+    soong_config_variables: {
+        release_package_messagequeue_implementation: {
+            srcs: ["android/os/%s"],
+            conditions_default: {
+                srcs: ["android/os/LegacyMessageQueue/MessageQueue.java"],
+            },
+        },
+    },
+    cmd: "mkdir -p android/os/; cp $(in) $(out);",
+    out: ["android/os/MessageQueue.java"],
 }
 
 aidl_library {
@@ -135,13 +205,35 @@ filegroup {
     srcs: [
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
-        "android/os/IHintManager.aidl",
-        "android/os/IHintSession.aidl",
         "android/os/IThermalEventListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
         "android/os/IPowerManager.aidl",
         "android/os/IWakeLockCallback.aidl",
+    ],
+}
+
+aidl_interface {
+    name: "android.os.hintmanager_aidl",
+    srcs: [
+        "android/os/IHintManager.aidl",
+        "android/os/IHintSession.aidl",
+    ],
+    unstable: true,
+    backend: {
+        java: {
+            sdk_version: "module_current",
+            enabled: true,
+        },
+        cpp: {
+            enabled: false,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    imports: [
+        "android.hardware.power-V5",
     ],
 }
 
@@ -556,7 +648,6 @@ filegroup {
 
 java_library {
     name: "protolog-lib",
-    platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
@@ -575,3 +666,9 @@ java_library {
 }
 
 // protolog end
+
+java_system_features_srcs {
+    name: "systemfeatures-gen-srcs",
+    full_class_name: "com.android.internal.pm.RoSystemFeatures",
+    visibility: ["//visibility:private"],
+}

@@ -20,8 +20,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.panel.mockVolumePanelUiComponent
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.volume.panel.shared.model.mockVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import com.google.common.truth.Truth
@@ -37,7 +37,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         DefaultComponentsLayoutManager(
             BOTTOM_BAR,
             headerComponents = listOf(COMPONENT_1),
-            footerComponents = listOf(COMPONENT_2),
+            footerComponents = listOf(COMPONENT_5, COMPONENT_2),
         )
 
     @Test
@@ -48,10 +48,18 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component2 = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
         val component3 = ComponentState(COMPONENT_3, kosmos.mockVolumePanelUiComponent, false)
         val component4 = ComponentState(COMPONENT_4, kosmos.mockVolumePanelUiComponent, false)
+        val component5 = ComponentState(COMPONENT_5, kosmos.mockVolumePanelUiComponent, false)
         val layout =
             underTest.layout(
-                VolumePanelState(0, false, false),
-                setOf(bottomBarComponentState, component1, component2, component3, component4)
+                VolumePanelState(orientation = 0, isLargeScreen = false),
+                setOf(
+                    bottomBarComponentState,
+                    component1,
+                    component2,
+                    component3,
+                    component4,
+                    component5,
+                )
             )
 
         Truth.assertThat(layout.bottomBarComponent).isEqualTo(bottomBarComponentState)
@@ -59,7 +67,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
             .containsExactlyElementsIn(listOf(component1))
             .inOrder()
         Truth.assertThat(layout.footerComponents)
-            .containsExactlyElementsIn(listOf(component2))
+            .containsExactlyElementsIn(listOf(component5, component2))
             .inOrder()
         Truth.assertThat(layout.contentComponents)
             .containsExactlyElementsIn(listOf(component3, component4))
@@ -71,7 +79,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component1State = ComponentState(COMPONENT_1, kosmos.mockVolumePanelUiComponent, false)
         val component2State = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
         underTest.layout(
-            VolumePanelState(0, false, false),
+            VolumePanelState(orientation = 0, isLargeScreen = false),
             setOf(
                 component1State,
                 component2State,
@@ -85,5 +93,6 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         const val COMPONENT_2: VolumePanelComponentKey = "test_component:2"
         const val COMPONENT_3: VolumePanelComponentKey = "test_component:3"
         const val COMPONENT_4: VolumePanelComponentKey = "test_component:4"
+        const val COMPONENT_5: VolumePanelComponentKey = "test_component:5"
     }
 }

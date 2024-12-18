@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "enable_bind_package_isolated_process"
+    is_exported: true
     namespace: "machine_learning"
     description: "This flag enables the newly added flag for binding package-private isolated processes."
     bug: "312706530"

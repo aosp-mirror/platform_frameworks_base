@@ -24,23 +24,24 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.function.Consumer;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
@@ -51,20 +52,13 @@ public class PipScheduler {
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
+    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
+    private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
 
-    // pinned PiP task's WC token
-    @Nullable
-    private WindowContainerToken mPipTaskToken;
-
-    // pinned PiP task's leash
-    @Nullable
-    private SurfaceControl mPinnedTaskLeash;
-
-    // true if Launcher has started swipe PiP to home animation
-    private boolean mInSwipePipToHomeTransition;
+    @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
@@ -101,11 +95,16 @@ public class PipScheduler {
         }
     }
 
-    public PipScheduler(Context context, PipBoundsState pipBoundsState,
-            ShellExecutor mainExecutor) {
+    public PipScheduler(Context context,
+            PipBoundsState pipBoundsState,
+            PhonePipMenuController pipMenuController,
+            ShellExecutor mainExecutor,
+            PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
+        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
+        mPipTransitionState = pipTransitionState;
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             // temporary broadcast receiver to initiate exit PiP via expand
@@ -115,29 +114,25 @@ public class PipScheduler {
         }
     }
 
+    ShellExecutor getMainExecutor() {
+        return mMainExecutor;
+    }
+
     void setPipTransitionController(PipTransitionController pipTransitionController) {
         mPipTransitionController = pipTransitionController;
     }
 
-    void setPinnedTaskLeash(SurfaceControl pinnedTaskLeash) {
-        mPinnedTaskLeash = pinnedTaskLeash;
-    }
-
-    void setPipTaskToken(@Nullable WindowContainerToken pipTaskToken) {
-        mPipTaskToken = pipTaskToken;
-    }
-
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTaskToken == null) {
+        if (mPipTransitionState.mPipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // final expanded bounds to be inherited from the parent
-        wct.setBounds(mPipTaskToken, null);
+        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
         return wct;
     }
 
@@ -162,25 +157,113 @@ public class PipScheduler {
     /**
      * Animates resizing of the pinned stack given the duration.
      */
-    public void scheduleAnimateResizePip(Rect toBounds, Consumer<Rect> onFinishResizeCallback) {
-        if (mPipTaskToken == null) {
+    public void scheduleAnimateResizePip(Rect toBounds) {
+        scheduleAnimateResizePip(toBounds, false /* configAtEnd */);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd) {
+        scheduleAnimateResizePip(toBounds, configAtEnd,
+                PipTransition.BOUNDS_CHANGE_JUMPCUT_DURATION);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     *
+     * @param configAtEnd true if we are delaying config updates until the transition ends.
+     * @param duration    the suggested duration to run the animation; the component responsible
+     *                    for running the animator will get this as an extra.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
+        if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTaskToken, toBounds);
-        mPipTransitionController.startResizeTransition(wct, onFinishResizeCallback);
+        wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        if (configAtEnd) {
+            wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
+        }
+        mPipTransitionController.startResizeTransition(wct, duration);
     }
 
-    void setInSwipePipToHomeTransition(boolean inSwipePipToHome) {
-        mInSwipePipToHomeTransition = true;
+    /**
+     * Signals to Core to finish the PiP resize transition.
+     * Note that we do not allow any actual WM Core changes at this point.
+     *
+     * @param toBounds destination bounds used only for internal state updates - not sent to Core.
+     * @param configAtEnd true if we are waiting for config updates at the end of the transition.
+     */
+    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
+        // Make updates to the internal state to reflect new bounds
+        onFinishingPipResize(toBounds);
+
+        SurfaceControl.Transaction tx = null;
+        if (configAtEnd) {
+            tx = new SurfaceControl.Transaction();
+            tx.addTransactionCommittedListener(mMainExecutor, () -> {
+                mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+            });
+        } else {
+            mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+        }
+        mPipTransitionController.finishTransition(tx);
     }
 
-    boolean isInSwipePipToHomeTransition() {
-        return mInSwipePipToHomeTransition;
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     */
+    public void scheduleUserResizePip(Rect toBounds) {
+        scheduleUserResizePip(toBounds, 0f /* degrees */);
     }
 
-    void onExitPip() {
-        mPipTaskToken = null;
-        mPinnedTaskLeash = null;
+    /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction}.
+     *
+     * @param degrees the angle to rotate the bounds to.
+     */
+    public void scheduleUserResizePip(Rect toBounds, float degrees) {
+        if (toBounds.isEmpty()) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
+            return;
+        }
+        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
+        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+
+        Matrix transformTensor = new Matrix();
+        final float[] mMatrixTmp = new float[9];
+        final float scale = (float) toBounds.width() / mPipBoundsState.getBounds().width();
+
+        transformTensor.setScale(scale, scale);
+        transformTensor.postTranslate(toBounds.left, toBounds.top);
+        transformTensor.postRotate(degrees, toBounds.centerX(), toBounds.centerY());
+
+        tx.setMatrix(leash, transformTensor, mMatrixTmp);
+        tx.apply();
+    }
+
+    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
+        mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
+    }
+
+    private void maybeUpdateMovementBounds() {
+        if (mUpdateMovementBoundsRunnable != null)  {
+            mUpdateMovementBoundsRunnable.run();
+        }
+    }
+
+    private void onFinishingPipResize(Rect newBounds) {
+        if (mPipBoundsState.getBounds().equals(newBounds)) {
+            return;
+        }
+        mPipBoundsState.setBounds(newBounds);
+        mPipMenuController.updateMenuLayout(newBounds);
+        maybeUpdateMovementBounds();
     }
 }

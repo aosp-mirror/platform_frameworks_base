@@ -25,15 +25,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.MenuPopupWindow;
 import android.widget.PopupWindow;
-import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
 
 import java.util.Objects;
 
@@ -44,6 +44,8 @@ import java.util.Objects;
 final class StandardMenuPopup extends MenuPopup implements OnDismissListener, OnItemClickListener,
         MenuPresenter, OnKeyListener {
     private static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
+    private static final int ITEM_LAYOUT_MATERIAL =
+            com.android.internal.R.layout.popup_menu_item_layout_material;
 
     private final Context mContext;
 
@@ -53,6 +55,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     private final int mPopupMaxWidth;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
+
     // The popup window is final in order to couple its lifecycle to the lifecycle of the
     // StandardMenuPopup.
     private final MenuPopupWindow mPopup;
@@ -117,7 +120,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);
-        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT_MATERIAL);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 

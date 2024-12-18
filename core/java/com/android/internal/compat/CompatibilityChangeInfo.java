@@ -25,6 +25,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CompatibilityChangeInfo implements Parcelable {
     private final long mChangeId;
     private final @Nullable String mName;

@@ -39,8 +39,8 @@ android_test {
     test_suites: ["device-tests"],
     libs: [
         "framework-res",
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
 }

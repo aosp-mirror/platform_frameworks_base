@@ -15,6 +15,9 @@
  */
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
@@ -26,6 +29,7 @@ import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
@@ -40,29 +44,37 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 import javax.inject.Inject
 
 class VisualInterruptionDecisionProviderImpl
 @Inject
 constructor(
-        private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
-        private val batteryController: BatteryController,
-        deviceProvisionedController: DeviceProvisionedController,
-        private val eventLog: EventLog,
-        private val globalSettings: GlobalSettings,
-        private val headsUpManager: HeadsUpManager,
-        private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
-        keyguardStateController: KeyguardStateController,
-        private val logger: VisualInterruptionDecisionLogger,
-        @Main private val mainHandler: Handler,
-        private val powerManager: PowerManager,
-        private val statusBarStateController: StatusBarStateController,
-        private val systemClock: SystemClock,
-        private val uiEventLogger: UiEventLogger,
-        private val userTracker: UserTracker,
-        private val avalancheProvider: AvalancheProvider
-
+    private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
+    private val batteryController: BatteryController,
+    deviceProvisionedController: DeviceProvisionedController,
+    private val eventLog: EventLog,
+    private val globalSettings: GlobalSettings,
+    private val headsUpManager: HeadsUpManager,
+    private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
+    keyguardStateController: KeyguardStateController,
+    private val logger: VisualInterruptionDecisionLogger,
+    @Main private val mainHandler: Handler,
+    private val powerManager: PowerManager,
+    private val statusBarStateController: StatusBarStateController,
+    private val systemClock: SystemClock,
+    private val uiEventLogger: UiEventLogger,
+    private val userTracker: UserTracker,
+    private val avalancheProvider: AvalancheProvider,
+    private val systemSettings: SystemSettings,
+    private val packageManager: PackageManager,
+    private val bubbles: Optional<Bubbles>,
+    private val context: Context,
+    private val notificationManager: NotificationManager,
+    private val settingsInteractor: NotificationSettingsInteractor
 ) : VisualInterruptionDecisionProvider {
 
     init {
@@ -83,7 +95,8 @@ constructor(
     private constructor(
         val decision: DecisionImpl,
         override val uiEventId: UiEventEnum? = null,
-        override val eventLogData: EventLogData? = null
+        override val eventLogData: EventLogData? = null,
+        val isSpammy: Boolean = false,
     ) : Loggable {
         companion object {
             val unsuppressed =
@@ -101,7 +114,8 @@ constructor(
                 LoggableDecision(
                     DecisionImpl(shouldInterrupt = false, logReason = suppressor.reason),
                     uiEventId = suppressor.uiEventId,
-                    eventLogData = suppressor.eventLogData
+                    eventLogData = suppressor.eventLogData,
+                    isSpammy = suppressor.isSpammy,
                 )
         }
     }
@@ -155,7 +169,7 @@ constructor(
         addCondition(PulseDisabledSuppressor(ambientDisplayConfiguration, userTracker))
         addCondition(PulseBatterySaverSuppressor(batteryController))
         addFilter(PeekPackageSnoozedSuppressor(headsUpManager))
-        addFilter(PeekAlreadyBubbledSuppressor(statusBarStateController))
+        addFilter(PeekAlreadyBubbledSuppressor(statusBarStateController, bubbles))
         addFilter(PeekDndSuppressor())
         addFilter(PeekNotImportantSuppressor())
         addCondition(PeekDeviceNotInUseSuppressor(powerManager, statusBarStateController))
@@ -164,14 +178,27 @@ constructor(
         addFilter(PulseLockscreenVisibilityPrivateSuppressor())
         addFilter(PulseLowImportanceSuppressor())
         addFilter(BubbleNotAllowedSuppressor())
-        addFilter(BubbleAppSuspendedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
+        addFilter(HunSilentNotificationSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())
+        addFilter(AlertAppSuspendedSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         if (NotificationAvalancheSuppression.isEnabled) {
-            addFilter(AvalancheSuppressor(avalancheProvider, systemClock))
+            addFilter(
+                AvalancheSuppressor(
+                    avalancheProvider,
+                    systemClock,
+                    settingsInteractor,
+                    packageManager,
+                    uiEventLogger,
+                    context,
+                    notificationManager,
+                    logger,
+                    systemSettings
+                )
+            )
             avalancheProvider.register()
         }
         started = true
@@ -231,14 +258,17 @@ constructor(
 
     private fun makeLoggablePeekDecision(entry: NotificationEntry): LoggableDecision =
         checkConditions(PEEK)
-            ?: checkFilters(PEEK, entry) ?: checkSuppressInterruptions(entry)
-                ?: checkSuppressAwakeInterruptions(entry) ?: checkSuppressAwakeHeadsUp(entry)
-                ?: LoggableDecision.unsuppressed
+            ?: checkFilters(PEEK, entry)
+            ?: checkSuppressInterruptions(entry)
+            ?: checkSuppressAwakeInterruptions(entry)
+            ?: checkSuppressAwakeHeadsUp(entry)
+            ?: LoggableDecision.unsuppressed
 
     private fun makeLoggablePulseDecision(entry: NotificationEntry): LoggableDecision =
         checkConditions(PULSE)
-            ?: checkFilters(PULSE, entry) ?: checkSuppressInterruptions(entry)
-                ?: LoggableDecision.unsuppressed
+            ?: checkFilters(PULSE, entry)
+            ?: checkSuppressInterruptions(entry)
+            ?: LoggableDecision.unsuppressed
 
     override fun makeAndLogBubbleDecision(entry: NotificationEntry): Decision =
         traceSection("VisualInterruptionDecisionProviderImpl#makeAndLogBubbleDecision") {
@@ -251,15 +281,19 @@ constructor(
 
     private fun makeLoggableBubbleDecision(entry: NotificationEntry): LoggableDecision =
         checkConditions(BUBBLE)
-            ?: checkFilters(BUBBLE, entry) ?: checkSuppressInterruptions(entry)
-                ?: checkSuppressAwakeInterruptions(entry) ?: LoggableDecision.unsuppressed
+            ?: checkFilters(BUBBLE, entry)
+            ?: checkSuppressInterruptions(entry)
+            ?: checkSuppressAwakeInterruptions(entry)
+            ?: LoggableDecision.unsuppressed
 
     private fun logDecision(
         type: VisualInterruptionType,
         entry: NotificationEntry,
         loggableDecision: LoggableDecision
     ) {
-        logger.logDecision(type.name, entry, loggableDecision.decision)
+        if (!loggableDecision.isSpammy || logger.spew) {
+            logger.logDecision(type.name, entry, loggableDecision.decision)
+        }
         logEvents(entry, loggableDecision)
     }
 

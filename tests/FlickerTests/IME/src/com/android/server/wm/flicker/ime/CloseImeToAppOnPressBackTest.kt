@@ -34,8 +34,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test IME window closing back to app window transitions. To run this test: `atest
- * FlickerTests:CloseImeWindowToAppTest`
+ * Test IME window closing back to app window transitions.
+ * To run this test: `atest FlickerTestsIme1:CloseImeToAppOnPressBackTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -72,7 +72,7 @@ class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicke
     @Presubmit
     @Test
     override fun navBarLayerPositionAtStartAndEnd() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeFalse(flicker.scenario.isLandscapeOrSeascapeAtStart)
         flicker.navBarLayerPositionAtStartAndEnd()
     }
@@ -80,7 +80,7 @@ class CloseImeToAppOnPressBackTest(flicker: LegacyFlickerTest) : BaseTest(flicke
     @Presubmit
     @Test
     fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
-        Assume.assumeFalse(flicker.scenario.isTablet)
+        Assume.assumeFalse(usesTaskbar)
         Assume.assumeTrue(flicker.scenario.isLandscapeOrSeascapeAtStart)
         flicker.navBarLayerPositionAtStartAndEnd()
     }

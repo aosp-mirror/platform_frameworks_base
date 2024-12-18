@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.widget.FrameLayout;
@@ -29,7 +26,6 @@ import androidx.annotation.Nullable;
 import androidx.core.os.CancellationSignal;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -82,17 +78,17 @@ public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
     private final NotifBindPipelineLogger mLogger;
     private final List<BindCallback> mScratchCallbacksList = new ArrayList<>();
-    private final Handler mMainHandler;
+    private final Processor<NotificationEntry> mStartProcessor;
     private BindStage mStage;
 
     @Inject
     NotifBindPipeline(
             CommonNotifCollection collection,
             NotifBindPipelineLogger logger,
-            @Main Looper mainLooper) {
+            NotificationEntryProcessorFactory processorFactory) {
         collection.addCollectionListener(mCollectionListener);
         mLogger = logger;
-        mMainHandler = new NotifBindPipelineHandler(mainLooper);
+        mStartProcessor = processorFactory.create(this::startPipeline);
     }
 
     /**
@@ -167,10 +163,7 @@ public final class NotifBindPipeline {
         // Abort any existing pipeline run
         mStage.abortStage(entry, bindEntry.row);
 
-        if (!mMainHandler.hasMessages(START_PIPELINE_MSG, entry)) {
-            Message msg = Message.obtain(mMainHandler, START_PIPELINE_MSG, entry);
-            mMainHandler.sendMessage(msg);
-        }
+        mStartProcessor.request(entry);
     }
 
     /**
@@ -223,7 +216,7 @@ public final class NotifBindPipeline {
                 mStage.abortStage(entry, row);
             }
             mStage.deleteStageParams(entry);
-            mMainHandler.removeMessages(START_PIPELINE_MSG, entry);
+            mStartProcessor.cancel(entry);
         }
     };
 
@@ -246,26 +239,5 @@ public final class NotifBindPipeline {
         public ExpandableNotificationRow row;
         public final Set<BindCallback> callbacks = new ArraySet<>();
         public boolean invalidated;
-    }
-
-    private static final int START_PIPELINE_MSG = 1;
-
-    private class NotifBindPipelineHandler extends Handler {
-
-        NotifBindPipelineHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case START_PIPELINE_MSG:
-                    NotificationEntry entry = (NotificationEntry) msg.obj;
-                    startPipeline(entry);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown message type: " + msg.what);
-            }
-        }
     }
 }

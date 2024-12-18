@@ -18,12 +18,14 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -35,7 +37,8 @@ import java.util.function.Supplier;
 /**
  * Face-specific internal enumerate client for the {@link IFace} AIDL HAL interface.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
+@VisibleForTesting
+public class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context,
@@ -55,5 +58,10 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    protected int getModality() {
+        return BiometricsProtoEnums.MODALITY_FACE;
     }
 }

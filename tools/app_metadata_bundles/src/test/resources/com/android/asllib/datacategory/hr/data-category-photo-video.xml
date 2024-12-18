@@ -1,0 +1,8 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="photo_video"
+        dataType="photos"
+        purposes="analytics" />
+    <data-shared dataCategory="photo_video"
+        dataType="videos"
+        purposes="analytics" />
+</holder_of_flattened_for_testing>

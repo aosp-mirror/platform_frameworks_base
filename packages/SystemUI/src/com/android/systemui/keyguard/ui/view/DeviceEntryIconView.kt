@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.util.StateSet
 import android.view.Gravity
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
@@ -31,6 +32,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
 import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
 
 class DeviceEntryIconView
@@ -39,11 +41,17 @@ constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttrs: Int = 0,
+    logger: LongPressHandlingViewLogger? = null,
 ) : FrameLayout(context, attrs, defStyleAttrs) {
+
     val longPressHandlingView: LongPressHandlingView =
-        LongPressHandlingView(context, attrs) {
-            context.resources.getInteger(R.integer.config_lockIconLongPress).toLong()
-        }
+        LongPressHandlingView(
+            context = context,
+            attrs = attrs,
+            longPressDuration = { ViewConfiguration.getLongPressTimeout().toLong() },
+            allowedTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop(),
+            logger = logger,
+        )
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
     val bgView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_bg }
     val aodFpDrawable: LottieDrawable = LottieDrawable()
@@ -66,24 +74,24 @@ constructor(
     private fun setupAccessibilityDelegate() {
         accessibilityDelegate =
             object : AccessibilityDelegate() {
-                private val accessibilityAuthenticateHint =
+                private val accessibilityBouncerHint =
                     AccessibilityNodeInfo.AccessibilityAction(
                         AccessibilityNodeInfoCompat.ACTION_CLICK,
-                        resources.getString(R.string.accessibility_authenticate_hint)
+                        resources.getString(R.string.accessibility_bouncer)
                     )
                 private val accessibilityEnterHint =
                     AccessibilityNodeInfo.AccessibilityAction(
                         AccessibilityNodeInfoCompat.ACTION_CLICK,
                         resources.getString(R.string.accessibility_enter_hint)
                     )
+
                 override fun onInitializeAccessibilityNodeInfo(
                     v: View,
                     info: AccessibilityNodeInfo
                 ) {
                     super.onInitializeAccessibilityNodeInfo(v, info)
                     when (accessibilityHintType) {
-                        AccessibilityHintType.AUTHENTICATE ->
-                            info.addAction(accessibilityAuthenticateHint)
+                        AccessibilityHintType.BOUNCER -> info.addAction(accessibilityBouncerHint)
                         AccessibilityHintType.ENTER -> info.addAction(accessibilityEnterHint)
                         AccessibilityHintType.NONE -> return
                     }
@@ -91,6 +99,12 @@ constructor(
             }
     }
 
+    /**
+     * Setups different icon states.
+     * - All lottie views will require a LottieOnCompositionLoadedListener to update
+     *   LottieProperties (like color) of the view.
+     * - Drawable properties can be updated using ImageView properties like imageTintList.
+     */
     private fun setupIconStates() {
         // Lockscreen States
         // LOCK
@@ -201,12 +215,12 @@ constructor(
             /* reversible */ false,
         )
 
-        // LockscreenFingerprint <=> LockscreenLocked
+        // LockscreenFingerprint => LockscreenLocked
         animatedIconDrawable.addTransition(
             R.id.locked_fp,
             R.id.locked,
             context.getDrawable(R.drawable.fp_to_locked) as AnimatedVectorDrawable,
-            /* reversible */ true,
+            /* reversible */ false,
         )
 
         // LockscreenUnlocked <=> AodLocked
@@ -214,7 +228,7 @@ constructor(
             R.id.unlocked,
             R.id.locked_aod,
             context.getDrawable(R.drawable.unlocked_to_aod_lock) as AnimatedVectorDrawable,
-            /* reversible */ true,
+            /* reversible */ false,
         )
     }
 
@@ -244,6 +258,7 @@ constructor(
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.width = ViewGroup.LayoutParams.MATCH_PARENT
         bgView.layoutParams = lp
+        bgView.alpha = 0f
     }
 
     fun getIconState(icon: IconType, aod: Boolean): IntArray {
@@ -252,6 +267,7 @@ constructor(
             IconType.LOCK -> lockIconState[0] = android.R.attr.state_first
             IconType.UNLOCK -> lockIconState[0] = android.R.attr.state_last
             IconType.FINGERPRINT -> lockIconState[0] = android.R.attr.state_middle
+            IconType.NONE -> return StateSet.NOTHING
         }
         if (aod) {
             lockIconState[1] = android.R.attr.state_single
@@ -261,15 +277,16 @@ constructor(
         return lockIconState
     }
 
-    enum class IconType {
-        LOCK,
-        UNLOCK,
-        FINGERPRINT,
+    enum class IconType(val contentDescriptionResId: Int) {
+        LOCK(R.string.accessibility_lock_icon),
+        UNLOCK(R.string.accessibility_unlock_button),
+        FINGERPRINT(R.string.accessibility_fingerprint_label),
+        NONE(-1),
     }
 
     enum class AccessibilityHintType {
         NONE,
-        AUTHENTICATE,
+        BOUNCER,
         ENTER,
     }
 }

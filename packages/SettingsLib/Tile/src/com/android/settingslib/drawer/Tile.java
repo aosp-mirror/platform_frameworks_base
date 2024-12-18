@@ -52,16 +52,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
-/**
- * Description of a single dashboard tile that the user can select.
- */
+/** Description of a single dashboard tile that the user can select. */
 public abstract class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
 
-    /**
-     * Optional list of user handles which the intent should be launched on.
-     */
+    /** Optional list of user handles which the intent should be launched on. */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
     public HashMap<UserHandle, PendingIntent> pendingIntentMap = new HashMap<>();
@@ -76,6 +72,7 @@ public abstract class Tile implements Parcelable {
     private CharSequence mSummaryOverride;
     private Bundle mMetaData;
     private String mCategory;
+    private String mGroupKey;
 
     public Tile(ComponentInfo info, String category, Bundle metaData) {
         mComponentInfo = info;
@@ -83,6 +80,9 @@ public abstract class Tile implements Parcelable {
         mComponentName = mComponentInfo.name;
         mCategory = category;
         mMetaData = metaData;
+        if (mMetaData != null) {
+            mGroupKey = metaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+        }
         mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
         if (isNewTask()) {
             mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -102,6 +102,7 @@ public abstract class Tile implements Parcelable {
         if (isNewTask()) {
             mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
+        mGroupKey = in.readString();
     }
 
     @Override
@@ -121,16 +122,13 @@ public abstract class Tile implements Parcelable {
         }
         dest.writeString(mCategory);
         dest.writeBundle(mMetaData);
+        dest.writeString(mGroupKey);
     }
 
-    /**
-     * Unique ID of the tile
-     */
+    /** Unique ID of the tile */
     public abstract int getId();
 
-    /**
-     * Human-readable description of the tile
-     */
+    /** Human-readable description of the tile */
     public abstract String getDescription();
 
     protected abstract ComponentInfo getComponentInfo(Context context);
@@ -147,16 +145,12 @@ public abstract class Tile implements Parcelable {
         return mComponentName;
     }
 
-    /**
-     * Intent to launch when the preference is selected.
-     */
+    /** Intent to launch when the preference is selected. */
     public Intent getIntent() {
         return mIntent;
     }
 
-    /**
-     * Category in which the tile should be placed.
-     */
+    /** Category in which the tile should be placed. */
     public String getCategory() {
         return mCategory;
     }
@@ -165,9 +159,7 @@ public abstract class Tile implements Parcelable {
         mCategory = newCategoryKey;
     }
 
-    /**
-     * Priority of this tile, used for display ordering.
-     */
+    /** Priority of this tile, used for display ordering. */
     public int getOrder() {
         if (hasOrder()) {
             return mMetaData.getInt(META_DATA_KEY_ORDER);
@@ -176,32 +168,24 @@ public abstract class Tile implements Parcelable {
         }
     }
 
-    /**
-     * Check whether tile has order.
-     */
+    /** Check whether tile has order. */
     public boolean hasOrder() {
         return mMetaData != null
                 && mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
     }
 
-    /**
-     * Check whether tile has a switch.
-     */
+    /** Check whether tile has a switch. */
     public boolean hasSwitch() {
         return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SWITCH_URI);
     }
 
-    /**
-     * Check whether tile has a pending intent.
-     */
+    /** Check whether tile has a pending intent. */
     public boolean hasPendingIntent() {
         return !pendingIntentMap.isEmpty();
     }
 
-    /**
-     * Title of the tile that is shown to the user.
-     */
+    /** Title of the tile that is shown to the user. */
     public CharSequence getTitle(Context context) {
         CharSequence title = null;
         ensureMetadataNotStale(context);
@@ -238,9 +222,7 @@ public abstract class Tile implements Parcelable {
         mSummaryOverride = summaryOverride;
     }
 
-    /**
-     * Optional summary describing what this tile controls.
-     */
+    /** Optional summary describing what this tile controls. */
     public CharSequence getSummary(Context context) {
         if (mSummaryOverride != null) {
             return mSummaryOverride;
@@ -275,16 +257,12 @@ public abstract class Tile implements Parcelable {
         mMetaData = metaData;
     }
 
-    /**
-     * The metaData from the activity that defines this tile.
-     */
+    /** The metaData from the activity that defines this tile. */
     public Bundle getMetaData() {
         return mMetaData;
     }
 
-    /**
-     * Optional key to use for this tile.
-     */
+    /** Optional key to use for this tile. */
     public String getKey(Context context) {
         ensureMetadataNotStale(context);
         if (!hasKey()) {
@@ -297,9 +275,7 @@ public abstract class Tile implements Parcelable {
         }
     }
 
-    /**
-     * Check whether title has key.
-     */
+    /** Check whether title has key. */
     public boolean hasKey() {
         return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_KEYHINT);
     }
@@ -325,8 +301,9 @@ public abstract class Tile implements Parcelable {
         if (iconResId != 0 && iconResId != android.R.color.transparent) {
             final Icon icon = Icon.createWithResource(componentInfo.packageName, iconResId);
             if (isIconTintable(context)) {
-                final TypedArray a = context.obtainStyledAttributes(new int[]{
-                        android.R.attr.colorControlNormal});
+                final TypedArray a =
+                        context.obtainStyledAttributes(
+                                new int[] {android.R.attr.colorControlNormal});
                 final int tintColor = a.getColor(0, 0);
                 a.recycle();
                 icon.setTint(tintColor);
@@ -349,26 +326,22 @@ public abstract class Tile implements Parcelable {
         return false;
     }
 
-    /**
-     * Whether the {@link Activity} should be launched in a separate task.
-     */
+    /** Whether the {@link Activity} should be launched in a separate task. */
     public boolean isNewTask() {
-        if (mMetaData != null
-                && mMetaData.containsKey(META_DATA_NEW_TASK)) {
+        if (mMetaData != null && mMetaData.containsKey(META_DATA_NEW_TASK)) {
             return mMetaData.getBoolean(META_DATA_NEW_TASK);
         }
         return false;
     }
 
-    /**
-     * Ensures metadata is not stale for this tile.
-     */
+    /** Ensures metadata is not stale for this tile. */
     private void ensureMetadataNotStale(Context context) {
         final PackageManager pm = context.getApplicationContext().getPackageManager();
 
         try {
-            final long lastUpdateTime = pm.getPackageInfo(mComponentPackage,
-                    PackageManager.GET_META_DATA).lastUpdateTime;
+            final long lastUpdateTime =
+                    pm.getPackageInfo(mComponentPackage, PackageManager.GET_META_DATA)
+                            .lastUpdateTime;
             if (lastUpdateTime == mLastUpdateTime) {
                 // All good. Do nothing
                 return;
@@ -382,72 +355,60 @@ public abstract class Tile implements Parcelable {
         }
     }
 
-    public static final Creator<Tile> CREATOR = new Creator<Tile>() {
-        public Tile createFromParcel(Parcel source) {
-            final boolean isProviderTile = source.readBoolean();
-            // reset the Parcel pointer before delegating to the real constructor.
-            source.setDataPosition(0);
-            return isProviderTile ? new ProviderTile(source) : new ActivityTile(source);
-        }
+    public static final Creator<Tile> CREATOR =
+            new Creator<Tile>() {
+                public Tile createFromParcel(Parcel source) {
+                    final boolean isProviderTile = source.readBoolean();
+                    // reset the Parcel pointer before delegating to the real constructor.
+                    source.setDataPosition(0);
+                    return isProviderTile ? new ProviderTile(source) : new ActivityTile(source);
+                }
 
-        public Tile[] newArray(int size) {
-            return new Tile[size];
-        }
-    };
+                public Tile[] newArray(int size) {
+                    return new Tile[size];
+                }
+            };
 
-    /**
-     * Check whether tile only has primary profile.
-     */
+    /** Check whether tile only has primary profile. */
     public boolean isPrimaryProfileOnly() {
         return isPrimaryProfileOnly(mMetaData);
     }
 
     static boolean isPrimaryProfileOnly(Bundle metaData) {
-        String profile = metaData != null
-                ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+        String profile = metaData != null ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }
 
-    /**
-     * Returns whether the tile belongs to another group / category.
-     */
+    /** Returns whether the tile belongs to another group / category. */
     public boolean hasGroupKey() {
-        return mMetaData != null
-                && !TextUtils.isEmpty(mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY));
+        return !TextUtils.isEmpty(mGroupKey);
     }
 
-    /**
-     * Returns the group / category key this tile belongs to.
-     */
+    /** Set the group / PreferenceCategory key this tile belongs to. */
+    public void setGroupKey(String groupKey) {
+        mGroupKey = groupKey;
+    }
+
+    /** Returns the group / category key this tile belongs to. */
     public String getGroupKey() {
-        return (mMetaData == null) ? null : mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+        return mGroupKey;
     }
 
-    /**
-     * Returns if this is searchable.
-     */
+    /** Returns if this is searchable. */
     public boolean isSearchable() {
         return mMetaData == null || mMetaData.getBoolean(META_DATA_PREFERENCE_SEARCHABLE, true);
     }
 
-    /**
-     * The type of the tile.
-     */
+    /** The type of the tile. */
     public enum Type {
-        /**
-         * A preference that can be tapped on to open a new page.
-         */
+        /** A preference that can be tapped on to open a new page. */
         ACTION,
 
-        /**
-         * A preference that can be tapped on to open an external app.
-         */
+        /** A preference that can be tapped on to open an external app. */
         EXTERNAL_ACTION,
 
-        /**
-         * A preference that shows an on / off switch that can be toggled by the user.
-         */
+        /** A preference that shows an on / off switch that can be toggled by the user. */
         SWITCH,
 
         /**
@@ -460,7 +421,7 @@ public abstract class Tile implements Parcelable {
          * A preference category with a title that can be used to group multiple preferences
          * together.
          */
-        GROUP;
+        GROUP
     }
 
     /**

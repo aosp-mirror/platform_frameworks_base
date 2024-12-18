@@ -17,7 +17,6 @@
 package com.android.server.pm.dex;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
 
 import static java.util.function.Function.identity;
@@ -31,21 +30,15 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.os.BatteryManager;
-import android.os.FileUtils;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -54,8 +47,6 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,9 +98,6 @@ public class DexManager {
 
     private IPackageManager mPackageManager;
     private final PackageDexOptimizer mPackageDexOptimizer;
-    private final Object mInstallLock;
-    @GuardedBy("mInstallLock")
-    private final Installer mInstaller;
 
     private BatteryManager mBatteryManager = null;
     private PowerManager mPowerManager = null;
@@ -124,21 +112,18 @@ public class DexManager {
     private static final int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
     private static final int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, DynamicCodeLogger dynamicCodeLogger) {
-        this(context, pdo, installer, installLock, dynamicCodeLogger, null);
+    public DexManager(Context context, PackageDexOptimizer pdo,
+            DynamicCodeLogger dynamicCodeLogger) {
+        this(context, pdo, dynamicCodeLogger, null);
     }
 
     @VisibleForTesting
-    public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
-            Object installLock, DynamicCodeLogger dynamicCodeLogger,
-            @Nullable IPackageManager packageManager) {
+    public DexManager(Context context, PackageDexOptimizer pdo,
+            DynamicCodeLogger dynamicCodeLogger, @Nullable IPackageManager packageManager) {
         mContext = context;
         mPackageCodeLocationsCache = new HashMap<>();
         mPackageDexUsage = new PackageDexUsage();
         mPackageDexOptimizer = pdo;
-        mInstaller = installer;
-        mInstallLock = installLock;
         mDynamicCodeLogger = dynamicCodeLogger;
         mPackageManager = packageManager;
 
@@ -496,60 +481,6 @@ public class DexManager {
     }
 
     /**
-     * Perform dexopt on with the given {@code options} on the secondary dex files.
-     * @return true if all secondary dex files were processed successfully (compiled or skipped
-     *         because they don't need to be compiled)..
-     */
-    public boolean dexoptSecondaryDex(DexoptOptions options) throws LegacyDexoptDisabledException {
-        if (isPlatformPackage(options.getPackageName())) {
-            // We could easily redirect to #dexoptSystemServer in this case. But there should be
-            // no-one calling this method directly for system server.
-            // As such we prefer to abort in this case.
-            Slog.wtf(TAG, "System server jars should be optimized with dexoptSystemServer");
-            return false;
-        }
-
-        PackageDexOptimizer pdo = getPackageDexOptimizer(options);
-        String packageName = options.getPackageName();
-        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
-        if (useInfo.getDexUseInfoMap().isEmpty()) {
-            if (DEBUG) {
-                Slog.d(TAG, "No secondary dex use for package:" + packageName);
-            }
-            // Nothing to compile, return true.
-            return true;
-        }
-        boolean success = true;
-        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
-            String dexPath = entry.getKey();
-            DexUseInfo dexUseInfo = entry.getValue();
-
-            PackageInfo pkg;
-            try {
-                pkg = getPackageManager().getPackageInfo(packageName, /*flags*/0,
-                    dexUseInfo.getOwnerUserId());
-            } catch (RemoteException e) {
-                throw new AssertionError(e);
-            }
-            // It may be that the package gets uninstalled while we try to compile its
-            // secondary dex files. If that's the case, just ignore.
-            // Note that we don't break the entire loop because the package might still be
-            // installed for other users.
-            if (pkg == null) {
-                Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
-                        + " for user " + dexUseInfo.getOwnerUserId());
-                mPackageDexUsage.removeUserPackage(packageName, dexUseInfo.getOwnerUserId());
-                continue;
-            }
-
-            int result = pdo.dexOptSecondaryDexPath(pkg.applicationInfo, dexPath,
-                    dexUseInfo, options);
-            success = success && (result != PackageDexOptimizer.DEX_OPT_FAILED);
-        }
-        return success;
-    }
-
-    /**
      * Select the dex optimizer based on the force parameter.
      * Forced compilation is done through ForcedUpdatePackageDexOptimizer which will adjust
      * the necessary dexopt flags to make sure that compilation is not skipped. This avoid
@@ -561,101 +492,6 @@ public class DexManager {
         return options.isForce()
                 ? new PackageDexOptimizer.ForcedUpdatePackageDexOptimizer(mPackageDexOptimizer)
                 : mPackageDexOptimizer;
-    }
-
-    /**
-     * Reconcile the information we have about the secondary dex files belonging to
-     * {@code packagName} and the actual dex files. For all dex files that were
-     * deleted, update the internal records and delete any generated oat files.
-     */
-    public void reconcileSecondaryDexFiles(String packageName)
-            throws LegacyDexoptDisabledException {
-        PackageUseInfo useInfo = getPackageUseInfoOrDefault(packageName);
-        if (useInfo.getDexUseInfoMap().isEmpty()) {
-            if (DEBUG) {
-                Slog.d(TAG, "No secondary dex use for package:" + packageName);
-            }
-            // Nothing to reconcile.
-            return;
-        }
-
-        boolean updated = false;
-        for (Map.Entry<String, DexUseInfo> entry : useInfo.getDexUseInfoMap().entrySet()) {
-            String dexPath = entry.getKey();
-            DexUseInfo dexUseInfo = entry.getValue();
-            PackageInfo pkg = null;
-            try {
-                // Note that we look for the package in the PackageManager just to be able
-                // to get back the real app uid and its storage kind. These are only used
-                // to perform extra validation in installd.
-                // TODO(calin): maybe a bit overkill.
-                pkg = getPackageManager().getPackageInfo(packageName, /*flags*/0,
-                    dexUseInfo.getOwnerUserId());
-            } catch (RemoteException ignore) {
-                // Can't happen, DexManager is local.
-            }
-            if (pkg == null) {
-                // It may be that the package was uninstalled while we process the secondary
-                // dex files.
-                Slog.d(TAG, "Could not find package when compiling secondary dex " + packageName
-                        + " for user " + dexUseInfo.getOwnerUserId());
-                // Update the usage and continue, another user might still have the package.
-                updated = mPackageDexUsage.removeUserPackage(
-                        packageName, dexUseInfo.getOwnerUserId()) || updated;
-                continue;
-            }
-
-            // Special handle system server files.
-            // We don't need an installd call because we have permissions to check if the file
-            // exists.
-            if (isPlatformPackage(packageName)) {
-                if (!Files.exists(Paths.get(dexPath))) {
-                    if (DEBUG) {
-                        Slog.w(TAG, "A dex file previously loaded by System Server does not exist "
-                                + " anymore: " + dexPath);
-                    }
-                    updated = mPackageDexUsage.removeUserPackage(
-                            packageName, dexUseInfo.getOwnerUserId()) || updated;
-                }
-                continue;
-            }
-
-            // This is a regular application.
-            ApplicationInfo info = pkg.applicationInfo;
-            int flags = 0;
-            if (info.deviceProtectedDataDir != null &&
-                    FileUtils.contains(info.deviceProtectedDataDir, dexPath)) {
-                flags |= StorageManager.FLAG_STORAGE_DE;
-            } else if (info.credentialProtectedDataDir!= null &&
-                    FileUtils.contains(info.credentialProtectedDataDir, dexPath)) {
-                flags |= StorageManager.FLAG_STORAGE_CE;
-            } else {
-                Slog.e(TAG, "Could not infer CE/DE storage for path " + dexPath);
-                updated = mPackageDexUsage.removeDexFile(
-                        packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
-                continue;
-            }
-
-            boolean dexStillExists = true;
-            synchronized(mInstallLock) {
-                try {
-                    String[] isas = dexUseInfo.getLoaderIsas().toArray(new String[0]);
-                    dexStillExists = mInstaller.reconcileSecondaryDexFile(dexPath, packageName,
-                            info.uid, isas, info.volumeUuid, flags);
-                } catch (InstallerException e) {
-                    Slog.e(TAG, "Got InstallerException when reconciling dex " + dexPath +
-                            " : " + e.getMessage());
-                }
-            }
-            if (!dexStillExists) {
-                updated = mPackageDexUsage.removeDexFile(
-                        packageName, dexPath, dexUseInfo.getOwnerUserId()) || updated;
-            }
-
-        }
-        if (updated) {
-            mPackageDexUsage.maybeWriteAsync();
-        }
     }
 
     /**
@@ -850,33 +686,6 @@ public class DexManager {
                         >= PowerManager.THERMAL_STATUS_SEVERE);
 
         return isBtmCritical;
-    }
-
-    /**
-     * Deletes all the optimizations files generated by ART.
-     * This is best effort, and the method will log but not throw errors
-     * for individual deletes
-     *
-     * @param packageInfo the package information.
-     * @return the number of freed bytes or -1 if there was an error in the process.
-     */
-    public long deleteOptimizedFiles(ArtPackageInfo packageInfo)
-            throws LegacyDexoptDisabledException {
-        long freedBytes = 0;
-        boolean hadErrors = false;
-        final String packageName = packageInfo.getPackageName();
-        for (String codePath : packageInfo.getCodePaths()) {
-            for (String isa : packageInfo.getInstructionSets()) {
-                try {
-                    freedBytes += mInstaller.deleteOdex(packageName, codePath, isa,
-                            packageInfo.getOatDir());
-                } catch (InstallerException e) {
-                    Log.e(TAG, "Failed deleting oat files for " + codePath, e);
-                    hadErrors = true;
-                }
-            }
-        }
-        return hadErrors ? -1 : freedBytes;
     }
 
     public static class RegisterDexModuleResult {

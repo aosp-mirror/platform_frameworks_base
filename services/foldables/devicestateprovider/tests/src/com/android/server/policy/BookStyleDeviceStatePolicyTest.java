@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Surface;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -215,6 +216,26 @@ public final class BookStyleDeviceStatePolicyTest {
         verify(mDisplayManager, atLeastOnce()).registerDisplayListener(
                 mDisplayListenerCaptor.capture(), nullable(Handler.class));
         setScreenOn(true);
+    }
+
+    @Test
+    public void test_postureBasedClosedState_createPolicy_doesNotRegisterHallSensor() {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_FOLDABLES_POSTURE_BASED_CLOSED_STATE, true);
+        clearInvocations(mSensorManager);
+
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+
+        verify(mSensorManager, never()).registerListener(any(), eq(mHallSensor), anyInt());
+    }
+
+    @Test
+    public void test_postureBasedClosedStateDisabled_createPolicy_registersHallSensor() {
+        mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_FOLDABLES_POSTURE_BASED_CLOSED_STATE, false);
+        clearInvocations(mSensorManager);
+
+        mInstrumentation.runOnMainSync(() -> mProvider = createProvider());
+
+        verify(mSensorManager).registerListener(any(), eq(mHallSensor), anyInt());
     }
 
     @Test
@@ -490,7 +511,7 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     @Test
-    public void test_unfoldTo60Degrees_andFoldTo10_switchesToClosedState() {
+    public void test_unfoldTo60Degrees_andFoldTo10_doesNotSwitchToClosedState() {
         sendHingeAngle(0f);
         sendRightSideFlatSensorEvent(false);
         mProvider.setListener(mListener);
@@ -500,6 +521,36 @@ public final class BookStyleDeviceStatePolicyTest {
         clearInvocations(mListener);
 
         sendHingeAngle(10f);
+
+        verify(mListener, never()).onStateChanged(anyInt());
+    }
+
+    @Test
+    public void test_unfoldTo100Degrees_andFoldTo10_switchesToClosedState() {
+        sendHingeAngle(0f);
+        sendRightSideFlatSensorEvent(false);
+        mProvider.setListener(mListener);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+        sendHingeAngle(100f);
+        assertLatestReportedState(DEVICE_STATE_HALF_OPENED);
+        clearInvocations(mListener);
+
+        sendHingeAngle(10f);
+
+        verify(mListener).onStateChanged(DEVICE_STATE_CLOSED);
+    }
+
+    @Test
+    public void test_unfoldTo10Degrees_andFoldTo0_switchesToClosedState() {
+        sendHingeAngle(0f);
+        sendRightSideFlatSensorEvent(false);
+        mProvider.setListener(mListener);
+        assertLatestReportedState(DEVICE_STATE_CLOSED);
+        sendHingeAngle(10f);
+        assertLatestReportedState(DEVICE_STATE_HALF_OPENED);
+        clearInvocations(mListener);
+
+        sendHingeAngle(0f);
 
         verify(mListener).onStateChanged(DEVICE_STATE_CLOSED);
     }
@@ -629,7 +680,11 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     private void sendScreenRotation(int rotation) {
-        when(mDisplay.getRotation()).thenReturn(rotation);
+        doAnswer(invocation -> {
+            final DisplayInfo displayInfo = invocation.getArgument(0);
+            displayInfo.rotation = rotation;
+            return null;
+        }).when(mDisplay).getDisplayInfo(any());
         mDisplayListenerCaptor.getAllValues().forEach((l) -> l.onDisplayChanged(DEFAULT_DISPLAY));
     }
 

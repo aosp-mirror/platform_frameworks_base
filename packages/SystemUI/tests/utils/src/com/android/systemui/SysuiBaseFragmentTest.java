@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.app.Instrumentation;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.BaseFragmentTest;
 import android.testing.DexmakerShareClassLoaderRule;
 
@@ -31,6 +32,7 @@ import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.mockito.Mockito;
 
@@ -42,6 +44,12 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
 
     @Rule
     public final SysuiLeakCheck mLeakCheck = new SysuiLeakCheck();
+
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule =
+            new SetFlagsRule.ClassRule(
+                    com.android.systemui.Flags.class);
+    @Rule public final SetFlagsRule mSetFlagsRule = mSetFlagsClassRule.createSetFlagsRule();
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =

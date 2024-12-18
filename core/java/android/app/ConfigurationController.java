@@ -21,6 +21,7 @@ import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
@@ -144,6 +145,24 @@ class ConfigurationController {
      * @param compat The new compatibility information.
      */
     void handleConfigurationChanged(@Nullable Configuration config,
+            @Nullable CompatibilityInfo compat) {
+        final ClientTransactionListenerController controller =
+                ClientTransactionListenerController.getInstance();
+        final Context contextToUpdate = ActivityThread.currentApplication();
+        controller.onContextConfigurationPreChanged(contextToUpdate);
+        try {
+            handleConfigurationChangedInner(config, compat);
+        } finally {
+            controller.onContextConfigurationPostChanged(contextToUpdate);
+        }
+    }
+
+    /**
+     * Update the configuration to latest.
+     * @param config The new configuration.
+     * @param compat The new compatibility information.
+     */
+    private void handleConfigurationChangedInner(@Nullable Configuration config,
             @Nullable CompatibilityInfo compat) {
         int configDiff;
         boolean equivalent;

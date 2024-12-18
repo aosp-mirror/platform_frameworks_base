@@ -49,7 +49,7 @@ import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Handler;
-import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.InflateException;
 import android.view.SurfaceControl;
@@ -75,10 +75,11 @@ import java.util.List;
 /** @hide */
 public class TransitionAnimation {
     public static final int WALLPAPER_TRANSITION_NONE = 0;
-    public static final int WALLPAPER_TRANSITION_OPEN = 1;
-    public static final int WALLPAPER_TRANSITION_CLOSE = 2;
-    public static final int WALLPAPER_TRANSITION_INTRA_OPEN = 3;
-    public static final int WALLPAPER_TRANSITION_INTRA_CLOSE = 4;
+    public static final int WALLPAPER_TRANSITION_CHANGE = 1;
+    public static final int WALLPAPER_TRANSITION_OPEN = 2;
+    public static final int WALLPAPER_TRANSITION_CLOSE = 3;
+    public static final int WALLPAPER_TRANSITION_INTRA_OPEN = 4;
+    public static final int WALLPAPER_TRANSITION_INTRA_CLOSE = 5;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
     private static final int THUMBNAIL_TRANSITION_ENTER_SCALE_UP = 0;
@@ -129,7 +130,6 @@ public class TransitionAnimation {
     private final int mDefaultWindowAnimationStyleResId;
 
     private final boolean mDebug;
-    private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
 
     public TransitionAnimation(Context context, boolean debug, String tag) {
@@ -166,7 +166,6 @@ public class TransitionAnimation {
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
 
-        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
         mLowRamRecentsEnabled = ActivityManager.isLowRamDeviceStatic();
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
@@ -188,23 +187,44 @@ public class TransitionAnimation {
         return createHiddenByKeyguardExit(mContext, mInterpolator, onWallpaper, toShade, subtle);
     }
 
+    /** Load keyguard unocclude animation for user. */
+    @Nullable
+    public Animation loadKeyguardUnoccludeAnimation(int userId) {
+        return loadDefaultAnimationRes(com.android.internal.R.anim.wallpaper_open_exit, userId);
+    }
+
+    /** Same as {@code loadKeyguardUnoccludeAnimation} for current user. */
     @Nullable
     public Animation loadKeyguardUnoccludeAnimation() {
-        return loadDefaultAnimationRes(com.android.internal.R.anim.wallpaper_open_exit);
+        return loadKeyguardUnoccludeAnimation(UserHandle.USER_CURRENT);
     }
 
+    /** Load voice activity open animation for user. */
     @Nullable
-    public Animation loadVoiceActivityOpenAnimation(boolean enter) {
+    public Animation loadVoiceActivityOpenAnimation(boolean enter, int userId) {
         return loadDefaultAnimationRes(enter
                 ? com.android.internal.R.anim.voice_activity_open_enter
-                : com.android.internal.R.anim.voice_activity_open_exit);
+                : com.android.internal.R.anim.voice_activity_open_exit, userId);
     }
 
+    /** Same as {@code loadVoiceActivityOpenAnimation} for current user. */
     @Nullable
-    public Animation loadVoiceActivityExitAnimation(boolean enter) {
+    public Animation loadVoiceActivityOpenAnimation(boolean enter) {
+        return loadVoiceActivityOpenAnimation(enter, UserHandle.USER_CURRENT);
+    }
+
+    /** Load voice activity exit animation for user. */
+    @Nullable
+    public Animation loadVoiceActivityExitAnimation(boolean enter, int userId) {
         return loadDefaultAnimationRes(enter
                 ? com.android.internal.R.anim.voice_activity_close_enter
-                : com.android.internal.R.anim.voice_activity_close_exit);
+                : com.android.internal.R.anim.voice_activity_close_exit, userId);
+    }
+
+    /** Same as {@code loadVoiceActivityExitAnimation} for current user. */
+    @Nullable
+    public Animation loadVoiceActivityExitAnimation(boolean enter) {
+        return loadVoiceActivityExitAnimation(enter, UserHandle.USER_CURRENT);
     }
 
     @Nullable
@@ -212,10 +232,17 @@ public class TransitionAnimation {
         return loadAnimationRes(packageName, resId);
     }
 
+    /** Load cross profile app enter animation for user. */
+    @Nullable
+    public Animation loadCrossProfileAppEnterAnimation(int userId) {
+        return loadAnimationRes(DEFAULT_PACKAGE,
+                com.android.internal.R.anim.task_open_enter_cross_profile_apps, userId);
+    }
+
+    /** Same as {@code loadCrossProfileAppEnterAnimation} for current user. */
     @Nullable
     public Animation loadCrossProfileAppEnterAnimation() {
-        return loadAnimationRes(DEFAULT_PACKAGE,
-                com.android.internal.R.anim.task_open_enter_cross_profile_apps);
+        return loadCrossProfileAppEnterAnimation(UserHandle.USER_CURRENT);
     }
 
     @Nullable
@@ -231,11 +258,11 @@ public class TransitionAnimation {
                 appRect.height(), 0, null);
     }
 
-    /** Load animation by resource Id from specific package. */
+    /** Load animation by resource Id from specific package for user. */
     @Nullable
-    public Animation loadAnimationRes(String packageName, int resId) {
+    public Animation loadAnimationRes(String packageName, int resId, int userId) {
         if (ResourceId.isValid(resId)) {
-            AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
+            AttributeCache.Entry ent = getCachedAnimations(packageName, resId, userId);
             if (ent != null) {
                 return loadAnimationSafely(ent.context, resId, mTag);
             }
@@ -243,10 +270,22 @@ public class TransitionAnimation {
         return null;
     }
 
-    /** Load animation by resource Id from android package. */
+    /** Same as {@code loadAnimationRes} for current user. */
+    @Nullable
+    public Animation loadAnimationRes(String packageName, int resId) {
+        return loadAnimationRes(packageName, resId, UserHandle.USER_CURRENT);
+    }
+
+    /** Load animation by resource Id from android package for user. */
+    @Nullable
+    public Animation loadDefaultAnimationRes(int resId, int userId) {
+        return loadAnimationRes(DEFAULT_PACKAGE, resId, userId);
+    }
+
+    /** Same as {@code loadDefaultAnimationRes} for current user. */
     @Nullable
     public Animation loadDefaultAnimationRes(int resId) {
-        return loadAnimationRes(DEFAULT_PACKAGE, resId);
+        return loadAnimationRes(DEFAULT_PACKAGE, resId, UserHandle.USER_CURRENT);
     }
 
     /** Load animation by attribute Id from specific LayoutParams */
@@ -379,10 +418,10 @@ public class TransitionAnimation {
     }
 
     @Nullable
-    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
+    private AttributeCache.Entry getCachedAnimations(String packageName, int resId, int userId) {
         if (mDebug) {
-            Slog.v(mTag, "Loading animations: package="
-                    + packageName + " resId=0x" + Integer.toHexString(resId));
+            Slog.v(mTag, "Loading animations: package=" + packageName + " resId=0x"
+                    + Integer.toHexString(resId) + " for user=" + userId);
         }
         if (packageName != null) {
             if ((resId & 0xFF000000) == 0x01000000) {
@@ -393,9 +432,14 @@ public class TransitionAnimation {
                         + packageName);
             }
             return AttributeCache.instance().get(packageName, resId,
-                    com.android.internal.R.styleable.WindowAnimation);
+                    com.android.internal.R.styleable.WindowAnimation, userId);
         }
         return null;
+    }
+
+    @Nullable
+    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
+        return getCachedAnimations(packageName, resId, UserHandle.USER_CURRENT);
     }
 
     /** Returns window animation style ID from {@link LayoutParams} or from system in some cases */
@@ -768,10 +812,8 @@ public class TransitionAnimation {
                         // We scale the width and clip to the top/left square
                         float scale =
                                 thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                        if (!mGridLayoutRecentsEnabled) {
-                            int unscaledThumbHeight = (int) (thumbHeight / scale);
-                            mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
-                        }
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
                         Animation scaleAnim = new ScaleAnimation(
                                 scaleUp ? scale : 1, scaleUp ? 1 : scale,
@@ -887,12 +929,6 @@ public class TransitionAnimation {
             toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
             pivotX = mTmpRect.width() / 2;
             pivotY = appRect.height() / 2 / scaleW;
-            if (mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header is displayed above the thumbnail instead of
-                // overlapping it.
-                fromY -= thumbHeightI;
-                toY -= thumbHeightI * scaleW;
-            }
         } else {
             pivotX = 0;
             pivotY = 0;
@@ -936,10 +972,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             set.addAnimation(clipAnim);
             a = set;
@@ -958,10 +991,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             a = set;
 
@@ -1081,8 +1111,7 @@ public class TransitionAnimation {
      * @return whether the transition should show the thumbnail being scaled down.
      */
     private boolean shouldScaleDownThumbnailTransition(int orientation) {
-        return mGridLayoutRecentsEnabled
-                || orientation == Configuration.ORIENTATION_PORTRAIT;
+        return orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private static int updateToTranslucentAnimIfNeeded(int anim, @TransitionOldType int transit) {
@@ -1316,6 +1345,21 @@ public class TransitionAnimation {
                 == HardwareBuffer.USAGE_PROTECTED_CONTENT;
     }
 
+    /**
+     * Returns the luminance in 0~1. The surface control is the source of the hardware buffer,
+     * which will be used if the buffer is protected from reading.
+     */
+    public static float getBorderLuma(@NonNull HardwareBuffer hwBuffer,
+            @NonNull ColorSpace colorSpace, @NonNull SurfaceControl sourceSurfaceControl) {
+        if (hasProtectedContent(hwBuffer)) {
+            // The buffer cannot be read. Capture another buffer which excludes protected content
+            // from the source surface.
+            return getBorderLuma(sourceSurfaceControl, hwBuffer.getWidth(), hwBuffer.getHeight());
+        }
+        // Use the existing buffer directly.
+        return getBorderLuma(hwBuffer, colorSpace);
+    }
+
     /** Returns the luminance in 0~1. */
     public static float getBorderLuma(SurfaceControl surfaceControl, int w, int h) {
         final ScreenCapture.ScreenshotHardwareBuffer buffer =
@@ -1357,35 +1401,39 @@ public class TransitionAnimation {
         final int pixelStride = plane.getPixelStride();
         final int rowStride = plane.getRowStride();
         final int sampling = 10;
-        final int[] borderLumas = new int[(width + height) * 2 / sampling];
+        final int[] histogram = new int[256];
 
         // Grab the top and bottom borders.
         int i = 0;
         for (int x = 0, size = width - sampling; x < size; x += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            final int topLm = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
+            final int bottomLm = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            histogram[topLm]++;
+            histogram[bottomLm]++;
         }
 
         // Grab the left and right borders.
         for (int y = 0, size = height - sampling; y < size; y += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            final int leftLm = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
+            final int rightLm = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            histogram[leftLm]++;
+            histogram[rightLm]++;
         }
 
         ir.close();
 
-        // Get "mode" by histogram.
-        final int[] histogram = new int[256];
-        int maxCount = 0;
-        int mostLuma = 0;
-        for (int luma : borderLumas) {
-            final int count = ++histogram[luma];
-            if (count > maxCount) {
-                maxCount = count;
-                mostLuma = luma;
+        // Find the median from histogram.
+        final int halfNum = (width + height) / sampling;
+        int sum = 0;
+        int medianLuminance = 0;
+        for (i = 0; i < histogram.length; i++) {
+            sum += histogram[i];
+            if (sum >= halfNum) {
+                medianLuminance = i;
+                break;
             }
         }
-        return mostLuma / 255f;
+        return medianLuminance / 255f;
     }
 
     /** Returns the luminance of the pixel in 0~255. */

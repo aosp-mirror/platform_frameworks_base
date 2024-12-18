@@ -21,6 +21,9 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN;
+import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
+import static android.appwidget.flags.Flags.generatedPreviews;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
@@ -56,6 +59,7 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,12 +84,15 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -96,6 +103,8 @@ import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.people.PeopleTileViewHelper;
 import com.android.systemui.people.SharedPreferencesHelper;
+import com.android.systemui.res.R;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -131,7 +140,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     private final Object mLock = new Object();
     private final Context mContext;
     private LauncherApps mLauncherApps;
-    private AppWidgetManager mAppWidgetManager;
+    private Optional<AppWidgetManager> mAppWidgetManagerOptional;
     private IPeopleManager mIPeopleManager;
     private SharedPreferences mSharedPrefs;
     private PeopleManager mPeopleManager;
@@ -160,16 +169,31 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     @GuardedBy("mLock")
     public static Map<Integer, PeopleSpaceTile> mTiles = new HashMap<>();
 
+    @NonNull private final UserTracker mUserTracker;
+    @NonNull private final SparseBooleanArray mUpdatedPreviews = new SparseBooleanArray();
+    @NonNull private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onUserUnlocked() {
+                    if (DEBUG) {
+                        Log.d(TAG, "onUserUnlocked " + mUserTracker.getUserId());
+                    }
+                    updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+                }
+            };
+
     @Inject
-    public PeopleSpaceWidgetManager(Context context, LauncherApps launcherApps,
-            CommonNotifCollection notifCollection,
+    public PeopleSpaceWidgetManager(Context context,
+            Optional<AppWidgetManager> appWidgetManagerOptional,
+            LauncherApps launcherApps, CommonNotifCollection notifCollection,
             PackageManager packageManager, Optional<Bubbles> bubblesOptional,
             UserManager userManager, NotificationManager notificationManager,
             BroadcastDispatcher broadcastDispatcher, @Background Executor bgExecutor,
-            DumpManager dumpManager) {
+            DumpManager dumpManager, @NonNull UserTracker userTracker,
+            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
-        mAppWidgetManager = AppWidgetManager.getInstance(context);
+        mAppWidgetManagerOptional = appWidgetManagerOptional;
         mIPeopleManager = IPeopleManager.Stub.asInterface(
                 ServiceManager.getService(Context.PEOPLE_SERVICE));
         mLauncherApps = launcherApps;
@@ -187,6 +211,8 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         mBroadcastDispatcher = broadcastDispatcher;
         mBgExecutor = bgExecutor;
         dumpManager.registerNormalDumpable(TAG, this);
+        mUserTracker = userTracker;
+        keyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
     }
 
     /** Initializes {@PeopleSpaceWidgetManager}. */
@@ -241,14 +267,14 @@ public class PeopleSpaceWidgetManager implements Dumpable {
      */
     @VisibleForTesting
     PeopleSpaceWidgetManager(Context context,
-            AppWidgetManager appWidgetManager, IPeopleManager iPeopleManager,
+            Optional<AppWidgetManager> appWidgetManager, IPeopleManager iPeopleManager,
             PeopleManager peopleManager, LauncherApps launcherApps,
             CommonNotifCollection notifCollection, PackageManager packageManager,
             Optional<Bubbles> bubblesOptional, UserManager userManager, BackupManager backupManager,
             INotificationManager iNotificationManager, NotificationManager notificationManager,
-            @Background Executor executor) {
+            @Background Executor executor, UserTracker userTracker) {
         mContext = context;
-        mAppWidgetManager = appWidgetManager;
+        mAppWidgetManagerOptional = appWidgetManager;
         mIPeopleManager = iPeopleManager;
         mPeopleManager = peopleManager;
         mLauncherApps = launcherApps;
@@ -262,6 +288,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         mManager = this;
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mBgExecutor = executor;
+        mUserTracker = userTracker;
     }
 
     /**
@@ -311,6 +338,10 @@ public class PeopleSpaceWidgetManager implements Dumpable {
 
     /** Updates the current widget view with provided {@link PeopleSpaceTile}. */
     private void updateAppWidgetViews(int appWidgetId, PeopleSpaceTile tile, Bundle options) {
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
         PeopleTileKey key = getKeyFromStorageByWidgetId(appWidgetId);
         if (DEBUG) Log.d(TAG, "Widget: " + appWidgetId + " for: " + key.toString());
 
@@ -323,7 +354,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
 
         // Tell the AppWidgetManager to perform an update on the current app widget.
         if (DEBUG) Log.d(TAG, "Calling update widget for widgetId: " + appWidgetId);
-        mAppWidgetManager.updateAppWidget(appWidgetId, views);
+        mAppWidgetManagerOptional.get().updateAppWidget(appWidgetId, views);
     }
 
     /** Updates tile in app widget options and the current view. */
@@ -336,13 +367,17 @@ public class PeopleSpaceWidgetManager implements Dumpable {
 
     /** Updates tile in app widget options and the current view. */
     public void updateAppWidgetOptionsAndView(int appWidgetId, PeopleSpaceTile tile) {
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
         if (tile == null) {
             Log.w(TAG, "Storing null tile for widget " + appWidgetId);
         }
         synchronized (mTiles) {
             mTiles.put(appWidgetId, tile);
         }
-        Bundle options = mAppWidgetManager.getAppWidgetOptions(appWidgetId);
+        Bundle options = mAppWidgetManagerOptional.get().getAppWidgetOptions(appWidgetId);
         updateAppWidgetViews(appWidgetId, tile, options);
     }
 
@@ -458,6 +493,10 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     private void updateWidgetsWithNotificationChangedInBackground(StatusBarNotification sbn,
             PeopleSpaceUtils.NotificationAction action,
             Collection<NotificationEntry> notifications) {
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
         try {
             PeopleTileKey key = new PeopleTileKey(
                     sbn.getShortcutId(), sbn.getUser().getIdentifier(), sbn.getPackageName());
@@ -465,7 +504,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
                 if (DEBUG) Log.d(TAG, "Sbn doesn't contain valid PeopleTileKey: " + key.toString());
                 return;
             }
-            int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
+            int[] widgetIds = mAppWidgetManagerOptional.get().getAppWidgetIds(
                     new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
             );
             if (widgetIds.length == 0) {
@@ -781,10 +820,14 @@ public class PeopleSpaceWidgetManager implements Dumpable {
                 UserHandle user,
                 NotificationChannel channel,
                 int modificationType) {
+            if (mAppWidgetManagerOptional.isEmpty()) {
+                return;
+            }
+
             if (channel.isConversation()) {
                 mBgExecutor.execute(() -> {
                     if (mUserManager.isUserUnlocked(user)) {
-                        updateWidgets(mAppWidgetManager.getAppWidgetIds(
+                        updateWidgets(mAppWidgetManagerOptional.get().getAppWidgetIds(
                                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
                         ));
                     }
@@ -803,13 +846,18 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         // learning about the widget. If so, the widget adder should have populated options with
         // PeopleTileKey arguments.
         if (DEBUG) Log.d(TAG, "onAppWidgetOptionsChanged called for widget: " + appWidgetId);
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
         PeopleTileKey optionsKey = AppWidgetOptionsHelper.getPeopleTileKeyFromBundle(newOptions);
         if (PeopleTileKey.isValid(optionsKey)) {
             if (DEBUG) {
                 Log.d(TAG, "PeopleTileKey was present in Options, shortcutId: "
                         + optionsKey.getShortcutId());
             }
-            AppWidgetOptionsHelper.removePeopleTileKey(mAppWidgetManager, appWidgetId);
+            AppWidgetOptionsHelper.removePeopleTileKey(mAppWidgetManagerOptional.get(),
+                    appWidgetId);
             addNewWidget(appWidgetId, optionsKey);
         }
         // Update views for new widget dimensions.
@@ -978,6 +1026,10 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     public boolean requestPinAppWidget(ShortcutInfo shortcutInfo, Bundle options) {
         if (DEBUG) Log.d(TAG, "Requesting pin widget, shortcutId: " + shortcutInfo.getId());
 
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return false;
+        }
+
         RemoteViews widgetPreview = getPreview(shortcutInfo.getId(),
                 shortcutInfo.getUserHandle(), shortcutInfo.getPackage(), options);
         if (widgetPreview == null) {
@@ -991,7 +1043,8 @@ public class PeopleSpaceWidgetManager implements Dumpable {
                 PeopleSpaceWidgetPinnedReceiver.getPendingIntent(mContext, shortcutInfo);
 
         ComponentName componentName = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
-        return mAppWidgetManager.requestPinAppWidget(componentName, extras, successCallback);
+        return mAppWidgetManagerOptional.get().requestPinAppWidget(componentName, extras,
+                successCallback);
     }
 
     /** Returns a list of map entries corresponding to user's priority conversations. */
@@ -1078,7 +1131,11 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     /** Updates any app widget to the current state, triggered by a broadcast update. */
     @VisibleForTesting
     void updateWidgetsFromBroadcastInBackground(String entryPoint) {
-        int[] appWidgetIds = mAppWidgetManager.getAppWidgetIds(
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
+        int[] appWidgetIds = mAppWidgetManagerOptional.get().getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
         if (appWidgetIds == null) {
             return;
@@ -1246,13 +1303,17 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         remapSharedFile(widgets);
         remapFollowupFile(widgets);
 
-        int[] widgetIds = mAppWidgetManager.getAppWidgetIds(
+        if (mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
+        int[] widgetIds = mAppWidgetManagerOptional.get().getAppWidgetIds(
                 new ComponentName(mContext, PeopleSpaceWidgetProvider.class));
         Bundle b = new Bundle();
         b.putBoolean(AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED, true);
         for (int id : widgetIds) {
             if (DEBUG) Log.d(TAG, "Setting widget as restored, widget id:" + id);
-            mAppWidgetManager.updateAppWidgetOptions(id, b);
+            mAppWidgetManagerOptional.get().updateAppWidgetOptions(id, b);
         }
 
         updateWidgets(widgetIds);
@@ -1406,5 +1467,34 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_APP);
+    }
+
+    @VisibleForTesting
+    void updateGeneratedPreviewForUser(UserHandle user) {
+        if (!generatedPreviews() || mUpdatedPreviews.get(user.getIdentifier())
+                || !mUserManager.isUserUnlocked(user) || mAppWidgetManagerOptional.isEmpty()) {
+            return;
+        }
+
+        // The widget provider may be disabled on SystemUI implementers, e.g. TvSystemUI.
+        ComponentName provider = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
+        List<AppWidgetProviderInfo> infos =
+                mAppWidgetManagerOptional.get().getInstalledProvidersForPackage(
+                        mContext.getPackageName(), user);
+        if (infos.stream().noneMatch(info -> info.provider.equals(provider))) {
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Updating People Space widget preview for user " + user.getIdentifier());
+        }
+        boolean success = mAppWidgetManagerOptional.get().setWidgetPreview(
+                provider, WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD,
+                new RemoteViews(mContext.getPackageName(),
+                        R.layout.people_space_placeholder_layout));
+        if (DEBUG && !success) {
+            Log.d(TAG, "Failed to update generated preview for user " + user.getIdentifier());
+        }
+        mUpdatedPreviews.put(user.getIdentifier(), success);
     }
 }

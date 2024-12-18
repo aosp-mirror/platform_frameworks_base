@@ -1,0 +1,6 @@
+<data-labels>
+    <data-shared dataType="photo_video_data_type_photos"
+        purposes="analytics" />
+    <data-shared dataType="photo_video_data_type_videos"
+        purposes="analytics" />
+</data-labels>

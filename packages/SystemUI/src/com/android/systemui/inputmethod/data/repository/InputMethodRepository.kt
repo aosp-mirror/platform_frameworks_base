@@ -18,7 +18,6 @@ package com.android.systemui.inputmethod.data.repository
 
 import android.annotation.SuppressLint
 import android.os.UserHandle
-import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -34,18 +33,27 @@ import kotlinx.coroutines.withContext
 
 /** Provides access to input-method related application state in the bouncer. */
 interface InputMethodRepository {
+
     /**
      * Creates and returns a new `Flow` of installed input methods that are enabled for the
      * specified user.
      *
+     * @param user The user to query.
      * @param fetchSubtypes Whether to fetch the IME Subtypes as well (requires an additional IPC
      *   call for each IME, avoid if not needed).
      * @see InputMethodManager.getEnabledInputMethodListAsUser
      */
-    suspend fun enabledInputMethods(userId: Int, fetchSubtypes: Boolean): Flow<InputMethodModel>
+    suspend fun enabledInputMethods(
+        user: UserHandle,
+        fetchSubtypes: Boolean,
+    ): Flow<InputMethodModel>
 
-    /** Returns enabled subtypes for the currently selected input method. */
-    suspend fun selectedInputMethodSubtypes(): List<InputMethodModel.Subtype>
+    /**
+     * Returns enabled subtypes for the currently selected input method.
+     *
+     * @param user The user to query.
+     */
+    suspend fun selectedInputMethodSubtypes(user: UserHandle): List<InputMethodModel.Subtype>
 
     /**
      * Shows the system's input method picker dialog.
@@ -67,20 +75,22 @@ constructor(
 ) : InputMethodRepository {
 
     override suspend fun enabledInputMethods(
-        userId: Int,
+        user: UserHandle,
         fetchSubtypes: Boolean
     ): Flow<InputMethodModel> {
         return withContext(backgroundDispatcher) {
-                inputMethodManager.getEnabledInputMethodListAsUser(UserHandle.of(userId))
+                inputMethodManager.getEnabledInputMethodListAsUser(user)
             }
             .asFlow()
             .map { inputMethodInfo ->
                 InputMethodModel(
+                    userId = user.identifier,
                     imeId = inputMethodInfo.id,
                     subtypes =
                         if (fetchSubtypes) {
                             enabledInputMethodSubtypes(
-                                inputMethodInfo,
+                                user = user,
+                                imeId = inputMethodInfo.id,
                                 allowsImplicitlyEnabledSubtypes = true
                             )
                         } else {
@@ -90,11 +100,19 @@ constructor(
             }
     }
 
-    override suspend fun selectedInputMethodSubtypes(): List<InputMethodModel.Subtype> {
-        return enabledInputMethodSubtypes(
-            inputMethodInfo = null, // Fetch subtypes for the currently-selected IME.
-            allowsImplicitlyEnabledSubtypes = false
-        )
+    override suspend fun selectedInputMethodSubtypes(
+        user: UserHandle,
+    ): List<InputMethodModel.Subtype> {
+        val selectedIme = inputMethodManager.getCurrentInputMethodInfoAsUser(user)
+        return if (selectedIme == null) {
+            emptyList()
+        } else {
+            enabledInputMethodSubtypes(
+                user = user,
+                imeId = selectedIme.id,
+                allowsImplicitlyEnabledSubtypes = false
+            )
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -107,21 +125,23 @@ constructor(
     /**
      * Returns a list of enabled input method subtypes for the specified input method info.
      *
-     * @param inputMethodInfo The [InputMethodInfo] whose subtypes list will be returned. If `null`,
-     *   returns enabled subtypes for the currently selected [InputMethodInfo].
+     * @param user The user to query.
+     * @param imeId The ID of the input method whose subtypes list will be returned.
      * @param allowsImplicitlyEnabledSubtypes Whether to allow to return the implicitly enabled
      *   subtypes. If an input method info doesn't have enabled subtypes, the framework will
      *   implicitly enable subtypes according to the current system language.
-     * @see InputMethodManager.getEnabledInputMethodSubtypeList
+     * @see InputMethodManager.getEnabledInputMethodSubtypeListAsUser
      */
     private suspend fun enabledInputMethodSubtypes(
-        inputMethodInfo: InputMethodInfo?,
+        user: UserHandle,
+        imeId: String,
         allowsImplicitlyEnabledSubtypes: Boolean
     ): List<InputMethodModel.Subtype> {
         return withContext(backgroundDispatcher) {
-                inputMethodManager.getEnabledInputMethodSubtypeList(
-                    inputMethodInfo,
-                    allowsImplicitlyEnabledSubtypes
+                inputMethodManager.getEnabledInputMethodSubtypeListAsUser(
+                    imeId,
+                    allowsImplicitlyEnabledSubtypes,
+                    user
                 )
             }
             .map {

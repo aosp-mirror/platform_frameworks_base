@@ -21,11 +21,15 @@ import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorEmptyImpl
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorEmptyImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractorEmptyImpl
 import dagger.Binds
 import dagger.Module
 
@@ -66,5 +70,15 @@ abstract class ShadeEmptyImplModule {
 
     @Binds
     @SysUISingleton
+    abstract fun bindsPanelExpansionInteractor(
+        sbai: ShadeViewControllerEmptyImpl
+    ): PanelExpansionInteractor
+
+    @Binds
+    @SysUISingleton
     abstract fun bindsPrivacyChipRepository(impl: PrivacyChipRepositoryImpl): PrivacyChipRepository
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindShadeModeInteractor(impl: ShadeModeInteractorEmptyImpl): ShadeModeInteractor
 }

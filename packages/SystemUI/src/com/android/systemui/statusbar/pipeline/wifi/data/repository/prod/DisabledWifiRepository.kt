@@ -18,8 +18,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryViaTrackerLibDagger
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import javax.inject.Inject
@@ -34,10 +33,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * wifi information.
  */
 @SysUISingleton
-class DisabledWifiRepository @Inject constructor() :
-    WifiRepositoryDagger, WifiRepositoryViaTrackerLibDagger {
-    override fun start() {}
-
+class DisabledWifiRepository @Inject constructor() : RealWifiRepository {
     override val isWifiEnabled: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
 
     override val isWifiDefault: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()

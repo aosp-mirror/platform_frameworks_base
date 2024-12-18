@@ -18,13 +18,14 @@ package com.android.systemui.media.controls.ui.controller
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
@@ -125,6 +126,7 @@ constructor(
     /** single pane media container placed at the top of the notifications list */
     var singlePaneContainer: MediaContainerView? = null
         private set
+
     private var splitShadeContainer: ViewGroup? = null
 
     /**
@@ -139,6 +141,8 @@ constructor(
         }
         reattachHostView()
         onMediaHostVisibilityChanged(mediaHost.visible)
+
+        singlePaneContainer?.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
 
     /** Called whenever the media hosts visibility changes */
@@ -146,7 +150,7 @@ constructor(
         refreshMediaPosition(reason = "onMediaHostVisibilityChanged")
 
         if (visible) {
-            if (migrateClocksToBlueprint() && useSplitShade) {
+            if (MigrateClocksToBlueprint.isEnabled && useSplitShade) {
                 return
             }
             mediaHost.hostView.layoutParams.apply {
@@ -181,6 +185,13 @@ constructor(
             mediaHost.hostView.parent?.let { (it as? ViewGroup)?.removeView(mediaHost.hostView) }
             activeContainer.addView(mediaHost.hostView)
         }
+    }
+
+    fun isWithinMediaViewBounds(x: Int, y: Int): Boolean {
+        val bounds = Rect()
+        mediaHost.hostView.getBoundsOnScreen(bounds)
+
+        return bounds.contains(x, y)
     }
 
     fun refreshMediaPosition(reason: String) {
@@ -297,6 +308,7 @@ constructor(
         }
     }
 
-    private val activeContainer: ViewGroup? =
-        if (useSplitShade) splitShadeContainer else singlePaneContainer
+    // This field is only used to log current active container.
+    private val activeContainer: ViewGroup?
+        get() = if (useSplitShade) splitShadeContainer else singlePaneContainer
 }

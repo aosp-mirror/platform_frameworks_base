@@ -20,9 +20,10 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
@@ -62,6 +63,7 @@ import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCapture;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -69,9 +71,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
-import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -89,9 +89,14 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import dagger.Lazy;
 
 import kotlin.Unit;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -105,9 +110,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.Job;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -136,12 +138,10 @@ public class AuthController implements
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-    private final Provider<SideFpsController> mSidefpsControllerFactory;
     private final CoroutineScope mApplicationCoroutineScope;
     private Job mBiometricContextListenerJob = null;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
     @NonNull private final Provider<PromptViewModel> mPromptViewModelProvider;
@@ -163,7 +163,6 @@ public class AuthController implements
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
-    @Nullable private SideFpsController mSideFpsController;
     @NonNull private Lazy<UdfpsLogger> mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
@@ -178,7 +177,6 @@ public class AuthController implements
     @NonNull private final SparseBooleanArray mSfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
@@ -187,12 +185,15 @@ public class AuthController implements
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
     @NonNull private final VibratorHelper mVibratorHelper;
+    @NonNull private final MSDLPlayer mMSDLPlayer;
+
+    private final kotlin.Lazy<ViewCapture> mLazyViewCapture;
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
         public void onTaskStackChanged() {
-            if (!isOwnerInForeground()) {
+            if (isOwnerInBackground()) {
                 mHandler.post(AuthController.this::cancelIfOwnerIsNotInForeground);
             }
         }
@@ -205,12 +206,12 @@ public class AuthController implements
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 reason = (reason != null) ? reason : "unknown";
-                closeDioalog(reason);
+                closeDialog(reason);
             }
         }
     };
 
-    private void closeDioalog(String reason) {
+    private void closeDialog(String reason) {
         if (isShowing()) {
             Log.i(TAG, "Close BP, reason :" + reason);
             mCurrentDialog.dismissWithoutCallback(true /* animate */);
@@ -232,21 +233,20 @@ public class AuthController implements
         }
     }
 
-    private boolean isOwnerInForeground() {
+    private boolean isOwnerInBackground() {
         if (mCurrentDialog != null) {
             final String clientPackage = mCurrentDialog.getOpPackageName();
-            final List<ActivityManager.RunningTaskInfo> runningTasks =
-                    mActivityTaskManager.getTasks(1);
-            if (!runningTasks.isEmpty()) {
-                final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                if (!topPackage.contentEquals(clientPackage)
-                        && !Utils.isSystem(mContext, clientPackage)) {
-                    Log.w(TAG, "Evicting client due to: " + topPackage);
-                    return false;
-                }
+            final String clientClassNameIfItIsConfirmDeviceCredentialActivity =
+                    mCurrentDialog.getClassNameIfItIsConfirmDeviceCredentialActivity();
+            final boolean isInBackground = Utils.isSystemAppOrInBackground(mActivityTaskManager,
+                    mContext, clientPackage,
+                    clientClassNameIfItIsConfirmDeviceCredentialActivity);
+            if (isInBackground) {
+                Log.w(TAG, "Evicting client due to top activity is not : " + clientPackage);
             }
+            return isInBackground;
         }
-        return true;
+        return false;
     }
 
     private void cancelIfOwnerIsNotInForeground() {
@@ -320,14 +320,7 @@ public class AuthController implements
                     this, mUdfpsLogger.get()));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
-
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
-        if (mSidefpsProps != null) {
-            if (!SideFpsControllerRefactor.isEnabled()) {
-                mSideFpsController = mSidefpsControllerFactory.get();
-            }
-        }
-
         mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
             @Override
             public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
@@ -571,6 +564,11 @@ public class AuthController implements
                         credentialAttestation);
                 break;
 
+            case AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS:
+                sendResultAndCleanUp(
+                        BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+                        credentialAttestation);
+                break;
             default:
                 Log.e(TAG, "Unhandled reason: " + reason);
                 break;
@@ -579,7 +577,7 @@ public class AuthController implements
 
     @Override
     public void handleShowGlobalActionsMenu() {
-        closeDioalog("PowerMenu shown");
+        closeDialog("PowerMenu shown");
     }
 
     /**
@@ -733,15 +731,12 @@ public class AuthController implements
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SideFpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull Lazy<UdfpsLogger> udfpsLogger,
             @NonNull Lazy<LogContextInteractor> logContextInteractor,
-            @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull Provider<PromptViewModel> promptViewModelProvider,
@@ -749,7 +744,9 @@ public class AuthController implements
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
             @NonNull UdfpsUtils udfpsUtils,
-            @NonNull VibratorHelper vibratorHelper) {
+            @NonNull VibratorHelper vibratorHelper,
+            Lazy<ViewCapture> daggerLazyViewCapture,
+            @NonNull MSDLPlayer msdlPlayer) {
         mContext = context;
         mExecution = execution;
         mUserManager = userManager;
@@ -761,7 +758,6 @@ public class AuthController implements
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
-        mSidefpsControllerFactory = sidefpsControllerFactory;
         mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
@@ -772,10 +768,10 @@ public class AuthController implements
         mUdfpsUtils = udfpsUtils;
         mApplicationCoroutineScope = applicationCoroutineScope;
         mVibratorHelper = vibratorHelper;
+        mMSDLPlayer = msdlPlayer;
 
         mLogContextInteractor = logContextInteractor;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
-        mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
@@ -790,7 +786,6 @@ public class AuthController implements
                 });
 
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mPanelInteractionDetector = panelInteractionDetector;
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -801,6 +796,8 @@ public class AuthController implements
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED_UNAUDITED);
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+
+        mLazyViewCapture = toKotlinLazy(daggerLazyViewCapture);
     }
 
     // TODO(b/229290039): UDFPS controller should manage its dimensions on its own. Remove this.
@@ -1003,6 +1000,16 @@ public class AuthController implements
      */
     public boolean isUdfpsSupported() {
         return getUdfpsProps() != null && !getUdfpsProps().isEmpty();
+    }
+
+    /**
+     * @return true if ultrasonic udfps HW is supported on this device. Can return true even if
+     * the user has not enrolled udfps. This may be false if called before
+     * onAllAuthenticatorsRegistered.
+     */
+    public boolean isUltrasonicUdfpsSupported() {
+        return getUdfpsProps() != null && !getUdfpsProps().isEmpty() && getUdfpsProps()
+                .get(0).isUltrasonicUdfps();
     }
 
     /**
@@ -1230,7 +1237,6 @@ public class AuthController implements
                 operationId,
                 requestId,
                 mWakefulnessLifecycle,
-                mPanelInteractionDetector,
                 mUserManager,
                 mLockPatternUtils,
                 viewModel);
@@ -1260,7 +1266,9 @@ public class AuthController implements
         }
         mCurrentDialog = newDialog;
 
-        if (!promptInfo.isAllowBackgroundAuthentication() && !isOwnerInForeground()) {
+        // TODO(b/353597496): We should check whether |allowBackgroundAuthentication| should be
+        //  removed.
+        if (!promptInfo.isAllowBackgroundAuthentication() && isOwnerInBackground()) {
             cancelIfOwnerIsNotInForeground();
         } else {
             mCurrentDialog.show(mWindowManager);
@@ -1305,7 +1313,6 @@ public class AuthController implements
             PromptInfo promptInfo, boolean requireConfirmation, int userId, int[] sensorIds,
             String opPackageName, boolean skipIntro, long operationId, long requestId,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
-            @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull PromptViewModel viewModel) {
@@ -1322,9 +1329,10 @@ public class AuthController implements
         config.mSensorIds = sensorIds;
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
-                wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
-                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                wakefulnessLifecycle, userManager, lockPatternUtils,
+                mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
+                mCredentialViewModelProvider, bgExecutor, mVibratorHelper,
+                mLazyViewCapture, mMSDLPlayer);
     }
 
     @Override

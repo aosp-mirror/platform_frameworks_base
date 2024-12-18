@@ -18,7 +18,19 @@ package com.android.systemui.statusbar.notification.icon
 
 import android.content.pm.launcherApps
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.statusbar.notification.collection.notifcollection.commonNotifCollection
 
 val Kosmos.iconManager by
-    Kosmos.Fixture { IconManager(commonNotifCollection, launcherApps, iconBuilder) }
+    Kosmos.Fixture {
+        IconManager(
+            commonNotifCollection,
+            launcherApps,
+            iconBuilder,
+            applicationCoroutineScope,
+            backgroundCoroutineContext,
+            mainCoroutineContext,
+        )
+    }

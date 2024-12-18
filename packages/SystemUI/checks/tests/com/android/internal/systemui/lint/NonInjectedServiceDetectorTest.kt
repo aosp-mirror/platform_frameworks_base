@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = NonInjectedServiceDetector()
@@ -44,7 +43,7 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
@@ -76,7 +75,7 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
@@ -109,7 +108,7 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
@@ -134,7 +133,7 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
                         """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedServiceDetector.ISSUE)
             .run()
@@ -147,6 +146,4 @@ class NonInjectedServiceDetectorTest : SystemUILintDetectorTest() {
                 """
             )
     }
-
-    private val stubs = androidStubs
 }

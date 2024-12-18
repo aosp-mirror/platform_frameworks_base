@@ -21,12 +21,14 @@ import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -35,14 +37,16 @@ import static org.mockito.Mockito.when;
 import android.app.StatusBarManager;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -71,11 +75,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class DozeTriggersTest extends SysuiTestCase {
 
@@ -85,6 +90,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     private DozeHost mHost;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+    private final AmbientDisplayConfiguration mConfig = DozeConfigurationUtil.createMockConfig();
     @Mock
     private DockManager mDockManager;
     @Mock
@@ -105,6 +111,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
     private SessionTracker mSessionTracker;
+    @Captor
+    private ArgumentCaptor<DozeHost.Callback> mHostCallbackCaptor;
 
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
@@ -116,7 +124,7 @@ public class DozeTriggersTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         setupDozeTriggers(
-                DozeConfigurationUtil.createMockConfig(),
+                mConfig,
                 DozeConfigurationUtil.createMockParameters());
     }
 
@@ -174,10 +182,69 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnNotification_startsPulseRequest() {
+        // GIVEN device is dozing
+        Runnable pulseSuppressListener = mock(Runnable.class);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        doAnswer(invocation -> null).when(mHost).addCallback(mHostCallbackCaptor.capture());
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        clearInvocations(mMachine);
+
+        // WHEN receive an alerting notification
+        mHostCallbackCaptor.getValue().onNotificationAlerted(pulseSuppressListener);
+
+        // THEN entering to pulse
+        verify(mHost).setPulsePending(true);
+        // AND suppress listeners are NOT notified
+        verify(pulseSuppressListener, never()).run();
+    }
+
+    @Test
+    public void testOnNotification_cannotPulse_notificationSuppressed() {
+        // GIVEN device is dozing
+        Runnable pulseSuppressListener = mock(Runnable.class);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
+        doAnswer(invocation -> null).when(mHost).addCallback(mHostCallbackCaptor.capture());
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        clearInvocations(mMachine);
+        // AND pulsing is disabled
+        when(mConfig.pulseOnNotificationEnabled(anyInt())).thenReturn(false);
+
+        // WHEN receive an alerting notification
+        mHostCallbackCaptor.getValue().onNotificationAlerted(pulseSuppressListener);
+
+        // THEN NOT starting pulse
+        verify(mHost, never()).setPulsePending(anyBoolean());
+        // AND the notification is suppressed
+        verify(pulseSuppressListener).run();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NOTIFICATION_PULSING_FIX)
+    public void testOnNotification_alreadyPulsing_notificationNotSuppressed() {
+        // GIVEN device is pulsing
+        Runnable pulseSuppressListener = mock(Runnable.class);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_PULSING);
+        doAnswer(invocation -> null).when(mHost).addCallback(mHostCallbackCaptor.capture());
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE_PULSING);
+        clearInvocations(mMachine);
+
+        // WHEN receive an alerting notification
+        mHostCallbackCaptor.getValue().onNotificationAlerted(pulseSuppressListener);
+
+        // THEN entering to pulse
+        verify(mHost, never()).setPulsePending(anyBoolean());
+        // AND suppress listeners are NOT notified
+        verify(pulseSuppressListener, never()).run();
+    }
+
+    @Test
     public void testOnNotification_noPulseIfPulseIsNotPendingAnymore() {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-        ArgumentCaptor<DozeHost.Callback> captor = ArgumentCaptor.forClass(DozeHost.Callback.class);
-        doAnswer(invocation -> null).when(mHost).addCallback(captor.capture());
+        doAnswer(invocation -> null).when(mHost).addCallback(mHostCallbackCaptor.capture());
 
         mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
@@ -189,7 +256,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         // WHEN prox check returns FAR
         mProximitySensor.setLastEvent(new ThresholdSensorEvent(false, 2));
-        captor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
+        mHostCallbackCaptor.getValue().onNotificationAlerted(null /* pulseSuppressedListener */);
         mProximitySensor.alertListeners();
 
         // THEN don't request pulse because the pending pulse was abandoned early

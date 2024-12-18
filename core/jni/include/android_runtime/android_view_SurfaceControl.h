@@ -28,6 +28,9 @@ namespace android {
 extern SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(
         JNIEnv* env, jobject surfaceControlObj);
 
+extern jobject android_view_SurfaceControl_getJavaSurfaceControl(
+        JNIEnv* env, const SurfaceControl& surfaceControl);
+
 /* Gets the underlying native SurfaceControl for a java SurfaceControl. */
 extern SurfaceComposerClient::Transaction*
 android_view_SurfaceTransaction_getNativeSurfaceTransaction(JNIEnv* env,

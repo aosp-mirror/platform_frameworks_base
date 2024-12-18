@@ -50,7 +50,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.widget.LinearLayoutManager;
 import com.android.internal.widget.RecyclerView;
 import com.android.wm.shell.R;
@@ -491,30 +491,33 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == ACTION_UP) {
-
             if (event.getKeyCode() == KEYCODE_BACK) {
                 mListener.onExitCurrentMenuMode();
                 return true;
             }
-
-            if (mCurrentMenuMode == MODE_MOVE_MENU && !mA11yManager.isEnabled()) {
-                switch (event.getKeyCode()) {
-                    case KEYCODE_DPAD_UP:
-                    case KEYCODE_DPAD_DOWN:
-                    case KEYCODE_DPAD_LEFT:
-                    case KEYCODE_DPAD_RIGHT:
+            switch (event.getKeyCode()) {
+                case KEYCODE_DPAD_UP:
+                case KEYCODE_DPAD_DOWN:
+                case KEYCODE_DPAD_LEFT:
+                case KEYCODE_DPAD_RIGHT:
+                    mListener.onUserInteracting();
+                    if (mCurrentMenuMode == MODE_MOVE_MENU && !mA11yManager.isEnabled()) {
                         mListener.onPipMovement(event.getKeyCode());
                         return true;
-                    case KEYCODE_ENTER:
-                    case KEYCODE_DPAD_CENTER:
+                    }
+                    break;
+                case KEYCODE_ENTER:
+                case KEYCODE_DPAD_CENTER:
+                    mListener.onUserInteracting();
+                    if (mCurrentMenuMode == MODE_MOVE_MENU && !mA11yManager.isEnabled()) {
                         mListener.onExitCurrentMenuMode();
                         return true;
-                    default:
-                        // Dispatch key event as normal below
-                }
+                    }
+                    break;
+                default:
+                    // Dispatch key event as normal below
             }
         }
-
         return super.dispatchKeyEvent(event);
     }
 
@@ -635,6 +638,11 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     }
 
     interface Listener {
+
+        /**
+         * Called when any button (that affects the menu) on current menu mode was pressed.
+         */
+        void onUserInteracting();
 
         /**
          * Called when a button for exiting the current menu mode was pressed.

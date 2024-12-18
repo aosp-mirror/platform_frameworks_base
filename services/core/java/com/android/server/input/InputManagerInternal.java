@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
@@ -84,29 +85,6 @@ public abstract class InputManagerInternal {
             @NonNull IBinder toChannelToken);
 
     /**
-     * Sets the display id that the MouseCursorController will be forced to target. Pass
-     * {@link android.view.Display#INVALID_DISPLAY} to clear the override.
-     *
-     * Note: This method generally blocks until the pointer display override has propagated.
-     * When setting a new override, the caller should ensure that an input device that can control
-     * the mouse pointer is connected. If a new override is set when no such input device is
-     * connected, the caller may be blocked for an arbitrary period of time.
-     *
-     * @return true if the pointer displayId was set successfully, or false if it fails.
-     *
-     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
-     */
-    public abstract boolean setVirtualMousePointerDisplayId(int pointerDisplayId);
-
-    /**
-     * Gets the display id that the MouseCursorController is being forced to target. Returns
-     * {@link android.view.Display#INVALID_DISPLAY} if there is no override
-     *
-     * @deprecated TODO(b/293587049): Not needed - remove after Pointer Icon Refactor is complete.
-     */
-    public abstract int getVirtualMousePointerDisplayId();
-
-    /**
      * Gets the current position of the mouse cursor.
      *
      * Returns NaN-s as the coordinates if the cursor is not available.
@@ -140,6 +118,11 @@ public abstract class InputManagerInternal {
      * {@link #registerLidSwitchCallback(LidSwitchCallback)}.
      */
     public abstract void unregisterLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
+
+    /**
+     * Notify the input manager that an IME connection is becoming active or is no longer active.
+     */
+    public abstract void notifyInputMethodConnectionActive(boolean connectionIsActive);
 
     /** Callback interface for notifications relating to the lid switch. */
     public interface LidSwitchCallback {
@@ -236,4 +219,44 @@ public abstract class InputManagerInternal {
      * display, external peripherals, fingerprint sensor, etc.
      */
     public abstract void notifyUserActivity();
+
+    /**
+     * Get the device ID of the {@link InputDevice} that used most recently.
+     *
+     * @return the last used input device ID, or
+     *     {@link android.os.IInputConstants#INVALID_INPUT_DEVICE_ID} if no device has been used
+     *     since boot.
+     */
+    public abstract int getLastUsedInputDeviceId();
+
+    /**
+     * Notify key gesture was completed by the user.
+     *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
+            @KeyGestureEvent.KeyGestureType int event);
+
+    /**
+     * Notify that a key gesture was detected by another system component, and it should be handled
+     * appropriately by KeyGestureController.
+     *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
+            int modifierState, @KeyGestureEvent.KeyGestureType int event);
 }

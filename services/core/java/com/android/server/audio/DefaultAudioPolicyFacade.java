@@ -16,100 +16,68 @@
 
 package com.android.server.audio;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.IAudioPolicyService;
-import android.media.permission.ClearCallingIdentityContext;
-import android.media.permission.SafeCloseable;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
+import com.android.media.permission.INativePermissionController;
+
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 /**
- * Default implementation of a facade to IAudioPolicyManager which fulfills AudioService
- * dependencies. This forwards calls as-is to IAudioPolicyManager.
- * Public methods throw IllegalStateException if AudioPolicy is not initialized/available
+ * Default implementation of a facade to IAudioPolicyService which fulfills AudioService
+ * dependencies. This forwards calls as-is to IAudioPolicyService.
  */
-public class DefaultAudioPolicyFacade implements AudioPolicyFacade, IBinder.DeathRecipient {
+public class DefaultAudioPolicyFacade implements AudioPolicyFacade {
 
-    private static final String TAG = "DefaultAudioPolicyFacade";
     private static final String AUDIO_POLICY_SERVICE_NAME = "media.audio_policy";
 
-    private final Object mServiceLock = new Object();
-    @GuardedBy("mServiceLock")
-    private IAudioPolicyService mAudioPolicy;
+    private final ServiceHolder<IAudioPolicyService> mServiceHolder;
 
-    public DefaultAudioPolicyFacade() {
-        try {
-            getAudioPolicyOrInit();
-        } catch (IllegalStateException e) {
-            // Log and suppress this exception, we may be able to connect later
-            Log.e(TAG, "Failed to initialize APM connection", e);
-        }
+    /**
+     * @param e - Executor for service start tasks
+     */
+    public DefaultAudioPolicyFacade(Executor e) {
+        mServiceHolder =
+                new ServiceHolder(
+                        AUDIO_POLICY_SERVICE_NAME,
+                        (Function<IBinder, IAudioPolicyService>)
+                                IAudioPolicyService.Stub::asInterface,
+                        e);
+        mServiceHolder.registerOnStartTask(i -> Binder.allowBlocking(i.asBinder()));
     }
 
     @Override
     public boolean isHotwordStreamSupported(boolean lookbackAudio) {
-        IAudioPolicyService ap = getAudioPolicyOrInit();
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+        IAudioPolicyService ap = mServiceHolder.waitForService();
+        try {
             return ap.isHotwordStreamSupported(lookbackAudio);
         } catch (RemoteException e) {
-            resetServiceConnection(ap.asBinder());
-            throw new IllegalStateException(e);
+            mServiceHolder.attemptClear(ap.asBinder());
+            throw new IllegalStateException();
         }
     }
 
     @Override
-    public void binderDied() {
-        Log.wtf(TAG, "Unexpected binderDied without IBinder object");
+    public @Nullable INativePermissionController getPermissionController() {
+        IAudioPolicyService ap = mServiceHolder.checkService();
+        if (ap == null) return null;
+        try {
+            var res = Objects.requireNonNull(ap.getPermissionController());
+            Binder.allowBlocking(res.asBinder());
+            return res;
+        } catch (RemoteException e) {
+            mServiceHolder.attemptClear(ap.asBinder());
+            return null;
+        }
     }
 
     @Override
-    public void binderDied(@NonNull IBinder who) {
-        resetServiceConnection(who);
-    }
-
-    private void resetServiceConnection(@Nullable IBinder deadAudioPolicy) {
-        synchronized (mServiceLock) {
-            if (mAudioPolicy != null && mAudioPolicy.asBinder().equals(deadAudioPolicy)) {
-                mAudioPolicy.asBinder().unlinkToDeath(this, 0);
-                mAudioPolicy = null;
-            }
-        }
-    }
-
-    private @Nullable IAudioPolicyService getAudioPolicy() {
-        synchronized (mServiceLock) {
-            return mAudioPolicy;
-        }
-    }
-
-    /*
-     * Does not block.
-     * @throws IllegalStateException for any failed connection
-     */
-    private @NonNull IAudioPolicyService getAudioPolicyOrInit() {
-        synchronized (mServiceLock) {
-            if (mAudioPolicy != null) {
-                return mAudioPolicy;
-            }
-            // Do not block while attempting to connect to APM. Defer to caller.
-            IAudioPolicyService ap = IAudioPolicyService.Stub.asInterface(
-                    ServiceManager.checkService(AUDIO_POLICY_SERVICE_NAME));
-            if (ap == null) {
-                throw new IllegalStateException(TAG + ": Unable to connect to AudioPolicy");
-            }
-            try {
-                ap.asBinder().linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                throw new IllegalStateException(
-                        TAG + ": Unable to link deathListener to AudioPolicy", e);
-            }
-            mAudioPolicy = ap;
-            return mAudioPolicy;
-        }
+    public void registerOnStartTask(Runnable task) {
+        mServiceHolder.registerOnStartTask(unused -> task.run());
     }
 }

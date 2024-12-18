@@ -140,6 +140,8 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.system_neutral2_800)
                 .setDarkThemeBadgeColors(
                         com.android.internal.R.color.system_neutral2_900)
+                .setAccessibilityString(com.android.internal
+                        .R.string.accessibility_label_clone_profile)
                 .setDefaultRestrictions(null)
                 .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
                 .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
@@ -195,6 +197,8 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
+                .setAccessibilityString(com.android.internal
+                        .R.string.accessibility_label_managed_profile)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
                 .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
@@ -292,6 +296,7 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_PRIVATE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
+                .setEnabled(UserManager.isPrivateProfileEnabled() ? 1 : 0)
                 .setLabels(R.string.profile_label_private)
                 .setIconBadge(com.android.internal.R.drawable.ic_private_profile_icon_badge)
                 .setBadgePlain(com.android.internal.R.drawable.ic_private_profile_badge)
@@ -305,7 +310,9 @@ public final class UserTypeFactory {
                         R.color.black)
                 .setDarkThemeBadgeColors(
                         R.color.white)
-                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setAccessibilityString(com.android.internal
+                        .R.string.accessibility_label_private_profile)
+                .setDefaultRestrictions(getDefaultPrivateProfileRestrictions())
                 .setDefaultCrossProfileIntentFilters(getDefaultPrivateCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
@@ -326,7 +333,8 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
                         .setProfileApiVisibility(
                                 UserProperties.PROFILE_API_VISIBILITY_HIDDEN)
-                        .setItemsRestrictedOnHomeScreen(true));
+                        .setItemsRestrictedOnHomeScreen(true)
+                        .setUpdateCrossProfileIntentFiltersOnOTA(true));
     }
 
     /**
@@ -425,6 +433,13 @@ public final class UserTypeFactory {
     private static Bundle getDefaultProfileRestrictions() {
         final Bundle restrictions = new Bundle();
         restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
+        return restrictions;
+    }
+
+    @VisibleForTesting
+    static Bundle getDefaultPrivateProfileRestrictions() {
+        final Bundle restrictions = getDefaultProfileRestrictions();
+        restrictions.putBoolean(UserManager.DISALLOW_BLUETOOTH_SHARING, true);
         return restrictions;
     }
 

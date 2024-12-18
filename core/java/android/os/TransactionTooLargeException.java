@@ -47,7 +47,7 @@ import android.os.RemoteException;
  * If possible, try to break up big requests into smaller pieces.
  * </p><p>
  * If you are implementing a service, it may help to impose size or complexity
- * contraints on the queries that clients can perform.  For example, if the result set
+ * constraints on the queries that clients can perform.  For example, if the result set
  * could become large, then don't allow the client to request more than a few records
  * at a time.  Alternately, instead of returning all of the available data all at once,
  * return the essential information first and make the client ask for additional information

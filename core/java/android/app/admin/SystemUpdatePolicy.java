@@ -78,6 +78,11 @@ import java.util.stream.Collectors;
  *
  * <h3>Developer guide</h3>
  * To learn more, read <a href="{@docRoot}work/dpc/system-updates">Manage system updates</a>.
+ * <p><strong>Note:</strong> <a href="https://source.android.com/docs/core/ota/modular-system">
+ * Google Play system updates</a> (also called Mainline updates) are automatically downloaded
+ * but require a device reboot to be installed. Refer to the mainline section in
+ * <a href="{@docRoot}work/dpc/system-updates#mainline">Manage system
+ * updates</a> for further details.</p>
  *
  * @see DevicePolicyManager#setSystemUpdatePolicy
  * @see DevicePolicyManager#getSystemUpdatePolicy

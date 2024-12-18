@@ -18,17 +18,19 @@ package android.util;
 
 import static org.junit.Assert.assertEquals;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.TimeZone;
 import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
@@ -41,6 +43,22 @@ public class TimeUtilsTest {
     public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
     public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
     public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+
+    private TimeZone mOrigTimezone;
+
+    @Before
+    public void setUp() {
+        mOrigTimezone = TimeZone.getDefault();
+
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
+
+    @After
+    public void tearDown() {
+        if (mOrigTimezone != null) {
+            TimeZone.setDefault(mOrigTimezone);
+        }
+    }
 
     @Test
     public void testFormatTime() {
@@ -85,32 +103,29 @@ public class TimeUtilsTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testDumpTime() {
-        assertEquals("2023-01-01 00:00:00.000", runWithPrintWriter((pw) -> {
+        assertEquals("2023-01-01 07:00:00.000", runWithPrintWriter((pw) -> {
             TimeUtils.dumpTime(pw, 1672556400000L);
         }));
-        assertEquals("2023-01-01 00:00:00.000 (now)", runWithPrintWriter((pw) -> {
+        assertEquals("2023-01-01 07:00:00.000 (now)", runWithPrintWriter((pw) -> {
             TimeUtils.dumpTimeWithDelta(pw, 1672556400000L, 1672556400000L);
         }));
-        assertEquals("2023-01-01 00:00:00.000 (-10ms)", runWithPrintWriter((pw) -> {
+        assertEquals("2023-01-01 07:00:00.000 (-10ms)", runWithPrintWriter((pw) -> {
             TimeUtils.dumpTimeWithDelta(pw, 1672556400000L, 1672556400000L + 10);
         }));
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testFormatForLogging() {
         assertEquals("unknown", TimeUtils.formatForLogging(0));
         assertEquals("unknown", TimeUtils.formatForLogging(-1));
         assertEquals("unknown", TimeUtils.formatForLogging(Long.MIN_VALUE));
-        assertEquals("2023-01-01 00:00:00", TimeUtils.formatForLogging(1672556400000L));
+        assertEquals("2023-01-01 07:00:00", TimeUtils.formatForLogging(1672556400000L));
     }
 
     @Test
-    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testLogTimeOfDay() {
-        assertEquals("01-01 00:00:00.000", TimeUtils.logTimeOfDay(1672556400000L));
+        assertEquals("01-01 07:00:00.000", TimeUtils.logTimeOfDay(1672556400000L));
     }
 
     public static String runWithPrintWriter(Consumer<PrintWriter> consumer) {

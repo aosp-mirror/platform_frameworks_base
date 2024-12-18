@@ -20,6 +20,7 @@ import android.os.Handler
 import android.util.Log
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.core.util.Consumer
 import com.android.systemui.unfold.compat.INNER_SCREEN_SMALLEST_SCREEN_WIDTH_THRESHOLD_DP
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
@@ -127,7 +128,11 @@ constructor(
 
         val currentDirection =
             if (angle < lastHingeAngle) FOLD_UPDATE_START_CLOSING else FOLD_UPDATE_START_OPENING
-        if (isTransitionInProgress && currentDirection != lastFoldUpdate) {
+        val changedDirectionWhileInTransition =
+            isTransitionInProgress && currentDirection != lastFoldUpdate
+        val unfoldedPastThresholdSinceLastTransition =
+            angle - lastHingeAngleBeforeTransition > HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES
+        if (changedDirectionWhileInTransition || unfoldedPastThresholdSinceLastTransition) {
             lastHingeAngleBeforeTransition = lastHingeAngle
         }
 
@@ -152,7 +157,7 @@ constructor(
                 isOnLargeScreen // Avoids sending closing event when on small screen.
         // Start event is sent regardless due to hall sensor.
         ) {
-            notifyFoldUpdate(transitionUpdate, lastHingeAngle)
+            notifyFoldUpdate(transitionUpdate, angle)
         }
 
         if (isTransitionInProgress) {
@@ -215,6 +220,7 @@ constructor(
     }
 
     private inner class FoldRotationListener : RotationChangeProvider.RotationListener {
+        @WorkerThread
         override fun onRotationChanged(newRotation: Int) {
             assertInProgressThread()
             if (isTransitionInProgress) cancelAnimation()

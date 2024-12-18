@@ -23,6 +23,9 @@ import android.graphics.Rect;
  * Callback called when receiving drag-resize or drag-move related input events.
  */
 public interface DragPositioningCallback {
+    /**
+     * Indicates the direction of resizing. May be combined together to indicate a diagonal drag.
+     */
     @IntDef(flag = true, value = {
             CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM
     })

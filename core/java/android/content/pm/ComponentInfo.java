@@ -284,7 +284,7 @@ public class ComponentInfo extends PackageItemInfo {
     /**
      * @hide
      */
-    @Override protected ApplicationInfo getApplicationInfo() {
+    @Override public ApplicationInfo getApplicationInfo() {
         return applicationInfo;
     }
 }

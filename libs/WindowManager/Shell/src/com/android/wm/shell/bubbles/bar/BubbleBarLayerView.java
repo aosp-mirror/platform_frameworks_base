@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
 
 import android.annotation.Nullable;
@@ -33,7 +33,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import com.android.wm.shell.R;
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -42,7 +43,10 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
-import com.android.wm.shell.common.bubbles.DismissView;
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
+import com.android.wm.shell.shared.bubbles.BaseBubblePinController;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.DismissView;
 
 import kotlin.Unit;
 
@@ -68,6 +72,7 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
+    private final BubbleExpandedViewPinController mBubbleExpandedViewPinController;
 
     @Nullable
     private BubbleViewProvider mExpandedBubble;
@@ -112,7 +117,22 @@ public class BubbleBarLayerView extends FrameLayout
 
         setUpDismissView();
 
-        setOnClickListener(view -> hideMenuOrCollapse());
+        mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
+                context, this, mPositioner);
+        mBubbleExpandedViewPinController.setListener(
+                new BaseBubblePinController.LocationChangeListener() {
+                    @Override
+                    public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
+                        mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
+                    }
+
+                    @Override
+                    public void onRelease(@NonNull BubbleBarLocation location) {
+                        mBubbleController.setBubbleBarLocation(location);
+                    }
+                });
+
+        setOnClickListener(view -> hideModalOrCollapse());
     }
 
     @Override
@@ -155,16 +175,19 @@ public class BubbleBarLayerView extends FrameLayout
         return mIsExpanded;
     }
 
-    // TODO(b/313661121) - when dragging is implemented, check user setting first
-    /** Whether the expanded view is positioned on the left or right side of the screen. */
-    public boolean isOnLeft() {
-        return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
+    /** Return whether the expanded view is being dragged */
+    public boolean isExpandedViewDragged() {
+        return mDragController != null && mDragController.isDragged();
     }
 
     /** Shows the expanded view of the provided bubble. */
     public void showExpandedView(BubbleViewProvider b) {
         BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();
         if (expandedView == null) {
+            return;
+        }
+        if (mExpandedBubble != null && mIsExpanded && b.getKey().equals(mExpandedBubble.getKey())) {
+            // Already showing this bubble, skip animating
             return;
         }
         if (mExpandedBubble != null && !b.getKey().equals(mExpandedBubble.getKey())) {
@@ -203,19 +226,22 @@ public class BubbleBarLayerView extends FrameLayout
 
                 @Override
                 public void onBackPressed() {
-                    hideMenuOrCollapse();
+                    hideModalOrCollapse();
                 }
             });
 
+            DragListener dragListener = inDismiss -> {
+                if (inDismiss && mExpandedBubble != null) {
+                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                }
+            };
             mDragController = new BubbleBarExpandedViewDragController(
                     mExpandedView,
                     mDismissView,
                     mAnimationHelper,
-                    () -> {
-                        mBubbleController.dismissBubble(mExpandedBubble.getKey(),
-                                DISMISS_USER_GESTURE);
-                        return Unit.INSTANCE;
-                    });
+                    mPositioner,
+                    mBubbleExpandedViewPinController,
+                    dragListener);
 
             addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
         }
@@ -324,40 +350,40 @@ public class BubbleBarLayerView extends FrameLayout
         }
         mDismissView = new DismissView(getContext());
         DismissViewUtils.setup(mDismissView);
-        int elevation = getResources().getDimensionPixelSize(R.dimen.bubble_elevation);
-
         addView(mDismissView);
-        mDismissView.setElevation(elevation);
     }
 
-    /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
-    private void hideMenuOrCollapse() {
+    /** Hides the current modal education/menu view, IME or collapses the expanded view */
+    private void hideModalOrCollapse() {
         if (mEducationViewController.isEducationVisible()) {
             mEducationViewController.hideEducation(/* animated = */ true);
-        } else if (isExpanded() && mExpandedView != null) {
-            mExpandedView.hideMenuOrCollapse();
-        } else {
-            mBubbleController.collapseStack();
+            return;
         }
+        if (isExpanded() && mExpandedView != null) {
+            boolean menuHidden = mExpandedView.hideMenuIfVisible();
+            if (menuHidden) {
+                return;
+            }
+            boolean imeHidden = mExpandedView.hideImeIfVisible();
+            if (imeHidden) {
+                return;
+            }
+        }
+        mBubbleController.collapseStack();
     }
 
     /** Updates the expanded view size and position. */
-    private void updateExpandedView() {
-        if (mExpandedView == null) return;
+    public void updateExpandedView() {
+        if (mExpandedView == null || mExpandedBubble == null) return;
         boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
-        final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
+        mPositioner.getBubbleBarExpandedViewBounds(mPositioner.isBubbleBarOnLeft(),
+                isOverflowExpanded, mTempRect);
         FrameLayout.LayoutParams lp = (LayoutParams) mExpandedView.getLayoutParams();
-        lp.width = width;
-        lp.height = height;
+        lp.width = mTempRect.width();
+        lp.height = mTempRect.height();
         mExpandedView.setLayoutParams(lp);
-        if (isOnLeft()) {
-            mExpandedView.setX(mPositioner.getInsets().left + padding);
-        } else {
-            mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);
-        }
-        mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
+        mExpandedView.setX(mTempRect.left);
+        mExpandedView.setY(mTempRect.top);
         mExpandedView.updateLocation();
     }
 
@@ -386,4 +412,5 @@ public class BubbleBarLayerView extends FrameLayout
             outRegion.op(mTempRect, Region.Op.UNION);
         }
     }
+
 }

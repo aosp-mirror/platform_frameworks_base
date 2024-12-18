@@ -21,13 +21,24 @@ import androidx.compose.ui.unit.dp
 
 object SettingsDimension {
     val paddingTiny = 2.dp
-    val paddingSmall = 4.dp
+    val paddingExtraSmall = 4.dp
+    val paddingSmall = if (isSpaExpressiveEnabled) 8.dp else 4.dp
+    val paddingExtraSmall5 = 10.dp
+    val paddingLarge = 16.dp
+    val paddingExtraLarge = 24.dp
+
+    val spinnerHorizontalPadding = paddingExtraLarge
+    val spinnerVerticalPadding = paddingLarge
+
+    val actionIconWidth = 32.dp
+    val actionIconHeight = 40.dp
+    val actionIconPadding = 4.dp
 
     val itemIconSize = 24.dp
     val itemIconContainerSize = 72.dp
-    val itemPaddingStart = 24.dp
-    val itemPaddingEnd = 16.dp
-    val itemPaddingVertical = 16.dp
+    val itemPaddingStart = paddingExtraLarge
+    val itemPaddingEnd = paddingLarge
+    val itemPaddingVertical = paddingLarge
     val itemPadding = PaddingValues(
         start = itemPaddingStart,
         top = itemPaddingVertical,
@@ -47,6 +58,7 @@ object SettingsDimension {
     val itemDividerHeight = 32.dp
 
     val iconLarge = 48.dp
+    val introIconSize = 40.dp
 
     /** The size when app icon is displayed in list. */
     val appIconItemSize = 32.dp
@@ -70,6 +82,6 @@ object SettingsDimension {
     /** The sizes info of illustration widget. */
     val illustrationMaxWidth = 412.dp
     val illustrationMaxHeight = 300.dp
-    val illustrationPadding = 16.dp
+    val illustrationPadding = paddingLarge
     val illustrationCornerRadius = 28.dp
 }

@@ -33,6 +33,7 @@ public class WatchableImpl implements Watchable {
     /**
      * The list of observers.
      */
+    @GuardedBy("mObservers")
     protected final ArrayList<Watcher> mObservers = new ArrayList<>();
 
     /**
@@ -83,7 +84,9 @@ public class WatchableImpl implements Watchable {
      * @return The number of registered observers.
      */
     public int registeredObserverCount() {
-        return mObservers.size();
+        synchronized (mObservers) {
+            return mObservers.size();
+        }
     }
 
     /**

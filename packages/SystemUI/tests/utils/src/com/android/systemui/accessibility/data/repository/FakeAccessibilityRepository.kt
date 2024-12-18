@@ -25,8 +25,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class FakeAccessibilityRepository(
     override val isTouchExplorationEnabled: MutableStateFlow<Boolean>,
+    override val isEnabled: MutableStateFlow<Boolean>,
 ) : AccessibilityRepository {
-    @Inject constructor() : this(MutableStateFlow(false))
+    @Inject constructor() : this(MutableStateFlow(false), MutableStateFlow(false))
 }
 
 @Module

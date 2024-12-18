@@ -20,8 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -80,15 +82,23 @@ public class FingerprintInternalEnumerateClientTest {
 
     private FingerprintInternalEnumerateClient mClient;
 
+    private boolean mNotificationSent;
+
     @Before
     public void setUp() {
         when(mAidlSession.getSession()).thenReturn(mSession);
 
         List<Fingerprint> enrolled = new ArrayList<>();
         enrolled.add(new Fingerprint("one", 1, 1));
-        mClient = new FingerprintInternalEnumerateClient(mContext, () -> mAidlSession, mToken,
+        mClient = spy(new FingerprintInternalEnumerateClient(mContext, () -> mAidlSession, mToken,
                 USER_ID, TAG, enrolled, mBiometricUtils, SENSOR_ID, mBiometricLogger,
-                mBiometricContext);
+                mBiometricContext));
+
+        mNotificationSent = false;
+        doAnswer(invocation -> {
+            mNotificationSent = true;
+            return null;
+        }).when(mClient).sendDanglingNotification(anyList());
     }
 
     @Test
@@ -104,6 +114,7 @@ public class FingerprintInternalEnumerateClientTest {
         assertThat(mClient.getUnknownHALTemplates().stream()
                 .flatMap(x -> Stream.of(x.getBiometricId()))
                 .collect(Collectors.toList())).containsExactly(2, 3);
+        assertThat(mNotificationSent).isTrue();
         verify(mBiometricUtils).removeBiometricForUser(mContext, USER_ID, 1);
         verify(mCallback).onClientFinished(mClient, true);
     }
@@ -118,6 +129,7 @@ public class FingerprintInternalEnumerateClientTest {
 
         verify(mSession).enumerateEnrollments();
         assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(0);
+        assertThat(mNotificationSent).isFalse();
         verify(mBiometricUtils, never()).removeBiometricForUser(any(), anyInt(), anyInt());
         verify(mCallback).onClientFinished(mClient, true);
     }

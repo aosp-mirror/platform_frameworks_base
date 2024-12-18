@@ -16,8 +16,10 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -102,7 +104,7 @@ public class GrammaticalInflectionManager {
      * Sets the current grammatical gender for all privileged applications. The value will be
      * stored in an encrypted file at {@link android.os.Environment#getDataSystemCeDirectory(int)}
      *
-     * @param grammaticalGender the terms of address the user preferred in system.
+     * @param grammaticalGender the grammatical gender set by the user for the system.
      *
      * @see Configuration#getGrammaticalGender
      * @hide
@@ -121,18 +123,42 @@ public class GrammaticalInflectionManager {
     }
 
     /**
-     * Get the current grammatical gender of privileged application from the encrypted file.
+     * Allows privileged preloaded applications to get the system grammatical gender when set.
      *
-     * @return the value of grammatical gender
+     * @return The value of system grammatical gender only if the calling app has the
+     * permission, otherwise throwing an exception.
+     *
+     * @throws SecurityException If the caller does not have the required permission.
      *
      * @see Configuration#getGrammaticalGender
      */
+    @RequiresPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
     @FlaggedApi(Flags.FLAG_SYSTEM_TERMS_OF_ADDRESS_ENABLED)
     @Configuration.GrammaticalGender
     public int getSystemGrammaticalGender() {
         try {
             return mService.getSystemGrammaticalGender(mContext.getAttributionSource(),
                     mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Peeks the current grammatical gender of privileged application from the specific user's
+     * encrypted file.
+     *
+     * @return the value of system grammatical gender.
+     * @hide
+     * @see Configuration#getGrammaticalGender
+     */
+    @RequiresPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
+    @FlaggedApi(Flags.FLAG_SYSTEM_TERMS_OF_ADDRESS_ENABLED)
+    @Configuration.GrammaticalGender
+    public int peekSystemGrammaticalGenderByUserId(int userId) {
+        try {
+            return mService.peekSystemGrammaticalGenderByUserId(mContext.getAttributionSource(),
+                    userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

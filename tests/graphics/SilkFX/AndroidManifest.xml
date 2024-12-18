@@ -23,12 +23,13 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <application android:label="SilkFX"
-         android:theme="@android:style/Theme.Material">
+         android:theme="@style/Theme.UsefulDefault">
 
         <activity android:name=".Main"
              android:label="SilkFX Demos"
              android:banner="@drawable/background1"
-             android:exported="true">
+             android:exported="true"
+             android:theme="@style/Theme.UsefulDefault">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>

@@ -16,6 +16,7 @@
 
 package com.android.server.display.color;
 
+import android.annotation.IntRange;
 import android.app.ActivityTaskManager;
 import android.hardware.display.ColorDisplayManager;
 import android.opengl.Matrix;
@@ -111,9 +112,15 @@ public class DisplayTransformManager {
     /**
      * Lock used for synchronize access to {@link #mDaltonizerMode}.
      */
-    private final Object mDaltonizerModeLock = new Object();
+    @VisibleForTesting
+    final Object mDaltonizerModeLock = new Object();
+    @VisibleForTesting
     @GuardedBy("mDaltonizerModeLock")
-    private int mDaltonizerMode = -1;
+    int mDaltonizerMode = -1;
+
+    @VisibleForTesting
+    @GuardedBy("mDaltonizerModeLock")
+    int mDaltonizerLevel = -1;
 
     private static final IBinder sFlinger = ServiceManager.getService(SURFACE_FLINGER);
 
@@ -168,12 +175,15 @@ public class DisplayTransformManager {
      * various types of color blindness.
      *
      * @param mode the new Daltonization mode, or -1 to disable
+     * @param level the level of saturation for color correction [-1,10] inclusive. -1 for when
+     *              it is not set.
      */
-    public void setDaltonizerMode(int mode) {
+    public void setDaltonizerMode(int mode, @IntRange(from = -1, to = 10) int level) {
         synchronized (mDaltonizerModeLock) {
-            if (mDaltonizerMode != mode) {
+            if (mDaltonizerMode != mode || mDaltonizerLevel != level) {
                 mDaltonizerMode = mode;
-                applyDaltonizerMode(mode);
+                mDaltonizerLevel = level;
+                applyDaltonizerMode(mode, level);
             }
         }
     }
@@ -223,10 +233,11 @@ public class DisplayTransformManager {
     /**
      * Propagates the provided Daltonization mode to the SurfaceFlinger.
      */
-    private static void applyDaltonizerMode(int mode) {
+    private static void applyDaltonizerMode(int mode, int level) {
         final Parcel data = Parcel.obtain();
         data.writeInterfaceToken("android.ui.ISurfaceComposer");
         data.writeInt(mode);
+        data.writeInt(level);
         try {
             sFlinger.transact(SURFACE_FLINGER_TRANSACTION_DALTONIZER, data, null, 0);
         } catch (RemoteException ex) {

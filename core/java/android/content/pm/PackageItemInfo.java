@@ -511,7 +511,7 @@ public class PackageItemInfo {
      *
      * @hide
      */
-    protected ApplicationInfo getApplicationInfo() {
+    public ApplicationInfo getApplicationInfo() {
         return null;
     }
 

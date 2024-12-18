@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"ปิด"</item>
     <item msgid="5137565285664080143">"เปิด"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"ไม่พร้อมใช้งาน"</item>
+    <item msgid="3079622119444911877">"ปิด"</item>
+    <item msgid="3028994095749238254">"เปิด"</item>
+  </string-array>
 </resources>

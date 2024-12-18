@@ -376,7 +376,8 @@ interface ITelecomService {
      */
     void requestLogMark(in String message);
 
-    void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
+    void setTestPhoneAcctSuggestionComponent(String flattenedComponentName,
+        in UserHandle userHandle);
 
     void setTestDefaultCallScreeningApp(String packageName);
 
@@ -401,7 +402,7 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInSelfManagedCall
      */
     boolean isInSelfManagedCall(String packageName, in UserHandle userHandle,
-        String callingPackage, boolean detectForAllUsers);
+        String callingPackage);
 
     /**
      * @see TelecomServiceImpl#addCall

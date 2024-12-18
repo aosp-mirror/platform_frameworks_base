@@ -258,6 +258,7 @@ public class ExternalDisplayPolicyTest {
 
         when(mMockedLogicalDisplay.isEnabledLocked()).thenReturn(false);
         mExternalDisplayPolicy.handleExternalDisplayConnectedLocked(mMockedLogicalDisplay);
+        mHandler.flush();
         verify(mMockedInjector, never()).sendExternalDisplayEventLocked(any(), anyInt());
         verify(mMockedDisplayNotificationManager, times(2))
                 .onHighTemperatureExternalDisplayNotAllowed();
@@ -317,7 +318,8 @@ public class ExternalDisplayPolicyTest {
                 mDisplayEventCaptor.capture());
         assertThat(mLogicalDisplayCaptor.getValue()).isEqualTo(mMockedLogicalDisplay);
         assertThat(mDisplayEventCaptor.getValue()).isEqualTo(EVENT_DISPLAY_CONNECTED);
-        verify(mMockedLogicalDisplay).setEnabledLocked(false);
+        verify(mMockedLogicalDisplayMapper).setEnabledLocked(eq(mMockedLogicalDisplay),
+                eq(false));
         clearInvocations(mMockedLogicalDisplayMapper);
         clearInvocations(mMockedLogicalDisplay);
     }

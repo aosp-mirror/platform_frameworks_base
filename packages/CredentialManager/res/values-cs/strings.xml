@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Ačkoliv směřujeme k budoucnosti bez hesel, vedle přístupových klíčů budou stále k dispozici i hesla."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Určete, kam ukládat <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vyberte správce hesel k uložení svých údajů, abyste se příště mohli přihlásit rychleji"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vytvořit přístupový klíč k přihlašování do aplikace <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Uložit heslo k přihlašování do aplikace <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Uložit přihlašovací údaje pro aplikaci <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Vytvořit přístupový klíč k přihlašování do aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Uložit heslo k přihlašování do aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Uložit přihlašovací údaje pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"přístupový klíč"</string>
     <string name="password" msgid="6738570945182936667">"heslo"</string>
     <string name="passkeys" msgid="5733880786866559847">"přístupové klíče"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Zpět na předchozí stránku"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zavřít"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Zavřít"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Použít uložený přístupový klíč pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Použít pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> uložené heslo?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Použít přihlášení pro <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Odemknout možnosti přihlášení pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Použijte pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> uložený přístupový klíč"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Použijte pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> uložené heslo"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Použijte pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> svůj účet"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Přihlašovat se do aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> uživatelským jménem <xliff:g id="USERNAME">%2$s</xliff:g> pomocí zámku obrazovky"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Odemkněte možnosti přihlášení pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Vyberte uložený přístupový klíč pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Vyberte uložené heslo pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Vyberte uložené přihlášení pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Vyberte přihlášení pro <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Vyberte účet pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vybrat možnost pro aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Použít tyto informace na <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Přihlásit se jinak"</string>

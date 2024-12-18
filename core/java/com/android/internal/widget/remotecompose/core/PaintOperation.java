@@ -23,9 +23,11 @@ public abstract class PaintOperation implements Operation {
 
     @Override
     public void apply(RemoteContext context) {
-        if (context.getMode() == RemoteContext.ContextMode.PAINT
-                && context.getPaintContext() != null) {
-            paint((PaintContext) context.getPaintContext());
+        if (context.getMode() == RemoteContext.ContextMode.PAINT) {
+            PaintContext paintContext = context.getPaintContext();
+            if (paintContext != null) {
+                paint(paintContext);
+            }
         }
     }
 

@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread;
 
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -32,6 +34,7 @@ import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -43,8 +46,10 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -62,6 +67,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     @Mock
     private Transitions mTransitions;
     @Mock
+    private InteractionJankMonitor mInteractionJankMonitor;
+    @Mock
     IBinder mToken;
     @Mock
     Supplier<SurfaceControl.Transaction> mTransactionFactory;
@@ -75,6 +82,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     Transitions.TransitionFinishCallback mTransitionFinishCallback;
     @Mock
     ShellExecutor mExecutor;
+    @Mock
+    Handler mHandler;
 
     private Point mPoint;
     private ExitDesktopTaskTransitionHandler mExitDesktopTaskTransitionHandler;
@@ -91,24 +100,24 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
                 .thenReturn(getContext().getResources().getDisplayMetrics());
 
         mExitDesktopTaskTransitionHandler = new ExitDesktopTaskTransitionHandler(mTransitions,
-                mContext);
+                mContext, mInteractionJankMonitor, mHandler);
         mPoint = new Point(0, 0);
     }
 
     @Test
     public void testTransitExitDesktopModeAnimation() throws Throwable {
-        final int transitionType = Transitions.TRANSIT_EXIT_DESKTOP_MODE;
+        final int transitionType = TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mExitDesktopTaskTransitionHandler);
 
-        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct, mPoint,
-                null);
+        mExitDesktopTaskTransitionHandler.startTransition(DesktopModeTransitionSource.UNKNOWN,
+                wct, mPoint, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FULLSCREEN);
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_EXIT_DESKTOP_MODE, change);
+        TransitionInfo info = createTransitionInfo(TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN, change);
         ArrayList<Exception> exceptions = new ArrayList<>();
         runOnUiThread(() -> {
             try {

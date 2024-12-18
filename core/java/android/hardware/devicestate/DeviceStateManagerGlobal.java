@@ -19,7 +19,6 @@ package android.hardware.devicestate;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.app.ActivityThread;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.Binder;
@@ -33,13 +32,9 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -55,18 +50,12 @@ public final class DeviceStateManagerGlobal {
     private static final String TAG = "DeviceStateManagerGlobal";
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    // TODO(b/325124054): Remove when system server refactor is completed
-    private static int[] sFoldedDeviceStates = new int[0];
-
     /**
      * Returns an instance of {@link DeviceStateManagerGlobal}. May return {@code null} if a
      * connection with the device state service couldn't be established.
      */
     @Nullable
     public static DeviceStateManagerGlobal getInstance() {
-        // TODO(b/325124054): Remove when system server refactor is completed
-        instantiateFoldedStateArray();
-
         synchronized (DeviceStateManagerGlobal.class) {
             if (sInstance == null) {
                 IBinder b = ServiceManager.getService(Context.DEVICE_STATE_SERVICE);
@@ -76,16 +65,6 @@ public final class DeviceStateManagerGlobal {
                 }
             }
             return sInstance;
-        }
-    }
-
-    // TODO(b/325124054): Remove when system server refactor is completed
-    // TODO(b/325330654): Investigate if we need a Context passed in to DSMGlobal
-    private static void instantiateFoldedStateArray() {
-        Context context = ActivityThread.currentApplication();
-        if (context != null) {
-            sFoldedDeviceStates = context.getResources().getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates);
         }
     }
 
@@ -111,33 +90,7 @@ public final class DeviceStateManagerGlobal {
     }
 
     /**
-     * Returns the set of supported device states.
-     *
-     * @see DeviceStateManager#getSupportedStates()
-     */
-    public int[] getSupportedStates() {
-        synchronized (mLock) {
-            final DeviceStateInfo currentInfo;
-            if (mLastReceivedInfo != null) {
-                // If we have mLastReceivedInfo a callback is registered for this instance and it
-                // is receiving the most recent info from the server. Use that info here.
-                currentInfo = mLastReceivedInfo;
-            } else {
-                // If mLastReceivedInfo is null there is no registered callback so we manually
-                // fetch the current info.
-                try {
-                    currentInfo = mDeviceStateManager.getDeviceStateInfo();
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-            }
-
-            return Arrays.copyOf(currentInfo.supportedStates, currentInfo.supportedStates.length);
-        }
-    }
-
-    /**
-     * Returns the {@link List} of supported device states.
+     * Returns {@link List} of supported {@link DeviceState}s.
      *
      * @see DeviceStateManager#getSupportedDeviceStates()
      */
@@ -158,7 +111,7 @@ public final class DeviceStateManagerGlobal {
                 }
             }
 
-            return createDeviceStateList(currentInfo.supportedStates);
+            return List.copyOf(currentInfo.supportedStates);
         }
     }
 
@@ -284,14 +237,9 @@ public final class DeviceStateManagerGlobal {
             mCallbacks.add(wrapper);
 
             if (mLastReceivedInfo != null) {
-                // Copy the array to prevent the callback from modifying the internal state.
-                final int[] supportedStates = Arrays.copyOf(mLastReceivedInfo.supportedStates,
-                        mLastReceivedInfo.supportedStates.length);
-                wrapper.notifySupportedStatesChanged(supportedStates);
-                wrapper.notifySupportedDeviceStatesChanged(createDeviceStateList(supportedStates));
-                wrapper.notifyBaseStateChanged(mLastReceivedInfo.baseState);
-                wrapper.notifyStateChanged(mLastReceivedInfo.currentState);
-                wrapper.notifyDeviceStateChanged(createDeviceState(mLastReceivedInfo.currentState));
+                wrapper.notifySupportedDeviceStatesChanged(
+                        List.copyOf(mLastReceivedInfo.supportedStates));
+                wrapper.notifyDeviceStateChanged(mLastReceivedInfo.currentState);
             }
         }
     }
@@ -372,23 +320,13 @@ public final class DeviceStateManagerGlobal {
         final int diff = oldInfo == null ? ~0 : info.diff(oldInfo);
         if ((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
-                // Copy the array to prevent callbacks from modifying the internal state.
-                final int[] supportedStates = Arrays.copyOf(info.supportedStates,
-                        info.supportedStates.length);
-                callbacks.get(i).notifySupportedStatesChanged(supportedStates);
                 callbacks.get(i).notifySupportedDeviceStatesChanged(
-                        createDeviceStateList(supportedStates));
-            }
-        }
-        if ((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0) {
-            for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notifyBaseStateChanged(info.baseState);
+                        List.copyOf(info.supportedStates));
             }
         }
         if ((diff & DeviceStateInfo.CHANGED_CURRENT_STATE) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notifyStateChanged(info.currentState);
-                callbacks.get(i).notifyDeviceStateChanged(createDeviceState(info.currentState));
+                callbacks.get(i).notifyDeviceStateChanged(info.currentState);
             }
         }
     }
@@ -421,36 +359,6 @@ public final class DeviceStateManagerGlobal {
         }
     }
 
-    /**
-     * Creates a {@link DeviceState} object from a device state identifier, with the
-     * {@link DeviceState} property that corresponds to what display is primary.
-     *
-     */
-    // TODO(b/325124054): Remove when system server refactor is completed
-    @NonNull
-    private DeviceState createDeviceState(int stateIdentifier) {
-        final Set<@DeviceState.DeviceStateProperties Integer> properties = new HashSet<>();
-        if (ArrayUtils.contains(sFoldedDeviceStates, stateIdentifier)) {
-            properties.add(DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY);
-        } else {
-            properties.add(DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY);
-        }
-        return new DeviceState(stateIdentifier, "" /* name */, properties);
-    }
-
-    /**
-     * Creates a list of {@link DeviceState} objects from an array of state identifiers.
-     */
-    // TODO(b/325124054): Remove when system server refactor is completed
-    @NonNull
-    private List<DeviceState> createDeviceStateList(int[] supportedStates) {
-        List<DeviceState> deviceStateList = new ArrayList<>();
-        for (int i = 0; i < supportedStates.length; i++) {
-            deviceStateList.add(createDeviceState(supportedStates[i]));
-        }
-        return deviceStateList;
-    }
-
     private final class DeviceStateManagerCallback extends IDeviceStateManagerCallback.Stub {
         @Override
         public void onDeviceStateInfoChanged(DeviceStateInfo info) {
@@ -480,24 +388,9 @@ public final class DeviceStateManagerGlobal {
             mExecutor = executor;
         }
 
-        void notifySupportedStatesChanged(int[] newSupportedStates) {
-            mExecutor.execute(() ->
-                    mDeviceStateCallback.onSupportedStatesChanged(newSupportedStates));
-        }
-
         void notifySupportedDeviceStatesChanged(List<DeviceState> newSupportedDeviceStates) {
             mExecutor.execute(() ->
                     mDeviceStateCallback.onSupportedStatesChanged(newSupportedDeviceStates));
-        }
-
-        void notifyBaseStateChanged(int newBaseState) {
-            execute("notifyBaseStateChanged",
-                    () -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
-        }
-
-        void notifyStateChanged(int newDeviceState) {
-            execute("notifyStateChanged",
-                    () -> mDeviceStateCallback.onStateChanged(newDeviceState));
         }
 
         void notifyDeviceStateChanged(DeviceState newDeviceState) {

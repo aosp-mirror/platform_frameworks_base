@@ -43,7 +43,7 @@ import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -204,6 +204,8 @@ public final class SensorPrivacyManager {
      * Types of state which can exist for the sensor privacy toggle
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
     public static class StateTypes {
         private StateTypes() {}
 
@@ -217,30 +219,12 @@ public final class SensorPrivacyManager {
          */
         public static final int DISABLED = SensorPrivacyIndividualEnabledSensorProto.DISABLED;
 
-        /**
-         * Constant indicating privacy is enabled except for the automotive driver assistance apps
-         * which are helpful for driving.
-         */
-        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-        public static final int AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS =
-                SensorPrivacyIndividualEnabledSensorProto.AUTO_DRIVER_ASSISTANCE_HELPFUL_APPS;
-
          /**
          * Constant indicating privacy is enabled except for the automotive driver assistance apps
          * which are required by car manufacturer for driving.
          */
-        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-        public static final int AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS =
-                SensorPrivacyIndividualEnabledSensorProto.AUTO_DRIVER_ASSISTANCE_REQUIRED_APPS;
-
-        /**
-         * Constant indicating privacy is enabled except for the automotive driver assistance apps
-         * which are both helpful for driving and also apps required by car manufacturer for
-         * driving.
-         */
-        @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-        public static final int AUTOMOTIVE_DRIVER_ASSISTANCE_APPS =
-                SensorPrivacyIndividualEnabledSensorProto.AUTO_DRIVER_ASSISTANCE_APPS;
+        public static final int ENABLED_EXCEPT_ALLOWLISTED_APPS =
+                SensorPrivacyIndividualEnabledSensorProto.ENABLED_EXCEPT_ALLOWLISTED_APPS;
 
         /**
          * Types of state which can exist for a sensor privacy toggle
@@ -250,9 +234,7 @@ public final class SensorPrivacyManager {
         @IntDef(value = {
                 ENABLED,
                 DISABLED,
-                AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS,
-                AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS,
-                AUTOMOTIVE_DRIVER_ASSISTANCE_APPS
+                ENABLED_EXCEPT_ALLOWLISTED_APPS
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface StateType {}
@@ -369,9 +351,6 @@ public final class SensorPrivacyManager {
     private final ArrayMap<Pair<Integer, OnSensorPrivacyChangedListener>,
             OnSensorPrivacyChangedListener> mLegacyToggleListeners = new ArrayMap<>();
 
-    @GuardedBy("mLock")
-    private ArrayMap<String, Boolean> mCameraPrivacyAllowlist = null;
-
     /** The singleton ISensorPrivacyListener for IPC which will be used to dispatch to local
      * listeners */
     @NonNull
@@ -397,7 +376,8 @@ public final class SensorPrivacyManager {
 
         @Override
         @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-        public void onSensorPrivacyStateChanged(int toggleType, int sensor, int state) {
+        public void onSensorPrivacyStateChanged(@ToggleType int toggleType,
+                @Sensors.Sensor int sensor, @StateTypes.StateType int state) {
             synchronized (mLock) {
                 for (int i = 0; i < mToggleListeners.size(); i++) {
                     OnSensorPrivacyChangedListener listener = mToggleListeners.keyAt(i);
@@ -725,6 +705,8 @@ public final class SensorPrivacyManager {
     /**
      * Returns sensor privacy state for a specific sensor.
      *
+     * @param toggleType The type of toggle to use
+     * @param sensor The sensor to check
      * @return int sensor privacy state.
      *
      * @hide
@@ -741,10 +723,11 @@ public final class SensorPrivacyManager {
         }
     }
 
-  /**
+   /**
      * Returns if camera privacy is enabled for a specific package.
      *
-     * @return boolean sensor privacy state.
+     * @param packageName The package to check
+     * @return boolean camera privacy state.
      *
      * @hide
      */
@@ -763,29 +746,41 @@ public final class SensorPrivacyManager {
      * Returns camera privacy allowlist.
      *
      * @return List of automotive driver assistance packages for
-     * privacy allowlisting. The returned map includes the package
-     * name as key and the value is a Boolean which tells if that package
-     * is required by the car manufacturer as mandatory package for driving.
+     * privacy allowlisting.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
     @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-    public @NonNull Map<String, Boolean>  getCameraPrivacyAllowlist() {
+    public @NonNull List<String>  getCameraPrivacyAllowlist() {
         synchronized (mLock) {
-            if (mCameraPrivacyAllowlist == null) {
-                mCameraPrivacyAllowlist = new ArrayMap<>();
-                try {
-                    for (CameraPrivacyAllowlistEntry entry :
-                            mService.getCameraPrivacyAllowlist()) {
-                        mCameraPrivacyAllowlist.put(entry.packageName, entry.isMandatory);
-                    }
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+            try {
+                return mService.getCameraPrivacyAllowlist();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return mCameraPrivacyAllowlist;
+        }
+    }
+
+    /**
+     * Sets camera privacy allowlist.
+     *
+     * @param allowlist List of automotive driver assistance packages for
+     * privacy allowlisting.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    public void setCameraPrivacyAllowlist(@NonNull List<String> allowlist) {
+        synchronized (mLock) {
+            try {
+                mService.setCameraPrivacyAllowlist(allowlist);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -802,7 +797,7 @@ public final class SensorPrivacyManager {
     public void setSensorPrivacy(@Sensors.Sensor int sensor,
             boolean enable) {
         setSensorPrivacy(resolveSourceFromCurrentContext(), sensor, enable,
-                UserHandle.USER_CURRENT);
+                mContext.getUserId());
     }
 
     private @Sources.Source int resolveSourceFromCurrentContext() {
@@ -842,6 +837,8 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacy(@Sources.Source int source, @Sensors.Sensor int sensor,
             boolean enable) {
+        // TODO(b/348510106): Replace USER_CURRENT with Context user and fix any tests that may be
+        // affected.
         setSensorPrivacy(source, sensor, enable, UserHandle.USER_CURRENT);
     }
 
@@ -867,6 +864,7 @@ public final class SensorPrivacyManager {
     /**
      * Sets sensor privacy to the specified state for an individual sensor.
      *
+     * @param source the source using which the sensor is toggled
      * @param sensor the sensor which to change the state for
      * @param state the state to which sensor privacy should be set.
      *
@@ -898,7 +896,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void setSensorPrivacyForProfileGroup(@Sources.Source int source,
             @Sensors.Sensor int sensor, boolean enable) {
-        setSensorPrivacyForProfileGroup(source , sensor, enable, UserHandle.USER_CURRENT);
+        setSensorPrivacyForProfileGroup(source , sensor, enable, mContext.getUserId());
     }
 
     /**
@@ -954,7 +952,7 @@ public final class SensorPrivacyManager {
     @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
     public void suppressSensorPrivacyReminders(int sensor,
             boolean suppress) {
-        suppressSensorPrivacyReminders(sensor, suppress, UserHandle.USER_CURRENT);
+        suppressSensorPrivacyReminders(sensor, suppress, mContext.getUserId());
     }
 
     /**

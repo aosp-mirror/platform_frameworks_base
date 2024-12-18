@@ -23,41 +23,57 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [ShadeRepository] */
 @SysUISingleton
 class FakeShadeRepository @Inject constructor() : ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
-    override val qsExpansion = _qsExpansion
+
+    @Deprecated("Use ShadeInteractor.qsExpansion instead")
+    override val qsExpansion = _qsExpansion.asStateFlow()
 
     private val _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
-    override val udfpsTransitionToFullShadeProgress = _udfpsTransitionToFullShadeProgress
+    override val udfpsTransitionToFullShadeProgress =
+        _udfpsTransitionToFullShadeProgress.asStateFlow()
 
     private val _currentFling: MutableStateFlow<FlingInfo?> = MutableStateFlow(null)
-    override val currentFling: StateFlow<FlingInfo?> = _currentFling
+    override val currentFling: StateFlow<FlingInfo?> = _currentFling.asStateFlow()
 
     private val _lockscreenShadeExpansion = MutableStateFlow(0f)
-    override val lockscreenShadeExpansion = _lockscreenShadeExpansion
+    override val lockscreenShadeExpansion = _lockscreenShadeExpansion.asStateFlow()
 
     private val _legacyShadeExpansion = MutableStateFlow(0f)
+
     @Deprecated("Use ShadeInteractor instead")
-    override val legacyShadeExpansion = _legacyShadeExpansion
+    override val legacyShadeExpansion = _legacyShadeExpansion.asStateFlow()
 
     private val _legacyShadeTracking = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead")
-    override val legacyShadeTracking = _legacyShadeTracking
+    override val legacyShadeTracking = _legacyShadeTracking.asStateFlow()
 
     private val _legacyQsTracking = MutableStateFlow(false)
-    @Deprecated("Use ShadeInteractor instead") override val legacyQsTracking = _legacyQsTracking
+
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyQsTracking = _legacyQsTracking.asStateFlow()
 
     private val _legacyExpandedOrAwaitingInputTransfer = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead")
-    override val legacyExpandedOrAwaitingInputTransfer = _legacyExpandedOrAwaitingInputTransfer
+    override val legacyExpandedOrAwaitingInputTransfer =
+        _legacyExpandedOrAwaitingInputTransfer.asStateFlow()
 
     private val _legacyIsQsExpanded = MutableStateFlow(false)
-    @Deprecated("Use ShadeInteractor instead") override val legacyIsQsExpanded = _legacyIsQsExpanded
 
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyIsQsExpanded = _legacyIsQsExpanded.asStateFlow()
+
+    @Deprecated("Use ShadeInteractor.isUserInteractingWithShade instead")
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
+
+    private var _isShadeLayoutWide = MutableStateFlow(false)
+    override val isShadeLayoutWide: StateFlow<Boolean> = _isShadeLayoutWide.asStateFlow()
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
@@ -65,8 +81,9 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     }
 
     private val _legacyExpandImmediate = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead")
-    override val legacyExpandImmediate = _legacyExpandImmediate
+    override val legacyExpandImmediate = _legacyExpandImmediate.asStateFlow()
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyExpandImmediate(legacyExpandImmediate: Boolean) {
@@ -96,6 +113,7 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     }
 
     private val _legacyQsFullscreen = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead") override val legacyQsFullscreen = _legacyQsFullscreen
 
     @Deprecated("Use ShadeInteractor instead")
@@ -104,6 +122,7 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     }
 
     private val _legacyIsClosing = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead") override val legacyIsClosing = _legacyIsClosing
 
     @Deprecated("Use ShadeInteractor instead")
@@ -130,6 +149,10 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeExpansion(expandedFraction: Float) {
         _legacyShadeExpansion.value = expandedFraction
+    }
+
+    override fun setShadeLayoutWide(isShadeLayoutWide: Boolean) {
+        _isShadeLayoutWide.value = isShadeLayoutWide
     }
 }
 

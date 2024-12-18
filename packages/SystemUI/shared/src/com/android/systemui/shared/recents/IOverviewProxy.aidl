@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
-// Next ID: 29
+// Next ID: 34
 oneway interface IOverviewProxy {
 
     void onActiveNavBarRegionChanges(in Region activeRegion) = 11;
@@ -65,7 +65,7 @@ oneway interface IOverviewProxy {
     /**
      * Sent when some system ui state changes.
      */
-    void onSystemUiStateChanged(int stateFlags) = 16;
+    void onSystemUiStateChanged(long stateFlags) = 16;
 
     /**
      * Sent when suggested rotation button could be shown
@@ -81,6 +81,11 @@ oneway interface IOverviewProxy {
      * Sent when behavior changes. See WindowInsetsController#@Behavior
      */
     void onSystemBarAttributesChanged(int displayId, int behavior) = 20;
+
+    /**
+     * Sent when {@link TaskbarDelegate#onTransitionModeUpdated} is called.
+     */
+    void onTransitionModeUpdated(int barMode, boolean checkBarModes) = 21;
 
     /**
      * Sent when the desired dark intensity of the nav buttons has changed
@@ -101,4 +106,35 @@ oneway interface IOverviewProxy {
      * Sent when the task bar stash state is toggled.
      */
     void onTaskbarToggled() = 27;
+
+    /**
+     * Sent when the wallpaper visibility is updated.
+     */
+    void updateWallpaperVisibility(int displayId, boolean visible) = 29;
+
+    /**
+     * Sent when {@link TaskbarDelegate#checkNavBarModes} is called.
+     */
+    void checkNavBarModes() = 30;
+
+    /**
+     * Sent when {@link TaskbarDelegate#finishBarAnimations} is called.
+     */
+    void finishBarAnimations() = 31;
+
+    /**
+     * Sent when {@link TaskbarDelegate#touchAutoDim} is called. {@param reset} is true, when auto
+     * dim is reset after a timeout.
+     */
+    void touchAutoDim(boolean reset) = 32;
+
+    /**
+     * Sent when {@link TaskbarDelegate#transitionTo} is called.
+     */
+    void transitionTo(int barMode, boolean animate) = 33;
+
+    /**
+     * Sent when {@link TaskbarDelegate#appTransitionPending} is called.
+     */
+    void appTransitionPending(boolean pending) = 34;
 }

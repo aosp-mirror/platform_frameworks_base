@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -653,6 +654,81 @@ public final class UiAutomation {
     }
 
     /**
+     * Adds permission to be overridden to the given state. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager#PERMISSION_GRANTED
+     * @see PackageManager#PERMISSION_DENIED
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void addOverridePermissionState(int uid, @NonNull String permission,
+            @PackageManager.PermissionResult int result) {
+        try {
+            mUiAutomationConnection.addOverridePermissionState(uid, permission, result);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes overridden permission. UiAutomation must be connected to root user.
+     *
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void removeOverridePermissionState(int uid, @NonNull String permission) {
+        try {
+            mUiAutomationConnection.removeOverridePermissionState(uid, permission);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions for the given UID. UiAutomation must be connected to
+     * root user.
+     *
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearOverridePermissionStates(int uid) {
+        try {
+            mUiAutomationConnection.clearOverridePermissionStates(uid);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears all overridden permissions on the device. UiAutomation must be connected to root user.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public void clearAllOverridePermissionStates() {
+        try {
+            mUiAutomationConnection.clearAllOverridePermissionStates();
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Performs a global action. Such an action can be performed at any moment
      * regardless of the current application or user location in that application.
      * For example going back, going home, opening recents, etc.
@@ -1198,7 +1274,7 @@ public final class UiAutomation {
                 ScreenCapture.createSyncCaptureListener();
         try {
             if (!mUiAutomationConnection.takeScreenshot(
-                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture)) {
+                    new Rect(0, 0, displaySize.x, displaySize.y), syncScreenCapture, mDisplayId)) {
                 return null;
             }
         } catch (RemoteException re) {
@@ -1571,10 +1647,13 @@ public final class UiAutomation {
 
             // Calling out without a lock held.
             mUiAutomationConnection.executeShellCommand(command, sink, null);
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error executing shell command!", ioe);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } catch (IOException | RemoteException e) {
+            Log.e(LOG_TAG, "Error executing shell command!", e);
+        } catch (IllegalArgumentException | NullPointerException | SecurityException e) {
+            // An exception of these types is propagated from the server.
+            // Rethrow it to keep the old behavior. To avoid FD leak, close the source.
+            IoUtils.closeQuietly(source);
+            throw e;
         } finally {
             IoUtils.closeQuietly(sink);
         }
@@ -1658,10 +1737,15 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.executeShellCommandWithStderr(
                     command, sink_read, source_write, stderr_sink_read);
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error executing shell command!", ioe);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error executing shell command!", re);
+        } catch (IOException | RemoteException e) {
+            Log.e(LOG_TAG, "Error executing shell command!", e);
+        } catch (IllegalArgumentException | SecurityException | NullPointerException e) {
+            // An exception of these types is propagated from the server.
+            // Rethrow it to keep the old behavior. To avoid FD leaks, close the sources.
+            IoUtils.closeQuietly(sink_write);
+            IoUtils.closeQuietly(source_read);
+            IoUtils.closeQuietly(stderr_source_read);
+            throw e;
         } finally {
             IoUtils.closeQuietly(sink_read);
             IoUtils.closeQuietly(source_write);

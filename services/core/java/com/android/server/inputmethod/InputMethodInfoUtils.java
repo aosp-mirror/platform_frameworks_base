@@ -22,6 +22,7 @@ import static com.android.server.inputmethod.SubtypeUtils.SUBTYPE_MODE_KEYBOARD;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
@@ -322,5 +323,25 @@ final class InputMethodInfoUtils {
         }
         return SubtypeUtils.containsSubtypeOf(imi, requiredLocale, checkCountry,
                 requiredSubtypeMode);
+    }
+
+    /**
+     * Marshals the given {@link InputMethodInfo} into a byte array.
+     *
+     * @param imi {@link InputMethodInfo} to be marshalled
+     * @return a byte array where the given {@link InputMethodInfo} is marshalled
+     */
+    @NonNull
+    static byte[] marshal(@NonNull InputMethodInfo imi) {
+        Parcel parcel = null;
+        try {
+            parcel = Parcel.obtain();
+            parcel.writeTypedObject(imi, 0);
+            return parcel.marshall();
+        } finally {
+            if (parcel != null) {
+                parcel.recycle();
+            }
+        }
     }
 }

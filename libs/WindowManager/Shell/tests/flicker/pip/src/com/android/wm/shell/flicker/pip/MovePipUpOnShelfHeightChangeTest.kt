@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized
 /**
  * Test Pip movement with Launcher shelf height change (decrease).
  *
- * To run this test: `atest WMShellFlickerTests:MovePipDownShelfHeightChangeTest`
+ * To run this test: `atest WMShellFlickerTestsPip3:MovePipUpOnShelfHeightChangeTest`
  *
  * Actions:
  * ```

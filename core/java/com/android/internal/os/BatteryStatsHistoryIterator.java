@@ -259,7 +259,9 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             final int extensionFlags = src.readInt();
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_POWER_STATS_DESCRIPTOR_FLAG) != 0) {
                 PowerStats.Descriptor descriptor = PowerStats.Descriptor.readSummaryFromParcel(src);
-                mDescriptorRegistry.register(descriptor);
+                if (descriptor != null) {
+                    mDescriptorRegistry.register(descriptor);
+                }
             }
             if ((extensionFlags & BatteryStatsHistory.EXTENSION_POWER_STATS_FLAG) != 0) {
                 cur.powerStats = PowerStats.readFromParcel(src, mDescriptorRegistry);

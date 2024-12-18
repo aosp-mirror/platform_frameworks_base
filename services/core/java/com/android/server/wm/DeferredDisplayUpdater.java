@@ -26,6 +26,9 @@ import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFi
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.os.Message;
+import android.os.Trace;
+import android.util.Slog;
 import android.view.DisplayInfo;
 import android.window.DisplayAreaInfo;
 import android.window.TransitionRequestInfo;
@@ -33,8 +36,9 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.wm.utils.DisplayInfoOverrides.DisplayInfoFieldsUpdater;
+import com.android.window.flags.Flags;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -48,7 +52,7 @@ import java.util.Objects;
  * display change transition. In this case, we will queue all display updates until the current
  * transition's collection finishes and then apply them afterwards.
  */
-public class DeferredDisplayUpdater implements DisplayUpdater {
+class DeferredDisplayUpdater {
 
     /**
      * List of fields that could be deferred before applying to DisplayContent.
@@ -64,6 +68,12 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
         // Also apply WM-override fields, since they might produce differences in window hierarchy
         WM_OVERRIDE_FIELDS.setFields(out, override);
     };
+
+    private static final String TAG = "DeferredDisplayUpdater";
+
+    private static final String TRACE_TAG_WAIT_FOR_TRANSITION =
+            "Screen unblock: wait for transition";
+    private static final int WAIT_FOR_TRANSITION_TIMEOUT = 1000;
 
     private final DisplayContent mDisplayContent;
 
@@ -88,7 +98,19 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
     @NonNull
     private final DisplayInfo mOutputDisplayInfo = new DisplayInfo();
 
-    public DeferredDisplayUpdater(@NonNull DisplayContent displayContent) {
+    /** Whether {@link #mScreenUnblocker} should wait for transition to be ready. */
+    private boolean mShouldWaitForTransitionWhenScreenOn;
+
+    /** The message to notify PhoneWindowManager#finishWindowsDrawn. */
+    @Nullable
+    private Message mScreenUnblocker;
+
+    private final Runnable mScreenUnblockTimeoutRunnable = () -> {
+        Slog.e(TAG, "Timeout waiting for the display switch transition to start");
+        continueScreenUnblocking();
+    };
+
+    DeferredDisplayUpdater(@NonNull DisplayContent displayContent) {
         mDisplayContent = displayContent;
         mNonOverrideDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
     }
@@ -100,8 +122,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
      *
      * @param finishCallback is called when all pending display updates are finished
      */
-    @Override
-    public void updateDisplayInfo(@NonNull Runnable finishCallback) {
+    void updateDisplayInfo(@NonNull Runnable finishCallback) {
         // Get the latest display parameters from the DisplayManager
         final DisplayInfo displayInfo = getCurrentDisplayInfo();
 
@@ -113,8 +134,10 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
 
         // Apply whole display info immediately as is if either:
         // * it is the first display update
+        // * the display doesn't have visible content
         // * shell transitions are disabled or temporary unavailable
         if (displayInfoDiff == DIFF_EVERYTHING
+                || !mDisplayContent.getLastHasContent()
                 || !mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             ProtoLog.d(WM_DEBUG_WINDOW_TRANSITIONS,
                     "DeferredDisplayUpdater: applying DisplayInfo immediately");
@@ -170,19 +193,36 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
             final Rect startBounds = new Rect(0, 0, mDisplayContent.mInitialDisplayWidth,
                     mDisplayContent.mInitialDisplayHeight);
             final int fromRotation = mDisplayContent.getRotation();
+            if (Flags.blastSyncNotificationShadeOnDisplaySwitch() && physicalDisplayUpdated) {
+                final WindowState notificationShade =
+                        mDisplayContent.getDisplayPolicy().getNotificationShade();
+                if (notificationShade != null && notificationShade.isVisible()
+                        && mDisplayContent.mAtmService.mKeyguardController.isKeyguardOrAodShowing(
+                                mDisplayContent.mDisplayId)) {
+                    Slog.i(TAG, notificationShade + " uses blast for display switch");
+                    notificationShade.mSyncMethodOverride = BLASTSyncEngine.METHOD_BLAST;
+                }
+            }
 
-            onStartCollect.run();
+            mDisplayContent.mAtmService.deferWindowLayout();
+            try {
+                onStartCollect.run();
 
-            ProtoLog.d(WM_DEBUG_WINDOW_TRANSITIONS,
-                    "DeferredDisplayUpdater: applied DisplayInfo after deferring");
+                ProtoLog.d(WM_DEBUG_WINDOW_TRANSITIONS,
+                        "DeferredDisplayUpdater: applied DisplayInfo after deferring");
 
-            if (physicalDisplayUpdated) {
-                onDisplayUpdated(transition, fromRotation, startBounds);
-            } else {
-                final TransitionRequestInfo.DisplayChange displayChange =
-                        getCurrentDisplayChange(fromRotation, startBounds);
-                mDisplayContent.mTransitionController.requestStartTransition(transition,
-                        /* startTask= */ null, /* remoteTransition= */ null, displayChange);
+                if (physicalDisplayUpdated) {
+                    onDisplayUpdated(transition, fromRotation, startBounds);
+                } else {
+                    final TransitionRequestInfo.DisplayChange displayChange =
+                            getCurrentDisplayChange(fromRotation, startBounds);
+                    mDisplayContent.mTransitionController.requestStartTransition(transition,
+                            /* startTask= */ null, /* remoteTransition= */ null, displayChange);
+                }
+            } finally {
+                // Run surface placement after requestStartTransition, so shell side can receive
+                // the transition request before handling task info changes.
+                mDisplayContent.mAtmService.continueWindowLayout();
             }
         });
     }
@@ -239,6 +279,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
                 getCurrentDisplayChange(fromRotation, startBounds);
         displayChange.setPhysicalDisplayChanged(true);
 
+        transition.addTransactionCompletedListener(this::continueScreenUnblocking);
         mDisplayContent.mTransitionController.requestStartTransition(transition,
                 /* startTask= */ null, /* remoteTransition= */ null, displayChange);
 
@@ -266,6 +307,63 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
             @Nullable DisplayInfo second) {
         if (first == null || second == null) return true;
         return !Objects.equals(first.uniqueId, second.uniqueId);
+    }
+
+    /**
+     * Called after physical display has changed and after DisplayContent applied new display
+     * properties.
+     */
+    void onDisplayContentDisplayPropertiesPostChanged() {
+        // Unblock immediately in case there is no transition. This is unlikely to happen.
+        if (mScreenUnblocker != null && !mDisplayContent.mTransitionController.inTransition()) {
+            mScreenUnblocker.sendToTarget();
+            mScreenUnblocker = null;
+        }
+    }
+
+    /**
+     * Called with {@code true} when physical display is going to switch. And {@code false} when
+     * the display is turned on or the device goes to sleep.
+     */
+    void onDisplaySwitching(boolean switching) {
+        mShouldWaitForTransitionWhenScreenOn = switching;
+    }
+
+    /** Returns {@code true} if the transition will control when to turn on the screen. */
+    boolean waitForTransition(@NonNull Message screenUnblocker) {
+        if (!Flags.waitForTransitionOnDisplaySwitch()) return false;
+        if (!mShouldWaitForTransitionWhenScreenOn) {
+            return false;
+        }
+        mScreenUnblocker = screenUnblocker;
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.beginAsyncSection(TRACE_TAG_WAIT_FOR_TRANSITION, screenUnblocker.hashCode());
+        }
+
+        mDisplayContent.mWmService.mH.removeCallbacks(mScreenUnblockTimeoutRunnable);
+        mDisplayContent.mWmService.mH.postDelayed(mScreenUnblockTimeoutRunnable,
+                WAIT_FOR_TRANSITION_TIMEOUT);
+        return true;
+    }
+
+    /**
+     * Continues the screen unblocking flow, could be called either on a binder thread as
+     * a result of surface transaction completed listener or from {@link WindowManagerService#mH}
+     * handler in case of timeout
+     */
+    private void continueScreenUnblocking() {
+        synchronized (mDisplayContent.mWmService.mGlobalLock) {
+            mShouldWaitForTransitionWhenScreenOn = false;
+            mDisplayContent.mWmService.mH.removeCallbacks(mScreenUnblockTimeoutRunnable);
+            if (mScreenUnblocker == null) {
+                return;
+            }
+            mScreenUnblocker.sendToTarget();
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.endAsyncSection(TRACE_TAG_WAIT_FOR_TRANSITION, mScreenUnblocker.hashCode());
+            }
+            mScreenUnblocker = null;
+        }
     }
 
     /**
@@ -306,6 +404,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
                 || first.defaultModeId != second.defaultModeId
                 || first.userPreferredModeId != second.userPreferredModeId
                 || !Arrays.equals(first.supportedModes, second.supportedModes)
+                || !Arrays.equals(first.appsSupportedModes, second.appsSupportedModes)
                 || first.colorMode != second.colorMode
                 || !Arrays.equals(first.supportedColorModes, second.supportedColorModes)
                 || !Objects.equals(first.hdrCapabilities, second.hdrCapabilities)
@@ -323,6 +422,7 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
                 || first.brightnessMaximum != second.brightnessMaximum
                 || first.brightnessDefault != second.brightnessDefault
                 || first.installOrientation != second.installOrientation
+                || first.isForceSdr != second.isForceSdr
                 || !Objects.equals(first.layoutLimitedRefreshRate, second.layoutLimitedRefreshRate)
                 || !BrightnessSynchronizer.floatEquals(first.hdrSdrRatio, second.hdrSdrRatio)
                 || !first.thermalRefreshRateThrottling.contentEquals(

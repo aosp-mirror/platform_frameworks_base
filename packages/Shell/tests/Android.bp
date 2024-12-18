@@ -11,9 +11,9 @@ android_test {
     name: "ShellTests",
     srcs: ["src/**/*.java"],
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
     static_libs: [
         "androidx.test.rules",
@@ -25,4 +25,11 @@ android_test {
     test_suites: ["device-tests"],
     instrumentation_for: "Shell",
     certificate: "platform",
+}
+
+test_module_config {
+    name: "ShellTests_android_server_os",
+    base: "ShellTests",
+    test_suites: ["device-tests"],
+    exclude_annotations: ["androidx.test.filters.LargeTest"],
 }

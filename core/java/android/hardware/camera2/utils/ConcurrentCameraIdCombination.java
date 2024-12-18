@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.hardware.camera2.utils;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
+import android.util.Pair;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -30,21 +32,21 @@ import java.util.Set;
  */
 public class ConcurrentCameraIdCombination implements Parcelable {
 
-    private Set<String> mConcurrentCameraIds = new HashSet<>();
+    private final Set<Pair<String, Integer>> mConcurrentCameraIdDeviceIdPairs = new ArraySet<>();
 
     public static final @NonNull
             Parcelable.Creator<ConcurrentCameraIdCombination> CREATOR =
-            new Parcelable.Creator<ConcurrentCameraIdCombination>() {
-        @Override
-        public ConcurrentCameraIdCombination createFromParcel(Parcel in) {
-            return new ConcurrentCameraIdCombination(in);
-        }
+            new Parcelable.Creator<>() {
+                @Override
+                public ConcurrentCameraIdCombination createFromParcel(Parcel in) {
+                    return new ConcurrentCameraIdCombination(in);
+                }
 
-        @Override
-        public ConcurrentCameraIdCombination[] newArray(int size) {
-            return new ConcurrentCameraIdCombination[size];
-        }
-    };
+                @Override
+                public ConcurrentCameraIdCombination[] newArray(int size) {
+                    return new ConcurrentCameraIdCombination[size];
+                }
+            };
 
     private ConcurrentCameraIdCombination(Parcel in) {
         readFromParcel(in);
@@ -57,9 +59,10 @@ public class ConcurrentCameraIdCombination implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mConcurrentCameraIds.size());
-        for (String cameraId : mConcurrentCameraIds) {
-            dest.writeString(cameraId);
+        dest.writeInt(mConcurrentCameraIdDeviceIdPairs.size());
+        for (Pair<String, Integer> cameraIdDeviceIdPair : mConcurrentCameraIdDeviceIdPairs) {
+            dest.writeString(cameraIdDeviceIdPair.first);
+            dest.writeInt(cameraIdDeviceIdPair.second);
         }
     }
 
@@ -67,7 +70,7 @@ public class ConcurrentCameraIdCombination implements Parcelable {
      * helper for CREATOR
      */
     public void readFromParcel(Parcel in) {
-        mConcurrentCameraIds.clear();
+        mConcurrentCameraIdDeviceIdPairs.clear();
         int cameraCombinationSize = in.readInt();
         if (cameraCombinationSize < 0) {
             throw new RuntimeException("cameraCombinationSize " + cameraCombinationSize
@@ -78,14 +81,15 @@ public class ConcurrentCameraIdCombination implements Parcelable {
             if (cameraId == null) {
                 throw new RuntimeException("Failed to read camera id from Parcel");
             }
-            mConcurrentCameraIds.add(cameraId);
+            int deviceId = in.readInt();
+            mConcurrentCameraIdDeviceIdPairs.add(new Pair<>(cameraId, deviceId));
         }
     }
 
     /**
      * Get this concurrent camera id combination.
      */
-    public Set<String> getConcurrentCameraIdCombination() {
-        return mConcurrentCameraIds;
+    public Set<Pair<String, Integer>> getConcurrentCameraIdCombination() {
+        return mConcurrentCameraIdDeviceIdPairs;
     }
 }

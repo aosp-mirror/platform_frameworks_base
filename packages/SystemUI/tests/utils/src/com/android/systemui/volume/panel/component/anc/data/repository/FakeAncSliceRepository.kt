@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.anc.data.repository
 
+import android.bluetooth.BluetoothDevice
 import androidx.slice.Slice
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +25,14 @@ class FakeAncSliceRepository : AncSliceRepository {
 
     private val sliceByWidth = mutableMapOf<Int, MutableStateFlow<Slice?>>()
 
-    override fun ancSlice(width: Int): Flow<Slice?> =
-        sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
+    override fun ancSlice(
+        device: BluetoothDevice,
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Flow<Slice?> {
+        return sliceByWidth.getOrPut(width) { MutableStateFlow(null) }
+    }
 
     fun putSlice(width: Int, slice: Slice?) {
         sliceByWidth.getOrPut(width) { MutableStateFlow(null) }.value = slice

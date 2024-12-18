@@ -16,16 +16,14 @@
 
 #include "CommonPool.h"
 
-#include <sys/resource.h>
 #include <utils/Trace.h>
-#include "renderthread/RenderThread.h"
 
 #include <array>
 
 namespace android {
 namespace uirenderer {
 
-CommonPool::CommonPool() {
+CommonPool::CommonPool() : CommonPoolBase() {
     ATRACE_CALL();
 
     CommonPool* pool = this;
@@ -36,22 +34,7 @@ CommonPool::CommonPool() {
     // Create 2 workers
     for (int i = 0; i < THREAD_COUNT; i++) {
         std::thread worker([pool, i, &mLock, &tids, &tidConditionVars] {
-            {
-                std::array<char, 20> name{"hwuiTask"};
-                snprintf(name.data(), name.size(), "hwuiTask%d", i);
-                auto self = pthread_self();
-                pthread_setname_np(self, name.data());
-                {
-                    std::unique_lock lock(mLock);
-                    tids[i] = pthread_gettid_np(self);
-                    tidConditionVars[i].notify_one();
-                }
-                setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
-                auto startHook = renderthread::RenderThread::getOnStartHook();
-                if (startHook) {
-                    startHook(name.data());
-                }
-            }
+            pool->setupThread(i, mLock, tids, tidConditionVars);
             pool->workerLoop();
         });
         worker.detach();
@@ -64,7 +47,9 @@ CommonPool::CommonPool() {
             }
         }
     }
-    mWorkerThreadIds = std::move(tids);
+    if (pool->supportsTid()) {
+        mWorkerThreadIds = std::move(tids);
+    }
 }
 
 CommonPool& CommonPool::instance() {
@@ -95,7 +80,7 @@ void CommonPool::enqueue(Task&& task) {
 
 void CommonPool::workerLoop() {
     std::unique_lock lock(mLock);
-    while (true) {
+    while (!mIsStopping) {
         if (!mWorkQueue.hasWork()) {
             mWaitingThreads++;
             mCondition.wait(lock);

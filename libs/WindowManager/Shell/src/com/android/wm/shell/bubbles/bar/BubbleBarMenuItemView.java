@@ -64,7 +64,7 @@ public class BubbleBarMenuItemView extends LinearLayout {
     void update(Icon icon, String title, @ColorInt int tint) {
         if (tint == Color.TRANSPARENT) {
             final TypedArray typedArray = getContext().obtainStyledAttributes(
-                    new int[]{android.R.attr.textColorPrimary});
+                    new int[]{com.android.internal.R.attr.materialColorOnSurface});
             mTextView.setTextColor(typedArray.getColor(0, Color.BLACK));
         } else {
             icon.setTint(tint);

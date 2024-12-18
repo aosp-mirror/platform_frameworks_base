@@ -22,9 +22,11 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
+import android.util.Slog;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalCleanupClient;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
@@ -41,6 +43,8 @@ import java.util.function.Supplier;
  */
 public class FingerprintInternalCleanupClient
         extends InternalCleanupClient<Fingerprint, AidlSession> {
+
+    private static final String TAG = "FingerprintInternalCleanupClient";
 
     public FingerprintInternalCleanupClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
@@ -77,7 +81,19 @@ public class FingerprintInternalCleanupClient
     @Override
     protected void onAddUnknownTemplate(int userId,
             @NonNull BiometricAuthenticator.Identifier identifier) {
-        FingerprintUtils.getInstance(getSensorId()).addBiometricForUser(
+        mBiometricUtils.addBiometricForUser(
                 getContext(), getTargetUserId(), (Fingerprint) identifier);
+    }
+
+    @Override
+    public void handleInvalidBiometricState() {
+        Slog.d(TAG, "Invalid fingerprint user state: delete the state.");
+        mBiometricUtils.deleteStateForUser(getTargetUserId());
+        BiometricNotificationUtils.showFingerprintLoeNotification(getContext());
+    }
+
+    @Override
+    protected int getModality() {
+        return BiometricsProtoEnums.MODALITY_FINGERPRINT;
     }
 }

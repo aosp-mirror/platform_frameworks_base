@@ -55,4 +55,10 @@ oneway interface IDisplayWindowInsetsController {
      * @see IWindow#hideInsets
      */
     void hideInsets(int types, boolean fromIme, in @nullable ImeTracker.Token statsToken);
+
+    /**
+     * Reports the requested IME visibility of the IME input target to
+     * the IDisplayWindowInsetsController
+     */
+    void setImeInputTargetRequestedVisibility(boolean visible);
 }

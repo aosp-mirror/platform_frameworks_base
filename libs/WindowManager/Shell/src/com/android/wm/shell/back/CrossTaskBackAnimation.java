@@ -29,11 +29,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Handler;
 import android.os.RemoteException;
+import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -46,10 +49,11 @@ import android.window.BackProgressAnimator;
 import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.policy.SystemBarUtils;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
-import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 
 import javax.inject.Inject;
 
@@ -66,7 +70,6 @@ import javax.inject.Inject;
  * IOnBackInvokedCallback} with WM Shell and receives back dispatches when a back navigation to
  * launcher starts.
  */
-@ShellMainThread
 public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int BACKGROUNDCOLOR = 0x43433A;
 
@@ -79,7 +82,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int POST_ANIMATION_DURATION_MS = 500;
 
     private final Rect mStartTaskRect = new Rect();
-    private final float mCornerRadius;
+    private float mCornerRadius;
+    private int mStatusbarHeight;
 
     // The closing window properties.
     private final Rect mClosingStartRect = new Rect();
@@ -91,7 +95,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final PointF mInitialTouchPos = new PointF();
     private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
-    private final Interpolator mProgressInterpolator = Interpolators.STANDARD_DECELERATE;
+    private final Interpolator mProgressInterpolator = Interpolators.BACK_GESTURE;
     private final Interpolator mVerticalMoveInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 
@@ -111,12 +115,23 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private float mVerticalMargin;
 
     @Inject
-    public CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
-        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
+    public CrossTaskBackAnimation(Context context, BackAnimationBackground background,
+            @ShellMainThread Handler handler) {
         mBackAnimationRunner = new BackAnimationRunner(
-                new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
+                new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK, handler);
         mBackground = background;
         mContext = context;
+        loadResources();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        loadResources();
+    }
+
+    private void loadResources() {
+        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        mStatusbarHeight = SystemBarUtils.getStatusBarHeight(mContext);
     }
 
     private static float mapRange(float value, float min, float max) {
@@ -142,7 +157,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
         // Draw background.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
-                BACKGROUNDCOLOR, mTransaction);
+                BACKGROUNDCOLOR, mTransaction, mStatusbarHeight);
         mInterWindowMargin = mContext.getResources()
                 .getDimension(R.dimen.cross_task_back_inter_window_margin);
         mVerticalMargin = mContext.getResources()
@@ -192,9 +207,9 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
-        mTransaction.apply();
+        applyTransaction();
 
-        mBackground.onBackProgressed(progress);
+        mBackground.customizeStatusBarAppearance((int) scaledTop);
     }
 
     private void updatePostCommitClosingAnimation(float progress) {
@@ -242,6 +257,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 .setCornerRadius(leash, cornerRadius);
     }
 
+    private void applyTransaction() {
+        mTransaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        mTransaction.apply();
+    }
+
     private void finishAnimation() {
         if (mEnteringTarget != null) {
             mEnteringTarget.leash.release();
@@ -255,8 +275,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         if (mBackground != null) {
             mBackground.removeBackground(mTransaction);
         }
-
-        mTransaction.apply();
+        applyTransaction();
         mBackInProgress = false;
         mTransformMatrix.reset();
         mClosingCurrentRect.setEmpty();
@@ -275,8 +294,6 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
-            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
-            mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
             mBackInProgress = true;
         }
         float progress = backEvent.getProgress();
@@ -305,7 +322,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             if (progress > 1 - UPDATE_SYSUI_FLAGS_THRESHOLD) {
                 mBackground.resetStatusBarCustomization();
             }
-            mTransaction.apply();
+            applyTransaction();
         });
 
         valueAnimator.addListener(new AnimatorListenerAdapter() {
@@ -326,6 +343,13 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
+            // in case we're still animating an onBackCancelled event, let's remove the finish-
+            // callback from the progress animator to prevent calling finishAnimation() before
+            // restarting a new animation
+            mProgressAnimator.removeOnBackCancelledFinishCallback();
+
+            mIsRightEdge = backEvent.getSwipeEdge() == EDGE_RIGHT;
+            mInitialTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
             mProgressAnimator.onBackStarted(backEvent,
                     CrossTaskBackAnimation.this::onGestureProgress);
         }

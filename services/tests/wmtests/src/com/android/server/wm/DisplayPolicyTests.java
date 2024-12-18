@@ -70,6 +70,8 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -282,11 +284,11 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         policy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
 
-        policy.screenTurnedOff();
+        policy.screenTurnedOff(false /* acquireSleepToken */);
         policy.setAwake(false);
         policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
-        policy.screenTurnedOff();
+        policy.screenTurnedOff(false /* acquireSleepToken */);
         assertFalse(wpc.isShowingUiWhileDozing());
 
         policy.screenTurningOn(null /* screenOnListener */);
@@ -391,7 +393,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 info.logicalWidth, info.logicalHeight).mConfigFrame);
 
         // If screen is not fully turned on, then the cache should be preserved.
-        displayPolicy.screenTurnedOff();
+        displayPolicy.screenTurnedOff(false /* acquireSleepToken */);
         final TransitionController transitionController = mDisplayContent.mTransitionController;
         spyOn(transitionController);
         doReturn(true).when(transitionController).isCollecting();
@@ -411,6 +413,10 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testUpdateDisplayConfigurationByDecor() {
+        if (Flags.insetsDecoupledConfiguration()) {
+            // No configuration update when flag enables.
+            return;
+        }
         doReturn(NO_CUTOUT).when(mDisplayContent).calculateDisplayCutoutForRotation(anyInt());
         final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
@@ -548,7 +554,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
-        navBarProvider.updateControlForTarget(mAppWindow, false);
+        navBarProvider.updateControlForTarget(mAppWindow, false, null /* statsToken */);
         navBarProvider.getSource().setVisible(false);
 
         displayPolicy.setCanSystemBarsBeShownByUser(false);
@@ -573,7 +579,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
-        navBarProvider.updateControlForTarget(win, false);
+        navBarProvider.updateControlForTarget(win, false, null /* statsToken */);
         navBarProvider.getSource().setVisible(false);
 
         displayPolicy.setCanSystemBarsBeShownByUser(true);

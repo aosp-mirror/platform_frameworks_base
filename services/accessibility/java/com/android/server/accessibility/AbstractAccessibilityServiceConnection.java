@@ -34,6 +34,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
 import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -44,10 +45,12 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.MagnificationConfig;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
+import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresNoPermission;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -68,6 +71,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -121,7 +125,6 @@ import java.util.Set;
  * This class represents an accessibility client - either an AccessibilityService or a UiAutomation.
  * It is responsible for behavior common to both types of clients.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServiceConnection.Stub
         implements ServiceConnection, IBinder.DeathRecipient, KeyEventDispatcher.KeyEventFilter,
         FingerprintGestureDispatcher.FingerprintGestureClient {
@@ -339,6 +342,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             AccessibilityTrace trace, WindowManagerInternal windowManagerInternal,
             SystemActionPerformer systemActionPerfomer,
             AccessibilityWindowManager a11yWindowManager) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mWindowManagerService = windowManagerInternal;
         mId = id;
@@ -469,6 +473,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return (mEventTypes != 0 && mService != null);
     }
 
+    @RequiresNoPermission
     @Override
     public void setOnKeyEventResult(boolean handled, int sequence) {
         if (svcConnTracingEnabled()) {
@@ -482,6 +487,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public AccessibilityServiceInfo getServiceInfo() {
         if (svcConnTracingEnabled()) {
@@ -501,6 +507,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 : AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) | mEventTypes;
     }
 
+    @RequiresNoPermission
     @Override
     public void setServiceInfo(AccessibilityServiceInfo info) {
         if (svcConnTracingEnabled()) {
@@ -536,16 +543,19 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setInstalledAndEnabledServices(List<AccessibilityServiceInfo> infos) {
         return;
     }
 
+    @RequiresNoPermission
     @Override
     public List<AccessibilityServiceInfo> getInstalledAndEnabledServices() {
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public void setAttributionTag(String attributionTag) {
         mAttributionTag = attributionTag;
@@ -558,6 +568,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     protected abstract boolean hasRightsToCurrentUserLocked();
 
     @Nullable
+    @RequiresNoPermission
     @Override
     public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
         if (svcConnTracingEnabled()) {
@@ -606,17 +617,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mDisplayTypes = displayTypes;
     }
 
+    @RequiresNoPermission
     @Override
     public AccessibilityWindowInfo getWindow(int windowId) {
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("getWindow", "windowId=" + windowId);
         }
+        int displayId = Display.INVALID_DISPLAY;
+        if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+            displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowId(
+                    mSystemSupport.getCurrentUserIdLocked(), windowId);
+        }
         synchronized (mLock) {
-            int displayId = Display.INVALID_DISPLAY;
-            if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
-                displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
-                        mSystemSupport.getCurrentUserIdLocked(), windowId);
-            }
             ensureWindowsAvailableTimedLocked(displayId);
 
             if (!hasRightsToCurrentUserLocked()) {
@@ -646,6 +658,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public String[] findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
             long accessibilityNodeId, String viewIdResName, int interactionId,
@@ -722,6 +735,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public String[] findAccessibilityNodeInfosByText(int accessibilityWindowId,
             long accessibilityNodeId, String text, int interactionId,
@@ -797,6 +811,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public String[] findAccessibilityNodeInfoByAccessibilityId(
             int accessibilityWindowId, long accessibilityNodeId, int interactionId,
@@ -875,6 +890,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public String[] findFocus(int accessibilityWindowId, long accessibilityNodeId,
             int focusType, int interactionId,
@@ -952,6 +968,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId,
             int direction, int interactionId,
@@ -1028,6 +1045,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return null;
     }
 
+    @RequiresNoPermission
     @Override
     public void sendGesture(int sequence, ParceledListSlice gestureSteps) {
         if (svcConnTracingEnabled()) {
@@ -1036,6 +1054,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1044,6 +1063,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean performAccessibilityAction(int accessibilityWindowId,
             long accessibilityNodeId, int action, Bundle arguments, int interactionId,
@@ -1075,16 +1095,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 action, arguments, interactionId, callback, mFetchFlags, interrogatingTid);
     }
 
+    @RequiresNoPermission
     @Override
     public boolean performGlobalAction(int action) {
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("performGlobalAction", "action=" + action);
         }
+        int currentUserId;
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
+            currentUserId = mSystemSupport.getCurrentUserIdLocked();
         }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         final long identity = Binder.clearCallingIdentity();
         try {
             return mSystemActionPerformer.performSystemAction(action);
@@ -1093,6 +1117,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public @NonNull List<AccessibilityNodeInfo.AccessibilityAction> getSystemActions() {
         if (svcConnTracingEnabled()) {
@@ -1111,6 +1136,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean isFingerprintGestureDetectionAvailable() {
         if (svcConnTracingEnabled()) {
@@ -1133,6 +1159,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Nullable
+    @RequiresNoPermission
     @Override
     public MagnificationConfig getMagnificationConfig(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1151,6 +1178,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public float getMagnificationScale(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1169,6 +1197,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public Region getMagnificationRegion(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1193,6 +1222,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
 
+    @RequiresNoPermission
     @Override
     public Region getCurrentMagnificationRegion(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1216,6 +1246,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public float getMagnificationCenterX(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1237,6 +1268,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public float getMagnificationCenterY(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1258,6 +1290,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean resetMagnification(int displayId, boolean animate) {
         if (svcConnTracingEnabled()) {
@@ -1282,6 +1315,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean resetCurrentMagnification(int displayId, boolean animate) {
         if (svcConnTracingEnabled()) {
@@ -1307,6 +1341,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean setMagnificationConfig(int displayId,
             @NonNull MagnificationConfig config, boolean animate) {
@@ -1333,6 +1368,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setMagnificationCallbackEnabled(int displayId, boolean enabled) {
         if (svcConnTracingEnabled()) {
@@ -1351,6 +1387,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return mInvocationHandler.isMagnificationCallbackEnabled(displayId);
     }
 
+    @RequiresNoPermission
     @Override
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {
         if (svcConnTracingEnabled()) {
@@ -1364,6 +1401,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void takeScreenshotOfWindow(int accessibilityWindowId, int interactionId,
             ScreenCapture.ScreenCaptureListener listener,
@@ -1414,6 +1452,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void takeScreenshot(int displayId, RemoteCallback callback) {
         if (svcConnTracingEnabled()) {
@@ -1553,6 +1592,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
+    @PermissionManuallyEnforced
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
@@ -1576,7 +1616,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * lock because this calls out to WindowManagerService.
      */
     void addWindowTokensForAllDisplays() {
-        final Display[] displays = mDisplayManager.getDisplays();
+        Display[] displays = {};
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            displays = mDisplayManager.getDisplays();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int i = 0; i < displays.length; i++) {
             final int displayId = displays[i].getDisplayId();
             addWindowTokenForDisplay(displayId);
@@ -1612,14 +1658,18 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void onRemoved() {
-        final Display[] displays = mDisplayManager.getDisplays();
+        Display[] displays = {};
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            displays = mDisplayManager.getDisplays();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int i = 0; i < displays.length; i++) {
             final int displayId = displays[i].getDisplayId();
             onDisplayRemoved(displayId);
         }
-        if (com.android.server.accessibility.Flags.cleanupA11yOverlays()) {
             detachAllOverlays();
-        }
     }
 
     /**
@@ -1651,6 +1701,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * @param displayId The id of the logical display that was added.
      * @return window token.
      */
+    @RequiresNoPermission
     @Override
     public IBinder getOverlayWindowToken(int displayId) {
         if (svcConnTracingEnabled()) {
@@ -1672,6 +1723,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * @param token The token
      * @return window id
      */
+    @RequiresNoPermission
     @Override
     public int getWindowIdForLeashToken(@NonNull IBinder token) {
         if (svcConnTracingEnabled()) {
@@ -1688,9 +1740,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void resetLocked() {
-        if (Flags.resettableDynamicProperties()) {
-            mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
-        }
+        mAccessibilityServiceInfo.resetDynamicallyConfigurableProperties();
         mSystemSupport.getKeyEventDispatcher().flush(this);
         try {
             // Clear the proxy in the other process so this
@@ -2525,6 +2575,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return mSendMotionEvents;
     }
 
+    @RequiresNoPermission
     @Override
     public void setGestureDetectionPassthroughRegion(int displayId, Region region) {
         if (svcConnTracingEnabled()) {
@@ -2539,6 +2590,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setTouchExplorationPassthroughRegion(int displayId, Region region) {
         if (svcConnTracingEnabled()) {
@@ -2553,6 +2605,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setFocusAppearance(int strokeWidth, int color) {
         if (svcConnTracingEnabled()) {
@@ -2560,6 +2613,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setCacheEnabled(boolean enabled) {
         if (svcConnTracingEnabled()) {
@@ -2576,6 +2630,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
             int processId, long threadId, int callingUid, Bundle callingStack) {
@@ -2631,6 +2686,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mTrace.logTrace(TRACE_WM + "." + methodName, FLAGS_WINDOW_MANAGER_INTERNAL, params);
     }
 
+    @RequiresNoPermission
     @Override
     public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
         final long identity = Binder.clearCallingIdentity();
@@ -2649,6 +2705,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return false;
     }
 
+    @RequiresNoPermission
     @Override
     public void requestTouchExploration(int displayId) {
         final long identity = Binder.clearCallingIdentity();
@@ -2659,6 +2716,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void requestDragging(int displayId, int pointerId) {
         final long identity = Binder.clearCallingIdentity();
@@ -2669,6 +2727,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void requestDelegating(int displayId) {
         final long identity = Binder.clearCallingIdentity();
@@ -2679,6 +2738,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void onDoubleTap(int displayId) {
         final long identity = Binder.clearCallingIdentity();
@@ -2689,6 +2749,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void onDoubleTapAndHold(int displayId) {
         final long identity = Binder.clearCallingIdentity();
@@ -2702,8 +2763,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     /**
      * Sets the scaling factor for animations.
      */
+    @RequiresNoPermission
     @Override
     public void setAnimationScale(float scale) {
+        int currentUserId;
+        synchronized (mLock) {
+            currentUserId = mSystemSupport.getCurrentUserIdLocked();
+        }
+        enforceCurrentUserIfVisibleBackgroundEnabled(currentUserId);
         final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Global.putFloat(
@@ -2719,6 +2786,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void attachAccessibilityOverlayToDisplay(
             int interactionId,
@@ -2735,6 +2803,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void attachAccessibilityOverlayToWindow(
             int interactionId,
@@ -2781,12 +2850,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    @SuppressLint("AndroidFrameworkRequiresPermission") // Unsupported in Abstract class
+    @EnforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     public void connectBluetoothBrailleDisplay(String bluetoothAddress,
             IBrailleDisplayController controller) {
+        connectBluetoothBrailleDisplay_enforcePermission();
         throw new UnsupportedOperationException();
     }
 
+    @RequiresNoPermission
     @Override
     public void connectUsbBrailleDisplay(UsbDevice usbDevice,
             IBrailleDisplayController controller) {
@@ -2794,8 +2865,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    @SuppressLint("AndroidFrameworkRequiresPermission") // Unsupported in Abstract class
+    @EnforcePermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)
     public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        setTestBrailleDisplayData_enforcePermission();
         throw new UnsupportedOperationException();
     }
 }

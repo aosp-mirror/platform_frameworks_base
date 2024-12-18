@@ -23,7 +23,5 @@ data class ShadeExpansionChangeEvent(
     /** Whether the panel should be considered expanded */
     val expanded: Boolean,
     /** Whether the user is actively dragging the panel. */
-    val tracking: Boolean,
-    /** The amount of pixels that the user has dragged during the expansion. */
-    val dragDownPxAmount: Float
+    val tracking: Boolean
 )

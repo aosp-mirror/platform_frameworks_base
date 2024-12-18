@@ -6,6 +6,20 @@ Ravenwood explicitly does not support “large” integration tests that expect 
 
 When writing tests under Ravenwood, all Android API symbols associated with your declared `sdk_version` are available to link against using, but unsupported APIs will throw an exception.  This design choice enables mocking of unsupported APIs, and supports sharing of test code to build “bivalent” test suites that run against either Ravenwood or a traditional device.
 
+## Manually running tests
+
+To run all Ravenwood tests, use:
+
+```
+./frameworks/base/ravenwood/scripts/run-ravenwood-tests.sh
+```
+
+To run a specific test, use "atest" as normal, selecting the test from a Ravenwood suite such as:
+
+```
+atest CtsOsTestCasesRavenwood:ParcelTest\#testSetDataCapacityNegative
+```
+
 ## Typical test structure
 
 Below are the typical steps needed to add a straightforward “small” unit test:
@@ -17,6 +31,7 @@ android_ravenwood_test {
     name: "MyTestsRavenwood",
     static_libs: [
         "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
         "androidx.test.rules",
     ],
     srcs: [
@@ -31,10 +46,10 @@ android_ravenwood_test {
 * Write your unit test just like you would for an Android device:
 
 ```
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +66,7 @@ public class MyCodeTest {
 * APIs available under Ravenwood are stateless by default.  If your test requires explicit states (such as defining the UID you’re running under, or requiring a main `Looper` thread), add a `RavenwoodRule` to declare that:
 
 ```
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -91,45 +106,6 @@ You can also run your new tests automatically via `TEST_MAPPING` rules like this
 
 > **Note:** There's a known bug #308854804 where `TEST_MAPPING` is not being applied, so we're currently planning to run all Ravenwood tests unconditionally in presubmit for changes to `frameworks/base/` and `cts/` until there is a better path forward.
 
-## Strategies for feature flags
-
-Ravenwood supports writing tests against logic that uses feature flags through the existing `SetFlagsRule` infrastructure maintained by the feature flagging team:
-
-```
-import android.platform.test.flag.junit.SetFlagsRule;
-
-@RunWith(AndroidJUnit4.class)
-public class MyCodeTest {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(SetFlagsRule.DefaultInitValueType.NULL_DEFAULT);
-
-    @Test
-    public void testEnabled() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_MY_FLAG);
-        // verify test logic that depends on flag being enabled
-    }
-```
-
-This naturally composes together well with any `RavenwoodRule` that your test may need.
-
-While `SetFlagsRule` is generally a best-practice (as it can explicitly confirm behaviors for both "on" and "off" states), you may need to write tests that use `CheckFlagsRule` (such as when writing CTS).  Ravenwood currently supports `CheckFlagsRule` by offering "all-on" and "all-off" behaviors:
-
-```
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
-import android.platform.test.ravenwood.RavenwoodRule;
-
-@RunWith(AndroidJUnit4.class)
-public class MyCodeTest {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isUnderRavenwood()
-            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-            : DeviceFlagsValueProvider.createCheckFlagsRule();
-```
-
-Ravenwood currently doesn't have knowledge of the "default" value of any flags, so using `createAllOnCheckFlagsRule()` is recommended to verify the widest possible set of behaviors.  The example code above falls back to using default values from `DeviceFlagsValueProvider` when not running on Ravenwood.
-
 ## Strategies for migration/bivalent tests
 
 Ravenwood aims to support tests that are written in a “bivalent” way, where the same test code can be dual-compiled to run on both a real Android device and under a Ravenwood environment.
@@ -150,7 +126,7 @@ public class MyCodeTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = PackageManager.class)
+    @DisabledOnRavenwood(blockedBy = PackageManager.class)
     public void testComplex() {
         // Complex test that runs on devices, but is ignored under Ravenwood
     }

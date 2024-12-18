@@ -28,6 +28,7 @@ import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
@@ -46,12 +47,11 @@ oneway interface IStatusBar
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
-    void togglePanel();
+    void toggleNotificationsPanel();
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher);
+    void setImeWindowStatus(int displayId, int vis, int backDisposition, boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
@@ -207,11 +207,6 @@ oneway interface IStatusBar
      * Notifies System UI that the display is ready to show system decorations.
      */
     void onDisplayReady(int displayId);
-
-    /**
-     * Notifies System UI whether the recents animation is running or not.
-     */
-    void onRecentsAnimationStateChanged(boolean running);
 
     /**
      * Notifies System UI side of system bar attribute change on the specified display.
@@ -370,20 +365,29 @@ oneway interface IStatusBar
     /**
      * Enters stage split from a current running app.
      *
+     * @param displayId the id of the current display.
      * @param leftOrTop indicates where the stage split is.
      */
-    void enterStageSplitFromRunningApp(boolean leftOrTop);
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
+
+    /**
+     * Set the split screen focus to the left / top app or the right / bottom app based on
+     * {@param leftOrTop}.
+     */
+    void setSplitscreenFocus(boolean leftOrTop);
 
     /**
      * Shows the media output switcher dialog.
      *
-     * @param packageName of the session for which the output switcher is shown.
+     * @param targetPackageName The package name for which to show the output switcher.
+     * @param targetUserHandle The UserHandle on which the package for which to show the output
+     *     switcher is running.
      */
-    void showMediaOutputSwitcher(String packageName);
+    void showMediaOutputSwitcher(String targetPackageName, in UserHandle targetUserHandle);
 
-    /** Enters desktop mode.
+    /** Enters desktop mode from the current focused app.
     *
     * @param displayId the id of the current display.
     */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId);
 }

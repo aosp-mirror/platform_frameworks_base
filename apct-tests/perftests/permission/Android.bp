@@ -43,7 +43,7 @@ android_test {
         "cts-install-lib-java",
     ],
 
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
 
     platform_apis: true,
 

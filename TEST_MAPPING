@@ -1,44 +1,17 @@
 {
   "presubmit-large": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksServicesTests_Presubmit"
     }
   ],
   "presubmit-pm": [
     {
-      "name": "PackageManagerServiceServerTests",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "PackageManagerServiceServerTests_Presubmit"
     }
   ],
   "presubmit": [
     {
-      "name": "ManagedProvisioningTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "ManagedProvisioningTests"
     },
     {
       "file_patterns": [
@@ -46,86 +19,28 @@
         "SystemServer\\.java",
         "services/tests/apexsystemservices/.*"
       ],
-      "name": "ApexSystemServicesTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "ApexSystemServicesTestCases"
     },
     {
-      "name": "FrameworksUiServicesTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksUiServicesTests"
     },
     {
-      "name": "FrameworksInputMethodSystemServerTests",
-      "options": [
-        {"include-filter": "com.android.server.inputmethod"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "FrameworksInputMethodSystemServerTests_server_inputmethod"
     },
     {
-      "name": "ExtServicesUnitTests-tplus",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "ExtServicesUnitTests-tplus"
     },
     {
-      "name": "ExtServicesUnitTests-sminus",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "ExtServicesUnitTests-sminus"
     },
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksCoreTests_Presubmit"
     },
     {
-      "name": "FrameworkPermissionTests",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworkPermissionTests_Presubmit"
     },
     {
-      "name": "FrameworksInProcessTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksInProcessTests"
     },
     {
       "name": "vts_treble_vintf_framework_test"
@@ -137,9 +52,16 @@
       "name": "CtsStrictJavaPackagesTestCases"
     }
   ],
-  "postsubmit-ravenwood": [
+  "ravenwood-presubmit": [
     {
       "name": "CtsUtilTestCasesRavenwood",
+      "host": true,
+      "file_patterns": [
+        "[Rr]avenwood"
+      ]
+    },
+    {
+      "name": "RavenwoodBivalentTest",
       "host": true,
       "file_patterns": [
         "[Rr]avenwood"
@@ -159,78 +81,25 @@
    // infra during the hardening phase.
    // TODO: this tag to be removed once the above is no longer an issue.
    {
-     "name": "FrameworksUiServicesTests",
-     "options": [
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       }
-     ]
+     "name": "FrameworksUiServicesTests"
    },
    {
-     "name": "ExtServicesUnitTests-tplus",
-     "options": [
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       }
-     ]
+     "name": "ExtServicesUnitTests-tplus"
    },
    {
-     "name": "ExtServicesUnitTests-sminus",
-     "options": [
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       }
-     ]
+     "name": "ExtServicesUnitTests-sminus"
    },
    {
-     "name": "TestablesTests",
-     "options": [
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       }
-     ]
+     "name": "TestablesTests"
    },
    {
-     "name": "FrameworksCoreTests",
-     "options": [
-       {
-         "include-annotation": "android.platform.test.annotations.Presubmit"
-       },
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       },
-       {
-         "exclude-annotation": "org.junit.Ignore"
-       }
-     ]
+     "name": "FrameworksCoreTests_Presubmit"
    },
    {
-     "name": "FrameworksServicesTests",
-     "options": [
-       {
-         "include-annotation": "android.platform.test.annotations.Presubmit"
-       },
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       },
-       {
-         "exclude-annotation": "org.junit.Ignore"
-       }
-     ]
+     "name": "FrameworksServicesTests_presubmit"
    },
    {
-     "name": "PackageManagerServiceServerTests",
-     "options": [
-       {
-         "include-annotation": "android.platform.test.annotations.Presubmit"
-       },
-       {
-         "exclude-annotation": "androidx.test.filters.FlakyTest"
-       },
-       {
-         "exclude-annotation": "org.junit.Ignore"
-       }
-     ]
+     "name": "PackageManagerServiceServerTests_Presubmit"
    }
  ]
 }

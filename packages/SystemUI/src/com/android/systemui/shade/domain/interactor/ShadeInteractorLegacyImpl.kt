@@ -16,10 +16,12 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.FlowTracing.traceAsCounter
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
@@ -45,14 +47,21 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
-    /** The amount [0-1] that the shade has been opened */
-    override val shadeExpansion: Flow<Float> =
+    init {
+        SceneContainerFlag.assertInLegacyMode()
+    }
+
+    /**
+     * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
+     * in downstream flows.
+     */
+    override val shadeExpansion: StateFlow<Float> =
         combine(
                 repository.lockscreenShadeExpansion,
                 keyguardRepository.statusBarState,
                 repository.legacyShadeExpansion,
                 repository.qsExpansion,
-                sharedNotificationContainerInteractor.isSplitShadeEnabled
+                sharedNotificationContainerInteractor.isSplitShadeEnabled,
             ) {
                 lockscreenShadeExpansion,
                 statusBarState,
@@ -62,7 +71,8 @@ constructor(
                 when (statusBarState) {
                     // legacyShadeExpansion is 1 instead of 0 when QS is expanded
                     StatusBarState.SHADE ->
-                        if (!splitShadeEnabled && qsExpansion > 0f) 0f else legacyShadeExpansion
+                        if (!splitShadeEnabled && qsExpansion > 0f) 1f - qsExpansion
+                        else legacyShadeExpansion
                     StatusBarState.KEYGUARD -> lockscreenShadeExpansion
                     // dragDownAmount, which drives lockscreenShadeExpansion resets to 0f when
                     // the pointer is lifted and the lockscreen shade is fully expanded
@@ -70,6 +80,8 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .traceAsCounter("panel_expansion") { (it * 100f).toInt() }
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion
 
@@ -85,19 +97,31 @@ constructor(
         repository.legacyExpandedOrAwaitingInputTransfer.stateIn(
             scope,
             SharingStarted.Eagerly,
-            false
+            false,
         )
 
     override val isUserInteractingWithShade: Flow<Boolean> =
         combine(
             userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion),
-            repository.legacyLockscreenShadeTracking
+            repository.legacyLockscreenShadeTracking,
         ) { legacyShadeTracking, legacyLockscreenShadeTracking ->
             legacyShadeTracking || legacyLockscreenShadeTracking
         }
 
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+
+    override fun expandNotificationShade(loggingReason: String) {
+        throw UnsupportedOperationException(
+            "expandNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun expandQuickSettingsShade(loggingReason: String) {
+        throw UnsupportedOperationException(
+            "expandQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
 
     /**
      * Return a flow for whether a user is interacting with an expandable shade component using
@@ -106,7 +130,7 @@ constructor(
      */
     private fun userInteractingFlow(
         tracking: Flow<Boolean>,
-        expansion: StateFlow<Float>
+        expansion: StateFlow<Float>,
     ): Flow<Boolean> {
         return flow {
             // initial value is false

@@ -849,6 +849,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_EXT_CPU_OVERRIDE = 1 << 5;
 
+    /**
+     * Whether the app has been previously not launched
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_EXT_NOT_LAUNCHED = 1 << 6;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_EXT_" }, value = {
             PRIVATE_FLAG_EXT_PROFILEABLE,
@@ -857,6 +863,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK,
             PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
             PRIVATE_FLAG_EXT_CPU_OVERRIDE,
+            PRIVATE_FLAG_EXT_NOT_LAUNCHED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlagsExt {}
@@ -2327,9 +2334,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Whether an app allows its playback audio to be captured by other apps.
      *
      * @return {@code true} if the app indicates that its audio can be captured by other apps.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_AUDIO_PLAYBACK_CAPTURE_ALLOWANCE)
     public boolean isAudioPlaybackCaptureAllowed() {
         return (privateFlags & PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE) != 0;
     }
@@ -2664,6 +2670,22 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /**
+     * Returns whether the app in the STOPPED state.
+     * @hide
+     */
+    public boolean isStopped() {
+        return (flags & ApplicationInfo.FLAG_STOPPED) != 0;
+    }
+
+    /**
+     * Returns whether the app was never launched (any process started) before.
+     * @hide
+     */
+    public boolean isNotLaunched() {
+        return (privateFlagsExt & ApplicationInfo.PRIVATE_FLAG_EXT_NOT_LAUNCHED) != 0;
+    }
+
+    /**
      * Checks if a changeId is enabled for the current user
      * @param changeId The changeId to verify
      * @return True of the changeId is enabled
@@ -2700,7 +2722,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
-    @Override protected ApplicationInfo getApplicationInfo() {
+    @Override public ApplicationInfo getApplicationInfo() {
         return this;
     }
 

@@ -19,6 +19,8 @@ package com.android.internal.os;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
+import static android.net.http.Flags.preloadHttpengineInZygote;
+
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__SECONDARY_ZYGOTE_INIT_START;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_ELAPSED_TIME__EVENT__ZYGOTE_INIT_START;
 
@@ -27,6 +29,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.SharedLibraryInfo;
 import android.content.res.Resources;
 import android.os.Build;
+import android.net.http.HttpEngine;
 import android.os.Environment;
 import android.os.IInstalld;
 import android.os.Process;
@@ -144,6 +147,23 @@ public class ZygoteInit {
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         preloadSharedLibraries();
         preloadTextResources();
+
+        // TODO: remove the try/catch and the flag read as soon as the flag is ramped and 25Q2
+        // starts building from source.
+        if (preloadHttpengineInZygote()) {
+            try {
+                HttpEngine.preload();
+            } catch (NoSuchMethodError e){
+                // The flag protecting this API is not an exported
+                // flag because ZygoteInit happens before the
+                // system service has initialized the flag which means
+                // that we can't query the real value of the flag
+                // from the tethering module. In order to avoid crashing
+                // in the case where we have (new zygote, old tethering).
+                // we catch the NoSuchMethodError and just log.
+                Log.d(TAG, "HttpEngine.preload() threw " + e);
+            }
+        }
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
         // for memory sharing purposes.
         WebViewFactory.prepareWebViewInZygote();
@@ -249,6 +269,10 @@ public class ZygoteInit {
         return isExperimentEnabled("profilesystemserver");
     }
 
+    private static boolean shouldProfileBootClasspath() {
+        return isExperimentEnabled("profilebootclasspath");
+    }
+
     /**
      * Performs Zygote process initialization. Loads and initializes commonly used classes.
      *
@@ -352,7 +376,7 @@ public class ZygoteInit {
             // If we are profiling the boot image, reset the Jit counters after preloading the
             // classes. We want to preload for performance, and we can use method counters to
             // infer what clases are used after calling resetJitCounters, for profile purposes.
-            if (isExperimentEnabled("profilebootclasspath")) {
+            if (shouldProfileBootClasspath()) {
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
                 VMRuntime.resetJitCounters();
                 Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -397,10 +421,18 @@ public class ZygoteInit {
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
                 false /*isNative*/));
 
+        if (Flags.enableApacheHttpLegacyPreload()) {
+            libs.add(new SharedLibraryInfo(
+                    "/system/framework/org.apache.http.legacy.jar", null /*packageName*/,
+                    null /*codePaths*/, null /*name*/, 0 /*version*/,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+        }
+
         // WindowManager Extensions is an optional shared library that is required for WindowManager
         // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
         // startup performance.
-        if (WindowManager.hasWindowExtensionsEnabled()) {
+        if (WindowManager.HAS_WINDOW_EXTENSIONS_ON_DEVICE) {
             final String systemExtFrameworkPath =
                     new File(Environment.getSystemExtDirectory(), "framework").getPath();
             libs.add(new SharedLibraryInfo(
@@ -452,9 +484,25 @@ public class ZygoteInit {
                             ? String.join(":", systemServerClasspath, standaloneSystemServerJars)
                             : systemServerClasspath;
                     prepareSystemServerProfile(systemServerPaths);
+                    try {
+                        SystemProperties.set("debug.tracing.profile_system_server", "1");
+                    } catch (RuntimeException e) {
+                        Slog.e(TAG, "Failed to set debug.tracing.profile_system_server", e);
+                    }
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
                 }
+            }
+        }
+
+        // Zygote can't set system properties due to permission denied. We need to be in System
+        // Server to set system properties, so we do it here instead of the more natural place in
+        // preloadClasses.
+        if (shouldProfileBootClasspath()) {
+            try {
+                SystemProperties.set("debug.tracing.profile_boot_classpath", "1");
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Failed to set debug.tracing.profile_boot_classpath", e);
             }
         }
 
@@ -623,21 +671,20 @@ public class ZygoteInit {
      */
     private static Runnable forkSystemServer(String abiList, String socketName,
             ZygoteServer zygoteServer) {
-        long capabilities = posixCapabilitiesAsBits(
-                OsConstants.CAP_IPC_LOCK,
-                OsConstants.CAP_KILL,
-                OsConstants.CAP_NET_ADMIN,
-                OsConstants.CAP_NET_BIND_SERVICE,
-                OsConstants.CAP_NET_BROADCAST,
-                OsConstants.CAP_NET_RAW,
-                OsConstants.CAP_SYS_MODULE,
-                OsConstants.CAP_SYS_NICE,
-                OsConstants.CAP_SYS_PTRACE,
-                OsConstants.CAP_SYS_TIME,
-                OsConstants.CAP_SYS_TTY_CONFIG,
-                OsConstants.CAP_WAKE_ALARM,
-                OsConstants.CAP_BLOCK_SUSPEND
-        );
+        long capabilities =
+                (1L << OsConstants.CAP_IPC_LOCK) |
+                (1L << OsConstants.CAP_KILL) |
+                (1L << OsConstants.CAP_NET_ADMIN) |
+                (1L << OsConstants.CAP_NET_BIND_SERVICE) |
+                (1L << OsConstants.CAP_NET_BROADCAST) |
+                (1L << OsConstants.CAP_NET_RAW) |
+                (1L << OsConstants.CAP_SYS_MODULE) |
+                (1L << OsConstants.CAP_SYS_NICE) |
+                (1L << OsConstants.CAP_SYS_PTRACE) |
+                (1L << OsConstants.CAP_SYS_TIME) |
+                (1L << OsConstants.CAP_SYS_TTY_CONFIG) |
+                (1L << OsConstants.CAP_WAKE_ALARM) |
+                (1L << OsConstants.CAP_BLOCK_SUSPEND);
         /* Containers run without some capabilities, so drop any caps that are not available. */
         StructCapUserHeader header = new StructCapUserHeader(
                 OsConstants._LINUX_CAPABILITY_VERSION_3, 0);
@@ -731,20 +778,6 @@ public class ZygoteInit {
         }
 
         return null;
-    }
-
-    /**
-     * Gets the bit array representation of the provided list of POSIX capabilities.
-     */
-    private static long posixCapabilitiesAsBits(int... capabilities) {
-        long result = 0;
-        for (int capability : capabilities) {
-            if ((capability < 0) || (capability > OsConstants.CAP_LAST_CAP)) {
-                throw new IllegalArgumentException(String.valueOf(capability));
-            }
-            result |= (1L << capability);
-        }
-        return result;
     }
 
     /**

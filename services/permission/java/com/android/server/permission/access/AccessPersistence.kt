@@ -25,9 +25,9 @@ import android.util.AtomicFile
 import android.util.Slog
 import android.util.SparseLongArray
 import com.android.internal.annotations.GuardedBy
-import com.android.internal.os.BackgroundThread
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
+import com.android.server.IoThread
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.PermissionApex
@@ -47,7 +47,7 @@ class AccessPersistence(private val policy: AccessPolicy) {
     private val writeLock = Any()
 
     fun initialize() {
-        writeHandler = WriteHandler(BackgroundThread.getHandler().looper)
+        writeHandler = WriteHandler(IoThread.getHandler().looper)
     }
 
     /**

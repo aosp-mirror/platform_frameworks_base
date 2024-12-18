@@ -60,7 +60,9 @@ class QSTileViewModelTest : SysuiTestCase() {
     @Mock private lateinit var qsTileAnalytics: QSTileAnalytics
 
     private val tileConfig =
-        QSTileConfigTestBuilder.build { policy = QSTilePolicy.Restricted("test_restriction") }
+        QSTileConfigTestBuilder.build {
+            policy = QSTilePolicy.Restricted(listOf("test_restriction"))
+        }
 
     private val userRepository = FakeUserRepository()
     private val tileDataInteractor = FakeQSTileDataInteractor<String>()
@@ -90,7 +92,8 @@ class QSTileViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(states()).isNotEmpty()
-            assertThat(states().first().label).isEqualTo(testTileData)
+            assertThat(states().last()).isNotNull()
+            assertThat(states().last()!!.label).isEqualTo(testTileData)
             verify(qsTileLogger).logInitialRequest(eq(tileConfig.tileSpec))
         }
 
@@ -193,6 +196,7 @@ class QSTileViewModelTest : SysuiTestCase() {
             qsTileAnalytics,
             qsTileLogger,
             FakeSystemClock(),
+            testCoroutineDispatcher,
             testCoroutineDispatcher,
             scope.backgroundScope,
         )

@@ -156,7 +156,6 @@ public abstract class CameraExtensionSession implements AutoCloseable {
          * @see #capture
          * @see #setRepeatingRequest
          */
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         public void onCaptureFailed(@NonNull CameraExtensionSession session,
                 @NonNull CaptureRequest request, @CaptureFailure.FailureReason int failure) {
             // default empty implementation

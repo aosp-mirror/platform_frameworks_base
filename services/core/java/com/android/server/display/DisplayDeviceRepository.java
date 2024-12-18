@@ -21,6 +21,7 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
+import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.display.DisplayManagerService.SyncRoot;
@@ -179,6 +180,20 @@ class DisplayDeviceRepository implements DisplayAdapter.Listener {
             if (diff == DisplayDeviceInfo.DIFF_STATE) {
                 Slog.i(TAG, "Display device changed state: \"" + info.name
                         + "\", " + Display.stateToString(info.state));
+            } else if (diff == DisplayDeviceInfo.DIFF_ROTATION) {
+                Slog.i(TAG, "Display device rotated: \"" + info.name
+                        + "\", " + Surface.rotationToString(info.rotation));
+            } else if (diff
+                    == (DisplayDeviceInfo.DIFF_MODE_ID | DisplayDeviceInfo.DIFF_RENDER_TIMINGS)) {
+                Slog.i(TAG, "Display device changed render timings: \"" + info.name
+                        + "\", renderFrameRate=" + info.renderFrameRate
+                        + ", presentationDeadlineNanos=" + info.presentationDeadlineNanos
+                        + ", appVsyncOffsetNanos=" + info.appVsyncOffsetNanos);
+            } else if (diff == DisplayDeviceInfo.DIFF_COMMITTED_STATE) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Display device changed committed state: \"" + info.name
+                            + "\", " + Display.stateToString(info.committedState));
+                }
             } else if (diff != DisplayDeviceInfo.DIFF_HDR_SDR_RATIO) {
                 Slog.i(TAG, "Display device changed: " + info);
             }

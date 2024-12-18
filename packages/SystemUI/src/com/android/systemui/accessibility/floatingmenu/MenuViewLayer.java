@@ -17,12 +17,13 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_BUTTON_COMPONENT_NAME;
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
@@ -35,19 +36,25 @@ import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.SettingsStringUtil;
+import android.util.ArraySet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -64,16 +71,18 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Flags;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissViewUtils;
-import com.android.wm.shell.common.bubbles.DismissView;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -97,14 +106,14 @@ class MenuViewLayer extends FrameLayout implements
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_action_dismiss";
+    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_dismiss";
 
     /**
      * Counter indicating the FAB was dragged to the Edit action button.
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_action_edit";
+    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_edit";
 
     private final WindowManager mWindowManager;
     private final MenuView mMenuView;
@@ -117,6 +126,7 @@ class MenuViewLayer extends FrameLayout implements
     private final MenuAnimationController mMenuAnimationController;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationManager mNotificationManager;
+    private StatusBarManager mStatusBarManager;
     private final MenuNotificationFactory mNotificationFactory;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final IAccessibilityFloatingMenu mFloatingMenu;
@@ -133,6 +143,8 @@ class MenuViewLayer extends FrameLayout implements
     private boolean mIsNotificationShown;
     private Optional<MenuEduTooltipView> mEduTooltipView = Optional.empty();
     private BroadcastReceiver mNotificationActionReceiver;
+    private NavigationModeController mNavigationModeController;
+    private NavigationModeController.ModeChangedListener mNavigationModeChangedListender;
 
     @IntDef({
             LayerIndex.MENU_VIEW,
@@ -162,35 +174,45 @@ class MenuViewLayer extends FrameLayout implements
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            mSecureSettings.putStringForUser(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
-                    UserHandle.USER_CURRENT);
+            if (android.view.accessibility.Flags.a11yQsShortcut()) {
+                mAccessibilityManager.enableShortcutsForTargets(
+                        /* enable= */ false,
+                        ShortcutConstants.UserShortcutType.SOFTWARE,
+                        new ArraySet<>(
+                                mAccessibilityManager.getAccessibilityShortcutTargets(SOFTWARE)),
+                        mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
+                );
+            } else {
+                mSecureSettings.putStringForUser(
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
+                        UserHandle.USER_CURRENT);
 
-            final List<ComponentName> hardwareKeyShortcutComponents =
-                    mAccessibilityManager.getAccessibilityShortcutTargets(
-                                    ACCESSIBILITY_SHORTCUT_KEY)
-                            .stream()
-                            .map(ComponentName::unflattenFromString)
-                            .toList();
+                final List<ComponentName> hardwareKeyShortcutComponents =
+                        mAccessibilityManager.getAccessibilityShortcutTargets(HARDWARE)
+                                .stream()
+                                .map(ComponentName::unflattenFromString)
+                                .toList();
 
-            // Should disable the corresponding service when the fragment type is
-            // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
-            final List<AccessibilityServiceInfo> serviceInfoList =
-                    mAccessibilityManager.getEnabledAccessibilityServiceList(
-                            AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-            serviceInfoList.forEach(info -> {
-                if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
-                    return;
-                }
+                // Should disable the corresponding service when the fragment type is
+                // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
+                final List<AccessibilityServiceInfo> serviceInfoList =
+                        mAccessibilityManager.getEnabledAccessibilityServiceList(
+                                AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+                serviceInfoList.forEach(info -> {
+                    if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
+                        return;
+                    }
 
-                final ComponentName serviceComponentName = info.getComponentName();
-                if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
-                    return;
-                }
+                    final ComponentName serviceComponentName = info.getComponentName();
+                    if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
+                        return;
+                    }
 
-                setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
-                        false);
-            });
+                    setAccessibilityServiceState(
+                            getContext(), serviceComponentName, /* enabled= */ false,
+                            mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
+                });
+            }
 
             mFloatingMenu.hide();
         }
@@ -201,7 +223,8 @@ class MenuViewLayer extends FrameLayout implements
             MenuViewModel menuViewModel,
             MenuViewAppearance menuViewAppearance, MenuView menuView,
             IAccessibilityFloatingMenu floatingMenu,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            NavigationModeController navigationModeController) {
         super(context);
 
         // Simplifies the translation positioning and animations
@@ -233,6 +256,9 @@ class MenuViewLayer extends FrameLayout implements
         mDismissView.getCircle().setId(R.id.action_remove_menu);
         mNotificationFactory = new MenuNotificationFactory(context);
         mNotificationManager = context.getSystemService(NotificationManager.class);
+        mStatusBarManager = context.getSystemService(StatusBarManager.class);
+        mNavigationModeController = navigationModeController;
+        mNavigationModeChangedListender = (mode -> mMenuView.onPositionChanged());
 
         if (Flags.floatingMenuDragToEdit()) {
             mDragToInteractAnimationController = new DragToInteractAnimationController(
@@ -303,9 +329,11 @@ class MenuViewLayer extends FrameLayout implements
         }
         addView(mMessageView, LayerIndex.MESSAGE_VIEW);
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            setClipChildren(true);
-        }
+        setClipChildren(true);
+
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
@@ -313,6 +341,7 @@ class MenuViewLayer extends FrameLayout implements
         mDragToInteractView.updateResources();
         mDismissView.updateResources();
         mDragToInteractAnimationController.updateResources();
+        mMenuAnimationController.skipAnimations();
     }
 
     @Override
@@ -358,6 +387,7 @@ class MenuViewLayer extends FrameLayout implements
                 mMigrationTooltipObserver);
         mMessageView.setUndoListener(view -> undo());
         getContext().registerComponentCallbacks(this);
+        mNavigationModeController.addListener(mNavigationModeChangedListender);
     }
 
     @Override
@@ -373,6 +403,7 @@ class MenuViewLayer extends FrameLayout implements
                 mMigrationTooltipObserver);
         mHandler.removeCallbacksAndMessages(/* token= */ null);
         getContext().unregisterComponentCallbacks(this);
+        mNavigationModeController.removeListener(mNavigationModeChangedListender);
     }
 
     @Override
@@ -430,25 +461,23 @@ class MenuViewLayer extends FrameLayout implements
     }
 
     public void onMoveToTuckedChanged(boolean moveToTuck) {
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
-            if (moveToTuck) {
-                final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
-                final int[] location = getLocationOnScreen();
-                bounds.offset(
-                        location[0],
-                        location[1]
-                );
+        if (moveToTuck) {
+            final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
+            final int[] location = getLocationOnScreen();
+            bounds.offset(
+                    location[0],
+                    location[1]
+            );
 
-                setClipBounds(bounds);
-            }
-            // Instead of clearing clip bounds when moveToTuck is false,
-            // wait until the spring animation finishes.
+            setClipBounds(bounds);
         }
-        // Function is a no-operation if flag is disabled.
+        // Instead of clearing clip bounds when moveToTuck is false,
+        // wait until the spring animation finishes.
     }
 
     private void onSpringAnimationsEndAction() {
         if (mShouldShowDockTooltip) {
+            mEduTooltipView.ifPresent(this::removeTooltip);
             mEduTooltipView = Optional.of(new MenuEduTooltipView(mContext, mMenuViewAppearance));
             mEduTooltipView.ifPresent(view -> addTooltipView(view,
                     getContext().getText(R.string.accessibility_floating_button_docking_tooltip),
@@ -457,14 +486,10 @@ class MenuViewLayer extends FrameLayout implements
             mMenuAnimationController.startTuckedAnimationPreview();
         }
 
-        if (Flags.floatingMenuAnimatedTuck()) {
-            if (!mMenuView.isMoveToTucked()) {
-                setClipBounds(null);
-            }
+        if (!mMenuView.isMoveToTucked()) {
+            setClipBounds(null);
         }
-        if (Flags.floatingMenuImeDisplacementAnimation()) {
-            mMenuView.onArrivalAtPosition(false);
-        }
+        mMenuView.onArrivalAtPosition(false);
     }
 
     void dispatchAccessibilityAction(int id) {
@@ -474,16 +499,50 @@ class MenuViewLayer extends FrameLayout implements
             } else {
                 hideMenuAndShowMessage();
             }
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_DISMISS);
+            mMenuView.incrementTexMetric(TEX_METRIC_DISMISS);
         } else if (id == R.id.action_edit
                 && Flags.floatingMenuDragToEdit()) {
-            mMenuView.gotoEditScreen();
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_EDIT);
+            gotoEditScreen();
+            mMenuView.incrementTexMetric(TEX_METRIC_EDIT);
         }
         mDismissView.hide();
         mDragToInteractView.hide();
         mDragToInteractAnimationController.animateInteractMenu(
                 id, /* scaleUp= */ false);
+    }
+
+    void gotoEditScreen() {
+        if (!Flags.floatingMenuDragToEdit()) {
+            return;
+        }
+        mMenuAnimationController.flingMenuThenSpringToEdge(
+                mMenuView.getMenuPosition().x, 100f, 0f);
+
+        Intent intent = getIntentForEditScreen();
+        PackageManager packageManager = getContext().getPackageManager();
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
+        if (!activities.isEmpty()) {
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            mStatusBarManager.collapsePanels();
+        }
+    }
+
+    Intent getIntentForEditScreen() {
+        List<String> targets = new SettingsStringUtil.ColonDelimitedSet.OfStrings(
+                mSecureSettings.getStringForUser(
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                        UserHandle.USER_CURRENT)).stream().toList();
+
+        Intent intent = new Intent(
+                Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
+        Bundle args = new Bundle();
+        Bundle fragmentArgs = new Bundle();
+        fragmentArgs.putStringArray("targets", targets.toArray(new String[0]));
+        args.putBundle(":settings:show_fragment_args", fragmentArgs);
+        intent.replaceExtras(args);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
     }
 
     private CharSequence getMigrationMessage() {

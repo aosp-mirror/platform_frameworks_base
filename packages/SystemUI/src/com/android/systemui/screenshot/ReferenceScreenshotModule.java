@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -29,4 +30,15 @@ public interface ReferenceScreenshotModule {
     static ScreenshotNotificationSmartActionsProvider providesScrnshtNotifSmartActionsProvider() {
         return new ScreenshotNotificationSmartActionsProvider();
     }
+
+    /** */
+    @Binds
+    ScreenshotActionsProvider.Factory bindScreenshotActionsProviderFactory(
+            DefaultScreenshotActionsProvider.Factory defaultScreenshotActionsProviderFactory);
+
+    /** */
+    @Provides
+    static ThumbnailObserver providesThumbnailObserver() {
+        return new ThumbnailObserver();
+    };
 }

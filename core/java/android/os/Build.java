@@ -17,6 +17,7 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -28,6 +29,7 @@ import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.sdk.Flags;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -393,10 +395,33 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
+         * Together with {@link SDK_MINOR_INT}, this constant defines the
+         * <pre>major.minor</pre> version of Android. <pre>SDK_INT</pre> is
+         * increased and <pre>SDK_MINOR_INT</pre> is set to 0 on new Android
+         * dessert releases. Between these, Android may also release so called
+         * minor releases where <pre>SDK_INT</pre> remains unchanged and
+         * <pre>SDK_MINOR_INT</pre> is increased. Minor releases can add new
+         * APIs, and have stricter guarantees around backwards compatibility
+         * (e.g. no changes gated by <pre>targetSdkVersion</pre>) compared to
+         * major releases.
+         * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
+
+        /**
+         * The minor SDK version of the software currently running on this hardware
+         * device. This value never changes while a device is booted, but it may
+         * increase when the hardware manufacturer provides an OTA update.
+         * <p>
+         * Together with {@link SDK_INT}, this constant defines the
+         * <pre>major.minor</pre> version of Android. See {@link SDK_INT} for
+         * more information.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int SDK_MINOR_INT = SystemProperties.getInt(
+                "ro.build.version.sdk_minor", 0);
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
@@ -1229,8 +1254,20 @@ public class Build {
         /**
          * Vanilla Ice Cream.
          */
-        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
+        public static final int VANILLA_ICE_CREAM = 35;
     }
+
+    /**
+     * The vendor API for 2024 Q2
+     *
+     * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK
+     * API level and the format has switched to YYYYMM (year and month)
+     *
+     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
+     *     level</a>
+     * @hide
+     */
+    public static final int VENDOR_API_2024_Q2 = 202404;
 
     /** The type of build, like "user" or "eng". */
     public static final String TYPE = getString("ro.build.type");

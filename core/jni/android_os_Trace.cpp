@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include <jni.h>
-
+#include <cutils/compiler.h>
 #include <cutils/trace.h>
+#include <jni.h>
 #include <log/log.h>
 #include <nativehelper/JNIHelp.h>
+#include <tracing_perfetto.h>
 
 #include <array>
 
@@ -59,33 +60,30 @@ inline static void withString(JNIEnv* env, jstring jstr, F callback) {
 
 static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jlong value) {
-    withString(env, nameStr, [tag, value](const char* str) {
-        atrace_int64(tag, str, value);
-    });
+    withString(env, nameStr,
+               [tag, value](const char* str) { tracing_perfetto::traceCounter(tag, str, value); });
 }
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr) {
-    withString(env, nameStr, [tag](const char* str) {
-        atrace_begin(tag, str);
-    });
+    withString(env, nameStr, [tag](const char* str) { tracing_perfetto::traceBegin(tag, str); });
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv*, jclass, jlong tag) {
-    atrace_end(tag);
+    tracing_perfetto::traceEnd(tag);
 }
 
 static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
     withString(env, nameStr, [tag, cookie](const char* str) {
-        atrace_async_begin(tag, str, cookie);
+        tracing_perfetto::traceAsyncBegin(tag, str, cookie);
     });
 }
 
 static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
     withString(env, nameStr, [tag, cookie](const char* str) {
-        atrace_async_end(tag, str, cookie);
+        tracing_perfetto::traceAsyncEnd(tag, str, cookie);
     });
 }
 
@@ -93,7 +91,7 @@ static void android_os_Trace_nativeAsyncTraceForTrackBegin(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jstring nameStr, jint cookie) {
     withString(env, trackStr, [env, tag, nameStr, cookie](const char* track) {
         withString(env, nameStr, [tag, track, cookie](const char* name) {
-            atrace_async_for_track_begin(tag, track, name, cookie);
+            tracing_perfetto::traceAsyncBeginForTrack(tag, name, track, cookie);
         });
     });
 }
@@ -101,77 +99,68 @@ static void android_os_Trace_nativeAsyncTraceForTrackBegin(JNIEnv* env, jclass,
 static void android_os_Trace_nativeAsyncTraceForTrackEnd(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jint cookie) {
     withString(env, trackStr, [tag, cookie](const char* track) {
-        atrace_async_for_track_end(tag, track, cookie);
+        tracing_perfetto::traceAsyncEndForTrack(tag, track, cookie);
     });
 }
 
 static void android_os_Trace_nativeSetAppTracingAllowed(JNIEnv*, jclass, jboolean allowed) {
+    // TODO(b/331916606): this is load-bearing for an app to notice that it is
+    // traced after post-zygote-fork specialisation.
     atrace_update_tags();
 }
 
 static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean enabled) {
-    atrace_set_tracing_enabled(enabled);
+    // no-op
 }
 
 static void android_os_Trace_nativeInstant(JNIEnv* env, jclass,
         jlong tag, jstring nameStr) {
-    withString(env, nameStr, [tag](const char* str) {
-        atrace_instant(tag, str);
-    });
+    withString(env, nameStr, [tag](const char* str) { tracing_perfetto::traceInstant(tag, str); });
 }
 
 static void android_os_Trace_nativeInstantForTrack(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jstring nameStr) {
     withString(env, trackStr, [env, tag, nameStr](const char* track) {
         withString(env, nameStr, [tag, track](const char* name) {
-            atrace_instant_for_track(tag, track, name);
+            tracing_perfetto::traceInstantForTrack(tag, track, name);
         });
     });
 }
 
+static jboolean android_os_Trace_nativeIsTagEnabled(jlong tag) {
+    return tracing_perfetto::isTagEnabled(tag);
+}
+
+static void android_os_Trace_nativeRegisterWithPerfetto(JNIEnv* env) {
+    tracing_perfetto::registerWithPerfetto();
+}
+
 static const JNINativeMethod gTraceMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeSetAppTracingAllowed",
-            "(Z)V",
-            (void*)android_os_Trace_nativeSetAppTracingAllowed },
-    { "nativeSetTracingEnabled",
-            "(Z)V",
-            (void*)android_os_Trace_nativeSetTracingEnabled },
+        /* name, signature, funcPtr */
+        {"nativeSetAppTracingAllowed", "(Z)V", (void*)android_os_Trace_nativeSetAppTracingAllowed},
+        {"nativeSetTracingEnabled", "(Z)V", (void*)android_os_Trace_nativeSetTracingEnabled},
 
-    // ----------- @FastNative  ----------------
+        // ----------- @FastNative  ----------------
 
-    { "nativeTraceCounter",
-            "(JLjava/lang/String;J)V",
-            (void*)android_os_Trace_nativeTraceCounter },
-    { "nativeTraceBegin",
-            "(JLjava/lang/String;)V",
-            (void*)android_os_Trace_nativeTraceBegin },
-    { "nativeTraceEnd",
-            "(J)V",
-            (void*)android_os_Trace_nativeTraceEnd },
-    { "nativeAsyncTraceBegin",
-            "(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceBegin },
-    { "nativeAsyncTraceEnd",
-            "(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceEnd },
-    { "nativeAsyncTraceForTrackBegin",
-            "(JLjava/lang/String;Ljava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceForTrackBegin },
-    { "nativeAsyncTraceForTrackEnd",
-            "(JLjava/lang/String;I)V",
-            (void*)android_os_Trace_nativeAsyncTraceForTrackEnd },
-    { "nativeInstant",
-            "(JLjava/lang/String;)V",
-            (void*)android_os_Trace_nativeInstant },
-    { "nativeInstantForTrack",
-            "(JLjava/lang/String;Ljava/lang/String;)V",
-            (void*)android_os_Trace_nativeInstantForTrack },
+        {"nativeTraceCounter", "(JLjava/lang/String;J)V",
+         (void*)android_os_Trace_nativeTraceCounter},
+        {"nativeTraceBegin", "(JLjava/lang/String;)V", (void*)android_os_Trace_nativeTraceBegin},
+        {"nativeTraceEnd", "(J)V", (void*)android_os_Trace_nativeTraceEnd},
+        {"nativeAsyncTraceBegin", "(JLjava/lang/String;I)V",
+         (void*)android_os_Trace_nativeAsyncTraceBegin},
+        {"nativeAsyncTraceEnd", "(JLjava/lang/String;I)V",
+         (void*)android_os_Trace_nativeAsyncTraceEnd},
+        {"nativeAsyncTraceForTrackBegin", "(JLjava/lang/String;Ljava/lang/String;I)V",
+         (void*)android_os_Trace_nativeAsyncTraceForTrackBegin},
+        {"nativeAsyncTraceForTrackEnd", "(JLjava/lang/String;I)V",
+         (void*)android_os_Trace_nativeAsyncTraceForTrackEnd},
+        {"nativeInstant", "(JLjava/lang/String;)V", (void*)android_os_Trace_nativeInstant},
+        {"nativeInstantForTrack", "(JLjava/lang/String;Ljava/lang/String;)V",
+         (void*)android_os_Trace_nativeInstantForTrack},
+        {"nativeRegisterWithPerfetto", "()V", (void*)android_os_Trace_nativeRegisterWithPerfetto},
 
-    // ----------- @CriticalNative  ----------------
-    { "nativeGetEnabledTags",
-            "()J",
-            (void*)atrace_get_enabled_tags },
+        // ----------- @CriticalNative  ----------------
+        {"nativeIsTagEnabled", "(J)Z", (void*)android_os_Trace_nativeIsTagEnabled},
 };
 
 int register_android_os_Trace(JNIEnv* env) {

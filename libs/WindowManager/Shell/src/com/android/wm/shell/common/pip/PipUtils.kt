@@ -16,20 +16,24 @@
 package com.android.wm.shell.common.pip
 
 import android.app.ActivityTaskManager
+import android.app.AppGlobals
 import android.app.RemoteAction
 import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.RemoteException
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import android.window.TaskSnapshot
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /** A class that includes convenience methods.  */
 object PipUtils {
@@ -135,7 +139,46 @@ object PipUtils {
         }
     }
 
+
+    /**
+     * Returns a fake source rect hint for animation purposes when app-provided one is invalid.
+     * Resulting adjusted source rect hint lets the app icon in the content overlay to stay visible.
+     */
     @JvmStatic
-    val isPip2ExperimentEnabled: Boolean
-        get() = Flags.enablePip2Implementation()
+    fun getEnterPipWithOverlaySrcRectHint(appBounds: Rect, aspectRatio: Float): Rect {
+        val appBoundsAspRatio = appBounds.width().toFloat() / appBounds.height()
+        val width: Int
+        val height: Int
+        var left = appBounds.left
+        var top = appBounds.top
+        if (appBoundsAspRatio < aspectRatio) {
+            width = appBounds.width()
+            height = (width / aspectRatio).roundToInt()
+            top = appBounds.top + (appBounds.height() - height) / 2
+        } else {
+            height = appBounds.height()
+            width = (height * aspectRatio).roundToInt()
+            left = appBounds.left + (appBounds.width() - width) / 2
+        }
+        return Rect(left, top, left + width, top + height)
+    }
+
+    private var isPip2ExperimentEnabled: Boolean? = null
+
+    /**
+     * Returns true if PiP2 implementation should be used. Besides the trunk stable flag,
+     * system property can be used to override this read only flag during development.
+     * It's currently limited to phone form factor, i.e., not enabled on ARC / TV.
+     */
+    @JvmStatic
+    fun isPip2ExperimentEnabled(): Boolean {
+        if (isPip2ExperimentEnabled == null) {
+            val isArc = AppGlobals.getPackageManager().hasSystemFeature(
+                "org.chromium.arc", 0)
+            val isTv = AppGlobals.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK, 0)
+            isPip2ExperimentEnabled = Flags.enablePip2() && !isArc && !isTv
+        }
+        return isPip2ExperimentEnabled as Boolean
+    }
 }

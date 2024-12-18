@@ -22,12 +22,12 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontFamily
-import android.testing.AndroidTestingRunner
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextDirectionHeuristic
 import android.text.TextDirectionHeuristics
 import android.text.TextPaint
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
@@ -62,7 +62,7 @@ private val END_PAINT = TextPaint(PAINT).apply {
     typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 700").build().toTypeface()
 }
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TextInterpolatorTest : SysuiTestCase() {
     lateinit var typefaceCache: TypefaceVariantCache

@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.ColorSpaceProfiles;
 import android.os.IBinder;
 
 import com.android.internal.camera.flags.Flags;
@@ -42,12 +43,12 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public class ExtensionConfiguration {
     private final int mSessionType;
     private final int mSessionTemplateId;
     private final List<ExtensionOutputConfiguration> mOutputs;
     private final CaptureRequest mSessionParameters;
+    private int mColorSpace;
 
     /**
      * Initialize an extension configuration instance
@@ -63,7 +64,6 @@ public class ExtensionConfiguration {
      * @param sessionParams     An optional set of camera capture
      *                          session parameter values
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public ExtensionConfiguration(@CameraDevice.SessionOperatingMode int sessionType,
             @CameraDevice.RequestTemplate int sessionTemplateId,
             @NonNull List<ExtensionOutputConfiguration> outputs,
@@ -72,9 +72,19 @@ public class ExtensionConfiguration {
         mSessionTemplateId = sessionTemplateId;
         mOutputs = outputs;
         mSessionParameters = sessionParams;
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
     }
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    /**
+     * Set the color space using the ordinal value of a
+     * {@link android.graphics.ColorSpace.Named}.
+     * The default will be -1, indicating an unspecified ColorSpace,
+     * unless explicitly set using this method.
+     */
+    public void setColorSpace(int colorSpace) {
+        mColorSpace = colorSpace;
+    }
+
     CameraSessionConfig getCameraSessionConfig() {
         if (mOutputs.isEmpty()) {
             return null;
@@ -84,6 +94,7 @@ public class ExtensionConfiguration {
         ret.sessionTemplateId = mSessionTemplateId;
         ret.sessionType = mSessionType;
         ret.outputConfigs = new ArrayList<>(mOutputs.size());
+        ret.colorSpace = mColorSpace;
         for (ExtensionOutputConfiguration outputConfig : mOutputs) {
             ret.outputConfigs.add(outputConfig.getOutputConfig());
         }

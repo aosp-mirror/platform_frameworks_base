@@ -24,9 +24,9 @@ import static android.view.View.VISIBLE;
 import static android.view.View.X;
 import static android.view.View.Y;
 
-import static com.android.wm.shell.animation.Interpolators.EMPHASIZED;
-import static com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.CORNER_RADIUS;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
+import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,13 +42,13 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject.MagneticTarget;
+import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject.MagneticTarget;
 
 /**
  * Helper class to animate a {@link BubbleBarExpandedView} on a bubble.
@@ -166,13 +166,8 @@ public class BubbleBarAnimationHelper {
         bbev.setTaskViewAlpha(0f);
         bbev.setVisibility(VISIBLE);
 
-        // Set the pivot point for the scale, so the view animates out from the bubble bar.
-        Rect bubbleBarBounds = mPositioner.getBubbleBarBounds();
-        mExpandedViewContainerMatrix.setScale(
-                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
-                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
-                bubbleBarBounds.centerX(),
-                bubbleBarBounds.top);
+        setScaleFromBubbleBar(mExpandedViewContainerMatrix,
+                1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT);
 
         bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
 
@@ -214,8 +209,8 @@ public class BubbleBarAnimationHelper {
         }
         bbev.setScaleX(1f);
         bbev.setScaleY(1f);
-        mExpandedViewContainerMatrix.setScaleX(1f);
-        mExpandedViewContainerMatrix.setScaleY(1f);
+
+        setScaleFromBubbleBar(mExpandedViewContainerMatrix, 1f);
 
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
         PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
@@ -240,6 +235,14 @@ public class BubbleBarAnimationHelper {
         mExpandedViewAlphaAnimator.reverse();
     }
 
+    private void setScaleFromBubbleBar(AnimatableScaleMatrix matrix, float scale) {
+        // Set the pivot point for the scale, so the view animates out from the bubble bar.
+        Rect availableRect = mPositioner.getAvailableRect();
+        float pivotX = mPositioner.isBubbleBarOnLeft() ? availableRect.left : availableRect.right;
+        float pivotY = mPositioner.getBubbleBarTopOnScreen();
+        matrix.setScale(scale, scale, pivotX, pivotY);
+    }
+
     /**
      * Animate the expanded bubble when it is being dragged
      */
@@ -250,6 +253,7 @@ public class BubbleBarAnimationHelper {
             return;
         }
         setDragPivot(bbev);
+        bbev.setDragging(true);
         // Corner radius gets scaled, apply the reverse scale to ensure we have the desired radius
         final float cornerRadius = bbev.getDraggedCornerRadius() / EXPANDED_VIEW_DRAG_SCALE;
 
@@ -326,6 +330,7 @@ public class BubbleBarAnimationHelper {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 bbev.resetPivot();
+                bbev.setDragging(false);
             }
         });
         startNewDragAnimation(animatorSet);
@@ -477,7 +482,7 @@ public class BubbleBarAnimationHelper {
     private Point getExpandedViewRestPosition(Size size) {
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
         Point point = new Point();
-        if (mLayerView.isOnLeft()) {
+        if (mPositioner.isBubbleBarOnLeft()) {
             point.x = mPositioner.getInsets().left + padding;
         } else {
             point.x = mPositioner.getAvailableRect().width() - size.getWidth() - padding;

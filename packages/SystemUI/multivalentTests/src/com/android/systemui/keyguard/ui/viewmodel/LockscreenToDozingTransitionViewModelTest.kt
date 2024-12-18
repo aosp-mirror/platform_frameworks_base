@@ -34,6 +34,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -85,26 +86,22 @@ class LockscreenToDozingTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
+            runCurrent()
 
             keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0f),
-                    step(0.1f),
-                    step(0.2f),
-                    step(0.3f),
-                    step(1f),
-                ),
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DOZING,
                 testScope,
             )
 
-            values.forEach { assertThat(it).isEqualTo(0f) }
+            assertThat(values[0]).isEqualTo(1f)
+            assertThat(values[1]).isEqualTo(0f)
         }
 
-
     @Test
-    fun lockscreenAlphaFadesOutAndFinishesVisible() =
+    fun lockscreenAlphaDoesNotFadeOut() =
         testScope.runTest {
             val alpha by collectValues(underTest.lockscreenAlpha)
             keyguardTransitionRepository.sendTransitionSteps(
@@ -113,31 +110,7 @@ class LockscreenToDozingTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(alpha[0]).isEqualTo(1f)
-            // Halfway through, it will have faded out
-            assertThat(alpha[1]).isEqualTo(0f)
-            // FINISHED alpha should be visible, to support pulsing
-            assertThat(alpha[2]).isEqualTo(1f)
-        }
-
-    @Test
-    fun deviceEntryBackgroundViewDisappear() =
-        testScope.runTest {
-            val values by collectValues(underTest.deviceEntryBackgroundViewAlpha)
-
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0f),
-                    step(0.1f),
-                    step(0.2f),
-                    step(0.3f),
-                    step(1f),
-                ),
-                testScope,
-            )
-
-            values.forEach { assertThat(it).isEqualTo(0f) }
+            alpha.forEach { assertThat(it).isEqualTo(1f) }
         }
 
     private fun step(value: Float, state: TransitionState = RUNNING): TransitionStep {

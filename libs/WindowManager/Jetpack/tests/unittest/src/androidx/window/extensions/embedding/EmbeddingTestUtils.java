@@ -163,12 +163,14 @@ public class EmbeddingTestUtils {
     }
 
     /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    @NonNull
     static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
             @NonNull Activity activity) {
         return createMockTaskFragmentInfo(container, activity, true /* isVisible */);
     }
 
     /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    @NonNull
     static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
             @NonNull Activity activity, boolean isVisible) {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
@@ -182,7 +184,27 @@ public class EmbeddingTestUtils {
                 false /* isTaskClearedForReuse */,
                 false /* isTaskFragmentClearedForPip */,
                 false /* isClearedForReorderActivityToFront */,
-                new Point());
+                new Point(),
+                false /* isTopChild */);
+    }
+
+    /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    @NonNull
+    static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
+            @NonNull Activity activity, boolean isVisible, boolean isOnTop) {
+        return new TaskFragmentInfo(container.getTaskFragmentToken(),
+                mock(WindowContainerToken.class),
+                new Configuration(),
+                1,
+                isVisible,
+                Collections.singletonList(activity.getActivityToken()),
+                new ArrayList<>(),
+                new Point(),
+                false /* isTaskClearedForReuse */,
+                false /* isTaskFragmentClearedForPip */,
+                false /* isClearedForReorderActivityToFront */,
+                new Point(),
+                isOnTop);
     }
 
     static ActivityInfo createActivityInfoWithMinDimensions() {
@@ -200,7 +222,7 @@ public class EmbeddingTestUtils {
         doReturn(resources).when(activity).getResources();
         doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
 
-        return new TaskContainer(TASK_ID, activity);
+        return new TaskContainer(TASK_ID, activity, mock(SplitController.class));
     }
 
     static TaskContainer createTestTaskContainer(@NonNull SplitController controller) {
@@ -247,5 +269,18 @@ public class EmbeddingTestUtils {
             @NonNull Predicate<WindowMetrics> windowMetricsPredicate) {
         return new SplitPlaceholderRule.Builder(placeholderIntent, activityPredicate,
                 intentPredicate, windowMetricsPredicate);
+    }
+
+    @NonNull
+    static TaskFragmentContainer createTfContainer(
+            @NonNull SplitController splitController, @NonNull Activity activity) {
+        return createTfContainer(splitController, TASK_ID, activity);
+    }
+
+    @NonNull
+    static TaskFragmentContainer createTfContainer(
+            @NonNull SplitController splitController, int taskId, @NonNull Activity activity) {
+        return new TaskFragmentContainer.Builder(splitController, taskId, activity)
+                .setPendingAppearedActivity(activity).build();
     }
 }

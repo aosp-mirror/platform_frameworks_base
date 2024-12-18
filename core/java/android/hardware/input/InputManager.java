@@ -17,7 +17,9 @@
 package android.hardware.input;
 
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
+import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -155,6 +157,34 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+    /**
+     * Broadcast Action: Query available keyboard glyph maps.
+     * <p>
+     * The input manager service locates available keyboard glyph maps
+     * by querying broadcast receivers that are registered for this action.
+     * An application can offer additional keyboard glyph maps to the user
+     * by declaring a suitable broadcast receiver in its manifest.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_QUERY_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS";
+
+    /**
+     * Metadata Key: Keyboard glyph map metadata associated with
+     * {@link #ACTION_QUERY_KEYBOARD_GLYPH_MAPS}.
+     * <p>
+     * Specifies the resource id of a XML resource that describes the keyboard
+     * glyph maps that are provided by the application.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String META_DATA_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS";
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -332,19 +362,6 @@ public final class InputManager {
     }
 
     /**
-     * Returns true if an input device is enabled. Should return true for most
-     * situations. Some system apps may disable an input device, for
-     * example to prevent unwanted touch events.
-     *
-     * @param id The input device Id.
-     *
-     * @hide
-     */
-    public boolean isInputDeviceEnabled(int id) {
-        return mGlobal.isInputDeviceEnabled(id);
-    }
-
-    /**
      * Enables an InputDevice.
      * <p>
      * Requires {@link android.Manifest.permission#DISABLE_INPUT_DEVICE}.
@@ -473,22 +490,21 @@ public final class InputManager {
     }
 
     /**
-     * Returns the descriptors of all supported keyboard layouts appropriate for the specified
-     * input device.
+     * Returns the descriptors of all supported keyboard layouts.
      * <p>
      * The input manager consults the built-in keyboard layouts as well as all keyboard layouts
      * advertised by applications using a {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
      * </p>
      *
-     * @param device The input device to query.
      * @return The ids of all keyboard layouts which are supported by the specified input device.
      *
      * @hide
      */
     @TestApi
     @NonNull
-    public List<String> getKeyboardLayoutDescriptorsForInputDevice(@NonNull InputDevice device) {
-        KeyboardLayout[] layouts = getKeyboardLayoutsForInputDevice(device.getIdentifier());
+    @SuppressLint("UnflaggedApi")
+    public List<String> getKeyboardLayoutDescriptors() {
+        KeyboardLayout[] layouts = getKeyboardLayouts();
         List<String> res = new ArrayList<>();
         for (KeyboardLayout kl : layouts) {
             res.add(kl.getDescriptor());
@@ -511,33 +527,18 @@ public final class InputManager {
     @TestApi
     @NonNull
     public String getKeyboardLayoutTypeForLayoutDescriptor(@NonNull String layoutDescriptor) {
-        KeyboardLayout[] layouts = getKeyboardLayouts();
-        for (KeyboardLayout kl : layouts) {
-            if (layoutDescriptor.equals(kl.getDescriptor())) {
-                return kl.getLayoutType();
-            }
-        }
-        return "";
+        KeyboardLayout layout = getKeyboardLayout(layoutDescriptor);
+        return layout == null ? "" : layout.getLayoutType();
     }
 
     /**
-     * Gets information about all supported keyboard layouts appropriate
-     * for a specific input device.
-     * <p>
-     * The input manager consults the built-in keyboard layouts as well
-     * as all keyboard layouts advertised by applications using a
-     * {@link #ACTION_QUERY_KEYBOARD_LAYOUTS} broadcast receiver.
-     * </p>
-     *
-     * @return A list of all supported keyboard layouts for a specific
-     * input device.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        return mGlobal.getKeyboardLayoutsForInputDevice(identifier);
+        return new KeyboardLayout[0];
     }
 
     /**
@@ -549,6 +550,7 @@ public final class InputManager {
      *
      * @hide
      */
+    @Nullable
     public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
         if (keyboardLayoutDescriptor == null) {
             throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
@@ -562,121 +564,45 @@ public final class InputManager {
     }
 
     /**
-     * Gets the current keyboard layout descriptor for the specified input device.
-     *
-     * @param identifier Identifier for the input device
-     * @return The keyboard layout descriptor, or null if no keyboard layout has been set.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
     @Nullable
     public String getCurrentKeyboardLayoutForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return null;
     }
 
     /**
-     * Sets the current keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The keyboard layout descriptor to use, must not be null.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
-            @NonNull String keyboardLayoutDescriptor) {
-        mGlobal.setCurrentKeyboardLayoutForInputDevice(identifier,
-                keyboardLayoutDescriptor);
-    }
+            @NonNull String keyboardLayoutDescriptor) {}
 
     /**
-     * Gets all keyboard layout descriptors that are enabled for the specified input device.
-     *
-     * @param identifier The identifier for the input device.
-     * @return The keyboard layout descriptors.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
     public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-
-        try {
-            return mIm.getEnabledKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return new String[0];
     }
 
     /**
-     * Adds the keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to add.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
             String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.addKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
     }
 
     /**
-     * Removes the keyboard layout descriptor for the specified input device.
-     * <p>
-     * This method may have the side-effect of causing the input device in question to be
-     * reconfigured.
-     * </p>
-     *
-     * @param identifier The identifier for the input device.
-     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to remove.
-     *
+     * TODO(b/330517633): Cleanup the unsupported API
      * @hide
      */
-    @TestApi
     @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void removeKeyboardLayoutForInputDevice(@NonNull InputDeviceIdentifier identifier,
             @NonNull String keyboardLayoutDescriptor) {
-        if (identifier == null) {
-            throw new IllegalArgumentException("inputDeviceDescriptor must not be null");
-        }
-        if (keyboardLayoutDescriptor == null) {
-            throw new IllegalArgumentException("keyboardLayoutDescriptor must not be null");
-        }
-
-        try {
-            mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
     }
 
     /**
@@ -1001,6 +927,23 @@ public final class InputManager {
     }
 
     /**
+     * Provides associated glyph map for the keyboard device (if available)
+     *
+     * @hide
+     */
+    @Nullable
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        if (!keyboardGlyphMap()) {
+            return null;
+        }
+        try {
+            return mIm.getKeyGlyphMap(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Injects an input event into the event system, targeting windows owned by the provided uid.
      *
      * If a valid targetUid is provided, the system will only consider injecting the input event
@@ -1066,11 +1009,10 @@ public final class InputManager {
      * originate from the system, just that we were unable to verify it. This can
      * happen for a number of reasons during normal operation.
      *
-     * @param event The {@link android.view.InputEvent} to check
+     * @param event The {@link android.view.InputEvent} to check.
      *
      * @return {@link android.view.VerifiedInputEvent}, which is a subset of the provided
-     * {@link android.view.InputEvent}
-     *         {@code null} if the event could not be verified.
+     *     {@link android.view.InputEvent}, or {@code null} if the event could not be verified.
      */
     @Nullable
     public VerifiedInputEvent verifyInputEvent(@NonNull InputEvent event) {
@@ -1082,21 +1024,14 @@ public final class InputManager {
     }
 
     /**
-     * Changes the mouse pointer's icon shape into the specified id.
+     * This method exists for backwards-compatibility, and is a no-op.
      *
-     * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon#TYPE_ARROW} and {@link PointerIcon#TYPE_HANDWRITING}.
-     *
+     * @deprecated
      * @hide
      */
     @UnsupportedAppUsage
     public void setPointerIconType(int iconId) {
-        mGlobal.setPointerIconType(iconId);
-    }
-
-    /** @hide */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        mGlobal.setCustomPointerIcon(icon);
+        Log.e(TAG, "setPointerIcon: Unsupported app usage!");
     }
 
     /** @hide */
@@ -1136,8 +1071,18 @@ public final class InputManager {
     /**
      * Monitor input on the specified display for gestures.
      *
+     * NOTE: New usages of Gesture Monitors are strongly discouraged. Gesture Monitors are
+     * deprecated, in favor of spy windows (see {@link LayoutParams#INPUT_FEATURE_SPY}).
+     * The spy window should be configured specifically to receive the desired events,
+     * unlike the gesture monitor which receives all events on the display.
+     *
      * @hide
+     * @deprecated
+     * @see LayoutParams#INPUT_FEATURE_SPY
+     * @see android.os.InputConfig#SPY
+     * @see #pilferPointers(IBinder)
      */
+    @Deprecated
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
     }
@@ -1145,13 +1090,14 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
-     * @param inputPort The port of the input device.
-     * @param displayPort The physical port of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayPort the physical port of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void addPortAssociation(@NonNull String inputPort, int displayPort) {
         try {
             mIm.addPortAssociation(inputPort, displayPort);
@@ -1163,12 +1109,13 @@ public final class InputManager {
     /**
      * Remove the runtime association between the input port and the display port. Any existing
      * static association for the cleared input port will be restored.
-     * @param inputPort The port of the input device to be cleared.
+     * @param inputPort the port of the input device to be cleared
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void removePortAssociation(@NonNull String inputPort) {
         try {
             mIm.removePortAssociation(inputPort);
@@ -1180,30 +1127,72 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and display, by unique id. Input ports are
      * expected to be unique.
-     * @param inputPort The port of the input device.
-     * @param displayUniqueId The unique id of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayUniqueId the unique id of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void addUniqueIdAssociation(@NonNull String inputPort,
+    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
             @NonNull String displayUniqueId) {
-        mGlobal.addUniqueIdAssociation(inputPort, displayUniqueId);
+        mGlobal.addUniqueIdAssociationByPort(inputPort, displayUniqueId);
     }
 
     /**
      * Removes a runtime association between the input device and display.
-     * @param inputPort The port of the input device.
+     * @param inputPort the port of the input device
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void removeUniqueIdAssociation(@NonNull String inputPort) {
-        mGlobal.removeUniqueIdAssociation(inputPort);
+    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
+        mGlobal.removeUniqueIdAssociationByPort(inputPort);
+    }
+
+    /**
+     * Add a runtime association between the input device name and display, by descriptor. Input
+     * device descriptors are expected to be unique per physical device, though one physical
+     * device can have multiple virtual input devices that possess the same descriptor.
+     * E.g. a keyboard with built in trackpad will be 2 different input devices with the same
+     * descriptor.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * @param displayUniqueId the unique id of the associated display
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
+                                                   @NonNull String displayUniqueId) {
+        mGlobal.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
+        mGlobal.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
     }
 
     /**
@@ -1262,8 +1251,22 @@ public final class InputManager {
      * canceled. Only the pilfering window will continue to receive events for the affected pointers
      * until the pointer is lifted.
      *
-     * This method should be used with caution as unexpected pilfering can break fundamental user
-     * interactions.
+     * Furthermore, if any new pointers go down within the touchable region of the pilfering window
+     * and are part of the same gesture, those new pointers will be pilfered as well, and will not
+     * be sent to any other windows.
+     *
+     * Pilfering is designed to be used only once per gesture. Once the gesture is complete
+     * (i.e. on {@link MotionEvent#ACTION_UP}, {@link MotionEvent#ACTION_CANCEL},
+     * or {@link MotionEvent#ACTION_HOVER_EXIT}), the system will resume dispatching pointers
+     * to the appropriately touched windows.
+     *
+     * NOTE: This method should be used with caution as unexpected pilfering can break fundamental
+     * user interactions.
+     *
+     * NOTE: Since this method pilfers pointers based on gesture stream that is
+     * currently active for the window, the behavior will depend on the state of the system, and
+     * is inherently racy. For example, a pilfer request on a quick tap may not be successful if
+     * the tap is already complete by the time the pilfer request is received by the system.
      *
      * @see android.os.InputConfig#SPY
      * @hide
@@ -1375,6 +1378,61 @@ public final class InputManager {
     }
 
     /**
+     * Registers a key gesture event listener for {@link KeyGestureEvent} being triggered.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyGestureEventListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event listener.
+     *
+     * @param listener the {@link KeyGestureEventListener}
+     * @hide
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
+        mGlobal.unregisterKeyGestureEventListener(listener);
+    }
+
+    /**
+     * Registers a key gesture event handler for {@link KeyGestureEvent} handling.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @throws IllegalArgumentException if {@code handler} has already been registered previously.
+     * @throws NullPointerException     if {@code handler} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler)
+            throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventHandler(handler);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event handler.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @hide
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
+        mGlobal.unregisterKeyGestureEventHandler(handler);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1474,5 +1532,52 @@ public final class InputManager {
          * @param state the new sticky modifier state, never null.
          */
         void onStickyModifierStateChanged(@NonNull StickyModifierState state);
+    }
+
+    /**
+     * A callback used to notify about key gesture event on completion.
+     *
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     * @hide
+     */
+    public interface KeyGestureEventListener {
+        /**
+         * Called when a key gesture event occurs.
+         *
+         * @param event the gesture event that occurred.
+         */
+        void onKeyGestureEvent(@NonNull KeyGestureEvent event);
+    }
+
+    /**
+     * A callback used to notify about key gesture event start, complete and cancel. Unlike
+     * {@see KeyGestureEventListener} which is to listen to successfully handled key gestures, this
+     * interface allows system components to register handler for handling key gestures.
+     *
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     *
+     * <p> NOTE: All callbacks will occur on system main and input threads, so the caller needs
+     * to move time-consuming operations to appropriate handler threads.
+     * @hide
+     */
+    public interface KeyGestureEventHandler {
+        /**
+         * Called when a key gesture event starts, is completed, or is cancelled. If a handler
+         * returns {@code true}, it implies that the handler intends to handle the key gesture and
+         * only this handler will receive the future events for this key gesture.
+         *
+         * @param event the gesture event
+         */
+        boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
+                @Nullable IBinder focusedToken);
+
+        /**
+         * Called to identify if a particular gesture is of interest to a handler.
+         *
+         * NOTE: If no active handler supports certain gestures, the gestures will not be captured.
+         */
+        boolean isKeyGestureSupported(@KeyGestureEvent.KeyGestureType int gestureType);
     }
 }

@@ -21,8 +21,10 @@ import android.content.pm.ApplicationInfo;
 class ApplicationInfoBuilder {
     private boolean mIsDebuggable;
     private int mTargetSdk;
+    private int mUid;
     private String mPackageName;
     private long mVersionCode;
+    private boolean mIsSystemApp;
 
     private ApplicationInfoBuilder() {
         mTargetSdk = -1;
@@ -39,6 +41,16 @@ class ApplicationInfoBuilder {
 
     ApplicationInfoBuilder debuggable() {
         mIsDebuggable = true;
+        return this;
+    }
+
+    ApplicationInfoBuilder systemApp() {
+        mIsSystemApp = true;
+        return this;
+    }
+
+    ApplicationInfoBuilder withUid(int uid) {
+        mUid = uid;
         return this;
     }
 
@@ -60,6 +72,10 @@ class ApplicationInfoBuilder {
         applicationInfo.packageName = mPackageName;
         applicationInfo.targetSdkVersion = mTargetSdk;
         applicationInfo.longVersionCode = mVersionCode;
+        applicationInfo.uid = mUid;
+        if (mIsSystemApp) {
+            applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        }
         return applicationInfo;
     }
 }

@@ -16,27 +16,22 @@
 
 #define LOG_TAG "SQLiteConnection"
 
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
+#include <android-base/mapped_file.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-
-#include <utils/Log.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
-#include <cutils/ashmem.h>
-#include <sys/mman.h>
-
-#include <string.h>
-#include <unistd.h>
-
 #include <androidfw/CursorWindow.h>
-
+#include <cutils/ashmem.h>
+#include <jni.h>
+#include <nativehelper/JNIHelp.h>
 #include <sqlite3.h>
 #include <sqlite3_android.h>
+#include <string.h>
+#include <unistd.h>
+#include <utils/Log.h>
+#include <utils/String16.h>
+#include <utils/String8.h>
 
 #include "android_database_SQLiteCommon.h"
-
 #include "core_jni_helpers.h"
 
 // Set to 1 to use UTF16 storage for localized indexes.
@@ -70,11 +65,14 @@ struct SQLiteConnection {
     // Open flags.
     // Must be kept in sync with the constants defined in SQLiteDatabase.java.
     enum {
+        // LINT.IfChange
         OPEN_READWRITE          = 0x00000000,
         OPEN_READONLY           = 0x00000001,
         OPEN_READ_MASK          = 0x00000001,
         NO_LOCALIZED_COLLATORS  = 0x00000010,
+        NO_DOUBLE_QUOTED_STRS   = 0x00000020,
         CREATE_IF_NECESSARY     = 0x10000000,
+        // LINT.ThenChange(/core/java/android/database/sqlite/SQLiteDatabase.java)
     };
 
     sqlite3* const db;
@@ -134,10 +132,15 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
     String8 label(labelChars);
     env->ReleaseStringUTFChars(labelStr, labelChars);
 
+    errno = 0;
     sqlite3* db;
     int err = sqlite3_open_v2(path.c_str(), &db, sqliteFlags, NULL);
     if (err != SQLITE_OK) {
-        throw_sqlite3_exception_errcode(env, err, "Could not open database");
+        if (errno == 0) {
+            throw_sqlite3_exception(env, db, "could not open database");
+        } else {
+            throw_sqlite3_exception(env, db, strerror(errno));
+        }
         return 0;
     }
 
@@ -148,6 +151,18 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
             throw_sqlite3_exception(env, db, "Cannot set lookaside");
             sqlite3_close(db);
             return 0;
+        }
+    }
+
+    // Disallow double-quoted string literals if the proper flag is set.
+    if ((openFlags & SQLiteConnection::NO_DOUBLE_QUOTED_STRS) != 0) {
+        void *setting = 0;
+        int err = 0;
+        if ((err = sqlite3_db_config(db, SQLITE_DBCONFIG_DQS_DDL, 0, setting)) != SQLITE_OK) {
+            ALOGE("failed to configure SQLITE_DBCONFIG_DQS_DDL: %d", err);
+        }
+        if ((err = sqlite3_db_config(db, SQLITE_DBCONFIG_DQS_DML, 0, setting)) != SQLITE_OK) {
+            ALOGE("failed to configure SQLITE_DBCONFIG_DQS_DML: %d", err);
         }
     }
 
@@ -436,7 +451,7 @@ static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
     int result = SQLITE_OK;
     if (connection->tableQuery == nullptr) {
         static char const* sql =
-                "SELECT COUNT(*) FROM tables_used(?) WHERE schema != 'temp' AND wr != 0";
+                "SELECT NULL FROM tables_used(?) WHERE schema != 'temp' AND wr != 0";
         result = sqlite3_prepare_v2(connection->db, sql, -1, &connection->tableQuery, nullptr);
         if (result != SQLITE_OK) {
             ALOGE("failed to compile query table: %s",
@@ -447,25 +462,20 @@ static jboolean nativeUpdatesTempOnly(JNIEnv* env, jclass,
 
     // A temporary, to simplify the code.
     sqlite3_stmt* query = connection->tableQuery;
-    sqlite3_reset(query);
-    sqlite3_clear_bindings(query);
     result = sqlite3_bind_text(query, 1, sqlite3_sql(statement), -1, SQLITE_STATIC);
     if (result != SQLITE_OK) {
         ALOGE("tables bind pointer returns %s", sqlite3_errstr(result));
-        return false;
     }
     result = sqlite3_step(query);
-    if (result != SQLITE_ROW) {
-        ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
-        // Make sure the query is no longer bound to the statement.
-        sqlite3_clear_bindings(query);
-        return false;
-    }
-
-    int count = sqlite3_column_int(query, 0);
-    // Make sure the query is no longer bound to the statement SQL string.
+    // Make sure the query is no longer bound to the statement SQL string and
+    // that is no longer holding any table locks.
+    sqlite3_reset(query);
     sqlite3_clear_bindings(query);
-    return count == 0;
+
+    if (result != SQLITE_ROW && result != SQLITE_DONE) {
+        ALOGE("tables query error: %d/%s", result, sqlite3_errstr(result));
+    }
+    return result == SQLITE_DONE;
 }
 
 static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
@@ -654,13 +664,14 @@ static int createAshmemRegionWithData(JNIEnv* env, const void* data, size_t leng
         ALOGE("ashmem_create_region failed: %s", strerror(error));
     } else {
         if (length > 0) {
-            void* ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-            if (ptr == MAP_FAILED) {
+            std::unique_ptr<base::MappedFile> mappedFile =
+                    base::MappedFile::FromFd(fd, 0, length, PROT_READ | PROT_WRITE);
+            if (mappedFile == nullptr) {
                 error = errno;
                 ALOGE("mmap failed: %s", strerror(error));
             } else {
-                memcpy(ptr, data, length);
-                munmap(ptr, length);
+                memcpy(mappedFile->data(), data, length);
+                mappedFile.reset();
             }
         }
 

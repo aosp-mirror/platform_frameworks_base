@@ -201,6 +201,10 @@ constructor(
         )
     }
 
+    fun addLockoutResetCallbackDone() {
+        logBuffer.log(TAG, DEBUG, {}, { "addlockoutResetCallback done" })
+    }
+
     fun authRequested(uiEvent: FaceAuthUiEvent) {
         logBuffer.log(
             TAG,

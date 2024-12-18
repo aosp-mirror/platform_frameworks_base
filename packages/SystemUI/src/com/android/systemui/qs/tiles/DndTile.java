@@ -35,7 +35,6 @@ import android.service.notification.ZenModeConfig;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -43,12 +42,14 @@ import androidx.annotation.Nullable;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.notification.EnableZenModeDialog;
+import com.android.settingslib.notification.modes.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.modes.shared.ModesUi;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -105,6 +106,10 @@ public class DndTile extends QSTileImpl<BooleanState> {
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+
+        // If the flag is on, this shouldn't run at all since the modes tile replaces the DND tile.
+        ModesUi.assertInLegacyMode();
+
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
         mController.observe(getLifecycle(), mZenCallback);
@@ -147,12 +152,12 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         // Zen is currently on
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            enableZenMode(view);
+            enableZenMode(expandable);
         }
     }
 
@@ -162,7 +167,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         mSettingZenDuration.setUserId(newUserId);
     }
 
-    private void enableZenMode(@Nullable View view) {
+    private void enableZenMode(@Nullable Expandable expandable) {
         int zenDuration = mSettingZenDuration.getValue();
         boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
@@ -183,11 +188,17 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
-                        if (view != null) {
-                            mDialogTransitionAnimator.showFromView(dialog, view, new DialogCuj(
+                        if (expandable != null) {
+                            DialogTransitionAnimator.Controller controller =
+                                    expandable.dialogTransitionController(new DialogCuj(
                                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                            INTERACTION_JANK_TAG),
-                                    /* animateBackgroundBoundsChange= */ false);
+                                            INTERACTION_JANK_TAG));
+                            if (controller != null) {
+                                mDialogTransitionAnimator.show(dialog,
+                                        controller, /* animateBackgroundBoundsChange= */ false);
+                            } else {
+                                dialog.show();
+                            }
                         } else {
                             dialog.show();
                         }
@@ -217,8 +228,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick(@Nullable View view) {
-        handleLongClick(view);
+    protected void handleSecondaryClick(@Nullable Expandable expandable) {
+        handleLongClick(expandable);
     }
 
     @Override
@@ -247,18 +258,20 @@ public class DndTile extends QSTileImpl<BooleanState> {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", "
-                        + state.secondaryLabel;
+                                + state.secondaryLabel;
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
-                        mContext.getString(R.string.accessibility_quick_settings_dnd_none_on)
+                                mContext.getString(
+                                        R.string.accessibility_quick_settings_dnd_none_on)
                                 + ", " + state.secondaryLabel;
                 break;
             case ZEN_MODE_ALARMS:
                 state.contentDescription =
                         mContext.getString(R.string.accessibility_quick_settings_dnd) + ", " +
-                        mContext.getString(R.string.accessibility_quick_settings_dnd_alarms_on)
+                                mContext.getString(
+                                        R.string.accessibility_quick_settings_dnd_alarms_on)
                                 + ", " + state.secondaryLabel;
                 break;
             default:

@@ -1,0 +1,8 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="personal"
+        dataType="name"
+        purposes="analytics|developer_communications" />
+    <data-shared dataCategory="personal"
+    dataType="email_address"
+    purposes="analytics" />
+</holder_of_flattened_for_testing>

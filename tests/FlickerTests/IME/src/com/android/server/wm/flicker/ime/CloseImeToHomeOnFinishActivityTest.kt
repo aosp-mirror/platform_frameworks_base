@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized
  * Unlike {@link OpenImeWindowTest} testing IME window opening transitions, this test also verify
  * there is no flickering when back to the simple activity without requesting IME to show.
  *
- * To run this test: `atest FlickerTests:OpenImeWindowAndCloseTest`
+ * To run this test: `atest FlickerTestsIme1:CloseImeToHomeOnFinishActivityTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

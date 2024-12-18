@@ -14,12 +14,13 @@
      limitations under the License.
 -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer">
         <item name="android:layout_width">360dp</item>
     </style>
 
-    <style name="AuthCredentialHeaderStyle">
+    <style name="AuthNonBioCredentialHeaderStyle">
         <item name="android:paddingStart">48dp</item>
         <item name="android:paddingEnd">24dp</item>
         <item name="android:paddingTop">48dp</item>
@@ -27,7 +28,7 @@
         <item name="android:gravity">top|left</item>
     </style>
 
-    <style name="AuthCredentialPatternContainerStyle">
+    <style name="AuthNonBioCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
         <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
         <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
@@ -38,22 +39,25 @@
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">6dp</item>
         <item name="android:textSize">36dp</item>
         <item name="android:focusable">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">6dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">6dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
 </resources>

@@ -16,6 +16,7 @@
 
 package com.android.shell;
 
+import static android.app.admin.flags.Flags.onboardingBugreportStorageBugFix;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
@@ -50,7 +51,6 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
-import android.os.BugreportManager.BugreportCallback.BugreportErrorCode;
 import android.os.BugreportParams;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -90,9 +90,9 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.Streams;
+
+import com.google.android.collect.Lists;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -110,6 +110,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -169,6 +171,8 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
     static final String EXTRA_INFO = "android.intent.extra.INFO";
+    static final String EXTRA_EXTRA_ATTACHMENT_URI =
+            "android.intent.extra.EXTRA_ATTACHMENT_URI";
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_DELAYED_SCREENSHOT = 2;
@@ -231,6 +235,9 @@ public class BugreportProgressService extends Service {
 
     /** Always keep remote bugreport files created in the last day. */
     private static final long REMOTE_MIN_KEEP_AGE = DateUtils.DAY_IN_MILLIS;
+
+    /** Minimum delay for sending last update notification */
+    private static final int DELAY_NOTIFICATION_MS = 250;
 
     private final Object mLock = new Object();
 
@@ -441,10 +448,14 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private static void sendRemoteBugreportFinishedBroadcast(Context context,
+    private void sendRemoteBugreportFinishedBroadcast(Context context,
             String bugreportFileName, File bugreportFile, long nonce) {
-        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE,
-                bugreportFile.getParentFile());
+        // Remote bugreports are stored in the same directory as normal bugreports, meaning that
+        // the remote bugreport storage limit will get applied to normal bugreports whenever a
+        // remote bugreport is triggered. The fix in cleanupOldFiles applies the normal bugreport
+        // limit to the remote bugreports as a quick fix.
+        cleanupOldFiles(
+                REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE, bugreportFile.getParentFile());
         final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
         final Uri bugreportUri = getUri(context, bugreportFile);
         final String bugreportHash = generateFileHash(bugreportFileName);
@@ -495,18 +506,58 @@ public class BugreportProgressService extends Service {
         return fileHash;
     }
 
-    static void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
+    void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    if (onboardingBugreportStorageBugFix()) {
+                        cleanupOldBugreports();
+                    } else {
+                        FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
+                    }
                 } catch (RuntimeException e) {
                     Log.e(TAG, "RuntimeException deleting old files", e);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private void cleanupOldBugreports() {
+        final File[] files = mBugreportsDir.listFiles();
+        if (files == null) return;
+
+        // Sort with newest files first
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File lhs, File rhs) {
+                return Long.compare(rhs.lastModified(), lhs.lastModified());
+            }
+        });
+
+        int normalBugreportFilesCount = 0;
+        int deferredBugreportFilesCount = 0;
+        for (int i = 0; i < files.length; i++) {
+            final File file = files[i];
+
+            // tmp files are deferred bugreports which have their separate storage limit
+            boolean isDeferredBugreportFile = file.getName().endsWith(".tmp");
+            if (isDeferredBugreportFile) {
+                deferredBugreportFilesCount++;
+            } else {
+                normalBugreportFilesCount++;
+            }
+            // Keep files newer than minAgeMs
+            final long age = System.currentTimeMillis() - file.lastModified();
+            final int count = isDeferredBugreportFile
+                    ? deferredBugreportFilesCount : normalBugreportFilesCount;
+            if (count > MIN_KEEP_COUNT  && age > MIN_KEEP_AGE) {
+                if (file.delete()) {
+                    Log.d(TAG, "Deleted old file " + file);
+                }
+            }
+        }
     }
 
     /**
@@ -634,9 +685,10 @@ public class BugreportProgressService extends Service {
         long nonce = intent.getLongExtra(EXTRA_BUGREPORT_NONCE, 0);
         String baseName = getBugreportBaseName(bugreportType);
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+        Uri extraAttachment = intent.getParcelableExtra(EXTRA_EXTRA_ATTACHMENT_URI, Uri.class);
 
-        BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                shareTitle, shareDescription, bugreportType, mBugreportsDir, nonce);
+        BugreportInfo info = new BugreportInfo(mContext, baseName, name, shareTitle,
+                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachment);
         synchronized (mLock) {
             if (info.bugreportFile.exists()) {
                 Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
@@ -800,6 +852,7 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
         info.lastProgress.set(progress);
+        info.lastUpdate.set(System.currentTimeMillis());
 
         sendForegroundabledNotification(info.id, builder.build());
     }
@@ -1184,6 +1237,10 @@ public class BugreportProgressService extends Service {
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
+        if (info.extraAttachment != null) {
+            clipData.addItem(new ClipData.Item(null, null, null, info.extraAttachment));
+            attachments.add(info.extraAttachment);
+        }
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
@@ -1315,6 +1372,16 @@ public class BugreportProgressService extends Service {
      */
     private void sendBugreportNotification(BugreportInfo info, boolean takingScreenshot) {
 
+        final long lastUpdate = System.currentTimeMillis() - info.lastUpdate.longValue();
+        if (lastUpdate < DELAY_NOTIFICATION_MS) {
+            Log.d(TAG, "Delaying final notification for "
+                    + (DELAY_NOTIFICATION_MS - lastUpdate) + " ms ");
+            mMainThreadHandler.postDelayed(() -> {
+                sendBugreportNotification(info, takingScreenshot);
+            }, DELAY_NOTIFICATION_MS - lastUpdate);
+            return;
+        }
+
         // Since adding the details can take a while, do it before notifying user.
         addDetailsToZipFile(info);
 
@@ -1335,6 +1402,7 @@ public class BugreportProgressService extends Service {
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
+                .setProgress(100 /* max value of progress percentage */, 100, false)
                 .setOnlyAlertOnce(false)
                 .setContentText(content);
 
@@ -2042,6 +2110,9 @@ public class BugreportProgressService extends Service {
          */
         final long nonce;
 
+        @Nullable
+        public Uri extraAttachment = null;
+
         private final Object mLock = new Object();
 
         /**
@@ -2049,7 +2120,8 @@ public class BugreportProgressService extends Service {
          */
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce) {
+                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce,
+                @Nullable Uri extraAttachment) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
@@ -2058,6 +2130,7 @@ public class BugreportProgressService extends Service {
             this.nonce = nonce;
             this.baseName = baseName;
             this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            this.extraAttachment = extraAttachment;
         }
 
         void createBugreportFile() {
@@ -2368,7 +2441,6 @@ public class BugreportProgressService extends Service {
             }
         }
         info.progress.set(progress);
-        info.lastUpdate.set(System.currentTimeMillis());
 
         updateProgress(info);
     }

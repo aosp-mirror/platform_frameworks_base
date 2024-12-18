@@ -16,22 +16,24 @@
 
 package android.app.servertransaction;
 
-import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -39,20 +41,22 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
-import android.window.WindowContext;
 import android.window.WindowContextInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for subtypes of {@link ClientTransactionItem}.
@@ -65,6 +69,9 @@ import org.mockito.MockitoAnnotations;
 @Presubmit
 public class ClientTransactionItemTest {
 
+    @Rule
+    public final MockitoRule mocks = MockitoJUnit.rule();
+
     @Mock
     private ClientTransactionHandler mHandler;
     @Mock
@@ -76,8 +83,6 @@ public class ClientTransactionItemTest {
     @Mock
     private IBinder mWindowClientToken;
     @Mock
-    private WindowContext mWindowContext;
-    @Mock
     private IWindow mWindow;
 
     // Can't mock final class.
@@ -86,57 +91,24 @@ public class ClientTransactionItemTest {
     private ActivityThread.ActivityClientRecord mActivityClientRecord;
     private ArrayMap<IBinder, DestroyActivityItem> mActivitiesToBeDestroyed;
     private InsetsState mInsetsState;
-    private ClientWindowFrames mFrames;
-    private MergedConfiguration mMergedConfiguration;
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         mGlobalConfig = new Configuration();
         mConfiguration = new Configuration();
         mActivitiesToBeDestroyed = new ArrayMap<>();
         mActivityClientRecord = new ActivityThread.ActivityClientRecord();
         mInsetsState = new InsetsState();
-        mFrames = new ClientWindowFrames();
-        mMergedConfiguration = new MergedConfiguration(mGlobalConfig, mConfiguration);
 
         doReturn(mActivity).when(mHandler).getActivity(mActivityToken);
         doReturn(mActivitiesToBeDestroyed).when(mHandler).getActivitiesToBeDestroyed();
     }
 
     @Test
-    public void testActivityConfigurationChangeItem_getContextToUpdate() {
-        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
-                .obtain(mActivityToken, mConfiguration, new ActivityWindowInfo());
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mActivity, context);
-    }
-
-    @Test
-    public void testActivityRelaunchItem_getContextToUpdate() {
-        final ActivityRelaunchItem item = ActivityRelaunchItem
-                .obtain(mActivityToken, null /* pendingResults */, null  /* pendingNewIntents */,
-                        0 /* configChange */, mMergedConfiguration, false /* preserveWindow */,
-                        new ActivityWindowInfo());
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mActivity, context);
-    }
-
-    @Test
-    public void testConfigurationChangeItem_getContextToUpdate() {
-        final ConfigurationChangeItem item = ConfigurationChangeItem
-                .obtain(mConfiguration, DEVICE_ID_DEFAULT);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(ActivityThread.currentApplication(), context);
-    }
-
-    @Test
     public void testDestroyActivityItem_preExecute() {
-        final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+        final DestroyActivityItem item =
+                new DestroyActivityItem(mActivityToken, false /* finished */);
+
         item.preExecute(mHandler);
 
         assertEquals(1, mActivitiesToBeDestroyed.size());
@@ -145,9 +117,10 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testDestroyActivityItem_postExecute() {
-        final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+        final DestroyActivityItem item =
+                new DestroyActivityItem(mActivityToken, false /* finished */);
         item.preExecute(mHandler);
+
         item.postExecute(mHandler, mPendingActions);
 
         assertTrue(mActivitiesToBeDestroyed.isEmpty());
@@ -155,38 +128,55 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testDestroyActivityItem_execute() {
-        final DestroyActivityItem item = DestroyActivityItem
-                .obtain(mActivityToken, false /* finished */, 123 /* configChanges */);
+        final DestroyActivityItem item =
+                new DestroyActivityItem(mActivityToken, false /* finished */);
+
         item.execute(mHandler, mActivityClientRecord, mPendingActions);
 
         verify(mHandler).handleDestroyActivity(eq(mActivityClientRecord), eq(false) /* finishing */,
-                eq(123) /* configChanges */, eq(false) /* getNonConfigInstance */, any());
+                eq(false) /* getNonConfigInstance */, any());
     }
 
     @Test
-    public void testLaunchActivityItem_getContextToUpdate() {
-        final LaunchActivityItem item = new TestUtils.LaunchActivityItemBuilder(
-                mActivityToken, new Intent(), new ActivityInfo())
-                .build();
+    public void testResumeActivityItem_preExecute_withProcState_updatesProcessState() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                ActivityManager.PROCESS_STATE_TOP /* procState */,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
 
-        final Context context = item.getContextToUpdate(mHandler);
+        item.preExecute(mHandler);
 
-        assertEquals(ActivityThread.currentApplication(), context);
+        verify(mHandler).updateProcessState(ActivityManager.PROCESS_STATE_TOP, false);
     }
 
     @Test
-    public void testMoveToDisplayItem_getContextToUpdate() {
-        final MoveToDisplayItem item = MoveToDisplayItem
-                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration, new ActivityWindowInfo());
-        final Context context = item.getContextToUpdate(mHandler);
+    public void testResumeActivityItem_preExecute_withUnknownProcState_skipsProcessStateUpdate() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                ActivityManager.PROCESS_STATE_UNKNOWN /* procState */,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
 
-        assertEquals(mActivity, context);
+        item.preExecute(mHandler);
+
+        verify(mHandler, never()).updateProcessState(anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testResumeActivityItem_preExecute_withoutProcState_skipsProcessStateUpdate() {
+        final ResumeActivityItem item = new ResumeActivityItem(mActivityToken,
+                true /* isForward */,
+                false /* shouldSendCompatFakeFocus*/);
+
+        item.preExecute(mHandler);
+
+        verify(mHandler, never()).updateProcessState(anyInt(), anyBoolean());
     }
 
     @Test
     public void testWindowContextInfoChangeItem_execute() {
-        final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
-                .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
+        final WindowContextInfoChangeItem item = new WindowContextInfoChangeItem(mWindowClientToken,
+                mConfiguration, DEFAULT_DISPLAY);
+
         item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextInfoChanged(mWindowClientToken,
@@ -194,20 +184,10 @@ public class ClientTransactionItemTest {
     }
 
     @Test
-    public void testWindowContextInfoChangeItem_getContextToUpdate() {
-        doReturn(mWindowContext).when(mHandler).getWindowContext(mWindowClientToken);
-
-        final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
-                .obtain(mWindowClientToken, mConfiguration, DEFAULT_DISPLAY);
-        final Context context = item.getContextToUpdate(mHandler);
-
-        assertEquals(mWindowContext, context);
-    }
-
-    @Test
     public void testWindowContextWindowRemovalItem_execute() {
-        final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
-                mWindowClientToken);
+        final WindowContextWindowRemovalItem item =
+                new WindowContextWindowRemovalItem(mWindowClientToken);
+
         item.execute(mHandler, mPendingActions);
 
         verify(mHandler).handleWindowContextWindowRemoval(mWindowClientToken);
@@ -215,27 +195,43 @@ public class ClientTransactionItemTest {
 
     @Test
     public void testWindowStateResizeItem_execute() throws RemoteException {
-        final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
+        final MergedConfiguration mergedConfiguration = new MergedConfiguration(mGlobalConfig,
+                mConfiguration);
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        final ClientWindowFrames frames = new ClientWindowFrames();
+        final WindowStateResizeItem item = new WindowStateResizeItem(mWindow, frames,
+                true /* reportDraw */, mergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
+                true /* dragResizing */, activityWindowInfo);
+
         item.execute(mHandler, mPendingActions);
 
-        verify(mWindow).resized(mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
+        verify(mWindow).resized(frames,
+                true /* reportDraw */, mergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
+                true /* dragResizing */, activityWindowInfo);
     }
 
     @Test
-    public void testWindowStateResizeItem_getContextToUpdate() {
-        final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
-                true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
-                true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
-        final Context context = item.getContextToUpdate(mHandler);
+    public void testWindowStateInsetsControlChangeItem_execute() throws RemoteException {
+        final InsetsSourceControl.Array activeControls = new InsetsSourceControl.Array();
+        final WindowStateInsetsControlChangeItem item = new WindowStateInsetsControlChangeItem(
+                mWindow, mInsetsState, activeControls);
 
-        assertEquals(ActivityThread.currentApplication(), context);
+        item.execute(mHandler, mPendingActions);
+
+        verify(mWindow).insetsControlChanged(mInsetsState, activeControls);
     }
 
+    @Test
+    public void testWindowStateInsetsControlChangeItem_executeError() throws RemoteException {
+        final InsetsSourceControl.Array spiedActiveControls = spy(new InsetsSourceControl.Array());
+        final WindowStateInsetsControlChangeItem item = new WindowStateInsetsControlChangeItem(
+                mWindow, mInsetsState, spiedActiveControls, false /* copyActiveControls */);
+        doThrow(new RemoteException()).when(mWindow).insetsControlChanged(any(), any());
+
+        item.execute(mHandler, mPendingActions);
+
+        verify(spiedActiveControls).release();
+    }
 }

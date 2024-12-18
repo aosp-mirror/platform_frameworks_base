@@ -31,6 +31,7 @@ import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualRotaryEncoderScrollEvent;
 import android.hardware.input.VirtualStylusButtonEvent;
 import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
@@ -41,7 +42,6 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.WindowManager;
 
@@ -77,6 +77,7 @@ class InputController {
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
     static final String PHYS_TYPE_NAVIGATION_TOUCHPAD = "NavigationTouchpad";
     static final String PHYS_TYPE_STYLUS = "Stylus";
+    static final String PHYS_TYPE_ROTARY_ENCODER = "RotaryEncoder";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
             PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
@@ -84,6 +85,7 @@ class InputController {
             PHYS_TYPE_TOUCHSCREEN,
             PHYS_TYPE_NAVIGATION_TOUCHPAD,
             PHYS_TYPE_STYLUS,
+            PHYS_TYPE_ROTARY_ENCODER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
@@ -169,7 +171,6 @@ class InputController {
         createDeviceInternal(InputDeviceDescriptor.TYPE_MOUSE, deviceName, vendorId, productId,
                 deviceToken, displayId, phys,
                 () -> mNativeWrapper.openUinputMouse(deviceName, vendorId, productId, phys));
-        setVirtualMousePointerDisplayId(displayId);
     }
 
     void createTouchscreen(@NonNull String deviceName, int vendorId, int productId,
@@ -208,6 +209,15 @@ class InputController {
                         height, width));
     }
 
+    void createRotaryEncoder(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId) throws DeviceCreationException {
+        final String phys = createPhys(PHYS_TYPE_ROTARY_ENCODER);
+        createDeviceInternal(InputDeviceDescriptor.TYPE_ROTARY_ENCODER, deviceName, vendorId,
+                productId, deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputRotaryEncoder(deviceName, vendorId, productId,
+                        phys));
+    }
+
     void unregisterInputDevice(@NonNull IBinder token) {
         synchronized (mLock) {
             final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.remove(
@@ -226,7 +236,7 @@ class InputController {
         token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
         mNativeWrapper.closeUinput(inputDeviceDescriptor.getNativePointer());
         String phys = inputDeviceDescriptor.getPhys();
-        InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+        InputManagerGlobal.getInstance().removeUniqueIdAssociationByPort(phys);
         // Type associations are added in the case of navigation touchpads. Those should be removed
         // once the input device gets closed.
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_NAVIGATION_TOUCHPAD) {
@@ -235,15 +245,6 @@ class InputController {
 
         if (inputDeviceDescriptor.getType() == InputDeviceDescriptor.TYPE_KEYBOARD) {
             mInputManagerInternal.removeKeyboardLayoutAssociation(phys);
-        }
-
-        // Reset values to the default if all virtual mice are unregistered, or set display
-        // id if there's another mouse (choose the most recent). The inputDeviceDescriptor must be
-        // removed from the mInputDeviceDescriptors instance variable prior to this point.
-        if (inputDeviceDescriptor.isMouse()) {
-            if (getVirtualMousePointerDisplayId() == inputDeviceDescriptor.getDisplayId()) {
-                updateActivePointerDisplayIdLocked();
-            }
         }
     }
 
@@ -276,29 +277,6 @@ class InputController {
         mWindowManager.setDisplayImePolicy(displayId, policy);
     }
 
-    // TODO(b/293587049): Remove after pointer icon refactor is complete.
-    @GuardedBy("mLock")
-    private void updateActivePointerDisplayIdLocked() {
-        InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (int i = 0; i < mInputDeviceDescriptors.size(); ++i) {
-            InputDeviceDescriptor otherInputDeviceDescriptor = mInputDeviceDescriptors.valueAt(i);
-            if (otherInputDeviceDescriptor.isMouse()) {
-                if (mostRecentlyCreatedMouse == null
-                        || (otherInputDeviceDescriptor.getCreationOrderNumber()
-                        > mostRecentlyCreatedMouse.getCreationOrderNumber())) {
-                    mostRecentlyCreatedMouse = otherInputDeviceDescriptor;
-                }
-            }
-        }
-        if (mostRecentlyCreatedMouse != null) {
-            setVirtualMousePointerDisplayId(
-                    mostRecentlyCreatedMouse.getDisplayId());
-        } else {
-            // All mice have been unregistered
-            setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
-        }
-    }
-
     /**
      * Validates a device name by checking whether a device with the same name already exists.
      * @param deviceName The name of the device to be validated
@@ -321,7 +299,7 @@ class InputController {
 
     private void setUniqueIdAssociation(int displayId, String phys) {
         final String displayUniqueId = mDisplayManagerInternal.getDisplayInfo(displayId).uniqueId;
-        InputManagerGlobal.getInstance().addUniqueIdAssociation(phys, displayUniqueId);
+        InputManagerGlobal.getInstance().addUniqueIdAssociationByPort(phys, displayUniqueId);
     }
 
     boolean sendDpadKeyEvent(@NonNull IBinder token, @NonNull VirtualKeyEvent event) {
@@ -355,9 +333,6 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 return false;
             }
-            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
-                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
-            }
             return mNativeWrapper.writeButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
         }
@@ -384,9 +359,6 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 return false;
             }
-            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
-                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
-            }
             return mNativeWrapper.writeRelativeEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getRelativeX(), event.getRelativeY(), event.getEventTimeNanos());
         }
@@ -398,9 +370,6 @@ class InputController {
                     token);
             if (inputDeviceDescriptor == null) {
                 return false;
-            }
-            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
-                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return mNativeWrapper.writeScrollEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getXAxisMovement(), event.getYAxisMovement(), event.getEventTimeNanos());
@@ -414,9 +383,6 @@ class InputController {
             if (inputDeviceDescriptor == null) {
                 throw new IllegalArgumentException(
                         "Could not get cursor position for input device for given token");
-            }
-            if (inputDeviceDescriptor.getDisplayId() != getVirtualMousePointerDisplayId()) {
-                setVirtualMousePointerDisplayId(inputDeviceDescriptor.getDisplayId());
             }
             return LocalServices.getService(InputManagerInternal.class).getCursorPosition(
                     inputDeviceDescriptor.getDisplayId());
@@ -446,6 +412,20 @@ class InputController {
             }
             return mNativeWrapper.writeStylusButtonEvent(inputDeviceDescriptor.getNativePointer(),
                     event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
+        }
+    }
+
+    boolean sendRotaryEncoderScrollEvent(@NonNull IBinder token,
+            @NonNull VirtualRotaryEncoderScrollEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
+            }
+            return mNativeWrapper.writeRotaryEncoderScrollEvent(
+                    inputDeviceDescriptor.getNativePointer(), event.getScrollAmount(),
+                    event.getEventTimeNanos());
         }
     }
 
@@ -495,6 +475,9 @@ class InputController {
             int productId, String phys, int height, int width);
     private static native long nativeOpenUinputStylus(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
+    private static native long nativeOpenUinputRotaryEncoder(String deviceName, int vendorId,
+            int productId, String phys);
+
     private static native void nativeCloseUinput(long ptr);
     private static native boolean nativeWriteDpadKeyEvent(long ptr, int androidKeyCode, int action,
             long eventTimeNanos);
@@ -512,6 +495,8 @@ class InputController {
     private static native boolean nativeWriteStylusMotionEvent(long ptr, int toolType, int action,
             int locationX, int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos);
     private static native boolean nativeWriteStylusButtonEvent(long ptr, int buttonCode, int action,
+            long eventTimeNanos);
+    private static native boolean nativeWriteRotaryEncoderScrollEvent(long ptr, float scrollAmount,
             long eventTimeNanos);
 
     /** Wrapper around the static native methods for tests. */
@@ -539,6 +524,11 @@ class InputController {
         public long openUinputStylus(String deviceName, int vendorId, int productId, String phys,
                 int height, int width) {
             return nativeOpenUinputStylus(deviceName, vendorId, productId, phys, height, width);
+        }
+
+        public long openUinputRotaryEncoder(String deviceName, int vendorId, int productId,
+                String phys) {
+            return nativeOpenUinputRotaryEncoder(deviceName, vendorId, productId, phys);
         }
 
         public void closeUinput(long ptr) {
@@ -588,6 +578,11 @@ class InputController {
                 long eventTimeNanos) {
             return nativeWriteStylusButtonEvent(ptr, buttonCode, action, eventTimeNanos);
         }
+
+        public boolean writeRotaryEncoderScrollEvent(long ptr, float scrollAmount,
+                long eventTimeNanos) {
+            return nativeWriteRotaryEncoderScrollEvent(ptr, scrollAmount, eventTimeNanos);
+        }
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -599,6 +594,7 @@ class InputController {
         static final int TYPE_DPAD = 4;
         static final int TYPE_NAVIGATION_TOUCHPAD = 5;
         static final int TYPE_STYLUS = 6;
+        static final int TYPE_ROTARY_ENCODER = 7;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
@@ -606,6 +602,7 @@ class InputController {
                 TYPE_DPAD,
                 TYPE_NAVIGATION_TOUCHPAD,
                 TYPE_STYLUS,
+                TYPE_ROTARY_ENCODER,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {
@@ -692,13 +689,15 @@ class InputController {
     }
 
     /** A helper class used to wait for an input device to be registered. */
-    private class WaitForDevice implements  AutoCloseable {
+    private class WaitForDevice implements AutoCloseable {
         private final CountDownLatch mDeviceAddedLatch = new CountDownLatch(1);
+        private final String mDeviceName;
         private final InputManager.InputDeviceListener mListener;
 
         private int mInputDeviceId = IInputConstants.INVALID_INPUT_DEVICE_ID;
 
         WaitForDevice(String deviceName, int vendorId, int productId, int associatedDisplayId) {
+            mDeviceName = deviceName;
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
@@ -744,15 +743,17 @@ class InputController {
             try {
                 if (!mDeviceAddedLatch.await(1, TimeUnit.MINUTES)) {
                     throw new DeviceCreationException(
-                            "Timed out waiting for virtual device to be created.");
+                            "Timed out waiting for virtual input device " + mDeviceName
+                                    + " to be created.");
                 }
             } catch (InterruptedException e) {
                 throw new DeviceCreationException(
-                        "Interrupted while waiting for virtual device to be created.", e);
+                        "Interrupted while waiting for virtual input device " + mDeviceName
+                                + " to be created.", e);
             }
             if (mInputDeviceId == IInputConstants.INVALID_INPUT_DEVICE_ID) {
                 throw new IllegalStateException(
-                        "Virtual input device was created with an invalid "
+                        "Virtual input device " + mDeviceName + " was created with an invalid "
                                 + "id=" + mInputDeviceId);
             }
             return mInputDeviceId;
@@ -835,7 +836,7 @@ class InputController {
                 throw e;
             }
         } catch (DeviceCreationException e) {
-            InputManagerGlobal.getInstance().removeUniqueIdAssociation(phys);
+            InputManagerGlobal.getInstance().removeUniqueIdAssociationByPort(phys);
             throw e;
         }
 
@@ -845,11 +846,9 @@ class InputController {
                             deviceName, inputDeviceId));
         }
 
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            String metricId = getMetricIdForInputType(type);
-            if (metricId != null) {
-                Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
-            }
+        String metricId = getMetricIdForInputType(type);
+        if (metricId != null) {
+            Counter.logIncrementWithUid(metricId, mAttributionSource.getUid());
         }
     }
 
@@ -867,6 +866,8 @@ class InputController {
                 return "virtual_devices.value_virtual_navigationtouchpad_created_count";
             case InputDeviceDescriptor.TYPE_STYLUS:
                 return "virtual_devices.value_virtual_stylus_created_count";
+            case InputDeviceDescriptor.TYPE_ROTARY_ENCODER:
+                return "virtual_devices.value_virtual_rotary_created_count";
             default:
                 Log.e(TAG, "No metric known for input type: " + type);
                 return null;
@@ -877,23 +878,5 @@ class InputController {
     interface DeviceCreationThreadVerifier {
         /** Returns true if the calling thread is a valid thread for device creation. */
         boolean isValidThread();
-    }
-
-    // TODO(b/293587049): Remove after pointer icon refactor is complete.
-    private void setVirtualMousePointerDisplayId(int displayId) {
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            // We no longer need to set the pointer display when pointer choreographer is enabled.
-            return;
-        }
-        mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
-    }
-
-    // TODO(b/293587049): Remove after pointer icon refactor is complete.
-    private int getVirtualMousePointerDisplayId() {
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            // We no longer need to get the pointer display when pointer choreographer is enabled.
-            return Display.INVALID_DISPLAY;
-        }
-        return mInputManagerInternal.getVirtualMousePointerDisplayId();
     }
 }

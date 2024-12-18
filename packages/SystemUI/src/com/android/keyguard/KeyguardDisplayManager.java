@@ -15,8 +15,10 @@
  */
 package com.android.keyguard;
 
+import android.annotation.NonNull;
 import android.app.Presentation;
 import android.content.Context;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
@@ -37,7 +39,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -46,7 +48,6 @@ import dagger.Lazy;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
 
 @SysUISingleton
 public class KeyguardDisplayManager {
@@ -286,7 +287,7 @@ public class KeyguardDisplayManager {
     /**
      * Helper used to receive device state info from {@link DeviceStateManager}.
      */
-    static class DeviceStateHelper implements DeviceStateManager.DeviceStateCallback {
+    public static class DeviceStateHelper implements DeviceStateManager.DeviceStateCallback {
 
         @Nullable
         private final DisplayAddress.Physical mRearDisplayPhysicalAddress;
@@ -315,11 +316,11 @@ public class KeyguardDisplayManager {
         }
 
         @Override
-        public void onStateChanged(int state) {
+        public void onDeviceStateChanged(@NonNull DeviceState state) {
             // When concurrent state ends, the display also turns off. This is enforced in various
             // ExtensionRearDisplayPresentationTest CTS tests. So, we don't need to invoke
             // hide() since that will happen through the onDisplayRemoved callback.
-            mIsInConcurrentDisplayState = state == mConcurrentState;
+            mIsInConcurrentDisplayState = state.getIdentifier() == mConcurrentState;
         }
 
         boolean isConcurrentDisplayActive(Display display) {

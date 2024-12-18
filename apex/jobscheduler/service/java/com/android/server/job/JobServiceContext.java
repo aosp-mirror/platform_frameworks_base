@@ -16,8 +16,6 @@
 
 package com.android.server.job;
 
-import static android.app.job.JobInfo.getPriorityString;
-
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.safelyScaleBytesToKBForHistogram;
@@ -73,9 +71,6 @@ import com.android.modules.expresslog.Histogram;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
-import com.android.server.tare.EconomicPolicy;
-import com.android.server.tare.EconomyManagerInternal;
-import com.android.server.tare.JobSchedulerEconomicPolicy;
 
 import java.util.Objects;
 
@@ -134,6 +129,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
     };
+    private static final String TRACE_JOB_FORCE_FINISHED_PREFIX = "forceJobFinished:";
+    private static final String TRACE_JOB_FORCE_FINISHED_DELIMITER = "#";
 
     // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
@@ -159,7 +156,6 @@ public final class JobServiceContext implements ServiceConnection {
     private final Object mLock;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final IBatteryStats mBatteryStats;
-    private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
     private final PowerManager mPowerManager;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -298,6 +294,11 @@ public final class JobServiceContext implements ServiceConnection {
         }
 
         @Override
+        public void forceJobFinished(int jobId) {
+            doForceJobFinished(this, jobId);
+        }
+
+        @Override
         public void updateEstimatedNetworkBytes(int jobId, JobWorkItem item,
                 long downloadBytes, long uploadBytes) {
             doUpdateEstimatedNetworkBytes(this, jobId, item, downloadBytes, uploadBytes);
@@ -324,7 +325,6 @@ public final class JobServiceContext implements ServiceConnection {
         mService = service;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mBatteryStats = batteryStats;
-        mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
         mJobConcurrencyManager = concurrencyManager;
@@ -414,11 +414,6 @@ public final class JobServiceContext implements ServiceConnection {
             mWakeLock.setReferenceCounted(false);
             mWakeLock.acquire();
 
-            // Note the start when we try to bind so that the app is charged for some processing
-            // even if binding fails.
-            mEconomyManagerInternal.noteInstantaneousEvent(
-                    job.getSourceUserId(), job.getSourcePackageName(),
-                    getStartActionId(job), String.valueOf(job.getJobId()));
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             // Use FLAG_FROM_BACKGROUND to avoid resetting the bad-app tracking.
@@ -485,6 +480,14 @@ public final class JobServiceContext implements ServiceConnection {
             mInitialDownloadedBytesFromCalling = TrafficStats.getUidRxBytes(job.getUid());
             mInitialUploadedBytesFromCalling = TrafficStats.getUidTxBytes(job.getUid());
 
+            int procState = mService.getUidProcState(job.getUid());
+            if (Flags.useCorrectProcessStateForLogging()
+                    && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+                // Try to get the latest proc state from AMS, there might be some delay
+                // for the proc states worse than TRANSIENT_BACKGROUND.
+                procState = mActivityManagerInternal.getUidProcessState(job.getUid());
+            }
+
             FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
                     // Given that the source tag is set by the calling app, it should be connected
@@ -529,7 +532,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getEstimatedNetworkDownloadBytes(),
                     job.getEstimatedNetworkUploadBytes(),
                     job.getWorkCount(),
-                    ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())),
+                    ActivityManager.processStateAmToProto(procState),
                     job.getNamespaceHash(),
                     /* system_measured_source_download_bytes */ 0,
                     /* system_measured_source_upload_bytes */ 0,
@@ -547,29 +550,17 @@ public final class JobServiceContext implements ServiceConnection {
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                final String componentPackage = job.getServiceComponent().getPackageName();
-                String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
-                if (!sourcePackage.equals(componentPackage)) {
-                    traceTag += ":" + componentPackage;
-                }
-                traceTag += "/" + job.getServiceComponent().getShortClassName();
-                if (!componentPackage.equals(job.serviceProcessName)) {
-                    traceTag += "$" + job.serviceProcessName;
-                }
-                if (job.getNamespace() != null) {
-                    traceTag += "@" + job.getNamespace();
-                }
-                traceTag += "#" + job.getJobId();
-
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
-                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                        traceTag, getId());
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                        JobSchedulerService.TRACE_TRACK_NAME, job.computeSystemTraceTag(),
+                        getId());
             }
             if (job.getAppTraceTag() != null) {
                 // Use the job's ID to distinguish traces since the ID will be unique per app.
-                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "JobScheduler",
-                        job.getAppTraceTag(), job.getJobId());
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP,
+                        JobSchedulerService.TRACE_TRACK_NAME, job.getAppTraceTag(),
+                        job.getJobId());
             }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
@@ -617,25 +608,6 @@ public final class JobServiceContext implements ServiceConnection {
                 PermissionChecker.PID_UNKNOWN, uid, pkgName, /* attributionTag */ null,
                 "network info via JS");
         return result == PermissionChecker.PERMISSION_GRANTED;
-    }
-
-    @EconomicPolicy.AppAction
-    private static int getStartActionId(@NonNull JobStatus job) {
-        switch (job.getEffectivePriority()) {
-            case JobInfo.PRIORITY_MAX:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START;
-            case JobInfo.PRIORITY_HIGH:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_HIGH_START;
-            case JobInfo.PRIORITY_LOW:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_LOW_START;
-            case JobInfo.PRIORITY_MIN:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_MIN_START;
-            default:
-                Slog.wtf(TAG, "Unknown priority: " + getPriorityString(job.getEffectivePriority()));
-                // Intentional fallthrough
-            case JobInfo.PRIORITY_DEFAULT:
-                return JobSchedulerEconomicPolicy.ACTION_JOB_DEFAULT_START;
-        }
     }
 
     /**
@@ -791,6 +763,35 @@ public final class JobServiceContext implements ServiceConnection {
                         JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
                         "app called jobFinished");
                 doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * This method just adds traces to evaluate jobs that leak jobparameters at the client.
+     * It does not stop the job.
+     */
+    void doForceJobFinished(JobCallback cb, int jobId) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final JobStatus executing;
+            synchronized (mLock) {
+                // not the current job, presumably it has finished in some way already
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+
+                executing = getRunningJobLocked();
+            }
+            if (executing != null && jobId == executing.getJobId()) {
+                final StringBuilder stateSuffix = new StringBuilder();
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_PREFIX);
+                stateSuffix.append(executing.getBatteryName());
+                stateSuffix.append(TRACE_JOB_FORCE_FINISHED_DELIMITER);
+                stateSuffix.append(executing.getJobId());
+                Trace.instant(Trace.TRACE_TAG_POWER, stateSuffix.toString());
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1571,6 +1572,13 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
         final int sourceUid = completedJob.getSourceUid();
+        int procState = mService.getUidProcState(completedJob.getUid());
+        if (Flags.useCorrectProcessStateForLogging()
+                && procState > ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND) {
+            // Try to get the latest proc state from AMS, there might be some delay
+            // for the proc states worse than TRANSIENT_BACKGROUND.
+            procState = mActivityManagerInternal.getUidProcessState(completedJob.getUid());
+        }
         FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
                 completedJob.isProxyJob()
                         ? new int[]{sourceUid, completedJob.getUid()} : new int[]{sourceUid},
@@ -1616,7 +1624,7 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getEstimatedNetworkUploadBytes(),
                 completedJob.getWorkCount(),
                 ActivityManager
-                        .processStateAmToProto(mService.getUidProcState(completedJob.getUid())),
+                        .processStateAmToProto(procState),
                 completedJob.getNamespaceHash(),
                 TrafficStats.getUidRxBytes(completedJob.getSourceUid())
                         - mInitialDownloadedBytesFromSource,
@@ -1636,24 +1644,18 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getFilteredTraceTag(),
                 completedJob.getFilteredDebugTags());
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                    getId());
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    JobSchedulerService.TRACE_TRACK_NAME, getId());
         }
         if (completedJob.getAppTraceTag() != null) {
-            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "JobScheduler",
-                    completedJob.getJobId());
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP,
+                    JobSchedulerService.TRACE_TRACK_NAME, completedJob.getJobId());
         }
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),
                     loggingInternalStopReason);
         } catch (RemoteException e) {
             // Whatever.
-        }
-        if (loggingStopReason == JobParameters.STOP_REASON_TIMEOUT) {
-            mEconomyManagerInternal.noteInstantaneousEvent(
-                    mRunningJob.getSourceUserId(), mRunningJob.getSourcePackageName(),
-                    JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
-                    String.valueOf(mRunningJob.getJobId()));
         }
         mNotificationCoordinator.removeNotificationAssociation(this,
                 reschedulingStopReason, completedJob);

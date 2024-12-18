@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Veorsion 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -32,6 +32,7 @@ import android.graphics.Rect;
      * @param displayId The logical display id.
      * @param bounds The window magnifier bounds in screen coordinates.
      */
+    @RequiresNoPermission
     void onWindowMagnifierBoundsChanged(int displayId, in Rect bounds);
 
     /**
@@ -41,6 +42,7 @@ import android.graphics.Rect;
      * @param displayId The logical display id.
      * @param magnificationMode new magnification mode.
      */
+    @RequiresNoPermission
     void onChangeMagnificationMode(int displayId, int magnificationMode);
 
     /**
@@ -49,6 +51,7 @@ import android.graphics.Rect;
      * @param displayId The logical display id.
      * @param sourceBounds The magnified bounds in screen coordinates.
      */
+    @RequiresNoPermission
     void onSourceBoundsChanged(int displayId, in Rect sourceBounds);
 
     /**
@@ -59,6 +62,7 @@ import android.graphics.Rect;
      * @param scale the target scale, or {@link Float#NaN} to leave unchanged
      * @param updatePersistence whether the new scale should be persisted in Settings
      */
+    @RequiresNoPermission
     void onPerformScaleAction(int displayId, float scale, boolean updatePersistence);
 
     /**
@@ -66,6 +70,7 @@ import android.graphics.Rect;
      *
      * @param displayId The logical display id.
      */
+    @RequiresNoPermission
     void onAccessibilityActionPerformed(int displayId);
 
     /**
@@ -73,6 +78,7 @@ import android.graphics.Rect;
      *
      * @param displayId The logical display id.
      */
+    @RequiresNoPermission
     void onMove(int displayId);
 
 }

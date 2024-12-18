@@ -1492,12 +1492,12 @@ public final class ShortcutInfo implements Parcelable {
         /**
          * Sets which surfaces a shortcut will be excluded from.
          *
-         * If the shortcut is set to be excluded from {@link #SURFACE_LAUNCHER}, shortcuts will be
-         * excluded from the search result of {@link android.content.pm.LauncherApps#getShortcuts(
-         * android.content.pm.LauncherApps.ShortcutQuery, UserHandle)} nor
-         * {@link android.content.pm.ShortcutManager#getShortcuts(int)}. This generally means the
-         * shortcut would not be displayed by a launcher app (e.g. in Long-Press menu), while
-         * remain visible in other surfaces such as assistant or on-device-intelligence.
+         * This API is reserved for future extension. Currently, marking a shortcut to be
+         * excluded from {@link #SURFACE_LAUNCHER} will not publish the shortcut, thus
+         * the following operations will be a no-op:
+         * {@link android.content.pm.ShortcutManager#pushDynamicShortcut(android.content.pm.ShortcutInfo)},
+         * {@link android.content.pm.ShortcutManager#addDynamicShortcuts(List)}, and
+         * {@link android.content.pm.ShortcutManager#setDynamicShortcuts(List)}.
          */
         @NonNull
         public Builder setExcludedFromSurfaces(final int surfaces) {
@@ -2501,33 +2501,19 @@ public final class ShortcutInfo implements Parcelable {
         return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true, indent);
     }
 
-    private void addIndentOrComma(StringBuilder sb, String indent) {
-        if (indent != null) {
-            sb.append("\n  ");
-            sb.append(indent);
-        } else {
-            sb.append(", ");
-        }
+    /** @hide */
+    public String toSimpleString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(mId);
+        addReadableFlags(sb);
+        return sb.toString();
     }
 
-    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
-        final StringBuilder sb = new StringBuilder();
-
-        if (indent != null) {
-            sb.append(indent);
-        }
-
-        sb.append("ShortcutInfo {");
-
-        sb.append("id=");
-        sb.append(secure ? "***" : mId);
-
-        sb.append(", flags=0x");
-        sb.append(Integer.toHexString(mFlags));
+    private void addReadableFlags(StringBuilder sb) {
         sb.append(" [");
         if ((mFlags & FLAG_SHADOW) != 0) {
-            // Note the shadow flag isn't actually used anywhere and it's just for dumpsys, so
-            // we don't have an isXxx for this.
+            // Note the shadow flag isn't actually used anywhere and it's
+            // just for dumpsys, so we don't have an isXxx for this.
             sb.append("Sdw");
         }
         if (!isEnabled()) {
@@ -2576,7 +2562,32 @@ public final class ShortcutInfo implements Parcelable {
             sb.append("Hid-L");
         }
         sb.append("]");
+    }
 
+    private void addIndentOrComma(StringBuilder sb, String indent) {
+        if (indent != null) {
+            sb.append("\n  ");
+            sb.append(indent);
+        } else {
+            sb.append(", ");
+        }
+    }
+
+    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
+        final StringBuilder sb = new StringBuilder();
+
+        if (indent != null) {
+            sb.append(indent);
+        }
+
+        sb.append("ShortcutInfo {");
+
+        sb.append("id=");
+        sb.append(secure ? "***" : mId);
+
+        sb.append(", flags=0x");
+        sb.append(Integer.toHexString(mFlags));
+        addReadableFlags(sb);
         addIndentOrComma(sb, indent);
 
         sb.append("packageName=");

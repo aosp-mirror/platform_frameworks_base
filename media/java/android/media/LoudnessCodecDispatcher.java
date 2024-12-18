@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static android.media.MediaFormat.KEY_AAC_DRC_ALBUM_MODE;
+import static android.media.MediaFormat.KEY_AAC_DRC_ATTENUATION_FACTOR;
+import static android.media.MediaFormat.KEY_AAC_DRC_BOOST_FACTOR;
 import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
 import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
 import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
@@ -141,6 +144,18 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
             if (bundle.containsKey(KEY_AAC_DRC_EFFECT_TYPE)) {
                 filteredBundle.putInt(KEY_AAC_DRC_EFFECT_TYPE,
                         bundle.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+            }
+            if (bundle.containsKey(KEY_AAC_DRC_BOOST_FACTOR)) {
+                filteredBundle.putInt(KEY_AAC_DRC_BOOST_FACTOR,
+                        bundle.getInt(KEY_AAC_DRC_BOOST_FACTOR));
+            }
+            if (bundle.containsKey(KEY_AAC_DRC_ATTENUATION_FACTOR)) {
+                filteredBundle.putInt(KEY_AAC_DRC_ATTENUATION_FACTOR,
+                        bundle.getInt(KEY_AAC_DRC_ATTENUATION_FACTOR));
+            }
+            if (bundle.containsKey(KEY_AAC_DRC_ALBUM_MODE)) {
+                filteredBundle.putInt(KEY_AAC_DRC_ALBUM_MODE,
+                        bundle.getInt(KEY_AAC_DRC_ALBUM_MODE));
             }
 
             return filteredBundle;

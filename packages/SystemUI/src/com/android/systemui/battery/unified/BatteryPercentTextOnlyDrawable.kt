@@ -23,6 +23,7 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.view.View
 import com.android.systemui.battery.unified.BatteryLayersDrawable.Companion.Metrics
 
 /**
@@ -71,6 +72,7 @@ class BatteryPercentTextOnlyDrawable(font: Typeface) : Drawable() {
     }
 
     override fun draw(canvas: Canvas) {
+        val rtl = layoutDirection == View.LAYOUT_DIRECTION_RTL
         val totalAvailableHeight = CanvasHeight * vScale
 
         // Distribute the vertical whitespace around the text. This is a simplified version of
@@ -81,11 +83,12 @@ class BatteryPercentTextOnlyDrawable(font: Typeface) : Drawable() {
         val totalAvailableWidth = CanvasWidth * hScale
         val textWidth = textPaint.measureText(percentText)
         val offsetX = (totalAvailableWidth - textWidth) / 2
+        val startOffset = if (rtl) ViewportInsetRight else ViewportInsetLeft
 
         // Draw the text centered in the available area
         canvas.drawText(
             percentText,
-            (ViewportInsetLeft * hScale) + offsetX,
+            (startOffset * hScale) + offsetX,
             (ViewportInsetTop * vScale) + offsetY,
             textPaint
         )

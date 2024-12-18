@@ -16,7 +16,9 @@
 
 package com.android.packageinstaller.v2.ui
 
-import android.app.Activity
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_FIRST_USER
+import android.app.Activity.RESULT_OK
 import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -43,6 +45,7 @@ import com.android.packageinstaller.v2.model.InstallRepository
 import com.android.packageinstaller.v2.model.InstallStage
 import com.android.packageinstaller.v2.model.InstallSuccess
 import com.android.packageinstaller.v2.model.InstallUserActionRequired
+import com.android.packageinstaller.v2.model.PackageUtil.localLogv
 import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment
 import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment
 import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment
@@ -65,8 +68,6 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
         private val LOG_TAG = InstallLaunch::class.java.simpleName
         private const val TAG_DIALOG = "dialog"
     }
-
-    private val localLOGV = false
 
     /**
      * A collection of unknown sources listeners that are actively listening for app ops mode
@@ -136,7 +137,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                     }
 
                     InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted)
-                    else -> setResult(Activity.RESULT_CANCELED, null, true)
+                    else -> setResult(RESULT_CANCELED, null, true)
                 }
             }
 
@@ -170,17 +171,22 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
                 val success = installStage as InstallSuccess
                 if (success.shouldReturnResult) {
                     val successIntent = success.resultIntent
-                    setResult(Activity.RESULT_OK, successIntent, true)
+                    setResult(RESULT_OK, successIntent, true)
                 } else {
-                    val successFragment = InstallSuccessFragment(success)
-                    showDialogInner(successFragment)
+                    val successDialog = InstallSuccessFragment(success)
+                    showDialogInner(successDialog)
                 }
             }
 
             InstallStage.STAGE_FAILED -> {
                 val failed = installStage as InstallFailed
-                val failedDialog = InstallFailedFragment(failed)
-                showDialogInner(failedDialog)
+                if (failed.shouldReturnResult) {
+                    val failureIntent = failed.resultIntent
+                    setResult(RESULT_FIRST_USER, failureIntent, true)
+                } else {
+                    val failureDialog = InstallFailedFragment(failed)
+                    showDialogInner(failureDialog)
+                }
             }
 
             else -> {
@@ -199,14 +205,14 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
         // admin enforcing the restriction for the affected user. If not enforced by the admin,
         // show the system dialog.
         if (adminSupportIntent != null) {
-            if (localLOGV) {
+            if (localLogv) {
                 Log.i(LOG_TAG, "Restriction set by admin, starting $adminSupportIntent")
             }
             startActivity(adminSupportIntent)
             // Finish the package installer app since the next dialog will not be shown by this app
             shouldFinish = true
         } else {
-            if (localLOGV) {
+            if (localLogv) {
                 Log.i(LOG_TAG, "Restriction set by system: $restriction")
             }
             val blockedByPolicyDialog = createDevicePolicyRestrictionDialog(restriction)
@@ -215,7 +221,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             shouldFinish = blockedByPolicyDialog == null
             showDialogInner(blockedByPolicyDialog)
         }
-        setResult(Activity.RESULT_CANCELED, null, shouldFinish)
+        setResult(RESULT_CANCELED, null, shouldFinish)
     }
 
     /**
@@ -225,7 +231,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
      * @return The dialog
      */
     private fun createDevicePolicyRestrictionDialog(restriction: String?): DialogFragment? {
-        if (localLOGV) {
+        if (localLogv) {
             Log.i(LOG_TAG, "createDialog($restriction)")
         }
         return when (restriction) {
@@ -253,12 +259,19 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
 
     fun setResult(resultCode: Int, data: Intent?, shouldFinish: Boolean) {
         super.setResult(resultCode, data)
+        if (resultCode != RESULT_OK) {
+            // Let callers know that the install was cancelled
+            installViewModel!!.cleanupInstall()
+        }
         if (shouldFinish) {
             finish()
         }
     }
 
     override fun onPositiveResponse(reasonCode: Int) {
+        if (localLogv) {
+            Log.d(LOG_TAG, "Positive button clicked. ReasonCode: $reasonCode")
+        }
         when (reasonCode) {
             InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE ->
                 installViewModel!!.forcedSkipSourceCheck()
@@ -269,17 +282,26 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
     }
 
     override fun onNegativeResponse(stageCode: Int) {
+        if (localLogv) {
+            Log.d(LOG_TAG, "Negative button clicked. StageCode: $stageCode")
+        }
         if (stageCode == InstallStage.STAGE_USER_ACTION_REQUIRED) {
             installViewModel!!.cleanupInstall()
         }
-        setResult(Activity.RESULT_CANCELED, null, true)
+        setResult(RESULT_CANCELED, null, true)
     }
 
     override fun onNegativeResponse(resultCode: Int, data: Intent?) {
+        if (localLogv) {
+            Log.d(LOG_TAG, "Negative button clicked. resultCode: $resultCode; Intent: $data")
+        }
         setResult(resultCode, data, true)
     }
 
     override fun sendUnknownAppsIntent(sourcePackageName: String) {
+        if (localLogv) {
+            Log.d(LOG_TAG, "Launching unknown-apps settings intent for $sourcePackageName")
+        }
         val settingsIntent = Intent()
         settingsIntent.setAction(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
         val packageUri = Uri.parse("package:$sourcePackageName")
@@ -299,7 +321,10 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
     }
 
     override fun openInstalledApp(intent: Intent?) {
-        setResult(Activity.RESULT_OK, intent, true)
+        if (localLogv) {
+            Log.d(LOG_TAG, "Opening $intent")
+        }
+        setResult(RESULT_OK, intent, true)
         if (intent != null && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
             startActivity(intent)
         }

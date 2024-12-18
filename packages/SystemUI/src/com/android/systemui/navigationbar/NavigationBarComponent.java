@@ -24,14 +24,15 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.qualifiers.DisplayId;
+import com.android.systemui.navigationbar.views.NavigationBar;
+
+import dagger.BindsInstance;
+import dagger.Subcomponent;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
-
-import dagger.BindsInstance;
-import dagger.Subcomponent;
 
 /**
  * Subcomponent for a NavigationBar.

@@ -33,6 +33,7 @@ import android.telephony.ims.MediaThreshold;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.flags.Flags;
 
@@ -69,6 +70,7 @@ import java.util.stream.Collectors;
  * its manifest file. Where permissions apply, they are noted in the
  * appropriate sub-interfaces.
  */
+@WeaklyReferencedCallback
 public class TelephonyCallback {
     private static final String LOG_TAG = "TelephonyCallback";
     /**
@@ -644,6 +646,36 @@ public class TelephonyCallback {
     public static final int EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED = 41;
 
     /**
+     * Event for listening to changes in carrier roaming non-terrestrial network mode.
+     *
+     * @see CarrierRoamingNtnModeListener
+     *
+     * @hide
+     */
+    public static final int EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED = 42;
+
+    /**
+     * Event for listening to changes in carrier roaming non-terrestrial network eligibility.
+     *
+     * @see CarrierRoamingNtnModeListener
+     *
+     * Device is eligible for satellite communication if all the following conditions are met:
+     * <ul>
+     * <li>Any subscription on the device supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+     * <li>{@link CarrierConfigManager#KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT} set to
+     * {@link CarrierConfigManager#CARRIER_ROAMING_NTN_CONNECT_MANUAL} </li>
+     * <li>The device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * and the hysteresis timer defined by {@link CarrierConfigManager
+     * #KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT} is expired.
+     * </li>
+     * </ul>
+     *
+     * @hide
+     */
+    public static final int EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED = 43;
+
+    /**
      * @hide
      */
     @IntDef(prefix = {"EVENT_"}, value = {
@@ -687,7 +719,9 @@ public class TelephonyCallback {
             EVENT_TRIGGER_NOTIFY_ANBR,
             EVENT_MEDIA_QUALITY_STATUS_CHANGED,
             EVENT_EMERGENCY_CALLBACK_MODE_CHANGED,
-            EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED
+            EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1686,6 +1720,41 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for carrier roaming non-terrestrial network listener.
+     *
+     * @hide
+     */
+    public interface CarrierRoamingNtnModeListener {
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network mode changes.
+         *
+         * @param active {@code true} If the device is connected to carrier roaming
+         *                           non-terrestrial network or was connected within the
+         *                           {CarrierConfigManager
+         *                           #KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+         *                           {code false} otherwise.
+         */
+        void onCarrierRoamingNtnModeChanged(boolean active);
+
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network eligibility changes.
+         *
+         * @param eligible {@code true} when the device is eligible for satellite
+         * communication if all the following conditions are met:
+         * <ul>
+         * <li>Any subscription on the device supports P2P satellite messaging which is defined by
+         * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+         * <li>{@link CarrierConfigManager#KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT} set to
+         * {@link CarrierConfigManager#CARRIER_ROAMING_NTN_CONNECT_MANUAL} </li>
+         * <li>The device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+         * and the hysteresis timer defined by {@link CarrierConfigManager
+         * #KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT} is expired. </li>
+         * </ul>
+         */
+        default void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {}
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      * <p>
@@ -2085,6 +2154,28 @@ public class TelephonyCallback {
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onCallBackModeStopped(type, reason)));
+        }
+
+        public void onCarrierRoamingNtnModeChanged(boolean active) {
+            if (!Flags.carrierEnabledSatelliteFlag()) return;
+
+            CarrierRoamingNtnModeListener listener =
+                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onCarrierRoamingNtnModeChanged(active)));
+        }
+
+        public void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {
+            if (!Flags.carrierRoamingNbIotNtn()) return;
+
+            CarrierRoamingNtnModeListener listener =
+                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCarrierRoamingNtnEligibleStateChanged(eligible)));
         }
     }
 }

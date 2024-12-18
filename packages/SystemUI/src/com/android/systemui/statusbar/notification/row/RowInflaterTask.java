@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,6 +32,9 @@ import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.time.SystemClock;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -46,43 +50,128 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     private NotificationEntry mEntry;
     private boolean mCancelled;
     private Throwable mInflateOrigin;
+    private final SystemClock mSystemClock;
+    private final RowInflaterTaskLogger mLogger;
+    private long mInflateStartTimeMs;
 
     @Inject
-    public RowInflaterTask() {
+    public RowInflaterTask(SystemClock systemClock, RowInflaterTaskLogger logger) {
+        mSystemClock = systemClock;
+        mLogger = logger;
     }
 
     /**
-     * Inflates a new notificationView. This should not be called twice on this object
+     * Inflates a new notificationView asynchronously, calling the {@code listener} on the main
+     * thread when done. This should not be called twice on this object.
      */
     public void inflate(Context context, ViewGroup parent, NotificationEntry entry,
             RowInflationFinishedListener listener) {
+        inflate(context, parent, entry, null, listener);
+    }
+
+    /**
+     * Inflates a new notificationView asynchronously, calling the {@code listener} on the supplied
+     * {@code listenerExecutor} (or the main thread if null) when done. This should not be called
+     * twice on this object.
+     */
+    @VisibleForTesting
+    public void inflate(Context context, ViewGroup parent, NotificationEntry entry,
+            @Nullable Executor listenerExecutor, RowInflationFinishedListener listener) {
         if (TRACE_ORIGIN) {
             mInflateOrigin = new Throwable("inflate requested here");
         }
         mListener = listener;
-        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context,
-                new RowAsyncLayoutInflater(entry));
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context, makeRowInflater(entry));
         mEntry = entry;
         entry.setInflationTask(this);
-        inflater.inflate(R.layout.status_bar_notification_row, parent, this);
+
+        mLogger.logInflateStart(entry);
+        mInflateStartTimeMs = mSystemClock.elapsedRealtime();
+        inflater.inflate(R.layout.status_bar_notification_row, parent, listenerExecutor, this);
+    }
+
+    /**
+     * Inflates a new notificationView synchronously.
+     * This method is only for testing-purpose.
+     */
+    @VisibleForTesting
+    public ExpandableNotificationRow inflateSynchronously(@NonNull Context context,
+            @Nullable ViewGroup parent, @NonNull NotificationEntry entry) {
+        final LayoutInflater inflater = new BasicRowInflater(context);
+        inflater.setFactory2(makeRowInflater(entry));
+        final ExpandableNotificationRow inflate = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                parent /* root */,
+                false /* attachToRoot */);
+        return inflate;
+    }
+
+    private RowAsyncLayoutInflater makeRowInflater(NotificationEntry entry) {
+        return new RowAsyncLayoutInflater(entry, mSystemClock, mLogger);
+    }
+
+    /**
+     * A {@link LayoutInflater} that is copy of BasicLayoutInflater.
+     */
+    private static class BasicRowInflater extends LayoutInflater {
+        private static final String[] sClassPrefixList =
+                {"android.widget.", "android.webkit.", "android.app."};
+        BasicRowInflater(Context context) {
+            super(context);
+        }
+
+        @Override
+        public LayoutInflater cloneInContext(Context newContext) {
+            return new BasicRowInflater(newContext);
+        }
+
+        @Override
+        protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
+            for (String prefix : sClassPrefixList) {
+                try {
+                    View view = createView(name, prefix, attrs);
+                    if (view != null) {
+                        return view;
+                    }
+                } catch (ClassNotFoundException e) {
+                    // In this case we want to let the base class take a crack
+                    // at it.
+                }
+            }
+
+            return super.onCreateView(name, attrs);
+        }
     }
 
     @VisibleForTesting
-    static class RowAsyncLayoutInflater implements AsyncLayoutFactory {
+    public static class RowAsyncLayoutInflater implements AsyncLayoutFactory {
         private final NotificationEntry mEntry;
+        private final SystemClock mSystemClock;
+        private final RowInflaterTaskLogger mLogger;
 
-        RowAsyncLayoutInflater(NotificationEntry entry) {
+        public RowAsyncLayoutInflater(NotificationEntry entry, SystemClock systemClock,
+                RowInflaterTaskLogger logger) {
             mEntry = entry;
+            mSystemClock = systemClock;
+            mLogger = logger;
         }
 
         @Nullable
         @Override
         public View onCreateView(@Nullable View parent, @NonNull String name,
                 @NonNull Context context, @NonNull AttributeSet attrs) {
-            if (name.equals(ExpandableNotificationRow.class.getName())) {
-                return new ExpandableNotificationRow(context, attrs, mEntry);
+            if (!name.equals(ExpandableNotificationRow.class.getName())) {
+                return null;
             }
-            return null;
+
+            final long startMs = mSystemClock.elapsedRealtime();
+            final ExpandableNotificationRow row =
+                    new ExpandableNotificationRow(context, attrs, mEntry);
+            final long elapsedMs = mSystemClock.elapsedRealtime() - startMs;
+
+            mLogger.logCreatedRow(mEntry, elapsedMs);
+
+            return row;
         }
 
         @Nullable
@@ -100,6 +189,9 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
 
     @Override
     public void onInflateFinished(View view, int resid, ViewGroup parent) {
+        final long elapsedMs = mSystemClock.elapsedRealtime() - mInflateStartTimeMs;
+        mLogger.logInflateFinish(mEntry, elapsedMs, mCancelled);
+
         if (!mCancelled) {
             try {
                 mEntry.onInflationTaskFinished();

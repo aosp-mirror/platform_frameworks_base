@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Við stefnum að framtíð án aðgangsorða en aðgangsorð verða áfram í boði samhliða aðgangslyklum."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Veldu hvar þú vilt vista <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Veldu aðgangsorðastjórnun til að vista upplýsingarnar og vera fljótari að skrá þig inn næst"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Búa til aðgangslykil til að skrá þig inn á <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vista aðgangsorð til að skrá þig inn á <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Viltu vista innskráningarupplýsingar fyrir <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Búa til aðgangslykil til að skrá þig inn á <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vista aðgangsorð til að skrá þig inn á <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Viltu vista innskráningarupplýsingar fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"aðgangslykill"</string>
     <string name="password" msgid="6738570945182936667">"aðgangsorð"</string>
     <string name="passkeys" msgid="5733880786866559847">"aðgangslykla"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Fara aftur á fyrri síðu"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Loka"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Hunsa"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Nota vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Nota vistaða aðgangsorðið þitt fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Nota innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Opna fyrir innskráningarvalkosti fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Nota vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Nota vistað aðgangsorð fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Nota reikninginn þinn fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Notaðu skjálásinn þinn til að skrá þig inn á <xliff:g id="APP_NAME">%1$s</xliff:g> með <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Opna innskráningaraðferð fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Veldu vistaðan aðgangslykil fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Veldu vistað aðgangsorð fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Veldu vistaða innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Veldu innskráningu fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Veldu reikning fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Velja valkost fyrir <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Nota þessar upplýsingar í <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Skrá inn með öðrum hætti"</string>

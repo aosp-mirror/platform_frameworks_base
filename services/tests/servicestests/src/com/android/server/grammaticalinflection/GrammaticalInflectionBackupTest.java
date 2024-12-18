@@ -18,6 +18,7 @@ package com.android.server.grammaticalinflection;
 
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -46,6 +47,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class GrammaticalInflectionBackupTest {
     @Before
     public void setUp() throws Exception {
         mBackupHelper = new GrammaticalInflectionBackupHelper(
-                mGrammaticalInflectionService, mMockPackageManager);
+                null, mGrammaticalInflectionService, mMockPackageManager);
     }
 
     @Test
@@ -106,6 +108,28 @@ public class GrammaticalInflectionBackupTest {
                 eq(Configuration.GRAMMATICAL_GENDER_NEUTRAL));
     }
 
+    @Test
+    public void testSystemBackupPayload_returnsGender()
+            throws IOException, ClassNotFoundException {
+        doReturn(Configuration.GRAMMATICAL_GENDER_MASCULINE).when(mGrammaticalInflectionService)
+                .getSystemGrammaticalGender(eq(DEFAULT_USER_ID));
+
+        int gender = convertByteArrayToInt(mBackupHelper.getSystemBackupPayload(DEFAULT_USER_ID));
+
+        assertEquals(gender, Configuration.GRAMMATICAL_GENDER_MASCULINE);
+    }
+
+    @Test
+    public void testApplySystemPayload_setSystemWideGrammaticalGender()
+            throws IOException {
+        mBackupHelper.applyRestoredSystemPayload(
+                intToByteArray(Configuration.GRAMMATICAL_GENDER_NEUTRAL), DEFAULT_USER_ID);
+
+        verify(mGrammaticalInflectionService).setSystemWideGrammaticalGender(
+                eq(Configuration.GRAMMATICAL_GENDER_NEUTRAL),
+                eq(DEFAULT_USER_ID));
+    }
+
     private void mockAppInstalled() {
         ApplicationInfo dummyApp = new ApplicationInfo();
         dummyApp.packageName = DEFAULT_PACKAGE_NAME;
@@ -140,5 +164,16 @@ public class GrammaticalInflectionBackupTest {
             throw e;
         }
         return data;
+    }
+
+    private byte[] intToByteArray(final int gender) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(gender);
+        return bb.array();
+    }
+
+    private int convertByteArrayToInt(byte[] intBytes) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(intBytes);
+        return byteBuffer.getInt();
     }
 }

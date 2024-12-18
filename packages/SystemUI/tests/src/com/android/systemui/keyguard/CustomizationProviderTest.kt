@@ -30,6 +30,7 @@ import android.testing.TestableLooper
 import android.view.SurfaceControlViewHost
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -49,8 +50,11 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRendererFactory
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
+import com.android.systemui.kosmos.unconfinedTestDispatcher
+import com.android.systemui.kosmos.unconfinedTestScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -62,12 +66,12 @@ import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
+import com.android.systemui.util.settings.unconfinedDispatcherFakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -85,6 +89,11 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class CustomizationProviderTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
+    private val testDispatcher = kosmos.unconfinedTestDispatcher
+    private val testScope = kosmos.unconfinedTestScope
+    private val fakeSettings = kosmos.unconfinedDispatcherFakeSettings
+
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var userTracker: UserTracker
@@ -95,15 +104,13 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogTransitionAnimator
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
-    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
+    @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     private lateinit var underTest: CustomizationProvider
-    private lateinit var testScope: TestScope
-
-    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
@@ -117,8 +124,6 @@ class CustomizationProviderTest : SysuiTestCase() {
         biometricSettingsRepository = FakeBiometricSettingsRepository()
 
         underTest = CustomizationProvider()
-        val testDispatcher = UnconfinedTestDispatcher()
-        testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
                 context = context,
@@ -167,7 +172,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                     KeyguardQuickAffordanceLegacySettingSyncer(
                         scope = testScope.backgroundScope,
                         backgroundDispatcher = testDispatcher,
-                        secureSettings = FakeSettings(),
+                        secureSettings = fakeSettings,
                         selectionsManager = localUserSelectionManager,
                     ),
                 dumpManager = mock(),
@@ -198,11 +203,13 @@ class CustomizationProviderTest : SysuiTestCase() {
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
                 logger = logger,
+                metricsLogger = metricsLogger,
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
+                sceneInteractor = { kosmos.sceneInteractor },
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
@@ -211,7 +218,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 mainDispatcher = testDispatcher,
                 backgroundHandler = backgroundHandler,
             )
-        underTest.mainDispatcher = UnconfinedTestDispatcher()
+        underTest.mainDispatcher = testDispatcher
 
         underTest.attachInfoForTesting(
             context,
@@ -314,6 +321,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         ),
                     )
                 )
+            runCurrent()
         }
 
     @Test
@@ -478,8 +486,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     private fun querySlots(): List<Slot> {
@@ -514,8 +521,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     private fun queryAffordances(): List<Affordance> {
@@ -555,8 +561,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         )
                     }
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     data class Slot(

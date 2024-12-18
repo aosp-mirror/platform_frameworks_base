@@ -29,14 +29,15 @@ import android.view.View
 import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
 import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DimenRes
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.classifier.FalsingCollector
@@ -57,6 +58,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.view.ViewUtil
 import com.android.systemui.util.wakelock.WakeLock
+import java.time.Duration
 import javax.inject.Inject
 
 /**
@@ -79,7 +81,7 @@ open class ChipbarCoordinator
 constructor(
     context: Context,
     logger: ChipbarLogger,
-    windowManager: WindowManager,
+    viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
     @Main mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,
     configurationController: ConfigurationController,
@@ -98,7 +100,7 @@ constructor(
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
         logger,
-        windowManager,
+        viewCaptureAwareWindowManager,
         mainExecutor,
         accessibilityManager,
         configurationController,
@@ -228,6 +230,18 @@ constructor(
         chipInnerView.contentDescription =
             "$loadedIconDesc${newInfo.text.loadText(context)}$endItemDesc"
         chipInnerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+        // Set minimum duration between content changes to 1 second in order to announce quick
+        // state changes.
+        chipInnerView.accessibilityDelegate =
+            object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.minDurationBetweenContentChanges = Duration.ofMillis(1000)
+                }
+            }
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----

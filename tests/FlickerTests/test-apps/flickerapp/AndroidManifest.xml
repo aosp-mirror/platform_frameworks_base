@@ -18,7 +18,19 @@
           package="com.android.server.wm.flicker.testapp">
 
     <uses-sdk android:minSdkVersion="29"
-              android:targetSdkVersion="29"/>
+              android:targetSdkVersion="35"/>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
@@ -71,6 +83,7 @@
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
                   android:theme="@style/CutoutShortEdges"
                   android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+                  android:showWhenLocked="true"
                   android:label="SeamlessActivity"
                   android:exported="true">
             <intent-filter>
@@ -102,12 +115,23 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".StartMediaProjectionActivity"
+            android:theme="@style/CutoutNever"
+            android:resizeableActivity="false"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.StartMediaProjectionActivity"
+            android:label="StartMediaProjectionActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".PortraitImmersiveActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitImmersiveActivity"
                   android:immersive="true"
                   android:resizeableActivity="true"
                   android:screenOrientation="portrait"
-                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="PortraitImmersiveActivity"
                   android:exported="true">
@@ -119,7 +143,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
-                  android:theme="@android:style/Theme"
+                  android:theme="@style/OptOutEdgeToEdge"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
                   android:exported="true">
@@ -273,7 +297,7 @@
                   android:exported="true"
                   android:label="MailActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.MailActivity"
-                  android:theme="@style/Theme.AppCompat.Light">
+                  android:theme="@style/OptOutEdgeToEdge.AppCompatTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -282,7 +306,7 @@
         <activity android:name=".GameActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.GameActivity"
                   android:immersive="true"
-                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:theme="@style/OptOutEdgeToEdge.NoTitleBar"
                   android:configChanges="screenSize"
                   android:label="GameActivity"
                   android:exported="true">
@@ -399,6 +423,11 @@
             <meta-data
                 android:name="android.voice_interaction"
                 android:resource="@xml/interaction_service"/>
+        </service>
+        <service android:name="com.android.wm.shell.flicker.utils.MediaProjectionService"
+            android:foregroundServiceType="mediaProjection"
+            android:label="WMShellTestsMediaProjectionService"
+            android:enabled="true">
         </service>
     </application>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>

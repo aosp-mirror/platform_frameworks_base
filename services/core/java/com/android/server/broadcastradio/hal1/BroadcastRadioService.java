@@ -35,6 +35,7 @@ public class BroadcastRadioService {
      * This field is used by native code, do not access or modify.
      */
     private final long mNativeContext = nativeInit();
+    private final RadioServiceUserController mUserController;
 
     private final Object mLock = new Object();
 
@@ -50,6 +51,10 @@ public class BroadcastRadioService {
     private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
             RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
 
+    public BroadcastRadioService(RadioServiceUserController userController) {
+        mUserController = Objects.requireNonNull(userController, "User controller can not be null");
+    }
+
     public @NonNull List<RadioManager.ModuleProperties> loadModules() {
         synchronized (mLock) {
             return Objects.requireNonNull(nativeLoadModules(mNativeContext));
@@ -58,7 +63,7 @@ public class BroadcastRadioService {
 
     public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
             boolean withAudio, ITunerCallback callback) {
-        if (!RadioServiceUserController.isCurrentOrSystemUser()) {
+        if (!mUserController.isCurrentOrSystemUser()) {
             Slogf.e(TAG, "Cannot open tuner on HAL 1.x client for non-current user");
             throw new IllegalStateException("Cannot open tuner for non-current user");
         }

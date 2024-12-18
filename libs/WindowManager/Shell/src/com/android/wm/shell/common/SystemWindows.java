@@ -42,12 +42,12 @@ import android.view.InsetsState;
 import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 
@@ -310,7 +310,7 @@ public class SystemWindows {
         @Override
         protected SurfaceControl getParentSurface(IWindow window,
                 WindowManager.LayoutParams attrs) {
-            SurfaceControl leash = new SurfaceControl.Builder(new SurfaceSession())
+            SurfaceControl leash = new SurfaceControl.Builder()
                   .setContainerLayer()
                   .setName("SystemWindowLeash")
                   .setHidden(false)
@@ -348,11 +348,11 @@ public class SystemWindows {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration newMergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                boolean dragResizing) {}
+                boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {}
 
         @Override
         public void insetsControlChanged(InsetsState insetsState,
-                InsetsSourceControl[] activeControls) {}
+                InsetsSourceControl.Array activeControls) {}
 
         @Override
         public void showInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken) {}
@@ -388,9 +388,6 @@ public class SystemWindows {
         public void dispatchDragEvent(DragEvent event) {}
 
         @Override
-        public void updatePointerIcon(float x, float y) {}
-
-        @Override
         public void dispatchWindowShown() {}
 
         @Override
@@ -407,6 +404,11 @@ public class SystemWindows {
             } catch (RemoteException ex) {
                 // ignore
             }
+        }
+
+        @Override
+        public void dumpWindow(ParcelFileDescriptor pfd) {
+
         }
     }
 }

@@ -2,4 +2,4 @@
 per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS
 
 # NativeTombstone
-per-file NativeTombstone* = gaillard@google.com
+per-file NativeTombstone* = benmiles@google.com

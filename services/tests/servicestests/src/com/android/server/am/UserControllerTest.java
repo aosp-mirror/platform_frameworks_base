@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_FALSE;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
@@ -34,6 +36,7 @@ import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.SCHEDULED_STOP_BACKGROUND_USER_MSG;
 import static com.android.server.am.UserController.USER_COMPLETED_EVENT_MSG;
 import static com.android.server.am.UserController.USER_CURRENT_MSG;
 import static com.android.server.am.UserController.USER_START_MSG;
@@ -52,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -85,6 +89,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IRemoteCallback;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
@@ -100,6 +105,7 @@ import android.view.Display;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
@@ -111,16 +117,20 @@ import com.android.server.pm.UserTypeFactory;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
+import com.google.common.collect.Range;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -135,7 +145,6 @@ import java.util.stream.Stream;
  */
 @SmallTest
 @Presubmit
-
 public class UserControllerTest {
     // Use big enough user id to avoid picking up already active user id.
     private static final int TEST_USER_ID = 100;
@@ -155,6 +164,7 @@ public class UserControllerTest {
     private UserController mUserController;
     private TestInjector mInjector;
     private final HashMap<Integer, UserState> mUserStates = new HashMap<>();
+    private final HashMap<Integer, UserInfo> mUserInfos = new HashMap<>();
 
     private final KeyEvictedCallback mKeyEvictedCallback = (userId) -> { /* ignore */ };
 
@@ -186,6 +196,9 @@ public class UserControllerTest {
     @Before
     public void setUp() throws Exception {
         runWithDexmakerShareClassLoader(() -> {
+            // Disable binder caches in this process.
+            IpcDataCache.disableForTestMode();
+
             mInjector = spy(new TestInjector(getInstrumentation().getTargetContext()));
             doNothing().when(mInjector).clearAllLockedTasks(anyString());
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
@@ -194,7 +207,8 @@ public class UserControllerTest {
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).systemServiceManagerOnUserCompletedEvent(
                     anyInt(), anyInt());
-            doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
+            doNothing().when(mInjector).activityManagerForceStopUserPackages(anyInt(),
+                    anyString(), anyBoolean());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
@@ -319,7 +333,8 @@ public class UserControllerTest {
     @Test
     public void testStartUserUIDisabled() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         verify(mInjector, never()).showUserSwitchingDialog(
@@ -389,7 +404,8 @@ public class UserControllerTest {
     @Test
     public void testFailedStartUserInForeground() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         mUserController.startUserInForeground(NONEXIST_USER_ID);
         verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
@@ -411,6 +427,7 @@ public class UserControllerTest {
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -419,7 +436,6 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         Set<Integer> expectedCodes = Collections.singleton(CONTINUE_USER_SWITCH_MSG);
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -442,6 +458,7 @@ public class UserControllerTest {
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -450,7 +467,6 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         // Verify that CONTINUE_USER_SWITCH_MSG is not sent (triggers timeout)
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -466,7 +482,8 @@ public class UserControllerTest {
     @Test
     public void testContinueUserSwitch() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -479,7 +496,7 @@ public class UserControllerTest {
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(0)).dismissKeyguard(any());
         verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
-        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
 
@@ -487,7 +504,8 @@ public class UserControllerTest {
     public void testContinueUserSwitchDismissKeyguard() {
         when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(false);
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -500,14 +518,15 @@ public class UserControllerTest {
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, times(1)).dismissKeyguard(any());
         verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
-        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false, false);
         verifySystemUserVisibilityChangesNeverNotified();
     }
 
     @Test
     public void testContinueUserSwitchUIDisabled() {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ false,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
@@ -520,17 +539,20 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector, never()).dismissUserSwitchingDialog(any());
-        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
+        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false, false);
     }
 
     private void continueUserSwitchAssertions(int expectedOldUserId, int expectedNewUserId,
-            boolean backgroundUserStopping) {
+            boolean backgroundUserStopping, boolean expectScheduleBackgroundUserStopping) {
         Set<Integer> expectedCodes = new LinkedHashSet<>();
         expectedCodes.add(COMPLETE_USER_SWITCH_MSG);
         expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
         if (backgroundUserStopping) {
             expectedCodes.add(CLEAR_USER_JOURNEY_SESSION_MSG);
             expectedCodes.add(0); // this is for directly posting in stopping.
+        }
+        if (expectScheduleBackgroundUserStopping) {
+            expectedCodes.add(SCHEDULED_STOP_BACKGROUND_USER_MSG);
         }
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
         assertEquals("Unexpected message sent", expectedCodes, actualCodes);
@@ -567,6 +589,204 @@ public class UserControllerTest {
                 ).collect(Collectors.toList()), Collections.emptySet());
     }
 
+    /** Test scheduling stopping of background users after a user-switch. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_switch() {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        setUpUser(TEST_USER_ID1, NO_USERINFO_FLAGS);
+
+        // Switch to TEST_USER_ID from user 0
+        int numberOfUserSwitches = 0;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                ++numberOfUserSwitches,
+                /* expectOldUserStopping= */false,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete (there should be no scheduled stopping).
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_ID1 from TEST_USER_ID
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
+                ++numberOfUserSwitches,
+                /* expectOldUserStopping= */false,
+                /* expectScheduleBackgroundUserStopping= */ true);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_ID1),
+                mUserController.getRunningUsersLU());
+
+        // Switch back to TEST_USER_ID from TEST_USER_ID1
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, TEST_USER_ID1,
+                ++numberOfUserSwitches,
+                /* expectOldUserStopping= */false,
+                /* expectScheduleBackgroundUserStopping= */ true);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID1, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID1);
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+    }
+
+    /** Test scheduling stopping of background users that were started in the background. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_startInBackground() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        // Start two full background users (which should both get scheduled for stopping)
+        // and one profile (which should not).
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        setUpAndStartUserInBackground(TEST_USER_ID1);
+        setUpAndStartProfileInBackground(TEST_USER_ID2, UserManager.USER_TYPE_PROFILE_MANAGED);
+
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_ID1, TEST_USER_ID2),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID1, TEST_USER_ID2),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID1);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID2),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+
+        // Now that we've processed the stops, let's make sure that a subsequent one will work too.
+        setUpAndStartUserInBackground(TEST_USER_ID3);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID2, TEST_USER_ID3),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID3);
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID2),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+    }
+
+    /** Test scheduling stopping of background users - reschedule if current user is a guest. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleWhenGuest() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        final int TEST_USER_GUEST = 902;
+        setUpUser(TEST_USER_GUEST, UserInfo.FLAG_GUEST);
+
+        setUpUser(TEST_USER_ID2, NO_USERINFO_FLAGS);
+
+        // Switch to TEST_USER_ID from user 0
+        int numberOfUserSwitches = 0;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_GUEST from TEST_USER_ID
+        addForegroundUserAndContinueUserSwitch(TEST_USER_GUEST, TEST_USER_ID,
+                ++numberOfUserSwitches, false,
+                /* expectScheduleBackgroundUserStopping= */ true);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID may be scheduled for stopping, but it shouldn't actually stop since the
+        // current user is a Guest.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_GUEST),
+                mUserController.getRunningUsersLU());
+
+        // Switch to TEST_USER_ID2 from TEST_USER_GUEST
+        // Guests are automatically stopped in the background, so it won't be scheduled.
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_GUEST,
+                ++numberOfUserSwitches, true,
+                /* expectScheduleBackgroundUserStopping= */ false);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+
+        // Allow the post-switch processing to complete.
+        // TEST_USER_ID should *still* be scheduled for stopping, since we skipped stopping it
+        // earlier.
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_GUEST);
+        assertAndProcessScheduledStopBackgroundUser(false, TEST_USER_ID2);
+        assertEquals(Arrays.asList(SYSTEM_USER_ID, TEST_USER_ID2),
+                mUserController.getRunningUsersLU());
+    }
+
+    /** Test scheduling stopping of background users - reschedule if user with a scheduled alarm. */
+    @Test
+    public void testScheduleStopOfBackgroundUser_rescheduleIfAlarm() throws Exception {
+        mSetFlagsRule.enableFlags(android.multiuser.Flags.FLAG_SCHEDULE_STOP_OF_BACKGROUND_USER);
+        assumeFalse(UserManager.isVisibleBackgroundUsersEnabled());
+
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 10, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ 2);
+
+        setUpAndStartUserInBackground(TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Initially, the background user has an alarm that will fire soon. So don't stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofMinutes(2).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID, TEST_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Now, that alarm is gone and the next alarm isn't for a long time. Do stop the user.
+        when(mInjector.mAlarmManagerInternal.getNextAlarmTriggerTimeForUser(eq(TEST_USER_ID)))
+                .thenReturn(System.currentTimeMillis() + Duration.ofDays(1).toMillis());
+        assertAndProcessScheduledStopBackgroundUser(true, TEST_USER_ID);
+        assertEquals(newHashSet(SYSTEM_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // No-one is scheduled to stop anymore.
+        assertAndProcessScheduledStopBackgroundUser(false, null);
+        verify(mInjector.mAlarmManagerInternal, never())
+                .getNextAlarmTriggerTimeForUser(eq(SYSTEM_USER_ID));
+    }
+
+    /**
+     * Process queued SCHEDULED_STOP_BACKGROUND_USER_MSG message, if expected.
+     * @param userId the user we are checking to see whether it is scheduled.
+     *               Can be null, when expectScheduled is false, to indicate no user should be
+     *               scheduled.
+     */
+    private void assertAndProcessScheduledStopBackgroundUser(
+            boolean expectScheduled, @Nullable Integer userId) {
+        TestHandler handler = mInjector.mHandler;
+        if (expectScheduled) {
+            assertTrue(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+            handler.removeMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId);
+            mUserController.processScheduledStopOfBackgroundUser(userId);
+        } else {
+            assertFalse(handler.hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, userId));
+        }
+    }
+
     @Test
     public void testExplicitSystemUserStartInBackground() {
         setUpUser(UserHandle.USER_SYSTEM, 0);
@@ -583,29 +803,30 @@ public class UserControllerTest {
     public void testUserLockingFromUserSwitchingForMultipleUsersNonDelayedLocking()
             throws InterruptedException, RemoteException {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        int numerOfUserSwitches = 1;
+        int numberOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false, false);
         // running: user 0, USER_ID
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
                 mUserController.getRunningUsersLU());
 
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false, false);
         // running: user 0, USER_ID, USER_ID1
         assertFalse(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID, TEST_USER_ID1}),
                 mUserController.getRunningUsersLU());
 
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false, false);
         UserState ussUser2 = mUserStates.get(TEST_USER_ID2);
         // skip middle step and call this directly.
         mUserController.finishUserSwitch(ussUser2);
@@ -627,24 +848,25 @@ public class UserControllerTest {
     public void testUserLockingFromUserSwitchingForMultipleUsersDelayedLockingMode()
             throws Exception {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         setUpUser(TEST_USER_ID1, 0);
         setUpUser(TEST_USER_ID2, 0);
-        int numerOfUserSwitches = 1;
+        int numberOfUserSwitches = 1;
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
-                numerOfUserSwitches, false);
+                numberOfUserSwitches, false, false);
         // running: user 0, USER_ID
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
                 mUserController.getRunningUsersLU());
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
 
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
-                numerOfUserSwitches, true);
+                numberOfUserSwitches, true, false);
         // running: user 0, USER_ID1
         // stopped + unlocked: USER_ID
-        numerOfUserSwitches++;
+        numberOfUserSwitches++;
         assertTrue(mUserController.canStartMoreUsers());
         assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1}),
                 mUserController.getRunningUsersLU());
@@ -659,7 +881,7 @@ public class UserControllerTest {
                 .lockCeStorage(anyInt());
 
         addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
-                numerOfUserSwitches, true);
+                numberOfUserSwitches, true, false);
         // running: user 0, USER_ID2
         // stopped + unlocked: USER_ID1
         // stopped + locked: USER_ID
@@ -675,12 +897,251 @@ public class UserControllerTest {
     }
 
     /**
+     * Test that, when exceeding the maximum number of running users, a profile of the current user
+     * is not stopped.
+     */
+    @Test
+    public void testStoppingExcessRunningUsersAfterSwitch_currentProfileNotStopped()
+            throws Exception {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 5, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        final int PARENT_ID = 200;
+        final int PROFILE1_ID = 201;
+        final int PROFILE2_ID = 202;
+        final int FG_USER_ID = 300;
+        final int BG_USER_ID = 400;
+
+        setUpUser(PARENT_ID, 0).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE1_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE2_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(FG_USER_ID, 0).profileGroupId = FG_USER_ID;
+        setUpUser(BG_USER_ID, 0).profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        int numberOfUserSwitches = 1;
+        addForegroundUserAndContinueUserSwitch(PARENT_ID, UserHandle.USER_SYSTEM,
+                numberOfUserSwitches, false, false);
+        mUserController.finishUserSwitch(mUserStates.get(PARENT_ID));
+        waitForHandlerToComplete(mInjector.mHandler, HANDLER_WAIT_TIME_MS);
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID, PARENT_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        assertThat(mUserController.startProfile(PROFILE1_ID, true, null)).isTrue();
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        numberOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(FG_USER_ID, PARENT_ID,
+                numberOfUserSwitches, false, false);
+        mUserController.finishUserSwitch(mUserStates.get(FG_USER_ID));
+        waitForHandlerToComplete(mInjector.mHandler, HANDLER_WAIT_TIME_MS);
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, FG_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        mUserController.startUser(BG_USER_ID, USER_START_MODE_BACKGROUND);
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, BG_USER_ID, FG_USER_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+
+        // Now we exceed the maxRunningUsers parameter (of 5):
+        assertThat(mUserController.startProfile(PROFILE2_ID, true, null)).isTrue();
+        // Currently, starting a profile doesn't trigger evaluating whether we've exceeded max, so
+        // we expect no users to be stopped. This policy may change in the future. Log but no fail.
+        if (!newHashSet(SYSTEM_USER_ID, PROFILE1_ID, BG_USER_ID, PROFILE2_ID, PARENT_ID, FG_USER_ID)
+                .equals(new HashSet<>(mUserController.getRunningUsersLU()))) {
+            Log.w(TAG, "Starting a profile that exceeded max running users didn't lead to "
+                    + "expectations: " + mUserController.getRunningUsersLU());
+        }
+
+        numberOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(PARENT_ID, FG_USER_ID,
+                numberOfUserSwitches, false, false);
+        mUserController.finishUserSwitch(mUserStates.get(PARENT_ID));
+        waitForHandlerToComplete(mInjector.mHandler, HANDLER_WAIT_TIME_MS);
+        // We've now done a user switch and should notice that we've exceeded the maximum number of
+        // users. The oldest background user should be stopped (BG_USER); even though PROFILE1 was
+        // older, it should not be stopped since it's a profile of the (new) current user.
+        assertFalse(mUserController.canStartMoreUsers());
+        assertEquals(newHashSet(
+                SYSTEM_USER_ID, PROFILE1_ID, PROFILE2_ID, FG_USER_ID, PARENT_ID),
+                new HashSet<>(mUserController.getRunningUsersLU()));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_enabled() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withoutDelayUserDataLocking() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_withPrevSystemUser() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(SYSTEM_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOn() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_TRUE);
+
+        assertTrue(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+    @Test
+    public void testEarlyPackageKillEnabledForUserSwitch_stopUserOnSwitchModeOff() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 4, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        mUserController.setStopUserOnSwitch(STOP_USER_ON_SWITCH_FALSE);
+
+        assertFalse(mUserController
+                .isEarlyPackageKillEnabledForUserSwitch(TEST_USER_ID, TEST_USER_ID1));
+    }
+
+
+    /**
+     * Test that, in getRunningUsersLU, parents come after their profile, even if the profile was
+     * started afterwards.
+     */
+    @Test
+    public void testRunningUsersListOrder_parentAfterProfile() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 7, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        final int PARENT_ID = 200;
+        final int PROFILE1_ID = 201;
+        final int PROFILE2_ID = 202;
+        final int FG_USER_ID = 300;
+        final int BG_USER_ID = 400;
+
+        setUpUser(PARENT_ID, 0).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE1_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE2_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(FG_USER_ID, 0).profileGroupId = FG_USER_ID;
+        setUpUser(BG_USER_ID, 0).profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        int numberOfUserSwitches = 1;
+        addForegroundUserAndContinueUserSwitch(PARENT_ID, UserHandle.USER_SYSTEM,
+                numberOfUserSwitches, false, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PARENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE1_ID, true, null)).isTrue();
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        numberOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(FG_USER_ID, PARENT_ID,
+                numberOfUserSwitches, false, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        mUserController.startUser(BG_USER_ID, USER_START_MODE_BACKGROUND);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, PROFILE1_ID, PARENT_ID, BG_USER_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE2_ID, true, null)).isTrue();
+        // Note for the future:
+        // It is not absolutely essential that PROFILE1 come before PROFILE2,
+        // nor that PROFILE1 come before BG_USER. We can change that policy later if we'd like.
+        // The important thing is that PROFILE1 and PROFILE2 precede PARENT,
+        // and that everything precedes OTHER.
+        assertEquals(Arrays.asList(new Integer[] {
+                SYSTEM_USER_ID, PROFILE1_ID, BG_USER_ID, PROFILE2_ID, PARENT_ID, FG_USER_ID}),
+                mUserController.getRunningUsersLU());
+    }
+
+    /**
+     * Test that, in getRunningUsersLU, the current user is always at the end, even if background
+     * users were started subsequently.
+     */
+    @Test
+    public void testRunningUsersListOrder_currentAtEnd() {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 7, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        final int CURRENT_ID = 200;
+        final int PROFILE_ID = 201;
+        final int BG_USER_ID = 400;
+
+        setUpUser(CURRENT_ID, 0).profileGroupId = CURRENT_ID;
+        setUpUser(PROFILE_ID, UserInfo.FLAG_PROFILE).profileGroupId = CURRENT_ID;
+        setUpUser(BG_USER_ID, 0).profileGroupId = BG_USER_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        addForegroundUserAndContinueUserSwitch(CURRENT_ID, UserHandle.USER_SYSTEM, 1, false, false);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        mUserController.startUser(BG_USER_ID, USER_START_MODE_BACKGROUND);
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, BG_USER_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
+
+        assertThat(mUserController.startProfile(PROFILE_ID, true, null)).isTrue();
+        assertEquals(Arrays.asList(
+                new Integer[] {SYSTEM_USER_ID, BG_USER_ID, PROFILE_ID, CURRENT_ID}),
+                mUserController.getRunningUsersLU());
+    }
+
+    /**
      * Test locking user with mDelayUserDataLocking false.
      */
     @Test
     public void testUserLockingWithStopUserForNonDelayedLockingMode() throws Exception {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         setUpAndStartUserInBackground(TEST_USER_ID);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID, /* allowDelayedLocking= */ true,
@@ -704,7 +1165,7 @@ public class UserControllerTest {
         int userId = -1;
 
         assertThrows(IllegalArgumentException.class,
-                () -> mUserController.stopUser(userId, /* force= */ true,
+                () -> mUserController.stopUser(userId,
                         /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                         /* keyEvictedCallback= */ null));
     }
@@ -713,7 +1174,7 @@ public class UserControllerTest {
     public void testStopUser_systemUser() {
         int userId = UserHandle.USER_SYSTEM;
 
-        int r = mUserController.stopUser(userId, /* force= */ true,
+        int r = mUserController.stopUser(userId,
                 /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                 /* keyEvictedCallback= */ null);
 
@@ -725,7 +1186,7 @@ public class UserControllerTest {
         setUpUser(TEST_USER_ID1, /* flags= */ 0);
         mUserController.startUser(TEST_USER_ID1, USER_START_MODE_FOREGROUND);
 
-        int r = mUserController.stopUser(TEST_USER_ID1, /* force= */ true,
+        int r = mUserController.stopUser(TEST_USER_ID1,
                 /* allowDelayedLocking= */ true, /* stopUserCallback= */ null,
                 /* keyEvictedCallback= */ null);
 
@@ -738,7 +1199,8 @@ public class UserControllerTest {
     @Test
     public void testUserLockingForDelayedLockingMode() throws Exception {
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ true,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         // allowDelayedLocking set and no KeyEvictedCallback, so it should not lock.
         setUpAndStartUserInBackground(TEST_USER_ID);
@@ -785,6 +1247,53 @@ public class UserControllerTest {
         verifyUserUnassignedFromDisplayNeverCalled(TEST_USER_ID);
     }
 
+    /** Test that stopping a profile doesn't also stop its parent, even if it's in background. */
+    @Test
+    public void testStopProfile_doesNotStopItsParent() throws Exception {
+        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
+                /* maxRunningUsers= */ 5, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+
+        final Range<Integer> RUNNING_RANGE =
+                Range.closed(UserState.STATE_BOOTING, UserState.STATE_RUNNING_UNLOCKED);
+
+        final int PARENT_ID = TEST_USER_ID1;
+        final int PROFILE_ID = TEST_USER_ID2;
+        final int OTHER_ID = TEST_USER_ID3;
+
+        setUpUser(PARENT_ID, 0).profileGroupId = PARENT_ID;
+        setUpUser(PROFILE_ID, UserInfo.FLAG_PROFILE).profileGroupId = PARENT_ID;
+        setUpUser(OTHER_ID, 0).profileGroupId = OTHER_ID;
+        mUserController.onSystemReady(); // To set the profileGroupIds in UserController.
+
+        // Start the parent in the background
+        boolean started = mUserController.startUser(PARENT_ID, USER_START_MODE_BACKGROUND);
+        assertWithMessage("startUser(%s)", PARENT_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+
+        // Start the profile
+        started = mUserController.startProfile(PROFILE_ID, true, null);
+        assertWithMessage("startProfile(%s)", PROFILE_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(PROFILE_ID).state).isIn(RUNNING_RANGE);
+
+        // Start an unrelated user
+        started = mUserController.startUser(OTHER_ID, USER_START_MODE_FOREGROUND);
+        assertWithMessage("startUser(%s)", OTHER_ID).that(started).isTrue();
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(PROFILE_ID).state).isIn(RUNNING_RANGE);
+        assertThat(mUserController.getStartedUserState(OTHER_ID).state).isIn(RUNNING_RANGE);
+
+        // Stop the profile and assert that its (background) parent didn't stop too
+        boolean stopped = mUserController.stopProfile(PROFILE_ID);
+        assertWithMessage("stopProfile(%s)", PROFILE_ID).that(stopped).isTrue();
+        if (mUserController.getStartedUserState(PROFILE_ID) != null) {
+            assertThat(mUserController.getStartedUserState(PROFILE_ID).state)
+                    .isNotIn(RUNNING_RANGE);
+        }
+        assertThat(mUserController.getStartedUserState(PARENT_ID).state).isIn(RUNNING_RANGE);
+    }
+
     @Test
     public void testStartProfile_disabledProfileFails() {
         setUpUser(TEST_USER_ID1, UserInfo.FLAG_PROFILE | UserInfo.FLAG_DISABLED, /* preCreated= */
@@ -823,9 +1332,11 @@ public class UserControllerTest {
     @Test
     public void testStopPrivateProfile() throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
         assertProfileLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* expectLocking= */ true);
         verifyUserUnassignedFromDisplay(TEST_USER_ID1);
@@ -840,9 +1351,11 @@ public class UserControllerTest {
     @Test
     public void testStopPrivateProfileWithDelayedLocking() throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ false);
@@ -851,18 +1364,28 @@ public class UserControllerTest {
     @Test
     public void testStopPrivateProfileWithDelayedLocking_flagDisabled() throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
-        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         mSetFlagsRule.disableFlags(
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
 
-        mSetFlagsRule.disableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.disableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         mSetFlagsRule.enableFlags(
                 android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
         setUpAndStartProfileInBackground(TEST_USER_ID2, UserManager.USER_TYPE_PROFILE_PRIVATE);
+        assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* allowDelayedLocking= */ true,
+                /* keyEvictedCallback */ null, /* expectLocking= */ true);
+
+        mSetFlagsRule.disableFlags(android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
+        setUpAndStartProfileInBackground(TEST_USER_ID3, UserManager.USER_TYPE_PROFILE_PRIVATE);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID2, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
     }
@@ -872,9 +1395,11 @@ public class UserControllerTest {
     public void testStopPrivateProfileWithDelayedLocking_imperviousToNumberOfRunningUsers()
             throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
-                /* maxRunningUsers= */ 1, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 1, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_PRIVATE);
         setUpAndStartProfileInBackground(TEST_USER_ID2, UserManager.USER_TYPE_PROFILE_MANAGED);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
@@ -888,9 +1413,11 @@ public class UserControllerTest {
     @Test
     public void testStopManagedProfileWithDelayedLocking() throws Exception {
         mUserController.setInitialConfig(/* mUserSwitchUiEnabled */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         setUpAndStartProfileInBackground(TEST_USER_ID1, UserManager.USER_TYPE_PROFILE_MANAGED);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* allowDelayedLocking= */ true,
                 /* keyEvictedCallback */ null, /* expectLocking= */ true);
@@ -1042,7 +1569,8 @@ public class UserControllerTest {
     public void testStallUserSwitchUntilTheKeyguardIsShown() throws Exception {
         // enable user switch ui, because keyguard is only shown then
         mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false);
+                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
+                /* backgroundUserScheduledStopTimeSecs= */ -1);
 
         // mock the device to be secure in order to expect the keyguard to be shown
         when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
@@ -1095,7 +1623,7 @@ public class UserControllerTest {
 
     private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean allowDelayedLocking,
             KeyEvictedCallback keyEvictedCallback, boolean expectLocking) throws Exception {
-        int r = mUserController.stopUser(userId, /* force= */ true, /* allowDelayedLocking= */
+        int r = mUserController.stopUser(userId, /* allowDelayedLocking= */
                 allowDelayedLocking, null, keyEvictedCallback);
         assertThat(r).isEqualTo(ActivityManager.USER_OP_SUCCESS);
         assertUserLockedOrUnlockedState(userId, allowDelayedLocking, expectLocking);
@@ -1122,7 +1650,8 @@ public class UserControllerTest {
     }
 
     private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,
-            int expectedNumberOfCalls, boolean expectOldUserStopping) {
+            int expectedNumberOfCalls, boolean expectOldUserStopping,
+            boolean expectScheduleBackgroundUserStopping) {
         // Start user -- this will update state of mUserController
         mUserController.startUser(newUserId, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -1135,15 +1664,19 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
+        assertEquals(expectScheduleBackgroundUserStopping,
+                mInjector.mHandler
+                        .hasEqualMessages(SCHEDULED_STOP_BACKGROUND_USER_MSG, expectedOldUserId));
         verify(mInjector, times(expectedNumberOfCalls)).dismissUserSwitchingDialog(any());
-        continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping);
+        continueUserSwitchAssertions(oldUserId, newUserId, expectOldUserStopping,
+                expectScheduleBackgroundUserStopping);
     }
 
-    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
-        setUpUser(userId, flags, /* preCreated= */ false, /* userType */ null);
+    private UserInfo setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
+        return setUpUser(userId, flags, /* preCreated= */ false, /* userType */ null);
     }
 
-    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated,
+    private UserInfo setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated,
             @Nullable String userType) {
         if (userType == null) {
             userType = UserInfo.getDefaultUserType(flags);
@@ -1158,6 +1691,12 @@ public class UserControllerTest {
         assertThat(userTypeDetails).isNotNull();
         when(mInjector.mUserManagerInternalMock.getUserProperties(eq(userId)))
                 .thenReturn(userTypeDetails.getDefaultUserPropertiesReference());
+
+        mUserInfos.put(userId, userInfo);
+        when(mInjector.mUserManagerMock.getUsers(anyBoolean()))
+                .thenReturn(mUserInfos.values().stream().toList());
+
+        return userInfo;
     }
 
     private static List<String> getActions(List<Intent> intents) {
@@ -1225,6 +1764,7 @@ public class UserControllerTest {
         private final WindowManagerService mWindowManagerMock;
         private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final PowerManagerInternal mPowerManagerInternal;
+        private final AlarmManagerInternal mAlarmManagerInternal;
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
@@ -1247,6 +1787,7 @@ public class UserControllerTest {
             mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
             mStorageManagerMock = mock(IStorageManager.class);
             mPowerManagerInternal = mock(PowerManagerInternal.class);
+            mAlarmManagerInternal = mock(AlarmManagerInternal.class);
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
@@ -1317,6 +1858,11 @@ public class UserControllerTest {
         }
 
         @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return mAlarmManagerInternal;
+        }
+
+        @Override
         KeyguardManager getKeyguardManager() {
             return mKeyguardManagerMock;
         }
@@ -1329,7 +1875,7 @@ public class UserControllerTest {
         @Override
         protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
-                String[] requiredPermissions, int appOp, Bundle bOptions, boolean ordered,
+                String[] requiredPermissions, int appOp, Bundle bOptions,
                 boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);
@@ -1401,6 +1947,13 @@ public class UserControllerTest {
     }
 
     private static class TestHandler extends Handler {
+        /**
+         * Keeps an accessible copy of messages that were queued for us to query.
+         *
+         * WARNING: queued messages get added to this, but processed/removed messages to NOT
+         * automatically get removed. This can lead to confusing bugs. Maybe one day someone will
+         * fix this, but in the meantime, this is your warning.
+         */
         private final List<Message> mMessages = new ArrayList<>();
 
         TestHandler(Looper looper) {

@@ -27,8 +27,11 @@ import android.graphics.PixelFormat
 class TestStubDrawable(private val name: String? = null) : Drawable() {
 
     override fun draw(canvas: Canvas) = Unit
+
     override fun setAlpha(alpha: Int) = Unit
+
     override fun setColorFilter(colorFilter: ColorFilter?) = Unit
+
     override fun getOpacity(): Int = PixelFormat.UNKNOWN
 
     override fun toString(): String {
@@ -37,6 +40,10 @@ class TestStubDrawable(private val name: String? = null) : Drawable() {
 
     override fun getConstantState(): ConstantState =
         TestStubConstantState(this, changingConfigurations)
+
+    override fun equals(other: Any?): Boolean {
+        return (other as? TestStubDrawable ?: return false).name == name
+    }
 
     private class TestStubConstantState(
         private val drawable: Drawable,

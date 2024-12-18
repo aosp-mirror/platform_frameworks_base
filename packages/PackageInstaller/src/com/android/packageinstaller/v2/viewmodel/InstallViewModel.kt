@@ -22,6 +22,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
 import com.android.packageinstaller.v2.model.InstallRepository
 import com.android.packageinstaller.v2.model.InstallStage
 import com.android.packageinstaller.v2.model.InstallStaging
@@ -36,6 +37,19 @@ class InstallViewModel(application: Application, val repository: InstallReposito
     private val _currentInstallStage = MediatorLiveData<InstallStage>(InstallStaging())
     val currentInstallStage: MutableLiveData<InstallStage>
         get() = _currentInstallStage
+
+    init {
+        // Since installing is an async operation, we may get the install result later in time.
+        // Result of the installation will be set in InstallRepository#installResult.
+        // As such, currentInstallStage will need to add another MutableLiveData as a data source
+        _currentInstallStage.addSource(
+            repository.installResult.distinctUntilChanged()
+        ) { installStage: InstallStage? ->
+            if (installStage != null) {
+                _currentInstallStage.value = installStage
+            }
+        }
+    }
 
     fun preprocessIntent(intent: Intent, callerInfo: InstallRepository.CallerInfo) {
         val stage = repository.performPreInstallChecks(intent, callerInfo)
@@ -62,12 +76,16 @@ class InstallViewModel(application: Application, val repository: InstallReposito
 
     private fun checkIfAllowedAndInitiateInstall() {
         val stage = repository.requestUserConfirmation()
-        _currentInstallStage.value = stage
+        if (stage != null) {
+            _currentInstallStage.value = stage
+        }
     }
 
     fun forcedSkipSourceCheck() {
         val stage = repository.forcedSkipSourceCheck()
-        _currentInstallStage.value = stage
+        if (stage != null) {
+            _currentInstallStage.value = stage
+        }
     }
 
     fun cleanupInstall() {
@@ -80,15 +98,7 @@ class InstallViewModel(application: Application, val repository: InstallReposito
     }
 
     fun initiateInstall() {
-        // Since installing is an async operation, we will get the install result later in time.
-        // Result of the installation will be set in InstallRepository#mInstallResult.
-        // As such, mCurrentInstallStage will need to add another MutableLiveData as a data source
         repository.initiateInstall()
-        _currentInstallStage.addSource(repository.installResult) { installStage: InstallStage? ->
-            if (installStage != null) {
-                _currentInstallStage.value = installStage
-            }
-        }
     }
 
     val stagedSessionId: Int

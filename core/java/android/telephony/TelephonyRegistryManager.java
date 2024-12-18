@@ -1073,6 +1073,52 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial network mode changed.
+     * @param subId subscription ID.
+     * @param active {@code true} If the device is connected to carrier roaming
+     *                           non-terrestrial network or was connected within the
+     *                           {CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}
+     *                           duration, {code false} otherwise.
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnModeChanged(int subId, boolean active) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnModeChanged(subId, active);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify external listeners that device eligibility to connect to carrier roaming
+     * non-terrestrial network changed.
+     *
+     * @param subId subscription ID.
+     * @param eligible {@code true} when the device is eligible for satellite
+     * communication if all the following conditions are met:
+     * <ul>
+     * <li>Any subscription supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+     * <li>{@link CarrierConfigManager#KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT} set to
+     * {@link CarrierConfigManager#CARRIER_ROAMING_NTN_CONNECT_MANUAL} </li>
+     * <li>The device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * and the hysteresis timer defined by {@link CarrierConfigManager
+     * #KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT} is expired. </li>
+     * </ul>
+     *
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnEligibleStateChanged(int subId, boolean eligible) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnEligibleStateChanged(subId, eligible);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1224,6 +1270,15 @@ public class TelephonyRegistryManager {
             eventList.add(
                     TelephonyCallback.EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
         }
+
+        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
+        }
+
         return eventList;
     }
 

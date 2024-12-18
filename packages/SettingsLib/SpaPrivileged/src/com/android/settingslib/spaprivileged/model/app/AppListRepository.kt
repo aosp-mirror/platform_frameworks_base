@@ -151,7 +151,7 @@ class AppListRepositoryImpl(
     }
 
     private fun isArchivingEnabled(featureFlags: FeatureFlags) =
-            featureFlags.archiving() || SystemProperties.getBoolean("pm.archiving.enabled", false)
+            featureFlags.archiving()
 
     override fun showSystemPredicate(
         userIdFlow: Flow<Int>,

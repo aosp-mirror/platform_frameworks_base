@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_PINNED;
 
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_PRIMARY_WITH_SECONDARY;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.DEFAULT_FINISH_SECONDARY_WITH_PRIMARY;
@@ -30,6 +31,7 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActi
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTfContainer;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createWindowLayoutInfo;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
 import static androidx.window.extensions.embedding.SplitPresenter.EXPAND_CONTAINERS_ATTRIBUTES;
@@ -85,10 +87,12 @@ import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 
@@ -106,6 +110,10 @@ import java.util.ArrayList;
 public class SplitPresenterTest {
 
     private Activity mActivity;
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private Resources mActivityResources;
     @Mock
@@ -119,7 +127,6 @@ public class SplitPresenterTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
         DeviceStateManagerFoldingFeatureProducer producer =
@@ -133,7 +140,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testCreateTaskFragment() {
-        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
         mPresenter.createTaskFragment(mTransaction, container.getTaskFragmentToken(),
                 mActivity.getActivityToken(), TASK_BOUNDS, WINDOWING_MODE_MULTI_WINDOW);
 
@@ -144,7 +151,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testResizeTaskFragment() {
-        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
         mPresenter.mFragmentInfos.put(container.getTaskFragmentToken(), mTaskFragmentInfo);
         mPresenter.resizeTaskFragment(mTransaction, container.getTaskFragmentToken(), TASK_BOUNDS);
 
@@ -160,7 +167,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testUpdateWindowingMode() {
-        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
         mPresenter.mFragmentInfos.put(container.getTaskFragmentToken(), mTaskFragmentInfo);
         mPresenter.updateWindowingMode(mTransaction, container.getTaskFragmentToken(),
                 WINDOWING_MODE_MULTI_WINDOW);
@@ -178,8 +185,8 @@ public class SplitPresenterTest {
 
     @Test
     public void testSetAdjacentTaskFragments() {
-        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
-        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container0 = createTfContainer(mController, mActivity);
+        final TaskFragmentContainer container1 = createTfContainer(mController, mActivity);
 
         mPresenter.setAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken(),
                 container1.getTaskFragmentToken(), null /* adjacentParams */);
@@ -196,8 +203,8 @@ public class SplitPresenterTest {
 
     @Test
     public void testClearAdjacentTaskFragments() {
-        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
-        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container0 = createTfContainer(mController, mActivity);
+        final TaskFragmentContainer container1 = createTfContainer(mController, mActivity);
 
         // No request to clear as it is not set by default.
         mPresenter.clearAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken());
@@ -218,8 +225,8 @@ public class SplitPresenterTest {
 
     @Test
     public void testSetCompanionTaskFragment() {
-        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
-        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container0 = createTfContainer(mController, mActivity);
+        final TaskFragmentContainer container1 = createTfContainer(mController, mActivity);
 
         mPresenter.setCompanionTaskFragment(mTransaction, container0.getTaskFragmentToken(),
                 container1.getTaskFragmentToken());
@@ -236,7 +243,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testSetTaskFragmentDimOnTask() {
-        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
 
         mPresenter.setTaskFragmentDimOnTask(mTransaction, container.getTaskFragmentToken(), true);
         verify(mTransaction).addTaskFragmentOperation(eq(container.getTaskFragmentToken()), any());
@@ -249,7 +256,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testUpdateAnimationParams() {
-        final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
 
         // Verify the default.
         assertTrue(container.areLastRequestedAnimationParamsEqual(
@@ -275,6 +282,28 @@ public class SplitPresenterTest {
         clearInvocations(mTransaction);
         mPresenter.updateAnimationParams(mTransaction, container.getTaskFragmentToken(),
                 animationParams);
+
+        verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
+    }
+
+    @Test
+    public void testSetTaskFragmentPinned() {
+        final TaskFragmentContainer container = createTfContainer(mController, mActivity);
+
+        // Verify the default.
+        assertFalse(container.isPinned());
+
+        mPresenter.setTaskFragmentPinned(mTransaction, container, true);
+
+        final TaskFragmentOperation expectedOperation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_PINNED).setBooleanValue(true).build();
+        verify(mTransaction).addTaskFragmentOperation(container.getTaskFragmentToken(),
+                expectedOperation);
+        assertTrue(container.isPinned());
+
+        // No request to set the same animation params.
+        clearInvocations(mTransaction);
+        mPresenter.setTaskFragmentPinned(mTransaction, container, true);
 
         verify(mTransaction, never()).addTaskFragmentOperation(any(), any());
     }
@@ -639,8 +668,8 @@ public class SplitPresenterTest {
     public void testExpandSplitContainerIfNeeded() {
         Activity secondaryActivity = createMockActivity();
         SplitRule splitRule = createSplitRule(mActivity, secondaryActivity);
-        TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
-        TaskFragmentContainer secondaryTf = mController.newContainer(secondaryActivity, TASK_ID);
+        TaskFragmentContainer primaryTf = createTfContainer(mController, mActivity);
+        TaskFragmentContainer secondaryTf = createTfContainer(mController, secondaryActivity);
         SplitContainer splitContainer = new SplitContainer(primaryTf, secondaryActivity,
                 secondaryTf, splitRule, SPLIT_ATTRIBUTES);
 
@@ -665,8 +694,8 @@ public class SplitPresenterTest {
 
         assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
                 splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
-        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
-        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
+        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf);
+        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf);
 
         splitContainer.updateCurrentSplitAttributes(SPLIT_ATTRIBUTES);
         clearInvocations(mPresenter);
@@ -675,15 +704,15 @@ public class SplitPresenterTest {
                 splitContainer, mActivity, null /* secondaryActivity */,
                 new Intent(ApplicationProvider.getApplicationContext(),
                         MinimumDimensionActivity.class)));
-        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
-        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
+        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf);
+        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf);
     }
 
     @Test
     public void testCreateNewSplitContainer_secondaryAbovePrimary() {
         final Activity secondaryActivity = createMockActivity();
-        final TaskFragmentContainer bottomTf = mController.newContainer(secondaryActivity, TASK_ID);
-        final TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer bottomTf = createTfContainer(mController, secondaryActivity);
+        final TaskFragmentContainer primaryTf = createTfContainer(mController, mActivity);
         final SplitPairRule rule = createSplitPairRuleBuilder(pair ->
                 pair.first == mActivity && pair.second == secondaryActivity, pair -> false,
                 metrics -> true)

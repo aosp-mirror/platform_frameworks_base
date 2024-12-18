@@ -19,17 +19,14 @@ package com.android.internal.systemui.lint
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
-import org.junit.Ignore
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = BindServiceOnMainThreadDetector()
 
     override fun getIssues(): List<Issue> = listOf(BindServiceOnMainThreadDetector.ISSUE)
 
-    @Ignore
     @Test
     fun testBindService() {
         lint()
@@ -37,7 +34,9 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
+
                     import android.content.Context;
+                    import android.content.Intent;
 
                     public class TestClass {
                         public void bind(Context context) {
@@ -48,13 +47,13 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:7: Warning: This method should be annotated with @WorkerThread because it calls bindService [BindServiceOnMainThread]
+                src/test/pkg/TestClass.java:9: Warning: This method should be annotated with @WorkerThread because it calls bindService [BindServiceOnMainThread]
                       context.bindService(intent, null, 0);
                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -62,7 +61,6 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
             )
     }
 
-    @Ignore
     @Test
     fun testBindServiceAsUser() {
         lint()
@@ -70,7 +68,9 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 TestFiles.java(
                         """
                     package test.pkg;
+
                     import android.content.Context;
+                    import android.content.Intent;
                     import android.os.UserHandle;
 
                     public class TestClass {
@@ -82,13 +82,13 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
             .expect(
                 """
-                src/test/pkg/TestClass.java:8: Warning: This method should be annotated with @WorkerThread because it calls bindServiceAsUser [BindServiceOnMainThread]
+                src/test/pkg/TestClass.java:10: Warning: This method should be annotated with @WorkerThread because it calls bindServiceAsUser [BindServiceOnMainThread]
                       context.bindServiceAsUser(intent, null, 0, UserHandle.ALL);
                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 0 errors, 1 warnings
@@ -114,7 +114,7 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
@@ -147,7 +147,7 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
@@ -181,7 +181,7 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
@@ -219,12 +219,10 @@ class BindServiceOnMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(BindServiceOnMainThreadDetector.ISSUE)
             .run()
             .expectClean()
     }
-
-    private val stubs = androidStubs
 }

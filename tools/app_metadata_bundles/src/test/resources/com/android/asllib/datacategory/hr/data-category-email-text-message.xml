@@ -1,0 +1,11 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="email_text_message"
+        dataType="emails"
+        purposes="analytics" />
+    <data-shared dataCategory="email_text_message"
+        dataType="text_messages"
+        purposes="analytics" />
+    <data-shared dataCategory="email_text_message"
+        dataType="other"
+        purposes="analytics" />
+</holder_of_flattened_for_testing>

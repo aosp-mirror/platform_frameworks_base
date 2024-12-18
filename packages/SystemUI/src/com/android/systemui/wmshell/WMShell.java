@@ -20,6 +20,8 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ONE_HANDED_ACTIVE;
@@ -32,7 +34,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
-import android.os.IBinder;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -43,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -55,6 +59,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -62,7 +67,9 @@ import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -95,7 +102,7 @@ public final class WMShell implements
         CoreStartable,
         CommandQueue.Callbacks {
     private static final String TAG = WMShell.class.getName();
-    private static final int INVALID_SYSUI_STATE_MASK =
+    private static final long INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
                     | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
@@ -124,6 +131,8 @@ public final class WMShell implements
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
+    private final CommunalTransitionViewModel mCommunalTransitionViewModel;
+    private final JavaAdapter mJavaAdapter;
     private final Executor mSysUiMainExecutor;
 
     // Listeners and callbacks. Note that we prefer member variable over anonymous class here to
@@ -187,6 +196,8 @@ public final class WMShell implements
             UserTracker userTracker,
             DisplayTracker displayTracker,
             NoteTaskInitializer noteTaskInitializer,
+            CommunalTransitionViewModel communalTransitionViewModel,
+            JavaAdapter javaAdapter,
             @Main Executor sysUiMainExecutor) {
         mContext = context;
         mShell = shell;
@@ -205,6 +216,8 @@ public final class WMShell implements
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
+        mCommunalTransitionViewModel = communalTransitionViewModel;
+        mJavaAdapter = javaAdapter;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -239,7 +252,25 @@ public final class WMShell implements
                 pip.showPictureInPictureMenu();
             }
         });
+        pip.registerPipTransitionCallback(
+                new PipTransitionController.PipTransitionCallback() {
+                    @Override
+                    public void onPipTransitionStarted(int direction, Rect pipBounds) {
+                        mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, true)
+                                .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                    }
 
+                    @Override
+                    public void onPipTransitionFinished(int direction) {
+                        mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, false)
+                                .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                    }
+
+                    @Override
+                    public void onPipTransitionCanceled(int direction) {
+                        // No op.
+                    }
+                }, mSysUiMainExecutor);
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
             pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);
@@ -253,13 +284,30 @@ public final class WMShell implements
             public void onFinishedWakingUp() {
                 splitScreen.onFinishedWakingUp();
             }
+
+            @Override
+            public void onStartedGoingToSleep() {
+                splitScreen.onStartedGoingToSleep();
+            }
         });
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void moveFocusedTaskToFullscreen(int displayId) {
                 splitScreen.goToFullscreenFromSplit();
             }
+
+            @Override
+            public void setSplitscreenFocus(boolean leftOrTop) {
+                splitScreen.setSplitscreenFocus(leftOrTop);
+            }
         });
+        splitScreen.registerSplitAnimationListener(new SplitScreen.SplitInvocationListener() {
+            @Override
+            public void onSplitAnimationInvoked(boolean animationRunning) {
+                mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_SPLIT_INVOCATION, animationRunning)
+                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+            }
+        }, mSysUiMainExecutor);
     }
 
     @VisibleForTesting
@@ -332,8 +380,8 @@ public final class WMShell implements
             }
 
             @Override
-            public void setImeWindowStatus(int displayId, IBinder token, int vis,
-                    int backDisposition, boolean showImeSwitcher) {
+            public void setImeWindowStatus(int displayId, @ImeWindowVisibility int vis,
+                    @BackDispositionMode int backDisposition, boolean showImeSwitcher) {
                 if (displayId == mDisplayTracker.getDefaultDisplayId()
                         && (vis & InputMethodService.IME_VISIBLE) != 0) {
                     oneHanded.stopOneHanded(
@@ -358,14 +406,18 @@ public final class WMShell implements
                 }, mSysUiMainExecutor);
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
-            public void enterDesktop(int displayId) {
-                desktopMode.enterDesktop(displayId);
+            public void moveFocusedTaskToDesktop(int displayId) {
+                desktopMode.moveFocusedTaskToDesktop(displayId,
+                        DesktopModeTransitionSource.KEYBOARD_SHORTCUT);
             }
-        });
-        mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
             public void moveFocusedTaskToFullscreen(int displayId) {
-                desktopMode.moveFocusedTaskToFullscreen(displayId);
+                desktopMode.moveFocusedTaskToFullscreen(displayId,
+                        DesktopModeTransitionSource.KEYBOARD_SHORTCUT);
+            }
+            @Override
+            public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
+                desktopMode.moveFocusedTaskToStageSplit(displayId, leftOrTop);
             }
         });
     }
@@ -374,6 +426,8 @@ public final class WMShell implements
     void initRecentTasks(RecentTasks recentTasks) {
         recentTasks.addAnimationStateListener(mSysUiMainExecutor,
                 mCommandQueue::onRecentsAnimationStateChanged);
+        mJavaAdapter.alwaysCollectFlow(mCommunalTransitionViewModel.getRecentsBackgroundColor(),
+                recentTasks::setTransitionBackgroundColor);
     }
 
     @Override

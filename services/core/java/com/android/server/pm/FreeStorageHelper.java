@@ -107,11 +107,9 @@ final class FreeStorageHelper {
             }
 
             // 4. Consider cached app data (above quotas)
-            synchronized (mPm.mInstallLock) {
-                try {
-                    mPm.mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
-                } catch (Installer.InstallerException ignored) {
-                }
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                mPm.mInstaller.freeCache(volumeUuid, bytes, Installer.FLAG_FREE_CACHE_V2);
+            } catch (Installer.InstallerException ignored) {
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -141,12 +139,10 @@ final class FreeStorageHelper {
             }
 
             // 8. Consider cached app data (below quotas)
-            synchronized (mPm.mInstallLock) {
-                try {
-                    mPm.mInstaller.freeCache(volumeUuid, bytes,
-                            Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
-                } catch (Installer.InstallerException ignored) {
-                }
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                mPm.mInstaller.freeCache(volumeUuid, bytes,
+                        Installer.FLAG_FREE_CACHE_V2 | Installer.FLAG_FREE_CACHE_V2_DEFY_QUOTA);
+            } catch (Installer.InstallerException ignored) {
             }
             if (file.getUsableSpace() >= bytes) return;
 
@@ -176,11 +172,9 @@ final class FreeStorageHelper {
             // 12. Clear temp install session files
             mPm.mInstallerService.freeStageDirs(volumeUuid);
         } else {
-            synchronized (mPm.mInstallLock) {
-                try {
-                    mPm.mInstaller.freeCache(volumeUuid, bytes, 0);
-                } catch (Installer.InstallerException ignored) {
-                }
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                mPm.mInstaller.freeCache(volumeUuid, bytes, 0);
+            } catch (Installer.InstallerException ignored) {
             }
         }
         if (file.getUsableSpace() >= bytes) return;
@@ -197,22 +191,20 @@ final class FreeStorageHelper {
         final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(resolvedPath,
                 mPackageAbiOverride);
         if (sizeBytes >= 0) {
-            synchronized (mPm.mInstallLock) {
-                try {
-                    mPm.mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
-                    PackageInfoLite pkgInfoLite = PackageManagerServiceUtils.getMinimalPackageInfo(
-                            mContext, pkgLite, resolvedPath, installFlags,
-                            mPackageAbiOverride);
-                    // The cache free must have deleted the file we downloaded to install.
-                    if (pkgInfoLite.recommendedInstallLocation
-                            == InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI) {
-                        pkgInfoLite.recommendedInstallLocation =
-                                InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
-                    }
-                    return pkgInfoLite.recommendedInstallLocation;
-                } catch (Installer.InstallerException e) {
-                    Slog.w(TAG, "Failed to free cache", e);
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+                mPm.mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
+                PackageInfoLite pkgInfoLite = PackageManagerServiceUtils.getMinimalPackageInfo(
+                        mContext, pkgLite, resolvedPath, installFlags,
+                        mPackageAbiOverride);
+                // The cache free must have deleted the file we downloaded to install.
+                if (pkgInfoLite.recommendedInstallLocation
+                        == InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI) {
+                    pkgInfoLite.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
                 }
+                return pkgInfoLite.recommendedInstallLocation;
+            } catch (Installer.InstallerException e) {
+                Slog.w(TAG, "Failed to free cache", e);
             }
         }
         return recommendedInstallLocation;

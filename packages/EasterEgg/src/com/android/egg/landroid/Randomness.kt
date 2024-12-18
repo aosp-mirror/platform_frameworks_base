@@ -61,6 +61,7 @@ fun Random.nextFloatInRange(from: Float, until: Float): Float =
 /** Return a random float in the range [start, end). */
 fun Random.nextFloatInRange(fromUntil: ClosedFloatingPointRange<Float>): Float =
     nextFloatInRange(fromUntil.start, fromUntil.endInclusive)
+
 /** Return a random float in the range [first, second). */
 fun Random.nextFloatInRange(fromUntil: Pair<Float, Float>): Float =
     nextFloatInRange(fromUntil.first, fromUntil.second)

@@ -61,7 +61,6 @@ public interface BiometricFingerprintConstants {
             BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             BIOMETRIC_ERROR_RE_ENROLL,
-            BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED,
             FINGERPRINT_ERROR_UNKNOWN,
             FINGERPRINT_ERROR_BAD_CALIBRATION,
             BIOMETRIC_ERROR_POWER_PRESSED})
@@ -221,7 +220,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_IMMOBILE,
             FINGERPRINT_ACQUIRED_TOO_BRIGHT,
             FINGERPRINT_ACQUIRED_POWER_PRESSED,
-            FINGERPRINT_ACQUIRED_RE_ENROLL})
+            FINGERPRINT_ACQUIRED_RE_ENROLL_OPTIONAL,
+            FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -316,7 +316,13 @@ public interface BiometricFingerprintConstants {
      * This message is sent to encourage the user to re-enroll their fingerprints.
      * @hide
      */
-    int FINGERPRINT_ACQUIRED_RE_ENROLL = 12;
+    int FINGERPRINT_ACQUIRED_RE_ENROLL_OPTIONAL = 12;
+
+    /**
+     * This message is sent to force the user to re-enroll their fingerprints.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED = 13;
 
     /**
      * @hide

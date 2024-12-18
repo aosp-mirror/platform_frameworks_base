@@ -21,6 +21,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,10 +48,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
+import com.android.settingslib.spa.framework.compose.contentDescription
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
@@ -82,7 +83,7 @@ fun SettingsCardContent(
     Card(
         shape = CornerExtraSmall,
         colors = CardDefaults.cardColors(
-            containerColor = containerColor.takeOrElse { SettingsTheme.colorScheme.surface },
+            containerColor = containerColor.takeOrElse { MaterialTheme.colorScheme.surface },
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -165,10 +166,11 @@ private fun DismissButton(onDismiss: (() -> Unit)?) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Buttons(buttons: List<CardButton>, color: Color) {
     if (buttons.isNotEmpty()) {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
                 space = SettingsDimension.itemPaddingEnd,
@@ -188,8 +190,7 @@ private fun Buttons(buttons: List<CardButton>, color: Color) {
 private fun Button(button: CardButton, color: Color) {
     TextButton(
         onClick = button.onClick,
-        modifier =
-            Modifier.semantics { button.contentDescription?.let { this.contentDescription = it } }
+        modifier = Modifier.contentDescription(button.contentDescription),
     ) {
         Text(text = button.text, color = color)
     }

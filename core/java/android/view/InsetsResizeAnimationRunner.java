@@ -34,6 +34,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.animation.Interpolator;
@@ -90,6 +91,11 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
     @Override
     public int getAnimationType() {
         return ANIMATION_TYPE_RESIZE;
+    }
+
+    @Override
+    public SurfaceParamsApplier getSurfaceParamsApplier() {
+        return SurfaceParamsApplier.DEFAULT;
     }
 
     @Override
@@ -232,6 +238,16 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
     }
 
     @Override
+    public long getDurationMs() {
+        return 0;
+    }
+
+    @Override
+    public Interpolator getInsetsInterpolator() {
+        return null;
+    }
+
+    @Override
     public void setReadyDispatched(boolean dispatched) {
     }
 
@@ -241,5 +257,10 @@ public class InsetsResizeAnimationRunner implements InsetsAnimationControlRunner
 
     @Override
     public void onCancelled(WindowInsetsAnimationController controller) {
+    }
+
+    @Override
+    public void updateLayoutInsetsDuringAnimation(
+            @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
     }
 }

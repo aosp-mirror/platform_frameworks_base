@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Rect;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -39,11 +38,13 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -60,7 +61,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** Tests for {@link MenuItemAccessibilityDelegate}. */
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
@@ -90,12 +91,13 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
                 mSecureSettings));
         mMenuView.setTranslationY(halfScreenHeight);
-        doNothing().when(mMenuView).gotoEditScreen();
 
         mMenuViewLayer = spy(new MenuViewLayer(
                 mContext, stubWindowManager, mAccessibilityManager,
                 stubMenuViewModel, stubMenuViewAppearance, mMenuView,
-                mock(IAccessibilityFloatingMenu.class), mSecureSettings));
+                mock(IAccessibilityFloatingMenu.class), mSecureSettings,
+                mock(NavigationModeController.class)));
+        doNothing().when(mMenuViewLayer).gotoEditScreen();
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();
         mStubListView = new RecyclerView(mContext);

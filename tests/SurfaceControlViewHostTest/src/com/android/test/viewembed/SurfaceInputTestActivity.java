@@ -88,6 +88,7 @@ public class SurfaceInputTestActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LinearLayout content = new LinearLayout(this);
+        content.setFitsSystemWindows(true);
         mLocalSurfaceView = new SurfaceView(this);
         content.addView(mLocalSurfaceView, new LinearLayout.LayoutParams(
                 500, 500, Gravity.CENTER_HORIZONTAL | Gravity.TOP));
@@ -138,7 +139,7 @@ public class SurfaceInputTestActivity extends Activity {
         c.drawText("Local SC", 0, 0, paint);
         surface.unlockCanvasAndPost(c);
         WindowManager wm = getSystemService(WindowManager.class);
-        wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+        wm.registerBatchedSurfaceControlInputReceiver(
                 attachedSurfaceControl.getInputTransferToken(), mLocalSurfaceControl,
                 Choreographer.getInstance(), event -> {
                     Log.d(TAG, "onInputEvent-sc " + event);
@@ -159,7 +160,7 @@ public class SurfaceInputTestActivity extends Activity {
             holder.unlockCanvasAndPost(c);
 
             WindowManager wm = getSystemService(WindowManager.class);
-            wm.registerBatchedSurfaceControlInputReceiver(getDisplayId(),
+            wm.registerBatchedSurfaceControlInputReceiver(
                     mLocalSurfaceView.getRootSurfaceControl().getInputTransferToken(),
                     mLocalSurfaceView.getSurfaceControl(),
                     Choreographer.getInstance(), event -> {

@@ -65,8 +65,8 @@ import org.junit.runners.Parameterized
 open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
     override val standardAppHelper: MapsAppHelper = MapsAppHelper(instrumentation)
 
-    override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS,
-        Manifest.permission.ACCESS_FINE_LOCATION)
+    override val permissions: Array<String> =
+        arrayOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_FINE_LOCATION)
 
     val locationManager: LocationManager =
         instrumentation.context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

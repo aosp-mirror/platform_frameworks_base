@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksVibratorCoreTests",
-      "options": [
-        {"exclude-annotation": "androidx.test.filters.LargeTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-        {"exclude-annotation": "org.junit.Ignore"}
-      ]
+      "name": "FrameworksVibratorCoreTests"
     }
   ],
   "postsubmit": [

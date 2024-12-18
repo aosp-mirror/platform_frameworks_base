@@ -39,23 +39,30 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates state about device entry fingerprint auth mechanism. */
 interface DeviceEntryFingerprintAuthRepository {
     /** Whether the device entry fingerprint auth is locked out. */
-    val isLockedOut: Flow<Boolean>
+    val isLockedOut: StateFlow<Boolean>
 
     /**
      * Whether the fingerprint sensor is currently listening, this doesn't mean that the user is
      * actively authenticating.
      */
     val isRunning: Flow<Boolean>
+
+    /** Whether the fingerprint sensor is actively authenticating. */
+    val isEngaged: StateFlow<Boolean>
 
     /**
      * Fingerprint sensor type present on the device, null if fingerprint sensor is not available.
@@ -120,7 +127,7 @@ constructor(
         else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
     }
 
-    override val isLockedOut: Flow<Boolean> =
+    override val isLockedOut: StateFlow<Boolean> by lazy {
         conflatedCallbackFlow {
                 val sendLockoutUpdate =
                     fun() {
@@ -144,7 +151,12 @@ constructor(
                 sendLockoutUpdate()
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
+            .stateIn(
+                scope,
+                started = Eagerly,
+                initialValue = keyguardUpdateMonitor.isFingerprintLockedOut
+            )
+    }
 
     override val isRunning: Flow<Boolean>
         get() =
@@ -175,6 +187,17 @@ constructor(
                 .flowOn(
                     mainDispatcher
                 ) // keyguardUpdateMonitor requires registration on main thread.
+
+    override val isEngaged: StateFlow<Boolean> =
+        authenticationStatus
+            .map { it.isEngaged }
+            .filterNotNull()
+            .map { it }
+            .stateIn(
+                scope = scope,
+                started = WhileSubscribed(),
+                initialValue = false,
+            )
 
     // TODO(b/322555228) Remove after consolidating device entry auth messages with BP auth messages
     //  in BiometricStatusRepository
@@ -259,7 +282,6 @@ constructor(
                                 if (biometricSourceType != BiometricSourceType.FINGERPRINT) {
                                     return
                                 }
-
                                 trySendWithFailureLogging(
                                     authenticationStatus,
                                     TAG,
@@ -292,6 +314,7 @@ constructor(
                         ) {
                             sendShouldUpdateIndicatorVisibility(true)
                         }
+
                         override fun onStrongAuthStateChanged(userId: Int) {
                             sendShouldUpdateIndicatorVisibility(true)
                         }
@@ -301,7 +324,7 @@ constructor(
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
             .flowOn(mainDispatcher)
-            .shareIn(scope, started = SharingStarted.WhileSubscribed(), replay = 1)
+            .shareIn(scope, started = WhileSubscribed(), replay = 1)
 
     companion object {
         const val TAG = "DeviceEntryFingerprintAuthRepositoryImpl"

@@ -18,12 +18,12 @@ package com.android.server.compat;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 
 import android.app.compat.ChangeIdStateCache;
 import android.app.compat.PackageOverride;
@@ -170,6 +170,25 @@ public class CompatConfigTest {
 
         assertThat(compatConfig.getDisabledChanges(ApplicationInfoBuilder.create().build()))
             .asList().containsExactly(12L, 123L, 1234L);
+    }
+
+    @Test
+    public void testGetLoggableChanges() throws Exception {
+        final long disabledChangeId = 1234L;
+        final long enabledLatestChangeId = 2345L;
+        final long enabledOlderChangeId = 3456L;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                // Disabled changes should not be logged.
+                .addDisabledChangeWithId(disabledChangeId)
+                // A change targeting the latest sdk should be logged.
+                .addEnableSinceSdkChangeWithId(3, enabledLatestChangeId)
+                // A change targeting an old sdk should not be logged.
+                .addEnableSinceSdkChangeWithId(1, enabledOlderChangeId)
+                .build();
+
+        assertThat(compatConfig.getLoggableChanges(
+                ApplicationInfoBuilder.create().withTargetSdk(3).build()))
+                    .asList().containsExactly(enabledLatestChangeId);
     }
 
     @Test

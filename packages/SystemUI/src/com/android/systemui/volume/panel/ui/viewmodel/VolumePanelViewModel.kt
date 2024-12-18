@@ -17,40 +17,59 @@
 package com.android.systemui.volume.panel.ui.viewmodel
 
 import android.content.Context
+import android.content.IntentFilter
 import android.content.res.Resources
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import com.android.systemui.Dumpable
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
+import com.android.systemui.util.kotlin.launchAndDispose
+import com.android.systemui.volume.VolumePanelDialogReceiver
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor
+import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.composable.ComponentsFactory
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
+import com.android.systemui.volume.panel.ui.layout.toLogString
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 
+private const val TAG = "VolumePanelViewModel"
+
+// Can't inject a constructor here because VolumePanelComponent provides this view model for its
+// components.
+@OptIn(ExperimentalCoroutinesApi::class)
 class VolumePanelViewModel(
     resources: Resources,
+    coroutineScope: CoroutineScope,
     daggerComponentFactory: VolumePanelComponentFactory,
     configurationController: ConfigurationController,
-) : ViewModel() {
+    broadcastDispatcher: BroadcastDispatcher,
+    private val dumpManager: DumpManager,
+    private val logger: VolumePanelLogger,
+    private val volumePanelGlobalStateInteractor: VolumePanelGlobalStateInteractor,
+) : Dumpable {
 
-    private val volumePanelComponent: VolumePanelComponent = daggerComponentFactory.create(this)
+    private val volumePanelComponent: VolumePanelComponent =
+        daggerComponentFactory.create(this, coroutineScope)
 
     private val scope: CoroutineScope
         get() = volumePanelComponent.coroutineScope()
@@ -64,31 +83,25 @@ class VolumePanelViewModel(
     private val componentsLayoutManager: ComponentsLayoutManager
         get() = volumePanelComponent.componentsLayoutManager()
 
-    private val mutablePanelVisibility = MutableStateFlow(true)
-
     val volumePanelState: StateFlow<VolumePanelState> =
-        combine(
-                configurationController.onConfigChanged
-                    .onStart { emit(resources.configuration) }
-                    .distinctUntilChanged(),
-                mutablePanelVisibility,
-            ) { configuration, isVisible ->
+        configurationController.onConfigChanged
+            .onStart { emit(resources.configuration) }
+            .map { configuration ->
                 VolumePanelState(
-                    orientation = configuration.orientation,
-                    isVisible = isVisible,
-                    isLargeScreen = resources.getBoolean(R.bool.volume_panel_is_large_screen),
-                )
+                        orientation = configuration.orientation,
+                        isLargeScreen = resources.getBoolean(R.bool.volume_panel_is_large_screen),
+                    )
+                    .also { logger.onVolumePanelStateChanged(it) }
             }
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
                 VolumePanelState(
                     orientation = resources.configuration.orientation,
-                    isVisible = mutablePanelVisibility.value,
                     isLargeScreen = resources.getBoolean(R.bool.volume_panel_is_large_screen)
                 ),
             )
-    val componentsLayout: Flow<ComponentsLayout> =
+    val componentsLayout: StateFlow<ComponentsLayout?> =
         combine(
                 componentsInteractor.components,
                 volumePanelState,
@@ -103,19 +116,34 @@ class VolumePanelViewModel(
                     }
                 componentsLayoutManager.layout(scope, componentStates)
             }
-            .shareIn(
+            .stateIn(
                 scope,
                 SharingStarted.Eagerly,
-                replay = 1,
+                null,
             )
 
-    fun dismissPanel() {
-        mutablePanelVisibility.update { false }
+    init {
+        scope.launchAndDispose {
+            dumpManager.registerNormalDumpable(TAG, this)
+            DisposableHandle { dumpManager.unregisterDumpable(TAG) }
+        }
+
+        volumePanelComponent.volumePanelStartables().onEach(VolumePanelStartable::start)
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(VolumePanelDialogReceiver.DISMISS_ACTION))
+            .onEach { dismissPanel() }
+            .launchIn(scope)
     }
 
-    override fun onCleared() {
-        scope.cancel()
-        super.onCleared()
+    fun dismissPanel() {
+        volumePanelGlobalStateInteractor.setVisible(false)
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        with(pw) {
+            println("volumePanelState=${volumePanelState.value}")
+            println("componentsLayout=${componentsLayout.value?.toLogString()}")
+        }
     }
 
     class Factory
@@ -124,17 +152,23 @@ class VolumePanelViewModel(
         @Application private val context: Context,
         private val daggerComponentFactory: VolumePanelComponentFactory,
         private val configurationController: ConfigurationController,
-    ) : ViewModelProvider.Factory {
+        private val broadcastDispatcher: BroadcastDispatcher,
+        private val dumpManager: DumpManager,
+        private val logger: VolumePanelLogger,
+        private val volumePanelGlobalStateInteractor: VolumePanelGlobalStateInteractor,
+    ) {
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            check(modelClass == VolumePanelViewModel::class.java)
+        fun create(coroutineScope: CoroutineScope): VolumePanelViewModel {
             return VolumePanelViewModel(
                 context.resources,
+                coroutineScope,
                 daggerComponentFactory,
                 configurationController,
+                broadcastDispatcher,
+                dumpManager,
+                logger,
+                volumePanelGlobalStateInteractor,
             )
-                as T
         }
     }
 }

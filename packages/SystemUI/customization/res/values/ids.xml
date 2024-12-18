@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- View ids for elements in large weather clock -->
+    <item type="id" name="weather_clock_time" />
+    <item type="id" name="weather_clock_date" />
+    <item type="id" name="weather_clock_weather_icon" />
+    <item type="id" name="weather_clock_temperature" />
+    <item type="id" name="weather_clock_alarm_dnd" />
+</resources>

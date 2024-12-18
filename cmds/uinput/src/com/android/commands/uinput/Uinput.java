@@ -137,6 +137,7 @@ public class Uinput {
             case INJECT -> d.injectEvent(e.getInjections(), e.getTimestampOffsetMicros());
             case DELAY -> d.addDelayNanos(e.getDurationNanos());
             case SYNC -> d.syncEvent(e.getSyncToken());
+            case UPDATE_TIME_BASE -> d.updateTimeBase();
         }
     }
 

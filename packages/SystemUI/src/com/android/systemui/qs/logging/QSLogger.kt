@@ -28,6 +28,7 @@ import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.core.LogLevel.ERROR
+import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.log.dagger.QSConfigLog
 import com.android.systemui.log.dagger.QSLog
@@ -55,6 +56,9 @@ constructor(
 
     fun d(@CompileTimeConstant msg: String, arg: Any) {
         buffer.log(TAG, DEBUG, { str1 = arg.toString() }, { "$msg: $str1" })
+    }
+    fun i(@CompileTimeConstant msg: String, arg: Any) {
+        buffer.log(TAG, INFO, { str1 = arg.toString() }, { "$msg: $str1" })
     }
 
     fun logTileAdded(tileSpec: String) {

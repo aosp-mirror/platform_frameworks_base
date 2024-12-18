@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.res.R;
+import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.util.LargeScreenUtils;
 
 /**
@@ -97,8 +98,7 @@ public class QuickStatusBarHeader extends FrameLayout {
             qqsLP.topMargin = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
         } else {
-            qqsLP.topMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height);
+            qqsLP.topMargin = LargeScreenHeaderHelper.getLargeScreenHeaderHeight(mContext);
         }
         mHeaderQsPanel.setLayoutParams(qqsLP);
     }
@@ -122,5 +122,12 @@ public class QuickStatusBarHeader extends FrameLayout {
         lp.setMarginStart(marginStart);
         lp.setMarginEnd(marginEnd);
         view.setLayoutParams(lp);
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedHeight() {
+        return mHeaderQsPanel.getSquishedHeight();
     }
 }

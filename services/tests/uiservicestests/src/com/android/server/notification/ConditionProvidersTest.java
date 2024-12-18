@@ -16,6 +16,9 @@
 
 package com.android.server.notification;
 
+import static android.service.notification.Condition.STATE_FALSE;
+import static android.service.notification.Condition.STATE_TRUE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -32,11 +35,13 @@ import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.net.Uri;
 import android.os.IInterface;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.Condition;
 
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -51,6 +56,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
     private ManagedServices.UserProfiles mUserProfiles;
     @Mock
     private ConditionProviders.Callback mCallback;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Before
     public void setUp() {
@@ -67,8 +76,8 @@ public class ConditionProvidersTest extends UiServiceTestCase {
         ManagedServices.ManagedServiceInfo msi = mProviders.new ManagedServiceInfo(
                 mock(IInterface.class), cn, 0, false, mock(ServiceConnection.class), 33, 100);
         Condition[] conditions = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditions);
@@ -85,9 +94,9 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE),
-                new Condition(Uri.parse("c"), "summary3", Condition.STATE_TRUE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE),
+                new Condition(Uri.parse("c"), "summary3", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
@@ -104,10 +113,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
-                new Condition(Uri.parse("b"), "summary2", Condition.STATE_TRUE),
-                new Condition(Uri.parse("a"), "summary3", Condition.STATE_FALSE),
-                new Condition(Uri.parse("a"), "summary4", Condition.STATE_FALSE)
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
+                new Condition(Uri.parse("b"), "summary2", STATE_TRUE),
+                new Condition(Uri.parse("a"), "summary3", STATE_FALSE),
+                new Condition(Uri.parse("a"), "summary4", STATE_FALSE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
@@ -124,10 +133,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
                 mock(IInterface.class), new ComponentName("package", "cls"), 0, false,
                 mock(ServiceConnection.class), 33, 100);
         Condition[] conditionsToNotify = new Condition[] {
-                new Condition(Uri.parse("a"), "summary", Condition.STATE_TRUE),
+                new Condition(Uri.parse("a"), "summary", STATE_TRUE),
                 null,
                 null,
-                new Condition(Uri.parse("b"), "summary", Condition.STATE_TRUE)
+                new Condition(Uri.parse("b"), "summary", STATE_TRUE)
         };
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);

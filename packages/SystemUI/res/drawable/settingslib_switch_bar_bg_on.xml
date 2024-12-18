@@ -16,10 +16,11 @@
   -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:color="?android:attr/colorControlHighlight">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/settingslib_state_on_color"/>
+            <solid android:color="?androidprv:attr/materialColorPrimaryContainer"/>
             <corners android:radius="@dimen/settingslib_switch_bar_radius"/>
         </shape>
     </item>

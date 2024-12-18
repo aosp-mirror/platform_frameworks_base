@@ -19,6 +19,16 @@ package com.android.systemui.volume.panel.component.spatial.domain.model
 /** Models spatial audio and head tracking enabled/disabled state. */
 interface SpatialAudioEnabledModel {
 
+    companion object {
+        /** All possible SpatialAudioEnabledModel implementations. */
+        val values =
+            listOf(
+                Disabled,
+                SpatialAudioEnabled,
+                HeadTrackingEnabled,
+            )
+    }
+
     /** Spatial audio is disabled. */
     data object Disabled : SpatialAudioEnabledModel
 
@@ -29,4 +39,7 @@ interface SpatialAudioEnabledModel {
 
     /** Head tracking is enabled. This also means that [SpatialAudioEnabled]. */
     data object HeadTrackingEnabled : SpatialAudioEnabled
+
+    /** Spatial audio enabled state is unknown. */
+    data object Unknown : SpatialAudioEnabled
 }

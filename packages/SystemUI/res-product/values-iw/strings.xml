@@ -58,9 +58,9 @@
     <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"קירור הטלפון ייעשה באופן אוטומטי. אפשר עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
     <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"קירור המכשיר ייעשה באופן אוטומטי. אפשר עדיין להשתמש במכשיר אבל ייתכן שהוא יפעל לאט יותר.\n\nהמכשיר יחזור לפעול כרגיל לאחר שיתקרר."</string>
     <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"קירור הטאבלט ייעשה באופן אוטומטי. אפשר עדיין להשתמש בטאבלט אבל ייתכן שהוא יפעל לאט יותר.\n\nהטאבלט יחזור לפעול כרגיל לאחר שיתקרר."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בשולי הטאבלט."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בקצה הטאבלט."</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בשולי המכשיר."</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בשולי הטלפון."</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"חיישן טביעות האצבע נמצא על לחצן ההפעלה. זה הלחצן השטוח ליד הלחצן הבולט של עוצמת הקול בקצה הטלפון."</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"לאפשרויות נוספות, יש לבטל את נעילת הטלפון"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"לאפשרויות נוספות, יש לבטל את נעילת הטאבלט"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"לאפשרויות נוספות, יש לבטל את נעילת המכשיר"</string>

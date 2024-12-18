@@ -278,7 +278,7 @@ public class MediaSessions {
         }
 
         @Override
-        public void onAudioInfoChanged(PlaybackInfo info) {
+        public void onAudioInfoChanged(@NonNull PlaybackInfo info) {
             if (D.BUG) {
                 Log.d(TAG, cb("onAudioInfoChanged") + Util.playbackInfoToString(info)
                         + " sentRemote=" + sentRemote);

@@ -193,14 +193,14 @@ public class BugreportReceiverTest {
         mService.mScreenshotDelaySec = SCREENSHOT_DELAY_SECONDS;
         // Dup the fds which are passing to startBugreport function.
         Mockito.doAnswer(invocation -> {
-            final boolean isScreenshotRequested = invocation.getArgument(6);
+            final boolean isScreenshotRequested = invocation.getArgument(7);
             if (isScreenshotRequested) {
                 mScreenshotFd = ParcelFileDescriptor.dup(invocation.getArgument(3));
             }
             mBugreportFd = ParcelFileDescriptor.dup(invocation.getArgument(2));
             return null;
         }).when(mMockIDumpstate).startBugreport(anyInt(), any(), any(), any(), anyInt(), anyInt(),
-                any(), anyBoolean());
+                any(), anyBoolean(), anyBoolean());
 
         setWarningState(mContext, STATE_HIDE);
 
@@ -250,7 +250,22 @@ public class BugreportReceiverTest {
         mIDumpstateListener.onProgress(300);
         assertProgressNotification(mProgressTitle, 99);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId, 1);
+        assertActionSendMultiple(extras);
+
+        assertServiceNotRunning();
+    }
+
+    @Test
+    public void testStressProgress() throws Exception {
+        sendBugreportStarted();
+        waitForScreenshotButtonEnabled(true);
+
+        for (int i = 0; i <= 1000; i++) {
+            mIDumpstateListener.onProgress(i);
+        }
+        sendBugreportFinished();
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId, 1);
         assertActionSendMultiple(extras);
 
         assertServiceNotRunning();
@@ -277,7 +292,7 @@ public class BugreportReceiverTest {
         assertScreenshotButtonEnabled(false);
         waitForScreenshotButtonEnabled(true);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId, 2);
         assertActionSendMultiple(extras, NO_NAME, NO_TITLE, NO_DESCRIPTION, 1);
 
         assertServiceNotRunning();
@@ -294,7 +309,7 @@ public class BugreportReceiverTest {
         // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
         sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
 
-        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId, 2);
         assertActionSendMultiple(extras, NO_NAME, NO_TITLE, NO_DESCRIPTION, 1);
 
         assertServiceNotRunning();
@@ -328,7 +343,7 @@ public class BugreportReceiverTest {
 
         assertProgressNotification(NEW_NAME, 00.00f);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE, 1);
         assertActionSendMultiple(extras, NEW_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
@@ -363,7 +378,7 @@ public class BugreportReceiverTest {
 
         assertProgressNotification(NEW_NAME, 00.00f);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE, 1);
         assertActionSendMultiple(extras, NEW_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
@@ -390,7 +405,7 @@ public class BugreportReceiverTest {
         detailsUi.descField.setText(mDescription);
         detailsUi.clickOk();
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId, 1);
         assertActionSendMultiple(extras, NO_NAME, NO_TITLE, mDescription, 0);
 
         assertServiceNotRunning();
@@ -441,7 +456,7 @@ public class BugreportReceiverTest {
         detailsUi.clickOk();
 
         // Finally, share bugreport.
-        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId, 1);
         assertActionSendMultiple(extras, NO_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
@@ -504,7 +519,7 @@ public class BugreportReceiverTest {
         mUiBot.click(ok, "ok");
 
         // Share the bugreport.
-        mUiBot.chooseActivity(UI_NAME);
+        mUiBot.chooseActivity(UI_NAME, mContext, 1);
         Bundle extras = mListener.getExtras();
         assertActionSendMultiple(extras);
 
@@ -531,7 +546,7 @@ public class BugreportReceiverTest {
         sendBugreportFinished();
         killService();
         assertServiceNotRunning();
-        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId, 1);
         assertActionSendMultiple(extras);
     }
 
@@ -543,7 +558,7 @@ public class BugreportReceiverTest {
         getInstrumentation().waitForIdleSync();
 
         verify(mMockIDumpstate, times(1)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), any(), anyBoolean());
+                anyInt(), anyInt(), any(), anyBoolean(), anyBoolean());
         sendBugreportFinished();
     }
 
@@ -608,7 +623,7 @@ public class BugreportReceiverTest {
         ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
                 IDumpstateListener.class);
         verify(mMockIDumpstate, timeout(TIMEOUT)).startBugreport(anyInt(), any(), any(), any(),
-                anyInt(), anyInt(), listenerCap.capture(), anyBoolean());
+                anyInt(), anyInt(), listenerCap.capture(), anyBoolean(), anyBoolean());
         mIDumpstateListener = listenerCap.getValue();
         assertNotNull("Dumpstate listener should not be null", mIDumpstateListener);
         mIDumpstateListener.onProgress(0);
@@ -618,45 +633,49 @@ public class BugreportReceiverTest {
      * Sends a "bugreport finished" event and waits for the result.
      *
      * @param id The bugreport id for finished notification string title substitution.
+     * @param count Number of files to be shared
      * @return extras sent in the shared intent.
      */
-    private Bundle sendBugreportFinishedAndGetSharedIntent(int id) throws Exception {
+    private Bundle sendBugreportFinishedAndGetSharedIntent(int id, int count) throws Exception {
         sendBugreportFinished();
-        return acceptBugreportAndGetSharedIntent(id);
+        return acceptBugreportAndGetSharedIntent(id, count);
     }
 
     /**
      * Sends a "bugreport finished" event and waits for the result.
      *
      * @param notificationTitle The title of finished notification.
+     * @param count Number of files to be shared
      * @return extras sent in the shared intent.
      */
-    private Bundle sendBugreportFinishedAndGetSharedIntent(String notificationTitle)
+    private Bundle sendBugreportFinishedAndGetSharedIntent(String notificationTitle, int count)
             throws Exception {
         sendBugreportFinished();
-        return acceptBugreportAndGetSharedIntent(notificationTitle);
+        return acceptBugreportAndGetSharedIntent(notificationTitle, count);
     }
 
     /**
      * Accepts the notification to share the finished bugreport and waits for the result.
      *
      * @param id The bugreport id for finished notification string title substitution.
+     * @param count Number of files to be shared
      * @return extras sent in the shared intent.
      */
-    private Bundle acceptBugreportAndGetSharedIntent(int id) {
+    private Bundle acceptBugreportAndGetSharedIntent(int id, int count) {
         final String notificationTitle = mContext.getString(R.string.bugreport_finished_title, id);
-        return acceptBugreportAndGetSharedIntent(notificationTitle);
+        return acceptBugreportAndGetSharedIntent(notificationTitle, count);
     }
 
     /**
      * Accepts the notification to share the finished bugreport and waits for the result.
      *
      * @param notificationTitle The title of finished notification.
+     * @param count Number of files to be shared
      * @return extras sent in the shared intent.
      */
-    private Bundle acceptBugreportAndGetSharedIntent(String notificationTitle) {
+    private Bundle acceptBugreportAndGetSharedIntent(String notificationTitle, int count) {
         mUiBot.clickOnNotification(notificationTitle);
-        mUiBot.chooseActivity(UI_NAME);
+        mUiBot.chooseActivity(UI_NAME, mContext, count);
         return mListener.getExtras();
     }
 

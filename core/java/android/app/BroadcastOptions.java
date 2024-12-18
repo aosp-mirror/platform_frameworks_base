@@ -18,8 +18,6 @@ package android.app;
 
 import static android.app.ActivityOptions.BackgroundActivityStartMode;
 
-import android.annotation.CurrentTimeMillisLong;
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -69,8 +67,6 @@ public class BroadcastOptions extends ComponentOptions {
     private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
     private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
     private @DeferralPolicy int mDeferralPolicy;
-    private @CurrentTimeMillisLong long mEventTriggerTimestampMillis;
-    private @CurrentTimeMillisLong long mRemoteEventTriggerTimestampMillis;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
@@ -194,18 +190,6 @@ public class BroadcastOptions extends ComponentOptions {
      */
     private static final String KEY_ID_FOR_RESPONSE_EVENT =
             "android:broadcast.idForResponseEvent";
-
-    /**
-     * Corresponds to {@link #setEventTriggerTimestampMillis(long)}.
-     */
-    private static final String KEY_EVENT_TRIGGER_TIMESTAMP =
-            "android:broadcast.eventTriggerTimestamp";
-
-    /**
-     * Corresponds to {@link #setRemoteEventTriggerTimestampMillis(long)}.
-     */
-    private static final String KEY_REMOTE_EVENT_TRIGGER_TIMESTAMP =
-            "android:broadcast.remoteEventTriggerTimestamp";
 
     /**
      * Corresponds to {@link #setDeliveryGroupPolicy(int)}.
@@ -359,8 +343,6 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
-        mEventTriggerTimestampMillis = opts.getLong(KEY_EVENT_TRIGGER_TIMESTAMP);
-        mRemoteEventTriggerTimestampMillis = opts.getLong(KEY_REMOTE_EVENT_TRIGGER_TIMESTAMP);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
                 DELIVERY_GROUP_POLICY_ALL);
         mDeliveryGroupMatchingNamespaceFragment = opts.getString(KEY_DELIVERY_GROUP_NAMESPACE);
@@ -807,60 +789,6 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
-     * Set the timestamp for the event that triggered this broadcast, in
-     * {@link System#currentTimeMillis()} timebase.
-     *
-     * <p> For instance, if this broadcast is for a push message, then this timestamp
-     * could correspond to when the device received the message.
-     *
-     * @param timestampMillis the timestamp in {@link System#currentTimeMillis()} timebase that
-     *                        correspond to the event that triggered this broadcast.
-     */
-    @FlaggedApi(android.app.Flags.FLAG_BCAST_EVENT_TIMESTAMPS)
-    public void setEventTriggerTimestampMillis(@CurrentTimeMillisLong long timestampMillis) {
-        mEventTriggerTimestampMillis = timestampMillis;
-    }
-
-    /**
-     * Return the timestamp for the event that triggered this broadcast, in
-     * {@link System#currentTimeMillis()} timebase.
-     *
-     * @return the timestamp in {@link System#currentTimeMillis()} timebase that was previously
-     *         set using {@link #setEventTriggerTimestampMillis(long)}.
-     */
-    @FlaggedApi(android.app.Flags.FLAG_BCAST_EVENT_TIMESTAMPS)
-    public @CurrentTimeMillisLong long getEventTriggerTimestampMillis() {
-        return mEventTriggerTimestampMillis;
-    }
-
-    /**
-     * Set the timestamp for the remote event, if any, that triggered this broadcast, in
-     * {@link System#currentTimeMillis()} timebase.
-     *
-     * <p> For instance, if this broadcast is for a push message, then this timestamp
-     * could correspond to when the message originated remotely.
-     *
-     * @param timestampMillis the timestamp in {@link System#currentTimeMillis()} timebase that
-     *                        correspond to the remote event that triggered this broadcast.
-     */
-    @FlaggedApi(android.app.Flags.FLAG_BCAST_EVENT_TIMESTAMPS)
-    public void setRemoteEventTriggerTimestampMillis(@CurrentTimeMillisLong long timestampMillis) {
-        mRemoteEventTriggerTimestampMillis = timestampMillis;
-    }
-
-    /**
-     * Return the timestamp for the remote event that triggered this broadcast, in
-     * {@link System#currentTimeMillis()} timebase.
-     *
-     * @return the timestamp in {@link System#currentTimeMillis()} timebase that was previously
-     *         set using {@link #setRemoteEventTriggerTimestampMillis(long)}}.
-     */
-    @FlaggedApi(android.app.Flags.FLAG_BCAST_EVENT_TIMESTAMPS)
-    public @CurrentTimeMillisLong long getRemoteEventTriggerTimestampMillis() {
-        return mRemoteEventTriggerTimestampMillis;
-    }
-
-    /**
      * Sets deferral policy for this broadcast that specifies how this broadcast
      * can be deferred for delivery at some future point.
      */
@@ -1194,12 +1122,6 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mIdForResponseEvent != 0) {
             b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
-        }
-        if (mEventTriggerTimestampMillis > 0) {
-            b.putLong(KEY_EVENT_TRIGGER_TIMESTAMP, mEventTriggerTimestampMillis);
-        }
-        if (mRemoteEventTriggerTimestampMillis > 0) {
-            b.putLong(KEY_REMOTE_EVENT_TRIGGER_TIMESTAMP, mRemoteEventTriggerTimestampMillis);
         }
         if (mDeliveryGroupPolicy != DELIVERY_GROUP_POLICY_ALL) {
             b.putInt(KEY_DELIVERY_GROUP_POLICY, mDeliveryGroupPolicy);

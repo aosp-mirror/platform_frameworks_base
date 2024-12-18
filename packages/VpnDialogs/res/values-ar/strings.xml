@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"طلب الاتصال"</string>
-    <string name="warning" msgid="809658604548412033">"‏يريد <xliff:g id="APP">%s</xliff:g> إعداد الاتصال بالشبكة الافتراضية الخاصة التي تتيح له مراقبة حركة المرور على الشبكة. فلا توافق إلا إذا كنت تثق في المصدر. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; يظهر في الجزء العلوي من الشاشة عندما تكون الشبكة الافتراضية الخاصة نشطة."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"‏يريد تطبيق <xliff:g id="APP">%s</xliff:g> إعداد اتصال شبكة افتراضية خاصة (VPN) يتيح له مراقبة حركة بيانات الشبكة. لا تقبل السماح بذلك إلا إذا كنت تثق في المصدر. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; يظهر على شاشتك عندما تكون الشبكة الافتراضية الخاصة نشطة."</string>
+    <string name="warning" msgid="809658604548412033">"‏يريد <xliff:g id="APP">%s</xliff:g> إعداد الاتصال بشبكة VPN التي تتيح له مراقبة حركة المرور على الشبكة. فلا توافق إلا إذا كنت تثق في المصدر. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; يظهر في الجزء العلوي من الشاشة عندما تكون شبكة VPN نشطة."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"‏يريد تطبيق <xliff:g id="APP">%s</xliff:g> إعداد اتصال شبكة VPN يتيح له مراقبة حركة بيانات الشبكة. لا تقبل السماح بذلك إلا إذا كنت تثق في المصدر. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; يظهر على شاشتك عندما تكون شبكة VPN نشطة."</string>
     <string name="legacy_title" msgid="192936250066580964">"‏VPN متصلة"</string>
     <string name="session" msgid="6470628549473641030">"الجلسة"</string>
     <string name="duration" msgid="3584782459928719435">"المدة:"</string>
@@ -27,9 +27,9 @@
     <string name="data_value_format" msgid="2192466557826897580">"<xliff:g id="NUMBER_0">%1$s</xliff:g> بايت / <xliff:g id="NUMBER_1">%2$s</xliff:g> من الحزم"</string>
     <string name="always_on_disconnected_title" msgid="1906740176262776166">"‏يتعذّر الاتصال بشبكة VPN التي يتم تشغيلها دائمًا"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"تم إعداد شبكة <xliff:g id="VPN_APP_0">%1$s</xliff:g> بحيث تبقى متصلة بالإنترنت دائمًا، ومع ذلك يتعذّر اتصالها بالإنترنت الآن. سيستخدم هاتفك شبكة عامة إلى أن يتمكّن من إعادة الاتصال بشبكة <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
-    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"‏تم إعداد شبكة <xliff:g id="VPN_APP">%1$s</xliff:g> بحيث تبقى متصلة بالإنترنت دائمًا، ومع ذلك يتعذّر اتصالها بالإنترنت الآن. لن تتوفر لديك إمكانية اتصال إلى أن تتمكّن الشبكة الافتراضية الخاصة (VPN) من إعادة الاتصال."</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"‏تم إعداد شبكة <xliff:g id="VPN_APP">%1$s</xliff:g> بحيث تبقى متصلة بالإنترنت دائمًا، ومع ذلك يتعذّر اتصالها بالإنترنت الآن. لن تتوفر لديك إمكانية اتصال إلى أن تتمكّن شبكة VPN من إعادة الاتصال."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
-    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"‏تغيير إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"‏تغيير إعدادات شبكة VPN"</string>
     <string name="configure" msgid="4905518375574791375">"تهيئة"</string>
     <string name="disconnect" msgid="971412338304200056">"قطع الاتصال"</string>
     <string name="open_app" msgid="3717639178595958667">"فتح التطبيق"</string>

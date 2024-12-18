@@ -142,7 +142,6 @@ class RebootEscrowManager {
             ERROR_KEYSTORE_FAILURE,
             ERROR_NO_NETWORK,
             ERROR_TIMEOUT_EXHAUSTED,
-            ERROR_NO_REBOOT_ESCROW_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface RebootEscrowErrorCode {
@@ -158,7 +157,6 @@ class RebootEscrowManager {
     static final int ERROR_KEYSTORE_FAILURE = 7;
     static final int ERROR_NO_NETWORK = 8;
     static final int ERROR_TIMEOUT_EXHAUSTED = 9;
-    static final int ERROR_NO_REBOOT_ESCROW_DATA = 10;
 
     private @RebootEscrowErrorCode int mLoadEscrowDataErrorCode = ERROR_NONE;
 
@@ -273,11 +271,6 @@ class RebootEscrowManager {
 
             return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
                     "server_based_ror_enabled", false);
-        }
-
-        public boolean waitForInternet() {
-            return DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_OTA, "wait_for_internet_ror", false);
         }
 
         public boolean isNetworkConnected() {
@@ -435,7 +428,7 @@ class RebootEscrowManager {
 
     /** Wrapper function to set error code serialized through handler, */
     private void setLoadEscrowDataErrorCode(@RebootEscrowErrorCode int value, Handler handler) {
-        if (mInjector.waitForInternet()) {
+        if (Flags.waitForInternetRor()) {
             mInjector.post(
                     handler,
                     () -> {
@@ -507,9 +500,6 @@ class RebootEscrowManager {
         if (rebootEscrowUsers.isEmpty()) {
             Slog.i(TAG, "No reboot escrow data found for users,"
                     + " skipping loading escrow data");
-            setLoadEscrowDataErrorCode(ERROR_NO_REBOOT_ESCROW_DATA, retryHandler);
-            reportMetricOnRestoreComplete(
-                    /* success= */ false, /* attemptCount= */ 1, retryHandler);
             clearMetricsStorage();
             return;
         }
@@ -521,7 +511,7 @@ class RebootEscrowManager {
             mWakeLock.acquire(mInjector.getWakeLockTimeoutMillis());
         }
 
-        if (mInjector.waitForInternet()) {
+        if (Flags.waitForInternetRor()) {
             // Timeout to stop retrying same as the wake lock timeout.
             mInjector.postDelayed(
                     retryHandler,
@@ -558,7 +548,7 @@ class RebootEscrowManager {
             return;
         }
 
-        if (mInjector.waitForInternet()) {
+        if (Flags.waitForInternetRor()) {
             if (mRebootEscrowTimedOut) {
                 Slog.w(TAG, "Failed to load reboot escrow data within timeout");
                 compareAndSetLoadEscrowDataErrorCode(

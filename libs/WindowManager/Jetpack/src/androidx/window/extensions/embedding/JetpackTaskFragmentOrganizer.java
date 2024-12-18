@@ -17,10 +17,12 @@
 package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_PINNED;
 
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -28,6 +30,7 @@ import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAs
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishPrimaryWithSecondary;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishSecondaryWithPrimary;
 
+import android.annotation.ColorInt;
 import android.app.Activity;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Intent;
@@ -47,6 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -165,10 +169,11 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     /**
      * Expands an existing TaskFragment to fill parent.
      * @param wct WindowContainerTransaction in which the task fragment should be resized.
-     * @param fragmentToken token of an existing TaskFragment.
+     * @param container the {@link TaskFragmentContainer} to be expanded.
      */
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
-            @NonNull IBinder fragmentToken) {
+            @NonNull TaskFragmentContainer container) {
+        final IBinder fragmentToken = container.getTaskFragmentToken();
         resizeTaskFragment(wct, fragmentToken, new Rect());
         clearAdjacentTaskFragments(wct, fragmentToken);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
@@ -353,14 +358,21 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
     void setTaskFragmentIsolatedNavigation(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean isolatedNav) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_ISOLATED_NAVIGATION).setIsolatedNav(isolatedNav).build();
+                OP_TYPE_SET_ISOLATED_NAVIGATION).setBooleanValue(isolatedNav).build();
+        wct.addTaskFragmentOperation(fragmentToken, operation);
+    }
+
+    void setTaskFragmentPinned(@NonNull WindowContainerTransaction wct,
+            @NonNull IBinder fragmentToken, boolean pinned) {
+        final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                OP_TYPE_SET_PINNED).setBooleanValue(pinned).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
     void setTaskFragmentDimOnTask(@NonNull WindowContainerTransaction wct,
             @NonNull IBinder fragmentToken, boolean dimOnTask) {
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_SET_DIM_ON_TASK).setDimOnTask(dimOnTask).build();
+                OP_TYPE_SET_DIM_ON_TASK).setBooleanValue(dimOnTask).build();
         wct.addTaskFragmentOperation(fragmentToken, operation);
     }
 
@@ -382,13 +394,34 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
         if (splitAttributes == null) {
             return TaskFragmentAnimationParams.DEFAULT;
         }
-        final AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
-        if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
-            return new TaskFragmentAnimationParams.Builder()
-                    .setAnimationBackgroundColor(colorBackground.getColor())
-                    .build();
-        } else {
-            return TaskFragmentAnimationParams.DEFAULT;
+        final TaskFragmentAnimationParams.Builder builder =
+                new TaskFragmentAnimationParams.Builder();
+        final int animationBackgroundColor = getAnimationBackgroundColor(splitAttributes);
+        builder.setAnimationBackgroundColor(animationBackgroundColor);
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            final int openAnimationResId =
+                    splitAttributes.getAnimationParams().getOpenAnimationResId();
+            builder.setOpenAnimationResId(openAnimationResId);
+            final int closeAnimationResId =
+                    splitAttributes.getAnimationParams().getCloseAnimationResId();
+            builder.setCloseAnimationResId(closeAnimationResId);
+            final int changeAnimationResId =
+                    splitAttributes.getAnimationParams().getChangeAnimationResId();
+            builder.setChangeAnimationResId(changeAnimationResId);
         }
+        return builder.build();
+    }
+
+    @ColorInt
+    private static int getAnimationBackgroundColor(@NonNull SplitAttributes splitAttributes) {
+        int animationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
+        AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
+        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+            animationBackground = splitAttributes.getAnimationParams().getAnimationBackground();
+        }
+        if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
+            animationBackgroundColor = colorBackground.getColor();
+        }
+        return animationBackgroundColor;
     }
 }

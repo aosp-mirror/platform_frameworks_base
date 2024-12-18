@@ -35,7 +35,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -91,7 +91,6 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
         return (transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
                 || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
                 && displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
-                && service.getRecentsAnimationController() == null
                 && displayContent.getAsyncRotationController() == null;
     }
 

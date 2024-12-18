@@ -17,7 +17,6 @@
 package com.android.systemui.shared.rotation;
 
 import static android.content.pm.PackageManager.FEATURE_PC;
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -38,8 +37,6 @@ import android.content.IntentFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -56,6 +53,9 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -71,12 +71,14 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
 /**
  * Contains logic that deals with showing a rotate suggestion button with animation.
  */
 public class RotationButtonController {
+    public static final boolean DEBUG_ROTATION = false;
 
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
@@ -143,12 +145,14 @@ public class RotationButtonController {
     };
 
     private final IRotationWatcher.Stub mRotationWatcher = new IRotationWatcher.Stub() {
+        @WorkerThread
         @Override
         public void onRotationChanged(final int rotation) {
+            @Nullable Boolean rotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
             mMainThreadHandler.postAtFrontOfQueue(() -> {
-                onRotationWatcherChanged(rotation);
+                onRotationWatcherChanged(rotation, rotationLocked);
             });
         }
     };
@@ -201,6 +205,10 @@ public class RotationButtonController {
         return mContext;
     }
 
+    /**
+     * We should pass single threaded executor (rather than {@link ThreadPoolExecutor}) as we will
+     * make binder calls on that executor and ordering is vital.
+     */
     public void setBgExecutor(Executor bgExecutor) {
         mBgExecutor = bgExecutor;
     }
@@ -232,24 +240,21 @@ public class RotationButtonController {
         mListenersRegistered = true;
 
         mBgExecutor.execute(() -> {
+            if (registerRotationWatcher) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
+                    mRotationWatcherRegistered = true;
+                } catch (IllegalArgumentException e) {
+                    Log.w(TAG, "RegisterListeners for the display failed", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RegisterListeners caught a RemoteException", e);
+                }
+            }
             final Intent intent = mContext.registerReceiver(mDockedReceiver,
                     new IntentFilter(Intent.ACTION_DOCK_EVENT));
             mContext.getMainExecutor().execute(() -> updateDockedState(intent));
         });
-
-        if (registerRotationWatcher) {
-            try {
-                WindowManagerGlobal.getWindowManagerService()
-                        .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
-                mRotationWatcherRegistered = true;
-            } catch (IllegalArgumentException e) {
-                mListenersRegistered = false;
-                Log.w(TAG, "RegisterListeners for the display failed", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RegisterListeners caught a RemoteException", e);
-                return;
-            }
-        }
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
     }
@@ -267,44 +272,28 @@ public class RotationButtonController {
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Docked receiver already unregistered", e);
             }
-        });
 
-        if (mRotationWatcherRegistered) {
-            try {
-                WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
-                        mRotationWatcher);
-            } catch (RemoteException e) {
-                Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
-                return;
+            if (mRotationWatcherRegistered) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
+                            mRotationWatcher);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
+                }
             }
-        }
+        });
 
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
-    public void setRotationLockedAtAngle(int rotationSuggestion, String caller) {
-        final Boolean isLocked = isRotationLocked();
+    public void setRotationLockedAtAngle(
+            @Nullable Boolean isLocked, int rotationSuggestion, String caller) {
         if (isLocked == null) {
             // Ignore if we can't read the setting for the current user
             return;
         }
         RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isLocked,
                 /* rotation= */ rotationSuggestion, caller);
-    }
-
-    /**
-     * @return whether rotation is currently locked, or <code>null</code> if the setting couldn't
-     *         be read
-     */
-    public Boolean isRotationLocked() {
-        try {
-            return RotationPolicy.isRotationLocked(mContext);
-        } catch (SecurityException e) {
-            // TODO(b/279561841): RotationPolicy uses the current user to resolve the setting which
-            //                    may change before the rotation watcher can be unregistered
-            Log.e(TAG, "Failed to get isRotationLocked", e);
-            return null;
-        }
     }
 
     public void setRotateSuggestionButtonState(boolean visible) {
@@ -470,7 +459,7 @@ public class RotationButtonController {
      * Called when the rotation watcher rotation changes, either from the watcher registered
      * internally in this class, or a signal propagated from NavBarHelper.
      */
-    public void onRotationWatcherChanged(int rotation) {
+    public void onRotationWatcherChanged(int rotation, @Nullable Boolean isRotationLocked) {
         if (!mListenersRegistered) {
             // Ignore if not registered
             return;
@@ -478,17 +467,16 @@ public class RotationButtonController {
 
         // If the screen rotation changes while locked, potentially update lock to flow with
         // new screen rotation and hide any showing suggestions.
-        Boolean rotationLocked = isRotationLocked();
-        if (rotationLocked == null) {
+        if (isRotationLocked == null) {
             // Ignore if we can't read the setting for the current user
             return;
         }
         // The isVisible check makes the rotation button disappear when we are not locked
         // (e.g. for tabletop auto-rotate).
-        if (rotationLocked || mRotationButton.isVisible()) {
+        if (isRotationLocked || mRotationButton.isVisible()) {
             // Do not allow a change in rotation to set user rotation when docked.
-            if (shouldOverrideUserLockPrefs(rotation) && rotationLocked && !mDocked) {
-                setRotationLockedAtAngle(rotation, /* caller= */
+            if (shouldOverrideUserLockPrefs(rotation) && isRotationLocked && !mDocked) {
+                setRotationLockedAtAngle(true, rotation, /* caller= */
                         "RotationButtonController#onRotationWatcherChanged");
             }
             setRotateSuggestionButtonState(false /* visible */, true /* forced */);
@@ -593,7 +581,8 @@ public class RotationButtonController {
     private void onRotateSuggestionClick(View v) {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
-        setRotationLockedAtAngle(mLastRotationSuggestion,
+        setRotationLockedAtAngle(
+                RotationPolicyUtil.isRotationLocked(mContext), mLastRotationSuggestion,
                 /* caller= */ "RotationButtonController#onRotateSuggestionClick");
         Log.i(TAG, "onRotateSuggestionClick() mLastRotationSuggestion=" + mLastRotationSuggestion);
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);

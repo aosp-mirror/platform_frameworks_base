@@ -22,12 +22,13 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils.LAUNCH_SOURCE_KEYGUARD
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -38,13 +39,12 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 object KeyguardSettingsViewBinder {
     fun bind(
         view: View,
         viewModel: KeyguardSettingsMenuViewModel,
-        longPressViewModel: KeyguardLongPressViewModel,
+        touchHandlingViewModel: KeyguardTouchHandlingViewModel,
         rootViewModel: KeyguardRootViewModel?,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
@@ -52,7 +52,7 @@ object KeyguardSettingsViewBinder {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
+                    launch("$TAG#viewModel.isVisible") {
                         viewModel.isVisible.distinctUntilChanged().collect { isVisible ->
                             view.animateVisibility(visible = isVisible)
                             if (isVisible) {
@@ -78,7 +78,7 @@ object KeyguardSettingsViewBinder {
                     // shows up in the Wallpaper Picker app. If we do that, then the
                     // settings menu should never be visible.
                     if (activityStarter != null) {
-                        launch {
+                        launch("$TAG#viewModel.shouldOpenSettings") {
                             viewModel.shouldOpenSettings
                                 .filter { it }
                                 .collect {
@@ -91,13 +91,13 @@ object KeyguardSettingsViewBinder {
                         }
                     }
 
-                    launch {
+                    launch("$TAG#rootViewModel?.lastRootViewTapPosition") {
                         rootViewModel?.lastRootViewTapPosition?.filterNotNull()?.collect { point ->
                             if (view.isVisible) {
                                 val hitRect = Rect()
                                 view.getHitRect(hitRect)
                                 if (!hitRect.contains(point.x, point.y)) {
-                                    longPressViewModel.onTouchedOutside()
+                                    touchHandlingViewModel.onTouchedOutside()
                                 }
                             }
                         }
@@ -136,4 +136,6 @@ object KeyguardSettingsViewBinder {
             }
             .start()
     }
+
+    private const val TAG = "KeyguardSettingsViewBinder"
 }

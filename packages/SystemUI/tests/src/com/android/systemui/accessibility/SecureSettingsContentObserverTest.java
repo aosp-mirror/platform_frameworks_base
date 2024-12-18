@@ -21,12 +21,13 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /** Test for {@link SecureSettingsContentObserver}. */
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SecureSettingsContentObserverTest extends SysuiTestCase {
 
@@ -72,7 +73,7 @@ public class SecureSettingsContentObserverTest extends SysuiTestCase {
 
         protected FakeSecureSettingsContentObserver(Context context, UserTracker userTracker,
                 String secureSettingsKey) {
-            super(context, userTracker, secureSettingsKey);
+            super(context, userTracker, Mockito.mock(SecureSettings.class), secureSettingsKey);
         }
 
         @Override

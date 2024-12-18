@@ -427,6 +427,12 @@ public class PowerExemptionManager {
      */
     public static final int REASON_PACKAGE_UNARCHIVE = 328;
 
+    /**
+     * Tile onClick event
+     * @hide
+     */
+    public static final int REASON_TILE_ONCLICK = 329;
+
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
 
@@ -504,13 +510,15 @@ public class PowerExemptionManager {
             REASON_ROLE_EMERGENCY,
             REASON_SYSTEM_MODULE,
             REASON_CARRIER_PRIVILEGED_APP,
-            REASON_OPT_OUT_REQUESTED,
             REASON_DPO_PROTECTED_APP,
             REASON_DISALLOW_APPS_CONTROL,
             REASON_ACTIVE_DEVICE_ADMIN,
             REASON_MEDIA_NOTIFICATION_TRANSFER,
             REASON_PACKAGE_INSTALLER,
+            REASON_SYSTEM_EXEMPT_APP_OP,
             REASON_PACKAGE_UNARCHIVE,
+            REASON_TILE_ONCLICK,
+            REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}

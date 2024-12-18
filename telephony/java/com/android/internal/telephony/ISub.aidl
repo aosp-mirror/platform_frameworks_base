@@ -309,6 +309,18 @@ interface ISub {
      */
     int setUsageSetting(int usageSetting, int subId, String callingPackage);
 
+    /**
+      * Set owner for this subscription.
+      *
+      * @param subId the unique SubscriptionInfo index in database
+      * @param groupOwner The group owner to assign to the subscription
+      *
+      * @throws SecurityException if caller is not authorized.
+      *
+      * @hide
+      */
+     void setGroupOwner(int subId, String groupOwner);
+
      /**
       * Set userHandle for this subscription.
       *

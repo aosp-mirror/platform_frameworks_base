@@ -18,10 +18,9 @@ package com.android.systemui.keyguard.ui.binder
 import com.android.keyguard.ViewMediatorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.log.core.LogLevel
@@ -40,11 +39,10 @@ constructor(
     private val viewMediatorCallback: ViewMediatorCallback,
     @Application private val scope: CoroutineScope,
     private val keyguardLogger: KeyguardLogger,
-    private val featureFlags: FeatureFlagsClassic,
 ) : CoreStartable {
 
     override fun start() {
-        if (!featureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (!ComposeBouncerFlags.isEnabled) {
             return
         }
 

@@ -28,8 +28,19 @@ using namespace std::literals;
 namespace aapt {
 
 static constexpr ApiVersion sDevelopmentSdkLevel = 10000;
+
+// clang-format off
 static constexpr StringPiece sDevelopmentSdkCodeNames[] = {
-    "Q"sv, "R"sv, "S"sv, "Sv2"sv, "Tiramisu"sv, "UpsideDownCake"sv, "VanillaIceCream"sv};
+    "Q"sv,
+    "R"sv,
+    "S"sv,
+    "Sv2"sv,
+    "Tiramisu"sv,
+    "UpsideDownCake"sv,
+    "VanillaIceCream"sv,
+    "Baklava"sv,
+};
+// clang-format on
 
 static constexpr auto sPrivacySandboxSuffix = "PrivacySandbox"sv;
 
@@ -64,6 +75,12 @@ static constexpr std::pair<uint16_t, ApiVersion> sAttrIdMap[] = {
     {0x0616, SDK_R},
     {0x064b, SDK_S},
     {0x064c, SDK_S_V2},
+    // TODO(zyy): add these when we need more rules for converting new attributes to the
+    // older ones, but don't bother for now as this would increase the array size for no
+    // real benefit
+    //    {0x0672, SDK_TIRAMISU},
+    //    {0x0687, SDK_UPSIDE_DOWN_CAKE},
+    //    {0x06a3, SDK_VANILLA_ICE_CREAM},
 };
 
 static_assert(std::is_sorted(std::begin(sAttrIdMap), std::end(sAttrIdMap),
