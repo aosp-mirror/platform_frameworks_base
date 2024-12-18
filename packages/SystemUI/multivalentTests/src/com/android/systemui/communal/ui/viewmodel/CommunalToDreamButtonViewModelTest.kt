@@ -21,8 +21,10 @@ import android.provider.Settings
 import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.collectLastValue
@@ -50,6 +52,7 @@ import org.mockito.kotlin.whenever
 class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val uiEventLoggerFake = kosmos.uiEventLoggerFake
     private val underTest: CommunalToDreamButtonViewModel by lazy {
         kosmos.communalToDreamButtonViewModel
     }
@@ -117,6 +120,18 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
                 runCurrent()
 
                 verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt())
+            }
+        }
+
+    @Test
+    fun onShowDreamButtonTap_eventLogged() =
+        with(kosmos) {
+            runTest {
+                underTest.onShowDreamButtonTap()
+                runCurrent()
+
+                assertThat(uiEventLoggerFake[0].eventId)
+                    .isEqualTo(CommunalUiEvent.COMMUNAL_HUB_SHOW_DREAM_BUTTON_TAP.id)
             }
         }
 }
