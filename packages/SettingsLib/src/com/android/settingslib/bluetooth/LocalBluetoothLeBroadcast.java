@@ -56,6 +56,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
+import com.android.settingslib.flags.Flags;
 
 import com.google.common.collect.ImmutableList;
 
@@ -1126,6 +1127,10 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     /** Update fallback active device if needed. */
     public void updateFallbackActiveDeviceIfNeeded() {
+        if (Flags.disableAudioSharingAutoPickFallbackInUi()) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded, disable flag is on");
+            return;
+        }
         if (isWorkProfile(mContext)) {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded for work profile.");
             return;
