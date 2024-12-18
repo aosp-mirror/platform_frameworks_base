@@ -1237,6 +1237,13 @@ flag {
 }
 
 flag {
+    name: "glanceable_hub_back_action"
+    namespace: "systemui"
+    description: "Support back action from glanceable hub"
+    bug: "382771533"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
