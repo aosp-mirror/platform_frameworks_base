@@ -347,7 +347,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
                         canShowWhileLocked = canShowWhileLocked,
                     )
                 } else {
-                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 }
 
             underTest.onQuickAffordanceTriggered(
