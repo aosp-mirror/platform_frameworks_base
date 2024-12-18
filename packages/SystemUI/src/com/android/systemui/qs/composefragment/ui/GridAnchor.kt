@@ -19,7 +19,7 @@ package com.android.systemui.qs.composefragment.ui
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.qs.shared.ui.ElementKeys
 
 /**
@@ -27,7 +27,7 @@ import com.android.systemui.qs.shared.ui.ElementKeys
  * able to have relative anchor translation of elements that appear in QS.
  */
 @Composable
-fun SceneScope.GridAnchor(modifier: Modifier = Modifier) {
+fun ContentScope.GridAnchor(modifier: Modifier = Modifier) {
     // The size of this anchor does not matter, as the tiles don't change size on expansion.
     Spacer(modifier.element(ElementKeys.GridAnchor))
 }
