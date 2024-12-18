@@ -503,6 +503,31 @@ public class Notifier {
         }
     }
 
+    @VisibleForTesting
+    int getWakelockMonitorTypeForLogging(int flags) {
+        switch (flags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
+            case PowerManager.FULL_WAKE_LOCK, PowerManager.SCREEN_DIM_WAKE_LOCK,
+                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
+                return PowerManager.FULL_WAKE_LOCK;
+            case PowerManager.DRAW_WAKE_LOCK:
+                return PowerManager.DRAW_WAKE_LOCK;
+            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                if (mSuspendWhenScreenOffDueToProximityConfig) {
+                    return -1;
+                }
+                return PowerManager.PARTIAL_WAKE_LOCK;
+            case PowerManager.PARTIAL_WAKE_LOCK:
+                return PowerManager.PARTIAL_WAKE_LOCK;
+            case PowerManager.DOZE_WAKE_LOCK:
+                // Doze wake locks are an internal implementation detail of the
+                // communication between dream manager service and power manager
+                // service.  They have no additive battery impact.
+                return -1;
+            default:
+                return -1;
+        }
+    }
+
     /**
      * Notifies that the device is changing wakefulness.
      * This function may be called even if the previous change hasn't finished in
@@ -1288,7 +1313,7 @@ public class Notifier {
         if (mBatteryStatsInternal == null) {
             return;
         }
-        final int type = flags & PowerManager.WAKE_LOCK_LEVEL_MASK;
+        final int type = getWakelockMonitorTypeForLogging(flags);
         if (workSource == null || workSource.isEmpty()) {
             final int mappedUid = mBatteryStatsInternal.getOwnerUid(ownerUid);
             mFrameworkStatsLogger.wakelockStateChanged(mappedUid, tag, type, eventType);
