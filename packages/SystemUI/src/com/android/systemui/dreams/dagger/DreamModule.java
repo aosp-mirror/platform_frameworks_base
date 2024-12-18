@@ -26,6 +26,7 @@ import android.content.res.Resources;
 
 import com.android.dream.lowlight.dagger.LowLightDreamComponent;
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.Flags;
 import com.android.systemui.ambient.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
@@ -48,6 +49,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
@@ -84,6 +86,8 @@ public interface DreamModule {
     String HOME_CONTROL_PANEL_DREAM_COMPONENT = "home_control_panel_dream_component";
     String DREAM_TILE_SPEC = "dream";
     String LOW_LIGHT_DREAM_SERVICE = "low_light_dream_component";
+
+    String LOW_LIGHT_CLOCK_DREAM = "low_light_clock_dream";
 
     /**
      * Provides the dream component
@@ -227,12 +231,24 @@ public interface DreamModule {
     }
 
     /**
+     * Binds a default (unset) clock dream.
+     */
+    @BindsOptionalOf
+    @Named(LOW_LIGHT_CLOCK_DREAM)
+    ComponentName bindsLowLightClockDream();
+
+    /**
      * Provides the component name of the low light dream, or null if not configured.
      */
     @Provides
     @Nullable
     @Named(LOW_LIGHT_DREAM_SERVICE)
-    static ComponentName providesLowLightDreamService(Context context) {
+    static ComponentName providesLowLightDreamService(Context context,
+            @Named(LOW_LIGHT_CLOCK_DREAM) Optional<ComponentName> clockDream) {
+        if (Flags.lowLightClockDream() && clockDream.isPresent()) {
+            return clockDream.get();
+        }
+
         String lowLightDreamComponent = context.getResources().getString(
                 R.string.config_lowLightDreamComponent
         );
