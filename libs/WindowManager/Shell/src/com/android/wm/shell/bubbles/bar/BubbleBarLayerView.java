@@ -424,6 +424,13 @@ public class BubbleBarLayerView extends FrameLayout
         }
     }
 
+    /** Handles IME position changes. */
+    public void onImeTopChanged(int imeTop) {
+        if (mIsExpanded) {
+            mAnimationHelper.onImeTopChanged(imeTop);
+        }
+    }
+
     /**
      * Log the event only if {@link #mExpandedBubble} is a {@link Bubble}.
      * <p>

@@ -2564,6 +2564,16 @@ public class BubbleController implements ConfigurationChangeListener,
 
             return IME_ANIMATION_DEFAULT;
         }
+
+        @Override
+        public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
+            if (mContext.getDisplayId() != displayId) {
+                return;
+            }
+            if (mLayerView != null) {
+                mLayerView.onImeTopChanged(imeTop);
+            }
+        }
     }
 
     /**
