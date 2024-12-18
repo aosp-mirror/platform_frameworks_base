@@ -17,45 +17,28 @@
 package com.android.systemui.volume.dialog.settings.ui.binder
 
 import android.view.View
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.setSnapshotBinding
-import com.android.systemui.lifecycle.viewModel
+import android.widget.ImageButton
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.settings.ui.viewmodel.VolumeDialogSettingsButtonViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @VolumeDialogScope
 class VolumeDialogSettingsButtonViewBinder
 @Inject
-constructor(private val viewModelFactory: VolumeDialogSettingsButtonViewModel.Factory) {
+constructor(private val viewModel: VolumeDialogSettingsButtonViewModel) {
 
-    fun bind(view: View) {
-        with(view) {
-            val button = requireViewById<View>(R.id.volume_dialog_settings)
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelFactory.create() },
-                ) { viewModel ->
-                    setSnapshotBinding {
-                        viewModel.isVisible
-                            .onEach { isVisible ->
-                                visibility = if (isVisible) View.VISIBLE else View.GONE
-                            }
-                            .launchIn(this)
+    fun CoroutineScope.bind(view: View) {
+        val button = view.requireViewById<ImageButton>(R.id.volume_dialog_settings)
+        viewModel.isVisible
+            .onEach { isVisible -> button.visibility = if (isVisible) View.VISIBLE else View.GONE }
+            .launchIn(this)
 
-                        button.setOnClickListener { viewModel.onButtonClicked() }
-                    }
+        viewModel.icon.onEach { button.setImageDrawable(it) }.launchIn(this)
 
-                    awaitCancellation()
-                }
-            }
-        }
+        button.setOnClickListener { viewModel.onButtonClicked() }
     }
 }

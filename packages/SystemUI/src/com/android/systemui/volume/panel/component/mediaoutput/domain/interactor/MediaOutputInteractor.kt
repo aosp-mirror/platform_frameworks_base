@@ -24,12 +24,13 @@ import androidx.annotation.WorkerThread
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSessions
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
-import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.shared.model.Result
 import com.android.systemui.volume.panel.shared.model.filterData
 import com.android.systemui.volume.panel.shared.model.wrapInResult
@@ -54,13 +55,13 @@ import kotlinx.coroutines.withContext
 
 /** Provides observable models about the current media session state. */
 @OptIn(ExperimentalCoroutinesApi::class)
-@VolumePanelScope
+@SysUISingleton
 class MediaOutputInteractor
 @Inject
 constructor(
     private val localMediaRepositoryFactory: LocalMediaRepositoryFactory,
     private val packageManager: PackageManager,
-    @VolumePanelScope private val coroutineScope: CoroutineScope,
+    @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
     mediaControllerRepository: MediaControllerRepository,
     private val mediaControllerInteractor: MediaControllerInteractor,
@@ -77,7 +78,7 @@ constructor(
                     .onStart { emit(activeSessions) }
             }
             .map { getMediaControllers(it) }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, MediaControllers(null, null))
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), MediaControllers(null, null))
 
     /** [MediaDeviceSessions] that contains currently active sessions. */
     val activeMediaDeviceSessions: Flow<MediaDeviceSessions> =
@@ -89,7 +90,11 @@ constructor(
                 )
             }
             .flowOn(backgroundCoroutineContext)
-            .stateIn(coroutineScope, SharingStarted.Eagerly, MediaDeviceSessions(null, null))
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                MediaDeviceSessions(null, null),
+            )
 
     /** Returns the default [MediaDeviceSession] from [activeMediaDeviceSessions] */
     val defaultActiveMediaSession: StateFlow<Result<MediaDeviceSession?>> =
@@ -104,7 +109,7 @@ constructor(
             }
             .wrapInResult()
             .flowOn(backgroundCoroutineContext)
-            .stateIn(coroutineScope, SharingStarted.Eagerly, Result.Loading())
+            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), Result.Loading())
 
     private val localMediaRepository: Flow<LocalMediaRepository> =
         defaultActiveMediaSession
