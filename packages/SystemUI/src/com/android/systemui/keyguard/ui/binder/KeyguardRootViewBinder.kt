@@ -127,21 +127,18 @@ object KeyguardRootViewBinder {
                     if (Flags.nonTouchscreenDevicesBypassFalsing()) {
                         if (
                             event.action == MotionEvent.ACTION_DOWN &&
-                            event.buttonState == MotionEvent.BUTTON_PRIMARY &&
-                            !event.isTouchscreenSource()
+                                event.buttonState == MotionEvent.BUTTON_PRIMARY &&
+                                !event.isTouchscreenSource()
                         ) {
                             consumed = true
                         } else if (
-                            event.action == MotionEvent.ACTION_UP &&
-                            !event.isTouchscreenSource()
+                            event.action == MotionEvent.ACTION_UP && !event.isTouchscreenSource()
                         ) {
                             statusBarKeyguardViewManager?.showBouncer(true)
                             consumed = true
                         }
                     }
-                    viewModel.setRootViewLastTapPosition(
-                        Point(event.x.toInt(), event.y.toInt())
-                    )
+                    viewModel.setRootViewLastTapPosition(Point(event.x.toInt(), event.y.toInt()))
                 }
                 consumed
             }
@@ -172,7 +169,6 @@ object KeyguardRootViewBinder {
                     launch("$TAG#alpha") {
                         viewModel.alpha(viewState).collect { alpha ->
                             view.alpha = alpha
-                            childViews[statusViewId]?.alpha = alpha
                             childViews[burnInLayerId]?.alpha = alpha
                         }
                     }
@@ -249,18 +245,6 @@ object KeyguardRootViewBinder {
                     launch {
                         viewModel.burnInLayerVisibility.collect { visibility ->
                             childViews[burnInLayerId]?.visibility = visibility
-                        }
-                    }
-
-                    launch {
-                        viewModel.burnInLayerAlpha.collect { alpha ->
-                            childViews[statusViewId]?.alpha = alpha
-                        }
-                    }
-
-                    launch {
-                        viewModel.lockscreenStateAlpha(viewState).collect { alpha ->
-                            childViews[statusViewId]?.alpha = alpha
                         }
                     }
 
@@ -553,7 +537,6 @@ object KeyguardRootViewBinder {
         return device?.supportsSource(InputDevice.SOURCE_TOUCHSCREEN) == true
     }
 
-    private val statusViewId = R.id.keyguard_status_view
     private val burnInLayerId = R.id.burn_in_layer
     private val aodNotificationIconContainerId = R.id.aod_notification_icon_container
     private val largeClockId = customR.id.lockscreen_clock_view_large
