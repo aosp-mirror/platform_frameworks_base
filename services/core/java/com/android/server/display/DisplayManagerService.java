@@ -2400,6 +2400,10 @@ public final class DisplayManagerService extends SystemService {
         sendDisplayEventIfEnabledLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED);
 
         applyDisplayChangedLocked(display);
+
+        if (mDisplayTopologyCoordinator != null) {
+            mDisplayTopologyCoordinator.onDisplayChanged(display.getDisplayInfoLocked());
+        }
     }
 
     private void applyDisplayChangedLocked(@NonNull LogicalDisplay display) {

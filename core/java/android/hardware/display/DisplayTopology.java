@@ -129,14 +129,38 @@ public final class DisplayTopology implements Parcelable {
     }
 
     /**
+     * Update the size of a display and normalize the topology.
+     * @param displayId The logical display ID
+     * @param width The new width
+     * @param height The new height
+     * @return True if the topology has changed.
+     */
+    public boolean updateDisplay(int displayId, float width, float height) {
+        TreeNode display = findDisplay(displayId, mRoot);
+        if (display == null) {
+            return false;
+        }
+        if (floatEquals(display.mWidth, width) && floatEquals(display.mHeight, height)) {
+            return false;
+        }
+        display.mWidth = width;
+        display.mHeight = height;
+        normalize();
+        Slog.i(TAG, "Display with ID " + displayId + " updated, new width: " + width
+                + ", new height: " + height);
+        return true;
+    }
+
+    /**
      * Remove a display from the topology.
      * The default topology is created from the remaining displays, as if they were reconnected
      * one by one.
      * @param displayId The logical display ID
+     * @return True if the display was present in the topology and removed.
      */
-    public void removeDisplay(int displayId) {
+    public boolean removeDisplay(int displayId) {
         if (findDisplay(displayId, mRoot) == null) {
-            return;
+            return false;
         }
         Queue<TreeNode> queue = new ArrayDeque<>();
         queue.add(mRoot);
@@ -159,6 +183,7 @@ public final class DisplayTopology implements Parcelable {
         } else {
             Slog.i(TAG, "Display with ID " + displayId + " removed");
         }
+        return true;
     }
 
     /**
@@ -685,12 +710,12 @@ public final class DisplayTopology implements Parcelable {
         /**
          * The width of the display in density-independent pixels (dp).
          */
-        private final float mWidth;
+        private float mWidth;
 
         /**
          * The height of the display in density-independent pixels (dp).
          */
-        private final float mHeight;
+        private float mHeight;
 
         /**
          * The position of this display relative to its parent.
