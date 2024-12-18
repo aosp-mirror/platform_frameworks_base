@@ -122,34 +122,26 @@ public class PipScheduler {
      * Schedules exit PiP via expand transition.
      */
     public void scheduleExitPipViaExpand() {
-        WindowContainerTransaction wct = getExitPipViaExpandTransaction();
-        if (wct != null) {
-            mMainExecutor.execute(() -> {
+        mMainExecutor.execute(() -> {
+            if (!mPipTransitionState.isInPip()) return;
+            WindowContainerTransaction wct = getExitPipViaExpandTransaction();
+            if (wct != null) {
                 mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct,
                         null /* destinationBounds */);
-            });
-        }
-    }
-
-    // TODO: Optimize this by running the animation as part of the transition
-    /** Runs remove PiP animation and schedules remove PiP transition after the animation ends. */
-    public void removePipAfterAnimation() {
-        SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        PipAlphaAnimator animator = mPipAlphaAnimatorSupplier.get(mContext,
-                mPipTransitionState.getPinnedTaskLeash(), tx, PipAlphaAnimator.FADE_OUT);
-        animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
-        animator.start();
+            }
+        });
     }
 
     /** Schedules remove PiP transition. */
-    private void scheduleRemovePipImmediately() {
-        WindowContainerTransaction wct = getRemovePipTransaction();
-        if (wct != null) {
-            mMainExecutor.execute(() -> {
+    public void scheduleRemovePip() {
+        mMainExecutor.execute(() -> {
+            if (!mPipTransitionState.isInPip()) return;
+            WindowContainerTransaction wct = getRemovePipTransaction();
+            if (wct != null) {
                 mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
                         null /* destinationBounds */);
-            });
-        }
+            }
+        });
     }
 
     /**
