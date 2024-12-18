@@ -17,6 +17,7 @@
 package com.android.server.location.contexthub;
 
 import android.chre.flags.Flags;
+import android.hardware.contexthub.IEndpointCommunication;
 import android.hardware.contexthub.Message;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
@@ -402,12 +403,14 @@ import java.util.concurrent.atomic.AtomicInteger;
     /**
      * Creates a transaction to send a message through a session.
      *
+     * @param hubInterface Interface for interacting with other endpoint hubs.
      * @param sessionId The ID of the endpoint session the message should be sent through.
      * @param message The message to send.
      * @param transactionCallback The callback of the transactions.
      * @return The generated transaction.
      */
     /* package */ ContextHubServiceTransaction createSessionMessageTransaction(
+            IEndpointCommunication hubInterface,
             int sessionId,
             Message message,
             String packageName,
@@ -422,7 +425,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             /* package */ int onTransact() {
                 try {
                     message.sequenceNumber = getMessageSequenceNumber();
-                    mContextHubProxy.sendMessageToEndpoint(sessionId, message);
+                    hubInterface.sendMessageToEndpoint(sessionId, message);
                     return ContextHubTransaction.RESULT_SUCCESS;
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while trying to send a session message", e);
