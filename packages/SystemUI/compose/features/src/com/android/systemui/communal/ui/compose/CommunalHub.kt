@@ -931,7 +931,9 @@ private fun BoxScope.CommunalHubLazyGrid(
                         Modifier.requiredSize(dpSize)
                             .thenIf(!isItemDragging) {
                                 Modifier.animateItem(
-                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    // See b/376495198 - not supported with AndroidView
+                                    fadeOutSpec = null,
                                 )
                             }
                             .thenIf(isItemDragging) { Modifier.zIndex(1f) },
@@ -980,11 +982,14 @@ private fun BoxScope.CommunalHubLazyGrid(
                     size = size,
                     selected = false,
                     modifier =
-                        Modifier.requiredSize(dpSize).animateItem().thenIf(
-                            communalResponsiveGrid()
-                        ) {
-                            Modifier.graphicsLayer { alpha = itemAlpha?.value ?: 1f }
-                        },
+                        Modifier.requiredSize(dpSize)
+                            .animateItem(
+                                // See b/376495198 - not supported with AndroidView
+                                fadeOutSpec = null
+                            )
+                            .thenIf(communalResponsiveGrid()) {
+                                Modifier.graphicsLayer { alpha = itemAlpha?.value ?: 1f }
+                            },
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
