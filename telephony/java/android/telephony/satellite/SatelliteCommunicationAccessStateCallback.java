@@ -25,24 +25,24 @@ import com.android.internal.telephony.flags.Flags;
 
 
 /**
- * A callback class for monitoring satellite communication allowed state changed events.
+ * A callback class for monitoring satellite communication access state changed events.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
-public interface SatelliteCommunicationAllowedStateCallback {
+public interface SatelliteCommunicationAccessStateCallback {
 
     /**
      * Telephony does not guarantee that whenever there is a change in communication allowed state,
      * this API will be called. Telephony does its best to detect the changes and notify its
-     * listeners accordingly. Satellite communication is allowed at a location when it is legally
-     * allowed by the local authority and satellite signal coverage is available.
+     * listeners accordingly. Satellite communication access is allowed at a location when it is
+     * legally allowed by the local authority and satellite signal coverage is available.
      *
      * @param isAllowed {@code true} means satellite is allowed,
      *                  {@code false} satellite is not allowed.
      */
-    void onSatelliteCommunicationAllowedStateChanged(boolean isAllowed);
+    void onAccessAllowedStateChanged(boolean isAllowed);
 
     /**
      * Callback method invoked when the satellite access configuration changes
@@ -52,6 +52,6 @@ public interface SatelliteCommunicationAllowedStateCallback {
      *                                       the current location,
      *                                       {@code satelliteRegionalConfiguration} will be null.
      */
-    default void onSatelliteAccessConfigurationChanged(
+    default void onAccessConfigurationChanged(
             @Nullable SatelliteAccessConfiguration satelliteAccessConfiguration) {};
 }

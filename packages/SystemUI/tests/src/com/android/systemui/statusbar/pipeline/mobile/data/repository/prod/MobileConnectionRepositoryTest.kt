@@ -37,7 +37,7 @@ import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
-import android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
+import android.telephony.TelephonyCallback.CarrierRoamingNtnListener
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
@@ -1311,7 +1311,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             // Starts out false
             assertThat(latest).isFalse()
 
-            val callback = getTelephonyCallbackForType<CarrierRoamingNtnModeListener>()
+            val callback = getTelephonyCallbackForType<CarrierRoamingNtnListener>()
 
             callback.onCarrierRoamingNtnModeChanged(true)
             assertThat(latest).isTrue()

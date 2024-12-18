@@ -19,18 +19,18 @@ package android.telephony.satellite;
 import android.telephony.satellite.SatelliteAccessConfiguration;
 
 /**
- * Interface for satellite communication allowed state callback.
+ * Interface for satellite communication access state callback.
  * @hide
  */
-oneway interface ISatelliteCommunicationAllowedStateCallback {
+oneway interface ISatelliteCommunicationAccessStateCallback {
     /**
      * Telephony does not guarantee that whenever there is a change in communication allowed
      * state, this API will be called. Telephony does its best to detect the changes and notify
-     * its listners accordingly.
+     * its listeners accordingly.
      *
      * @param allowed whether satellite communication state or not
      */
-    void onSatelliteCommunicationAllowedStateChanged(in boolean isAllowed);
+    void onAccessAllowedStateChanged(in boolean isAllowed);
 
     /**
      * Callback method invoked when the satellite access configuration changes
@@ -39,6 +39,6 @@ oneway interface ISatelliteCommunicationAllowedStateCallback {
      * When satellite is not allowed at the current location,
      * {@code satelliteRegionalConfiguration} will be null.
      */
-    void onSatelliteAccessConfigurationChanged(in SatelliteAccessConfiguration
+    void onAccessConfigurationChanged(in SatelliteAccessConfiguration
         satelliteAccessConfiguration);
 }

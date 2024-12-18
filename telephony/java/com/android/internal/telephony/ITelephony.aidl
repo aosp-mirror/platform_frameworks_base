@@ -69,7 +69,7 @@ import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
-import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
+import android.telephony.satellite.ISatelliteCommunicationAccessStateCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
 import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
@@ -3446,20 +3446,20 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForCommunicationAllowedStateChanged(int subId,
-            in ISatelliteCommunicationAllowedStateCallback callback);
+    int registerForCommunicationAccessStateChanged(int subId,
+            in ISatelliteCommunicationAccessStateCallback callback);
 
     /**
      * Unregisters for satellite communication allowed state.
      * If callback was not registered before, the request will be ignored.
      *
      * @param subId The subId of the subscription to unregister for supported state changed.
-     * @param callback The callback that was passed to registerForCommunicationAllowedStateChanged.
+     * @param callback The callback that was passed to registerForCommunicationAccessStateChanged.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void unregisterForCommunicationAllowedStateChanged(int subId,
-            in ISatelliteCommunicationAllowedStateCallback callback);
+    void unregisterForCommunicationAccessStateChanged(int subId,
+            in ISatelliteCommunicationAccessStateCallback callback);
 
     /**
      * This API can be used by only CTS to override the boolean configs used by the

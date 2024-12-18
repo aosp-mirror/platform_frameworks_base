@@ -15956,7 +15956,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public default void onCallStatesChanged(@NonNull java.util.List<android.telephony.CallState>);
   }
 
-  @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static interface TelephonyCallback.CarrierRoamingNtnModeListener {
+  @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public static interface TelephonyCallback.CarrierRoamingNtnListener {
     method public default void onCarrierRoamingNtnAvailableServicesChanged(@NonNull int[]);
     method public default void onCarrierRoamingNtnEligibleStateChanged(boolean);
     method public void onCarrierRoamingNtnModeChanged(boolean);
@@ -18634,9 +18634,9 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public void onSatelliteCapabilitiesChanged(@NonNull android.telephony.satellite.SatelliteCapabilities);
   }
 
-  @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public interface SatelliteCommunicationAllowedStateCallback {
-    method public default void onSatelliteAccessConfigurationChanged(@Nullable android.telephony.satellite.SatelliteAccessConfiguration);
-    method public void onSatelliteCommunicationAllowedStateChanged(boolean);
+  @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public interface SatelliteCommunicationAccessStateCallback {
+    method public void onAccessAllowedStateChanged(boolean);
+    method public default void onAccessConfigurationChanged(@Nullable android.telephony.satellite.SatelliteAccessConfiguration);
   }
 
   @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") public final class SatelliteDatagram implements android.os.Parcelable {
@@ -18675,7 +18675,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void provisionSatellite(@NonNull java.util.List<android.telephony.satellite.SatelliteSubscriberInfo>, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Boolean,android.telephony.satellite.SatelliteManager.SatelliteException>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void provisionService(@NonNull String, @NonNull byte[], @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForCapabilitiesChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteCapabilitiesCallback);
-    method @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForCommunicationAllowedStateChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteCommunicationAllowedStateCallback);
+    method @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForCommunicationAccessStateChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteCommunicationAccessStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForIncomingDatagram(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteDatagramCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public int registerForModemStateChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.SatelliteModemStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void registerForNtnSignalStrengthChanged(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.satellite.NtnSignalStrengthCallback);
@@ -18704,7 +18704,7 @@ package android.telephony.satellite {
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void startTransmissionUpdates(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>, @NonNull android.telephony.satellite.SatelliteTransmissionUpdateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void stopTransmissionUpdates(@NonNull android.telephony.satellite.SatelliteTransmissionUpdateCallback, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForCapabilitiesChanged(@NonNull android.telephony.satellite.SatelliteCapabilitiesCallback);
-    method @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForCommunicationAllowedStateChanged(@NonNull android.telephony.satellite.SatelliteCommunicationAllowedStateCallback);
+    method @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForCommunicationAccessStateChanged(@NonNull android.telephony.satellite.SatelliteCommunicationAccessStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForIncomingDatagram(@NonNull android.telephony.satellite.SatelliteDatagramCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForModemStateChanged(@NonNull android.telephony.satellite.SatelliteModemStateCallback);
     method @FlaggedApi("com.android.internal.telephony.flags.oem_enabled_satellite_flag") @RequiresPermission(android.Manifest.permission.SATELLITE_COMMUNICATION) public void unregisterForNtnSignalStrengthChanged(@NonNull android.telephony.satellite.NtnSignalStrengthCallback);
@@ -18833,9 +18833,9 @@ package android.telephony.satellite {
     method public int describeContents();
     method public int getCarrierId();
     method @NonNull public String getNiddApn();
-    method public int getSubId();
     method @NonNull public String getSubscriberId();
     method public int getSubscriberIdType();
+    method public int getSubscriptionId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.satellite.SatelliteSubscriberInfo> CREATOR;
     field public static final int SUBSCRIBER_ID_TYPE_ICCID = 0; // 0x0
@@ -18847,9 +18847,9 @@ package android.telephony.satellite {
     method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo build();
     method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setCarrierId(int);
     method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setNiddApn(@NonNull String);
-    method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setSubId(int);
     method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setSubscriberId(@NonNull String);
     method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setSubscriberIdType(int);
+    method @NonNull public android.telephony.satellite.SatelliteSubscriberInfo.Builder setSubscriptionId(int);
   }
 
   @FlaggedApi("com.android.internal.telephony.flags.satellite_system_apis") public final class SatelliteSubscriberProvisionStatus implements android.os.Parcelable {
