@@ -17,7 +17,7 @@
 package android.app.jank.tests;
 
 import android.app.jank.AppJankStats;
-import android.app.jank.FrameOverrunHistogram;
+import android.app.jank.RelativeFrameTimeHistogram;
 
 public class JankUtils {
     private static final int APP_ID = 25;
@@ -29,8 +29,8 @@ public class JankUtils {
         AppJankStats jankStats = new AppJankStats(
                 /*App Uid*/APP_ID,
                 /*Widget Id*/"test widget id",
-                /*Widget Category*/AppJankStats.SCROLL,
-                /*Widget State*/AppJankStats.SCROLLING,
+                /*Widget Category*/AppJankStats.WIDGET_CATEGORY_SCROLL,
+                /*Widget State*/AppJankStats.WIDGET_STATE_SCROLLING,
                 /*Total Frames*/100,
                 /*Janky Frames*/25,
                 getOverrunHistogram()
@@ -41,12 +41,12 @@ public class JankUtils {
     /**
      * Returns a mock histogram to be used with an AppJankStats object.
      */
-    public static FrameOverrunHistogram getOverrunHistogram() {
-        FrameOverrunHistogram overrunHistogram = new FrameOverrunHistogram();
-        overrunHistogram.addFrameOverrunMillis(-2);
-        overrunHistogram.addFrameOverrunMillis(1);
-        overrunHistogram.addFrameOverrunMillis(5);
-        overrunHistogram.addFrameOverrunMillis(25);
+    public static RelativeFrameTimeHistogram getOverrunHistogram() {
+        RelativeFrameTimeHistogram overrunHistogram = new RelativeFrameTimeHistogram();
+        overrunHistogram.addRelativeFrameTimeMillis(-2);
+        overrunHistogram.addRelativeFrameTimeMillis(1);
+        overrunHistogram.addRelativeFrameTimeMillis(5);
+        overrunHistogram.addRelativeFrameTimeMillis(25);
         return overrunHistogram;
     }
 }

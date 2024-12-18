@@ -111,7 +111,7 @@ public class JankDataProcessor {
         pendingStat.mTotalFrames += jankStat.getTotalFrameCount();
 
         mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
-                jankStat.getFrameOverrunHistogram().getBucketCounters());
+                jankStat.getRelativeFrameTimeHistogram().getBucketCounters());
     }
 
     private void mergeNewStat(String stateKey, String activityName, AppJankStats jankStats) {
@@ -136,7 +136,7 @@ public class JankDataProcessor {
         pendingStat.mJankyFrames = jankStats.getJankyFrameCount();
 
         mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
-                jankStats.getFrameOverrunHistogram().getBucketCounters());
+                jankStats.getRelativeFrameTimeHistogram().getBucketCounters());
 
         mPendingJankStats.put(stateKey, pendingStat);
     }
@@ -271,7 +271,8 @@ public class JankDataProcessor {
         private static final int[] sFrameOverrunHistogramBounds =  {
                 Integer.MIN_VALUE, -200, -150, -100, -90, -80, -70, -60, -50, -40, -30, -25, -20,
                 -18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25,
-                30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000
+                30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
+                Integer.MAX_VALUE
         };
         private final int[] mFrameOverrunBuckets = new int[sFrameOverrunHistogramBounds.length];
 
@@ -414,7 +415,7 @@ public class JankDataProcessor {
             if (overrunTime < 200) {
                 return (overrunTime - 50) / 100 + 41;
             }
-            if (overrunTime < 1000) {
+            if (overrunTime <= 1000) {
                 return (overrunTime - 200) / 100 + 43;
             }
             return sFrameOverrunHistogramBounds.length - 1;

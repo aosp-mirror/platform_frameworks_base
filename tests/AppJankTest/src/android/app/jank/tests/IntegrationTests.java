@@ -76,6 +76,7 @@ public class IntegrationTests {
     private ActivityTestRule<EmptyActivity> mEmptyActivityRule =
             new ActivityTestRule<>(EmptyActivity.class, false , true);
 
+
     @Before
     public void setUp() {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
@@ -163,7 +164,7 @@ public class IntegrationTests {
         // of that state.
         for (int i = 0; i < uiStates.size(); i++) {
             StateTracker.StateData stateData = uiStates.get(i);
-            if (stateData.mWidgetCategory.equals(AppJankStats.ANIMATION)) {
+            if (stateData.mWidgetCategory.equals(AppJankStats.WIDGET_CATEGORY_ANIMATION)) {
                 assertNotEquals(Long.MAX_VALUE, stateData.mVsyncIdEnd);
             }
         }
