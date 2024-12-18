@@ -105,6 +105,13 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
+    name: "activity_embedding_support_for_connected_displays"
+    description: "Enables activity embedding support for connected displays, including enabling AE optimization for Settings."
+    bug: "369438353"
+}
+
+flag {
+    namespace: "windowing_sdk"
     name: "wlinfo_oncreate"
     description: "Makes WindowLayoutInfo accessible without racing in the Activity#onCreate()"
     bug: "337820752"
