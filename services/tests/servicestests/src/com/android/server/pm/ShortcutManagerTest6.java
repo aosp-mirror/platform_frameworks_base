@@ -28,52 +28,7 @@ import androidx.test.filters.SmallTest;
 public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
     public void testHasShortcutHostPermissionInner_with3pLauncher_complicated() {
         // Set the default launcher.
-        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_2, USER_0);
-        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_0));
-        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_FALLBACK_LAUNCHER, USER_0));
-        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_0));
-        assertTrue(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_2, USER_0));
-
-        // Last known launcher should be set.
-        assertEquals(CALLING_PACKAGE_2,
-                mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
-
-        // Now the default launcher has changed.
-        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_1, USER_0);
-
-        assertTrue(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_0));
-
-        // Last known launcher should be set.
-        assertEquals(CALLING_PACKAGE_1,
-                mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
-
-        // Change the default launcher again.
-        prepareGetRoleHoldersAsUser(
-                getSystemLauncher().activityInfo.getComponentName().getPackageName(), USER_0);
-
-        assertTrue(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_0));
-        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_0));
-
-        // Last known launcher should be set to default.
-        assertEquals(PACKAGE_SYSTEM_LAUNCHER,
-                mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
-    }
-
-    public void testHasShortcutHostPermissionInner_multiUser() {
-        mRunningUsers.put(USER_10, true);
-
-        prepareGetRoleHoldersAsUser(PACKAGE_FALLBACK_LAUNCHER, USER_0);
         prepareGetRoleHoldersAsUser(CALLING_PACKAGE_2, USER_10);
-
-        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_0));
-        assertTrue(mService.hasShortcutHostPermissionInner(PACKAGE_FALLBACK_LAUNCHER, USER_0));
-        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_0));
-        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_2, USER_0));
-
-        // Last known launcher should be set.
-        assertEquals(PACKAGE_FALLBACK_LAUNCHER,
-                mService.getUserShortcutsLocked(USER_0).getCachedLauncher());
-
         assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_10));
         assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_FALLBACK_LAUNCHER, USER_10));
         assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_10));
@@ -82,5 +37,50 @@ public class ShortcutManagerTest6 extends BaseShortcutManagerTest {
         // Last known launcher should be set.
         assertEquals(CALLING_PACKAGE_2,
                 mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
+
+        // Now the default launcher has changed.
+        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_1, USER_10);
+
+        assertTrue(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_10));
+
+        // Last known launcher should be set.
+        assertEquals(CALLING_PACKAGE_1,
+                mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
+
+        // Change the default launcher again.
+        prepareGetRoleHoldersAsUser(
+                getSystemLauncher().activityInfo.getComponentName().getPackageName(), USER_10);
+
+        assertTrue(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_10));
+        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_10));
+
+        // Last known launcher should be set to default.
+        assertEquals(PACKAGE_SYSTEM_LAUNCHER,
+                mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
+    }
+
+    public void testHasShortcutHostPermissionInner_multiUser() {
+        mRunningUsers.put(USER_11, true);
+
+        prepareGetRoleHoldersAsUser(PACKAGE_FALLBACK_LAUNCHER, USER_10);
+        prepareGetRoleHoldersAsUser(CALLING_PACKAGE_2, USER_11);
+
+        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_10));
+        assertTrue(mService.hasShortcutHostPermissionInner(PACKAGE_FALLBACK_LAUNCHER, USER_10));
+        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_10));
+        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_2, USER_10));
+
+        // Last known launcher should be set.
+        assertEquals(PACKAGE_FALLBACK_LAUNCHER,
+                mService.getUserShortcutsLocked(USER_10).getCachedLauncher());
+
+        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_SYSTEM_LAUNCHER, USER_11));
+        assertFalse(mService.hasShortcutHostPermissionInner(PACKAGE_FALLBACK_LAUNCHER, USER_11));
+        assertFalse(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_1, USER_11));
+        assertTrue(mService.hasShortcutHostPermissionInner(CALLING_PACKAGE_2, USER_11));
+
+        // Last known launcher should be set.
+        assertEquals(CALLING_PACKAGE_2,
+                mService.getUserShortcutsLocked(USER_11).getCachedLauncher());
     }
 }

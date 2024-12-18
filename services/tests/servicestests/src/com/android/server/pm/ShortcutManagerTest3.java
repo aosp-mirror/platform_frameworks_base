@@ -70,14 +70,14 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 + ConfigConstants.KEY_MAX_SHORTCUTS + "=99999999"
         );
 
-        setCaller(CALLING_PACKAGE, USER_0);
+        setCaller(CALLING_PACKAGE, USER_10);
     }
 
     private void publishManifestShortcuts(ComponentName activity, int resId) {
         addManifestShortcutResource(activity, resId);
         updatePackageVersion(CALLING_PACKAGE, 1);
         mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageAddIntent(CALLING_PACKAGE, USER_0));
+                genPackageAddIntent(CALLING_PACKAGE, USER_10));
     }
 
     public void testSetDynamicShortcuts_noManifestShortcuts() {
@@ -299,8 +299,8 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .isEmpty();
 
 
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE, list("s2", "s4", "x2"), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE, list("s2", "s4", "x2"), HANDLE_USER_10);
         });
         // Still same order.
         assertWith(getCallerShortcuts()).selectDynamic().selectByActivity(A1)
@@ -408,9 +408,9 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
         assertWith(getCallerShortcuts()).selectDynamic().selectByChangedSince(lastApiTime)
                 .isEmpty();
 
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
             mLauncherApps.pinShortcuts(
-                    CALLING_PACKAGE, list("s2", "s4", "x1", "x2"), HANDLE_USER_0);
+                    CALLING_PACKAGE, list("s2", "s4", "x1", "x2"), HANDLE_USER_10);
         });
         // Still same order.
 
@@ -483,8 +483,8 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
         assertWith(getCallerShortcuts()).selectDynamic().selectByChangedSince(lastApiTime)
                 .haveIds("s2", "s4");
 
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE, list("s2", "s4", "x2"), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE, list("s2", "s4", "x2"), HANDLE_USER_10);
         });
         // Still same order.
         assertWith(getCallerShortcuts()).selectDynamic().selectByActivity(A1)
@@ -518,7 +518,7 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 R.xml.shortcut_share_targets);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
         mService.mPackageMonitor.onReceive(getTestContext(),
-                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_10));
 
         // There are two valid <share-target> definitions in the test manifest with two different
         // categories: {"com.test.category.CATEGORY1", "com.test.category.CATEGORY2"} and

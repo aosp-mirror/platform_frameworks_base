@@ -238,15 +238,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoParcel() {
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
         ShortcutInfo si = parceled(new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setTitle("title")
                 .setIntent(makeIntent("action", ShortcutActivity.class))
                 .build());
         assertEquals(mClientContext.getPackageName(), si.getPackage());
-        assertEquals(USER_10, si.getUserId());
-        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
         assertEquals("id", si.getId());
         assertEquals("title", si.getTitle());
         assertEquals("action", si.getIntent().getAction());
@@ -325,7 +325,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoParcel_resId() {
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
         ShortcutInfo si;
 
         PersistableBundle pb = new PersistableBundle();
@@ -379,7 +379,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoClone() {
-        setCaller(CALLING_PACKAGE_1, USER_11);
+        setCaller(CALLING_PACKAGE_1, USER_12);
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
@@ -406,8 +406,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
 
-        assertEquals(USER_11, si.getUserId());
-        assertEquals(HANDLE_USER_11, si.getUserHandle());
+        assertEquals(USER_12, si.getUserId());
+        assertEquals(HANDLE_USER_12, si.getUserHandle());
         assertEquals(mClientContext.getPackageName(), si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivity());
@@ -527,7 +527,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoClone_resId() {
-        setCaller(CALLING_PACKAGE_1, USER_11);
+        setCaller(CALLING_PACKAGE_1, USER_12);
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
@@ -552,8 +552,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
 
-        assertEquals(USER_11, si.getUserId());
-        assertEquals(HANDLE_USER_11, si.getUserHandle());
+        assertEquals(USER_12, si.getUserId());
+        assertEquals(HANDLE_USER_12, si.getUserHandle());
         assertEquals(mClientContext.getPackageName(), si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivity());
@@ -953,9 +953,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoSaveAndLoad() throws InterruptedException {
-        mRunningUsers.put(USER_10, true);
+        mRunningUsers.put(USER_11, true);
 
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
@@ -1010,16 +1010,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Save and load.
         mService.saveDirtyInfo();
         initService();
-        mService.handleUnlockUser(USER_10);
+        mService.handleUnlockUser(USER_11);
 
-        dumpUserFile(USER_10);
+        dumpUserFile(USER_11);
         dumpsysOnLogcat("after load");
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_11);
 
-        assertEquals(USER_10, si.getUserId());
-        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
@@ -1056,19 +1056,19 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
         // to test it.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_11);
         assertEquals(1, si.getRank());
         assertEquals(2, si.getPersons().length);
         assertEquals("personUri2", si.getPersons()[1].getUri());
         assertEquals("6.7.8.9", si.getLocusId().getId());
 
-        dumpUserFile(USER_10);
+        dumpUserFile(USER_11);
     }
 
     public void testShortcutInfoSaveAndLoad_maskableBitmap() throws InterruptedException {
-        mRunningUsers.put(USER_10, true);
+        mRunningUsers.put(USER_11, true);
 
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
 
         final Icon bmp32x32 = Icon.createWithAdaptiveBitmap(BitmapFactory.decodeResource(
             getTestContext().getResources(), R.drawable.black_32x32));
@@ -1100,16 +1100,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Save and load.
         mService.saveDirtyInfo();
         initService();
-        mService.handleUnlockUser(USER_10);
+        mService.handleUnlockUser(USER_11);
 
-        dumpUserFile(USER_10);
+        dumpUserFile(USER_11);
         dumpsysOnLogcat("after load");
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_11);
 
-        assertEquals(USER_10, si.getUserId());
-        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
@@ -1131,13 +1131,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getIconUri());
         assertTrue(si.getLastChangedTimestamp() < now);
 
-        dumpUserFile(USER_10);
+        dumpUserFile(USER_11);
     }
 
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
-        mRunningUsers.put(USER_10, true);
+        mRunningUsers.put(USER_11, true);
 
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
 
         final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
 
@@ -1175,13 +1175,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Save and load.
         mService.saveDirtyInfo();
         initService();
-        mService.handleUnlockUser(USER_10);
+        mService.handleUnlockUser(USER_11);
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_11);
 
-        assertEquals(USER_10, si.getUserId());
-        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
@@ -1207,14 +1207,14 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
         // to test it.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_11);
         assertEquals(1, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_uri() throws InterruptedException {
-        mRunningUsers.put(USER_10, true);
+        mRunningUsers.put(USER_11, true);
 
-        setCaller(CALLING_PACKAGE_1, USER_10);
+        setCaller(CALLING_PACKAGE_1, USER_11);
 
         final Icon uriIcon = Icon.createWithContentUri("test_uri");
 
@@ -1255,13 +1255,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Save and load.
         mService.saveDirtyInfo();
         initService();
-        mService.handleUnlockUser(USER_10);
+        mService.handleUnlockUser(USER_11);
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_11);
 
-        assertEquals(USER_10, si.getUserId());
-        assertEquals(HANDLE_USER_10, si.getUserHandle());
+        assertEquals(USER_11, si.getUserId());
+        assertEquals(HANDLE_USER_11, si.getUserHandle());
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
@@ -1288,7 +1288,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
         // to test it.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_11);
         assertEquals(1, si.getRank());
         assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_URI
                 | ShortcutInfo.FLAG_STRINGS_RESOLVED | ShortcutInfo.FLAG_ADAPTIVE_BITMAP,
@@ -1300,7 +1300,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     }
 
     public void testShortcutInfoSaveAndLoad_forBackup() {
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_32x32));
@@ -1332,16 +1332,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
-        setCaller(LAUNCHER_1, USER_0);
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_0);
+        setCaller(LAUNCHER_1, USER_10);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_10);
 
         // Do backup & restore.
         backupAndRestore();
 
-        mService.handleUnlockUser(USER_0); // Load user-0.
+        mService.handleUnlockUser(USER_10); // Load user-0.
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
 
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
@@ -1364,12 +1364,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getIconUri());
 
         // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
         assertEquals(0, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_forBackup_resId() {
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
 
@@ -1399,16 +1399,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
-        setCaller(LAUNCHER_1, USER_0);
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_0);
+        setCaller(LAUNCHER_1, USER_10);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_10);
 
         // Do backup & restore.
         backupAndRestore();
 
-        mService.handleUnlockUser(USER_0); // Load user-0.
+        mService.handleUnlockUser(USER_10); // Load user-0.
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
 
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
@@ -1434,12 +1434,12 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getIconUri());
 
         // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
         assertEquals(0, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_forBackup_uri() {
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon uriIcon = Icon.createWithContentUri("test_uri");
 
@@ -1469,16 +1469,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
-        setCaller(LAUNCHER_1, USER_0);
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_0);
+        setCaller(LAUNCHER_1, USER_10);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_10);
 
         // Do backup & restore.
         backupAndRestore();
 
-        mService.handleUnlockUser(USER_0); // Load user-0.
+        mService.handleUnlockUser(USER_10); // Load user-0.
 
         ShortcutInfo si;
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id", USER_10);
 
         assertEquals(CALLING_PACKAGE_1, si.getPackage());
         assertEquals("id", si.getId());
@@ -1504,7 +1504,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getIconUri());
 
         // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
-        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
         assertEquals(0, si.getRank());
     }
 
@@ -1512,7 +1512,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertTrue(mManager.setDynamicShortcuts(list(
                 makeShortcutWithIntent("s1", intent))));
         initService();
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
         assertWith(getCallerShortcuts())
                 .haveIds("s1")
@@ -1528,7 +1528,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertTrue(mManager.setDynamicShortcuts(list(
                 makeShortcutWithIntents("s1", intents))));
         initService();
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
         assertWith(getCallerShortcuts())
                 .haveIds("s1")
@@ -1804,35 +1804,35 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // but it will work for other users too because we check the locale change at any
         // API entry point.
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
 
         // Make sure even if we receive ACTION_LOCALE_CHANGED, if the locale hasn't actually
         // changed, we don't reset throttling.
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             mManager.updateShortcuts(list());
             assertEquals(2, mManager.getRemainingCallCount());
         });
 
         mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(2, mManager.getRemainingCallCount()); // Still 2.
         });
 
@@ -1842,7 +1842,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // The locale should be persisted, so it still shouldn't reset throttling.
         mService.mReceiver.onReceive(mServiceContext, new Intent(Intent.ACTION_LOCALE_CHANGED));
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(2, mManager.getRemainingCallCount()); // Still 2.
         });
     }
@@ -1861,22 +1861,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // First, all packages have less than 3 (== initial value) remaining calls.
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
@@ -1886,22 +1886,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mService.mUidObserver.onUidStateChanged(
                 CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
@@ -1911,22 +1911,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mService.mUidObserver.onUidStateChanged(
                 CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         mService.mUidObserver.onUidStateChanged(
@@ -1944,22 +1944,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
@@ -1967,7 +1967,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // Do the same thing one more time.  This would catch the bug with mixuing up
         // the current time and the elapsed time.
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             mManager.updateShortcuts(list(makeShortcut("s")));
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
@@ -1979,22 +1979,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
@@ -2003,10 +2003,10 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Package 1 on user-10 comes to foreground.
         // Now, also try calling some APIs and make sure foreground apps don't get throttled.
         mService.mUidObserver.onUidStateChanged(
-                UserHandle.getUid(USER_10, CALLING_UID_1),
+                UserHandle.getUid(USER_11, CALLING_UID_1),
                 ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
             assertFalse(mManager.isRateLimitingActive());
 
@@ -2025,7 +2025,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertEquals(0, mManager.getRemainingCallCount());
             assertTrue(mManager.isRateLimitingActive());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
 
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
@@ -2035,7 +2035,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertEquals(0, mManager.getRemainingCallCount());
             assertTrue(mManager.isRateLimitingActive());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
 
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
@@ -2045,7 +2045,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertEquals(0, mManager.getRemainingCallCount());
             assertTrue(mManager.isRateLimitingActive());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
 
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
@@ -2065,7 +2065,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             assertEquals(0, mManager.getRemainingCallCount());
             assertTrue(mManager.isRateLimitingActive());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
 
             mManager.setDynamicShortcuts(list(makeShortcut("s")));
@@ -2088,95 +2088,95 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // First, all packages have less than 3 (== initial value) remaining calls.
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
         // Simulate a call from sys UI.
         mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
-        mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0);
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertEquals(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-
-        mManager.onApplicationActive(CALLING_PACKAGE_3, USER_0);
-
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertEquals(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
-            assertEquals(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
-            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
-        });
-
         mManager.onApplicationActive(CALLING_PACKAGE_1, USER_10);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
-            assertEquals(3, mManager.getRemainingCallCount());
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mManager.onApplicationActive(CALLING_PACKAGE_3, USER_10);
+
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mManager.onApplicationActive(CALLING_PACKAGE_1, USER_11);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
         });
     }
 
     public void testReportShortcutUsed() {
-        mRunningUsers.put(USER_10, true);
+        mRunningUsers.put(USER_11, true);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             reset(mMockUsageStatsManagerInternal);
 
             // Report with an nonexistent shortcut.
@@ -2192,9 +2192,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
             mManager.reportShortcutUsed("s2");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
-                    eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_10));
+                    eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_11));
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_11, () -> {
             // Try with a different package.
             reset(mMockUsageStatsManagerInternal);
 
@@ -2211,7 +2211,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
             mManager.reportShortcutUsed("s3");
             verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
-                    eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_10));
+                    eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_11));
         });
     }
 
@@ -2333,7 +2333,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         final Icon bmp64x64 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_64x64));
 
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcutWithIcon("res32x32", res32x32),
                     makeShortcutWithIcon("res64x64", res64x64),
@@ -2342,9 +2342,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
 
         // We can't predict the compressed bitmap sizes, so get the real sizes here.
-        final long bitmapTotal =
-                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp32x32")).length() +
-                new File(getBitmapAbsPath(USER_0, CALLING_PACKAGE_2, "bmp64x64")).length();
+        final long bitmapTotal = new File(getBitmapAbsPath(
+                USER_10, CALLING_PACKAGE_2, "bmp32x32")).length() + new File(
+                        getBitmapAbsPath(USER_10, CALLING_PACKAGE_2, "bmp64x64")).length();
 
         // Read the expected output and inject the bitmap size.
         final String expected = readTestAsset("shortcut/dumpsys_expected.txt")
@@ -2358,15 +2358,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
      * can still be read.
      */
     public void testLoadLegacySavedFile() throws Exception {
-        final File path = mService.getUserFile(USER_0).getBaseFile();
+        final File path = mService.getUserFile(USER_10).getBaseFile();
         path.getParentFile().mkdirs();
         try (Writer w = new FileWriter(path)) {
             w.write(readTestAsset("shortcut/shortcut_legacy_file.xml"));
         };
         initService();
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("manifest-shortcut-storage")
                     .forShortcutWithId("manifest-shortcut-storage", si -> {
@@ -2381,58 +2381,58 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         mRunningUsers.clear();
         mUnlockedUsers.clear();
 
-        assertFalse(mService.isUserUnlockedL(USER_0));
         assertFalse(mService.isUserUnlockedL(USER_10));
+        assertFalse(mService.isUserUnlockedL(USER_11));
 
         // Start user 0, still locked.
-        mRunningUsers.put(USER_0, true);
-        assertFalse(mService.isUserUnlockedL(USER_0));
+        mRunningUsers.put(USER_10, true);
         assertFalse(mService.isUserUnlockedL(USER_10));
+        assertFalse(mService.isUserUnlockedL(USER_11));
 
         // Unlock user.
-        mUnlockedUsers.put(USER_0, true);
-        assertTrue(mService.isUserUnlockedL(USER_0));
-        assertFalse(mService.isUserUnlockedL(USER_10));
+        mUnlockedUsers.put(USER_10, true);
+        assertTrue(mService.isUserUnlockedL(USER_10));
+        assertFalse(mService.isUserUnlockedL(USER_11));
 
         // Clear again.
         mRunningUsers.clear();
         mUnlockedUsers.clear();
 
         // Directly call the lifecycle event.  Now also locked.
-        mService.handleUnlockUser(USER_0);
-        assertTrue(mService.isUserUnlockedL(USER_0));
-        assertFalse(mService.isUserUnlockedL(USER_10));
+        mService.handleUnlockUser(USER_10);
+        assertTrue(mService.isUserUnlockedL(USER_10));
+        assertFalse(mService.isUserUnlockedL(USER_11));
 
         // Directly call the stop lifecycle event.  Goes back to the initial state.
-        mService.handleStopUser(USER_0);
-        assertFalse(mService.isUserUnlockedL(USER_0));
+        mService.handleStopUser(USER_10);
         assertFalse(mService.isUserUnlockedL(USER_10));
+        assertFalse(mService.isUserUnlockedL(USER_11));
     }
 
     public void testEphemeralApp() {
-        mRunningUsers.put(USER_10, true); // this test needs user 10.
+        mRunningUsers.put(USER_11, true); // this test needs user 10.
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertWith(mManager.getDynamicShortcuts()).isEmpty();
-        });
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertWith(mManager.getDynamicShortcuts()).isEmpty();
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
+            assertWith(mManager.getDynamicShortcuts()).isEmpty();
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertWith(mManager.getDynamicShortcuts()).isEmpty();
         });
         // Make package 1 ephemeral.
-        mEphemeralPackages.add(UserPackage.of(USER_0, CALLING_PACKAGE_1));
+        mEphemeralPackages.add(UserPackage.of(USER_10, CALLING_PACKAGE_1));
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertExpectException(IllegalStateException.class, "Ephemeral apps", () -> {
                 mManager.getDynamicShortcuts();
             });
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertWith(mManager.getDynamicShortcuts()).isEmpty();
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertWith(mManager.getDynamicShortcuts()).isEmpty();
         });
     }
