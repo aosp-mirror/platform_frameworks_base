@@ -118,12 +118,12 @@ class ShadeModeInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun getTopEdgeSplitFraction_wideScreen_leftSideLarger() =
+    fun getTopEdgeSplitFraction_wideScreen_splitInHalf() =
         testScope.runTest {
             // Ensure isShadeLayoutWide is collected.
             val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
             kosmos.shadeRepository.setShadeLayoutWide(true)
 
-            assertThat(underTest.getTopEdgeSplitFraction()).isGreaterThan(0.5f)
+            assertThat(underTest.getTopEdgeSplitFraction()).isEqualTo(0.5f)
         }
 }

@@ -79,11 +79,7 @@ interface ShadeInteractor : BaseShadeInteractor {
      * The fraction between [0..1] (i.e., percentage) of screen width to consider the threshold
      * between "top-left" and "top-right" for the purposes of dual-shade invocation.
      *
-     * When the dual-shade is not wide, this always returns 0.5 (the top edge is evenly split). On
-     * wide layouts however, a larger fraction is returned because only the area of the system
-     * status icons is considered top-right.
-     *
-     * Note that this fraction only determines the split between the absolute left and right
+     * Note that this fraction only determines the *split* between the absolute left and right
      * directions. In RTL layouts, the "top-start" edge will resolve to "top-right", and "top-end"
      * will resolve to "top-left".
      */
