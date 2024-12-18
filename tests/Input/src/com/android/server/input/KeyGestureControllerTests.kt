@@ -466,27 +466,27 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + ALT + DPAD_LEFT -> Change Splitscreen Focus Left",
+                "CTRL + ALT + DPAD_LEFT -> Change Splitscreen Focus Left",
                 intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_LEFT
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_LEFT),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + CTRL + DPAD_RIGHT -> Change Splitscreen Focus Right",
+                "CTRL + ALT + DPAD_RIGHT -> Change Splitscreen Focus Right",
                 intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_RIGHT
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_RIGHT),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
@@ -735,25 +735,25 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + ALT + '-' -> Magnifier Zoom Out",
+                "META + ALT + '-' -> Magnification Zoom Out",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_MINUS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT,
                 intArrayOf(KeyEvent.KEYCODE_MINUS),
                 KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + ALT + '=' -> Magnifier Zoom In",
+                "META + ALT + '=' -> Magnification Zoom In",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_EQUALS
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN,
                 intArrayOf(KeyEvent.KEYCODE_EQUALS),
                 KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
@@ -785,49 +785,49 @@ class KeyGestureControllerTests {
             TestData(
                 "META + ALT + 'Down' -> Magnification Pan Down",
                 intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_DOWN
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_DOWN),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
                 "META + ALT + 'Up' -> Magnification Pan Up",
                 intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_UP
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_UP),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
                 "META + ALT + 'Left' -> Magnification Pan Left",
                 intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_LEFT
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_LEFT),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
                 "META + ALT + 'Right' -> Magnification Pan Right",
                 intArrayOf(
-                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_ALT_LEFT,
                     KeyEvent.KEYCODE_DPAD_RIGHT
                 ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT,
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
                 intArrayOf(KeyEvent.KEYCODE_DPAD_RIGHT),
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
         )
