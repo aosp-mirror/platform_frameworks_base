@@ -119,27 +119,7 @@ public final class DeviceConfigService extends Binder {
         for (String line : MyShellCommand.listAll(iprovider)) {
             pw.println(line);
         }
-
-        ArrayList<String> missingFiles = new ArrayList<String>();
-        for (String fileName : sAconfigTextProtoFilesOnDevice) {
-            File aconfigFile = new File(fileName);
-            if (!aconfigFile.exists()) {
-                missingFiles.add(fileName);
-            }
-        }
-
-        if (missingFiles.isEmpty()) {
-            pw.println("\nAconfig flags:");
-            for (String name : MyShellCommand.listAllAconfigFlags(iprovider)) {
-                pw.println(name);
-            }
-        } else {
-            pw.println("\nFailed to dump aconfig flags due to missing files:");
-            for (String fileName : missingFiles) {
-                pw.println(fileName);
-            }
-        }
-    }
+   }
 
     private static HashSet<String> getAconfigFlagNamesInDeviceConfig() {
         HashSet<String> nameSet = new HashSet<String>();
