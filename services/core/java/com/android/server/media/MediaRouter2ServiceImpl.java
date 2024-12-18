@@ -2634,10 +2634,17 @@ class MediaRouter2ServiceImpl {
         }
 
         @Override
-        public void onSessionUpdated(@NonNull MediaRoute2Provider provider,
-                @NonNull RoutingSessionInfo sessionInfo) {
-            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionInfoChangedOnHandler,
-                    this, provider, sessionInfo));
+        public void onSessionUpdated(
+                @NonNull MediaRoute2Provider provider,
+                @NonNull RoutingSessionInfo sessionInfo,
+                Set<String> packageNamesWithRoutingSessionOverrides) {
+            sendMessage(
+                    PooledLambda.obtainMessage(
+                            UserHandler::onSessionInfoChangedOnHandler,
+                            this,
+                            provider,
+                            sessionInfo,
+                            packageNamesWithRoutingSessionOverrides));
         }
 
         @Override
@@ -3148,10 +3155,31 @@ class MediaRouter2ServiceImpl {
                     toOriginalRequestId(uniqueRequestId), sessionInfo);
         }
 
-        private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
-                @NonNull RoutingSessionInfo sessionInfo) {
+        /**
+         * Implementation of {@link MediaRoute2Provider.Callback#onSessionUpdated}.
+         *
+         * <p>Must run on the thread that corresponds to this {@link UserHandler}.
+         */
+        private void onSessionInfoChangedOnHandler(
+                @NonNull MediaRoute2Provider provider,
+                @NonNull RoutingSessionInfo sessionInfo,
+                Set<String> packageNamesWithRoutingSessionOverrides) {
             List<ManagerRecord> managers = getManagerRecords();
             for (ManagerRecord manager : managers) {
+                if (Flags.enableMirroringInMediaRouter2()) {
+                    String targetPackageName = manager.mTargetPackageName;
+                    boolean skipDueToOverride =
+                            targetPackageName != null
+                                    && packageNamesWithRoutingSessionOverrides.contains(
+                                            targetPackageName);
+                    boolean sessionIsForTargetPackage =
+                            TextUtils.isEmpty(sessionInfo.getClientPackageName()) // is global.
+                                    || TextUtils.equals(
+                                            targetPackageName, sessionInfo.getClientPackageName());
+                    if (skipDueToOverride || !sessionIsForTargetPackage) {
+                        continue;
+                    }
+                }
                 manager.notifySessionUpdated(sessionInfo);
             }
 
