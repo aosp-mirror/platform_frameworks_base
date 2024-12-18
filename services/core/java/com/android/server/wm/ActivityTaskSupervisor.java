@@ -76,7 +76,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_SUPERVISOR_TASK_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ClientLifecycleManager.shouldDispatchLaunchActivityItemIndependently;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_ALLOWLISTED;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_LAUNCHABLE;
@@ -2524,7 +2523,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetRootTaskBounds) {
         task.forAllActivities(r -> {
             if (!r.attachedToProcess()) return;
-            if (!isPip2ExperimentEnabled()) mPipModeChangedActivities.add(r);
+            mPipModeChangedActivities.add(r);
             // If we are scheduling pip change, then remove this activity from multi-window
             // change list as the processing of pip change will make sure multi-window changed
             // message is processed in the right order relative to pip changed.
@@ -2533,7 +2532,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
         mPipModeChangedTargetRootTaskBounds = targetRootTaskBounds;
 
-        if (!isPip2ExperimentEnabled() && !mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
+        if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
             mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
         }
     }

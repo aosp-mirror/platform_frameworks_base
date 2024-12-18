@@ -120,22 +120,15 @@ public class PipSchedulerTest {
     @Test
     public void scheduleExitPipViaExpand_nullTaskToken_noop() {
         setNullPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleExitPipViaExpand();
 
-        verify(mMockMainExecutor, times(1)).execute(mRunnableArgumentCaptor.capture());
-        assertNotNull(mRunnableArgumentCaptor.getValue());
-        mRunnableArgumentCaptor.getValue().run();
-
-        verify(mMockPipTransitionController, never())
-                .startExitTransition(eq(TRANSIT_EXIT_PIP), any(), isNull());
+        verify(mMockMainExecutor, never()).execute(any());
     }
 
     @Test
     public void scheduleExitPipViaExpand_exitTransitionCalled() {
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleExitPipViaExpand();
 
@@ -149,13 +142,20 @@ public class PipSchedulerTest {
 
     @Test
     public void removePipAfterAnimation() {
+        //TODO: Update once this is changed to run animation as part of transition
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
-        mPipScheduler.scheduleRemovePip();
+        mPipScheduler.removePipAfterAnimation();
+        verify(mMockAlphaAnimator, times(1))
+                .setAnimationEndCallback(mRunnableArgumentCaptor.capture());
+        assertNotNull(mRunnableArgumentCaptor.getValue());
+        verify(mMockAlphaAnimator, times(1)).start();
+
+        mRunnableArgumentCaptor.getValue().run();
 
         verify(mMockMainExecutor, times(1)).execute(mRunnableArgumentCaptor.capture());
         assertNotNull(mRunnableArgumentCaptor.getValue());
+
         mRunnableArgumentCaptor.getValue().run();
 
         verify(mMockPipTransitionController, times(1))
