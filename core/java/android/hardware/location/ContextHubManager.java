@@ -718,7 +718,19 @@ public final class ContextHubManager {
     /**
      * Find a list of endpoints that provides a specific service.
      *
-     * @param serviceDescriptor Statically generated ID for an endpoint.
+     * <p>Service descriptor should uniquely identify the interface (scoped to type). Convention of
+     * the descriptor depend on interface type.
+     *
+     * <p>Examples:
+     *
+     * <ol>
+     *   <li>AOSP-defined AIDL: android.hardware.something.IFoo/default
+     *   <li>Vendor-defined AIDL: com.example.something.IBar/default
+     *   <li>Pigweed RPC with Protobuf: com.example.proto.ExampleService
+     * </ol>
+     *
+     * @param serviceDescriptor The service descriptor for a service provided by the hub. The value
+     *     cannot be null or empty.
      * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
      * @throws IllegalArgumentException if the serviceDescriptor is empty/null.
      */
