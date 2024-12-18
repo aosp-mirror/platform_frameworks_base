@@ -479,6 +479,7 @@ public class Notifier {
             case PowerManager.PARTIAL_WAKE_LOCK:
                 return BatteryStats.WAKE_TYPE_PARTIAL;
 
+            case PowerManager.FULL_WAKE_LOCK:
             case PowerManager.SCREEN_DIM_WAKE_LOCK:
             case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                 return BatteryStats.WAKE_TYPE_FULL;
