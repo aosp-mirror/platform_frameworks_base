@@ -12,5 +12,5 @@ flag {
     name: "ccapi_baklava_enabled"
     namespace: "machine_learning"
     description: "Feature flag for baklava content capture API"
-    bug: "309411951"
+    bug: "380381249"
 }
