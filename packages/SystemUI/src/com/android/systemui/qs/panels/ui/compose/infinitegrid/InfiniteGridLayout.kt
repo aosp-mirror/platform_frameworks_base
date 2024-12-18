@@ -19,6 +19,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -94,16 +95,18 @@ constructor(
             val it = sizedTiles[spanIndex]
             val column = cellIndex % columns
             cellIndex += it.width
-            Tile(
-                tile = it.tile,
-                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
-                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
-                squishiness = { squishiness },
-                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
-                coroutineScope = scope,
-                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
-                detailsViewModel = detailsViewModel,
-            )
+            key(it.tile.spec) {
+                Tile(
+                    tile = it.tile,
+                    iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                    modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                    squishiness = { squishiness },
+                    tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
+                    coroutineScope = scope,
+                    bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                    detailsViewModel = detailsViewModel,
+                )
+            }
         }
     }
 

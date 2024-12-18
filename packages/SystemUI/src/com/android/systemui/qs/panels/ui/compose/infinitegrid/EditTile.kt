@@ -19,7 +19,6 @@
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -76,6 +75,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -460,29 +460,34 @@ private fun AvailableTileGrid(
             Modifier.fillMaxWidth().wrapContentHeight().testTag(AVAILABLE_TILES_GRID_TEST_TAG),
     ) {
         groupedTiles.forEach { (category, tiles) ->
-            Text(
-                text = category.label.load() ?: "",
-                fontSize = 20.sp,
-                color = labelColors.label,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, bottom = 8.dp, top = 8.dp),
-            )
-            tiles.chunked(columns).forEach { row ->
-                Row(
-                    horizontalArrangement = spacedBy(TileArrangementPadding),
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-                ) {
-                    row.forEachIndexed { index, tileGridCell ->
-                        AvailableTileGridCell(
-                            cell = tileGridCell,
-                            index = index,
-                            dragAndDropState = dragAndDropState,
-                            selectionState = selectionState,
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                        )
-                    }
+            key(category) {
+                Text(
+                    text = category.label.load() ?: "",
+                    fontSize = 20.sp,
+                    color = labelColors.label,
+                    modifier =
+                        Modifier.fillMaxWidth().padding(start = 16.dp, bottom = 8.dp, top = 8.dp),
+                )
+                tiles.chunked(columns).forEach { row ->
+                    Row(
+                        horizontalArrangement = spacedBy(TileArrangementPadding),
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                    ) {
+                        row.forEachIndexed { index, tileGridCell ->
+                            key(tileGridCell.tile.tileSpec) {
+                                AvailableTileGridCell(
+                                    cell = tileGridCell,
+                                    index = index,
+                                    dragAndDropState = dragAndDropState,
+                                    selectionState = selectionState,
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                )
+                            }
+                        }
 
-                    // Spacers for incomplete rows
-                    repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                        // Spacers for incomplete rows
+                        repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                    }
                 }
             }
         }
@@ -711,7 +716,7 @@ private fun AvailableTileGridCell(
         ) {
             // Icon
             SmallTileContent(
-                icon = cell.tile.icon,
+                iconProvider = { cell.tile.icon },
                 color = colors.icon,
                 animateToEnd = true,
                 modifier = Modifier.align(Alignment.Center),
@@ -781,7 +786,7 @@ fun EditTile(
         // Icon
         Box(Modifier.size(ToggleTargetSize)) {
             SmallTileContent(
-                icon = tile.icon,
+                iconProvider = { tile.icon },
                 color = colors.icon,
                 animateToEnd = true,
                 size = { CommonTileDefaults.IconSize - iconSizeDiff * progress() },

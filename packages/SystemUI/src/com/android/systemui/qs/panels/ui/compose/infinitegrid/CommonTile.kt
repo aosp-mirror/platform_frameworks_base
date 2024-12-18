@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
+import android.content.Context
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
@@ -83,7 +84,7 @@ private const val TEST_TAG_TOGGLE = "qs_tile_toggle_target"
 fun LargeTileContent(
     label: String,
     secondaryLabel: String?,
-    icon: Icon,
+    iconProvider: Context.() -> Icon,
     sideDrawable: Drawable?,
     colors: TileColors,
     squishiness: () -> Float,
@@ -129,7 +130,7 @@ fun LargeTileContent(
                 }
         ) {
             SmallTileContent(
-                icon = icon,
+                iconProvider = iconProvider,
                 color = colors.icon,
                 size = { CommonTileDefaults.LargeTileIconSize },
                 modifier = Modifier.align(Alignment.Center),
@@ -194,14 +195,15 @@ fun LargeTileLabels(
 @Composable
 fun SmallTileContent(
     modifier: Modifier = Modifier,
-    icon: Icon,
+    iconProvider: Context.() -> Icon,
     color: Color,
     size: () -> Dp = { CommonTileDefaults.IconSize },
     animateToEnd: Boolean = false,
 ) {
+    val context = LocalContext.current
+    val icon = iconProvider(context)
     val animatedColor by animateColorAsState(color, label = "QSTileIconColor")
     val iconModifier = modifier.size({ size().roundToPx() }, { size().roundToPx() })
-    val context = LocalContext.current
     val loadedDrawable =
         remember(icon, context) {
             when (icon) {

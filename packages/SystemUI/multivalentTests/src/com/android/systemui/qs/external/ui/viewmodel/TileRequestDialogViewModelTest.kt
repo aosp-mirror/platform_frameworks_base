@@ -89,7 +89,7 @@ class TileRequestDialogViewModelTest : SysuiTestCase() {
                 expect.that(state).isEqualTo(expectedState.state)
                 expect.that(handlesLongClick).isFalse()
                 expect.that(handlesSecondaryClick).isFalse()
-                expect.that(icon.get()).isEqualTo(defaultIcon)
+                expect.that(icon).isEqualTo(defaultIcon)
                 expect.that(sideDrawable).isNull()
                 expect.that(accessibilityUiState).isEqualTo(expectedState.accessibilityUiState)
             }
@@ -112,7 +112,7 @@ class TileRequestDialogViewModelTest : SysuiTestCase() {
                 expect.that(state).isEqualTo(expectedState.state)
                 expect.that(handlesLongClick).isFalse()
                 expect.that(handlesSecondaryClick).isFalse()
-                expect.that(icon.get()).isEqualTo(QSTileImpl.DrawableIcon(loadedDrawable))
+                expect.that(icon).isEqualTo(QSTileImpl.DrawableIcon(loadedDrawable))
                 expect.that(sideDrawable).isNull()
                 expect.that(accessibilityUiState).isEqualTo(expectedState.accessibilityUiState)
             }
@@ -135,7 +135,7 @@ class TileRequestDialogViewModelTest : SysuiTestCase() {
             underTest.activateIn(testScope)
             runCurrent()
 
-            assertThat(underTest.uiState.icon.get()).isEqualTo(defaultIcon)
+            assertThat(underTest.uiState.icon).isEqualTo(defaultIcon)
         }
 
     companion object {
