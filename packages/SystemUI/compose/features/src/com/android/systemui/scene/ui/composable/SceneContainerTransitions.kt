@@ -5,7 +5,6 @@ import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
-import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
@@ -110,17 +109,13 @@ val SceneContainerTransitions = transitions {
 
     // Overlay transitions
 
-    // TODO(b/376659778): Remove this transition once nested STLs are supported.
-    from(Scenes.Gone, to = Overlays.NotificationsShade) {
-        toNotificationsShadeTransition(translateClock = true)
-    }
     to(Overlays.NotificationsShade) { toNotificationsShadeTransition() }
     to(Overlays.QuickSettingsShade) { toQuickSettingsShadeTransition() }
     from(Overlays.NotificationsShade, to = Overlays.QuickSettingsShade) {
         notificationsShadeToQuickSettingsShadeTransition()
     }
     from(Scenes.Gone, to = Overlays.NotificationsShade, key = SlightlyFasterShadeCollapse) {
-        toNotificationsShadeTransition(translateClock = true, durationScale = 0.9)
+        toNotificationsShadeTransition(durationScale = 0.9)
     }
     from(Scenes.Gone, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
         toQuickSettingsShadeTransition(durationScale = 0.9)
