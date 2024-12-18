@@ -86,11 +86,9 @@ void ZipAssetsProvider::ZipCloser::operator()(ZipArchive* a) const {
 }
 
 ZipAssetsProvider::ZipAssetsProvider(ZipArchiveHandle handle, PathOrDebugName&& path,
-                                     package_property_t flags, time_t last_mod_time)
-    : zip_handle_(handle),
-      name_(std::move(path)),
-      flags_(flags),
-      last_mod_time_(last_mod_time) {}
+                                     package_property_t flags, ModDate last_mod_time)
+    : zip_handle_(handle), name_(std::move(path)), flags_(flags), last_mod_time_(last_mod_time) {
+}
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
                                                              package_property_t flags,
@@ -104,10 +102,10 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
     return {};
   }
 
-  struct stat sb{.st_mtime = -1};
+  ModDate mod_date = kInvalidModDate;
   // Skip all up-to-date checks if the file won't ever change.
-  if (!isReadonlyFilesystem(path.c_str())) {
-    if ((released_fd < 0 ? stat(path.c_str(), &sb) : fstat(released_fd, &sb)) < 0) {
+  if (isKnownWritablePath(path.c_str()) || !isReadonlyFilesystem(GetFileDescriptor(handle))) {
+    if (mod_date = getFileModDate(GetFileDescriptor(handle)); mod_date == kInvalidModDate) {
       // Stat requires execute permissions on all directories path to the file. If the process does
       // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
       // always have to return true.
@@ -116,7 +114,7 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(std::string path,
   }
 
   return std::unique_ptr<ZipAssetsProvider>(
-      new ZipAssetsProvider(handle, PathOrDebugName::Path(std::move(path)), flags, sb.st_mtime));
+      new ZipAssetsProvider(handle, PathOrDebugName::Path(std::move(path)), flags, mod_date));
 }
 
 std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
@@ -137,10 +135,10 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
     return {};
   }
 
-  struct stat sb{.st_mtime = -1};
+  ModDate mod_date = kInvalidModDate;
   // Skip all up-to-date checks if the file won't ever change.
   if (!isReadonlyFilesystem(released_fd)) {
-    if (fstat(released_fd, &sb) < 0) {
+    if (mod_date = getFileModDate(released_fd); mod_date == kInvalidModDate) {
       // Stat requires execute permissions on all directories path to the file. If the process does
       // not have execute permissions on this file, allow the zip to be opened but IsUpToDate() will
       // always have to return true.
@@ -150,7 +148,7 @@ std::unique_ptr<ZipAssetsProvider> ZipAssetsProvider::Create(base::unique_fd fd,
   }
 
   return std::unique_ptr<ZipAssetsProvider>(new ZipAssetsProvider(
-      handle, PathOrDebugName::DebugName(std::move(friendly_name)), flags, sb.st_mtime));
+      handle, PathOrDebugName::DebugName(std::move(friendly_name)), flags, mod_date));
 }
 
 std::unique_ptr<Asset> ZipAssetsProvider::OpenInternal(const std::string& path,
@@ -282,21 +280,16 @@ const std::string& ZipAssetsProvider::GetDebugName() const {
   return name_.GetDebugName();
 }
 
-bool ZipAssetsProvider::IsUpToDate() const {
-  if (last_mod_time_ == -1) {
-    return true;
+UpToDate ZipAssetsProvider::IsUpToDate() const {
+  if (last_mod_time_ == kInvalidModDate) {
+    return UpToDate::Always;
   }
-  struct stat sb{};
-  if (fstat(GetFileDescriptor(zip_handle_.get()), &sb) < 0) {
-    // If fstat fails on the zip archive, return true so the zip archive the resource system does
-    // attempt to refresh the ApkAsset.
-    return true;
-  }
-  return last_mod_time_ == sb.st_mtime;
+  return fromBool(last_mod_time_ == getFileModDate(GetFileDescriptor(zip_handle_.get())));
 }
 
-DirectoryAssetsProvider::DirectoryAssetsProvider(std::string&& path, time_t last_mod_time)
-    : dir_(std::move(path)), last_mod_time_(last_mod_time) {}
+DirectoryAssetsProvider::DirectoryAssetsProvider(std::string&& path, ModDate last_mod_time)
+    : dir_(std::move(path)), last_mod_time_(last_mod_time) {
+}
 
 std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::string path) {
   struct stat sb;
@@ -317,7 +310,7 @@ std::unique_ptr<DirectoryAssetsProvider> DirectoryAssetsProvider::Create(std::st
 
   const bool isReadonly = isReadonlyFilesystem(path.c_str());
   return std::unique_ptr<DirectoryAssetsProvider>(
-      new DirectoryAssetsProvider(std::move(path), isReadonly ? -1 : sb.st_mtime));
+      new DirectoryAssetsProvider(std::move(path), isReadonly ? kInvalidModDate : getModDate(sb)));
 }
 
 std::unique_ptr<Asset> DirectoryAssetsProvider::OpenInternal(const std::string& path,
@@ -346,17 +339,11 @@ const std::string& DirectoryAssetsProvider::GetDebugName() const {
   return dir_;
 }
 
-bool DirectoryAssetsProvider::IsUpToDate() const {
-  if (last_mod_time_ == -1) {
-    return true;
+UpToDate DirectoryAssetsProvider::IsUpToDate() const {
+  if (last_mod_time_ == kInvalidModDate) {
+    return UpToDate::Always;
   }
-  struct stat sb;
-  if (stat(dir_.c_str(), &sb) < 0) {
-    // If stat fails on the zip archive, return true so the zip archive the resource system does
-    // attempt to refresh the ApkAsset.
-    return true;
-  }
-  return last_mod_time_ == sb.st_mtime;
+  return fromBool(last_mod_time_ == getFileModDate(dir_.c_str()));
 }
 
 MultiAssetsProvider::MultiAssetsProvider(std::unique_ptr<AssetsProvider>&& primary,
@@ -397,8 +384,8 @@ const std::string& MultiAssetsProvider::GetDebugName() const {
   return debug_name_;
 }
 
-bool MultiAssetsProvider::IsUpToDate() const {
-  return primary_->IsUpToDate() && secondary_->IsUpToDate();
+UpToDate MultiAssetsProvider::IsUpToDate() const {
+  return combine(primary_->IsUpToDate(), [this] { return secondary_->IsUpToDate(); });
 }
 
 EmptyAssetsProvider::EmptyAssetsProvider(std::optional<std::string>&& path) :
@@ -442,8 +429,8 @@ const std::string& EmptyAssetsProvider::GetDebugName() const {
   return kEmpty;
 }
 
-bool EmptyAssetsProvider::IsUpToDate() const {
-  return true;
+UpToDate EmptyAssetsProvider::IsUpToDate() const {
+  return UpToDate::Always;
 }
 
 }  // namespace android
