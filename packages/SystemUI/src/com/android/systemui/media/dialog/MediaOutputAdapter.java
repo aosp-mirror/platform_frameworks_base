@@ -98,7 +98,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 ((MediaGroupDividerViewHolder) viewHolder).onBind(currentMediaItem.getTitle());
                 break;
             case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
-                ((MediaDeviceViewHolder) viewHolder).onBind(CUSTOMIZED_ITEM_PAIR_NEW);
+                ((MediaDeviceViewHolder) viewHolder).onBindPairNewDevice();
                 break;
             case MediaItem.MediaItemType.TYPE_DEVICE:
                 ((MediaDeviceViewHolder) viewHolder).onBind(
@@ -418,20 +418,18 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             updateIconAreaClickListener(listener);
         }
 
-        @Override
-        void onBind(int customizedItem) {
-            if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-                mTitleText.setTextColor(mController.getColorItemContent());
-                mCheckBox.setVisibility(View.GONE);
-                setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new));
-                final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
-                mTitleIcon.setImageDrawable(addDrawable);
-                mTitleIcon.setImageTintList(
-                        ColorStateList.valueOf(mController.getColorItemContent()));
-                mIconAreaLayout.setBackgroundTintList(
-                        ColorStateList.valueOf(mController.getColorItemBackground()));
-                mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
-            }
+        /** Binds a ViewHolder for a "Connect a device" item. */
+        void onBindPairNewDevice() {
+            mTitleText.setTextColor(mController.getColorItemContent());
+            mCheckBox.setVisibility(View.GONE);
+            setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new));
+            final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
+            mTitleIcon.setImageDrawable(addDrawable);
+            mTitleIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
+            mIconAreaLayout.setBackgroundTintList(
+                    ColorStateList.valueOf(mController.getColorItemBackground()));
+            mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
         }
 
         private void onGroupActionTriggered(boolean isChecked, MediaDevice device) {

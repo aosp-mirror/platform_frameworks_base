@@ -305,11 +305,6 @@ public class MediaSwitchingController
         }
     }
 
-    boolean shouldShowLaunchSection() {
-        // TODO(b/231398073): Implements this when available.
-        return false;
-    }
-
     public boolean isRefreshing() {
         return mIsRefreshing;
     }
