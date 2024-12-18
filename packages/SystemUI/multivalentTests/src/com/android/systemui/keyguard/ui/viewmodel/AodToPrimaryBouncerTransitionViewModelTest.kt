@@ -21,7 +21,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +44,8 @@ class AodToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {
 
             kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.0f, 0.3f, 0.4f, 0.5f, 1.0f),
-                startValue = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS,
-                endValue = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS,
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
                 transitionFactory = { value, state ->
                     TransitionStep(
                         from = KeyguardState.AOD,

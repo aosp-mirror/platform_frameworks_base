@@ -24,10 +24,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -45,6 +44,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 class PrimaryBouncerToAodTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition, PrimaryBouncerTransition {
@@ -84,8 +84,8 @@ constructor(
         transitionAnimation.sharedFlow(
             duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
             onStep = { step ->
-                MathUtils.lerp(MAX_BACKGROUND_BLUR_RADIUS, MIN_BACKGROUND_BLUR_RADIUS, step)
+                MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, step)
             },
-            onFinish = { MIN_BACKGROUND_BLUR_RADIUS },
+            onFinish = { blurConfig.minBlurRadiusPx },
         )
 }

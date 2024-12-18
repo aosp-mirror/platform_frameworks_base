@@ -70,6 +70,7 @@ class BouncerWindowBlurTestUtil(
         if (checkInterpolatedValues) {
             assertThat(actualValuesProvider.invoke())
                 .containsExactly(*transitionProgress.map(interpolationFunction).toTypedArray())
+                .inOrder()
         } else {
             assertThat(actualValuesProvider.invoke()).contains(endValue)
         }

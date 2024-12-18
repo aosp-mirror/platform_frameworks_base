@@ -111,8 +111,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
             answer.arguments[0] as Float / maxBlur.toFloat()
         }
         `when`(blurUtils.supportsBlursOnWindows()).thenReturn(true)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController =
             NotificationShadeDepthController(
@@ -322,8 +322,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(blurUtils.ratioOfBlurRadius(anyFloat())).then { answer ->
             answer.arguments[0] as Float / maxBlur.toFloat()
         }
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController.transitionToFullShadeProgress = 1f
         notificationShadeDepthController.updateBlurCallback.doFrame(0)

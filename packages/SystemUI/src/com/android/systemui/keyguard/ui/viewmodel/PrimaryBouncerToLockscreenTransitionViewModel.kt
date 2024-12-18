@@ -24,10 +24,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,6 +42,7 @@ import kotlinx.coroutines.flow.Flow
 class PrimaryBouncerToLockscreenTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     animationFlow: KeyguardTransitionAnimationFlow,
     shadeDependentFlows: ShadeDependentFlows,
 ) : DeviceEntryIconTransition, PrimaryBouncerTransition {
@@ -78,12 +78,12 @@ constructor(
     override val windowBlurRadius: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsExpanded =
-                transitionAnimation.immediatelyTransitionTo(MAX_BACKGROUND_BLUR_RADIUS),
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
             flowWhenShadeIsNotExpanded =
                 transitionAnimation.sharedFlow(
                     duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
                     onStep = {
-                        MathUtils.lerp(MAX_BACKGROUND_BLUR_RADIUS, MIN_BACKGROUND_BLUR_RADIUS, it)
+                        MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, it)
                     },
                 ),
         )

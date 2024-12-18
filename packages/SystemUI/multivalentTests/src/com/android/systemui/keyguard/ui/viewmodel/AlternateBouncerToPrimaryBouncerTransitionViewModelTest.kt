@@ -27,7 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
@@ -79,8 +79,8 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
 
             kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
-                startValue = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS,
-                endValue = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS,
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
                 checkInterpolatedValues = false,
                 transitionFactory = ::step,
                 actualValuesProvider = { values },
@@ -95,8 +95,8 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
 
             kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
-                startValue = PrimaryBouncerTransition.MIN_BACKGROUND_BLUR_RADIUS,
-                endValue = PrimaryBouncerTransition.MAX_BACKGROUND_BLUR_RADIUS,
+                startValue = kosmos.blurConfig.minBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
                 transitionFactory = ::step,
                 actualValuesProvider = { values },
             )

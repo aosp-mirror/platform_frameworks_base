@@ -111,6 +111,8 @@ constructor(
     // Only for dumpsys
     private var lastAppliedBlur = 0
 
+    val maxBlurRadiusPx = blurUtils.maxBlurRadius
+
     // Shade expansion offset that happens when pulling down on a HUN.
     var panelPullDownMinFraction = 0f
 
@@ -198,8 +200,8 @@ constructor(
         val animationRadius =
             MathUtils.constrain(
                 shadeAnimation.radius,
-                blurUtils.minBlurRadius.toFloat(),
-                blurUtils.maxBlurRadius.toFloat(),
+                blurUtils.minBlurRadius,
+                blurUtils.maxBlurRadius,
             )
         val expansionRadius =
             blurUtils.blurRadiusOfRatio(
