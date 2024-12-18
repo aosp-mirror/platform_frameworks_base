@@ -5707,6 +5707,7 @@ public final class Settings {
          * The value 1 - enable, 0 - disable
          * @hide
          */
+        @Readable
         public static final String NOTIFICATION_COOLDOWN_ENABLED =
             "notification_cooldown_enabled";
 
