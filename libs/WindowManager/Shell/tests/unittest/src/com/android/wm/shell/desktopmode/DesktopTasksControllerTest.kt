@@ -4160,8 +4160,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
                         screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
                         configuration.windowConfiguration.appBounds = bounds
                     }
-                appCompatTaskInfo.topActivityLetterboxAppWidth = bounds.width()
-                appCompatTaskInfo.topActivityLetterboxAppHeight = bounds.height()
+                appCompatTaskInfo.topActivityAppBounds.set(0, 0, bounds.width(), bounds.height())
                 isResizeable = false
             }
 
@@ -4879,15 +4878,19 @@ class DesktopTasksControllerTest : ShellTestCase() {
             appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
             if (deviceOrientation == ORIENTATION_LANDSCAPE) {
-                configuration.windowConfiguration.appBounds =
-                    Rect(0, 0, DISPLAY_DIMENSION_LONG, DISPLAY_DIMENSION_SHORT)
-                appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_LONG
-                appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_SHORT
+                appCompatTaskInfo.topActivityAppBounds.set(
+                    0,
+                    0,
+                    DISPLAY_DIMENSION_LONG,
+                    DISPLAY_DIMENSION_SHORT,
+                )
             } else {
-                configuration.windowConfiguration.appBounds =
-                    Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
-                appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_SHORT
-                appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_LONG
+                appCompatTaskInfo.topActivityAppBounds.set(
+                    0,
+                    0,
+                    DISPLAY_DIMENSION_SHORT,
+                    DISPLAY_DIMENSION_LONG,
+                )
             }
 
             if (shouldLetterbox) {
@@ -4897,17 +4900,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
                         screenOrientation == SCREEN_ORIENTATION_PORTRAIT
                 ) {
                     // Letterbox to portrait size
-                    appCompatTaskInfo.setTopActivityLetterboxed(true)
-                    appCompatTaskInfo.topActivityLetterboxAppWidth = 1200
-                    appCompatTaskInfo.topActivityLetterboxAppHeight = 1600
+                    appCompatTaskInfo.isTopActivityLetterboxed = true
+                    appCompatTaskInfo.topActivityAppBounds.set(0, 0, 1200, 1600)
                 } else if (
                     deviceOrientation == ORIENTATION_PORTRAIT &&
                         screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
                 ) {
                     // Letterbox to landscape size
-                    appCompatTaskInfo.setTopActivityLetterboxed(true)
-                    appCompatTaskInfo.topActivityLetterboxAppWidth = 1600
-                    appCompatTaskInfo.topActivityLetterboxAppHeight = 1200
+                    appCompatTaskInfo.isTopActivityLetterboxed = true
+                    appCompatTaskInfo.topActivityAppBounds.set(0, 0, 1600, 1200)
                 }
             }
         }
