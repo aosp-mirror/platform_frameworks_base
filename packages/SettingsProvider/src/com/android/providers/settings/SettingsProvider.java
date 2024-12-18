@@ -120,6 +120,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
@@ -2914,6 +2915,14 @@ public class SettingsProvider extends ContentProvider {
         };
     }
 
+    @VisibleForTesting
+    void injectServices(UserManager userManager, IPackageManager packageManager,
+            SystemConfigManager sysConfigManager) {
+        mUserManager = userManager;
+        mPackageManager = packageManager;
+        mSysConfigManager = sysConfigManager;
+    }
+
     private static final class Arguments {
         private static final Pattern WHERE_PATTERN_WITH_PARAM_NO_BRACKETS =
                 Pattern.compile("[\\s]*name[\\s]*=[\\s]*\\?[\\s]*");
@@ -3080,6 +3089,7 @@ public class SettingsProvider extends ContentProvider {
 
         private static final String SSAID_USER_KEY = "userkey";
 
+        @GuardedBy("mLock")
         private final SparseArray<SettingsState> mSettingsStates = new SparseArray<>();
 
         private GenerationRegistry mGenerationRegistry;
@@ -3992,6 +4002,14 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        @VisibleForTesting
+        void injectSettings(SettingsState settings, int type, int userId) {
+            int key = makeKey(type, userId);
+            synchronized (mLock) {
+                mSettingsStates.put(key, settings);
+            }
+        }
+
         private final class MyHandler extends Handler {
             private static final int MSG_NOTIFY_URI_CHANGED = 1;
             private static final int MSG_NOTIFY_DATA_CHANGED = 2;
@@ -4023,12 +4041,21 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        private final class UpgradeController {
+        @VisibleForTesting
+        final class UpgradeController {
             private static final int SETTINGS_VERSION = 226;
 
             private final int mUserId;
 
+            private final Injector mInjector;
+
             public UpgradeController(int userId) {
+                this(/* injector= */ null, userId);
+            }
+
+            @VisibleForTesting
+            UpgradeController(Injector injector, int userId) {
+                mInjector = injector == null ? new Injector() : injector;
                 mUserId = userId;
             }
 
@@ -6136,8 +6163,8 @@ public class SettingsProvider extends ContentProvider {
                             systemSettings.getSettingLocked(Settings.System.PEAK_REFRESH_RATE);
                     final Setting minRefreshRateSetting =
                             systemSettings.getSettingLocked(Settings.System.MIN_REFRESH_RATE);
-                    float highestRefreshRate = RefreshRateSettingsUtils
-                            .findHighestRefreshRateForDefaultDisplay(getContext());
+                    float highestRefreshRate =
+                            mInjector.findHighestRefreshRateForDefaultDisplay(getContext());
 
                     if (!peakRefreshRateSetting.isNull()) {
                         try {
@@ -6317,6 +6344,14 @@ public class SettingsProvider extends ContentProvider {
 
             private long getBitMask(int capability) {
                 return 1 << (capability - 1);
+            }
+
+            @VisibleForTesting
+            static class Injector {
+                float findHighestRefreshRateForDefaultDisplay(Context context) {
+                    return RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(
+                            context);
+                }
             }
         }
 
