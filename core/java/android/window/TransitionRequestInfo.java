@@ -115,8 +115,11 @@ public final class TransitionRequestInfo implements Parcelable {
     @DataClass(genToString = true, genSetters = true, genBuilder = false, genConstructor = false)
     public static final class DisplayChange implements Parcelable {
         private final int mDisplayId;
+
+        // If non-null, these bounds changes should ignore any potential rotation changes.
         @Nullable private Rect mStartAbsBounds = null;
         @Nullable private Rect mEndAbsBounds = null;
+
         private int mStartRotation = WindowConfiguration.ROTATION_UNDEFINED;
         private int mEndRotation = WindowConfiguration.ROTATION_UNDEFINED;
         private boolean mPhysicalDisplayChanged = false;
@@ -471,7 +474,7 @@ public final class TransitionRequestInfo implements Parcelable {
                 "pipTask = " + mPipTask + ", " +
                 "remoteTransition = " + mRemoteTransition + ", " +
                 "displayChange = " + mDisplayChange + ", " +
-                "flags = " + mFlags + ", " +
+                "flags = " + Integer.toHexString(mFlags) + ", " +
                 "debugId = " + mDebugId +
         " }";
     }

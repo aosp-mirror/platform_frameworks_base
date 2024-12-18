@@ -28,6 +28,12 @@ object QSTileInputTestKtx {
         expandable: Expandable? = null,
     ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.Click(expandable), data)
 
+    fun <T> toggleClick(
+        data: T,
+        user: UserHandle = UserHandle.CURRENT,
+        expandable: Expandable? = null,
+    ): QSTileInput<T> = QSTileInput(user, QSTileUserAction.ToggleClick(expandable), data)
+
     fun <T> longClick(
         data: T,
         user: UserHandle = UserHandle.CURRENT,

@@ -57,8 +57,8 @@ interface SettingsPageProvider {
     /**
      * The API to indicate whether the page is enabled or not.
      * During SPA page migration, one can use it to enable certain pages in one release.
-     * When the page is disabled, all its related functionalities, such as browsing, search,
-     * slice provider, are disabled as well.
+     * When the page is disabled, all its related functionalities, such as browsing and search,
+     * are disabled as well.
      */
     fun isEnabled(arguments: Bundle?): Boolean = true
 

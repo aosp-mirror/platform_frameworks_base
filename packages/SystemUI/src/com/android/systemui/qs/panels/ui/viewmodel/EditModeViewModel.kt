@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import android.content.Context
+import androidx.compose.ui.util.fastMap
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.EditTilesListInteractor
@@ -27,32 +30,36 @@ import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.MinimumTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.util.kotlin.emitOnStart
+import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
-import javax.inject.Named
 
 @SysUISingleton
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditModeViewModel
 @Inject
 constructor(
-        private val editTilesListInteractor: EditTilesListInteractor,
-        private val currentTilesInteractor: CurrentTilesInteractor,
-        private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
-        private val minTilesInteractor: MinimumTilesInteractor,
-        @Named("Default") private val defaultGridLayout: GridLayout,
-        @Application private val applicationScope: CoroutineScope,
-        gridLayoutTypeInteractor: GridLayoutTypeInteractor,
-        gridLayoutMap: Map<GridLayoutType, @JvmSuppressWildcards GridLayout>,
+    private val editTilesListInteractor: EditTilesListInteractor,
+    private val currentTilesInteractor: CurrentTilesInteractor,
+    private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
+    private val minTilesInteractor: MinimumTilesInteractor,
+    private val configurationInteractor: ConfigurationInteractor,
+    @Application private val applicationContext: Context,
+    @Named("Default") private val defaultGridLayout: GridLayout,
+    @Application private val applicationScope: CoroutineScope,
+    gridLayoutTypeInteractor: GridLayoutTypeInteractor,
+    gridLayoutMap: Map<GridLayoutType, @JvmSuppressWildcards GridLayout>,
 ) {
     private val _isEditing = MutableStateFlow(false)
 
@@ -93,19 +100,22 @@ constructor(
                 val editTilesData = editTilesListInteractor.getTilesToEdit()
                 // Query only the non current platform tiles, as any current tile is clearly
                 // available
-                val unavailable = tilesAvailabilityInteractor.getUnavailableTiles(
-                        editTilesData.stockTiles.map { it.tileSpec }
-                                .minus(currentTilesInteractor.currentTilesSpecs.toSet())
-                )
-                currentTilesInteractor.currentTiles.map { tiles ->
-                    val currentSpecs = tiles.map { it.spec }
-                    val canRemoveTiles = currentSpecs.size > minimumTiles
-                    val allTiles = editTilesData.stockTiles + editTilesData.customTiles
-                    val allTilesMap = allTiles.associate { it.tileSpec to it }
-                    val currentTiles = currentSpecs.map { allTilesMap.get(it) }.filterNotNull()
-                    val nonCurrentTiles = allTiles.filter { it.tileSpec !in currentSpecs }
+                val unavailable =
+                    tilesAvailabilityInteractor.getUnavailableTiles(
+                        editTilesData.stockTiles
+                            .map { it.tileSpec }
+                            .minus(currentTilesInteractor.currentTilesSpecs.toSet())
+                    )
+                currentTilesInteractor.currentTiles
+                    .map { tiles ->
+                        val currentSpecs = tiles.map { it.spec }
+                        val canRemoveTiles = currentSpecs.size > minimumTiles
+                        val allTiles = editTilesData.stockTiles + editTilesData.customTiles
+                        val allTilesMap = allTiles.associate { it.tileSpec to it }
+                        val currentTiles = currentSpecs.map { allTilesMap.get(it) }.filterNotNull()
+                        val nonCurrentTiles = allTiles.filter { it.tileSpec !in currentSpecs }
 
-                    (currentTiles + nonCurrentTiles)
+                        (currentTiles + nonCurrentTiles)
                             .filterNot { it.tileSpec in unavailable }
                             .map {
                                 val current = it.tileSpec in currentSpecs
@@ -119,16 +129,22 @@ constructor(
                                         add(AvailableEditActions.ADD)
                                     }
                                 }
-                                EditTileViewModel(
-                                        it.tileSpec,
-                                        it.icon,
-                                        it.label,
-                                        it.appName,
-                                        current,
-                                        availableActions
+                                UnloadedEditTileViewModel(
+                                    it.tileSpec,
+                                    it.icon,
+                                    it.label,
+                                    it.appName,
+                                    current,
+                                    availableActions,
+                                    it.category,
                                 )
                             }
-                }
+                    }
+                    .combine(configurationInteractor.onAnyConfigurationChange.emitOnStart()) {
+                        tiles,
+                        _ ->
+                        tiles.fastMap { it.load(applicationContext) }
+                    }
             } else {
                 emptyFlow()
             }
@@ -144,19 +160,41 @@ constructor(
         _isEditing.value = false
     }
 
-    /** Immediately moves [tileSpec] to [position]. */
-    fun moveTile(tileSpec: TileSpec, position: Int) {
-        throw NotImplementedError("This is not supported yet")
-    }
-
-    /** Immediately adds [tileSpec] to the current tiles at [position]. */
+    /**
+     * Immediately adds [tileSpec] to the current tiles at [position]. If the [tileSpec] was already
+     * present, it will be moved to the new position.
+     */
     fun addTile(tileSpec: TileSpec, position: Int = POSITION_AT_END) {
-        currentTilesInteractor.addTile(tileSpec, position)
+        val specs = currentTilesInteractor.currentTilesSpecs.toMutableList()
+        val currentPosition = specs.indexOf(tileSpec)
+
+        if (currentPosition != -1) {
+            // No operation needed if the element is already in the list at the right position
+            if (currentPosition == position) {
+                return
+            }
+            // Removing tile if it's present at a different position to insert it at the new index.
+            specs.removeAt(currentPosition)
+        }
+
+        if (position >= 0 && position < specs.size) {
+            specs.add(position, tileSpec)
+        } else {
+            specs.add(tileSpec)
+        }
+
+        // Setting the new tiles as one operation to avoid UI jank with tiles disappearing and
+        // reappearing
+        currentTilesInteractor.setTiles(specs)
     }
 
     /** Immediately removes [tileSpec] from the current tiles. */
     fun removeTile(tileSpec: TileSpec) {
         currentTilesInteractor.removeTiles(listOf(tileSpec))
+    }
+
+    fun setTiles(tileSpecs: List<TileSpec>) {
+        currentTilesInteractor.setTiles(tileSpecs)
     }
 
     /** Immediately resets the current tiles to the default list. */

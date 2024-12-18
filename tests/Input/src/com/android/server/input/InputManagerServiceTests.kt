@@ -17,8 +17,12 @@
 package com.android.server.input
 
 
+import android.Manifest
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.PermissionChecker
+import android.content.pm.PackageManager
+import android.content.pm.PackageManagerInternal
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayViewport
 import android.hardware.display.VirtualDisplay
@@ -27,20 +31,30 @@ import android.hardware.input.InputManagerGlobal
 import android.os.InputEventInjectionSync
 import android.os.SystemClock
 import android.os.test.TestLooper
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
-import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
 import android.view.View.OnKeyListener
 import android.view.InputDevice
+import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.WindowManager
 import android.test.mock.MockContentResolver
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.internal.util.test.FakeSettingsProvider
-import com.google.common.truth.Truth.assertThat
 import com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity
+import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.internal.policy.KeyInterceptionInfo
+import com.android.internal.util.test.FakeSettingsProvider
+import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.server.LocalServices
+import com.android.server.wm.WindowManagerInternal
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -49,15 +63,15 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when`
 import org.mockito.stubbing.OngoingStubbing
 
 /**
@@ -69,14 +83,28 @@ import org.mockito.stubbing.OngoingStubbing
 @Presubmit
 class InputManagerServiceTests {
 
-    @get:Rule
-    val mockitoRule = MockitoJUnit.rule()!!
+    companion object {
+        val ACTION_KEY_EVENTS = listOf(
+            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_META_LEFT),
+            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_META_RIGHT),
+            KeyEvent( /* downTime= */0, /* eventTime= */0, /* action= */0, /* code= */0,
+                /* repeat= */0, KeyEvent.META_META_ON
+            )
+        )
+    }
+
+    @JvmField
+    @Rule
+    val extendedMockitoRule =
+        ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java)
+            .mockStatic(PermissionChecker::class.java).build()!!
+
+    @JvmField
+    @Rule
+    val setFlagsRule = SetFlagsRule()
 
     @get:Rule
     val fakeSettingsProviderRule = FakeSettingsProvider.rule()!!
-
-    @get:Rule
-    val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()!!
 
     @Mock
     private lateinit var native: NativeInputManagerService
@@ -85,7 +113,16 @@ class InputManagerServiceTests {
     private lateinit var wmCallbacks: InputManagerService.WindowManagerCallbacks
 
     @Mock
+    private lateinit var windowManagerInternal: WindowManagerInternal
+
+    @Mock
+    private lateinit var packageManagerInternal: PackageManagerInternal
+
+    @Mock
     private lateinit var uEventManager: UEventManager
+
+    @Mock
+    private lateinit var kbdController: InputManagerService.KeyboardBacklightControllerInterface
 
     private lateinit var service: InputManagerService
     private lateinit var localService: InputManagerInternal
@@ -113,11 +150,29 @@ class InputManagerServiceTests {
                 override fun registerLocalService(service: InputManagerInternal?) {
                     localService = service!!
                 }
+
+                override fun getKeyboardBacklightController(
+                    nativeService: NativeInputManagerService?,
+                    dataStore: PersistentDataStore?
+                ): InputManagerService.KeyboardBacklightControllerInterface {
+                    return kbdController
+                }
             })
         inputManagerGlobalSession = InputManagerGlobal.createTestSession(service)
         val inputManager = InputManager(context)
         whenever(context.getSystemService(InputManager::class.java)).thenReturn(inputManager)
         whenever(context.getSystemService(Context.INPUT_SERVICE)).thenReturn(inputManager)
+        whenever(context.checkCallingOrSelfPermission(Manifest.permission.MANAGE_KEY_GESTURES))
+            .thenReturn(
+                PackageManager.PERMISSION_GRANTED
+            )
+
+        ExtendedMockito.doReturn(windowManagerInternal).`when` {
+            LocalServices.getService(eq(WindowManagerInternal::class.java))
+        }
+        ExtendedMockito.doReturn(packageManagerInternal).`when` {
+            LocalServices.getService(eq(PackageManagerInternal::class.java))
+        }
 
         assertTrue("Local service must be registered", this::localService.isInitialized)
         service.setWindowManagerCallbacks(wmCallbacks)
@@ -151,14 +206,16 @@ class InputManagerServiceTests {
         verify(native).setTouchpadNaturalScrollingEnabled(anyBoolean())
         verify(native).setTouchpadTapToClickEnabled(anyBoolean())
         verify(native).setTouchpadTapDraggingEnabled(anyBoolean())
+        verify(native).setShouldNotifyTouchpadHardwareState(anyBoolean())
         verify(native).setTouchpadRightClickZoneEnabled(anyBoolean())
         verify(native).setShowTouches(anyBoolean())
         verify(native).setMotionClassifierEnabled(anyBoolean())
         verify(native).setMaximumObscuringOpacityForTouch(anyFloat())
         verify(native).setStylusPointerIconEnabled(anyBoolean())
-        // Called twice at boot, since there are individual callbacks to update the
-        // key repeat timeout and the key repeat delay.
-        verify(native, times(2)).setKeyRepeatConfiguration(anyInt(), anyInt())
+        // Called thrice at boot, since there are individual callbacks to update the
+        // key repeat timeout, the key repeat delay and whether key repeat enabled.
+        verify(native, times(3)).setKeyRepeatConfiguration(anyInt(), anyInt(),
+            anyBoolean())
     }
 
     @Test
@@ -194,7 +251,7 @@ class InputManagerServiceTests {
     }
 
     @Test
-    fun testAddAndRemoveVirtualmKeyboardLayoutAssociation() {
+    fun testAddAndRemoveVirtualKeyboardLayoutAssociation() {
         val inputPort = "input port"
         val languageTag = "language"
         val layoutType = "layoutType"
@@ -203,6 +260,48 @@ class InputManagerServiceTests {
 
         localService.removeKeyboardLayoutAssociation(inputPort)
         verify(native, times(2)).changeKeyboardLayoutAssociation()
+    }
+
+    @Test
+    fun testActionKeyEventsForwardedToFocusedWindow_whenCorrectlyRequested() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */true,
+            /* hasPrivateFlag = */true
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
+    }
+
+    @Test
+    fun testActionKeyEventsNotForwardedToFocusedWindow_whenNoPermissions() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */false,
+            /* hasPrivateFlag = */true
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertNotEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
+    }
+
+    @Test
+    fun testActionKeyEventsNotForwardedToFocusedWindow_whenNoPrivateFlag() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */true,
+            /* hasPrivateFlag = */false
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertNotEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
     }
 
     private fun createVirtualDisplays(count: Int): List<VirtualDisplay> {
@@ -371,6 +470,91 @@ class InputManagerServiceTests {
         // Verify that the event went to Display 2 not Display 1
         verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
         verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun handleKeyGestures_keyboardBacklight() {
+        service.systemRunning()
+
+        val backlightDownEvent = createKeyEvent(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN)
+        service.interceptKeyBeforeDispatching(null, backlightDownEvent, /* policyFlags = */0)
+        verify(kbdController).decrementKeyboardBacklight(anyInt())
+
+        val backlightUpEvent = createKeyEvent(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP)
+        service.interceptKeyBeforeDispatching(null, backlightUpEvent, /* policyFlags = */0)
+        verify(kbdController).incrementKeyboardBacklight(anyInt())
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun handleKeyGestures_toggleCapsLock() {
+        service.systemRunning()
+
+        val metaDownEvent = createKeyEvent(KeyEvent.KEYCODE_META_LEFT)
+        service.interceptKeyBeforeDispatching(null, metaDownEvent, /* policyFlags = */0)
+        val altDownEvent =
+            createKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_META_ON, KeyEvent.ACTION_DOWN)
+        service.interceptKeyBeforeDispatching(null, altDownEvent, /* policyFlags = */0)
+        val altUpEvent =
+            createKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_META_ON, KeyEvent.ACTION_UP)
+        service.interceptKeyBeforeDispatching(null, altUpEvent, /* policyFlags = */0)
+
+        verify(native).toggleCapsLock(anyInt())
+    }
+
+    fun overrideSendActionKeyEventsToFocusedWindow(
+        hasPermission: Boolean,
+        hasPrivateFlag: Boolean
+    ) {
+        ExtendedMockito.doReturn(
+            if (hasPermission) {
+                PermissionChecker.PERMISSION_GRANTED
+            } else {
+                PermissionChecker.PERMISSION_HARD_DENIED
+            }
+        ).`when` {
+            PermissionChecker.checkPermissionForDataDelivery(
+                any(),
+                eq(Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW),
+                anyInt(),
+                anyInt(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        val info = KeyInterceptionInfo(
+            /* type = */0,
+            if (hasPrivateFlag) {
+                WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS
+            } else {
+                0
+            },
+            "title",
+            /* uid = */0
+        )
+        whenever(windowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info)
+    }
+
+    private fun createKeyEvent(
+        keycode: Int,
+        modifierState: Int = 0,
+        action: Int = KeyEvent.ACTION_DOWN
+    ): KeyEvent {
+        return KeyEvent(
+            /* downTime = */0,
+            /* eventTime = */0,
+            action,
+            keycode,
+            /* repeat = */0,
+            modifierState,
+            KeyCharacterMap.VIRTUAL_KEYBOARD,
+            /* scancode = */0,
+            /* flags = */0,
+            InputDevice.SOURCE_KEYBOARD
+        )
     }
 }
 

@@ -1,3 +1,7 @@
 mmm -j8 frameworks/base/libs/hwui &&
 adb push $OUT/data/benchmarktest/hwuimicro/hwuimicro /data/benchmarktest/hwuimicro/hwuimicro &&
 adb shell /data/benchmarktest/hwuimicro/hwuimicro
+
+OR
+
+atest hwuimicro

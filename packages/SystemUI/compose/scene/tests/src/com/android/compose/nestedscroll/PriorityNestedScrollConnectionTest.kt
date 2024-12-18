@@ -70,7 +70,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag
+            source = NestedScrollSource.Drag,
         )
         assertThat(isStarted).isEqualTo(false)
 
@@ -89,7 +89,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag
+            source = NestedScrollSource.Drag,
         )
     }
 
@@ -115,7 +115,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag
+            source = NestedScrollSource.Drag,
         )
         assertThat(isStarted).isEqualTo(false)
 
@@ -130,7 +130,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = offset1,
             available = offset2,
-            source = NestedScrollSource.Drag
+            source = NestedScrollSource.Drag,
         )
 
         assertThat(lastScroll).isEqualTo(offset2)
@@ -184,10 +184,7 @@ class PriorityNestedScrollConnectionTest {
     fun receive_onPostFling() = runTest {
         canStartPostFling = true
 
-        scrollConnection.onPostFling(
-            consumed = velocity1,
-            available = velocity2,
-        )
+        scrollConnection.onPostFling(consumed = velocity1, available = velocity2)
 
         assertThat(lastStop).isEqualTo(velocity2)
     }
@@ -202,7 +199,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag
+            source = NestedScrollSource.Drag,
         )
         assertThat(isStarted).isEqualTo(false)
 

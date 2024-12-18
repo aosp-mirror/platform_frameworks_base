@@ -50,7 +50,6 @@ constructor(
         fromState: KeyguardState,
         toState: KeyguardState,
     ) {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         val toScene =
             if (fromState == KeyguardState.GLANCEABLE_HUB) {
@@ -63,16 +62,16 @@ constructor(
         communalInteractor
             .transitionProgressToScene(toScene)
             .sample(
-                transitionInteractor.startedKeyguardState,
+                transitionInteractor.startedKeyguardTransitionStep,
                 ::Pair,
             )
-            .collect { (transitionProgress, lastStartedState) ->
+            .collect { (transitionProgress, lastStartedStep) ->
                 val id = transitionId
                 if (id == null) {
                     // No transition started.
                     if (
                         transitionProgress is CommunalTransitionProgressModel.Transition &&
-                            lastStartedState == fromState
+                            lastStartedStep.to == fromState
                     ) {
                         transitionId =
                             transitionRepository.startTransition(
@@ -85,7 +84,7 @@ constructor(
                             )
                     }
                 } else {
-                    if (lastStartedState != toState) {
+                    if (lastStartedStep.to != toState) {
                         return@collect
                     }
                     // An existing `id` means a transition is started, and calls to

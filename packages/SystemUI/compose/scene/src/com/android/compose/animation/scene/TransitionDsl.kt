@@ -17,13 +17,16 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.animation.scene.content.state.TransitionState
+import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -47,53 +50,77 @@ interface SceneTransitionsBuilder {
     var interruptionHandler: InterruptionHandler
 
     /**
-     * Define the default animation to be played when transitioning [to] the specified scene, from
-     * any scene. For the animation specification to apply only when transitioning between two
-     * specific scenes, use [from] instead.
+     * Default [ProgressConverter] used during overscroll. It lets you change a linear progress into
+     * a function of your choice. Defaults to [ProgressConverter.Default].
+     */
+    var defaultOverscrollProgressConverter: ProgressConverter
+
+    /**
+     * Define the default animation to be played when transitioning [to] the specified content, from
+     * any content. For the animation specification to apply only when transitioning between two
+     * specific contents, use [from] instead.
      *
      * If [key] is not `null`, then this transition will only be used if the same key is specified
      * when triggering the transition.
      *
+     * Optionally, define a [preview] animation which will be played during the first stage of the
+     * transition, e.g. during the predictive back gesture. In case your transition should be
+     * reversible with the reverse animation having a preview as well, define a [reversePreview].
+     *
      * @see from
      */
     fun to(
-        to: SceneKey,
+        to: ContentKey,
         key: TransitionKey? = null,
+        preview: (TransitionBuilder.() -> Unit)? = null,
+        reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 
     /**
-     * Define the animation to be played when transitioning [from] the specified scene. For the
-     * animation specification to apply only when transitioning between two specific scenes, pass
-     * the destination scene via the [to] argument.
+     * Define the animation to be played when transitioning [from] the specified content. For the
+     * animation specification to apply only when transitioning between two specific contents, pass
+     * the destination content via the [to] argument.
      *
-     * When looking up which transition should be used when animating from scene A to scene B, we
-     * pick the single transition with the given [key] and matching one of these predicates (in
+     * When looking up which transition should be used when animating from content A to content B,
+     * we pick the single transition with the given [key] and matching one of these predicates (in
      * order of importance):
      * 1. from == A && to == B
      * 2. to == A && from == B, which is then treated in reverse.
      * 3. (from == A && to == null) || (from == null && to == B)
      * 4. (from == B && to == null) || (from == null && to == A), which is then treated in reverse.
+     *
+     * Optionally, define a [preview] animation which will be played during the first stage of the
+     * transition, e.g. during the predictive back gesture. In case your transition should be
+     * reversible with the reverse animation having a preview as well, define a [reversePreview].
      */
     fun from(
-        from: SceneKey,
-        to: SceneKey? = null,
+        from: ContentKey,
+        to: ContentKey? = null,
         key: TransitionKey? = null,
+        preview: (TransitionBuilder.() -> Unit)? = null,
+        reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
     ): TransitionSpec
 
     /**
-     * Define the animation to be played when the [scene] is overscrolled in the given
+     * Define the animation to be played when the [content] is overscrolled in the given
      * [orientation].
      *
      * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
      * [distance] down/right, -1f when moving in the opposite direction.
      */
     fun overscroll(
-        scene: SceneKey,
+        content: ContentKey,
         orientation: Orientation,
-        builder: OverscrollBuilder.() -> Unit = {},
+        builder: OverscrollBuilder.() -> Unit,
     ): OverscrollSpec
+
+    /**
+     * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
+     * eventually consume the remaining gesture.
+     */
+    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
@@ -122,6 +149,7 @@ interface BaseTransitionBuilder : PropertyTransformationBuilder {
     fun fractionRange(
         start: Float? = null,
         end: Float? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 }
@@ -164,6 +192,7 @@ interface TransitionBuilder : BaseTransitionBuilder {
     fun timestampRange(
         startMillis: Int? = null,
         endMillis: Int? = null,
+        easing: Easing = LinearEasing,
         builder: PropertyTransformationBuilder.() -> Unit,
     )
 
@@ -185,6 +214,17 @@ interface TransitionBuilder : BaseTransitionBuilder {
 
 @TransitionDsl
 interface OverscrollBuilder : BaseTransitionBuilder {
+    /**
+     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
+     * outputs the desired **overscroll progress value**.
+     *
+     * When the progress value is:
+     * - 0, the user is not overscrolling.
+     * - 1, the user overscrolled by exactly the [distance].
+     * - Greater than 1, the user overscrolled more than the [distance].
+     */
+    var progressConverter: ProgressConverter?
+
     /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
     fun translate(
         matcher: ElementMatcher,
@@ -204,98 +244,174 @@ interface OverscrollScope : Density {
 /**
  * An interface to decide where we should draw shared Elements or compose MovableElements.
  *
- * @see DefaultElementScenePicker
- * @see HighestZIndexScenePicker
- * @see LowestZIndexScenePicker
- * @see MovableElementScenePicker
+ * @see DefaultElementContentPicker
+ * @see HighestZIndexContentPicker
+ * @see LowestZIndexContentPicker
+ * @see MovableElementContentPicker
  */
-interface ElementScenePicker {
+interface ElementContentPicker {
     /**
-     * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the given [transition]. If this element
-     * should not be drawn or composed in neither [transition.fromScene] nor [transition.toScene],
-     * return `null`.
+     * Return the content in which [element] should be drawn (when using `Modifier.element(key)`) or
+     * composed (when using `MovableElement(key)`) during the given [transition].
      *
-     * Important: For [MovableElements][SceneScope.MovableElement], this scene picker will *always*
-     * be used during transitions to decide whether we should compose that element in a given scene
-     * or not. Therefore, you should make sure that the returned [SceneKey] contains the movable
-     * element, otherwise that element will not be composed in any scene during the transition.
+     * Important: For [MovableElements][ContentScope.MovableElement], this content picker will
+     * *always* be used during transitions to decide whether we should compose that element in a
+     * given content or not. Therefore, you should make sure that the returned [ContentKey] contains
+     * the movable element, otherwise that element will not be composed in any scene during the
+     * transition.
      */
-    fun sceneDuringTransition(
+    fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float,
-    ): SceneKey?
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey
 
     /**
-     * Return [transition.fromScene] if it is in [scenes] and [transition.toScene] is not, or return
-     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not. If neither
-     * [transition.fromScene] and [transition.toScene] are in [scenes], return `null`. If both
-     * [transition.fromScene] and [transition.toScene] are in [scenes], throw an exception.
+     * Return [transition.fromContent] if it is in [contents] and [transition.toContent] is not, or
+     * return [transition.toContent] if it is in [contents] and [transition.fromContent] is not. If
+     * neither [transition.toContent] and [transition.fromContent] are in [contents] or if both
+     * [transition.fromContent] and [transition.toContent] are in [contents], throw an exception.
      *
-     * This function can be useful when computing the scene in which a movable element should be
+     * This function can be useful when computing the content in which a movable element should be
      * composed.
      */
-    fun pickSingleSceneIn(
-        scenes: Set<SceneKey>,
+    fun pickSingleContentIn(
+        contents: Set<ContentKey>,
         transition: TransitionState.Transition,
         element: ElementKey,
-    ): SceneKey? {
-        val fromScene = transition.fromScene
-        val toScene = transition.toScene
-        val fromSceneInScenes = scenes.contains(fromScene)
-        val toSceneInScenes = scenes.contains(toScene)
+    ): ContentKey {
+        val fromContent = transition.fromContent
+        val toContent = transition.toContent
+        val fromContentInContents = contents.contains(fromContent)
+        val toContentInContents = contents.contains(toContent)
 
-        return when {
-            fromSceneInScenes && toSceneInScenes -> {
-                error(
-                    "Element $element can be in both $fromScene and $toScene. You should add a " +
-                        "special case for this transition before calling pickSingleSceneIn()."
-                )
-            }
-            fromSceneInScenes -> fromScene
-            toSceneInScenes -> toScene
-            else -> null
+        if (fromContentInContents && toContentInContents) {
+            error(
+                "Element $element can be in both $fromContent and $toContent. You should add a " +
+                    "special case for this transition before calling pickSingleSceneIn()."
+            )
         }
-    }
-}
 
-/** An [ElementScenePicker] that draws/composes elements in the scene with the highest z-order. */
-object HighestZIndexScenePicker : ElementScenePicker {
-    override fun sceneDuringTransition(
-        element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
-    ): SceneKey {
-        return if (fromSceneZIndex > toSceneZIndex) {
-            transition.fromScene
-        } else {
-            transition.toScene
+        if (!fromContentInContents && !toContentInContents) {
+            error(
+                "Element $element can be neither in $fromContent and $toContent. This either " +
+                    "means that you should add one of them in the scenes set passed to " +
+                    "pickSingleSceneIn(), or there is an internal error and this element was " +
+                    "composed when it shouldn't be."
+            )
         }
-    }
-}
 
-/** An [ElementScenePicker] that draws/composes elements in the scene with the lowest z-order. */
-object LowestZIndexScenePicker : ElementScenePicker {
-    override fun sceneDuringTransition(
-        element: ElementKey,
-        transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float
-    ): SceneKey {
-        return if (fromSceneZIndex < toSceneZIndex) {
-            transition.fromScene
+        return if (fromContentInContents) {
+            fromContent
         } else {
-            transition.toScene
+            toContent
         }
     }
 }
 
 /**
- * An [ElementScenePicker] that draws/composes elements in the scene we are transitioning to, iff
- * that scene is in [scenes].
+ * An element picker on which we can query the set of contents (scenes or overlays) that contain the
+ * element. This is needed by [MovableElement], that needs to know at composition time on which of
+ * the candidate contents an element should be composed.
+ *
+ * @see DefaultElementContentPicker(contents)
+ * @see HighestZIndexContentPicker(contents)
+ * @see LowestZIndexContentPicker(contents)
+ * @see MovableElementContentPicker
+ */
+interface StaticElementContentPicker : ElementContentPicker {
+    /** The exhaustive lists of contents that contain this element. */
+    val contents: Set<ContentKey>
+}
+
+/**
+ * An [ElementContentPicker] that draws/composes elements in the content with the highest z-order.
+ */
+object HighestZIndexContentPicker : ElementContentPicker {
+    override fun contentDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey {
+        return if (fromContentZIndex > toContentZIndex) {
+            transition.fromContent
+        } else {
+            transition.toContent
+        }
+    }
+
+    /**
+     * Return a [StaticElementContentPicker] that behaves like [HighestZIndexContentPicker] and can
+     * be used by [MovableElement].
+     */
+    operator fun invoke(contents: Set<ContentKey>): StaticElementContentPicker {
+        return object : StaticElementContentPicker {
+            override val contents: Set<ContentKey> = contents
+
+            override fun contentDuringTransition(
+                element: ElementKey,
+                transition: TransitionState.Transition,
+                fromContentZIndex: Float,
+                toContentZIndex: Float,
+            ): ContentKey {
+                return HighestZIndexContentPicker.contentDuringTransition(
+                    element,
+                    transition,
+                    fromContentZIndex,
+                    toContentZIndex,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * An [ElementContentPicker] that draws/composes elements in the content with the lowest z-order.
+ */
+object LowestZIndexContentPicker : ElementContentPicker {
+    override fun contentDuringTransition(
+        element: ElementKey,
+        transition: TransitionState.Transition,
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey {
+        return if (fromContentZIndex < toContentZIndex) {
+            transition.fromContent
+        } else {
+            transition.toContent
+        }
+    }
+
+    /**
+     * Return a [StaticElementContentPicker] that behaves like [LowestZIndexContentPicker] and can
+     * be used by [MovableElement].
+     */
+    operator fun invoke(contents: Set<ContentKey>): StaticElementContentPicker {
+        return object : StaticElementContentPicker {
+            override val contents: Set<ContentKey> = contents
+
+            override fun contentDuringTransition(
+                element: ElementKey,
+                transition: TransitionState.Transition,
+                fromContentZIndex: Float,
+                toContentZIndex: Float,
+            ): ContentKey {
+                return LowestZIndexContentPicker.contentDuringTransition(
+                    element,
+                    transition,
+                    fromContentZIndex,
+                    toContentZIndex,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * An [ElementContentPicker] that draws/composes elements in the content we are transitioning to,
+ * iff that content is in [contents].
  *
  * This picker can be useful for movable elements whose content size depends on its content (because
  * it wraps it) in at least one scene. That way, the target size of the MovableElement will be
@@ -307,23 +423,34 @@ object LowestZIndexScenePicker : ElementScenePicker {
  * is not the same as when going from scene B to scene A, so it's not usable in situations where
  * z-ordering during the transition matters.
  */
-class MovableElementScenePicker(private val scenes: Set<SceneKey>) : ElementScenePicker {
-    override fun sceneDuringTransition(
+class MovableElementContentPicker(override val contents: Set<ContentKey>) :
+    StaticElementContentPicker {
+    override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromSceneZIndex: Float,
-        toSceneZIndex: Float,
-    ): SceneKey? {
+        fromContentZIndex: Float,
+        toContentZIndex: Float,
+    ): ContentKey {
         return when {
-            scenes.contains(transition.toScene) -> transition.toScene
-            scenes.contains(transition.fromScene) -> transition.fromScene
-            else -> null
+            transition.toContent in contents -> transition.toContent
+            else -> {
+                check(transition.fromContent in contents) {
+                    "Neither ${transition.fromContent} nor ${transition.toContent} are in " +
+                        "contents. This transition should not have been used for this element."
+                }
+                transition.fromContent
+            }
         }
     }
 }
 
-/** The default [ElementScenePicker]. */
-val DefaultElementScenePicker = HighestZIndexScenePicker
+/** The default [ElementContentPicker]. */
+val DefaultElementContentPicker = HighestZIndexContentPicker
+
+/** The [DefaultElementContentPicker] that can be used for [MovableElement]s. */
+fun DefaultElementContentPicker(contents: Set<ContentKey>): StaticElementContentPicker {
+    return HighestZIndexContentPicker(contents)
+}
 
 @TransitionDsl
 interface PropertyTransformationBuilder {
@@ -373,7 +500,7 @@ interface PropertyTransformationBuilder {
         matcher: ElementMatcher,
         scaleX: Float = 1f,
         scaleY: Float = 1f,
-        pivot: Offset = Offset.Unspecified
+        pivot: Offset = Offset.Unspecified,
     )
 
     /**
@@ -388,4 +515,36 @@ interface PropertyTransformationBuilder {
         anchorWidth: Boolean = true,
         anchorHeight: Boolean = true,
     )
+}
+
+/** This converter lets you change a linear progress into a function of your choice. */
+fun interface ProgressConverter {
+    fun convert(progress: Float): Float
+
+    companion object {
+        /** Starts linearly with some resistance and slowly approaches to 0.2f */
+        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
+
+        /**
+         * The scroll stays linear, with [factor] you can control how much resistance there is.
+         *
+         * @param factor If you choose a value between 0f and 1f, the progress will grow more
+         *   slowly, like there's resistance. A value of 1f means there's no resistance.
+         */
+        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
+
+        /**
+         * This function starts linear and slowly approaches [maxProgress].
+         *
+         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
+         * function.
+         *
+         * @param maxProgress is the maximum progress value.
+         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
+         *   control how quickly you get to the [maxProgress].
+         */
+        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
+            maxProgress * tanh(x = it / (maxProgress * tilt))
+        }
+    }
 }

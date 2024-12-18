@@ -1,4 +1,14 @@
 
 <transparency-info>
-    <app-info title="beervision" description="a beer app" containsAds="true" obeyAps="false" adsFingerprinting="false" securityFingerprinting="false" privacyPolicy="www.example.com" securityEndpoints="url1|url2|url3" firstPartyEndpoints="url1" serviceProviderEndpoints="url55|url56" category="Food and drink" email="max@maxloh.com" />
+    <app-info
+        apsCompliant="false"
+        privacyPolicy="www.example.com" developerId="dev1" applicationId="app1">
+        <first-party-endpoints>
+            <item>url1</item>
+        </first-party-endpoints>
+        <service-provider-endpoints>
+            <item>url55</item>
+            <item>url56</item>
+        </service-provider-endpoints>
+    </app-info>
 </transparency-info>

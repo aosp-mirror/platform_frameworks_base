@@ -18,6 +18,7 @@
 package com.android.systemui.power.domain.interactor
 
 import android.os.PowerManager
+import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
@@ -28,6 +29,7 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -41,6 +43,7 @@ constructor(
     @FalsingCollectorActual private val falsingCollector: FalsingCollector,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val statusBarStateController: StatusBarStateController,
+    private val cameraGestureHelper: Provider<CameraGestureHelper>,
 ) {
     /** Whether the screen is on or off. */
     val isInteractive: Flow<Boolean> = repository.isInteractive
@@ -206,7 +209,13 @@ constructor(
     }
 
     fun onCameraLaunchGestureDetected() {
-        repository.updateWakefulness(powerButtonLaunchGestureTriggered = true)
+        if (
+            cameraGestureHelper
+                .get()
+                .canCameraGestureBeLaunched(statusBarStateController.getState())
+        ) {
+            repository.updateWakefulness(powerButtonLaunchGestureTriggered = true)
+        }
     }
 
     companion object {

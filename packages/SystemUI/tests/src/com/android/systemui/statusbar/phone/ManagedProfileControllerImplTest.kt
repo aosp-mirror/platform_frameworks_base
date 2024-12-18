@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.phone
 
 import android.content.pm.UserInfo
 import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -29,12 +31,15 @@ import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.never
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ManagedProfileControllerImplTest : SysuiTestCase() {
 
     private val mainExecutor: FakeExecutor = FakeExecutor(FakeSystemClock())
@@ -43,12 +48,20 @@ class ManagedProfileControllerImplTest : SysuiTestCase() {
 
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var userManager: UserManager
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        controller = ManagedProfileControllerImpl(context, mainExecutor, userTracker, userManager)
+        controller =
+            ManagedProfileControllerImpl(
+                context,
+                mainExecutor,
+                userTracker,
+                userManager,
+                keyguardUpdateMonitor
+            )
     }
 
     @Test
@@ -102,6 +115,24 @@ class ManagedProfileControllerImplTest : SysuiTestCase() {
         val captor = argumentCaptor<UserTracker.Callback>()
         verify(userTracker).addCallback(capture(captor), any())
         captor.value.onProfilesChanged(userManager.getEnabledProfiles(1))
+    }
+
+    @Test
+    fun hasWorkingProfile_setWorkModeEnabled_callsAwakenFromDream() {
+        `when`(userTracker.userId).thenReturn(1)
+        setupWorkingProfile(1)
+        `when`(userManager.requestQuietModeEnabled(any(), any())).thenReturn(false)
+        controller.hasActiveProfile()
+
+        controller.isWorkModeEnabled = true
+
+        verify(keyguardUpdateMonitor).awakenFromDream()
+    }
+
+    @Test
+    fun noWorkingProfile_setWorkModeEnabled_NoAwakenFromDreamCall() {
+        controller.isWorkModeEnabled = true
+        verify(keyguardUpdateMonitor, never()).awakenFromDream()
     }
 
     private fun setupWorkingProfile(userId: Int) {

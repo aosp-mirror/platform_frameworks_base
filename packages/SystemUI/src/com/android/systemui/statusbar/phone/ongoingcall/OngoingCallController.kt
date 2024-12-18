@@ -23,7 +23,6 @@ import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.app.PendingIntent
 import android.app.UidObserver
 import android.content.Context
-import android.util.Log
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
@@ -35,8 +34,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
@@ -44,6 +46,9 @@ import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.policy.CallbackController
@@ -64,15 +69,16 @@ constructor(
     private val context: Context,
     private val ongoingCallRepository: OngoingCallRepository,
     private val notifCollection: CommonNotifCollection,
+    private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
-    private val logger: OngoingCallLogger,
     private val dumpManager: DumpManager,
     private val statusBarWindowController: StatusBarWindowController,
     private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
     private val statusBarModeRepository: StatusBarModeRepositoryStore,
+    @OngoingCallLog private val logger: LogBuffer,
 ) : CallbackController<OngoingCallListener>, Dumpable, CoreStartable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
@@ -96,6 +102,7 @@ constructor(
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
+                StatusBarUseReposForCallChip.assertInLegacyMode()
                 // We have a new call notification or our existing call notification has been
                 // updated.
                 // TODO(b/183229367): This likely won't work if you take a call from one app then
@@ -108,6 +115,9 @@ constructor(
                         CallNotificationInfo(
                             entry.sbn.key,
                             entry.sbn.notification.getWhen(),
+                            // In this old listener pattern, we don't have access to the
+                            // notification icon.
+                            notificationIconView = null,
                             entry.sbn.notification.contentIntent,
                             entry.sbn.uid,
                             entry.sbn.notification.extras.getInt(
@@ -122,8 +132,20 @@ constructor(
 
                     callNotificationInfo = newOngoingCallInfo
                     if (newOngoingCallInfo.isOngoing) {
+                        logger.log(
+                            TAG,
+                            LogLevel.DEBUG,
+                            { str1 = newOngoingCallInfo.key },
+                            { "Call notif *is* ongoing -> showing chip. key=$str1" },
+                        )
                         updateChip()
                     } else {
+                        logger.log(
+                            TAG,
+                            LogLevel.DEBUG,
+                            { str1 = newOngoingCallInfo.key },
+                            { "Call notif not ongoing -> hiding chip. key=$str1" },
+                        )
                         removeChip()
                     }
                 }
@@ -131,6 +153,12 @@ constructor(
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
                 if (entry.sbn.key == callNotificationInfo?.key) {
+                    logger.log(
+                        TAG,
+                        LogLevel.DEBUG,
+                        { str1 = entry.sbn.key },
+                        { "Call notif removed -> hiding chip. key=$str1" },
+                    )
                     removeChip()
                 }
             }
@@ -138,7 +166,25 @@ constructor(
 
     override fun start() {
         dumpManager.registerDumpable(this)
-        notifCollection.addCollectionListener(notifListener)
+
+        if (Flags.statusBarUseReposForCallChip()) {
+            scope.launch {
+                // Listening to [ActiveNotificationsInteractor] instead of using
+                // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
+                // 1. ActiveNotificationsInteractor automatically filters the notification list to
+                // just notifications for the current user, which ensures we don't show a call chip
+                // for User 1's call while User 2 is active (see b/328584859).
+                // 2. ActiveNotificationsInteractor only emits notifications that are currently
+                // present in the shade, which means we know we've already inflated the icon that we
+                // might use for the call chip (see b/354930838).
+                activeNotificationsInteractor.ongoingCallNotification.collect {
+                    updateInfoFromNotifModel(it)
+                }
+            }
+        } else {
+            notifCollection.addCollectionListener(notifListener)
+        }
+
         scope.launch {
             statusBarModeRepository.defaultDisplay.isInFullscreenMode.collect {
                 isFullscreen = it
@@ -151,7 +197,8 @@ constructor(
     /**
      * Sets the chip view that will contain ongoing call information.
      *
-     * Should only be called from [CollapsedStatusBarFragment].
+     * Should only be called from
+     * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: View) {
         tearDownChipView()
@@ -162,15 +209,6 @@ constructor(
         if (hasOngoingCall()) {
             updateChip()
         }
-    }
-
-    /**
-     * Called when the chip's visibility may have changed.
-     *
-     * Should only be called from [CollapsedStatusBarFragment].
-     */
-    fun notifyChipVisibilityChanged(chipIsVisible: Boolean) {
-        logger.logChipVisibilityChanged(chipIsVisible)
     }
 
     /**
@@ -189,8 +227,24 @@ constructor(
                 callNotificationInfo
                     // This shouldn't happen, but protect against it in case
                     ?: return OngoingCallModel.NoCall
+            logger.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    bool1 = Flags.statusBarCallChipNotificationIcon()
+                    bool2 = currentInfo.notificationIconView != null
+                },
+                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" }
+            )
+            val icon =
+                if (Flags.statusBarCallChipNotificationIcon()) {
+                    currentInfo.notificationIconView
+                } else {
+                    null
+                }
             return OngoingCallModel.InCall(
                 startTimeMs = currentInfo.callStartTime,
+                notificationIconView = icon,
                 intent = currentInfo.intent,
             )
         } else {
@@ -208,6 +262,49 @@ constructor(
 
     override fun removeCallback(listener: OngoingCallListener) {
         synchronized(mListeners) { mListeners.remove(listener) }
+    }
+
+    private fun updateInfoFromNotifModel(notifModel: ActiveNotificationModel?) {
+        if (notifModel == null) {
+            logger.log(TAG, LogLevel.DEBUG, {}, { "NotifInteractorCallModel: null" })
+            removeChip()
+        } else if (notifModel.callType != CallType.Ongoing) {
+            logger.log(
+                TAG,
+                LogLevel.ERROR,
+                { str1 = notifModel.callType.name },
+                { "Notification Interactor sent ActiveNotificationModel with callType=$str1" },
+            )
+            removeChip()
+        } else {
+            logger.log(
+                TAG,
+                LogLevel.DEBUG,
+                {
+                    str1 = notifModel.key
+                    long1 = notifModel.whenTime
+                    str1 = notifModel.callType.name
+                    bool1 = notifModel.statusBarChipIconView != null
+                },
+                { "NotifInteractorCallModel: key=$str1 when=$long1 callType=$str2 hasIcon=$bool1" }
+            )
+
+            val newOngoingCallInfo =
+                CallNotificationInfo(
+                    notifModel.key,
+                    notifModel.whenTime,
+                    notifModel.statusBarChipIconView,
+                    notifModel.contentIntent,
+                    notifModel.uid,
+                    isOngoing = true,
+                    statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
+                )
+            if (newOngoingCallInfo == callNotificationInfo) {
+                return
+            }
+            callNotificationInfo = newOngoingCallInfo
+            updateChip()
+        }
     }
 
     private fun updateChip() {
@@ -250,14 +347,12 @@ constructor(
             // If we failed to update the chip, don't store the call info. Then [hasOngoingCall]
             // will return false and we fall back to typical notification handling.
             callNotificationInfo = null
-
-            if (DEBUG) {
-                Log.w(
-                    TAG,
-                    "Ongoing call chip view could not be found; " +
-                        "Not displaying chip in status bar"
-                )
-            }
+            logger.log(
+                TAG,
+                LogLevel.WARNING,
+                {},
+                { "Ongoing call chip view could not be found; Not displaying chip in status bar" },
+            )
         }
     }
 
@@ -275,7 +370,6 @@ constructor(
         val intent = callNotificationInfo?.intent
         if (currentChipView != null && backgroundView != null && intent != null) {
             currentChipView.setOnClickListener {
-                logger.logChipClicked()
                 activityStarter.postStartActivityDismissingKeyguard(
                     intent,
                     ActivityTransitionAnimator.Controller.fromView(
@@ -333,9 +427,7 @@ constructor(
      * detected.
      */
     private fun onSwipeAwayGestureDetected() {
-        if (DEBUG) {
-            Log.d(TAG, "Swipe away gesture detected")
-        }
+        logger.log(TAG, LogLevel.DEBUG, {}, { "Swipe away gesture detected" })
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
         statusBarWindowController.setOngoingProcessRequiresStatusBarVisible(false)
         swipeStatusBarAwayGestureHandler.removeOnGestureDetectedCallback(TAG)
@@ -349,6 +441,8 @@ constructor(
     private data class CallNotificationInfo(
         val key: String,
         val callStartTime: Long,
+        /** The icon set as the [android.app.Notification.getSmallIcon] field. */
+        val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val uid: Int,
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
@@ -368,7 +462,10 @@ constructor(
         pw.println("Call app visible: ${uidObserver.isCallAppVisible}")
     }
 
-    /** Our implementation of a [IUidObserver]. */
+    /**
+     * Observer to tell us when the app that posted the ongoing call notification is visible so that
+     * we don't show the call chip at the same time (since the timers could be out-of-sync).
+     */
     inner class CallAppUidObserver : UidObserver() {
         /** True if the application managing the call is visible to the user. */
         var isCallAppVisible: Boolean = false
@@ -395,6 +492,12 @@ constructor(
                     isProcessVisibleToUser(
                         iActivityManager.getUidProcessState(uid, context.opPackageName)
                     )
+                logger.log(
+                    TAG,
+                    LogLevel.DEBUG,
+                    { bool1 = isCallAppVisible },
+                    { "On uid observer registration, isCallAppVisible=$bool1" },
+                )
                 if (isRegistered) {
                     return
                 }
@@ -406,7 +509,13 @@ constructor(
                 )
                 isRegistered = true
             } catch (se: SecurityException) {
-                Log.e(TAG, "Security exception when trying to set up uid observer: $se")
+                logger.log(
+                    TAG,
+                    LogLevel.ERROR,
+                    {},
+                    { "Security exception when trying to set up uid observer" },
+                    se,
+                )
             }
         }
 
@@ -431,6 +540,12 @@ constructor(
             val oldIsCallAppVisible = isCallAppVisible
             isCallAppVisible = isProcessVisibleToUser(procState)
             if (oldIsCallAppVisible != isCallAppVisible) {
+                logger.log(
+                    TAG,
+                    LogLevel.DEBUG,
+                    { bool1 = isCallAppVisible },
+                    { "#onUidStateChanged. isCallAppVisible=$bool1" },
+                )
                 // Animations may be run as a result of the call's state change, so ensure
                 // the listener is notified on the main thread.
                 mainExecutor.execute { sendStateChangeEvent() }
@@ -443,5 +558,4 @@ private fun isCallNotification(entry: NotificationEntry): Boolean {
     return entry.sbn.notification.isStyle(Notification.CallStyle::class.java)
 }
 
-private const val TAG = "OngoingCallController"
-private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
+private const val TAG = OngoingCallRepository.TAG

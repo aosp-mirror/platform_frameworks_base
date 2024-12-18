@@ -16,21 +16,43 @@
 
 package com.android.server.am;
 
+import android.annotation.IntDef;
 import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal.OomAdjReason;
+import android.app.ActivityManagerInternal.FrozenProcessListener;
+import android.util.Pair;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.PrintWriter;
-
 import dalvik.annotation.optimization.NeverCompile;
+
+import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * The state info of app when it's cached, used by the optimizer.
  */
 final class ProcessCachedOptimizerRecord {
+
+    static final int SHOULD_NOT_FREEZE_REASON_NONE = 1;
+    static final int SHOULD_NOT_FREEZE_REASON_UID_ALLOWLISTED = 1 << 1;
+    static final int SHOULD_NOT_FREEZE_REASON_BINDER_ALLOW_OOM_MANAGEMENT = 1 << 2;
+    static final int SHOULD_NOT_FREEZE_REASON_BIND_WAIVE_PRIORITY = 1 << 3;
+
+    @IntDef(flag = true, prefix = {"SHOULD_NOT_FREEZE_REASON_"}, value = {
+        SHOULD_NOT_FREEZE_REASON_NONE,
+        SHOULD_NOT_FREEZE_REASON_UID_ALLOWLISTED,
+        SHOULD_NOT_FREEZE_REASON_BINDER_ALLOW_OOM_MANAGEMENT,
+        SHOULD_NOT_FREEZE_REASON_BIND_WAIVE_PRIORITY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ShouldNotFreezeReason {}
+
     private final ProcessRecord mApp;
 
     private final ActivityManagerGlobalLock mProcLock;
@@ -112,6 +134,18 @@ final class ProcessCachedOptimizerRecord {
     private boolean mShouldNotFreeze;
 
     /**
+     * Reason for mShouldNotFreeze being set to a particular value.
+     */
+    @GuardedBy("mProcLock")
+    private @ShouldNotFreezeReason int mShouldNotFreezeReason;
+
+    /**
+     * The value of adjSeq when last time mShouldNotFreeze was set.
+     */
+    @GuardedBy("mProcLock")
+    private int mShouldNotFreezeAdjSeq;
+
+    /**
      * Exempt from freezer (now for system apps with INSTALL_PACKAGES permission)
      */
     @GuardedBy("mProcLock")
@@ -134,6 +168,12 @@ final class ProcessCachedOptimizerRecord {
      */
     @GuardedBy("mProcLock")
     private long mLastUsedTimeout;
+
+    /**
+     * The list of callbacks for this process whenever it is frozen or unfrozen.
+     */
+    final CopyOnWriteArrayList<Pair<Executor, FrozenProcessListener>> mFrozenProcessListeners =
+            new CopyOnWriteArrayList<>();
 
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
@@ -275,8 +315,19 @@ final class ProcessCachedOptimizerRecord {
     }
 
     @GuardedBy("mProcLock")
-    void setShouldNotFreeze(boolean shouldNotFreeze) {
-        setShouldNotFreeze(shouldNotFreeze, false);
+    @ShouldNotFreezeReason int shouldNotFreezeReason() {
+        return mShouldNotFreezeReason;
+    }
+
+    @GuardedBy("mProcLock")
+    int shouldNotFreezeAdjSeq() {
+        return mShouldNotFreezeAdjSeq;
+    }
+
+    @GuardedBy("mProcLock")
+    void setShouldNotFreeze(boolean shouldNotFreeze, @ShouldNotFreezeReason int reason,
+            int adjSeq) {
+        setShouldNotFreeze(shouldNotFreeze, false, reason, adjSeq);
     }
 
     /**
@@ -284,9 +335,22 @@ final class ProcessCachedOptimizerRecord {
      * if it was a real run.
      */
     @GuardedBy("mProcLock")
-    boolean setShouldNotFreeze(boolean shouldNotFreeze, boolean dryRun) {
+    boolean setShouldNotFreeze(boolean shouldNotFreeze, boolean dryRun,
+            @ShouldNotFreezeReason int reason, int adjSeq) {
         if (dryRun) {
             return mFrozen && !shouldNotFreeze;
+        }
+        if (Flags.traceUpdateAppFreezeStateLsp()) {
+            if (shouldNotFreeze) {
+                reason &= ~SHOULD_NOT_FREEZE_REASON_NONE;
+            } else {
+                reason = SHOULD_NOT_FREEZE_REASON_NONE;
+            }
+
+            if (reason != mShouldNotFreezeReason || shouldNotFreeze != mShouldNotFreeze) {
+                mShouldNotFreezeAdjSeq = adjSeq;
+            }
+            mShouldNotFreezeReason = reason;
         }
         mShouldNotFreeze = shouldNotFreeze;
         return false;
@@ -332,6 +396,22 @@ final class ProcessCachedOptimizerRecord {
         mFreezeExempt = exempt;
     }
 
+    void addFrozenProcessListener(Executor executor, FrozenProcessListener listener) {
+        mFrozenProcessListeners.add(new Pair<Executor, FrozenProcessListener>(executor, listener));
+    }
+
+    void dispatchFrozenEvent() {
+        mFrozenProcessListeners.forEach((pair) -> {
+            pair.first.execute(() -> pair.second.onProcessFrozen(mApp.mPid));
+        });
+    }
+
+    void dispatchUnfrozenEvent() {
+        mFrozenProcessListeners.forEach((pair) -> {
+            pair.first.execute(() -> pair.second.onProcessUnfrozen(mApp.mPid));
+        });
+    }
+
     ProcessCachedOptimizerRecord(ProcessRecord app) {
         mApp = app;
         mProcLock = app.mService.mProcLock;
@@ -355,6 +435,10 @@ final class ProcessCachedOptimizerRecord {
         pw.print(" " + IS_FROZEN + "="); pw.println(mFrozen);
         pw.print(prefix); pw.print("earliestFreezableTimeMs=");
         TimeUtils.formatDuration(mEarliestFreezableTimeMillis, nowUptime, pw);
+        if (!mFrozenProcessListeners.isEmpty()) {
+            pw.print(" mFrozenProcessListeners=");
+            mFrozenProcessListeners.forEach((pair) -> pw.print(pair.second + ", "));
+        }
         pw.println();
     }
 }

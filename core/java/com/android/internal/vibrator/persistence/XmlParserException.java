@@ -23,7 +23,6 @@ import org.xmlpull.v1.XmlPullParserException;
 /**
  * Represents an error while parsing a vibration XML input.
  *
- * @see XmlParser
  * @hide
  */
 public final class XmlParserException extends Exception {

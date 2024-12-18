@@ -34,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.TAG
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
-import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.shared.animation.Interpolators
 import java.util.concurrent.Executor
 import javax.inject.Inject
 

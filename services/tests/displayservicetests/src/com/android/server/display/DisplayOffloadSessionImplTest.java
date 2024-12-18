@@ -38,7 +38,7 @@ public class DisplayOffloadSessionImplTest {
     private DisplayManagerInternal.DisplayOffloader mDisplayOffloader;
 
     @Mock
-    private DisplayPowerControllerInterface mDisplayPowerController;
+    private DisplayPowerController mDisplayPowerController;
 
     private DisplayOffloadSessionImpl mSession;
 
@@ -93,5 +93,12 @@ public class DisplayOffloadSessionImplTest {
         mSession.blockScreenOn(unblocker);
 
         verify(mDisplayOffloader).onBlockingScreenOn(eq(unblocker));
+    }
+
+    @Test
+    public void testUnblockScreenOn() {
+        mSession.cancelBlockScreenOn();
+
+        verify(mDisplayOffloader).cancelBlockScreenOn();
     }
 }

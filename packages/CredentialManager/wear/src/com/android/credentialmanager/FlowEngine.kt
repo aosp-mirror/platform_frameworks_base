@@ -81,12 +81,12 @@ sealed class CredentialSelectorUiState {
             ) : Get()
         /** Getting credential UI state on secondary screen when there are multiple accounts available. */
         data class MultipleEntry(
-            val accounts: List<PerUserNameEntries>,
+            val accounts: List<PerNameEntries>,
             val actionEntryList: List<ActionEntryInfo>,
             val authenticationEntryList: List<AuthenticationEntryInfo>,
         ) : Get() {
-            data class PerUserNameEntries(
-                val userName: String,
+            data class PerNameEntries(
+                val name: String,
                 val sortedCredentialEntryList: List<CredentialEntryInfo>,
             )
         }

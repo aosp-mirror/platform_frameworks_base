@@ -107,6 +107,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -132,6 +133,7 @@ import android.window.InputTransferToken;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.R;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.ElementType;
@@ -478,6 +480,17 @@ public interface WindowManager extends ViewManager {
      */
     int TRANSIT_SLEEP = 12;
     /**
+     * An Activity was going to be visible from back navigation.
+     * @hide
+     */
+    int TRANSIT_PREPARE_BACK_NAVIGATION = 13;
+    /**
+     * An Activity was going to be invisible from back navigation.
+     * @hide
+     */
+    int TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION = 14;
+
+    /**
      * The first slot for custom transition types. Callers (like Shell) can make use of custom
      * transition types for dealing with special cases. These types are effectively ignored by
      * Core and will just be passed along as part of TransitionInfo objects. An example is
@@ -505,6 +518,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_PIP,
             TRANSIT_WAKE,
             TRANSIT_SLEEP,
+            TRANSIT_PREPARE_BACK_NAVIGATION,
+            TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION,
             TRANSIT_FIRST_CUSTOM
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1668,6 +1683,15 @@ public interface WindowManager extends ViewManager {
     public void requestAppKeyboardShortcuts(final KeyboardShortcutsReceiver receiver, int deviceId);
 
     /**
+     * Request the application launch keyboard shortcuts the system has defined.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
+     *
+     * @hide
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
+
+    /**
      * Request for ime's keyboard shortcuts to be retrieved asynchronously.
      *
      * @param receiver The callback to be triggered when the result is ready.
@@ -1909,6 +1933,8 @@ public interface WindowManager extends ViewManager {
             case TRANSIT_PIP: return "PIP";
             case TRANSIT_WAKE: return "WAKE";
             case TRANSIT_SLEEP: return "SLEEP";
+            case TRANSIT_PREPARE_BACK_NAVIGATION: return "PREDICTIVE_BACK";
+            case TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION: return "CLOSE_PREDICTIVE_BACK";
             case TRANSIT_FIRST_CUSTOM: return "FIRST_CUSTOM";
             default:
                 if (type > TRANSIT_FIRST_CUSTOM) {
@@ -2346,7 +2372,7 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
-         * Window type: the drag-and-drop pseudowindow.  There is only one
+         * Window type: the drag-and-drop pseudowindow. There is only one
          * drag layer (at most), and it is placed on top of all other windows.
          * In multiuser systems shows only on the owning user's window.
          * @hide
@@ -2356,7 +2382,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows. These windows
-         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * are displayed on top of the status bar and any {@link #TYPE_STATUS_BAR_PANEL}
          * windows.
          * @hide
          */
@@ -3437,6 +3463,15 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 1 << 22;
 
         /**
+         * Indicates that the window should receive key events including Action/Meta key.
+         * They will not be intercepted as usual and instead will be passed to the window with other
+         * key events.
+         * TODO(b/358569822) Remove this once we have nicer API for listening to shortcuts
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS = 1 << 23;
+
+        /**
          * Flag to indicate that the window is color space agnostic, and the color can be
          * interpreted to any color space.
          * @hide
@@ -3449,6 +3484,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
+
+        /**
+         * Flag to indicate that the window has the
+         * {@link R.styleable.Window_windowOptOutEdgeToEdgeEnforcement} flag set.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE = 1 << 26;
 
         /**
          * Flag to indicate that the window is controlling how it fits window insets on its own.
@@ -3523,6 +3565,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_CONSUME_IME_INSETS,
+                PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
@@ -3626,6 +3669,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
                         name = "CONSUME_IME_INSETS"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        equals = PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE,
+                        name = "OPTOUT_EDGE_TO_EDGE"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
                         equals = PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -4601,6 +4648,30 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public InsetsFrameProvider[] providedInsets;
+
+        /**
+         * Sets the insets to be provided by the window.
+         *
+         * @param insetsParams The parameters for the insets to be provided by the window.
+         *
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+        @SystemApi
+        public void setInsetsParams(@NonNull List<InsetsParams> insetsParams) {
+            if (insetsParams.isEmpty()) {
+                providedInsets = null;
+            } else {
+                providedInsets = new InsetsFrameProvider[insetsParams.size()];
+                for (int i = 0; i < insetsParams.size(); ++i) {
+                    final InsetsParams params = insetsParams.get(i);
+                    providedInsets[i] =
+                            new InsetsFrameProvider(/* owner= */ this, /* index= */ i,
+                                    params.getType())
+                                    .setInsetsSize(params.getInsetsSize());
+                }
+            }
+        }
 
         /**
          * Specifies which {@link InsetsType}s should be forcibly shown. The types shown by this
@@ -6071,6 +6142,56 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
+     * Specifies the parameters of the insets provided by a window.
+     *
+     * @see WindowManager.LayoutParams#setInsetsParams(List)
+     * @see android.graphics.Insets
+     *
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+    @SystemApi
+    public static class InsetsParams {
+
+        private final @InsetsType int mType;
+        private @Nullable Insets mInsets;
+
+        /**
+         * Creates an instance of InsetsParams.
+         *
+         * @param type the type of insets to provide, e.g. {@link WindowInsets.Type#statusBars()}.
+         * @see WindowInsets.Type
+         */
+        public InsetsParams(@InsetsType int type) {
+            mType = type;
+        }
+
+        /**
+         * Sets the size of the provided insets. If {@code null}, then the provided insets will
+         * have the same size as the window frame.
+         */
+        public @NonNull InsetsParams setInsetsSize(@Nullable Insets insets) {
+            mInsets = insets;
+            return this;
+        }
+
+        /**
+         * Returns the type of provided insets.
+         */
+        public @InsetsType int getType() {
+            return mType;
+        }
+
+        /**
+         * Returns the size of the provided insets. May be {@code null} if the provided insets have
+         * the same size as the window frame.
+         */
+        public @Nullable Insets getInsetsSize() {
+            return mInsets;
+        }
+    }
+
+    /**
      * Holds the WM lock for the specified amount of milliseconds.
      * Intended for use by the tests that need to imitate lock contention.
      * The token should be obtained by
@@ -6387,10 +6508,6 @@ public interface WindowManager extends ViewManager {
      * The host is likely to be an {@link AttachedSurfaceControl} so the host token can be
      * retrieved via {@link AttachedSurfaceControl#getInputTransferToken()}.
      * <p><br>
-     * Only the window currently receiving touch is allowed to transfer the gesture so if the caller
-     * attempts to transfer touch gesture from a token that doesn't have touch, it will fail the
-     * transfer.
-     * <p><br>
      * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
      * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
      * value returned from either
@@ -6414,6 +6531,23 @@ public interface WindowManager extends ViewManager {
      * arrives, input dispatcher will do a new round of hit testing. So, if the host window is
      * still the first thing that's being touched, then it will receive the new gesture again. It
      * will again be up to the host to transfer this new gesture to the embedded.
+     * <p><br>
+     * The call can fail for the following reasons:
+     * <ul>
+     * <li>
+     * Caller attempts to transfer touch gesture from a token that doesn't have an active gesture.
+     * </li>
+     * <li>
+     * The gesture is transferred to a token that is not associated with the transferFromToken. For
+     * example, if the caller transfers to a {@link SurfaceControlViewHost} not attached to the
+     * host window via {@link SurfaceView#setChildSurfacePackage(SurfacePackage)}.
+     * </li>
+     * <li>
+     * The active gesture completes before the transfer is complete, such as in the case of a
+     * fling.
+     * </li>
+     * </ul>
+     * <p>
      *
      * @param transferFromToken the InputTransferToken for the currently active gesture
      * @param transferToToken   the InputTransferToken to transfer the gesture to.

@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import android.content.res.Resources;
+
 import com.android.systemui.statusbar.policy.CallbackController;
 
 public interface ReduceBrightColorsController extends
@@ -27,6 +29,8 @@ public interface ReduceBrightColorsController extends
     /** Sets the activation state of Reduce Bright Colors */
     void setReduceBrightColorsActivated(boolean activated);
 
+    /** Gets whether Reduce Bright Colors is being transitioned to Even Dimmer */
+    boolean isInUpgradeMode(Resources resources);
     /**
      * Listener invoked whenever the Reduce Bright Colors settings are changed.
      */

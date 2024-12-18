@@ -109,6 +109,7 @@ public final class SystemClock {
     private static final String TAG = "SystemClock";
 
     private static volatile IAlarmManager sIAlarmManager;
+    private static volatile ITimeDetectorService sITimeDetectorService;
 
     /**
      * Since {@code nanoTime()} is arbitrary, anchor our Ravenwood clocks against it.
@@ -186,6 +187,14 @@ public final class SystemClock {
                     .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
         }
         return sIAlarmManager;
+    }
+
+    private static ITimeDetectorService getITimeDetectorService() {
+        if (sITimeDetectorService == null) {
+            sITimeDetectorService = ITimeDetectorService.Stub
+                    .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
+        }
+        return sITimeDetectorService;
     }
 
     /**
@@ -331,35 +340,35 @@ public final class SystemClock {
      * at any time. Due to network delays, variations between servers, or local
      * (client side) clock drift, the accuracy of the returned times cannot be
      * guaranteed. In extreme cases, consecutive calls to {@link
-     * #currentNetworkTimeMillis()} could return times that are out of order.
+     * #currentNetworkTimeMillis(ITimeDetectorService)} could return times that
+     * are out of order.
      *
      * @throws DateTimeException when no network time can be provided.
      * @hide
      */
     public static long currentNetworkTimeMillis() {
-        ITimeDetectorService timeDetectorService = ITimeDetectorService.Stub
-                .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
-        if (timeDetectorService != null) {
-            UnixEpochTime time;
-            try {
-                time = timeDetectorService.latestNetworkTime();
-            } catch (ParcelableException e) {
-                e.maybeRethrow(DateTimeException.class);
-                throw new RuntimeException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-
-            if (time == null) {
-                // This is not expected.
-                throw new DateTimeException("Network based time is not available.");
-            }
-            long currentMillis = elapsedRealtime();
-            long deltaMs = currentMillis - time.getElapsedRealtimeMillis();
-            return time.getUnixEpochTimeMillis() + deltaMs;
-        } else {
+        ITimeDetectorService timeDetectorService = getITimeDetectorService();
+        if (timeDetectorService == null) {
             throw new RuntimeException(new DeadSystemException());
         }
+
+        UnixEpochTime time;
+        try {
+            time = timeDetectorService.latestNetworkTime();
+        } catch (ParcelableException e) {
+            e.maybeRethrow(DateTimeException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        if (time == null) {
+            // This is not expected.
+            throw new DateTimeException("Network based time is not available.");
+        }
+
+        long currentMillis = elapsedRealtime();
+        long deltaMs = currentMillis - time.getElapsedRealtimeMillis();
+        return time.getUnixEpochTimeMillis() + deltaMs;
     }
 
    /**
@@ -380,7 +389,7 @@ public final class SystemClock {
      * at any time. Due to network delays, variations between servers, or local
      * (client side) clock drift, the accuracy of the returned times cannot be
      * guaranteed. In extreme cases, consecutive calls to {@link
-     * Clock#millis()} on the returned {@link Clock}could return times that are
+     * Clock#millis()} on the returned {@link Clock} could return times that are
      * out of order.
      *
      * @throws DateTimeException when no network time can be provided.

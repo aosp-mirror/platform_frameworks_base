@@ -42,6 +42,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
@@ -145,7 +146,8 @@ final class NavigationBarController {
         return mImpl.toDebugString();
     }
 
-    private static final class Impl implements Callback, Window.DecorCallback {
+    private static final class Impl implements Callback, Window.DecorCallback,
+            NavigationBarView.ButtonClickListener {
         private static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
         // Copied from com.android.systemui.animation.Interpolators#LEGACY_DECELERATE
@@ -241,6 +243,7 @@ final class NavigationBarController {
                                     ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN
                                     : 0);
                     navigationBarView.setNavigationIconHints(hints);
+                    navigationBarView.prepareNavButtons(this);
                 }
             } else {
                 mNavigationBarFrame.setLayoutParams(new FrameLayout.LayoutParams(
@@ -590,6 +593,17 @@ final class NavigationBarController {
                 onSystemBarAppearanceChanged(mAppearance);
             }
             return drawLegacyNavigationBarBackground;
+        }
+
+        @Override
+        public void onImeSwitchButtonClick(View v) {
+            mService.onImeSwitchButtonClickFromClient();
+        }
+
+        @Override
+        public boolean onImeSwitchButtonLongClick(View v) {
+            v.getContext().getSystemService(InputMethodManager.class).showInputMethodPicker();
+            return true;
         }
 
         /**

@@ -6158,11 +6158,14 @@ final public class MediaCodec {
                     buffer.limit(buffer.position() + Utils.divUp(bitDepth, 8)
                             + (mHeight / vert - 1) * rowInc + (mWidth / horiz - 1) * colInc);
                     mPlanes[ix] = new MediaPlane(buffer.slice(), rowInc, colInc);
-                    if ((mFormat == ImageFormat.YUV_420_888 || mFormat == ImageFormat.YCBCR_P010)
+                    if ((mFormat == ImageFormat.YUV_420_888 || mFormat == ImageFormat.YCBCR_P010
+                                || mFormat == ImageFormat.YCBCR_P210)
                             && ix == 1) {
                         cbPlaneOffset = planeOffset;
                     } else if ((mFormat == ImageFormat.YUV_420_888
-                            || mFormat == ImageFormat.YCBCR_P010) && ix == 2) {
+                                       || mFormat == ImageFormat.YCBCR_P010
+                                       || mFormat == ImageFormat.YCBCR_P210)
+                            && ix == 2) {
                         crPlaneOffset = planeOffset;
                     }
                 }
@@ -6172,7 +6175,7 @@ final public class MediaCodec {
             }
 
             // Validate chroma semiplanerness.
-            if (mFormat == ImageFormat.YCBCR_P010) {
+            if (mFormat == ImageFormat.YCBCR_P010 || mFormat == ImageFormat.YCBCR_P210) {
                 if (crPlaneOffset != cbPlaneOffset + planeOffsetInc) {
                     throw new UnsupportedOperationException("Invalid plane offsets"
                     + " cbPlaneOffset: " + cbPlaneOffset + " crPlaneOffset: " + crPlaneOffset);

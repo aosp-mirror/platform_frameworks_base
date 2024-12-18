@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
 import android.app.PendingIntent
+import com.android.systemui.statusbar.StatusBarIconView
 
 /** Represents the state of any ongoing calls. */
 sealed interface OngoingCallModel {
@@ -29,8 +30,15 @@ sealed interface OngoingCallModel {
      * @property startTimeMs the time that the phone call started, based on the notification's
      *   `when` field. Importantly, this time is relative to
      *   [com.android.systemui.util.time.SystemClock.currentTimeMillis], **not**
-     *   [com.android.systemui.util.time.SystemClock.elapsedRealtime].
+     *   [com.android.systemui.util.time.SystemClock.elapsedRealtime]. This value can be 0 if the
+     *   user has started an outgoing call that hasn't been answered yet - see b/192379214.
+     * @property notificationIconView the [android.app.Notification.getSmallIcon] that's set on the
+     *   call notification. We may use this icon in the chip instead of the default phone icon.
      * @property intent the intent associated with the call notification.
      */
-    data class InCall(val startTimeMs: Long, val intent: PendingIntent?) : OngoingCallModel
+    data class InCall(
+        val startTimeMs: Long,
+        val notificationIconView: StatusBarIconView?,
+        val intent: PendingIntent?,
+    ) : OngoingCallModel
 }

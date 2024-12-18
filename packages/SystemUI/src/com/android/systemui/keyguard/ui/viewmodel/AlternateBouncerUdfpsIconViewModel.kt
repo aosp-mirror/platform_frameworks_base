@@ -23,6 +23,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shared.recents.utilities.Utilities.clamp
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,6 +51,7 @@ constructor(
     private val isSupported: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
     val alpha: Flow<Float> =
         alternateBouncerViewModel.transitionToAlternateBouncerProgress.map {
+            SceneContainerFlag.assertInLegacyMode()
             clamp(it * 2f, 0f, 1f)
         }
 

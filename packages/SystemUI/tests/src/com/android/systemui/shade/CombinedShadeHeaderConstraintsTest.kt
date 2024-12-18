@@ -16,11 +16,11 @@
 
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -33,7 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
 
     private lateinit var qqsConstraint: ConstraintSet

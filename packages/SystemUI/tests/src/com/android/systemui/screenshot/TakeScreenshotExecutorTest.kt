@@ -3,7 +3,6 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.graphics.Bitmap
 import android.net.Uri
-import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
 import android.view.Display.TYPE_INTERNAL
@@ -12,6 +11,7 @@ import android.view.Display.TYPE_VIRTUAL
 import android.view.Display.TYPE_WIFI
 import android.view.WindowManager
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
@@ -38,14 +38,14 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class TakeScreenshotExecutorTest : SysuiTestCase() {
 
-    private val controller = mock<ScreenshotController>()
+    private val controller = mock<LegacyScreenshotController>()
     private val notificationsController0 = mock<ScreenshotNotificationsController>()
     private val notificationsController1 = mock<ScreenshotNotificationsController>()
-    private val controllerFactory = mock<ScreenshotController.Factory>()
+    private val controllerFactory = mock<InteractiveScreenshotHandler.Factory>()
     private val callback = mock<TakeScreenshotService.RequestCallback>()
     private val notificationControllerFactory = mock<ScreenshotNotificationsController.Factory>()
 
@@ -69,7 +69,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+        whenever(controllerFactory.create(any())).thenReturn(controller)
         whenever(notificationControllerFactory.create(eq(0))).thenReturn(notificationsController0)
         whenever(notificationControllerFactory.create(eq(1))).thenReturn(notificationsController1)
     }
@@ -83,8 +83,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 
-            verify(controllerFactory).create(eq(internalDisplay), any())
-            verify(controllerFactory, never()).create(eq(externalDisplay), any())
+            verify(controllerFactory).create(eq(internalDisplay))
+            verify(controllerFactory, never()).create(eq(externalDisplay))
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -118,8 +118,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 callback
             )
 
-            verify(controllerFactory).create(eq(internalDisplay), any())
-            verify(controllerFactory, never()).create(eq(externalDisplay), any())
+            verify(controllerFactory).create(eq(internalDisplay))
+            verify(controllerFactory, never()).create(eq(externalDisplay))
 
             val capturer = ArgumentCaptor<ScreenshotData>()
 
@@ -151,7 +151,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     @Test
     fun executeScreenshots_allowedTypes_allCaptured() =
         testScope.runTest {
-            whenever(controllerFactory.create(any(), any())).thenReturn(controller)
+            whenever(controllerFactory.create(any())).thenReturn(controller)
 
             setDisplays(
                 display(TYPE_INTERNAL, id = 0),
@@ -287,7 +287,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     fun onCloseSystemDialogsReceived_controllerHasPendingTransitions() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
-            whenever(controller.isPendingSharedTransition).thenReturn(true)
+            whenever(controller.isPendingSharedTransition()).thenReturn(true)
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
 

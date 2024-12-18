@@ -998,7 +998,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Tooltip">
         <item name="fontFamily">sans-serif</item>
-        <item name="textSize">14sp</item>
+        <item name="textSize">?android:attr/tooltipFontSize</item>
     </style>
 
     <style name="Widget.ActivityChooserView">
@@ -1504,26 +1504,50 @@ please see styles_device_defaults.xml.
 
     <!-- @hide -->
     <style name="PointerIconVectorStyleFillGreen">
-        <item name="pointerIconVectorFill">#6DD58C</item>
-        <item name="pointerIconVectorFillInverse">#6DD58C</item>
+        <item name="pointerIconVectorFill">#1AA64A</item>
+        <item name="pointerIconVectorFillInverse">#1AA64A</item>
     </style>
 
     <!-- @hide -->
-    <style name="PointerIconVectorStyleFillYellow">
-        <item name="pointerIconVectorFill">#FDD663</item>
-        <item name="pointerIconVectorFillInverse">#FDD663</item>
+    <style name="PointerIconVectorStyleFillRed">
+        <item name="pointerIconVectorFill">#F55E57</item>
+        <item name="pointerIconVectorFillInverse">#F55E57</item>
     </style>
 
     <!-- @hide -->
     <style name="PointerIconVectorStyleFillPink">
-        <item name="pointerIconVectorFill">#F2B8B5</item>
-        <item name="pointerIconVectorFillInverse">#F2B8B5</item>
+        <item name="pointerIconVectorFill">#F94AAB</item>
+        <item name="pointerIconVectorFillInverse">#F94AAB</item>
     </style>
 
     <!-- @hide -->
     <style name="PointerIconVectorStyleFillBlue">
-        <item name="pointerIconVectorFill">#8AB4F8</item>
-        <item name="pointerIconVectorFillInverse">#8AB4F8</item>
+        <item name="pointerIconVectorFill">#009DC9</item>
+        <item name="pointerIconVectorFillInverse">#009DC9</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleFillPurple">
+        <item name="pointerIconVectorFill">#AD72FF</item>
+        <item name="pointerIconVectorFillInverse">#AD72FF</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeWhite">
+        <item name="pointerIconVectorStroke">@color/white</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeBlack">
+        <item name="pointerIconVectorStroke">@color/black</item>
+        <item name="pointerIconVectorStrokeInverse">@color/black</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="PointerIconVectorStyleStrokeNone">
+        <item name="pointerIconVectorStroke">@color/transparent</item>
+        <item name="pointerIconVectorStrokeInverse">@color/transparent</item>
     </style>
 
     <!-- @hide -->

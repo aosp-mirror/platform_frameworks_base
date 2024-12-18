@@ -18,6 +18,9 @@ package com.android.internal.statusbar;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.UserHandle;
 
@@ -37,18 +40,55 @@ public class StatusBarIconTest {
      */
     @Test
     public void testParcelable() {
+        final StatusBarIcon original = newStatusBarIcon();
+
+        final StatusBarIcon copy = parcelAndUnparcel(original);
+
+        assertSerializableFieldsEqual(copy, original);
+    }
+
+    @Test
+    public void testClone_withPreloaded() {
+        final StatusBarIcon original = newStatusBarIcon();
+        original.preloadedIcon = new ColorDrawable(Color.RED);
+
+        final StatusBarIcon copy = original.clone();
+
+        assertSerializableFieldsEqual(copy, original);
+        assertThat(copy.preloadedIcon).isNotNull();
+        assertThat(copy.preloadedIcon).isInstanceOf(ColorDrawable.class);
+        assertThat(((ColorDrawable) copy.preloadedIcon).getColor()).isEqualTo(Color.RED);
+    }
+
+    @Test
+    public void testClone_noPreloaded() {
+        final StatusBarIcon original = newStatusBarIcon();
+
+        final StatusBarIcon copy = original.clone();
+
+        assertSerializableFieldsEqual(copy, original);
+        assertThat(copy.preloadedIcon).isEqualTo(original.preloadedIcon);
+    }
+
+    private static StatusBarIcon newStatusBarIcon() {
         final UserHandle dummyUserHandle = UserHandle.of(100);
         final String dummyIconPackageName = "com.android.internal.statusbar.test";
-        final int dummyIconId = 123;
+        final Icon dummyIcon = Icon.createWithResource(dummyIconPackageName, 123);
         final int dummyIconLevel = 1;
         final int dummyIconNumber = 2;
         final CharSequence dummyIconContentDescription = "dummyIcon";
-        final StatusBarIcon original = new StatusBarIcon(dummyIconPackageName, dummyUserHandle,
-                dummyIconId, dummyIconLevel, dummyIconNumber, dummyIconContentDescription,
-                StatusBarIcon.Type.SystemIcon);
+        return new StatusBarIcon(
+                dummyUserHandle,
+                dummyIconPackageName,
+                dummyIcon,
+                dummyIconLevel,
+                dummyIconNumber,
+                dummyIconContentDescription,
+                StatusBarIcon.Type.SystemIcon,
+                StatusBarIcon.Shape.FIXED_SPACE);
+    }
 
-        final StatusBarIcon copy = clone(original);
-
+    private static void assertSerializableFieldsEqual(StatusBarIcon copy, StatusBarIcon original) {
         assertThat(copy.user).isEqualTo(original.user);
         assertThat(copy.pkg).isEqualTo(original.pkg);
         assertThat(copy.icon.sameAs(original.icon)).isTrue();
@@ -56,19 +96,18 @@ public class StatusBarIconTest {
         assertThat(copy.visible).isEqualTo(original.visible);
         assertThat(copy.number).isEqualTo(original.number);
         assertThat(copy.contentDescription).isEqualTo(original.contentDescription);
+        assertThat(copy.type).isEqualTo(original.type);
+        assertThat(copy.shape).isEqualTo(original.shape);
     }
 
-    private StatusBarIcon clone(StatusBarIcon original) {
-        Parcel parcel = null;
+    private static StatusBarIcon parcelAndUnparcel(StatusBarIcon original) {
+        Parcel parcel = Parcel.obtain();
         try {
-            parcel = Parcel.obtain();
             original.writeToParcel(parcel, 0);
             parcel.setDataPosition(0);
             return StatusBarIcon.CREATOR.createFromParcel(parcel);
         } finally {
-            if (parcel != null) {
-                parcel.recycle();
-            }
+            parcel.recycle();
         }
     }
 }

@@ -210,6 +210,11 @@ public final class ApplicationStartInfo implements Parcelable {
     public static final int START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE = 7;
 
     /**
+     * @see #getMonoticCreationTimeMs
+     */
+    private long mMonoticCreationTimeMs;
+
+    /**
      * @see #getStartupState
      */
     private @StartupState int mStartupState;
@@ -487,6 +492,15 @@ public final class ApplicationStartInfo implements Parcelable {
     }
 
     /**
+     * Monotonic elapsed time persisted across reboots.
+     *
+     * @hide
+     */
+    public long getMonoticCreationTimeMs() {
+        return mMonoticCreationTimeMs;
+    }
+
+    /**
      * The process id.
      *
      * <p class="note"> Note: field will be set for any {@link #getStartupState} value.</p>
@@ -666,10 +680,13 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeParcelable(mStartIntent, flags);
         dest.writeInt(mLaunchMode);
         dest.writeBoolean(mWasForceStopped);
+        dest.writeLong(mMonoticCreationTimeMs);
     }
 
     /** @hide */
-    public ApplicationStartInfo() {}
+    public ApplicationStartInfo(long monotonicCreationTimeMs) {
+        mMonoticCreationTimeMs = monotonicCreationTimeMs;
+    }
 
     /** @hide */
     public ApplicationStartInfo(ApplicationStartInfo other) {
@@ -686,6 +703,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mStartIntent = other.mStartIntent;
         mLaunchMode = other.mLaunchMode;
         mWasForceStopped = other.mWasForceStopped;
+        mMonoticCreationTimeMs = other.mMonoticCreationTimeMs;
     }
 
     private ApplicationStartInfo(@NonNull Parcel in) {
@@ -708,6 +726,7 @@ public final class ApplicationStartInfo implements Parcelable {
                 in.readParcelable(Intent.class.getClassLoader(), android.content.Intent.class);
         mLaunchMode = in.readInt();
         mWasForceStopped = in.readBoolean();
+        mMonoticCreationTimeMs = in.readLong();
     }
 
     private static String intern(@Nullable String source) {
@@ -786,6 +805,7 @@ public final class ApplicationStartInfo implements Parcelable {
         }
         proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
         proto.write(ApplicationStartInfoProto.WAS_FORCE_STOPPED, mWasForceStopped);
+        proto.write(ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS, mMonoticCreationTimeMs);
         proto.end(token);
     }
 
@@ -869,6 +889,10 @@ public final class ApplicationStartInfo implements Parcelable {
                     mWasForceStopped = proto.readBoolean(
                             ApplicationStartInfoProto.WAS_FORCE_STOPPED);
                     break;
+                case (int) ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS:
+                    mMonoticCreationTimeMs = proto.readLong(
+                            ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS);
+                    break;
             }
         }
         proto.end(token);
@@ -880,6 +904,8 @@ public final class ApplicationStartInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append(prefix)
                 .append("ApplicationStartInfo ").append(seqSuffix).append(':')
+                .append('\n')
+                .append(" monotonicCreationTimeMs=").append(mMonoticCreationTimeMs)
                 .append('\n')
                 .append(" pid=").append(mPid)
                 .append(" realUid=").append(mRealUid)
@@ -949,14 +975,15 @@ public final class ApplicationStartInfo implements Parcelable {
             && mDefiningUid == o.mDefiningUid && mReason == o.mReason
             && mStartupState == o.mStartupState && mStartType == o.mStartType
             && mLaunchMode == o.mLaunchMode && TextUtils.equals(mProcessName, o.mProcessName)
-            && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped;
+            && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped
+            && mMonoticCreationTimeMs == o.mMonoticCreationTimeMs;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mPid, mRealUid, mPackageUid, mDefiningUid, mReason, mStartupState,
-                mStartType, mLaunchMode, mProcessName,
-                mStartupTimestampsNs);
+                mStartType, mLaunchMode, mProcessName, mStartupTimestampsNs,
+                mMonoticCreationTimeMs);
     }
 
     private boolean timestampsEquals(@NonNull ApplicationStartInfo other) {

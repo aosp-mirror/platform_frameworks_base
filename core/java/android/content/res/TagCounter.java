@@ -16,11 +16,14 @@
 
 package android.content.res;
 
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+
 /**
  * Counter used to track the number of tags seen during manifest validation.
  *
  * {@hide}
  */
+@RavenwoodKeepWholeClass
 public class TagCounter {
     private static final int DEFAULT_MAX_COUNT = 512;
 

@@ -19,11 +19,12 @@ package com.android.systemui.settings.brightness
 import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.service.vr.IVrManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -40,7 +41,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class BrightnessControllerTest : SysuiTestCase() {
 
@@ -51,6 +52,7 @@ class BrightnessControllerTest : SysuiTestCase() {
     @Mock private lateinit var displayTracker: DisplayTracker
     @Mock private lateinit var displayManager: DisplayManager
     @Mock private lateinit var iVrManager: IVrManager
+    @Mock private lateinit var logger: LogBuffer
 
     private lateinit var testableLooper: TestableLooper
 
@@ -69,10 +71,11 @@ class BrightnessControllerTest : SysuiTestCase() {
                 displayTracker,
                 displayManager,
                 secureSettings,
+                logger,
                 iVrManager,
                 executor,
                 mock(),
-                Handler(testableLooper.looper)
+                Handler(testableLooper.looper),
             )
     }
 

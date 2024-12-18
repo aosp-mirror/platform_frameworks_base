@@ -16,7 +16,7 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.shade.ui.composable.ShadeScene
 import dagger.Binds
 import dagger.Module

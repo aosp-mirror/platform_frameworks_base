@@ -463,8 +463,9 @@ public final class CarrierRestrictionRules implements Parcelable {
     public String toString() {
         return "CarrierRestrictionRules(allowed:" + mAllowedCarriers + ", excluded:"
                 + mExcludedCarriers + ", default:" + mCarrierRestrictionDefault
-                + ", MultiSim policy:" + mMultiSimPolicy + getCarrierInfoList() +
-                "  mIsCarrierLockInfoSupported = " + mUseCarrierLockInfo + ")";
+                + ", MultiSim policy:" + mMultiSimPolicy + getCarrierInfoList()
+                + ", mIsCarrierLockInfoSupported = " + mUseCarrierLockInfo
+                + getCarrierRestrictionStatusToLog() + ")";
     }
 
     private String getCarrierInfoList() {
@@ -474,6 +475,13 @@ public final class CarrierRestrictionRules implements Parcelable {
         } else {
             return "";
         }
+    }
+
+    private String getCarrierRestrictionStatusToLog() {
+        if(android.os.Build.isDebuggable()) {
+            return ", CarrierRestrictionStatus = " + mCarrierRestrictionStatus;
+        }
+        return "";
     }
 
     /**

@@ -159,7 +159,7 @@ public final class BarringInfo implements Parcelable {
 
         /**
          * @return the conditional barring factor as a percentage 0-100, which is the probability of
-         *         a random device being barred for the service type.
+         *         a random device being allowed for a conditionally barred service.
          */
         public int getConditionalBarringFactor() {
             return mConditionalBarringFactor;

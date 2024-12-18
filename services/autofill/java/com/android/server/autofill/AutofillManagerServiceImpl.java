@@ -92,6 +92,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
@@ -192,6 +193,8 @@ final class AutofillManagerServiceImpl
 
     private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
 
+    private final UserManagerInternal mUserManagerInternal;
+
     private final DisabledInfoCache mDisabledInfoCache;
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
@@ -208,6 +211,7 @@ final class AutofillManagerServiceImpl
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mContentCaptureManagerInternal = LocalServices.getService(
                 ContentCaptureManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mDisabledInfoCache = disableCache;
         updateLocked(disabled);
     }
@@ -379,6 +383,13 @@ final class AutofillManagerServiceImpl
             return 0;
         }
 
+        // TODO(b/376482880): remove this check once autofill service supports visible
+        // background users.
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(mUserId)) {
+            Slog.d(TAG, "Currently, autofill service does not support visible background users.");
+            return 0;
+        }
+
         if (!forAugmentedAutofillOnly && isAutofillDisabledLocked(clientActivity)) {
             // Standard autofill is enabled, but service disabled autofill for this activity; that
             // means no session, unless the activity is allowlisted for augmented autofill
@@ -464,7 +475,8 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
+    void setAutofillFailureLocked(
+            int sessionId, int uid, @NonNull List<AutofillId> ids, boolean isRefill) {
         if (!isEnabledLocked()) {
             Slog.wtf(TAG, "Service not enabled");
             return;
@@ -474,7 +486,7 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAutofillFailure(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.setAutofillFailureLocked(ids);
+        session.setAutofillFailureLocked(ids, isRefill);
     }
 
     @GuardedBy("mLock")
@@ -489,6 +501,52 @@ final class AutofillManagerServiceImpl
             return;
         }
         session.setViewAutofilledLocked(id);
+    }
+
+    @GuardedBy("mLock")
+    void notifyNotExpiringResponseDuringAuth(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyNotExpiringResponseDuringAuth(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setNotifyNotExpiringResponseDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    void notifyViewEnteredIgnoredDuringAuthCount(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyViewEnteredIgnoredDuringAuthCount(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setLogViewEnteredIgnoredDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    public void setAutofillIdsAttemptedForRefill(
+            int sessionId, @NonNull List<AutofillId> ids, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setAutofillIdsAttemptedForRefill(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setAutofillIdsAttemptedForRefillLocked(ids);
     }
 
     @GuardedBy("mLock")

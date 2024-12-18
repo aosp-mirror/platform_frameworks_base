@@ -17,8 +17,12 @@ package com.android.systemui.statusbar.disableflags.data.model
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
+import android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS
+import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ALERTS
+import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
+import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
@@ -27,12 +31,14 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
  * Model for the disable flags that come from [IStatusBar].
  *
  * For clients of the disable flags: do *not* refer to the disable integers directly. Instead,
- * re-use or define a helper method that internally processes the flags. (We want to hide the
- * bitwise logic here so no one else has to worry about it.)
+ * re-use or define a helper method or property that internally processes the flags. (We want to
+ * hide the bitwise logic here so no one else has to worry about it.)
  */
 data class DisableFlagsModel(
     private val disable1: Int = DISABLE_NONE,
     private val disable2: Int = DISABLE2_NONE,
+    /** True if we should animate any view visibility changes and false otherwise. */
+    val animate: Boolean = false,
 ) {
     /** Returns true if notification alerts are allowed based on the flags. */
     fun areNotificationAlertsEnabled(): Boolean {
@@ -49,6 +55,13 @@ data class DisableFlagsModel(
         return (disable2 and DISABLE2_QUICK_SETTINGS) == 0
     }
 
+    val isClockEnabled = (disable1 and DISABLE_CLOCK) == 0
+
+    val areNotificationIconsEnabled = (disable1 and DISABLE_NOTIFICATION_ICONS) == 0
+
+    val isSystemInfoEnabled =
+        (disable1 and DISABLE_SYSTEM_INFO) == 0 && (disable2 and DISABLE2_SYSTEM_ICONS) == 0
+
     /** Logs the change to the provided buffer. */
     fun logChange(buffer: LogBuffer, disableFlagsLogger: DisableFlagsLogger) {
         buffer.log(
@@ -60,9 +73,9 @@ data class DisableFlagsModel(
             },
             {
                 disableFlagsLogger.getDisableFlagsString(
-                    new = DisableFlagsLogger.DisableState(int1, int2),
+                    new = DisableFlagsLogger.DisableState(int1, int2)
                 )
-            }
+            },
         )
     }
 

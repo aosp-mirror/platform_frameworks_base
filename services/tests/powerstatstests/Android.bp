@@ -59,18 +59,20 @@ android_ravenwood_test {
     name: "PowerStatsTestsRavenwood",
     static_libs: [
         "services.core",
+        "platformprotosnano",
         "coretests-aidl",
         "ravenwood-junit",
         "truth",
         "androidx.annotation_annotation",
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
-        "androidx.test.ext.junit",
         "modules-utils-binary-xml",
         "flag-junit",
     ],
     srcs: [
         "src/com/android/server/power/stats/*.java",
+        "src/com/android/server/power/stats/format/*.java",
+        "src/com/android/server/power/stats/processor/*.java",
     ],
     java_resources: [
         "res/xml/power_profile*.xml",

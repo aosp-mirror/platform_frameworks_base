@@ -28,8 +28,10 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -69,8 +71,11 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock private lateinit var mUserActivityNotifier: UserActivityNotifier
     private val updateMonitorCallbackArgumentCaptor =
         ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+
+    private val kosmos = testKosmos()
 
     @Before
     fun setup() {
@@ -101,7 +106,9 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
                 emergencyButtonController,
                 fakeFeatureFlags,
                 mSelectedUserInteractor,
-                keyguardKeyboardInteractor
+                keyguardKeyboardInteractor,
+                kosmos.bouncerHapticPlayer,
+                mUserActivityNotifier,
             )
         underTest.init()
         underTest.onViewAttached()
@@ -159,14 +166,14 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
         updateMonitorCallbackArgumentCaptor.value.onSimStateChanged(
             /* subId= */ 0,
             /* slotId= */ 0,
-            TelephonyManager.SIM_STATE_PIN_REQUIRED
+            TelephonyManager.SIM_STATE_PIN_REQUIRED,
         )
         verify(keyguardSecurityCallback, never()).showCurrentSecurityScreen()
 
         updateMonitorCallbackArgumentCaptor.value.onSimStateChanged(
             /* subId= */ 0,
             /* slotId= */ 0,
-            TelephonyManager.SIM_STATE_PUK_REQUIRED
+            TelephonyManager.SIM_STATE_PUK_REQUIRED,
         )
 
         verify(keyguardSecurityCallback).showCurrentSecurityScreen()

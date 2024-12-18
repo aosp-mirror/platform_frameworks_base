@@ -159,7 +159,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
-            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CAMERA})
+            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CAMERA,
+            POLICY_TYPE_BLOCKED_ACTIVITY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -171,10 +172,21 @@ public final class VirtualDeviceParams implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY,
-            POLICY_TYPE_CLIPBOARD})
+            POLICY_TYPE_CLIPBOARD, POLICY_TYPE_BLOCKED_ACTIVITY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface DynamicPolicyType {}
+
+    /**
+     * Policy types that can be dynamically changed for a specific display.
+     *
+     * @see VirtualDeviceManager.VirtualDevice#setDevicePolicyForDisplay
+     * @hide
+     */
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface DynamicDisplayPolicyType {}
 
     /**
      * Tells the sensor framework how to handle sensor requests from contexts associated with this
@@ -229,6 +241,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * @see VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption
      * @see VirtualDeviceManager.VirtualDevice#removeActivityPolicyExemption
      */
+    // TODO(b/333443509): Update the documentation of custom policy and link to the new policy
+    // POLICY_TYPE_BLOCKED_ACTIVITY
     @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
     public static final int POLICY_TYPE_ACTIVITY = 3;
 
@@ -262,6 +276,23 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
     public static final int POLICY_TYPE_CAMERA = 5;
+
+    /**
+     * Tells the virtual device framework how to handle activity launches that were blocked due to
+     * the current activity policy.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Show UI informing the user of the blocked activity
+     *     launch on the virtual display that the activity was originally launched on.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Does not inform the user of the blocked activity
+     *     launch. The virtual device owner can use this policy together with
+     *     {@link VirtualDeviceManager.ActivityListener#onActivityLaunchBlocked} to provide custom
+     *     experience on the virtual device.
+     * </ul>
+     */
+    // TODO(b/333443509): Link to POLICY_TYPE_ACTIVITY
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+    public static final int POLICY_TYPE_BLOCKED_ACTIVITY = 6;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -1172,6 +1203,10 @@ public final class VirtualDeviceParams implements Parcelable {
 
             if (!Flags.virtualCamera()) {
                 mDevicePolicies.delete(POLICY_TYPE_CAMERA);
+            }
+
+            if (!android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                mDevicePolicies.delete(POLICY_TYPE_BLOCKED_ACTIVITY);
             }
 
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE

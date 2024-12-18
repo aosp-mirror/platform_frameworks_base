@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.hearingaid;
 
+import static com.android.systemui.accessibility.hearingaid.HearingDevicesUiEventLogger.LAUNCH_SOURCE_A11Y;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +48,7 @@ public class HearingDevicesDialogReceiver extends BroadcastReceiver {
         }
 
         if (ACTION.equals(intent.getAction())) {
-            mDialogManager.showDialog(/* view= */ null);
+            mDialogManager.showDialog(/* expandable= */ null, LAUNCH_SOURCE_A11Y);
         }
     }
 }

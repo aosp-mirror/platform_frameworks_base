@@ -20,6 +20,7 @@ import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATIO
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
@@ -53,6 +54,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
@@ -90,15 +92,18 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.NotifStats;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.shared.GroupHunAnimationFix;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController.NotificationPanelEvent;
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
+import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -135,6 +140,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private HeadsUpManager mHeadsUpManager;
+    @Mock private HeadsUpTouchHelper.Callback mHeadsUpCallback;
+    @Mock private Provider<IStatusBarService> mStatusBarService;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -184,14 +191,12 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerArgumentCaptor;
 
-
-    private final ActiveNotificationListRepository mActiveNotificationsRepository =
-            new ActiveNotificationListRepository();
-
     private final SeenNotificationsInteractor mSeenNotificationsInteractor =
-            new SeenNotificationsInteractor(mActiveNotificationsRepository);
+            mKosmos.getSeenNotificationsInteractor();
 
     private NotificationStackScrollLayoutController mController;
+
+    private NotificationTestHelper mNotificationTestHelper;
 
     @Before
     public void setUp() {
@@ -200,6 +205,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mKeyguardTransitionRepo.getTransitions()).thenReturn(emptyFlow());
+        mNotificationTestHelper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
     }
 
     @Test
@@ -222,6 +232,42 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 any(ConfigurationController.ConfigurationListener.class));
     }
 
+    @Test
+    @EnableFlags(GroupHunAnimationFix.FLAG_NAME)
+    public void changeHeadsUpAnimatingAwayToTrue_onEntryAnimatingAwayEndedNotCalled()
+            throws Exception {
+        // Before: bind an ExpandableNotificationRow,
+        initController(/* viewIsAttached= */ true);
+        mController.setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
+        NotificationListContainer listContainer = mController.getNotificationListContainer();
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        listContainer.bindRow(row);
+
+        // When: call setHeadsUpAnimatingAway to change set mHeadsupDisappearRunning to true
+        row.setHeadsUpAnimatingAway(true);
+
+        // Then: mHeadsUpManager.onEntryAnimatingAwayEnded is not called
+        verify(mHeadsUpManager, never()).onEntryAnimatingAwayEnded(row.getEntry());
+    }
+
+    @Test
+    @EnableFlags(GroupHunAnimationFix.FLAG_NAME)
+    public void changeHeadsUpAnimatingAwayToFalse_onEntryAnimatingAwayEndedCalled()
+            throws Exception {
+        // Before: bind an ExpandableNotificationRow, set its mHeadsupDisappearRunning to true
+        initController(/* viewIsAttached= */ true);
+        mController.setHeadsUpAppearanceController(mock(HeadsUpAppearanceController.class));
+        NotificationListContainer listContainer = mController.getNotificationListContainer();
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        listContainer.bindRow(row);
+        row.setHeadsUpAnimatingAway(true);
+
+        // When: call setHeadsUpAnimatingAway to change set mHeadsupDisappearRunning to false
+        row.setHeadsUpAnimatingAway(false);
+
+        // Then: mHeadsUpManager.onEntryAnimatingAwayEnded is called
+        verify(mHeadsUpManager).onEntryAnimatingAwayEnded(row.getEntry());
+    }
     @Test
     public void testOnDensityOrFontScaleChanged_reInflatesFooterViews() {
         initController(/* viewIsAttached= */ true);
@@ -973,6 +1019,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayout.getViewTreeObserver())
                 .thenReturn(viewTreeObserver);
         when(mNotificationStackScrollLayout.getContext()).thenReturn(getContext());
+        when(mNotificationStackScrollLayout.getHeadsUpCallback()).thenReturn(mHeadsUpCallback);
+        when(mHeadsUpCallback.getContext()).thenReturn(getContext());
         mController = new NotificationStackScrollLayoutController(
                 mNotificationStackScrollLayout,
                 true,
@@ -981,6 +1029,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mVisibilityProvider,
                 mNotificationWakeUpCoordinator,
                 mHeadsUpManager,
+                mStatusBarService,
                 mNotificationRoundnessManager,
                 mTunerService,
                 mDeviceProvisionedController,

@@ -19,6 +19,7 @@ package com.android.server.power;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -121,6 +122,9 @@ final class WakeLockLog {
             {"*job*/", "*gms_scheduler*/", "IntentOp:"};
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
+    @VisibleForTesting
+    static final String SYSTEM_PACKAGE_NAME = "System";
 
     /**
      * Lock protects WakeLockLog.dump (binder thread) from conflicting with changes to the log
@@ -516,21 +520,26 @@ final class WakeLockLog {
                 return;
             }
 
-            String[] packages;
-            if (uidToPackagesCache.contains(tag.ownerUid)) {
-                packages = uidToPackagesCache.get(tag.ownerUid);
-            } else {
-                packages = packageManager.getPackagesForUid(tag.ownerUid);
-                uidToPackagesCache.put(tag.ownerUid, packages);
+            if (tag.ownerUid == Process.SYSTEM_UID) {
+                packageName = SYSTEM_PACKAGE_NAME;
             }
+            else {
+                String[] packages;
+                if (uidToPackagesCache.contains(tag.ownerUid)) {
+                    packages = uidToPackagesCache.get(tag.ownerUid);
+                } else {
+                    packages = packageManager.getPackagesForUid(tag.ownerUid);
+                    uidToPackagesCache.put(tag.ownerUid, packages);
+                }
 
-            if (packages != null && packages.length > 0) {
-                packageName = packages[0];
-                if (packages.length > 1) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(packageName)
-                            .append(",...");
-                    packageName = sb.toString();
+                if (packages != null && packages.length > 0) {
+                    packageName = packages[0];
+                    if (packages.length > 1) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(packageName)
+                                .append(",...");
+                        packageName = sb.toString();
+                    }
                 }
             }
         }

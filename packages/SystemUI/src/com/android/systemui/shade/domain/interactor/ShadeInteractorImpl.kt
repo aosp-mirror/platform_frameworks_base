@@ -54,11 +54,14 @@ constructor(
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     private val baseShadeInteractor: BaseShadeInteractor,
-) : ShadeInteractor, BaseShadeInteractor by baseShadeInteractor {
+    shadeModeInteractor: ShadeModeInteractor,
+) :
+    ShadeInteractor,
+    BaseShadeInteractor by baseShadeInteractor,
+    ShadeModeInteractor by shadeModeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
-            .map { isDisabledByFlags -> isDisabledByFlags.isShadeEnabled() }
-            .distinctUntilChanged()
+            .map { it.isShadeEnabled() }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isQsEnabled: StateFlow<Boolean> =

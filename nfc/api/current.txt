@@ -211,7 +211,7 @@ package android.nfc.cardemulation {
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, String);
     method @FlaggedApi("android.nfc.enable_card_emulation_euicc") public boolean isEuiccSupported();
     method public boolean registerAidsForService(android.content.ComponentName, String, java.util.List<java.lang.String>);
-    method @FlaggedApi("android.nfc.nfc_event_listener") public void registerNfcEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.cardemulation.CardEmulation.NfcEventListener);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public void registerNfcEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.cardemulation.CardEmulation.NfcEventCallback);
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public boolean registerPollingLoopFilterForService(@NonNull android.content.ComponentName, @NonNull String, boolean);
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public boolean registerPollingLoopPatternFilterForService(@NonNull android.content.ComponentName, @NonNull String, boolean);
     method public boolean removeAidsForService(android.content.ComponentName, String);
@@ -221,7 +221,7 @@ package android.nfc.cardemulation {
     method public boolean setPreferredService(android.app.Activity, android.content.ComponentName);
     method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setShouldDefaultToObserveModeForService(@NonNull android.content.ComponentName, boolean);
     method public boolean supportsAidPrefixRegistration();
-    method @FlaggedApi("android.nfc.nfc_event_listener") public void unregisterNfcEventListener(@NonNull android.nfc.cardemulation.CardEmulation.NfcEventListener);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public void unregisterNfcEventCallback(@NonNull android.nfc.cardemulation.CardEmulation.NfcEventCallback);
     method @NonNull @RequiresPermission(android.Manifest.permission.NFC) public boolean unsetOffHostForService(@NonNull android.content.ComponentName);
     method public boolean unsetPreferredService(android.app.Activity);
     field @Deprecated public static final String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
@@ -244,7 +244,7 @@ package android.nfc.cardemulation {
     field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
   }
 
-  @FlaggedApi("android.nfc.nfc_event_listener") public static interface CardEmulation.NfcEventListener {
+  @FlaggedApi("android.nfc.nfc_event_listener") public static interface CardEmulation.NfcEventCallback {
     method @FlaggedApi("android.nfc.nfc_event_listener") public default void onAidConflictOccurred(@NonNull String);
     method @FlaggedApi("android.nfc.nfc_event_listener") public default void onAidNotRouted(@NonNull String);
     method @FlaggedApi("android.nfc.nfc_event_listener") public default void onInternalErrorReported(int);

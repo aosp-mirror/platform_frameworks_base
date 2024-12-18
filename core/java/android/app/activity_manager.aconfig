@@ -81,3 +81,80 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_running_app_processes"
+     description: "Rate limit calls to getRunningAppProcesses using a cache"
+     is_fixed_read_only: true
+     bug: "360374604"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_processes_in_error_state"
+     description: "Rate limit calls to getProcessesInErrorState using a cache"
+     is_fixed_read_only: true
+     bug: "361146083"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "use_app_info_not_launched"
+     description: "Use the notLaunched state from ApplicationInfo instead of current value"
+     is_fixed_read_only: true
+     bug: "362516211"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "cache_get_current_user_id"
+     description: "Add caching for getCurrentUserId"
+     is_fixed_read_only: true
+     bug: "361853873"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_memory_info"
+     description: "Rate limit calls to getMemoryInfo using a cache"
+     is_fixed_read_only: true
+     bug: "364312431"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "rate_limit_get_my_memory_state"
+     description: "Rate limit calls to getMyMemoryState using a cache"
+     is_fixed_read_only: true
+     bug: "365182205"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "backstage_power"
+     name: "use_sticky_bcast_cache"
+     description: "Use cache for sticky broadcast intents"
+     is_fixed_read_only: true
+     bug: "356148006"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

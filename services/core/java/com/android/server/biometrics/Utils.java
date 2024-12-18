@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_ADVANCED;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
@@ -35,6 +36,7 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_SENSOR_PRIVACY_ENABLED;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
+import static com.android.server.biometrics.PreAuthInfo.MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,6 +50,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
@@ -140,6 +143,14 @@ public class Utils {
     }
 
     /**
+     * @param authenticators composed of one or more values from {@link Authenticators}
+     * @return true if mandatory biometrics is requested
+     */
+    static boolean isMandatoryBiometricsRequested(@Authenticators.Types int authenticators) {
+        return (authenticators & Authenticators.MANDATORY_BIOMETRICS) != 0;
+    }
+
+    /**
      * @param promptInfo should be first processed by
      * {@link #combineAuthenticatorBundles(PromptInfo)}
      * @return true if device credential is allowed.
@@ -223,17 +234,18 @@ public class Utils {
      * @param promptInfo
      * @return
      */
-    static boolean isValidAuthenticatorConfig(PromptInfo promptInfo) {
+    static boolean isValidAuthenticatorConfig(Context context, PromptInfo promptInfo) {
         final int authenticators = promptInfo.getAuthenticators();
-        return isValidAuthenticatorConfig(authenticators);
+        return isValidAuthenticatorConfig(context, authenticators);
     }
 
     /**
-     * Checks if the authenticator configuration is a valid combination of the public APIs
-     * @param authenticators
-     * @return
+     * Checks if the authenticator configuration is a valid combination of the public APIs.
+     *
+     * throws {@link SecurityException} if the caller requests for mandatory biometrics without
+     * {@link SET_BIOMETRIC_DIALOG_ADVANCED} permission
      */
-    static boolean isValidAuthenticatorConfig(int authenticators) {
+    static boolean isValidAuthenticatorConfig(Context context, int authenticators) {
         // The caller is not required to set the authenticators. But if they do, check the below.
         if (authenticators == 0) {
             return true;
@@ -241,8 +253,15 @@ public class Utils {
 
         // Check if any of the non-biometric and non-credential bits are set. If so, this is
         // invalid.
-        final int testBits = ~(Authenticators.DEVICE_CREDENTIAL
-                | Authenticators.BIOMETRIC_MIN_STRENGTH);
+        final int testBits;
+        if (Flags.mandatoryBiometrics()) {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH
+                    | Authenticators.MANDATORY_BIOMETRICS);
+        } else {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH);
+        }
         if ((authenticators & testBits) != 0) {
             Slog.e(BiometricService.TAG, "Non-biometric, non-credential bits found."
                     + " Authenticators: " + authenticators);
@@ -258,6 +277,11 @@ public class Utils {
         } else if (biometricBits == Authenticators.BIOMETRIC_STRONG) {
             return true;
         } else if (biometricBits == Authenticators.BIOMETRIC_WEAK) {
+            return true;
+        } else if (isMandatoryBiometricsRequested(authenticators)) {
+            //TODO(b/347123256): Update CTS test
+            context.enforceCallingOrSelfPermission(SET_BIOMETRIC_DIALOG_ADVANCED,
+                    "Must have SET_BIOMETRIC_DIALOG_ADVANCED permission");
             return true;
         }
 
@@ -298,10 +322,18 @@ public class Utils {
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
-                biometricManagerCode = BiometricManager.BIOMETRIC_SUCCESS;
+                biometricManagerCode = Flags.mandatoryBiometrics()
+                        ? BiometricManager.BIOMETRIC_ERROR_LOCKOUT
+                        : BiometricManager.BIOMETRIC_SUCCESS;
                 break;
             case BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED:
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+                break;
+            case BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS:
+                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
                 break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
@@ -364,9 +396,14 @@ public class Utils {
                 return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
             case BIOMETRIC_SENSOR_PRIVACY_ENABLED:
                 return BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED;
+            case MANDATORY_BIOMETRIC_UNAVAILABLE_ERROR:
+                return BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE;
+            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
+                if (Flags.mandatoryBiometrics()) {
+                    return BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+                }
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
             case BIOMETRIC_HARDWARE_NOT_DETECTED:
-            case BIOMETRIC_NOT_ENABLED_FOR_APPS:
             default:
                 return BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
         }
@@ -575,6 +612,8 @@ public class Utils {
         }
     }
 
+    // LINT.IfChange
+
     /**
      * Checks if a client package is running in the background.
      *
@@ -607,4 +646,6 @@ public class Utils {
 
         return true;
     }
+    // LINT.ThenChange(frameworks/base/packages/SystemUI/shared/biometrics/src/com/android
+    // /systemui/biometrics/Utils.kt)
 }

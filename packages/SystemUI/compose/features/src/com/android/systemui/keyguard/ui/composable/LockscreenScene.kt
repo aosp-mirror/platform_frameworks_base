@@ -22,28 +22,36 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.animation.scene.animateContentFloatAsState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
+import com.android.systemui.keyguard.ui.viewmodel.LockscreenUserActionsViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /** The lock screen scene shows when the device is locked. */
 @SysUISingleton
 class LockscreenScene
 @Inject
 constructor(
-    viewModel: LockscreenSceneViewModel,
+    actionsViewModelFactory: LockscreenUserActionsViewModel.Factory,
     private val lockscreenContent: Lazy<LockscreenContent>,
-) : ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Lockscreen
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        viewModel.destinationScenes
+    private val actionsViewModel: LockscreenUserActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
+
+    override suspend fun onActivated(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
@@ -61,7 +69,7 @@ private fun SceneScope.LockscreenScene(
     lockscreenContent: Lazy<LockscreenContent>,
     modifier: Modifier = Modifier,
 ) {
-    animateSceneFloatAsState(
+    animateContentFloatAsState(
         value = QuickSettings.SharedValues.SquishinessValues.LockscreenSceneStarting,
         key = QuickSettings.SharedValues.TilesSquishiness,
     )

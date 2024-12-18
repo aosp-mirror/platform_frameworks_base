@@ -51,7 +51,8 @@ constructor(
             onCancel = { 0f },
         )
 
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
+    // Show immediately to avoid what can appear to be a flicker on device wakeup
+    val lockscreenAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(1f)
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)

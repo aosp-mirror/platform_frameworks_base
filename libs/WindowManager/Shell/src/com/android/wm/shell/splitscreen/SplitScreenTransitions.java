@@ -21,12 +21,12 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
-import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
-import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
+import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FADE_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
@@ -46,10 +46,10 @@ import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -439,9 +439,9 @@ class SplitScreenTransitions {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
                 mPendingResize != null);
         if (mPendingResize != null) {
+            mPendingResize.cancel(null);
             mainDecor.cancelRunningAnimations();
             sideDecor.cancelRunningAnimations();
-            mPendingResize.cancel(null);
             mAnimations.clear();
             onFinish(null /* wct */);
         }
@@ -504,7 +504,9 @@ class SplitScreenTransitions {
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTransitionConsumed for passThrough transition");
         }
 
-        // TODO: handle transition consumed for active remote handler
+        if (mActiveRemoteHandler != null) {
+            mActiveRemoteHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
     }
 
     void onFinish(WindowContainerTransaction wct) {

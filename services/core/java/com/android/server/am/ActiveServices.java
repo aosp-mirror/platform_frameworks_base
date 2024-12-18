@@ -127,6 +127,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE_EXECUTING;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -1515,9 +1516,8 @@ public final class ActiveServices {
                 serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
         mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
         final ProcessRecord hostApp = r.app;
-        final boolean wasStopped = hostApp == null ? wasStopped(r) : false;
-        final boolean firstLaunch =
-                hostApp == null ? !mAm.wasPackageEverLaunched(r.packageName, r.userId) : false;
+        final boolean wasStopped = hostApp == null ? r.appInfo.isStopped() : false;
+        final boolean firstLaunch = hostApp == null ? r.appInfo.isNotLaunched() : false;
 
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg,
                 false /* whileRestarting */,
@@ -4304,12 +4304,11 @@ public final class ActiveServices {
                 // queued up in the app side as they're one way calls. And we'll also hold off
                 // the service timeout timer until the process is unfrozen.
                 mAm.mOomAdjuster.updateAppFreezeStateLSP(callerApp, OOM_ADJ_REASON_BIND_SERVICE,
-                        true);
+                        true, UNKNOWN_ADJ);
             }
 
-            final boolean wasStopped = hostApp == null ? wasStopped(s) : false;
-            final boolean firstLaunch =
-                    hostApp == null ? !mAm.wasPackageEverLaunched(s.packageName, s.userId) : false;
+            final boolean wasStopped = hostApp == null ? s.appInfo.isStopped() : false;
+            final boolean firstLaunch = hostApp == null ? s.appInfo.isNotLaunched() : false;
 
             boolean needOomAdj = false;
             if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
@@ -5078,7 +5077,10 @@ public final class ActiveServices {
                         + " requires " + r.permission);
                 return new ServiceLookupResult(r.permission);
             } else if ((Manifest.permission.BIND_HOTWORD_DETECTION_SERVICE.equals(r.permission)
-                    || Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE.equals(r.permission))
+                    || Manifest.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE.equals(r.permission)
+                    || Manifest.permission.BIND_WEARABLE_SENSING_SERVICE.equals(r.permission)
+                    || Manifest.permission.BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE.equals(
+                    r.permission))
                     && callingUid != Process.SYSTEM_UID) {
                 // Hotword detection and visual query detection must run in its own sandbox, and we
                 // don't even trust its enclosing application to bind to it - only the system.
@@ -6652,9 +6654,10 @@ public final class ActiveServices {
 
             // If unbound while waiting to start and there is no connection left in this service,
             // remove the pending service
-            if (s.getConnections().isEmpty()) {
+            if (s.getConnections().isEmpty() && !s.startRequested) {
                 mPendingServices.remove(s);
                 mPendingBringups.remove(s);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Removed pending service: " + s);
             }
 
             if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
@@ -6960,7 +6963,8 @@ public final class ActiveServices {
     }
 
     private boolean collectPackageServicesLocked(String packageName, Set<String> filterByClasses,
-            boolean evenPersistent, boolean doit, ArrayMap<ComponentName, ServiceRecord> services) {
+            boolean evenPersistent, boolean doit, int minOomAdj,
+            ArrayMap<ComponentName, ServiceRecord> services) {
         boolean didSomething = false;
         for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord service = services.valueAt(i);
@@ -6968,6 +6972,11 @@ public final class ActiveServices {
                     || (service.packageName.equals(packageName)
                         && (filterByClasses == null
                             || filterByClasses.contains(service.name.getClassName())));
+            if (service.app != null && service.app.mState.getCurAdj() < minOomAdj) {
+                Slog.i(TAG, "Skip force stopping service " + service
+                            + ": below minimum oom adj level");
+                continue;
+            }
             if (sameComponent
                     && (service.app == null || evenPersistent || !service.app.isPersistent())) {
                 if (!doit) {
@@ -6991,6 +7000,12 @@ public final class ActiveServices {
 
     boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
             int userId, boolean evenPersistent, boolean fullStop, boolean doit) {
+        return bringDownDisabledPackageServicesLocked(packageName, filterByClasses, userId,
+                evenPersistent, fullStop, doit, ProcessList.INVALID_ADJ);
+    }
+
+    boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
+            int userId, boolean evenPersistent, boolean fullStop, boolean doit, int minOomAdj) {
         boolean didSomething = false;
 
         if (mTmpCollectionResults != null) {
@@ -7000,7 +7015,8 @@ public final class ActiveServices {
         if (userId == UserHandle.USER_ALL) {
             for (int i = mServiceMap.size() - 1; i >= 0; i--) {
                 didSomething |= collectPackageServicesLocked(packageName, filterByClasses,
-                        evenPersistent, doit, mServiceMap.valueAt(i).mServicesByInstanceName);
+                        evenPersistent, doit, minOomAdj,
+                        mServiceMap.valueAt(i).mServicesByInstanceName);
                 if (!doit && didSomething) {
                     return true;
                 }
@@ -7013,7 +7029,7 @@ public final class ActiveServices {
             if (smap != null) {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByInstanceName;
                 didSomething = collectPackageServicesLocked(packageName, filterByClasses,
-                        evenPersistent, doit, items);
+                        evenPersistent, doit, minOomAdj, items);
             }
             if (doit && filterByClasses == null) {
                 forceStopPackageLocked(packageName, userId);
@@ -9334,9 +9350,5 @@ public final class ActiveServices {
         }
         return mCachedDeviceProvisioningPackage != null
                 && mCachedDeviceProvisioningPackage.equals(packageName);
-    }
-
-    private boolean wasStopped(ServiceRecord serviceRecord) {
-        return (serviceRecord.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
     }
 }

@@ -19,7 +19,6 @@ package com.android.systemui.media.controls.domain.pipeline.interactor
 import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.media.session.MediaSession
 import android.provider.Settings
@@ -31,11 +30,13 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.BroadcastDialogController
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
+import com.android.systemui.media.controls.domain.pipeline.getNotificationActions
+import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.MediaControlModel
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -50,9 +51,8 @@ import kotlinx.coroutines.flow.map
 class MediaControlInteractor
 @AssistedInject
 constructor(
-    @Application applicationContext: Context,
     @Assisted private val instanceId: InstanceId,
-    repository: MediaFilterRepository,
+    private val repository: MediaFilterRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val keyguardStateController: KeyguardStateController,
     private val activityStarter: ActivityStarter,
@@ -60,6 +60,7 @@ constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val mediaOutputDialogManager: MediaOutputDialogManager,
     private val broadcastDialogController: BroadcastDialogController,
+    private val mediaLogger: MediaLogger,
 ) {
 
     val mediaControl: Flow<MediaControlModel?> =
@@ -72,14 +73,17 @@ constructor(
     fun removeMediaControl(
         token: MediaSession.Token?,
         instanceId: InstanceId,
-        delayMs: Long
+        delayMs: Long,
+        eventId: Int,
+        location: Int,
     ): Boolean {
+        logSmartspaceUserEvent(eventId, location)
         val dismissed =
             mediaDataProcessor.dismissMediaData(instanceId, delayMs, userInitiated = true)
         if (!dismissed) {
             Log.w(
                 TAG,
-                "Manager failed to dismiss media of instanceId=$instanceId, Token uid=${token?.uid}"
+                "Manager failed to dismiss media of instanceId=$instanceId, Token uid=${token?.uid}",
             )
         }
         return dismissed
@@ -101,7 +105,7 @@ constructor(
                 artwork = artwork,
                 deviceData = device,
                 semanticActionButtons = semanticActions,
-                notificationActionButtons = actions,
+                notificationActionButtons = getNotificationActions(data.actions, activityStarter),
                 actionsToShowInCollapsed = actionsToShowInCompact,
                 isDismissible = isClearable,
                 isResume = resumption,
@@ -114,18 +118,24 @@ constructor(
         activityStarter.startActivity(SETTINGS_INTENT, /* dismissShade= */ true)
     }
 
-    fun startClickIntent(expandable: Expandable, clickIntent: PendingIntent) {
-        if (!launchOverLockscreen(clickIntent)) {
+    fun startClickIntent(
+        expandable: Expandable,
+        clickIntent: PendingIntent,
+        eventId: Int,
+        location: Int,
+    ) {
+        logSmartspaceUserEvent(eventId, location)
+        if (!launchOverLockscreen(expandable, clickIntent)) {
             activityStarter.postStartActivityDismissingKeyguard(
                 clickIntent,
-                expandable.activityTransitionController(Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER)
+                expandable.activityTransitionController(Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER),
             )
         }
     }
 
     fun startDeviceIntent(deviceIntent: PendingIntent) {
         if (deviceIntent.isActivity) {
-            if (!launchOverLockscreen(deviceIntent)) {
+            if (!launchOverLockscreen(expandable = null, deviceIntent)) {
                 activityStarter.postStartActivityDismissingKeyguard(deviceIntent)
             }
         } else {
@@ -133,20 +143,33 @@ constructor(
         }
     }
 
-    private fun launchOverLockscreen(pendingIntent: PendingIntent): Boolean {
+    private fun launchOverLockscreen(
+        expandable: Expandable?,
+        pendingIntent: PendingIntent,
+    ): Boolean {
         val showOverLockscreen =
             keyguardStateController.isShowing &&
                 activityIntentHelper.wouldPendingShowOverLockscreen(
                     pendingIntent,
-                    lockscreenUserManager.currentUserId
+                    lockscreenUserManager.currentUserId,
                 )
         if (showOverLockscreen) {
             try {
-                val options = BroadcastOptions.makeBasic()
-                options.isInteractive = true
-                options.pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                pendingIntent.send(options.toBundle())
+                if (expandable != null) {
+                    activityStarter.startPendingIntentMaybeDismissingKeyguard(
+                        pendingIntent,
+                        /* intentSentUiThreadCallback = */ null,
+                        expandable.activityTransitionController(
+                            Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER
+                        ),
+                    )
+                } else {
+                    val options = BroadcastOptions.makeBasic()
+                    options.isInteractive = true
+                    options.pendingIntentBackgroundActivityStartMode =
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    pendingIntent.send(options.toBundle())
+                }
             } catch (e: PendingIntent.CanceledException) {
                 Log.e(TAG, "pending intent of $instanceId was canceled")
             }
@@ -158,7 +181,7 @@ constructor(
     fun startMediaOutputDialog(
         expandable: Expandable,
         packageName: String,
-        token: MediaSession.Token? = null
+        token: MediaSession.Token? = null,
     ) {
         mediaOutputDialogManager.createAndShowWithController(
             packageName,
@@ -172,8 +195,20 @@ constructor(
         broadcastDialogController.createBroadcastDialogWithController(
             broadcastApp,
             packageName,
-            expandable.dialogTransitionController()
+            expandable.dialogTransitionController(),
         )
+    }
+
+    fun logSmartspaceUserEvent(eventId: Int, location: Int) {
+        repository.logSmartspaceCardUserEvent(
+            eventId,
+            MediaSmartspaceLogger.getSurface(location),
+            instanceId = instanceId,
+        )
+    }
+
+    fun logMediaControlIsBound(artistName: CharSequence, songName: CharSequence) {
+        mediaLogger.logMediaControlIsBound(instanceId, artistName, songName)
     }
 
     private fun Expandable.dialogController(): DialogTransitionAnimator.Controller? {

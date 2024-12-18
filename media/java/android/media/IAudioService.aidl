@@ -101,6 +101,8 @@ interface IAudioService {
 
     oneway void portEvent(in int portId, in int event, in @nullable PersistableBundle extras);
 
+    void permissionUpdateBarrier();
+
     // Java-only methods below.
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 
@@ -250,7 +252,7 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
-    int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
+    int requestAudioFocus(in AudioAttributes aa, int focusReqType, IBinder cb,
             IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
             in String attributionTag, int flags, IAudioPolicyCallback pcb, int sdk);
 
@@ -300,6 +302,9 @@ interface IAudioService {
     @nullable IVolumeController getVolumeController();
 
     void notifyVolumeControllerVisible(in IVolumeController controller, boolean visible);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setVolumeControllerLongPressTimeoutEnabled(boolean enable);
 
     boolean isStreamAffectedByRingerMode(int streamType);
 
@@ -385,6 +390,8 @@ interface IAudioService {
     int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 
     void setVolumePolicy(in VolumePolicy policy);
+
+    VolumePolicy getVolumePolicy();
 
     boolean hasRegisteredDynamicPolicy();
 
@@ -558,7 +565,7 @@ interface IAudioService {
 
     long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
 
-    int requestAudioFocusForTest(in AudioAttributes aa, int durationHint, IBinder cb,
+    int requestAudioFocusForTest(in AudioAttributes aa, int focusReqType, IBinder cb,
             in IAudioFocusDispatcher fd, in String clientId, in String callingPackageName,
             int flags, int uid, int sdk);
 
@@ -702,6 +709,10 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     List<AudioFocusInfo> getFocusStack();
 
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    oneway void sendFocusLossAndUpdate(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
 
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
@@ -760,14 +771,14 @@ interface IAudioService {
 
     void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
 
-    oneway void startLoudnessCodecUpdates(int sessionId);
+    void startLoudnessCodecUpdates(int sessionId);
 
-    oneway void stopLoudnessCodecUpdates(int sessionId);
+    void stopLoudnessCodecUpdates(int sessionId);
 
-    oneway void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
+    void addLoudnessCodecInfo(int sessionId, int mediaCodecHash,
             in LoudnessCodecInfo codecInfo);
 
-    oneway void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
+    void removeLoudnessCodecInfo(int sessionId, in LoudnessCodecInfo codecInfo);
 
     PersistableBundle getLoudnessParams(in LoudnessCodecInfo codecInfo);
 

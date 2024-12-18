@@ -27,31 +27,31 @@ import com.android.systemui.bouncer.shared.model.BouncerMessagePair
 import com.android.systemui.bouncer.shared.model.BouncerMessageStrings
 import com.android.systemui.bouncer.shared.model.primaryMessage
 import com.android.systemui.bouncer.shared.model.secondaryMessage
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.BiometricMessageInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
 import com.android.systemui.deviceentry.shared.model.FaceFailureMessage
 import com.android.systemui.deviceentry.shared.model.FaceLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FaceTimeoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintFailureMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
-import com.android.systemui.user.ui.viewmodel.UserViewModel
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.time.SystemClock
-import dagger.Module
-import dagger.Provides
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -65,20 +65,20 @@ import kotlinx.coroutines.launch
 
 /** Holds UI state for the 2-line status message shown on the bouncer. */
 @OptIn(ExperimentalCoroutinesApi::class)
-class BouncerMessageViewModel(
+class BouncerMessageViewModel
+@AssistedInject
+constructor(
     @Application private val applicationContext: Context,
-    @Application private val applicationScope: CoroutineScope,
     private val bouncerInteractor: BouncerInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
-    selectedUser: Flow<UserViewModel>,
+    private val userSwitcherViewModel: UserSwitcherViewModel,
     private val clock: SystemClock,
     private val biometricMessageInteractor: BiometricMessageInteractor,
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
-    private val fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
-    flags: ComposeBouncerFlags,
-) {
+    private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
+) : ExclusiveActivatable() {
     /**
      * A message shown when the user has attempted the wrong credential too many times and now must
      * wait a while before attempting to authenticate again.
@@ -94,6 +94,26 @@ class BouncerMessageViewModel(
     /** The user-facing message to show in the bouncer. */
     val message: MutableStateFlow<MessageViewModel?> = MutableStateFlow(null)
 
+    override suspend fun onActivated(): Nothing {
+        if (!ComposeBouncerFlags.isComposeBouncerOrSceneContainerEnabled()) {
+            return awaitCancellation()
+        }
+
+        coroutineScope {
+            launch {
+                // Update the lockout countdown whenever the selected user is switched.
+                userSwitcherViewModel.selectedUser.collect { startLockoutCountdown() }
+            }
+
+            launch { defaultBouncerMessageInitializer() }
+            launch { listenForSimBouncerEvents() }
+            launch { listenForBouncerEvents() }
+            launch { listenForFaceMessages() }
+            launch { listenForFingerprintMessages() }
+            awaitCancellation()
+        }
+    }
+
     /** Initializes the bouncer message to default whenever it is shown. */
     fun onShown() {
         showDefaultMessage()
@@ -108,172 +128,164 @@ class BouncerMessageViewModel(
 
     private var lockoutCountdownJob: Job? = null
 
-    private fun defaultBouncerMessageInitializer() {
-        applicationScope.launch {
-            resetToDefault.emit(Unit)
-            authenticationInteractor.authenticationMethod
-                .flatMapLatest { authMethod ->
-                    if (authMethod == AuthenticationMethodModel.Sim) {
-                        resetToDefault.map {
-                            MessageViewModel(simBouncerInteractor.getDefaultMessage())
-                        }
-                    } else if (authMethod.isSecure) {
-                        combine(
-                            deviceEntryInteractor.deviceEntryRestrictionReason,
-                            lockoutMessage,
-                            fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer,
-                            resetToDefault,
-                        ) { deviceEntryRestrictedReason, lockoutMsg, isFpAllowedInBouncer, _ ->
-                            lockoutMsg
-                                ?: deviceEntryRestrictedReason.toMessage(
-                                    authMethod,
-                                    isFpAllowedInBouncer
-                                )
-                        }
-                    } else {
-                        emptyFlow()
+    private suspend fun defaultBouncerMessageInitializer() {
+        resetToDefault.emit(Unit)
+        authenticationInteractor.authenticationMethod
+            .flatMapLatest { authMethod ->
+                if (authMethod == AuthenticationMethodModel.Sim) {
+                    resetToDefault.map {
+                        MessageViewModel(simBouncerInteractor.getDefaultMessage())
                     }
+                } else if (authMethod.isSecure) {
+                    combine(
+                        deviceUnlockedInteractor.deviceEntryRestrictionReason,
+                        lockoutMessage,
+                        deviceEntryBiometricsAllowedInteractor
+                            .isFingerprintCurrentlyAllowedOnBouncer,
+                        resetToDefault,
+                    ) { deviceEntryRestrictedReason, lockoutMsg, isFpAllowedInBouncer, _ ->
+                        lockoutMsg
+                            ?: deviceEntryRestrictedReason.toMessage(
+                                authMethod,
+                                isFpAllowedInBouncer
+                            )
+                    }
+                } else {
+                    emptyFlow()
                 }
-                .collectLatest { messageViewModel -> message.value = messageViewModel }
-        }
+            }
+            .collect { messageViewModel -> message.value = messageViewModel }
     }
 
-    private fun listenForSimBouncerEvents() {
+    private suspend fun listenForSimBouncerEvents() {
         // Listen for any events from the SIM bouncer and update the message shown on the bouncer.
-        applicationScope.launch {
-            authenticationInteractor.authenticationMethod
-                .flatMapLatest { authMethod ->
-                    if (authMethod == AuthenticationMethodModel.Sim) {
-                        simBouncerInteractor.bouncerMessageChanged.map { simMsg ->
-                            simMsg?.let { MessageViewModel(it) }
-                        }
-                    } else {
-                        emptyFlow()
+        authenticationInteractor.authenticationMethod
+            .flatMapLatest { authMethod ->
+                if (authMethod == AuthenticationMethodModel.Sim) {
+                    simBouncerInteractor.bouncerMessageChanged.map { simMsg ->
+                        simMsg?.let { MessageViewModel(it) }
                     }
+                } else {
+                    emptyFlow()
                 }
-                .collectLatest {
-                    if (it != null) {
-                        message.value = it
-                    } else {
-                        resetToDefault.emit(Unit)
-                    }
+            }
+            .collect {
+                if (it != null) {
+                    message.value = it
+                } else {
+                    resetToDefault.emit(Unit)
                 }
-        }
+            }
     }
 
-    private fun listenForFaceMessages() {
+    private suspend fun listenForFaceMessages() {
         // Listen for any events from face authentication and update the message shown on the
         // bouncer.
-        applicationScope.launch {
-            biometricMessageInteractor.faceMessage
-                .sample(
-                    authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer,
-                )
-                .collectLatest { (faceMessage, authMethod, fingerprintAllowedOnBouncer) ->
-                    val isFaceAuthStrong = faceAuthInteractor.isFaceAuthStrong()
-                    val defaultPrimaryMessage =
-                        BouncerMessageStrings.defaultMessage(
-                                authMethod,
-                                fingerprintAllowedOnBouncer
+        biometricMessageInteractor.faceMessage
+            .sample(
+                authenticationInteractor.authenticationMethod,
+                deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer,
+            )
+            .collectLatest { (faceMessage, authMethod, fingerprintAllowedOnBouncer) ->
+                val isFaceAuthStrong = faceAuthInteractor.isFaceAuthStrong()
+                val defaultPrimaryMessage =
+                    BouncerMessageStrings.defaultMessage(authMethod, fingerprintAllowedOnBouncer)
+                        .primaryMessage
+                        .toResString()
+                message.value =
+                    when (faceMessage) {
+                        is FaceTimeoutMessage ->
+                            MessageViewModel(
+                                text = defaultPrimaryMessage,
+                                secondaryText = faceMessage.message,
+                                isUpdateAnimated = true
                             )
-                            .primaryMessage
-                            .toResString()
-                    message.value =
-                        when (faceMessage) {
-                            is FaceTimeoutMessage ->
-                                MessageViewModel(
-                                    text = defaultPrimaryMessage,
-                                    secondaryText = faceMessage.message,
-                                    isUpdateAnimated = true
-                                )
-                            is FaceLockoutMessage ->
-                                if (isFaceAuthStrong)
-                                    BouncerMessageStrings.class3AuthLockedOut(authMethod)
-                                        .toMessage()
-                                else
-                                    BouncerMessageStrings.faceLockedOut(
-                                            authMethod,
-                                            fingerprintAllowedOnBouncer
-                                        )
-                                        .toMessage()
-                            is FaceFailureMessage ->
-                                BouncerMessageStrings.incorrectFaceInput(
+                        is FaceLockoutMessage ->
+                            if (isFaceAuthStrong)
+                                BouncerMessageStrings.class3AuthLockedOut(authMethod).toMessage()
+                            else
+                                BouncerMessageStrings.faceLockedOut(
                                         authMethod,
                                         fingerprintAllowedOnBouncer
                                     )
                                     .toMessage()
-                            else ->
-                                MessageViewModel(
-                                    text = defaultPrimaryMessage,
-                                    secondaryText = faceMessage.message,
-                                    isUpdateAnimated = false
+                        is FaceFailureMessage ->
+                            BouncerMessageStrings.incorrectFaceInput(
+                                    authMethod,
+                                    fingerprintAllowedOnBouncer
                                 )
-                        }
-                    delay(MESSAGE_DURATION)
-                    resetToDefault.emit(Unit)
-                }
-        }
-    }
-
-    private fun listenForFingerprintMessages() {
-        applicationScope.launch {
-            // Listen for any events from fingerprint authentication and update the message shown
-            // on the bouncer.
-            biometricMessageInteractor.fingerprintMessage
-                .sample(
-                    authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer
-                )
-                .collectLatest { (fingerprintMessage, authMethod, isFingerprintAllowed) ->
-                    val defaultPrimaryMessage =
-                        BouncerMessageStrings.defaultMessage(authMethod, isFingerprintAllowed)
-                            .primaryMessage
-                            .toResString()
-                    message.value =
-                        when (fingerprintMessage) {
-                            is FingerprintLockoutMessage ->
-                                BouncerMessageStrings.class3AuthLockedOut(authMethod).toMessage()
-                            is FingerprintFailureMessage ->
-                                BouncerMessageStrings.incorrectFingerprintInput(authMethod)
-                                    .toMessage()
-                            else ->
-                                MessageViewModel(
-                                    text = defaultPrimaryMessage,
-                                    secondaryText = fingerprintMessage.message,
-                                    isUpdateAnimated = false
-                                )
-                        }
-                    delay(MESSAGE_DURATION)
-                    resetToDefault.emit(Unit)
-                }
-        }
-    }
-
-    private fun listenForBouncerEvents() {
-        // Keeps the lockout message up-to-date.
-        applicationScope.launch {
-            bouncerInteractor.onLockoutStarted.collect { startLockoutCountdown() }
-        }
-
-        // Listens to relevant bouncer events
-        applicationScope.launch {
-            bouncerInteractor.onIncorrectBouncerInput
-                .sample(
-                    authenticationInteractor.authenticationMethod,
-                    fingerprintInteractor.isFingerprintCurrentlyAllowedOnBouncer
-                )
-                .collectLatest { (_, authMethod, isFingerprintAllowed) ->
-                    message.emit(
-                        BouncerMessageStrings.incorrectSecurityInput(
-                                authMethod,
-                                isFingerprintAllowed
+                                .toMessage()
+                        else ->
+                            MessageViewModel(
+                                text = defaultPrimaryMessage,
+                                secondaryText = faceMessage.message,
+                                isUpdateAnimated = false
                             )
-                            .toMessage()
+                    }
+                delay(MESSAGE_DURATION)
+                resetToDefault.emit(Unit)
+            }
+    }
+
+    private suspend fun listenForFingerprintMessages() {
+        // Listen for any events from fingerprint authentication and update the message shown
+        // on the bouncer.
+        biometricMessageInteractor.fingerprintMessage
+            .sample(
+                authenticationInteractor.authenticationMethod,
+                deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer
+            )
+            .collectLatest { (fingerprintMessage, authMethod, isFingerprintAllowed) ->
+                val defaultPrimaryMessage =
+                    BouncerMessageStrings.defaultMessage(authMethod, isFingerprintAllowed)
+                        .primaryMessage
+                        .toResString()
+                message.value =
+                    when (fingerprintMessage) {
+                        is FingerprintLockoutMessage ->
+                            BouncerMessageStrings.class3AuthLockedOut(authMethod).toMessage()
+                        is FingerprintFailureMessage ->
+                            BouncerMessageStrings.incorrectFingerprintInput(authMethod).toMessage()
+                        else ->
+                            MessageViewModel(
+                                text = defaultPrimaryMessage,
+                                secondaryText = fingerprintMessage.message,
+                                isUpdateAnimated = false
+                            )
+                    }
+                delay(MESSAGE_DURATION)
+                resetToDefault.emit(Unit)
+            }
+    }
+
+    private suspend fun listenForBouncerEvents() {
+        coroutineScope {
+            // Keeps the lockout message up-to-date.
+            launch { bouncerInteractor.onLockoutStarted.collect { startLockoutCountdown() } }
+
+            // Start already active lockdown if it exists
+            launch { startLockoutCountdown() }
+
+            // Listens to relevant bouncer events
+            launch {
+                bouncerInteractor.onIncorrectBouncerInput
+                    .sample(
+                        authenticationInteractor.authenticationMethod,
+                        deviceEntryBiometricsAllowedInteractor
+                            .isFingerprintCurrentlyAllowedOnBouncer
                     )
-                    delay(MESSAGE_DURATION)
-                    resetToDefault.emit(Unit)
-                }
+                    .collectLatest { (_, authMethod, isFingerprintAllowed) ->
+                        message.emit(
+                            BouncerMessageStrings.incorrectSecurityInput(
+                                    authMethod,
+                                    isFingerprintAllowed
+                                )
+                                .toMessage()
+                        )
+                        delay(MESSAGE_DURATION)
+                        resetToDefault.emit(Unit)
+                    }
+            }
         }
     }
 
@@ -322,10 +334,10 @@ class BouncerMessageViewModel(
     }
 
     /** Shows the countdown message and refreshes it every second. */
-    private fun startLockoutCountdown() {
+    private suspend fun startLockoutCountdown() {
         lockoutCountdownJob?.cancel()
-        lockoutCountdownJob =
-            applicationScope.launch {
+        lockoutCountdownJob = coroutineScope {
+            launch {
                 authenticationInteractor.authenticationMethod.collectLatest { authMethod ->
                     do {
                         val remainingSeconds = remainingLockoutSeconds()
@@ -351,6 +363,7 @@ class BouncerMessageViewModel(
                     lockoutCountdownJob = null
                 }
             }
+        }
     }
 
     private fun remainingLockoutSeconds(): Int {
@@ -364,20 +377,9 @@ class BouncerMessageViewModel(
 
     private fun Int.toResString(): String = applicationContext.getString(this)
 
-    init {
-        if (flags.isComposeBouncerOrSceneContainerEnabled()) {
-            applicationScope.launch {
-                // Update the lockout countdown whenever the selected user is switched.
-                selectedUser.collect { startLockoutCountdown() }
-            }
-
-            defaultBouncerMessageInitializer()
-
-            listenForSimBouncerEvents()
-            listenForBouncerEvents()
-            listenForFaceMessages()
-            listenForFingerprintMessages()
-        }
+    @AssistedFactory
+    interface Factory {
+        fun create(): BouncerMessageViewModel
     }
 
     companion object {
@@ -397,40 +399,3 @@ data class MessageViewModel(
      */
     val isUpdateAnimated: Boolean = true,
 )
-
-@OptIn(ExperimentalCoroutinesApi::class)
-@Module
-object BouncerMessageViewModelModule {
-
-    @Provides
-    @SysUISingleton
-    fun viewModel(
-        @Application applicationContext: Context,
-        @Application applicationScope: CoroutineScope,
-        bouncerInteractor: BouncerInteractor,
-        simBouncerInteractor: SimBouncerInteractor,
-        authenticationInteractor: AuthenticationInteractor,
-        clock: SystemClock,
-        biometricMessageInteractor: BiometricMessageInteractor,
-        faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-        deviceEntryInteractor: DeviceEntryInteractor,
-        fingerprintInteractor: DeviceEntryFingerprintAuthInteractor,
-        flags: ComposeBouncerFlags,
-        userSwitcherViewModel: UserSwitcherViewModel,
-    ): BouncerMessageViewModel {
-        return BouncerMessageViewModel(
-            applicationContext = applicationContext,
-            applicationScope = applicationScope,
-            bouncerInteractor = bouncerInteractor,
-            simBouncerInteractor = simBouncerInteractor,
-            authenticationInteractor = authenticationInteractor,
-            clock = clock,
-            biometricMessageInteractor = biometricMessageInteractor,
-            faceAuthInteractor = faceAuthInteractor,
-            deviceEntryInteractor = deviceEntryInteractor,
-            fingerprintInteractor = fingerprintInteractor,
-            flags = flags,
-            selectedUser = userSwitcherViewModel.selectedUser,
-        )
-    }
-}

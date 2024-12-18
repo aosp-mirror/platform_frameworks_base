@@ -21,6 +21,7 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
@@ -41,6 +42,9 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +52,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 private const val TAG = "FooterActionsViewModel"
 
@@ -129,6 +135,31 @@ class FooterActionsViewModel(
                         }
                     }
                 )
+            }
+
+            return FooterActionsViewModel(
+                context,
+                footerActionsInteractor,
+                falsingManager,
+                globalActionsDialogLite,
+                activityStarter,
+                showPowerButton,
+            )
+        }
+
+        @OptIn(ExperimentalCoroutinesApi::class)
+        fun create(lifecycleCoroutineScope: LifecycleCoroutineScope): FooterActionsViewModel {
+            val globalActionsDialogLite = globalActionsDialogLiteProvider.get()
+            if (lifecycleCoroutineScope.isActive) {
+                lifecycleCoroutineScope.launch(start = CoroutineStart.ATOMIC) {
+                    try {
+                        awaitCancellation()
+                    } finally {
+                        globalActionsDialogLite.destroy()
+                    }
+                }
+            } else {
+                globalActionsDialogLite.destroy()
             }
 
             return FooterActionsViewModel(

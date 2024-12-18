@@ -10,6 +10,9 @@
                     "include-filter": "android.media.audio.cts.AudioFocusTest"
                 },
                 {
+                    "include-filter": "android.media.audio.cts.AudioPlaybackCaptureTest"
+                },
+                {
                     "include-filter": "android.media.audio.cts.SpatializerTest"
                 }
             ]

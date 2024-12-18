@@ -2,6 +2,7 @@ package com.android.systemui.statusbar.notification.collection.provider
 
 import android.util.ArraySet
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.util.ListenerSet
 import javax.inject.Inject
 
@@ -13,12 +14,18 @@ class VisualStabilityProvider @Inject constructor() {
     /** The subset of active listeners which are temporary (will be removed after called) */
     private val temporaryListeners = ArraySet<OnReorderingAllowedListener>()
 
+    private val banListeners = ListenerSet<OnReorderingBannedListener>()
+
     var isReorderingAllowed = true
         set(value) {
             if (field != value) {
                 field = value
                 if (value) {
                     notifyReorderingAllowed()
+                } else if (NotificationThrottleHun.isEnabled){
+                    banListeners.forEach { listener ->
+                        listener.onReorderingBanned()
+                    }
                 }
             }
         }
@@ -36,6 +43,10 @@ class VisualStabilityProvider @Inject constructor() {
     fun addPersistentReorderingAllowedListener(listener: OnReorderingAllowedListener) {
         temporaryListeners.remove(listener)
         allListeners.addIfAbsent(listener)
+    }
+
+    fun addPersistentReorderingBannedListener(listener: OnReorderingBannedListener) {
+        banListeners.addIfAbsent(listener)
     }
 
     /** Add a listener which will be removed when it is called. */
@@ -56,4 +67,8 @@ class VisualStabilityProvider @Inject constructor() {
 
 fun interface OnReorderingAllowedListener {
     fun onReorderingAllowed()
+}
+
+fun interface OnReorderingBannedListener {
+    fun onReorderingBanned()
 }

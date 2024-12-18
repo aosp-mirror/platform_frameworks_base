@@ -86,7 +86,7 @@ fun Session(storage: SessionStorage = SessionStorage()): Session = SessionImpl(s
  */
 @Composable
 fun <T> Session.rememberSession(vararg inputs: Any?, key: String? = null, init: () -> T): T =
-    rememberSession(key, inputs, init = init)
+    rememberSession(key, *inputs, init = init)
 
 /**
  * An explicit storage for remembering composable state outside of the lifetime of a composition.
@@ -151,7 +151,7 @@ fun rememberSaveableSession(
     vararg inputs: Any?,
     key: String? = null,
 ): SaveableSession =
-    rememberSaveable(inputs, SaveableSessionImpl.SessionSaver, key) { SaveableSessionImpl() }
+    rememberSaveable(*inputs, SaveableSessionImpl.SessionSaver, key) { SaveableSessionImpl() }
 
 private class SessionImpl(
     private val storage: SessionStorage = SessionStorage(),

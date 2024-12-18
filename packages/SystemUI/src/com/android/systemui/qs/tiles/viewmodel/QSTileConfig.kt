@@ -21,13 +21,18 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.android.internal.logging.InstanceId
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 
-data class QSTileConfig(
+data class QSTileConfig
+@JvmOverloads
+constructor(
     val tileSpec: TileSpec,
     val uiConfig: QSTileUIConfig,
     val instanceId: InstanceId,
+    val category: TileCategory,
     val metricsSpec: String = tileSpec.spec,
     val policy: QSTilePolicy = QSTilePolicy.NoRestrictions,
+    val autoRemoveOnUnavailable: Boolean = true,
 )
 
 /**
@@ -38,6 +43,7 @@ sealed interface QSTileUIConfig {
 
     val iconRes: Int
         @DrawableRes get
+
     val labelRes: Int
         @StringRes get
 
@@ -48,6 +54,7 @@ sealed interface QSTileUIConfig {
     data object Empty : QSTileUIConfig {
         override val iconRes: Int
             get() = Resources.ID_NULL
+
         override val labelRes: Int
             get() = Resources.ID_NULL
     }

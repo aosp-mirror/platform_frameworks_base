@@ -16,13 +16,14 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -43,8 +44,14 @@ constructor(
     sceneInteractor: SceneInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
-    /** Whether a show-when-locked activity is at the top of the current activity stack. */
-    private val isOccludingActivityShown: StateFlow<Boolean> =
+    /**
+     * Whether a show-when-locked activity is at the top of the current activity stack.
+     *
+     * Note: this isn't enough to figure out whether the scene container UI should be invisible as
+     * that also depends on the things like the state of AOD and the current scene. If the code
+     * needs that, [invisibleDueToOcclusion] should be collected instead.
+     */
+    val isOccludingActivityShown: StateFlow<Boolean> =
         keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
@@ -69,6 +76,9 @@ constructor(
     /**
      * Whether the scene container should become invisible due to "occlusion" by an in-foreground
      * "show when locked" activity.
+     *
+     * Note: this returns `false` when an overlaid scene (like shade or QS) is shown above the
+     * occluding activity.
      */
     val invisibleDueToOcclusion: StateFlow<Boolean> =
         combine(
@@ -108,27 +118,30 @@ constructor(
     private val ObservableTransitionState.canBeOccluded: Boolean
         get() =
             when (this) {
-                is ObservableTransitionState.Idle -> currentScene.canBeOccluded
+                is ObservableTransitionState.Idle ->
+                    currentOverlays.all { it.canBeOccluded } && currentScene.canBeOccluded
                 is ObservableTransitionState.Transition ->
-                    fromScene.canBeOccluded && toScene.canBeOccluded
+                    // TODO(b/356596436): Should also verify currentOverlays.isEmpty(), but
+                    //  currentOverlays is a Flow and we need a state.
+                    fromContent.canBeOccluded && toContent.canBeOccluded
             }
 
     /**
-     * Whether the scene can be occluded by a "show when locked" activity. Some scenes should, on
+     * Whether the content can be occluded by a "show when locked" activity. Some content should, on
      * principle not be occlude-able because they render as if they are expanding on top of the
      * occluding activity.
      */
-    private val SceneKey.canBeOccluded: Boolean
+    private val ContentKey.canBeOccluded: Boolean
         get() =
             when (this) {
-                Scenes.Bouncer -> true
+                Overlays.NotificationsShade -> false
+                Overlays.QuickSettingsShade -> false
+                Scenes.Bouncer -> false
                 Scenes.Communal -> true
                 Scenes.Gone -> true
                 Scenes.Lockscreen -> true
-                Scenes.NotificationsShade -> false
                 Scenes.QuickSettings -> false
-                Scenes.QuickSettingsShade -> false
                 Scenes.Shade -> false
-                else -> error("SceneKey \"$this\" doesn't have a mapping for canBeOccluded!")
+                else -> error("ContentKey \"$this\" doesn't have a mapping for canBeOccluded!")
             }
 }

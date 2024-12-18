@@ -58,6 +58,7 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -89,6 +90,7 @@ import java.util.Locale;
  * with {@link android.app.Activity#getResources}:</p>
  * <pre>Configuration config = getResources().getConfiguration();</pre>
  */
+@RavenwoodKeepWholeClass
 public final class Configuration implements Parcelable, Comparable<Configuration> {
     /** @hide */
     public static final Configuration EMPTY = new Configuration();

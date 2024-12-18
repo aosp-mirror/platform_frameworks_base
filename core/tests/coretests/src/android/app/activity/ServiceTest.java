@@ -157,6 +157,21 @@ public class ServiceTest extends TestCase {
         assertThat(mCurrentConnection.takePid(), is(NOT_STARTED));
     }
 
+    @Test
+    public void testRestart_stickyStartedService_unbindHappenedAfterRestart_restarted() {
+        final int servicePid = startService(Service.START_STICKY);
+        assertThat(servicePid, not(NOT_STARTED));
+        assertThat(bindService(0 /* flags */), is(servicePid));
+
+        final int restartedServicePid = waitForServiceStarted(
+                () -> {
+                    Process.killProcess(servicePid);
+                    mContext.unbindService(mCurrentConnection);
+                    mCurrentConnection = null;
+                });
+        assertThat(restartedServicePid, not(NOT_STARTED));
+    }
+
     /** @return The pid of the started service. */
     private int startService(int code) {
         return waitForServiceStarted(

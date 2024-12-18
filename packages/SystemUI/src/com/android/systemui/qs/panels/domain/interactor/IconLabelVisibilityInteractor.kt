@@ -20,7 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.qs.panels.shared.model.IconLabelVisibilityLog
+import com.android.systemui.qs.panels.shared.model.PanelsLog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +33,7 @@ class IconLabelVisibilityInteractor
 @Inject
 constructor(
     private val preferencesInteractor: QSPreferencesInteractor,
-    @IconLabelVisibilityLog private val logBuffer: LogBuffer,
+    @PanelsLog private val logBuffer: LogBuffer,
     @Application scope: CoroutineScope,
 ) {
     val showLabels: StateFlow<Boolean> =

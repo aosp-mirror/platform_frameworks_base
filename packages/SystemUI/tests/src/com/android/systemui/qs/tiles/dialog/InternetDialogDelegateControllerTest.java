@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +62,7 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
@@ -160,7 +162,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
     @Mock
     InternetDialogController.InternetDialogCallback mInternetDialogCallback;
     @Mock
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     @Mock
     private ToastFactory mToastFactory;
     @Mock
@@ -232,8 +234,9 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
                 mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
-                mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
-                mLocationController, mDialogTransitionAnimator, mWifiStateWorker, mFlags);
+                mWindowManager, mToastFactory, mWorkerHandler,
+                mCarrierConfigTracker, mLocationController, mDialogTransitionAnimator,
+                mWifiStateWorker, mFlags);
         mSubscriptionManager.addOnSubscriptionsChangedListener(mExecutor,
                 mInternetDialogController.mOnSubscriptionsChangedListener);
         mInternetDialogController.onStart(mInternetDialogCallback, true);
@@ -882,6 +885,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
         int subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
         assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+    }
+
+    @Test
+    public void getActiveAutoSwitchNonDdsSubId_registerCallbackForExistedSubId_notRegister() {
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
+
+        // Adds non DDS subId
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // 1st time is onStart(), 2nd time is getActiveAutoSwitchNonDdsSubId()
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
+
+        // Adds non DDS subId again
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // Does not add due to cached subInfo in mSubIdTelephonyCallbackMap.
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
     }
 
     @Test

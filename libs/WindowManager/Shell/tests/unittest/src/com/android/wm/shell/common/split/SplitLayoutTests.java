@@ -19,9 +19,7 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -37,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -67,6 +66,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
+    @Mock Handler mHandler;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
 
@@ -82,7 +82,8 @@ public class SplitLayoutTests extends ShellTestCase {
                 mDisplayController,
                 mDisplayImeController,
                 mTaskOrganizer,
-                SplitLayout.PARALLAX_NONE));
+                SplitLayout.PARALLAX_NONE,
+                mHandler));
     }
 
     @Test
@@ -150,8 +151,8 @@ public class SplitLayoutTests extends ShellTestCase {
     @UiThreadTest
     public void testSnapToDismissStart() {
         // verify it callbacks properly when the snap target indicates dismissing split.
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                SNAP_TO_START_AND_DISMISS);
+        DividerSnapAlgorithm.SnapTarget snapTarget =
+                mSplitLayout.mDividerSnapAlgorithm.getDismissStartTarget();
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
@@ -162,8 +163,8 @@ public class SplitLayoutTests extends ShellTestCase {
     @UiThreadTest
     public void testSnapToDismissEnd() {
         // verify it callbacks properly when the snap target indicates dismissing split.
-        DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                SNAP_TO_END_AND_DISMISS);
+        DividerSnapAlgorithm.SnapTarget snapTarget =
+                mSplitLayout.mDividerSnapAlgorithm.getDismissEndTarget();
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), snapTarget);
         waitDividerFlingFinished();
@@ -202,10 +203,5 @@ public class SplitLayoutTests extends ShellTestCase {
         configuration.windowConfiguration.setBounds(
                 new Rect(0, 0, 1080, 2160));
         return configuration;
-    }
-
-    private static DividerSnapAlgorithm.SnapTarget getSnapTarget(int position, int flag) {
-        return new DividerSnapAlgorithm.SnapTarget(
-                position /* position */, position /* taskPosition */, flag);
     }
 }

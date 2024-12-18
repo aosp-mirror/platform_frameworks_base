@@ -58,6 +58,7 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
@@ -67,6 +68,7 @@ import android.window.IOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedCallbackInfo;
 import android.window.OnBackInvokedDispatcher;
+import android.window.TaskFragmentOrganizer;
 import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -108,6 +110,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
+        doReturn(true).when(mBackAnimationAdapter).isAnimatable(anyInt());
         mNavigationMonitor = mock(BackNavigationController.NavigationMonitor.class);
         mRootHomeTask = initHomeActivity();
     }
@@ -556,7 +559,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         }).when(appWindow.mSession).setOnBackInvokedCallbackInfo(eq(appWindow.mClient), any());
 
         addToWindowMap(appWindow, true);
-        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null);
+        dispatcher.attachToWindow(appWindow.mSession, appWindow.mClient, null, null);
 
 
         OnBackInvokedCallback appCallback = createBackCallback(appLatch);
@@ -612,6 +615,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
     public void testTransitionHappensCancelNavigation() {
         // Create a floating task and a fullscreen task, then navigating on fullscreen task.
         // The navigation should not been cancelled when transition happens on floating task, and
@@ -670,25 +674,28 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAdjacentFocusInActivityEmbedding() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
+    public void testBackOnMostRecentWindowInActivityEmbedding() {
         final Task task = createTask(mDefaultDisplay);
-        final TaskFragment primaryTf = createTaskFragmentWithActivity(task);
-        final TaskFragment secondaryTf = createTaskFragmentWithActivity(task);
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final TaskFragment primaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment secondaryTf = createTaskFragmentWithEmbeddedActivity(task, organizer);
         final ActivityRecord primaryActivity = primaryTf.getTopMostActivity();
         final ActivityRecord secondaryActivity = secondaryTf.getTopMostActivity();
         primaryTf.setAdjacentTaskFragment(secondaryTf);
         secondaryTf.setAdjacentTaskFragment(primaryTf);
 
-        final WindowState windowState = mock(WindowState.class);
-        windowState.mActivityRecord = primaryActivity;
-        doReturn(windowState).when(mWm).getFocusedWindowLocked();
-        doReturn(primaryTf).when(windowState).getTaskFragment();
+        final WindowState primaryWindow = mock(WindowState.class);
+        final WindowState secondaryWindow = mock(WindowState.class);
+        doReturn(primaryActivity).when(primaryWindow).getActivityRecord();
+        doReturn(secondaryActivity).when(secondaryWindow).getActivityRecord();
         doReturn(1L).when(primaryActivity).getLastWindowCreateTime();
         doReturn(2L).when(secondaryActivity).getLastWindowCreateTime();
+        doReturn(mDisplayContent).when(primaryActivity).getDisplayContent();
+        doReturn(secondaryWindow).when(mDisplayContent).findFocusedWindow(eq(secondaryActivity));
 
-        startBackNavigation();
-        verify(mWm).moveFocusToActivity(eq(secondaryActivity));
+        final WindowState mostRecentUsedWindow =
+                mWm.getMostRecentUsedEmbeddedWindowForBack(primaryWindow);
+        assertThat(mostRecentUsedWindow).isEqualTo(secondaryWindow);
     }
 
     /**

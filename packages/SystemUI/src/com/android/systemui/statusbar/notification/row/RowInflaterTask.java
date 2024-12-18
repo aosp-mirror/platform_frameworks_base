@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -89,8 +90,57 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
         inflater.inflate(R.layout.status_bar_notification_row, parent, listenerExecutor, this);
     }
 
+    /**
+     * Inflates a new notificationView synchronously.
+     * This method is only for testing-purpose.
+     */
+    @VisibleForTesting
+    public ExpandableNotificationRow inflateSynchronously(@NonNull Context context,
+            @Nullable ViewGroup parent, @NonNull NotificationEntry entry) {
+        final LayoutInflater inflater = new BasicRowInflater(context);
+        inflater.setFactory2(makeRowInflater(entry));
+        final ExpandableNotificationRow inflate = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                parent /* root */,
+                false /* attachToRoot */);
+        return inflate;
+    }
+
     private RowAsyncLayoutInflater makeRowInflater(NotificationEntry entry) {
         return new RowAsyncLayoutInflater(entry, mSystemClock, mLogger);
+    }
+
+    /**
+     * A {@link LayoutInflater} that is copy of BasicLayoutInflater.
+     */
+    private static class BasicRowInflater extends LayoutInflater {
+        private static final String[] sClassPrefixList =
+                {"android.widget.", "android.webkit.", "android.app."};
+        BasicRowInflater(Context context) {
+            super(context);
+        }
+
+        @Override
+        public LayoutInflater cloneInContext(Context newContext) {
+            return new BasicRowInflater(newContext);
+        }
+
+        @Override
+        protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
+            for (String prefix : sClassPrefixList) {
+                try {
+                    View view = createView(name, prefix, attrs);
+                    if (view != null) {
+                        return view;
+                    }
+                } catch (ClassNotFoundException e) {
+                    // In this case we want to let the base class take a crack
+                    // at it.
+                }
+            }
+
+            return super.onCreateView(name, attrs);
+        }
     }
 
     @VisibleForTesting

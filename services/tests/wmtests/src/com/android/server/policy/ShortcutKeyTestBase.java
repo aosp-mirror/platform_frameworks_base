@@ -43,12 +43,20 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 
 import static java.util.Collections.unmodifiableMap;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
+import android.hardware.input.KeyGestureEvent;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
@@ -75,6 +83,7 @@ class ShortcutKeyTestBase {
     public RuleChain rules = RuleChain.outerRule(mSettingsProviderRule).around(mSetFlagsRule);
 
     private Resources mResources;
+    private PackageManager mPackageManager;
     TestPhoneWindowManager mPhoneWindowManager;
     DispatchedKeyHandler mDispatchedKeyHandler = event -> false;
     Context mContext;
@@ -99,9 +108,25 @@ class ShortcutKeyTestBase {
     public void setup() {
         mContext = spy(getInstrumentation().getTargetContext());
         mResources = spy(mContext.getResources());
+        mPackageManager = spy(mContext.getPackageManager());
+        doReturn(mContext).when(mContext).createContextAsUser(anyObject(), anyInt());
         doReturn(mResources).when(mContext).getResources();
         doReturn(mSettingsProviderRule.mockContentResolver(mContext))
                 .when(mContext).getContentResolver();
+        XmlResourceParser testBookmarks = mResources.getXml(
+                com.android.frameworks.wmtests.R.xml.bookmarks);
+        doReturn(testBookmarks).when(mResources).getXml(com.android.internal.R.xml.bookmarks);
+
+        try {
+            // Keep packageName / className in sync with
+            // services/tests/wmtests/res/xml/bookmarks.xml
+            ActivityInfo testActivityInfo = new ActivityInfo();
+            testActivityInfo.applicationInfo = new ApplicationInfo();
+            testActivityInfo.packageName =
+                    testActivityInfo.applicationInfo.packageName = "com.test";
+            doReturn(testActivityInfo).when(mPackageManager).getActivityInfo(
+                    eq(new ComponentName("com.test", "com.test.BookmarkTest")), anyInt());
+        } catch (PackageManager.NameNotFoundException ignored) { }
     }
 
 
@@ -202,6 +227,31 @@ class ShortcutKeyTestBase {
 
     void sendKey(int keyCode, boolean longPress) {
         sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
+    }
+
+    boolean sendKeyGestureEventStart(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_START).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int gestureType, int modifierState) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setModifierState(modifierState).setKeyGestureType(
+                        gestureType).setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
+    }
+
+    boolean sendKeyGestureEventComplete(int keycode, int modifierState, int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeycodes(new int[]{keycode}).setModifierState(
+                        modifierState).setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
     }
 
     /**

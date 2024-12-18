@@ -5,11 +5,15 @@ import android.content.pm.PackageManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.res.R
@@ -37,6 +41,7 @@ import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
@@ -44,6 +49,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @JvmField @Rule var expect: Expect = Expect.create()
@@ -63,7 +69,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         EmptyShadeView(context, /* attrs= */ null).apply {
             layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
         }
-    private val footerView = FooterView(context, /*attrs=*/ null)
+    private val footerView = FooterView(context, /* attrs= */ null)
     @OptIn(ExperimentalCoroutinesApi::class)
     private val ambientState =
         AmbientState(
@@ -86,9 +92,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun px(@DimenRes id: Int): Float =
         testableResources.resources.getDimensionPixelSize(id).toFloat()
 
-    private val bigGap = px(R.dimen.notification_section_divider_height)
-    private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
+    private val notifSectionDividerGap = px(R.dimen.notification_section_divider_height)
     private val scrimPadding = px(R.dimen.notification_side_paddings)
+    private val baseZ by lazy { ambientState.baseZHeight }
+    private val headsUpZ = px(R.dimen.heads_up_pinned_elevation)
+    private val bigGap = notifSectionDividerGap
+    private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
 
     @Before
     fun setUp() {
@@ -109,6 +118,30 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
+    fun resetViewStates_childPositionedAtStackTop() {
+        val stackTop = 100f
+        ambientState.stackTop = stackTop
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(stackTop)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_defaultHun_yTranslationIsHeadsUpTop() {
+        val headsUpTop = 200f
+        ambientState.headsUpTop = headsUpTop
+
+        whenever(notificationRow.isPinned).thenReturn(true)
+        whenever(notificationRow.isHeadsUp).thenReturn(true)
+
+        resetViewStates_hunYTranslationIs(headsUpTop)
+    }
+
+    @Test
+    @DisableSceneContainer
     fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -116,6 +149,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -123,6 +157,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun resetViewStates_defaultHunWhenShadeIsOpening_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -135,6 +170,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAway_yTranslationIsInset() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
@@ -142,6 +178,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAway_StackMarginChangesHunYTranslation() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
@@ -149,6 +186,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_defaultHun_newHeadsUpAnim_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
@@ -157,6 +195,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_defaultHunWithStackMargin_newHeadsUpAnim_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
@@ -165,6 +204,189 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
+    fun resetViewStates_defaultHunInShade_stackTopEqualsHunTop_hunHasFullHeight() {
+        // Given: headsUpTop == stackTop -> haven't scrolled the stack yet
+        val headsUpTop = 150f
+        val collapsedHeight = 100
+        val intrinsicHeight = 300
+        fakeHunInShade(
+            headsUpTop = headsUpTop,
+            stackTop = headsUpTop,
+            collapsedHeight = collapsedHeight,
+            intrinsicHeight = intrinsicHeight,
+        )
+
+        // When
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: HUN is at the headsUpTop
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is not elevated
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ)
+        // And: HUN has its full height
+        assertThat(notificationRow.viewState.height).isEqualTo(intrinsicHeight)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_defaultHunInShade_stackTopGreaterThanHeadsUpTop_hunClampedToHeadsUpTop() {
+        // Given: headsUpTop < stackTop -> scrolled the stack a little bit
+        val stackTop = -25f
+        val headsUpTop = 150f
+        val collapsedHeight = 100
+        val intrinsicHeight = 300
+        fakeHunInShade(
+            headsUpTop = headsUpTop,
+            stackTop = stackTop,
+            collapsedHeight = collapsedHeight,
+            intrinsicHeight = intrinsicHeight
+        )
+
+        // When
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: HUN is translated to the headsUpTop
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is not elevated
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ)
+        // And: HUN is clipped to the available space
+        // newTranslation = max(150, -25)
+        // distToReal = 150 - (-25)
+        // height = max(300 - 175, 100)
+        assertThat(notificationRow.viewState.height).isEqualTo(125)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_defaultHunInShade_stackOverscrolledHun_hunClampedToHeadsUpTop() {
+        // Given: headsUpTop << stackTop -> stack has fully overscrolled the HUN
+        val stackTop = -500f
+        val headsUpTop = 150f
+        val collapsedHeight = 100
+        val intrinsicHeight = 300
+        fakeHunInShade(
+            headsUpTop = headsUpTop,
+            stackTop = stackTop,
+            collapsedHeight = collapsedHeight,
+            intrinsicHeight = intrinsicHeight
+        )
+
+        // When
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: HUN is translated to the headsUpTop
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN fully elevated to baseZ + headsUpZ
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ + headsUpZ)
+        // And: HUN is clipped to its collapsed height
+        assertThat(notificationRow.viewState.height).isEqualTo(collapsedHeight)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_defaultHun_showingQS_hunTranslatedToHeadsUpTop() {
+        // Given: the shade is open and scrolled to the bottom to show the QuickSettings
+        val headsUpTop = 2000f
+        val intrinsicHunHeight = 300
+        fakeHunInShade(
+            headsUpTop = headsUpTop,
+            stackTop = 2600f, // stack scrolled below the screen
+            stackCutoff = 4000f,
+            collapsedHeight = 100,
+            intrinsicHeight = intrinsicHunHeight,
+        )
+        ambientState.qsExpansionFraction = 1.0f
+        whenever(notificationRow.isAboveShelf).thenReturn(true)
+
+        // When
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        // Then: HUN is translated to the headsUpTop
+        assertThat(notificationRow.viewState.yTranslation).isEqualTo(headsUpTop)
+        // And: HUN is elevated to baseZ + headsUpZ
+        assertThat(notificationRow.viewState.zTranslation).isEqualTo(baseZ + headsUpZ)
+        // And: HUN maintained its full height
+        assertThat(notificationRow.viewState.height).isEqualTo(intrinsicHunHeight)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_fullOverlap_hunHasFullElevation() {
+        // Given: the overlap equals to the top content padding
+        val contentTop = 280f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is fully elevated to baseZ + headsUpZ
+        assertThat(viewState.zTranslation).isEqualTo(headsUpZ)
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_someOverlap_hunIsPartlyElevated() {
+        // Given: the overlap is bigger than zero, but less than the top content padding
+        val contentTop = 290f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is partly elevated
+        assertThat(viewState.zTranslation).apply {
+            isGreaterThan(0f)
+            isLessThan(headsUpZ)
+        }
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun updateZTranslationForHunInStack_noOverlap_hunIsNotElevated() {
+        // Given: no overlap between the content and the HUN
+        val contentTop = 300f
+        val contentTopPadding = 20f
+        val viewState =
+            ExpandableViewState().apply {
+                height = 100
+                yTranslation = 200f
+            }
+
+        // When
+        stackScrollAlgorithm.updateZTranslationForHunInStack(
+            /* scrollingContentTop = */ contentTop,
+            /* scrollingContentTopPadding */ contentTopPadding,
+            /* baseZ = */ 0f,
+            /* viewState = */ viewState,
+        )
+
+        // Then: HUN is not elevated
+        assertThat(viewState.zTranslation).isEqualTo(0f)
+    }
+
+    @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_defaultHun_showingQS_newHeadsUpAnim_hunTranslatedToMax() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
@@ -181,6 +403,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAway_showingQS_newHeadsUpAnim_hunTranslatedToBottomOfScreen() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
@@ -225,6 +448,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_yTranslationIsInset() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
@@ -235,6 +459,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_hasStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
@@ -269,6 +494,27 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableSceneContainer
+    fun resetViewStates_emptyShadeView_isCenteredVertically_withSceneContainer() {
+        stackScrollAlgorithm.initView(context)
+        hostView.removeAllViews()
+        hostView.addView(emptyShadeView)
+        ambientState.layoutMaxHeight = maxPanelHeight.toInt()
+
+        val stackTop = 200f
+        val stackBottom = 2000f
+        val stackHeight = stackBottom - stackTop
+        ambientState.stackTop = stackTop
+        ambientState.stackCutoff = stackBottom
+
+        stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
+
+        val centeredY = stackTop + stackHeight / 2f - emptyShadeView.height / 2f
+        assertThat(emptyShadeView.viewState.yTranslation).isEqualTo(centeredY)
+    }
+
+    @Test
+    @DisableSceneContainer
     fun resetViewStates_emptyShadeView_isCenteredVertically() {
         stackScrollAlgorithm.initView(context)
         hostView.removeAllViews()
@@ -520,6 +766,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
     @Test
     fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
         ambientState.isClearAllInProgress = true
@@ -702,8 +949,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = 50f
 
         stackScrollAlgorithm.clampHunToTop(
-            /* quickQsOffsetHeight= */ 10f,
-            /* stackTranslation= */ 0f,
+            /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 1f,
             expandableViewState
         )
@@ -718,8 +964,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = -10f
 
         stackScrollAlgorithm.clampHunToTop(
-            /* quickQsOffsetHeight= */ 10f,
-            /* stackTranslation= */ 0f,
+            /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 1f,
             expandableViewState
         )
@@ -735,8 +980,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = -100f
 
         stackScrollAlgorithm.clampHunToTop(
-            /* quickQsOffsetHeight= */ 10f,
-            /* stackTranslation= */ 0f,
+            /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 10f,
             expandableViewState
         )
@@ -754,8 +998,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = 5f
 
         stackScrollAlgorithm.clampHunToTop(
-            /* quickQsOffsetHeight= */ 10f,
-            /* stackTranslation= */ 0f,
+            /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 10f,
             expandableViewState
         )
@@ -815,6 +1058,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunFullyOverlapsQqsPanel_hunShouldHaveFullShadow() {
         // Given: shade is opened, yTranslation of HUN is 0,
         // the height of HUN equals to the height of QQS Panel,
@@ -840,6 +1084,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunPartiallyOverlapsQQS_hunShouldHavePartialShadow() {
         // Given: shade is opened, yTranslation of HUN is greater than 0,
         // the height of HUN is equal to the height of QQS Panel,
@@ -869,6 +1114,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunDoesNotOverlapQQS_hunShouldHaveNoShadow() {
         // Given: shade is opened, yTranslation of HUN is equal to QQS Panel's height,
         // the height of HUN is equal to the height of QQS Panel,
@@ -899,6 +1145,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeClosed_hunShouldHaveFullShadow() {
         // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
         // the height of HUN is equal to the height of QQS Panel,
@@ -927,6 +1174,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
         // Given: shade is closed when HUN pops up,
         // now drags down the HUN to open shade
@@ -1154,6 +1402,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         assertFalse(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
     }
+
     // endregion
 
     private fun createHunViewMock(
@@ -1201,7 +1450,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // set stackEndHeight and stackHeight
         // ExpansionFractionWithoutShelf == stackHeight / stackEndHeight
         ambientState.stackEndHeight = 100f
-        ambientState.stackHeight = ambientState.stackEndHeight * fraction
+        ambientState.interpolatedStackHeight = ambientState.stackEndHeight * fraction
     }
 
     private fun resetViewStates_hunYTranslationIs(expected: Float) {
@@ -1265,6 +1514,36 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
         expect.that(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
+    }
+
+    /** fakes the notification row under test, to be a HUN in a fully opened shade */
+    private fun fakeHunInShade(
+        collapsedHeight: Int,
+        intrinsicHeight: Int,
+        headsUpTop: Float,
+        headsUpBottom: Float = headsUpTop + intrinsicHeight, // assume all the space available
+        stackTop: Float,
+        stackCutoff: Float = 2000f,
+        fullStackHeight: Float = 3000f
+    ) {
+        ambientState.headsUpTop = headsUpTop
+        ambientState.headsUpBottom = headsUpBottom
+        ambientState.stackTop = stackTop
+        ambientState.stackCutoff = stackCutoff
+
+        // shade is fully open
+        ambientState.expansionFraction = 1.0f
+        with(fullStackHeight) {
+            ambientState.interpolatedStackHeight = this
+            ambientState.stackEndHeight = this
+        }
+        stackScrollAlgorithm.setIsExpanded(true)
+
+        whenever(notificationRow.headerVisibleAmount).thenReturn(1.0f)
+        whenever(notificationRow.mustStayOnScreen()).thenReturn(true)
+        whenever(notificationRow.isHeadsUp).thenReturn(true)
+        whenever(notificationRow.collapsedHeight).thenReturn(collapsedHeight)
+        whenever(notificationRow.intrinsicHeight).thenReturn(intrinsicHeight)
     }
 }
 

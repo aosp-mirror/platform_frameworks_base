@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.logging;
 
 /**
  * NotificationList proto from atoms.proto, duplicated here so that it's accessible in the build.
- * Must be kept in sync with the version in atoms.proto.
+ * Must be kept in sync with the version in stats/atoms/sysui/sysui_atoms.proto.
  */
 
 message Notification {
@@ -43,6 +43,13 @@ message Notification {
         SECTION_ALERTING = 4;
         SECTION_SILENT = 5;
         SECTION_FOREGROUND_SERVICE = 6;
+        SECTION_PRIORITY_PEOPLE = 7;
+        SECTION_TOP_ONGOING = 8;
+        SECTION_TOP_UNSEEN = 9;
+        SECTION_NEWS = 10;
+        SECTION_SOCIAL = 11;
+        SECTION_RECS = 12;
+        SECTION_PROMO = 13;
     }
     optional NotificationSection section = 6;
 }

@@ -19,8 +19,8 @@ package com.android.systemui.shared.recents.model;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
@@ -218,6 +218,7 @@ public class Task {
     @ViewDebug.ExportedProperty(category="recents")
     public String title;
     @ViewDebug.ExportedProperty(category="recents")
+    @Nullable
     public String titleDescription;
     @ViewDebug.ExportedProperty(category="recents")
     public int colorPrimary;
@@ -245,6 +246,12 @@ public class Task {
     // Last snapshot data, only used for recent tasks
     public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
             new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
+
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isVisible;
+
+    @ViewDebug.ExportedProperty(category = "recents")
+    public boolean isMinimized;
 
     public Task() {
         // Do nothing
@@ -279,6 +286,8 @@ public class Task {
         lastSnapshotData.set(other.lastSnapshotData);
         positionInParent = other.positionInParent;
         appBounds = other.appBounds;
+        isVisible = other.isVisible;
+        isMinimized = other.isMinimized;
     }
 
     /**

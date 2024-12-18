@@ -23,16 +23,19 @@
     <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.WAKEUP_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
 
     <application>
         <activity
             android:name=".desktopmode.DesktopWallpaperActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
+            android:showForAllUsers="true"
             android:theme="@style/DesktopWallpaperTheme" />
 
         <activity
             android:name=".bubbles.shortcut.CreateBubbleShortcutActivity"
+            android:featureFlag="com.android.wm.shell.enable_retrievable_bubbles"
             android:exported="true"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay"
@@ -46,6 +49,7 @@
 
         <activity
             android:name=".bubbles.shortcut.ShowBubblesActivity"
+            android:featureFlag="com.android.wm.shell.enable_retrievable_bubbles"
             android:exported="true"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay" >

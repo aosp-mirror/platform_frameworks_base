@@ -226,7 +226,7 @@ public final class BroadcastRadioServiceImpl {
         }
 
         TunerSession tunerSession = radioModule.openSession(callback);
-        if (legacyConfig != null) {
+        if (tunerSession != null && legacyConfig != null) {
             tunerSession.setConfiguration(legacyConfig);
         }
         return tunerSession;

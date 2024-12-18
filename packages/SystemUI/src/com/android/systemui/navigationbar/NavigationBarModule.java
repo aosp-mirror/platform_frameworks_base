@@ -16,16 +16,24 @@
 
 package com.android.systemui.navigationbar;
 
+import static com.android.systemui.Flags.enableViewCaptureTracing;
+import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.app.viewcapture.ViewCapture;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
+import com.android.systemui.navigationbar.views.NavigationBarFrame;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.res.R;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -70,5 +78,16 @@ public interface NavigationBarModule {
     @DisplayId
     static WindowManager provideWindowManager(@DisplayId Context context) {
         return context.getSystemService(WindowManager.class);
+    }
+
+    /** A ViewCaptureAwareWindowManager specific to the display's context. */
+    @Provides
+    @NavigationBarScope
+    @DisplayId
+    static ViewCaptureAwareWindowManager provideViewCaptureAwareWindowManager(
+            @DisplayId WindowManager windowManager, Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager(windowManager,
+                /* lazyViewCapture= */ toKotlinLazy(daggerLazyViewCapture),
+                /* isViewCaptureEnabled= */ enableViewCaptureTracing());
     }
 }

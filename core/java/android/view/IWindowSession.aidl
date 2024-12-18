@@ -30,6 +30,7 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.Surface;
@@ -48,18 +49,6 @@ import java.util.List;
  * {@hide}
  */
 interface IWindowSession {
-
-    /**
-     * Bundle key to store the latest sync seq id for the relayout configuration.
-     * @see #relayout
-     */
-    const String KEY_RELAYOUT_BUNDLE_SEQID = "seqid";
-    /**
-     * Bundle key to store the latest ActivityWindowInfo associated with the relayout configuration.
-     * Will only be set if the relayout window is an activity window.
-     * @see #relayout
-     */
-    const String KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO = "activity_window_info";
 
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
@@ -83,16 +72,6 @@ interface IWindowSession {
      * grantInputChannel
      */
     void remove(IBinder clientToken);
-
-    /**
-     * @deprecated
-     */
-    int relayoutLegacy(IWindow window, in WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
-            out Bundle bundle);
 
     /**
      * Change the parameters of a window.  You supply the
@@ -160,15 +139,6 @@ interface IWindowSession {
     @UnsupportedAppUsage
     oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
             int seqId);
-
-    @UnsupportedAppUsage
-    boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
-
-    /**
-     * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
-     * permission.
-     */
-    oneway void performHapticFeedbackAsync(int effectId, boolean always, boolean fromIme);
 
     /**
      * Initiate the drag operation itself
@@ -298,7 +268,8 @@ interface IWindowSession {
     /**
      * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes,
+            in @nullable ImeTracker.Token imeStatsToken);
 
     /**
      * Called when the system gesture exclusion has changed.
@@ -391,4 +362,14 @@ interface IWindowSession {
      * @return {@code true} if the focus changes. Otherwise, {@code false}.
      */
     boolean moveFocusToAdjacentWindow(IWindow fromWindow, int direction);
+
+    /**
+     * Notifies the statsToken and IME visibility to the ImeInsetsSourceProvider.
+     *
+     * @param window The window that is used to get the ImeInsetsSourceProvider.
+     * @param visible {@code true} to make it visible, {@code false} to hide it.
+     * @param statsToken the token tracking the current IME request.
+     */
+    oneway void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
+            in ImeTracker.Token statsToken);
 }

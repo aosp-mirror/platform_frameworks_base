@@ -10,3 +10,6 @@ rule com.android.modules.utils.build.** android.internal.modules.utils.build.@1
 
 # For Perfetto proto dependencies
 rule perfetto.protos.** android.internal.perfetto.protos.@1
+
+# For aconfig storage classes
+rule android.aconfig.storage.** android.internal.aconfig.storage.@1

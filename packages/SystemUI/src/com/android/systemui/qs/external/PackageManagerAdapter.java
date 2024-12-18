@@ -26,6 +26,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.RemoteException;
 
+import androidx.annotation.Nullable;
+
 import javax.inject.Inject;
 
 // Adapter that wraps calls to PackageManager or IPackageManager for {@link TileLifecycleManager}.
@@ -45,6 +47,7 @@ public class PackageManagerAdapter {
         mIPackageManager = AppGlobals.getPackageManager();
     }
 
+    @Nullable
     public ServiceInfo getServiceInfo(ComponentName className, int flags, int userId)
             throws RemoteException {
         return mIPackageManager.getServiceInfo(className, flags, userId);

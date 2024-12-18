@@ -416,7 +416,8 @@ public class SurfaceTexture {
     }
 
     /**
-     * Retrieve the dataspace associated with the texture image.
+     * Retrieve the dataspace associated with the texture image
+     * set by the most recent call to {@link #updateTexImage}.
      */
     @SuppressLint("MethodNameUnits")
     public @NamedDataSpace int getDataSpace() {

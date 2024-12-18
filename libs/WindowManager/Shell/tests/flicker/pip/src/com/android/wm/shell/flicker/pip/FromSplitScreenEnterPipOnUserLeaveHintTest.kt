@@ -183,12 +183,6 @@ class FromSplitScreenEnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) :
     }
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 312446524)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
     @Test
     @FlakyTest(bugId = 336510055)
     override fun entireScreenCovered() {

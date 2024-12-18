@@ -19,6 +19,7 @@ package android.view.accessibility;
 
 import static android.view.accessibility.AccessibilityNodeInfo.FOCUS_ACCESSIBILITY;
 
+import android.annotation.Nullable;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -47,6 +48,8 @@ public class AccessibilityCache {
     private static final boolean CHECK_INTEGRITY = Build.IS_ENG;
 
     private boolean mEnabled = true;
+
+    private final SparseArray<String> mWindowIdToEventSourceClassName = new SparseArray<>();
 
     /**
      * {@link AccessibilityEvent} types that are critical for the cache to stay up to date
@@ -273,8 +276,11 @@ public class AccessibilityCache {
                     clearSubTreeLocked(event.getWindowId(), event.getSourceNodeId());
                 } break;
 
-                case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+                case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
                     mValidWindowCacheTimeStamp = event.getEventTime();
+                    if (event.getWindowChanges() == AccessibilityEvent.WINDOWS_CHANGE_REMOVED) {
+                        mWindowIdToEventSourceClassName.remove(event.getWindowId());
+                    }
                     if (event.getWindowChanges()
                             == AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED) {
                         // Don't need to clear all cache. Unless the changes are related to
@@ -282,8 +288,15 @@ public class AccessibilityCache {
                         clearWindowCacheLocked();
                         break;
                     }
+                    clear();
+                }
+                break;
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
                     mValidWindowCacheTimeStamp = event.getEventTime();
+                    if (event.getContentChangeTypes() == 0 && event.getClassName() != null) {
+                        mWindowIdToEventSourceClassName.put(event.getWindowId(),
+                                event.getClassName().toString());
+                    }
                     clear();
                 } break;
             }
@@ -905,6 +918,12 @@ public class AccessibilityCache {
         synchronized (mLock) {
             mOnNodeAddedListener = null;
         }
+    }
+
+    /** Returns the source class associated with the window with the given id. */
+    @Nullable
+    public String getEventSourceClassName(int windowId) {
+        return mWindowIdToEventSourceClassName.get(windowId);
     }
 
     // Layer of indirection included to break dependency chain for testing

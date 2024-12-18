@@ -16,17 +16,13 @@
 
 package com.android.companiondevicemanager;
 
-import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
-import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
-
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_HELPER_SUMMARIES;
 import static com.android.companiondevicemanager.Utils.getApplicationIcon;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import android.annotation.Nullable;
 import android.companion.AssociationRequest;
-import android.companion.virtual.flags.Flags;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -58,7 +54,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
     private Button mButton;
 
     interface CompanionVendorHelperDialogListener {
-        void onShowHelperDialogFailed();
+        void onShowHelperDialogFailed(CharSequence error);
         void onHelperDialogDismissed();
     }
 
@@ -105,7 +101,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
 
         final String deviceProfile = request.getDeviceProfile();
         final String packageName = request.getPackageName();
-        final CharSequence displayName = request.getDisplayName();
+        final CharSequence deviceName = request.getDisplayName();
         final int userId = request.getUserId();
         final CharSequence appLabel;
 
@@ -114,7 +110,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
             appLabel = getApplicationLabel(getContext(), packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
-            mListener.onShowHelperDialogFailed();
+            mListener.onShowHelperDialogFailed(e.getMessage());
             return;
         }
 
@@ -123,37 +119,17 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         mAppIcon = view.findViewById(R.id.app_icon);
         mButton = view.findViewById(R.id.btn_back);
 
-        final CharSequence title;
-        final Spanned summary;
-
-        switch (deviceProfile) {
-            case DEVICE_PROFILE_APP_STREAMING:
-                title = getHtmlFromResources(getContext(), R.string.helper_title_app_streaming);
-                summary = getHtmlFromResources(
-                        getContext(), Flags.interactiveScreenMirror()
-                                ? R.string.helper_summary_app_streaming_with_mirroring
-                                : R.string.helper_summary_app_streaming, title, displayName);
-                break;
-
-            case DEVICE_PROFILE_COMPUTER:
-                title = getHtmlFromResources(getContext(), R.string.helper_title_computer);
-                summary = getHtmlFromResources(
-                        getContext(), R.string.helper_summary_computer, title, displayName);
-                break;
-
-            case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
-                title = appLabel;
-                summary = getHtmlFromResources(
-                        getContext(), R.string.helper_summary_nearby_device_streaming, title,
-                        displayName);
-                break;
-
-            default:
-                throw new RuntimeException("Unsupported profile " + deviceProfile);
+        if (PROFILE_HELPER_SUMMARIES.containsKey(deviceProfile)) {
+            final int summaryResourceId = PROFILE_HELPER_SUMMARIES.get(deviceProfile);
+            final Spanned summary = getHtmlFromResources(
+                    getContext(), summaryResourceId, appLabel, deviceName,
+                    getString(R.string.device_type));
+            mSummary.setText(summary);
+        } else {
+            throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
-        mTitle.setText(title);
-        mSummary.setText(summary);
+        mTitle.setText(appLabel);
         mAppIcon.setImageDrawable(applicationIcon);
 
         mButton.setOnClickListener(v -> {

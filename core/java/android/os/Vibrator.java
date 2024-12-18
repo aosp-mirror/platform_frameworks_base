@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,9 +31,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
+import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -184,16 +187,6 @@ public abstract class Vibrator {
     }
 
     /**
-     * Whether the keyboard vibration is enabled by default.
-     *
-     * @return {@code true} if the keyboard vibration is default enabled, {@code false} otherwise.
-     * @hide
-     */
-    public boolean isDefaultKeyboardVibrationEnabled() {
-        return getConfig().isDefaultKeyboardVibrationEnabled();
-    }
-
-    /**
      * Return the ID of this vibrator.
      *
      * @return A non-negative integer representing the id of the vibrator controlled by this
@@ -319,6 +312,86 @@ public abstract class Vibrator {
      */
     public float getHapticChannelMaximumAmplitude() {
         return getConfig().getHapticChannelMaximumAmplitude();
+    }
+
+    /**
+     * Checks whether the vibrator supports the creation of envelope effects.
+     *
+     * Envelope effects are defined by a series of frequency-amplitude pairs with specified
+     * transition times, allowing the creation of more complex vibration patterns.
+     *
+     * @return True if the hardware supports creating envelope effects, false otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public boolean areEnvelopeEffectsSupported() {
+        return getInfo().areEnvelopeEffectsSupported();
+    }
+
+    /**
+     * Retrieves the maximum duration supported for an envelope effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantees a
+     * maximum duration equivalent to the product of {@link #getMaxEnvelopeEffectSize()} and
+     * {@link #getMaxEnvelopeEffectControlPointDurationMillis()}. If the device does not support
+     * envelope effects, this method will return 0.
+     *
+     * @return The maximum duration (in milliseconds) allowed for an envelope effect, or 0 if
+     * envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectDurationMillis() {
+        return getInfo().getMaxEnvelopeEffectDurationMillis();
+    }
+
+    /**
+     * Retrieves the maximum number of control points supported for an envelope effect.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee support
+     * for a minimum of 16 control points. If the device does not support envelope effects,
+     * this method will return 0.
+     *
+     * @return the maximum number of control points allowed for an envelope effect, or 0 if
+     * envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectSize() {
+        return getInfo().getMaxEnvelopeEffectSize();
+    }
+
+    /**
+     * Retrieves the minimum duration supported between two control points within an envelope
+     * effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee
+     * support for durations down to at least 20 milliseconds. If the device does
+     * not support envelope effects, this method will return 0.
+     *
+     * @return the minimum allowed duration between two control points in an envelope effect,
+     * or 0 if envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMinEnvelopeEffectControlPointDurationMillis() {
+        return getInfo().getMinEnvelopeEffectControlPointDurationMillis();
+    }
+
+    /**
+     * Retrieves the maximum duration supported between two control points within an envelope
+     * effect, in milliseconds.
+     *
+     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
+     * this value will be positive. Devices with envelope effects capabilities guarantee support
+     * for durations up to at least 1 second. If the device does not support envelope effects,
+     * this method will return 0.
+     *
+     * @return the maximum allowed duration between two control points in an envelope effect,
+     * or 0 if envelope effects are not supported.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public int getMaxEnvelopeEffectControlPointDurationMillis() {
+        return getInfo().getMaxEnvelopeEffectControlPointDurationMillis();
     }
 
     /**
@@ -506,7 +579,27 @@ public abstract class Vibrator {
      */
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public void vibrate(@NonNull VibrationEffect vibe, @NonNull VibrationAttributes attributes) {
-        vibrate(Process.myUid(), mPackageName, vibe, null, attributes);
+        vibrate(vibe, attributes, null);
+    }
+
+    /**
+     * Vibrate with a given effect.
+     *
+     * <p>The app should be in the foreground for the vibration to happen. Background apps should
+     * specify a ringtone, notification or alarm usage in order to vibrate.</p>
+     *
+     * @param vibe       {@link VibrationEffect} describing the vibration to be performed.
+     * @param attributes {@link VibrationAttributes} corresponding to the vibration. For example,
+     *                   specify {@link VibrationAttributes#USAGE_ALARM} for alarm vibrations or
+     *                   {@link VibrationAttributes#USAGE_RINGTONE} for vibrations associated with
+     *                   incoming calls.
+     * @param reason     the reason for this vibration, used for debugging purposes.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.VIBRATE)
+    public void vibrate(@NonNull VibrationEffect vibe,
+            @NonNull VibrationAttributes attributes, String reason) {
+        vibrate(Process.myUid(), mPackageName, vibe, reason, attributes);
     }
 
     /**
@@ -529,18 +622,41 @@ public abstract class Vibrator {
      *
      * @param constant the ID for the haptic feedback. This should be one of the constants defined
      *          in {@link HapticFeedbackConstants}.
-     * @param always {@code true} if the haptic feedback should be played regardless of the user
-     *          vibration intensity settings applicable to the corresponding vibration.
-     *          {@code false} if the vibration for the haptic feedback should respect the applicable
-     *          vibration intensity settings.
      * @param reason the reason for this haptic feedback.
-     * @param fromIme the haptic feedback is performed from an IME.
+     * @param flags Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      *
      * @hide
      */
-    public void performHapticFeedback(int constant, boolean always, String reason,
-            boolean fromIme) {
+    public void performHapticFeedback(int constant, String reason,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
         Log.w(TAG, "performHapticFeedback is not supported");
+    }
+
+    /**
+     * Performs a haptic feedback. Similar to {@link #performHapticFeedback} but also take into the
+     * consideration the {@link InputDevice} that triggered the haptic
+     *
+     * <p>A haptic feedback is a short vibration feedback. The type of feedback is identified via
+     * the {@code constant}, which should be one of the effect constants provided in
+     * {@link HapticFeedbackConstants}. The haptic feedback provided for a given effect ID is
+     * consistent across all usages on the same device.
+     *
+     * @param constant      the ID for the haptic feedback. This should be one of the constants
+     *                      defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId the integer id of the input device that triggered the haptic feedback.
+     * @param inputSource   the {@link InputDevice.Source} that triggered the haptic feedback.
+     * @param reason        the reason for this haptic feedback.
+     * @param flags         Additional flags as per {@link HapticFeedbackConstants}.
+     * @param privFlags     Additional private flags as per {@link HapticFeedbackConstants}.
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(
+            int constant, int inputDeviceId, int inputSource, String reason,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        Log.w(TAG, "performHapticFeedbackForInputDevice is not supported");
     }
 
     /**

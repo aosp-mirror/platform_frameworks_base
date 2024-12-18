@@ -37,7 +37,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `updates minPhysicalRefreshRate if summary has less`() {
+    fun updatesMinPhysicalRefreshRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 45f
 
@@ -47,7 +47,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `does not update minPhysicalRefreshRate if summary has more`() {
+    fun doesNotUpdateMinPhysicalRefreshRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 75f
 
@@ -57,7 +57,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `updates maxPhysicalRefreshRate if summary has more`() {
+    fun updatesMaxPhysicalRefreshRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.maxPhysicalRefreshRate = 120f
 
@@ -67,7 +67,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `does not update maxPhysicalRefreshRate if summary has less`() {
+    fun doesNotUpdateMaxPhysicalRefreshRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.maxPhysicalRefreshRate = 75f
 
@@ -77,7 +77,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `updates maxRenderFrameRate if summary has more`() {
+    fun updatesMaxRenderFrameRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.maxRenderFrameRate = 120f
 
@@ -87,7 +87,7 @@ class PhysicalVoteTest {
     }
 
     @Test
-    fun `does not update maxRenderFrameRate if summary has less`() {
+    fun doesNotUpdateMaxRenderFrameRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.maxRenderFrameRate = 75f
 

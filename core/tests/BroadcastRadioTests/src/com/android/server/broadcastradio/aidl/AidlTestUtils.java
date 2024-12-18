@@ -15,6 +15,7 @@
  */
 package com.android.server.broadcastradio.aidl;
 
+import android.annotation.Nullable;
 import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramIdentifier;
@@ -110,20 +111,25 @@ final class AidlTestUtils {
 
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel,
-            ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
-            int hwSignalQuality) {
+            @Nullable ProgramIdentifier logicallyTunedTo,
+            @Nullable ProgramIdentifier physicallyTunedTo, int hwSignalQuality) {
         return makeHalProgramInfo(hwSel, logicallyTunedTo, physicallyTunedTo, hwSignalQuality,
                 new ProgramIdentifier[]{}, new Metadata[]{});
     }
 
     static ProgramInfo makeHalProgramInfo(
             android.hardware.broadcastradio.ProgramSelector hwSel,
-            ProgramIdentifier logicallyTunedTo, ProgramIdentifier physicallyTunedTo,
-            int hwSignalQuality, ProgramIdentifier[] relatedContent, Metadata[] metadata) {
+            @Nullable ProgramIdentifier logicallyTunedTo,
+            @Nullable ProgramIdentifier physicallyTunedTo, int hwSignalQuality,
+            ProgramIdentifier[] relatedContent, Metadata[] metadata) {
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = hwSel;
-        hwInfo.logicallyTunedTo = logicallyTunedTo;
-        hwInfo.physicallyTunedTo = physicallyTunedTo;
+        if (logicallyTunedTo != null) {
+            hwInfo.logicallyTunedTo = logicallyTunedTo;
+        }
+        if (physicallyTunedTo != null) {
+            hwInfo.physicallyTunedTo = physicallyTunedTo;
+        }
         hwInfo.signalQuality = hwSignalQuality;
         hwInfo.relatedContent = relatedContent;
         hwInfo.metadata = metadata;

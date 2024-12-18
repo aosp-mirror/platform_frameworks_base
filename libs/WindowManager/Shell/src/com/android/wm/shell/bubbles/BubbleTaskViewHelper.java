@@ -15,7 +15,7 @@
  */
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -35,7 +35,8 @@ import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.taskview.TaskView;
 
 /**
@@ -59,6 +60,9 @@ public class BubbleTaskViewHelper {
 
         /** Called when back is pressed on the task root. */
         void onBackPressed();
+
+        /** Called when task removal has started. */
+        void onTaskRemovalStarted();
     }
 
     private final Context mContext;
@@ -103,14 +107,15 @@ public class BubbleTaskViewHelper {
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
-                            MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
-                    options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
+                            MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     Intent fillInIntent = new Intent();
                     // Apply flags to make behaviour match documentLaunchMode=always.
                     fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
+                    final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
+                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
                     if (mBubble.isAppBubble()) {
                         Context context =
                                 mContext.createContextAsUser(
@@ -125,7 +130,7 @@ public class BubbleTaskViewHelper {
                                 /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
-                    } else if (mBubble.hasMetadataShortcutId()) {
+                    } else if (isShortcutBubble) {
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);
@@ -188,6 +193,7 @@ public class BubbleTaskViewHelper {
                 ((ViewGroup) mParentView).removeView(mTaskView);
                 mTaskView = null;
             }
+            mListener.onTaskRemovalStarted();
         }
 
         @Override

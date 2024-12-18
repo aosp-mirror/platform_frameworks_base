@@ -3,8 +3,6 @@ package com.android.systemui.user.domain.interactor
 import android.annotation.UserIdInt
 import android.content.pm.UserInfo
 import android.os.UserManager
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.Flags.refactorGetCurrentUser
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
@@ -21,23 +19,11 @@ class SelectedUserInteractor @Inject constructor(private val repository: UserRep
     /** Flow providing the [UserInfo] of the currently selected user. */
     val selectedUserInfo = repository.selectedUserInfo
 
-    /**
-     * Returns the ID of the currently-selected user.
-     *
-     * @param bypassFlag this will ignore the feature flag and get the data from the repository
-     *   instead. This is used for refactored methods that were previously pointing to `userTracker`
-     *   and therefore should not be routed back to KeyguardUpdateMonitor when flag is disabled.
-     *   KeyguardUpdateMonitor.getCurrentUser() is deprecated and will be removed soon (together
-     *   with this flag).
-     */
+    /** Returns the ID of the currently-selected user. */
     @UserIdInt
     @JvmOverloads
-    fun getSelectedUserId(bypassFlag: Boolean = false): Int {
-        return if (bypassFlag || refactorGetCurrentUser()) {
-            repository.getSelectedUserInfo().id
-        } else {
-            KeyguardUpdateMonitor.getCurrentUser()
-        }
+    fun getSelectedUserId(): Int {
+        return repository.getSelectedUserInfo().id
     }
 
     /**

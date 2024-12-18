@@ -20,11 +20,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.accessibility.data.repository.captioningRepository
+import com.android.systemui.accessibility.domain.interactor.captioningInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.view.accessibility.data.repository.captioningInteractor
-import com.android.systemui.view.accessibility.data.repository.captioningRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -49,7 +50,7 @@ class CaptioningViewModelTest : SysuiTestCase() {
                 CaptioningViewModel(
                     context,
                     captioningInteractor,
-                    testScope.backgroundScope,
+                    applicationCoroutineScope,
                     uiEventLogger,
                 )
             }

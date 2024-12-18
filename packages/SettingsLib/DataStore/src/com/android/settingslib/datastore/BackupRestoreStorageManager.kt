@@ -129,7 +129,7 @@ class BackupRestoreStorageManager private constructor(private val application: A
             }
         }
 
-        override fun onChanged(reason: Int) = onKeyChanged(null, reason)
+        override fun onChanged(observable: Observable, reason: Int) = onKeyChanged(null, reason)
 
         override fun onKeyChanged(key: Any?, reason: Int) {
             notifyBackupManager(key, reason)

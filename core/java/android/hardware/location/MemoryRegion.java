@@ -19,8 +19,11 @@ package android.hardware.location;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.chre.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
  * @hide
@@ -125,6 +128,16 @@ public class MemoryRegion implements Parcelable{
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mSizeBytes, mSizeBytesFree, mIsReadable,
+                mIsWritable, mIsExecutable);
     }
 
     @Override

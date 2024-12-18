@@ -42,7 +42,7 @@ class SupportedRefreshRatesVoteTest {
     }
 
     @Test
-    fun `adds supported refresh rates if supportedModes in summary is null`() {
+    fun addsSupportedRefreshRates_summaryHasNull() {
         val summary = createVotesSummary()
 
         supportedRefreshRatesVote.updateSummary(summary)
@@ -51,7 +51,7 @@ class SupportedRefreshRatesVoteTest {
     }
 
     @Test
-    fun `does not add supported refresh rates if summary has empty list of refresh rates`() {
+    fun doesNotAddSupportedRefreshRates_summaryHasEmptyList() {
         val summary = createVotesSummary()
         summary.supportedRefreshRates = ArrayList()
 
@@ -61,7 +61,7 @@ class SupportedRefreshRatesVoteTest {
     }
 
     @Test
-    fun `filters out supported refresh rates that does not match vote`() {
+    fun filtersSupportedRefreshRatesThatDoesNotMatchVote() {
         val summary = createVotesSummary()
         summary.supportedRefreshRates = ArrayList(listOf(otherMode, refreshRates[0]))
 

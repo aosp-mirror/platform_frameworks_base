@@ -139,6 +139,14 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
+    <!-- Click action label for bubbles to expand menu. [CHAR LIMIT=30]-->
+    <string name="bubble_accessibility_action_expand_menu">expand menu</string>
+    <!-- Click action label for bubbles to collapse menu. [CHAR LIMIT=30]-->
+    <string name="bubble_accessibility_action_collapse_menu">collapse menu</string>
+    <!-- Action in accessibility menu to move the bubble bar to the left side of the screen. [CHAR_LIMIT=30] -->
+    <string name="bubble_accessibility_action_move_bar_left">Move left</string>
+    <!-- Action in accessibility menu to move the bubble bar to the right side of the screen. [CHAR_LIMIT=30] -->
+    <string name="bubble_accessibility_action_move_bar_right">Move right</string>
     <!-- Accessibility announcement when the stack of bubbles expands. [CHAR LIMIT=NONE]-->
     <string name="bubble_accessibility_announce_expand">expand <xliff:g id="bubble_title" example="Messages">%1$s</xliff:g></string>
     <!-- Accessibility announcement when the stack of bubbles collapses. [CHAR LIMIT=NONE]-->
@@ -147,6 +155,8 @@
     <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
     <string name="bubble_dismiss_text">Dismiss bubble</string>
+    <!-- Text used to move the bubble to fullscreen. [CHAR LIMIT=30] -->
+    <string name="bubble_fullscreen_text">Move to fullscreen</string>
     <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
     <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
     <!-- Title text for the bubbles feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
@@ -263,7 +273,7 @@
     <!-- Accessibility text for the caption back button [CHAR LIMIT=NONE] -->
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
-    <string name="handle_text">Handle</string>
+    <string name="handle_text">App handle</string>
     <!-- Accessibility text for the handle menu app icon [CHAR LIMIT=NONE] -->
     <string name="app_icon_text">App Icon</string>
     <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
@@ -280,14 +290,29 @@
     <string name="select_text">Select</string>
     <!-- Accessibility text for the handle menu screenshot button [CHAR LIMIT=NONE] -->
     <string name="screenshot_text">Screenshot</string>
+    <!-- Accessibility text for the handle menu open in browser button [CHAR LIMIT=NONE] -->
+    <string name="open_in_browser_text">Open in browser</string>
+    <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
+    <string name="new_window_text">New Window</string>
+    <!-- Accessibility text for the handle menu new window button [CHAR LIMIT=NONE] -->
+    <string name="manage_windows_text">Manage Windows</string>
     <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
     <string name="collapse_menu_text">Close Menu</string>
-    <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
-    <string name="expand_menu_text">Open Menu</string>
+    <!-- Accessibility text for the App Header's App Chip [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_app_header_chip_text">Open Menu</string>
     <!-- Maximize menu maximize button string. -->
     <string name="desktop_mode_maximize_menu_maximize_text">Maximize Screen</string>
     <!-- Maximize menu snap buttons string. -->
     <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
+    <!-- Snap resizing non-resizable string. -->
+    <string name="desktop_mode_non_resizable_snap_text">This app can\'t be resized</string>
+    <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
+    <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
+
 </resources>

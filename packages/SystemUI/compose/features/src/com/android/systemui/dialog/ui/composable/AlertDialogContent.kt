@@ -89,7 +89,7 @@ fun AlertDialogContent(
 
         // Content.
         val contentColor = LocalAndroidColorScheme.current.onSurfaceVariant
-        Box(Modifier.defaultMinSize(minHeight = 48.dp)) {
+        Box {
             CompositionLocalProvider(LocalContentColor provides contentColor) {
                 ProvideTextStyle(
                     MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Center)

@@ -216,8 +216,8 @@ private:
  */
 class RecyclingClippingPixelAllocator : public android::skia::BRDAllocator {
 public:
-    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
-                                    bool mustMatchColorType = true);
+    RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap, bool mustMatchColorType = true,
+                                    std::optional<SkRect> desiredSubset = std::nullopt);
 
     ~RecyclingClippingPixelAllocator();
 
@@ -241,11 +241,24 @@ public:
     SkCodec::ZeroInitialized zeroInit() const override { return SkCodec::kNo_ZeroInitialized; }
 
 private:
+    /**
+     *  Optionally returns a subset rectangle that we need to upsample from.
+     *  E.g., a gainmap subset may be decoded in a slightly larger rectangle
+     *  than is needed (in order to correctly preserve gainmap alignment when
+     *  rendering at display time), so we need to re-sample the "intended"
+     *  gainmap back up to the bitmap dimensions.
+     *
+     *  If we don't need to upsample from a subregion, then returns an empty
+     *  optional
+     */
+    static std::optional<SkRect> getSourceBoundsForUpsample(std::optional<SkRect> subset);
+
     android::Bitmap* mRecycledBitmap;
     const size_t     mRecycledBytes;
     SkBitmap*        mSkiaBitmap;
     bool             mNeedsCopy;
     const bool mMustMatchColorType;
+    const std::optional<SkRect> mDesiredSubset;
 };
 
 class AshmemPixelAllocator : public SkBitmap::Allocator {

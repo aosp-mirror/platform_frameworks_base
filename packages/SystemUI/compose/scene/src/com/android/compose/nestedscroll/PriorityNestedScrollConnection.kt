@@ -38,7 +38,7 @@ class PriorityNestedScrollConnection(
     private val canStartPreScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
     private val canStartPostScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
     private val canStartPostFling: (velocityAvailable: Velocity) -> Boolean,
-    private val canContinueScroll: () -> Boolean,
+    private val canContinueScroll: (source: NestedScrollSource) -> Boolean,
     private val canScrollOnFling: Boolean,
     private val onStart: (offsetAvailable: Offset) -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
@@ -61,7 +61,7 @@ class PriorityNestedScrollConnection(
 
         if (
             isPriorityMode ||
-                (source == NestedScrollSource.Fling && !canScrollOnFling) ||
+                (source == NestedScrollSource.SideEffect && !canScrollOnFling) ||
                 !canStartPostScroll(available, offsetBeforeStart)
         ) {
             // The priority mode cannot start so we won't consume the available offset.
@@ -73,7 +73,7 @@ class PriorityNestedScrollConnection(
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (!isPriorityMode) {
-            if (source != NestedScrollSource.Fling || canScrollOnFling) {
+            if (source == NestedScrollSource.UserInput || canScrollOnFling) {
                 if (canStartPreScroll(available, offsetScrolledBeforePriorityMode)) {
                     return onPriorityStart(available)
                 }
@@ -84,7 +84,7 @@ class PriorityNestedScrollConnection(
             return Offset.Zero
         }
 
-        if (!canContinueScroll()) {
+        if (!canContinueScroll(source)) {
             // Step 3a: We have lost priority and we no longer need to intercept scroll events.
             onPriorityStop(velocity = Velocity.Zero)
 
@@ -129,7 +129,11 @@ class PriorityNestedScrollConnection(
         return onPriorityStop(available)
     }
 
-    /** Method to call before destroying the object or to reset the initial state. */
+    /**
+     * Method to call before destroying the object or to reset the initial state.
+     *
+     * TODO(b/303224944) This method should be removed.
+     */
     fun reset() {
         // Step 3c: To ensure that an onStop is always called for every onStart.
         onPriorityStop(velocity = Velocity.Zero)
@@ -170,7 +174,7 @@ fun PriorityNestedScrollConnection(
     canStartPreScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
     canStartPostScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
     canStartPostFling: (velocityAvailable: Float) -> Boolean,
-    canContinueScroll: () -> Boolean,
+    canContinueScroll: (source: NestedScrollSource) -> Boolean,
     canScrollOnFling: Boolean,
     onStart: (offsetAvailable: Float) -> Unit,
     onScroll: (offsetAvailable: Float) -> Float,

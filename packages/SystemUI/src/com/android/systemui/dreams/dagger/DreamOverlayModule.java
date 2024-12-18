@@ -18,7 +18,6 @@ package com.android.systemui.dreams.dagger;
 
 import android.content.res.Resources;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.lifecycle.Lifecycle;
@@ -42,7 +41,6 @@ import javax.inject.Named;
 @Module
 public abstract class DreamOverlayModule {
     public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
-    public static final String HUB_GESTURE_INDICATOR_VIEW = "hub_gesture_indicator_view";
     public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
             "burn_in_protection_update_interval";
@@ -73,18 +71,6 @@ public abstract class DreamOverlayModule {
     public static ViewGroup providesDreamOverlayContentView(DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_content),
                 "R.id.dream_overlay_content must not be null");
-    }
-
-    /**
-     * Gesture indicator bar on the right edge of the screen to indicate to users that they can
-     * swipe to see their widgets on lock screen.
-     */
-    @Provides
-    @DreamOverlayComponent.DreamOverlayScope
-    @Named(HUB_GESTURE_INDICATOR_VIEW)
-    public static View providesHubGestureIndicatorView(DreamOverlayContainerView view) {
-        return Preconditions.checkNotNull(view.findViewById(R.id.glanceable_hub_handle),
-                "R.id.glanceable_hub_handle must not be null");
     }
 
     /** */

@@ -2173,8 +2173,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                                             (1 << AudioManager.STREAM_NOTIFICATION) |
                                             (1 << AudioManager.STREAM_SYSTEM) |
                                             (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
-            if (!mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_voice_capable)) {
+            if (!getTelephonyManager().isVoiceCapable()) {
                 ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
             }
             loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,

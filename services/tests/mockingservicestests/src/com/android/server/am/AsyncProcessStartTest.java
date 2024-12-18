@@ -189,7 +189,7 @@ public class AsyncProcessStartTest {
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, boolean wedge)
             throws Exception {
-        final IApplicationThread thread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred thread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         doAnswer((invocation) -> {

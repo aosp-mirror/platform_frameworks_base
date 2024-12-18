@@ -23,11 +23,13 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.ActiveUnlockModel
 import com.android.systemui.keyguard.shared.model.TrustManagedModel
 import com.android.systemui.keyguard.shared.model.TrustModel
 import com.android.systemui.user.data.repository.UserRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Encapsulates any state relevant to trust agents and trust grants. */
 interface TrustRepository {
@@ -51,7 +54,7 @@ interface TrustRepository {
     val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean>
 
     /** Flow representing whether the current user is trusted. */
-    val isCurrentUserTrusted: Flow<Boolean>
+    val isCurrentUserTrusted: StateFlow<Boolean>
 
     /** Flow representing whether active unlock is running for the current user. */
     val isCurrentUserActiveUnlockRunning: Flow<Boolean>
@@ -63,6 +66,9 @@ interface TrustRepository {
 
     /** A trust agent is requesting to dismiss the keyguard from a trust change. */
     val trustAgentRequestingToDismissKeyguard: Flow<TrustModel>
+
+    /** Reports a keyguard visibility change. */
+    suspend fun reportKeyguardShowingChanged()
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,6 +77,7 @@ class TrustRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val trustManager: TrustManager,
     private val logger: TrustRepositoryLogger,
@@ -191,11 +198,26 @@ constructor(
     private fun isUserTrustManaged(userId: Int) =
         trustManagedForUser[userId]?.isTrustManaged ?: false
 
-    override val isCurrentUserTrusted: Flow<Boolean>
+    override val isCurrentUserTrusted: StateFlow<Boolean>
         get() =
             combine(trust, userRepository.selectedUserInfo, ::Pair)
-                .map { latestTrustModelForUser[it.second.id]?.isTrusted ?: false }
+                .map { isCurrentUserTrusted(it.second.id) }
                 .distinctUntilChanged()
                 .onEach { logger.isCurrentUserTrusted(it) }
                 .onStart { emit(false) }
+                .stateIn(
+                    scope = applicationScope,
+                    started = SharingStarted.WhileSubscribed(),
+                    initialValue = isCurrentUserTrusted(),
+                )
+
+    private fun isCurrentUserTrusted(
+        selectedUserId: Int = userRepository.getSelectedUserInfo().id
+    ): Boolean {
+        return latestTrustModelForUser[selectedUserId]?.isTrusted ?: false
+    }
+
+    override suspend fun reportKeyguardShowingChanged() {
+        withContext(backgroundDispatcher) { trustManager.reportKeyguardShowingChanged() }
+    }
 }

@@ -23,6 +23,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * @hide
  */
@@ -78,6 +81,35 @@ public final class WebViewProviderInfo implements Parcelable {
         out.writeInt(availableByDefault ? 1 : 0);
         out.writeInt(isFallback ? 1 : 0);
         out.writeTypedArray(signatures, 0);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof WebViewProviderInfo that) {
+            return this.packageName.equals(that.packageName)
+                    && this.description.equals(that.description)
+                    && this.availableByDefault == that.availableByDefault
+                    && this.isFallback == that.isFallback
+                    && Arrays.equals(this.signatures, that.signatures);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(packageName, description, availableByDefault,
+                isFallback, Arrays.hashCode(signatures));
+    }
+
+    @Override
+    public String toString() {
+        return "WebViewProviderInfo; packageName=" + packageName
+                + " description=\"" + description
+                + "\" availableByDefault=" + availableByDefault
+                + " isFallback=" + isFallback
+                + " signatures=" + Arrays.toString(signatures);
     }
 
     // fields read from framework resource

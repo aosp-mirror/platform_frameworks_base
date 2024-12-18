@@ -292,8 +292,10 @@ final class RemovePackageHelper {
         // Step 2: destroy app data.
         mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId, appDataDeletionFlags);
         if (userId != UserHandle.USER_ALL) {
-            ps.setCeDataInode(-1, userId);
-            ps.setDeDataInode(-1, userId);
+            synchronized (mPm.mLock) {
+                ps.setCeDataInode(-1, userId);
+                ps.setDeDataInode(-1, userId);
+            }
         }
 
         final PreferredActivityHelper preferredActivityHelper = new PreferredActivityHelper(mPm,
@@ -425,12 +427,21 @@ final class RemovePackageHelper {
             }
             final boolean isArchive = (flags & PackageManager.DELETE_ARCHIVE) != 0;
             final long currentTimeMillis = System.currentTimeMillis();
-            for (int userId : outInfo.mRemovedUsers) {
-                if (DEBUG_REMOVE) {
-                    final boolean wasInstalled = deletedPs.getInstalled(userId);
-                    Slog.d(TAG, "    user " + userId + ": " + wasInstalled + " => " + false);
+            synchronized (mPm.mLock) {
+                for (int userId : outInfo.mRemovedUsers) {
+                    if (DEBUG_REMOVE) {
+                        final boolean wasInstalled = deletedPs.getInstalled(userId);
+                        Slog.d(TAG, "    user " + userId + ": " + wasInstalled + " => " + false);
+                    }
+                    deletedPs.setInstalled(/* installed= */ false, userId);
                 }
-                deletedPs.setInstalled(/* installed= */ false, userId);
+
+                // Preserve split apk information for downgrade check with DELETE_KEEP_DATA and
+                // archived app cases
+                if (deletedPkg != null && deletedPkg.getSplitNames() != null) {
+                    deletedPs.setSplitNames(deletedPkg.getSplitNames());
+                    deletedPs.setSplitRevisionCodes(deletedPkg.getSplitRevisionCodes());
+                }
             }
         }
 
@@ -441,17 +452,19 @@ final class RemovePackageHelper {
             if (DEBUG_REMOVE) {
                 Slog.d(TAG, "Propagating install state across downgrade");
             }
-            for (int userId : allUserHandles) {
-                final boolean installed = ArrayUtils.contains(outInfo.mOrigUsers, userId);
-                if (DEBUG_REMOVE) {
-                    Slog.d(TAG, "    user " + userId + " => " + installed);
-                }
-                if (installed != deletedPs.getInstalled(userId)) {
-                    installedStateChanged = true;
-                }
-                deletedPs.setInstalled(installed, userId);
-                if (installed) {
-                    deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
+            synchronized (mPm.mLock) {
+                for (int userId : allUserHandles) {
+                    final boolean installed = ArrayUtils.contains(outInfo.mOrigUsers, userId);
+                    if (DEBUG_REMOVE) {
+                        Slog.d(TAG, "    user " + userId + " => " + installed);
+                    }
+                    if (installed != deletedPs.getInstalled(userId)) {
+                        installedStateChanged = true;
+                    }
+                    deletedPs.setInstalled(installed, userId);
+                    if (installed) {
+                        deletedPs.setUninstallReason(UNINSTALL_REASON_UNKNOWN, userId);
+                    }
                 }
             }
         }
