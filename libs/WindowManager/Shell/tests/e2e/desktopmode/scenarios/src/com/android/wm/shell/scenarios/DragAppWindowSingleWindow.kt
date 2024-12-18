@@ -36,7 +36,7 @@ open class DragAppWindowSingleWindow : DragAppWindowScenarioTestBase()
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

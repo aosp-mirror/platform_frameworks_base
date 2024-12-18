@@ -86,7 +86,6 @@ public class PersistentDataBlockServiceTest {
     private File mDataBlockFile;
     private File mFrpSecretFile;
     private File mFrpSecretTmpFile;
-    private String mOemUnlockPropertyValue;
     private boolean mIsUpgradingFromPreV = false;
 
     @Mock private UserManager mUserManager;
@@ -102,13 +101,6 @@ public class PersistentDataBlockServiceTest {
             // it registers the service, etc.  But we need to signal init done to prevent
             // `isFrpActive` from blocking.
             signalInitDone();
-        }
-
-        @Override
-        void setProperty(String key, String value) {
-            // Override to capture the value instead of actually setting the property.
-            assertThat(key).isEqualTo("sys.oem_unlock_allowed");
-            mOemUnlockPropertyValue = value;
         }
 
         @Override
@@ -598,7 +590,6 @@ public class PersistentDataBlockServiceTest {
 
         mInterface.setOemUnlockEnabled(true);
         assertThat(mInterface.getOemUnlockEnabled()).isTrue();
-        assertThat(mOemUnlockPropertyValue).isEqualTo("1");
     }
 
     @Test
@@ -635,7 +626,6 @@ public class PersistentDataBlockServiceTest {
         // The current implementation does not check digest before set or get the oem unlock bit.
         tamperWithDigest();
         mInterface.setOemUnlockEnabled(true);
-        assertThat(mOemUnlockPropertyValue).isEqualTo("1");
         tamperWithDigest();
         assertThat(mInterface.getOemUnlockEnabled()).isTrue();
     }
@@ -676,7 +666,6 @@ public class PersistentDataBlockServiceTest {
 
         mInternalInterface.forceOemUnlockEnabled(true);
 
-        assertThat(mOemUnlockPropertyValue).isEqualTo("1");
         assertThat(readBackingFile(mPdbService.getOemUnlockDataOffset(), 1).array())
                 .isEqualTo(new byte[] { 1 });
     }

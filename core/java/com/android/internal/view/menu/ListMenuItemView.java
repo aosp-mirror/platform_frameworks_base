@@ -33,8 +33,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.android.text.flags.Flags;
-
 /**
  * The item view for each item in the ListView-based MenuViews.
  */
@@ -283,10 +281,7 @@ public class ListMenuItemView extends LinearLayout
 
     private void insertIconView() {
         LayoutInflater inflater = getInflater();
-        mIconView = (ImageView) inflater.inflate(
-                !Flags.fixMisalignedContextMenu()
-                        ? com.android.internal.R.layout.list_menu_item_fixed_size_icon :
-                        com.android.internal.R.layout.list_menu_item_icon,
+        mIconView = (ImageView) inflater.inflate(com.android.internal.R.layout.list_menu_item_icon,
                 this, false);
         addContentView(mIconView, 0);
     }

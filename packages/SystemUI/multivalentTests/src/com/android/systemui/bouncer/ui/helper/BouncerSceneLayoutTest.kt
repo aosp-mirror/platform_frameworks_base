@@ -25,10 +25,10 @@ import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STANDARD_BOUNCE
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import org.junit.Test
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameter
-import platform.test.runner.parameterized.Parameters
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.Parameter
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
@@ -41,6 +41,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             height = SizeClass.EXPANDED,
             naturallyHeld = Vertically,
         )
+
     data object Tablet :
         Device(
             name = "tablet",
@@ -48,6 +49,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             height = SizeClass.MEDIUM,
             naturallyHeld = Horizontally,
         )
+
     data object Folded :
         Device(
             name = "folded",
@@ -55,6 +57,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             height = SizeClass.MEDIUM,
             naturallyHeld = Vertically,
         )
+
     data object Unfolded :
         Device(
             name = "unfolded",
@@ -64,6 +67,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             widthWhenUnnaturallyHeld = SizeClass.MEDIUM,
             heightWhenUnnaturallyHeld = SizeClass.MEDIUM,
         )
+
     data object TallerFolded :
         Device(
             name = "taller folded",
@@ -71,6 +75,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
             height = SizeClass.EXPANDED,
             naturallyHeld = Vertically,
         )
+
     data object TallerUnfolded :
         Device(
             name = "taller unfolded",
@@ -131,7 +136,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                                 TestCase(
                                     device = device,
                                     held = device.naturallyHeld,
-                                    isSideBySideSupported = false,
+                                    isOneHandedModeSupported = false,
                                     expected = STANDARD_BOUNCER,
                                 )
                             )
@@ -151,7 +156,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                                 TestCase(
                                     device = device,
                                     held = device.naturallyHeld.flip(),
-                                    isSideBySideSupported = false,
+                                    isOneHandedModeSupported = false,
                                     expected = STANDARD_BOUNCER,
                                 )
                             )
@@ -170,7 +175,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                         calculateLayoutInternal(
                             width = device.width(whenHeld = held),
                             height = device.height(whenHeld = held),
-                            isSideBySideSupported = isSideBySideSupported,
+                            isOneHandedModeSupported = isOneHandedModeSupported,
                         )
                     )
                     .isEqualTo(expected)
@@ -182,7 +187,7 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
         val device: Device,
         val held: Held,
         val expected: BouncerSceneLayout,
-        val isSideBySideSupported: Boolean = true,
+        val isOneHandedModeSupported: Boolean = true,
     ) {
         override fun toString(): String {
             return buildString {
@@ -190,8 +195,8 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
                 append(" width: ${device.width(held).name.lowercase(Locale.US)}")
                 append(" height: ${device.height(held).name.lowercase(Locale.US)}")
                 append(" when held $held")
-                if (!isSideBySideSupported) {
-                    append(" (side-by-side not supported)")
+                if (!isOneHandedModeSupported) {
+                    append(" (one-handed-mode not supported)")
                 }
             }
         }
@@ -242,11 +247,13 @@ class BouncerSceneLayoutTest : SysuiTestCase() {
     sealed class Held {
         abstract fun flip(): Held
     }
+
     data object Vertically : Held() {
         override fun flip(): Held {
             return Horizontally
         }
     }
+
     data object Horizontally : Held() {
         override fun flip(): Held {
             return Vertically

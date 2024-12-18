@@ -69,8 +69,9 @@ final class IRadioServiceAidlImpl extends IRadioService.Stub {
         return serviceList;
     }
 
-    IRadioServiceAidlImpl(BroadcastRadioService service, ArrayList<String> serviceList) {
-        this(service, new BroadcastRadioServiceImpl(serviceList));
+    IRadioServiceAidlImpl(BroadcastRadioService service, List<String> serviceList,
+            RadioServiceUserController userController) {
+        this(service, new BroadcastRadioServiceImpl(serviceList, userController));
         Slogf.i(TAG, "Initialize BroadcastRadioServiceAidl(%s)", service);
     }
 

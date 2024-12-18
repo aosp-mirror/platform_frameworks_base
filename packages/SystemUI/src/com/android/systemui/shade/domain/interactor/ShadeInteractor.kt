@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import androidx.annotation.FloatRange
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.shade.shared.model.ShadeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -26,19 +28,22 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Business logic for shade interactions. */
 interface ShadeInteractor : BaseShadeInteractor {
-    /** Emits true if the shade is currently allowed and false otherwise. */
+    /** Emits true if the Notifications shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean>
 
-    /** Emits true if QS is currently allowed and false otherwise. */
+    /** Emits true if QS shade is currently allowed and false otherwise. */
     val isQsEnabled: StateFlow<Boolean>
 
-    /** Whether either the shade or QS is fully expanded. */
+    /** Whether either the Notifications shade or QS shade is fully expanded. */
     val isAnyFullyExpanded: StateFlow<Boolean>
 
-    /** Whether the Shade is fully expanded. */
+    /** Whether the Notifications Shade is fully expanded. */
     val isShadeFullyExpanded: Flow<Boolean>
 
-    /** Whether the Shade is fully collapsed. */
+    /** Whether Notifications Shade is expanded a non-zero amount. */
+    val isShadeAnyExpanded: StateFlow<Boolean>
+
+    /** Whether the Notifications Shade is fully collapsed. */
     val isShadeFullyCollapsed: Flow<Boolean>
 
     /**
@@ -69,6 +74,20 @@ interface ShadeInteractor : BaseShadeInteractor {
      * wide as the entire screen.
      */
     val isShadeLayoutWide: StateFlow<Boolean>
+
+    /**
+     * The fraction between [0..1] (i.e., percentage) of screen width to consider the threshold
+     * between "top-left" and "top-right" for the purposes of dual-shade invocation.
+     *
+     * When the dual-shade is not wide, this always returns 0.5 (the top edge is evenly split). On
+     * wide layouts however, a larger fraction is returned because only the area of the system
+     * status icons is considered top-right.
+     *
+     * Note that this fraction only determines the split between the absolute left and right
+     * directions. In RTL layouts, the "top-start" edge will resolve to "top-right", and "top-end"
+     * will resolve to "top-left".
+     */
+    @FloatRange(from = 0.0, to = 1.0) fun getTopEdgeSplitFraction(): Float
 }
 
 /** ShadeInteractor methods with implementations that differ between non-empty impls. */
@@ -87,7 +106,7 @@ interface BaseShadeInteractor {
      */
     val isAnyExpanded: StateFlow<Boolean>
 
-    /** The amount [0-1] that the shade has been opened. */
+    /** The amount [0-1] that the Notifications Shade has been opened. */
     val shadeExpansion: StateFlow<Float>
 
     /**
@@ -96,7 +115,7 @@ interface BaseShadeInteractor {
      */
     val qsExpansion: StateFlow<Float>
 
-    /** Whether Quick Settings is expanded a non-zero amount. */
+    /** Whether Quick Settings Shade is expanded a non-zero amount. */
     val isQsExpanded: StateFlow<Boolean>
 
     /**
@@ -125,12 +144,46 @@ interface BaseShadeInteractor {
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean>
+
+    /**
+     * Triggers the expansion (opening) of the notifications shade. If it is already expanded, this
+     * has no effect.
+     */
+    fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey? = null)
+
+    /**
+     * Triggers the expansion (opening) of the quick settings shade. If it is already expanded, this
+     * has no effect.
+     */
+    fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey? = null)
+
+    /**
+     * Triggers the collapse (closing) of the notifications shade. If it is already collapsed, this
+     * has no effect.
+     */
+    fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey? = null)
+
+    /**
+     * Triggers the collapse (closing) of the quick settings shade. If it is already collapsed, this
+     * has no effect.
+     */
+    fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey? = null,
+        bypassNotificationsShade: Boolean = false,
+    )
+
+    /**
+     * Triggers the collapse (closing) of the notifications shade or quick settings shade, whichever
+     * is open. If both are already collapsed, this has no effect.
+     */
+    fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey? = null)
 }
 
 fun createAnyExpansionFlow(
     scope: CoroutineScope,
     shadeExpansion: Flow<Float>,
-    qsExpansion: Flow<Float>
+    qsExpansion: Flow<Float>,
 ): StateFlow<Float> {
     return combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
         .stateIn(scope, SharingStarted.Eagerly, 0f)

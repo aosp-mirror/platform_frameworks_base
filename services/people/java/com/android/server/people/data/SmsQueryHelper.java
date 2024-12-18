@@ -98,6 +98,8 @@ class SmsQueryHelper {
                     }
                 }
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception when querying SMS table.", e);
         } finally {
             Binder.defaultBlockingForCurrentThread();
         }

@@ -221,7 +221,7 @@ public class LocaleManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out,
                 FileDescriptor err, String[] args, ShellCallback callback,
                 ResultReceiver resultReceiver) {
-            (new LocaleManagerShellCommand(mBinderService))
+            (new LocaleManagerShellCommand(mBinderService, mContext))
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 

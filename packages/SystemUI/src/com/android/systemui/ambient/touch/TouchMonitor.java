@@ -25,7 +25,6 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
@@ -53,6 +52,8 @@ import com.android.systemui.util.display.DisplayHelper;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import kotlin.Unit;
+
 import kotlinx.coroutines.Job;
 
 import java.util.Collection;
@@ -76,17 +77,19 @@ import javax.inject.Named;
  * touches are consumed.
  */
 public class TouchMonitor {
+    // An incrementing id used to identify the touch monitor instance.
+    private static int sNextInstanceId = 0;
+
+    private final Logger mLogger;
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
-    public String TAG = "DreamOverlayTouchMonitor";
-    private final Logger mLogger;
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
 
     private final ConfigurationInteractor mConfigurationInteractor;
 
     private final Lifecycle mLifecycle;
-    private Rect mExclusionRect = null;
+    private Rect mExclusionRect = new Rect();
 
     private ISystemGestureExclusionListener mGestureExclusionListener;
 
@@ -140,7 +143,7 @@ public class TouchMonitor {
                     completer.set(predecessor);
                 }
 
-                if (mActiveTouchSessions.isEmpty()) {
+                if (mActiveTouchSessions.isEmpty() && mInitialized) {
                     if (mStopMonitoringPending) {
                         stopMonitoring(false);
                     } else {
@@ -273,7 +276,7 @@ public class TouchMonitor {
 
         @Override
         public void onDestroy(LifecycleOwner owner) {
-            stopMonitoring(true);
+            destroy();
         }
     };
 
@@ -281,6 +284,11 @@ public class TouchMonitor {
      * When invoked, instantiates a new {@link InputSession} to monitor touch events.
      */
     private void startMonitoring() {
+        if (!mInitialized) {
+            mLogger.w("attempting to startMonitoring when not initialized");
+            return;
+        }
+
         mLogger.i("startMonitoring(): monitoring started");
         stopMonitoring(true);
 
@@ -292,19 +300,27 @@ public class TouchMonitor {
                         public void onSystemGestureExclusionChanged(int displayId,
                                 Region systemGestureExclusion,
                                 Region systemGestureExclusionUnrestricted) {
-                            mExclusionRect = systemGestureExclusion.getBounds();
+                            final Rect bounds = systemGestureExclusion.getBounds();
+                            if (!mExclusionRect.equals(bounds)) {
+                                mExclusionRect = bounds;
+                                mLogger.i(msg -> "Exclusion rect updated to " + msg.getStr1(),
+                                        msg -> {
+                                            msg.setStr1(bounds.toString());
+                                            return Unit.INSTANCE;
+                                        });
+                            }
                         }
                     };
+                    mLogger.i("Registering system gesture exclusion listener");
                     mWindowManagerService.registerSystemGestureExclusionListener(
                             mGestureExclusionListener, mDisplayId);
                 } catch (RemoteException e) {
-                    // Handle the exception
-                    Log.e(TAG, "Failed to register gesture exclusion listener", e);
+                    mLogger.e("Failed to register gesture exclusion listener", e);
                 }
             });
         }
         mCurrentInputSession = mInputSessionFactory.create(
-                        "dreamOverlay",
+                        mLoggingName,
                         mInputEventListener,
                         mOnGestureListener,
                         true)
@@ -315,18 +331,19 @@ public class TouchMonitor {
      * Destroys any active {@link InputSession}.
      */
     private void stopMonitoring(boolean force) {
-        mExclusionRect = null;
+        mExclusionRect = new Rect();
         if (bouncerAreaExclusion()) {
             mBackgroundExecutor.execute(() -> {
                 try {
                     if (mGestureExclusionListener != null) {
+                        mLogger.i("Unregistering system gesture exclusion listener");
                         mWindowManagerService.unregisterSystemGestureExclusionListener(
                                 mGestureExclusionListener, mDisplayId);
                         mGestureExclusionListener = null;
                     }
                 } catch (RemoteException e) {
                     // Handle the exception
-                    Log.e(TAG, "unregisterSystemGestureExclusionListener: failed", e);
+                    mLogger.e("unregisterSystemGestureExclusionListener: failed", e);
                 }
             });
         }
@@ -543,6 +560,7 @@ public class TouchMonitor {
     private InputSession mCurrentInputSession;
     private final int mDisplayId;
     private final IWindowManager mWindowManagerService;
+    private final String mLoggingName;
 
     private Rect mMaxBounds;
 
@@ -589,7 +607,8 @@ public class TouchMonitor {
         mDisplayHelper = displayHelper;
         mWindowManagerService = windowManagerService;
         mConfigurationInteractor = configurationInteractor;
-        mLogger = new Logger(logBuffer, loggingName + ":TouchMonitor");
+        mLoggingName = loggingName + ":TouchMonitor[" + sNextInstanceId++ + "]";
+        mLogger = new Logger(logBuffer, mLoggingName);
     }
 
     /**
@@ -614,7 +633,8 @@ public class TouchMonitor {
      */
     public void destroy() {
         if (!mInitialized) {
-            throw new IllegalStateException("TouchMonitor not initialized");
+            // In the case that we've already been destroyed, this is a no-op
+            return;
         }
 
         stopMonitoring(true);

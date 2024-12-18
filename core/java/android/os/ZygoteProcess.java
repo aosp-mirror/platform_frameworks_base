@@ -73,6 +73,9 @@ public class ZygoteProcess {
 
     private static final int ZYGOTE_CONNECT_TIMEOUT_MS = 60000;
 
+    // How long we wait for an AppZygote to complete pre-loading; this is a pretty conservative
+    // value that we can probably decrease over time, but we want to be careful here.
+    public static volatile int sAppZygotePreloadTimeoutMs = 15000;
     /**
      * Use a relatively short delay, because for app zygote, this is in the critical path of
      * service launch.
@@ -1100,31 +1103,52 @@ public class ZygoteProcess {
     }
 
     /**
+     * Updates the timeout used when preloading code in the app-zygote
+     *
+     * @param timeoutMs timeout in milliseconds
+     */
+    public static void setAppZygotePreloadTimeout(int timeoutMs) {
+        Slog.i(LOG_TAG, "Changing app-zygote preload timeout to " + timeoutMs + " ms.");
+
+        sAppZygotePreloadTimeoutMs = timeoutMs;
+    }
+
+    /**
      * Instructs the zygote to pre-load the application code for the given Application.
      * Only the app zygote supports this function.
      */
     public boolean preloadApp(ApplicationInfo appInfo, String abi)
             throws ZygoteStartFailedEx, IOException {
         synchronized (mLock) {
+            int ret;
             ZygoteState state = openZygoteSocketIfNeeded(abi);
-            state.mZygoteOutputWriter.write("2");
-            state.mZygoteOutputWriter.newLine();
+            int previousSocketTimeout = state.mZygoteSessionSocket.getSoTimeout();
 
-            state.mZygoteOutputWriter.write("--preload-app");
-            state.mZygoteOutputWriter.newLine();
+            try {
+                state.mZygoteSessionSocket.setSoTimeout(sAppZygotePreloadTimeoutMs);
 
-            // Zygote args needs to be strings, so in order to pass ApplicationInfo,
-            // write it to a Parcel, and base64 the raw Parcel bytes to the other side.
-            Parcel parcel = Parcel.obtain();
-            appInfo.writeToParcel(parcel, 0 /* flags */);
-            String encodedParcelData = Base64.getEncoder().encodeToString(parcel.marshall());
-            parcel.recycle();
-            state.mZygoteOutputWriter.write(encodedParcelData);
-            state.mZygoteOutputWriter.newLine();
+                state.mZygoteOutputWriter.write("2");
+                state.mZygoteOutputWriter.newLine();
 
-            state.mZygoteOutputWriter.flush();
+                state.mZygoteOutputWriter.write("--preload-app");
+                state.mZygoteOutputWriter.newLine();
 
-            return (state.mZygoteInputStream.readInt() == 0);
+                // Zygote args needs to be strings, so in order to pass ApplicationInfo,
+                // write it to a Parcel, and base64 the raw Parcel bytes to the other side.
+                Parcel parcel = Parcel.obtain();
+                appInfo.writeToParcel(parcel, 0 /* flags */);
+                String encodedParcelData = Base64.getEncoder().encodeToString(parcel.marshall());
+                parcel.recycle();
+                state.mZygoteOutputWriter.write(encodedParcelData);
+                state.mZygoteOutputWriter.newLine();
+
+                state.mZygoteOutputWriter.flush();
+
+                ret = state.mZygoteInputStream.readInt();
+            } finally {
+                state.mZygoteSessionSocket.setSoTimeout(previousSocketTimeout);
+            }
+            return ret == 0;
         }
     }
 

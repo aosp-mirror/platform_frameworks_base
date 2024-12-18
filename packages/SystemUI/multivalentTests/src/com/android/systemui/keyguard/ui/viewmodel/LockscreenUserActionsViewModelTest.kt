@@ -18,34 +18,35 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys
+import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.pow
@@ -66,12 +67,13 @@ import platform.test.runner.parameterized.Parameters
 class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
     companion object {
-        private const val parameterCount = 6
+        private const val parameterCount = 7
 
         @Parameters(
             name =
                 "canSwipeToEnter={0}, downWithTwoPointers={1}, downFromEdge={2}," +
-                    " isSingleShade={3}, isCommunalAvailable={4}, isShadeTouchable={5}"
+                    " isSingleShade={3}, isCommunalAvailable={4}, isShadeTouchable={5}," +
+                    " isOccluded={6}"
         )
         @JvmStatic
         fun combinations() = buildList {
@@ -84,6 +86,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                             /* isSingleShade= */ combination and 8 != 0,
                             /* isCommunalAvailable= */ combination and 16 != 0,
                             /* isShadeTouchable= */ combination and 32 != 0,
+                            /* isOccluded= */ combination and 64 != 0,
                         )
                         .also { check(it.size == parameterCount) }
                 )
@@ -111,12 +114,14 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
 
         private fun expectedDownDestination(
             downFromEdge: Boolean,
-            isSingleShade: Boolean,
+            isNarrowScreen: Boolean,
             isShadeTouchable: Boolean,
+            isOccluded: Boolean,
         ): SceneKey? {
             return when {
                 !isShadeTouchable -> null
-                downFromEdge && isSingleShade -> Scenes.QuickSettings
+                downFromEdge && isNarrowScreen && !isOccluded -> Scenes.QuickSettings
+                downFromEdge && isNarrowScreen && isOccluded -> null
                 else -> Scenes.Shade
             }
         }
@@ -143,7 +148,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
             }
         }
 
-        private fun expectedLeftDestination(
+        private fun expectedStartDestination(
             isCommunalAvailable: Boolean,
             isShadeTouchable: Boolean,
         ): SceneKey? {
@@ -162,15 +167,17 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
     @JvmField @Parameter(0) var canSwipeToEnter: Boolean = false
     @JvmField @Parameter(1) var downWithTwoPointers: Boolean = false
     @JvmField @Parameter(2) var downFromEdge: Boolean = false
-    @JvmField @Parameter(3) var isSingleShade: Boolean = true
+    @JvmField @Parameter(3) var isNarrowScreen: Boolean = true
     @JvmField @Parameter(4) var isCommunalAvailable: Boolean = false
     @JvmField @Parameter(5) var isShadeTouchable: Boolean = false
+    @JvmField @Parameter(6) var isOccluded: Boolean = false
 
-    private val underTest by lazy { createLockscreenSceneViewModel() }
+    private val underTest by lazy { kosmos.lockscreenUserActionsViewModel }
 
     @Test
     @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
-    fun userActions() =
+    @DisableFlags(Flags.FLAG_DUAL_SHADE)
+    fun userActions_fullscreenShade() =
         testScope.runTest {
             underTest.activateIn(this)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
@@ -182,7 +189,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                 }
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
-            kosmos.shadeRepository.setShadeLayoutWide(!isSingleShade)
+            kosmos.shadeRepository.setShadeLayoutWide(!isNarrowScreen)
             kosmos.setCommunalAvailable(isCommunalAvailable)
             kosmos.fakePowerRepository.updateWakefulness(
                 rawState =
@@ -190,14 +197,14 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                         WakefulnessState.AWAKE
                     } else {
                         WakefulnessState.ASLEEP
-                    },
+                    }
             )
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = isOccluded)
 
             val userActions by collectLastValue(underTest.actions)
             val downDestination =
                 userActions?.get(
-                    Swipe(
-                        SwipeDirection.Down,
+                    Swipe.Down(
                         fromSource = Edge.Top.takeIf { downFromEdge },
                         pointerCount = if (downWithTwoPointers) 2 else 1,
                     )
@@ -212,15 +219,16 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     expectedDownDestination(
                         downFromEdge = downFromEdge,
-                        isSingleShade = isSingleShade,
+                        isNarrowScreen = isNarrowScreen,
                         isShadeTouchable = isShadeTouchable,
+                        isOccluded = isOccluded,
                     )
                 )
 
             assertThat(downDestination?.transitionKey)
                 .isEqualTo(
                     expectedDownTransitionKey(
-                        isSingleShade = isSingleShade,
+                        isSingleShade = isNarrowScreen,
                         isShadeTouchable = isShadeTouchable,
                     )
                 )
@@ -241,28 +249,114 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            val leftScene by
+            val startScene by
                 collectLastValue(
-                    (userActions?.get(Swipe.Left) as? UserActionResult.ChangeScene)?.toScene?.let {
-                        scene ->
-                        kosmos.sceneInteractor.resolveSceneFamily(scene)
-                    } ?: flowOf(null)
+                    (userActions?.get(Swipe.Start) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
+                        ?: flowOf(null)
                 )
 
-            assertThat(leftScene)
+            assertThat(startScene)
                 .isEqualTo(
-                    expectedLeftDestination(
+                    expectedStartDestination(
                         isCommunalAvailable = isCommunalAvailable,
                         isShadeTouchable = isShadeTouchable,
                     )
                 )
         }
 
-    private fun createLockscreenSceneViewModel(): LockscreenUserActionsViewModel {
-        return LockscreenUserActionsViewModel(
-            deviceEntryInteractor = kosmos.deviceEntryInteractor,
-            communalInteractor = kosmos.communalInteractor,
-            shadeInteractor = kosmos.shadeInteractor,
-        )
-    }
+    @Test
+    @EnableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_DUAL_SHADE)
+    fun userActions_dualShade() =
+        testScope.runTest {
+            underTest.activateIn(this)
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                if (canSwipeToEnter) {
+                    AuthenticationMethodModel.None
+                } else {
+                    AuthenticationMethodModel.Pin
+                }
+            )
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
+            kosmos.shadeRepository.setShadeLayoutWide(!isNarrowScreen)
+            kosmos.setCommunalAvailable(isCommunalAvailable)
+            kosmos.fakePowerRepository.updateWakefulness(
+                rawState =
+                    if (isShadeTouchable) {
+                        WakefulnessState.AWAKE
+                    } else {
+                        WakefulnessState.ASLEEP
+                    }
+            )
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(onTop = isOccluded)
+
+            val userActions by collectLastValue(underTest.actions)
+
+            val downDestination =
+                userActions?.get(
+                    Swipe.Down(
+                        fromSource = Edge.Top.takeIf { downFromEdge },
+                        pointerCount = if (downWithTwoPointers) 2 else 1,
+                    )
+                )
+
+            if (downFromEdge || downWithTwoPointers || !isShadeTouchable) {
+                // Top edge is not applicable in dual shade, as well as two-finger swipe.
+                assertThat(downDestination).isNull()
+            } else {
+                assertThat(downDestination).isEqualTo(ShowOverlay(Overlays.NotificationsShade))
+                assertThat(downDestination?.transitionKey).isNull()
+            }
+
+            val downFromTopRightDestination =
+                userActions?.get(
+                    Swipe.Down(
+                        fromSource = SceneContainerEdge.TopRight,
+                        pointerCount = if (downWithTwoPointers) 2 else 1,
+                    )
+                )
+            when {
+                !isShadeTouchable -> assertThat(downFromTopRightDestination).isNull()
+                downWithTwoPointers -> assertThat(downFromTopRightDestination).isNull()
+                else -> {
+                    assertThat(downFromTopRightDestination)
+                        .isEqualTo(ShowOverlay(Overlays.QuickSettingsShade))
+                    assertThat(downFromTopRightDestination?.transitionKey).isNull()
+                }
+            }
+
+            val upScene by
+                collectLastValue(
+                    (userActions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene?.let {
+                        scene ->
+                        kosmos.sceneInteractor.resolveSceneFamily(scene)
+                    } ?: flowOf(null)
+                )
+
+            assertThat(upScene)
+                .isEqualTo(
+                    expectedUpDestination(
+                        canSwipeToEnter = canSwipeToEnter,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
+
+            val startScene by
+                collectLastValue(
+                    (userActions?.get(Swipe.Start) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
+                        ?: flowOf(null)
+                )
+
+            assertThat(startScene)
+                .isEqualTo(
+                    expectedStartDestination(
+                        isCommunalAvailable = isCommunalAvailable,
+                        isShadeTouchable = isShadeTouchable,
+                    )
+                )
+        }
 }

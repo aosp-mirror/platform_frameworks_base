@@ -25,7 +25,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -83,6 +83,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -860,10 +861,10 @@ public class ViewRootImplTest {
             assertEquals(mViewRootImpl.getFrameRateCompatibility(),
                     FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             if (toolkitFrameRateVelocityMappingReadOnly()) {
                 assertEquals(24, mViewRootImpl.getPreferredFrameRate(), 0.1);
-                assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                assertEquals(FRAME_RATE_COMPATIBILITY_AT_LEAST,
                         mViewRootImpl.getFrameRateCompatibility());
                 assertFalse(mViewRootImpl.isFrameRateConflicted());
             } else {
@@ -887,10 +888,10 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             if (toolkitFrameRateVelocityMappingReadOnly()) {
                 assertEquals(60, mViewRootImpl.getPreferredFrameRate(), 0.1);
-                assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                assertEquals(FRAME_RATE_COMPATIBILITY_AT_LEAST,
                         mViewRootImpl.getFrameRateCompatibility());
             } else {
                 assertEquals(FRAME_RATE_CATEGORY_HIGH,
@@ -903,7 +904,7 @@ public class ViewRootImplTest {
                     mViewRootImpl.getFrameRateCompatibility());
             // Should be false since 60 is a divisor of 120.
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             assertEquals(120, mViewRootImpl.getPreferredFrameRate(), 0.1);
             // compatibility should be remained the same (FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
             // since the frame rate 60 is smaller than 120.
@@ -1599,7 +1600,6 @@ public class ViewRootImplTest {
                 nativeCreateASurfaceControlFromSurface(mViewRootImpl.mSurface));
     }
 
-    @EnableFlags(Flags.FLAG_INSETS_CONTROL_SEQ)
     @Test
     public void testHandleInsetsControlChanged() {
         mView = new View(sContext);
@@ -1628,6 +1628,42 @@ public class ViewRootImplTest {
             assertEquals(state1, controller.getLastDispatchedState());
             assertNotEquals(state0, controller.getLastDispatchedState());
         });
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_FOCUS_RECT_MIN_SIZE)
+    public void testAdjustAccessibilityFocusedBounds_largeEnoughBoundsAreUnchanged() {
+        final int strokeWidth = sContext.getSystemService(AccessibilityManager.class)
+                .getAccessibilityFocusStrokeWidth();
+        final int left, top, width, height;
+        left = top = 100;
+        width = height = strokeWidth * 2;
+        final Rect bounds = new Rect(left, top, left + width, top + height);
+        final Rect originalBounds = new Rect(bounds);
+
+        mViewRootImpl.adjustAccessibilityFocusedRectBoundsIfNeeded(bounds);
+
+        assertThat(bounds).isEqualTo(originalBounds);
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_FOCUS_RECT_MIN_SIZE)
+    public void testAdjustAccessibilityFocusedBounds_smallBoundsAreExpanded() {
+        final int strokeWidth = sContext.getSystemService(AccessibilityManager.class)
+                .getAccessibilityFocusStrokeWidth();
+        final int left, top, width, height;
+        left = top = 100;
+        width = height = strokeWidth;
+        final Rect bounds = new Rect(left, top, left + width, top + height);
+        final Rect originalBounds = new Rect(bounds);
+
+        mViewRootImpl.adjustAccessibilityFocusedRectBoundsIfNeeded(bounds);
+
+        // Bounds should be centered on the same point, but expanded to at least strokeWidth * 2
+        assertThat(bounds.centerX()).isEqualTo(originalBounds.centerX());
+        assertThat(bounds.centerY()).isEqualTo(originalBounds.centerY());
+        assertThat(bounds.width()).isAtLeast(strokeWidth * 2);
+        assertThat(bounds.height()).isAtLeast(strokeWidth * 2);
     }
 
     private boolean setForceDarkSysProp(boolean isForceDarkEnabled) {

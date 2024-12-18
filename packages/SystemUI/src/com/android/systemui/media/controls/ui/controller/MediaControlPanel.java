@@ -21,6 +21,7 @@ import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 import static com.android.settingslib.flags.Flags.legacyLeAudioSharing;
 import static com.android.systemui.Flags.communalHub;
 import static com.android.systemui.Flags.mediaLockscreenLaunchAnimation;
+import static com.android.systemui.media.controls.domain.pipeline.MediaActionsKt.getNotificationActions;
 import static com.android.systemui.media.controls.shared.model.SmartspaceMediaDataKt.NUM_REQUIRED_RECOMMENDATIONS;
 
 import android.animation.Animator;
@@ -544,6 +545,7 @@ public class MediaControlPanel {
 
     /** Bind this player view based on the data given. */
     public void bindPlayer(@NonNull MediaData data, String key) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mMediaViewHolder == null) {
             return;
         }
@@ -637,10 +639,7 @@ public class MediaControlPanel {
         // to something which might impact the measurement
         // State refresh interferes with the translation animation, only run it if it's not running.
         if (!mMetadataAnimationHandler.isRunning()) {
-            // Don't refresh in scene framework, because it will calculate with invalid layout sizes
-            if (!SceneContainerFlag.isEnabled()) {
-                mMediaViewController.refreshState();
-            }
+            mMediaViewController.refreshState();
         }
 
         if (shouldPlayTurbulenceNoise()) {
@@ -906,11 +905,6 @@ public class MediaControlPanel {
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
-        if (SceneContainerFlag.isEnabled() && (width <= 0 || height <= 0)) {
-            // TODO(b/312714128): ensure we have a valid size before setting background
-            width = mMediaViewController.getWidthInSceneContainerPx();
-            height = mMediaViewController.getHeightInSceneContainerPx();
-        }
 
         final int finalWidth = width;
         final int finalHeight = height;
@@ -1170,7 +1164,7 @@ public class MediaControlPanel {
 
             // Set all the generic buttons
             List<Integer> actionsWhenCollapsed = data.getActionsToShowInCompact();
-            List<MediaAction> actions = data.getActions();
+            List<MediaAction> actions = getNotificationActions(data.getActions(), mActivityStarter);
             int i = 0;
             for (; i < actions.size() && i < genericButtons.size(); i++) {
                 boolean showInCompact = actionsWhenCollapsed.contains(i);
@@ -1375,8 +1369,9 @@ public class MediaControlPanel {
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
         int notVisibleValue;
-        if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
-                || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
+        if (!shouldBeHiddenDueToScrubbing
+                && ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
+                    || (buttonId == R.id.actionNext && semanticActions.getReserveNext()))) {
             notVisibleValue = ConstraintSet.INVISIBLE;
             mMediaViewHolder.getAction(buttonId).setFocusable(visible);
             mMediaViewHolder.getAction(buttonId).setClickable(visible);
@@ -1414,7 +1409,9 @@ public class MediaControlPanel {
         // The scrubbing time views replace the SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING action views,
         // so we should only allow scrubbing times to be shown if those action views are present.
         return semanticActions != null && SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch(
-                id -> semanticActions.getActionById(id) != null
+                id -> (semanticActions.getActionById(id) != null
+                        || ((id == R.id.actionPrev && semanticActions.getReservePrev())
+                            || (id == R.id.actionNext && semanticActions.getReserveNext())))
         );
     }
 

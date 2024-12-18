@@ -134,7 +134,7 @@ public class BatteryStatsUserLifecycleTests {
 
     private int getNumberOfUidsInBatteryStats() throws Exception {
         ArraySet<Integer> uids = new ArraySet<>();
-        final String dumpsys = executeShellCommand("dumpsys batterystats --checkin");
+        final String dumpsys = executeShellCommand("dumpsys batterystats -c");
         for (String line : dumpsys.split("\n")) {
             final String[] parts = line.trim().split(",");
             if (parts.length < 5 ||

@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -36,8 +36,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class DeepArrayOpsPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private Object[] mArray;
     private Object[] mArray2;
@@ -100,7 +99,7 @@ public class DeepArrayOpsPerfTest {
     @Parameters(method = "getData")
     public void deepHashCode(int arrayLength) throws Exception {
         setUp(arrayLength);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Arrays.deepHashCode(mArray);
         }
@@ -110,7 +109,7 @@ public class DeepArrayOpsPerfTest {
     @Parameters(method = "getData")
     public void deepEquals(int arrayLength) throws Exception {
         setUp(arrayLength);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Arrays.deepEquals(mArray, mArray2);
         }

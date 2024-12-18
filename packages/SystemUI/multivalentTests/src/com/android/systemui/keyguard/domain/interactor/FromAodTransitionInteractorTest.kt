@@ -42,8 +42,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -69,7 +70,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -77,7 +77,7 @@ import org.mockito.Mockito.spy
 class FromAodTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
 
     private val testScope = kosmos.testScope
@@ -89,7 +89,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @Before
     fun setup() {
         powerInteractor = kosmos.powerInteractor
-        transitionRepository = kosmos.fakeKeyguardTransitionRepository
+        transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
         underTest = kosmos.fromAodTransitionInteractor
 
         underTest.start()
@@ -101,7 +101,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.AOD,
-                testScope
+                testScope,
             )
             kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
             reset(transitionRepository)
@@ -117,10 +117,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
 
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -133,10 +130,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
 
             // Waking with a SHOW_WHEN_LOCKED activity on top should transition to OCCLUDED.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.AOD,
-                    to = KeyguardState.OCCLUDED,
-                )
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.OCCLUDED)
         }
 
     @Test
@@ -363,13 +357,13 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
                         from = KeyguardState.GONE,
                         to = KeyguardState.AOD,
                         transitionState = TransitionState.STARTED,
-                        value = 0f
+                        value = 0f,
                     ),
                     TransitionStep(
                         from = KeyguardState.GONE,
                         to = KeyguardState.AOD,
                         transitionState = TransitionState.RUNNING,
-                        value = 0.1f
+                        value = 0.1f,
                     ),
                 ),
                 testScope = testScope,

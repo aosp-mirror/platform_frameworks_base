@@ -124,7 +124,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         state.value = enabled;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_invert_colors_icon_on
                 : R.drawable.qs_invert_colors_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();

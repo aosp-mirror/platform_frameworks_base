@@ -22,7 +22,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
@@ -138,7 +138,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
 
         mKeyboardShortcutsReceiver.onReceive(mContext, SHOW_INTENT);
 
-        verifyZeroInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
 
         mKeyboardShortcutsReceiver.onReceive(mContext, SHOW_INTENT);
 
-        verifyZeroInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
 
         mKeyboardShortcutsReceiver.onReceive(mContext, DISMISS_INTENT);
 
-        verifyZeroInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
     }
 
     @Test
@@ -171,6 +171,6 @@ public class KeyboardShortcutsReceiverTest extends SysuiTestCase {
 
         mKeyboardShortcutsReceiver.onReceive(mContext, DISMISS_INTENT);
 
-        verifyZeroInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
+        verifyNoMoreInteractions(mKeyboardShortcuts, mKeyboardShortcutListSearch);
     }
 }

@@ -1334,6 +1334,9 @@ public abstract class Window {
      * <p>The requested color mode is not guaranteed to be honored. Please refer to
      * {@link #getColorMode()} for more information.</p>
      *
+     * <p>Note: This does not impact SurfaceViews or SurfaceControls, as those have their own
+     * independent color mode and HDR parameters.</p>
+     *
      * @see #getColorMode()
      * @see Display#isWideColorGamut()
      * @see Configuration#isScreenWideColorGamut()
@@ -1345,7 +1348,7 @@ public abstract class Window {
     }
 
     /**
-     * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+     * <p>Sets the desired amount of HDR headroom to be used when rendering as a ratio of
      * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
      * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
      *
@@ -1360,6 +1363,9 @@ public abstract class Window {
      * of factors such as ambient conditions, display capabilities, or bit-depth limitations.
      * See {@link Display#getHdrSdrRatio()} for more information as well as how to query the
      * current value.</p>
+     *
+     * <p>Note: This does not impact SurfaceViews or SurfaceControls, as those have their own
+     * independent desired HDR headroom and HDR capabilities.</p>
      *
      * @param desiredHeadroom The amount of HDR headroom that is desired. Must be >= 1.0 (no HDR)
      *                        and <= 10,000.0. Passing 0.0 will reset to the default, automatically

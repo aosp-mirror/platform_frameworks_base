@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.helper.widget.Layer
@@ -25,10 +26,12 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
-import com.android.systemui.res.R
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
+import com.android.systemui.plugins.clocks.DefaultClockFaceLayout.Companion.getSmallClockTopPadding
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
@@ -45,21 +48,22 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardClockViewModel
 @Inject
 constructor(
+    val context: Context,
     keyguardClockInteractor: KeyguardClockInteractor,
     @Application private val applicationScope: CoroutineScope,
     aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     @get:VisibleForTesting val shadeInteractor: ShadeInteractor,
     private val systemBarUtils: SystemBarUtilsProxy,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
+    // TODO: b/374267505 - Use ShadeDisplayAware resources here.
     @Main private val resources: Resources,
 ) {
     var burnInLayer: Layer? = null
 
     val clockSize: StateFlow<ClockSize> =
-        combine(
-                keyguardClockInteractor.selectedClockSize,
-                keyguardClockInteractor.clockSize,
-            ) { selectedSize, clockSize ->
+        combine(keyguardClockInteractor.selectedClockSize, keyguardClockInteractor.clockSize) {
+                selectedSize,
+                clockSize ->
                 if (selectedSize == ClockSizeSetting.SMALL) ClockSize.SMALL else clockSize
             }
             .stateIn(
@@ -80,10 +84,7 @@ constructor(
     val currentClock = keyguardClockInteractor.currentClock
 
     val hasCustomWeatherDataDisplay =
-        combine(
-                isLargeClockVisible,
-                currentClock,
-            ) { isLargeClock, currentClock ->
+        combine(isLargeClockVisible, currentClock) { isLargeClock, currentClock ->
                 currentClock?.let { clock ->
                     val face = if (isLargeClock) clock.largeClock else clock.smallClock
                     face.config.hasCustomWeatherDataDisplay
@@ -93,14 +94,14 @@ constructor(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
-                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false
+                    currentClock.value?.largeClock?.config?.hasCustomWeatherDataDisplay ?: false,
             )
 
     val clockShouldBeCentered: StateFlow<Boolean> =
         keyguardClockInteractor.clockShouldBeCentered.stateIn(
             scope = applicationScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = false
+            initialValue = false,
         )
 
     // To translate elements below smartspace in weather clock to avoid overlapping between date
@@ -111,7 +112,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     val currentClockLayout: StateFlow<ClockLayout> =
@@ -145,7 +146,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = ClockLayout.SMALL_CLOCK
+                initialValue = ClockLayout.SMALL_CLOCK,
             )
 
     val hasCustomPositionUpdatedAnimation: StateFlow<Boolean> =
@@ -156,20 +157,19 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     /** Calculates the top margin for the small clock. */
-    fun getSmallClockTopMargin(): Int {
-        val statusBarHeight = systemBarUtils.getStatusBarHeaderHeightKeyguard()
-        return if (shadeInteractor.isShadeLayoutWide.value) {
-            resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin) -
-                if (ComposeLockscreen.isEnabled) statusBarHeight else 0
-        } else {
-            resources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                if (!ComposeLockscreen.isEnabled) statusBarHeight else 0
-        }
-    }
+    fun getSmallClockTopMargin(): Int =
+        getSmallClockTopPadding(
+            ClockPreviewConfig(
+                context,
+                shadeInteractor.isShadeLayoutWide.value,
+                SceneContainerFlag.isEnabled,
+            ),
+            systemBarUtils.getStatusBarHeaderHeightKeyguard(),
+        )
 
     val smallClockTopMargin =
         combine(
@@ -183,11 +183,14 @@ constructor(
     fun getLargeClockTopMargin(): Int {
         return systemBarUtils.getStatusBarHeight() +
             resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
-            resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+            resources.getDimensionPixelSize(customR.dimen.keyguard_smartspace_top_offset)
     }
 
     val largeClockTopMargin: Flow<Int> =
         configurationInteractor.onAnyConfigurationChange.map { getLargeClockTopMargin() }
+
+    val largeClockTextSize: Flow<Int> =
+        configurationInteractor.dimensionPixelSize(customR.dimen.large_clock_text_size)
 
     enum class ClockLayout {
         LARGE_CLOCK,

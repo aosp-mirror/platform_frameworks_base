@@ -32,6 +32,17 @@ import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_DEVICE_LOCK;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_ERROR;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_FOREGROUND_SERVICE_CHANGE;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_HOST_APP_STOP;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_NEW_MEDIA_ROUTE;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_NEW_PROJECTION;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_QS_TILE;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_STATUS_BAR_CHIP_STOP;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_TASK_APP_CLOSE;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_APP_TASK;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_DISPLAY;
 import static com.android.internal.util.FrameworkStatsLog.MEDIA_PROJECTION_TARGET_CHANGED__TARGET_TYPE__TARGET_TYPE_UNKNOWN;
@@ -46,6 +57,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.media.projection.StopReason;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -81,6 +93,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     private static final int TEST_WINDOWING_MODE = 987;
     private static final int TEST_CONTENT_TO_RECORD = 654;
+    private static final int TEST_STOP_SOURCE = 321;
 
     @Mock private FrameworkStatsLogWrapper mFrameworkStatsLogWrapper;
     @Mock private MediaProjectionSessionIdGenerator mSessionIdGenerator;
@@ -136,6 +149,14 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
+    public void logInitiated_logsUnknownStopSource() {
+        mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
+
+        verifyStopSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
+    @Test
     public void logInitiated_noPreviousSession_logsUnknownTimeSinceLastActive() {
         when(mTimestampStore.timeSinceLastActiveSession()).thenReturn(null);
 
@@ -177,7 +198,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     @Test
     public void logStopped_logsStateChangedAtomId() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyStateChangedAtomIdLogged();
     }
@@ -187,42 +208,49 @@ public class MediaProjectionMetricsLoggerTest {
         int currentSessionId = 987;
         when(mSessionIdGenerator.getCurrentSessionId()).thenReturn(currentSessionId);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifySessionIdLogged(currentSessionId);
     }
 
     @Test
     public void logStopped_logsStateStopped() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyStateLogged(MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
     }
 
     @Test
     public void logStopped_logsHostUid() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyStateChangedHostUidLogged(TEST_HOST_UID);
     }
 
     @Test
     public void logStopped_logsTargetUid() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyStageChangedTargetUidLogged(TEST_TARGET_UID);
     }
 
     @Test
+    public void logStopped_logsStopSource() {
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, StopReason.STOP_UNKNOWN);
+
+        verifyStopSourceLogged(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
+    @Test
     public void logStopped_logsUnknownTimeSinceLastActive() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyTimeSinceLastActiveSessionLogged(-1);
     }
 
     @Test
     public void logStopped_logsUnknownSessionCreationSource() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verifyCreationSourceLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
@@ -230,7 +258,7 @@ public class MediaProjectionMetricsLoggerTest {
 
     @Test
     public void logStopped_logsPreviousState() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_UNKNOWN);
 
@@ -238,7 +266,7 @@ public class MediaProjectionMetricsLoggerTest {
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_STOPPED);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE, TEST_STOP_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
     }
@@ -247,14 +275,14 @@ public class MediaProjectionMetricsLoggerTest {
     public void logStopped_capturingWasInProgress_registersActiveSessionEnded() {
         mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verify(mTimestampStore).registerActiveSessionEnded();
     }
 
     @Test
     public void logStopped_capturingWasNotInProgress_doesNotRegistersActiveSessionEnded() {
-        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID);
+        mLogger.logStopped(TEST_HOST_UID, TEST_TARGET_UID, TEST_STOP_SOURCE);
 
         verify(mTimestampStore, never()).registerActiveSessionEnded();
     }
@@ -314,6 +342,14 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
+    public void logInProgress_logsUnknownSessionStopSource() {
+        mLogger.logInProgress(TEST_HOST_UID, TEST_TARGET_UID);
+
+        verifyStopSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
+    @Test
     public void logInProgress_logsPreviousState() {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
         verifyPreviousStateLogged(
@@ -323,7 +359,7 @@ public class MediaProjectionMetricsLoggerTest {
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE, TEST_STOP_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_CAPTURING_IN_PROGRESS);
 
@@ -387,6 +423,14 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
+    public void logPermissionRequestDisplayed_logsUnknownSessionStopSource() {
+        mLogger.logPermissionRequestDisplayed(TEST_HOST_UID);
+
+        verifyStopSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
+    @Test
     public void logPermissionRequestDisplayed_logsPreviousState() {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
         verifyPreviousStateLogged(
@@ -396,7 +440,7 @@ public class MediaProjectionMetricsLoggerTest {
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE, TEST_STOP_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_PERMISSION_REQUEST_DISPLAYED);
 
@@ -460,6 +504,14 @@ public class MediaProjectionMetricsLoggerTest {
     }
 
     @Test
+    public void logAppSelectorDisplayed_logsUnknownSessionStopSource() {
+        mLogger.logAppSelectorDisplayed(TEST_HOST_UID);
+
+        verifyStopSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
+    @Test
     public void logAppSelectorDisplayed_logsPreviousState() {
         mLogger.logInitiated(TEST_HOST_UID, TEST_CREATION_SOURCE);
         verifyPreviousStateLogged(
@@ -469,7 +521,7 @@ public class MediaProjectionMetricsLoggerTest {
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_INITIATED);
 
-        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE);
+        mLogger.logStopped(TEST_HOST_UID, TEST_CREATION_SOURCE, TEST_STOP_SOURCE);
         verifyPreviousStateLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__STATE__MEDIA_PROJECTION_STATE_APP_SELECTOR_DISPLAYED);
 
@@ -533,6 +585,14 @@ public class MediaProjectionMetricsLoggerTest {
 
         verifyCreationSourceLogged(
                 MEDIA_PROJECTION_STATE_CHANGED__CREATION_SOURCE__CREATION_SOURCE_UNKNOWN);
+    }
+
+    @Test
+    public void logProjectionPermissionRequestCancelled_logsUnknownStopSource() {
+        mLogger.logProjectionPermissionRequestCancelled(TEST_HOST_UID);
+
+        verifyStopSourceLogged(
+                MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
     }
 
     @Test
@@ -614,6 +674,42 @@ public class MediaProjectionMetricsLoggerTest {
                 .isEqualTo(MEDIA_PROJECTION_TARGET_CHANGED__TARGET_WINDOWING_MODE__WINDOWING_MODE_UNKNOWN);
     }
 
+    @Test
+    public void testStopReasonToSessionStopSource() {
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_HOST_APP))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_HOST_APP_STOP);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_TARGET_REMOVED))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_TASK_APP_CLOSE);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_DEVICE_LOCKED))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_DEVICE_LOCK);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_PRIVACY_CHIP))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_STATUS_BAR_CHIP_STOP);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_QS_TILE))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_QS_TILE);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_USER_SWITCH))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_USER_SWITCH);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_FOREGROUND_SERVICE_CHANGE))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_FOREGROUND_SERVICE_CHANGE);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_NEW_PROJECTION))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_NEW_PROJECTION);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_NEW_MEDIA_ROUTE))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_NEW_MEDIA_ROUTE);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_ERROR))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_ERROR);
+
+        mExpect.that(mLogger.stopReasonToSessionStopSource(StopReason.STOP_UNKNOWN))
+                .isEqualTo(MEDIA_PROJECTION_STATE_CHANGED__STOP_SOURCE__STOP_SOURCE_UNKNOWN);
+    }
+
     private void verifyStateChangedAtomIdLogged() {
         verify(mFrameworkStatsLogWrapper)
                 .writeStateChanged(
@@ -624,7 +720,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyStateLogged(int state) {
@@ -637,7 +734,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyStateChangedHostUidLogged(int hostUid) {
@@ -650,7 +748,8 @@ public class MediaProjectionMetricsLoggerTest {
                         eq(hostUid),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyCreationSourceLogged(int creationSource) {
@@ -663,7 +762,22 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        eq(creationSource));
+                        eq(creationSource),
+                        /* stopSource= */ anyInt());
+    }
+
+    private void verifyStopSourceLogged(int stopSource) {
+        verify(mFrameworkStatsLogWrapper)
+                .writeStateChanged(
+                        /* code= */ anyInt(),
+                        /* sessionId= */ anyInt(),
+                        /* state= */ anyInt(),
+                        /* previousState= */ anyInt(),
+                        /* hostUid= */ anyInt(),
+                        /* targetUid= */ anyInt(),
+                        /* timeSinceLastActive= */ anyInt(),
+                        /* stopSource= */ anyInt(),
+                        eq(stopSource));
     }
 
     private void verifyStageChangedTargetUidLogged(int targetUid) {
@@ -676,7 +790,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         eq(targetUid),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyTimeSinceLastActiveSessionLogged(int timeSinceLastActiveSession) {
@@ -689,7 +804,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ eq(timeSinceLastActiveSession),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifySessionIdLogged(int newSessionId) {
@@ -702,7 +818,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyPreviousStateLogged(int previousState) {
@@ -715,7 +832,8 @@ public class MediaProjectionMetricsLoggerTest {
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
                         /* timeSinceLastActive= */ anyInt(),
-                        /* creationSource= */ anyInt());
+                        /* creationSource= */ anyInt(),
+                        /* stopSource= */ anyInt());
     }
 
     private void verifyTargetChangedAtomIdLogged() {
@@ -726,7 +844,12 @@ public class MediaProjectionMetricsLoggerTest {
                         /* targetType= */ anyInt(),
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
-                        /* targetWindowingMode= */ anyInt());
+                        /* targetWindowingMode= */ anyInt(),
+                        /* width= */ anyInt(),
+                        /* height= */ anyInt(),
+                        /* centerX= */ anyInt(),
+                        /* centerY= */ anyInt(),
+                        /* targetChangeType= */ anyInt());
     }
 
     private void verifyTargetTypeLogged(int targetType) {
@@ -737,7 +860,12 @@ public class MediaProjectionMetricsLoggerTest {
                         eq(targetType),
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
-                        /* targetWindowingMode= */ anyInt());
+                        /* targetWindowingMode= */ anyInt(),
+                        /* width= */ anyInt(),
+                        /* height= */ anyInt(),
+                        /* centerX= */ anyInt(),
+                        /* centerY= */ anyInt(),
+                        /* targetChangeType= */ anyInt());
     }
 
     private void verifyTargetChangedHostUidLogged(int hostUid) {
@@ -748,7 +876,12 @@ public class MediaProjectionMetricsLoggerTest {
                         /* targetType= */ anyInt(),
                         eq(hostUid),
                         /* targetUid= */ anyInt(),
-                        /* targetWindowingMode= */ anyInt());
+                        /* targetWindowingMode= */ anyInt(),
+                        /* width= */ anyInt(),
+                        /* height= */ anyInt(),
+                        /* centerX= */ anyInt(),
+                        /* centerY= */ anyInt(),
+                        /* targetChangeType= */ anyInt());
     }
 
     private void verifyTargetChangedTargetUidLogged(int targetUid) {
@@ -759,7 +892,12 @@ public class MediaProjectionMetricsLoggerTest {
                         /* targetType= */ anyInt(),
                         /* hostUid= */ anyInt(),
                         eq(targetUid),
-                        /* targetWindowingMode= */ anyInt());
+                        /* targetWindowingMode= */ anyInt(),
+                        /* width= */ anyInt(),
+                        /* height= */ anyInt(),
+                        /* centerX= */ anyInt(),
+                        /* centerY= */ anyInt(),
+                        /* targetChangeType= */ anyInt());
     }
 
     private void verifyWindowingModeLogged(int targetWindowingMode) {
@@ -770,6 +908,11 @@ public class MediaProjectionMetricsLoggerTest {
                         /* targetType= */ anyInt(),
                         /* hostUid= */ anyInt(),
                         /* targetUid= */ anyInt(),
-                        eq(targetWindowingMode));
+                        eq(targetWindowingMode),
+                        /* width= */ anyInt(),
+                        /* height= */ anyInt(),
+                        /* centerX= */ anyInt(),
+                        /* centerY= */ anyInt(),
+                        /* targetChangeType= */ anyInt());
     }
 }

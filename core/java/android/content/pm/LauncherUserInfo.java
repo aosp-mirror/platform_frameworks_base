@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.os.Bundle;
 import android.os.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,10 +32,24 @@ import android.os.UserManager;
 @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
 public final class LauncherUserInfo implements Parcelable {
 
+    /**
+     * A boolean extra indicating whether the private space entrypoint should be hidden when locked.
+     *
+     * @see #getUserConfig
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_ADD_LAUNCHER_USER_CONFIG)
+    public static final String PRIVATE_SPACE_ENTRYPOINT_HIDDEN =
+            "private_space_entrypoint_hidden";
+
     private final String mUserType;
 
     // Serial number for the user, should be same as in the {@link UserInfo} object.
     private final int mUserSerialNumber;
+
+    // Additional configs for the user, e.g., whether to hide the private space entrypoint when
+    // locked.
+    private final Bundle mUserConfig;
+
 
     /**
      * Returns type of the user as defined in {@link UserManager}. e.g.,
@@ -47,6 +62,17 @@ public final class LauncherUserInfo implements Parcelable {
     @NonNull
     public String getUserType() {
         return mUserType;
+    }
+
+    /**
+     * Returns additional configs for this launcher user
+     *
+     * @see #PRIVATE_SPACE_ENTRYPOINT_HIDDEN
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_ADD_LAUNCHER_USER_CONFIG)
+    @NonNull
+    public Bundle getUserConfig() {
+        return mUserConfig;
     }
 
     /**
@@ -63,6 +89,7 @@ public final class LauncherUserInfo implements Parcelable {
     private LauncherUserInfo(@NonNull Parcel in) {
         mUserType = in.readString16NoHelper();
         mUserSerialNumber = in.readInt();
+        mUserConfig = in.readBundle(Bundle.class.getClassLoader());
     }
 
     @Override
@@ -70,6 +97,7 @@ public final class LauncherUserInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString16NoHelper(mUserType);
         dest.writeInt(mUserSerialNumber);
+        dest.writeBundle(mUserConfig);
     }
 
     @Override
@@ -99,23 +127,36 @@ public final class LauncherUserInfo implements Parcelable {
         private final String mUserType;
 
         private final int mUserSerialNumber;
+        private final Bundle mUserConfig;
+
+
+        @FlaggedApi(android.multiuser.Flags.FLAG_ADD_LAUNCHER_USER_CONFIG)
+        public Builder(@NonNull String userType, int userSerialNumber, @NonNull Bundle config) {
+            this.mUserType = userType;
+            this.mUserSerialNumber = userSerialNumber;
+            this.mUserConfig = config;
+        }
 
         public Builder(@NonNull String userType, int userSerialNumber) {
             this.mUserType = userType;
             this.mUserSerialNumber = userSerialNumber;
+            this.mUserConfig = new Bundle();
         }
 
         /**
          * Builds the LauncherUserInfo object
          */
-        @NonNull public LauncherUserInfo build() {
-            return new LauncherUserInfo(this.mUserType, this.mUserSerialNumber);
+        @NonNull
+        public LauncherUserInfo build() {
+            return new LauncherUserInfo(this.mUserType, this.mUserSerialNumber, this.mUserConfig);
         }
 
     } // End builder
 
-    private LauncherUserInfo(@NonNull  String userType, int userSerialNumber) {
+    private LauncherUserInfo(@NonNull String userType, int userSerialNumber,
+            @NonNull Bundle config) {
         this.mUserType = userType;
         this.mUserSerialNumber = userSerialNumber;
+        this.mUserConfig = config;
     }
 }

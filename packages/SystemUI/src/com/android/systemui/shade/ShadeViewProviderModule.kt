@@ -33,8 +33,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -50,7 +50,6 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
@@ -82,14 +81,14 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesWindowRootView(
-            layoutInflater: LayoutInflater,
+            @ShadeDisplayAware layoutInflater: LayoutInflater,
             viewModelFactory: SceneContainerViewModel.Factory,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             overlaysProvider: Provider<Set<@JvmSuppressWildcards Overlay>>,
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
-            alternateBouncerDependencies: Provider<AlternateBouncerDependencies>,
+            qsSceneAdapter: Provider<QSSceneAdapter>,
         ): WindowRootView {
             return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
@@ -104,7 +103,7 @@ abstract class ShadeViewProviderModule {
                     overlays = overlaysProvider.get(),
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
-                    alternateBouncerDependencies = alternateBouncerDependencies.get(),
+                    qsSceneAdapter = qsSceneAdapter,
                 )
                 sceneWindowRootView
             } else {
@@ -119,9 +118,7 @@ abstract class ShadeViewProviderModule {
         //  {@link NotificationShadeWindowViewController} can inject this view.
         @Provides
         @SysUISingleton
-        fun providesNotificationShadeWindowView(
-            root: WindowRootView,
-        ): NotificationShadeWindowView {
+        fun providesNotificationShadeWindowView(root: WindowRootView): NotificationShadeWindowView {
             if (SceneContainerFlag.isEnabled) {
                 return root.requireViewById(R.id.legacy_window_root)
             }
@@ -133,7 +130,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesNotificationStackScrollLayout(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): NotificationStackScrollLayout {
             return notificationShadeWindowView.requireViewById(R.id.notification_stack_scroller)
         }
@@ -142,23 +139,9 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesNotificationPanelView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): NotificationPanelView {
             return notificationShadeWindowView.requireViewById(R.id.notification_panel)
-        }
-
-        /**
-         * Constructs a new, unattached [KeyguardBottomAreaView].
-         *
-         * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
-         */
-        @Provides
-        fun providesKeyguardBottomAreaView(
-            npv: NotificationPanelView,
-            layoutInflater: LayoutInflater,
-        ): KeyguardBottomAreaView {
-            return layoutInflater.inflate(R.layout.keyguard_bottom_area, npv, false)
-                as KeyguardBottomAreaView
         }
 
         @Provides
@@ -178,7 +161,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesKeyguardRootView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): KeyguardRootView {
             return notificationShadeWindowView.requireViewById(R.id.keyguard_root_view)
         }
@@ -186,7 +169,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesSharedNotificationContainer(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): SharedNotificationContainer {
             return notificationShadeWindowView.requireViewById(R.id.shared_notification_container)
         }
@@ -195,7 +178,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesAuthRippleView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): AuthRippleView? {
             return notificationShadeWindowView.requireViewById(R.id.auth_ripple)
         }
@@ -203,9 +186,7 @@ abstract class ShadeViewProviderModule {
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
         @Provides
         @SysUISingleton
-        fun providesTapAgainView(
-            notificationPanelView: NotificationPanelView,
-        ): TapAgainView {
+        fun providesTapAgainView(notificationPanelView: NotificationPanelView): TapAgainView {
             return notificationPanelView.requireViewById(R.id.shade_falsing_tap_again)
         }
 
@@ -213,7 +194,7 @@ abstract class ShadeViewProviderModule {
         @Provides
         @SysUISingleton
         fun providesNotificationsQuickSettingsContainer(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): NotificationsQuickSettingsContainer {
             return notificationShadeWindowView.requireViewById(R.id.notification_container_parent)
         }
@@ -223,7 +204,7 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         @Named(SHADE_HEADER)
         fun providesShadeHeaderView(
-            notificationShadeWindowView: NotificationShadeWindowView,
+            notificationShadeWindowView: NotificationShadeWindowView
         ): MotionLayout {
             val stub = notificationShadeWindowView.requireViewById<ViewStub>(R.id.qs_header_stub)
             val layoutId = R.layout.combined_qs_header
@@ -251,7 +232,7 @@ abstract class ShadeViewProviderModule {
         fun providesBatteryMeterViewController(
             @Named(SHADE_HEADER) batteryMeterView: BatteryMeterView,
             userTracker: UserTracker,
-            configurationController: ConfigurationController,
+            @ShadeDisplayAware configurationController: ConfigurationController,
             tunerService: TunerService,
             @Main mainHandler: Handler,
             contentResolver: ContentResolver,
@@ -275,7 +256,7 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         @Named(SHADE_HEADER)
         fun providesOngoingPrivacyChip(
-            @Named(SHADE_HEADER) header: MotionLayout,
+            @Named(SHADE_HEADER) header: MotionLayout
         ): OngoingPrivacyChip {
             return header.requireViewById(R.id.privacy_chip)
         }
@@ -284,7 +265,7 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         @Named(SHADE_HEADER)
         fun providesStatusIconContainer(
-            @Named(SHADE_HEADER) header: MotionLayout,
+            @Named(SHADE_HEADER) header: MotionLayout
         ): StatusIconContainer {
             return header.requireViewById(R.id.statusIcons)
         }

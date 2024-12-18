@@ -16,15 +16,16 @@
 
 package com.android.wm.shell.scenarios
 
-import android.platform.test.annotations.Postsubmit
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
+import com.android.server.wm.flicker.helpers.DesktopModeAppHelper.AppProperty
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
@@ -32,16 +33,12 @@ import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-@Postsubmit
-open class ResizeAppWithCornerResize
-@JvmOverloads
-constructor(
+@Ignore("Test Base Class")
+abstract class ResizeAppWithCornerResize(
     val rotation: Rotation = Rotation.ROTATION_0,
     val horizontalChange: Int = 200,
     val verticalChange: Int = -200,
@@ -68,8 +65,9 @@ constructor(
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
+        ChangeDisplayOrientationRule.setRotation(rotation)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test
@@ -86,12 +84,5 @@ constructor(
     @After
     fun teardown() {
         testApp.exit(wmHelper)
-    }
-
-    companion object {
-        enum class AppProperty {
-            STANDARD,
-            NON_RESIZABLE
-        }
     }
 }

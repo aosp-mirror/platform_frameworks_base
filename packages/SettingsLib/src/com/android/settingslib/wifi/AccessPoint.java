@@ -21,6 +21,7 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.NETWORK_
 
 import android.annotation.IntDef;
 import android.annotation.MainThread;
+import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -1643,7 +1644,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         CharSequence appLabel = "";
         ApplicationInfo appInfo = null;
         try {
-            int userId = UserHandle.getUserId(UserHandle.USER_CURRENT);
+            int userId = ActivityManager.getCurrentUser();
             appInfo = packageManager.getApplicationInfoAsUser(packageName, 0 /* flags */, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Failed to get app info", e);

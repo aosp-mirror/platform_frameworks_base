@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone.ui;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
@@ -29,35 +28,34 @@ import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
 
-import javax.inject.Inject;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
-/**
- * Version of {@link IconManager} that observes state from the DarkIconDispatcher.
- */
+/** Version of {@link IconManager} that observes state from the {@link DarkIconDispatcher}. */
 public class DarkIconManager extends IconManager {
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final int mIconHorizontalMargin;
 
+    @AssistedInject
     public DarkIconManager(
-            LinearLayout linearLayout,
-            StatusBarLocation location,
+            @Assisted LinearLayout linearLayout,
+            @Assisted StatusBarLocation location,
             WifiUiAdapter wifiUiAdapter,
             MobileUiAdapter mobileUiAdapter,
             MobileContextProvider mobileContextProvider,
-            DarkIconDispatcher darkIconDispatcher) {
-        super(linearLayout,
-                location,
-                wifiUiAdapter,
-                mobileUiAdapter,
-                mobileContextProvider);
-        mIconHorizontalMargin = mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.res.R.dimen.status_bar_icon_horizontal_margin);
+            @Assisted DarkIconDispatcher darkIconDispatcher) {
+        super(linearLayout, location, wifiUiAdapter, mobileUiAdapter, mobileContextProvider);
+        mIconHorizontalMargin =
+                mContext.getResources()
+                        .getDimensionPixelSize(
+                                com.android.systemui.res.R.dimen.status_bar_icon_horizontal_margin);
         mDarkIconDispatcher = darkIconDispatcher;
     }
 
     @Override
-    protected void onIconAdded(int index, String slot, boolean blocked,
-            StatusBarIconHolder holder) {
+    protected void onIconAdded(
+            int index, String slot, boolean blocked, StatusBarIconHolder holder) {
         StatusIconDisplayable view = addHolder(index, slot, blocked, holder);
         mDarkIconDispatcher.addDarkReceiver(view);
     }
@@ -106,34 +104,14 @@ public class DarkIconManager extends IconManager {
         super.exitDemoMode();
     }
 
-    @SysUISingleton
-    public static class Factory {
-        private final WifiUiAdapter mWifiUiAdapter;
-        private final MobileContextProvider mMobileContextProvider;
-        private final MobileUiAdapter mMobileUiAdapter;
-        private final DarkIconDispatcher mDarkIconDispatcher;
+    /** */
+    @AssistedFactory
+    public interface Factory {
 
-        @Inject
-        public Factory(
-                WifiUiAdapter wifiUiAdapter,
-                MobileContextProvider mobileContextProvider,
-                MobileUiAdapter mobileUiAdapter,
-                DarkIconDispatcher darkIconDispatcher) {
-            mWifiUiAdapter = wifiUiAdapter;
-            mMobileContextProvider = mobileContextProvider;
-            mMobileUiAdapter = mobileUiAdapter;
-            mDarkIconDispatcher = darkIconDispatcher;
-        }
-
-        /** Creates a new {@link DarkIconManager} for the given view group and location. */
-        public DarkIconManager create(LinearLayout group, StatusBarLocation location) {
-            return new DarkIconManager(
-                    group,
-                    location,
-                    mWifiUiAdapter,
-                    mMobileUiAdapter,
-                    mMobileContextProvider,
-                    mDarkIconDispatcher);
-        }
+        /** Creates a new {@link DarkIconManager}. */
+        DarkIconManager create(
+                LinearLayout group,
+                StatusBarLocation location,
+                DarkIconDispatcher darkIconDispatcher);
     }
 }

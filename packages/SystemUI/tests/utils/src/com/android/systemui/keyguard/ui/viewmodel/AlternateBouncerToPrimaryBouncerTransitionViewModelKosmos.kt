@@ -26,5 +26,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.alternateBouncerToPrimaryBouncerTransitionViewModel by Fixture {
     AlternateBouncerToPrimaryBouncerTransitionViewModel(
         animationFlow = keyguardTransitionAnimationFlow,
+        shadeDependentFlows = shadeDependentFlows,
     )
 }

@@ -17,11 +17,11 @@
 package com.android.systemui.accessibility.hearingaid;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothDevice;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -51,6 +51,8 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    private static final int TEST_LAUNCH_SOURCE_ID = 1;
+
     private final FakeExecutor mMainExecutor = new FakeExecutor(new FakeSystemClock());
     private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
     @Mock
@@ -70,7 +72,7 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        when(mDialogFactory.create(anyBoolean())).thenReturn(mDialogDelegate);
+        when(mDialogFactory.create(anyBoolean(), anyInt())).thenReturn(mDialogDelegate);
         when(mDialogDelegate.createDialog()).thenReturn(mDialog);
 
         mManager = new HearingDevicesDialogManager(
@@ -86,21 +88,22 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     public void showDialog_existHearingDevice_showPairNewDeviceFalse() {
         when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(true);
 
-        mManager.showDialog(mExpandable);
+        mManager.showDialog(mExpandable, TEST_LAUNCH_SOURCE_ID);
         mBackgroundExecutor.runAllReady();
         mMainExecutor.runAllReady();
 
-        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ false));
+        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ false),
+                eq(TEST_LAUNCH_SOURCE_ID));
     }
 
     @Test
     public void showDialog_noHearingDevice_showPairNewDeviceTrue() {
         when(mDevicesChecker.isAnyPairedHearingDevice()).thenReturn(false);
 
-        mManager.showDialog(mExpandable);
+        mManager.showDialog(mExpandable, TEST_LAUNCH_SOURCE_ID);
         mBackgroundExecutor.runAllReady();
         mMainExecutor.runAllReady();
 
-        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ true));
+        verify(mDialogFactory).create(eq(/* showPairNewDevice= */ true), eq(TEST_LAUNCH_SOURCE_ID));
     }
 }

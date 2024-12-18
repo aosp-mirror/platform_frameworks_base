@@ -61,6 +61,10 @@ class FakeZenModeRepository : ZenModeRepository {
         mutableModesFlow.value += zenModes
     }
 
+    fun addMode(mode: ZenMode) {
+        mutableModesFlow.value += mode
+    }
+
     fun addMode(id: String, @AutomaticZenRule.Type type: Int = AutomaticZenRule.TYPE_UNKNOWN,
         active: Boolean = false) {
         mutableModesFlow.value += newMode(id, type, active)
@@ -68,6 +72,10 @@ class FakeZenModeRepository : ZenModeRepository {
 
     fun removeMode(id: String) {
         mutableModesFlow.value = mutableModesFlow.value.filter { it.id != id }
+    }
+
+    fun clearModes() {
+        mutableModesFlow.value = listOf()
     }
 
     fun getMode(id: String): ZenMode? {

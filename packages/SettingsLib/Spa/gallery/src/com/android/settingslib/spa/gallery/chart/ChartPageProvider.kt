@@ -39,6 +39,7 @@ import java.text.NumberFormat
 private enum class WeekDay(val num: Int) {
     Sun(0), Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6),
 }
+
 private const val TITLE = "Sample Chart"
 
 object ChartPageProvider : SettingsPageProvider {
@@ -103,14 +104,12 @@ object ChartPageProvider : SettingsPageProvider {
         return entryList
     }
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
     }
 }
 

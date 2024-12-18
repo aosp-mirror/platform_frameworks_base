@@ -2,11 +2,13 @@ set noparent
 
 # Bug component: 78010
 
-aioana@google.com
-aroederer@google.com
-iyz@google.com
 jeffdq@google.com
 juliacr@google.com
+
+aioana@google.com
+aroederer@google.com
+asc@google.com
+iyz@google.com
 juliatuttle@google.com
 kurucz@google.com
 liuyining@google.com
@@ -15,4 +17,4 @@ matiashe@google.com
 valiiftime@google.com
 yurilin@google.com
 
-per-file MediaNotificationProcessor.java = ethibodeau@google.com, asc@google.com
+per-file MediaNotificationProcessor.java = ethibodeau@google.com

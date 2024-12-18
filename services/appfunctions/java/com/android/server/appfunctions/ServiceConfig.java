@@ -21,6 +21,9 @@ public interface ServiceConfig {
     // TODO(b/357551503): Obtain namespace from DeviceConfig.
     String NAMESPACE_APP_FUNCTIONS = "appfunctions";
 
-    /** Returns the maximum time to wait for an app function execution to be complete. */
-    long getExecuteAppFunctionTimeoutMillis();
+    /**
+     * Returns the timeout for which the system server waits for the app function service to
+     * successfully cancel the execution of an app function before forcefully unbinding the service.
+     */
+    long getExecuteAppFunctionCancellationTimeoutMillis();
 }

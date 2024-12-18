@@ -109,7 +109,7 @@ public class DisplayControl {
     /**
      * Sets the HDR conversion mode for the device.
      *
-     * Returns the system preferred Hdr output type nn case when HDR conversion mode is
+     * Returns the system preferred HDR output type in case when HDR conversion mode is
      * {@link android.hardware.display.HdrConversionMode#HDR_CONVERSION_SYSTEM}.
      * Returns Hdr::INVALID in other cases.
      * @hide

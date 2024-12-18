@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -49,8 +50,9 @@ public class AccessibilityGestureTargetsObserver extends
     }
 
     @Inject
-    public AccessibilityGestureTargetsObserver(Context context, UserTracker userTracker) {
-        super(context, userTracker, Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS);
+    public AccessibilityGestureTargetsObserver(
+            Context context, UserTracker userTracker, SecureSettings secureSettings) {
+        super(context, userTracker, secureSettings, Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS);
     }
 
     @Override

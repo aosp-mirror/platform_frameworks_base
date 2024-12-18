@@ -16,8 +16,20 @@
 
 package com.android.systemui.inputdevice.tutorial
 
+import android.content.applicationContext
+import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 import org.mockito.kotlin.mock
 
 var Kosmos.inputDeviceTutorialLogger: InputDeviceTutorialLogger by
     Kosmos.Fixture { mock<InputDeviceTutorialLogger>() }
+
+var Kosmos.tutorialSchedulerRepository by
+    Kosmos.Fixture {
+        TutorialSchedulerRepository(
+            applicationContext = applicationContext,
+            testScope.backgroundScope,
+            "KosmosTutorialSchedulerRepository"
+        )
+    }

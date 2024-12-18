@@ -15,115 +15,82 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 public class PaintChangeAdapter implements PaintChanges {
 
     @Override
-    public void setTextSize(float size) {
-
-    }
+    public void setTextSize(float size) {}
 
     @Override
-    public void setTypeFace(int fontType, int weight, boolean italic) {
-
-    }
+    public void setTypeFace(int fontType, int weight, boolean italic) {}
 
     @Override
-    public void setStrokeWidth(float width) {
-
-    }
+    public void setStrokeWidth(float width) {}
 
     @Override
-    public void setColor(int color) {
-
-    }
+    public void setColor(int color) {}
 
     @Override
-    public void setStrokeCap(int cap) {
-
-    }
+    public void setStrokeCap(int cap) {}
 
     @Override
-    public void setStyle(int style) {
-
-    }
+    public void setStyle(int style) {}
 
     @Override
-    public void setShader(int shader) {
-
-    }
+    public void setShader(int shader) {}
 
     @Override
-    public void setImageFilterQuality(int quality) {
-
-    }
+    public void setImageFilterQuality(int quality) {}
 
     @Override
-    public void setAlpha(float a) {
-
-    }
+    public void setAlpha(float a) {}
 
     @Override
-    public void setStrokeMiter(float miter) {
-
-    }
+    public void setStrokeMiter(float miter) {}
 
     @Override
-    public void setStrokeJoin(int join) {
-
-    }
+    public void setStrokeJoin(int join) {}
 
     @Override
-    public void setFilterBitmap(boolean filter) {
-
-    }
+    public void setFilterBitmap(boolean filter) {}
 
     @Override
-    public void setBlendMode(int blendmode) {
-
-    }
+    public void setBlendMode(int blendmode) {}
 
     @Override
-    public void setAntiAlias(boolean aa) {
-
-    }
+    public void setAntiAlias(boolean aa) {}
 
     @Override
-    public void clear(long mask) {
-
-    }
+    public void clear(long mask) {}
 
     @Override
-    public void setLinearGradient(int[] colorsArray,
-                                  float[] stopsArray,
-                                  float startX,
-                                  float startY,
-                                  float endX,
-                                  float endY,
-                                  int tileMode) {
-
-    }
-
-    @Override
-    public void setRadialGradient(int[] colorsArray,
-                                  float[] stopsArray,
-                                  float centerX,
-                                  float centerY,
-                                  float radius,
-                                  int tileMode) {
-
-    }
+    public void setLinearGradient(
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
+            float startX,
+            float startY,
+            float endX,
+            float endY,
+            int tileMode) {}
 
     @Override
-    public void setSweepGradient(int[] colorsArray,
-                                 float[] stopsArray,
-                                 float centerX,
-                                 float centerY) {
-
-    }
+    public void setRadialGradient(
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
+            float centerX,
+            float centerY,
+            float radius,
+            int tileMode) {}
 
     @Override
-    public void setColorFilter(int color, int mode) {
+    public void setSweepGradient(
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
+            float centerX,
+            float centerY) {}
 
-    }
-
+    @Override
+    public void setColorFilter(int color, int mode) {}
 }

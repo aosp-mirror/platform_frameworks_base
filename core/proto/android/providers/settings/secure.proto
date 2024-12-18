@@ -104,6 +104,8 @@ message SecureSettingsProto {
         optional SettingProto accessibility_single_finger_panning_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_gesture_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto display_daltonizer_saturation_level = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_key_gesture_targets = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hct_rect_prompt_status = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;
@@ -255,6 +257,12 @@ message SecureSettingsProto {
     }
     optional Display display = 100;
 
+    message DoubleTapPowerButton {
+        optional SettingProto gesture_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto gesture = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional DoubleTapPowerButton double_tap_power_button = 103;
+
     message Doze {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -401,6 +409,7 @@ message SecureSettingsProto {
     optional SettingProto long_press_timeout = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto key_press_timeout_ms = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto key_press_delay_ms = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_repeat_enabled = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message ManagedProfile {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -557,6 +566,8 @@ message SecureSettingsProto {
     // answered as RTT calls when supported by the device and carrier. Boolean
     // value.
     optional SettingProto rtt_calling_mode = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    optional SettingProto screen_off_udfps_enabled = 104 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Screensaver {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -735,5 +746,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 102;
+    // Next tag = 105;
 }

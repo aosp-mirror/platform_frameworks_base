@@ -17,6 +17,7 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.security.KeyStore2;
 import android.security.KeyStoreSecurityLevel;
 import android.security.keymaster.KeymasterDefs;
@@ -335,11 +336,11 @@ public class AndroidKeyStoreProvider extends Provider {
     }
 
     /**
-     * Loads an an AndroidKeyStoreKey from the AndroidKeyStore backend.
+     * Loads an AndroidKeyStoreKey from the AndroidKeyStore backend.
      *
      * @param keyStore The keystore2 backend.
      * @param alias The alias of the key in the Keystore database.
-     * @param namespace The a Keystore namespace. This is used by system api only to request
+     * @param namespace The Keystore namespace. This is used by system api only to request
      *         Android system specific keystore namespace, which can be configured
      *         in the device's SEPolicy. Third party apps and most system components
      *         set this parameter to -1 to indicate their application specific namespace.
@@ -351,14 +352,40 @@ public class AndroidKeyStoreProvider extends Provider {
     public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
             @NonNull KeyStore2 keyStore, @NonNull String alias, int namespace)
             throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
-        KeyDescriptor descriptor = new KeyDescriptor();
+        int descriptorNamespace;
+        int descriptorDomain;
         if (namespace == KeyProperties.NAMESPACE_APPLICATION) {
-            descriptor.nspace = KeyProperties.NAMESPACE_APPLICATION; // ignored;
-            descriptor.domain = Domain.APP;
+            descriptorNamespace = KeyProperties.NAMESPACE_APPLICATION; // ignored;
+            descriptorDomain = Domain.APP;
         } else {
-            descriptor.nspace = namespace;
-            descriptor.domain = Domain.SELINUX;
+            descriptorNamespace = namespace;
+            descriptorDomain = Domain.SELINUX;
         }
+        return loadAndroidKeyStoreKeyFromKeystore(keyStore, alias, descriptorNamespace,
+                descriptorDomain);
+    }
+
+    /**
+     * Loads an AndroidKeyStoreKey from the AndroidKeyStore backend.
+     *
+     * @param keyStore The keystore2 backend
+     * @param alias The alias of the key in the Keystore database
+     * @param namespace The Keystore namespace. This is used by system api only to request
+     *         Android system specific keystore namespace, which can be configured
+     *         in the device's SEPolicy. Third party apps and most system components
+     *         set this parameter to -1 to indicate their application specific namespace.
+     *         See <a href="https://source.android.com/security/keystore#access-control">
+     *             Keystore 2.0 access control</a>
+     * @param domain The Keystore domain
+     * @return an AndroidKeyStoreKey corresponding to the provided values for the KeyDescriptor
+     * @hide
+     */
+    public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(@NonNull KeyStore2 keyStore,
+            @Nullable String alias, long namespace, int domain)
+            throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
+        KeyDescriptor descriptor = new KeyDescriptor();
+        descriptor.nspace = namespace;
+        descriptor.domain = domain;
         descriptor.alias = alias;
         descriptor.blob = null;
 

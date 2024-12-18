@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles.impl.modes.ui
 
 import android.app.Flags
 import android.graphics.drawable.TestStubDrawable
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -60,34 +59,24 @@ class ModesTileMapperTest : SysuiTestCase() {
     @Test
     fun inactiveState() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-            )
+        val model = ModesTileModel(isActivated = false, activeModes = emptyList(), icon = icon)
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.INACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("No active modes")
     }
 
     @Test
     fun activeState_oneMode() {
         val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = true,
-                activeModes = listOf("DND"),
-                icon = icon,
-            )
+        val model = ModesTileModel(isActivated = true, activeModes = listOf("DND"), icon = icon)
 
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("DND is active")
     }
 
@@ -104,43 +93,24 @@ class ModesTileMapperTest : SysuiTestCase() {
         val state = underTest.map(config, model)
 
         assertThat(state.activationState).isEqualTo(QSTileState.ActivationState.ACTIVE)
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.secondaryLabel).isEqualTo("3 modes are active")
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_MODES_UI_ICONS)
-    fun state_withEnabledFlag_noIconResId() {
+    fun state_modelHasIconResId_includesIconResId() {
         val icon = TestStubDrawable("res123").asIcon()
         val model =
             ModesTileModel(
                 isActivated = false,
                 activeModes = emptyList(),
                 icon = icon,
-                iconResId = 123 // Should not be populated, but is ignored even if present
+                iconResId = 123,
             )
 
         val state = underTest.map(config, model)
 
-        assertThat(state.icon()).isEqualTo(icon)
-        assertThat(state.iconRes).isNull()
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_MODES_UI_ICONS)
-    fun state_withDisabledFlag_includesIconResId() {
-        val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-                iconResId = 123
-            )
-
-        val state = underTest.map(config, model)
-
-        assertThat(state.icon()).isEqualTo(icon)
+        assertThat(state.icon).isEqualTo(icon)
         assertThat(state.iconRes).isEqualTo(123)
     }
 }

@@ -357,16 +357,19 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktiveer die Verbeterde Konnektiwiteit-kenmerk."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Plaaslike terminaal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiveer terminaalprogram wat plaaslike skermtoegang bied"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-ontwikkelingomgewing"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimenteel) Laat Linux-terminale op Android loop"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"As jy deaktiveer, sal Linux se terminale data uitgevee word"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrolering"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Stel HDCP-kontrolering se gedrag"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ontfouting"</string>
     <string name="debug_app" msgid="8903350241392391766">"Kies ontfoutprogram"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Geen ontfoutprogram gestel nie"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Ontfoutingsprogram: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"Kies program"</string>
+    <string name="select_application" msgid="2543228890535466325">"Kies app"</string>
     <string name="no_application" msgid="9038334538870247690">"Niks"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Wag vir ontfouter"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Ontfoutde program wag vir ontfouter om te heg voordat dit uitgevoer word"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Ontfoute app wag vir ontfouter om te heg voordat dit uitgevoer word"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Invoer"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Skets"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardeware-versnelde lewering"</string>
@@ -425,11 +428,11 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Agtergrondproseslimiet"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Wys agtergrond-ANR\'e"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wys Program Reageer Nie-dialoog vir agtergrondprogramme"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wys App Reageer Nie-dialoog vir agtergrondapps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Wys kennisgewingkanaalwaarskuwings"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wys waarskuwing op skerm wanneer \'n program \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wys waarskuwing op skerm wanneer \'n app \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Dwing toelating op eksterne berging"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige app na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye vensters"</string>
@@ -543,7 +546,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktiewe invoermetodes"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik stelseltale"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Kon nie instellings vir <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> oopmaak nie"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die program <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie app nie begin voordat jy jou foon ontsluit het nie"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registrasiestaat"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreer"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en onthounotas"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie app toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die app op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie app geskeduleer is, nie werk nie."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"skedule, wekker, onthounota, horlosie"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Moenie Steur Nie"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Moenie Steur Nie"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Skakel aan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Skakel Moenie steur nie aan"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sopas"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Hierdie foon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Hierdie tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Hierdie rekenaar (intern)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Hierdie TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokluidspreker"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Eksterne toestel"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Gekoppelde toestel"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Hierdie foon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analoog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AANVULLENDE"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan nie op hierdie toestel speel nie"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Gradeer rekening op om oor te skakel"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan nie aflaaie hier speel nie"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Gekoppel deur ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Gekoppel deur eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV-verstek"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-uitset"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne luidsprekers"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ingeboude luidspreker"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV-oudio"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>
@@ -617,7 +621,7 @@
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Kon nie die gedeelde data uitvee nie."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Daar is geen huurkontrakte vir hierdie gedeelde data verkry nie. Wil jy dit uitvee?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Programme wat data deel"</string>
-    <string name="accessor_no_description_text" msgid="7510967452505591456">"Geen beskrywing is deur die program voorsien nie."</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Geen beskrywing is deur die app voorsien nie."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"Huurkontrak verval op <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Vee gedeelde data uit?"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Is jy seker jy wil hierdie gedeelde data uitvee?"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Gedeaktiveer"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Geaktiveer"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Jou toestel moet herselflaai om hierdie verandering toe te pas. Herselflaai nou of kanselleer."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Bedrade oorfone"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Bedrade oorfoon"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Bedrade oudio"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-oudio"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Bedrade mikrofoon"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-mikrofoon"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-mikrofoon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aan"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Af"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Diensverskaffernetwerk verander tans"</string>
@@ -728,7 +737,7 @@
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Verander uitvoer"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellingteruggebaaranimasies"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Aktiveer stelselanimasies vir voorspellingteruggebaar."</string>
-    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Hierdie instelling aktiveer stelselanimasies vir voorspellinggebaaranimasie. Dit vereis dat enableOnBackInvokedCallback per program op waar gestel word in die manifeslêer."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Hierdie instelling aktiveer stelselanimasies vir voorspellinggebaaranimasie. Dit vereis dat enableOnBackInvokedCallback per app op waar gestel word in die manifeslêer."</string>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="not_specified" msgid="5423502443185110328">"Nie gespesifiseer nie"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutrum"</string>

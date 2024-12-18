@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
+import static com.android.server.hdmi.RequestSadAction.RETRY_COUNTER_MAX;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -144,7 +145,7 @@ public class RequestSadActionTest {
     }
 
     @Test
-    public void noResponse_queryAgainOnce_emptyResult() {
+    public void noResponse_queryAgain_emptyResult() {
         RequestSadAction action = new RequestSadAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM,
                 mCallback);
         action.start();
@@ -154,13 +155,13 @@ public class RequestSadActionTest {
         HdmiCecMessage expected1 = HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
                 mTvLogicalAddress, Constants.ADDR_AUDIO_SYSTEM,
                 CODECS_TO_QUERY_1.stream().mapToInt(i -> i).toArray());
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mSupportedSads).isNotNull();
         assertThat(mSupportedSads.size()).isEqualTo(0);
@@ -507,7 +508,7 @@ public class RequestSadActionTest {
     }
 
     @Test
-    public void invalidMessageLength_queryAgainOnce() {
+    public void invalidMessageLength_queryAgain() {
         RequestSadAction action = new RequestSadAction(mHdmiCecLocalDeviceTv, ADDR_AUDIO_SYSTEM,
                 mCallback);
         action.start();
@@ -524,16 +525,13 @@ public class RequestSadActionTest {
                 0x27, 0x20, 0x0A};
         HdmiCecMessage response1 = HdmiCecMessageBuilder.buildReportShortAudioDescriptor(
                 Constants.ADDR_AUDIO_SYSTEM, mTvLogicalAddress, sadsToRespond_1);
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
-        mNativeWrapper.clearResultMessages();
-        action.processCommand(response1);
-        mTestLooper.dispatchAll();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(TIMEOUT_MS);
-        mTestLooper.dispatchAll();
+
+        for (int i = 0; i <= RETRY_COUNTER_MAX; ++i) {
+            assertThat(mNativeWrapper.getResultMessages()).contains(expected1);
+            mNativeWrapper.clearResultMessages();
+            mTestLooper.moveTimeForward(TIMEOUT_MS);
+            mTestLooper.dispatchAll();
+        }
 
         assertThat(mSupportedSads).isNotNull();
         assertThat(mSupportedSads.size()).isEqualTo(0);

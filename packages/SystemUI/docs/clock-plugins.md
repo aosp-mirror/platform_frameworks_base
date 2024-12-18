@@ -43,12 +43,6 @@ present in the source tree, although it will likely be removed in a later patch.
 SystemUI event dispatchers to the clock controllers. It maintains a set of event listeners, but
 otherwise attempts to do as little work as possible. It does maintain some state where necessary.
 
-[KeyguardClockSwitchController](../src/com/android/keyguard/KeyguardClockSwitchController.java) is
-the primary controller for the [KeyguardClockSwitch](../src/com/android/keyguard/KeyguardClockSwitch.java),
-which serves as the view parent within SystemUI. Together they ensure the correct clock (either
-large or small) is shown, handle animation between clock sizes, and control some sizing/layout
-parameters for the clocks.
-
 ### Creating a custom clock
 In order to create a custom clock, a partner must:
  - Write an implementation of ClockProviderPlugin and the subinterfaces relevant to your use-case.

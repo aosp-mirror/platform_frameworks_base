@@ -18,4 +18,5 @@ package com.android.systemui.volume.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.audioRepository by Kosmos.Fixture { FakeAudioRepository() }
+val Kosmos.fakeAudioRepository by Kosmos.Fixture { FakeAudioRepository() }
+val Kosmos.audioRepository by Kosmos.Fixture { fakeAudioRepository }

@@ -33,8 +33,6 @@ import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
-import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -65,13 +63,7 @@ public class ResourcesManagerTest {
     private static final String TEST_LIB = "com.android.frameworks.coretests.bdr_helper_app1";
 
     @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            RavenwoodRule.isOnRavenwood()
-                    ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-                    : DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private ResourcesManager mResourcesManager;
     private Map<Integer, DisplayMetrics> mDisplayMetricsMap;
@@ -119,7 +111,7 @@ public class ResourcesManagerTest {
             }
 
             @Override
-            protected DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments daj) {
+            public DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments daj) {
                 return mDisplayMetricsMap.get(displayId);
             }
         };
@@ -466,6 +458,49 @@ public class ResourcesManagerTest {
         assertNotNull(ResourcesManager.getInstance().getRegisteredResourcePaths().get(TEST_LIB));
         // Revert the ResourcesManager instance back.
         ResourcesManager.setInstance(oriResourcesManager);
+    }
+
+    @Test
+    @SmallTest
+    @DisabledOnRavenwood(blockedBy = ResourcesManager.class)
+    public void testResourceConfigurationAppliedWhenOverrideDoesNotExist() {
+        final int width = 240;
+        final int height = 360;
+        final float densityDpi = mDisplayMetricsMap.get(Display.DEFAULT_DISPLAY).densityDpi;
+        final int widthDp = (int) (width / densityDpi + 0.5f);
+        final int heightDp = (int) (height / densityDpi + 0.5f);
+
+        final int overrideWidth = 480;
+        final int overrideHeight = 720;
+        final int overrideWidthDp = (int) (overrideWidth / densityDpi + 0.5f);
+        final int overrideHeightDp = (int) (height / densityDpi + 0.5f);
+
+        // The method to be tested is overridden for other tests to provide a setup environment.
+        // Create a new one for this test only.
+        final ResourcesManager resourcesManager = new ResourcesManager();
+
+        Configuration newConfig = new Configuration();
+        newConfig.windowConfiguration.setAppBounds(0, 0, width, height);
+        newConfig.screenWidthDp = widthDp;
+        newConfig.screenHeightDp = heightDp;
+        resourcesManager.applyConfigurationToResources(newConfig, null);
+
+        assertEquals(width, resourcesManager.getDisplayMetrics(Display.DEFAULT_DISPLAY,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS).widthPixels);
+        assertEquals(height, resourcesManager.getDisplayMetrics(Display.DEFAULT_DISPLAY,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS).heightPixels);
+
+        Configuration overrideConfig = new Configuration();
+        overrideConfig.windowConfiguration.setAppBounds(0, 0, overrideWidth, overrideHeight);
+        overrideConfig.screenWidthDp = overrideWidthDp;
+        overrideConfig.screenHeightDp = overrideHeightDp;
+
+        final DisplayAdjustments daj = new DisplayAdjustments(overrideConfig);
+
+        assertEquals(overrideWidth, resourcesManager.getDisplayMetrics(
+                Display.DEFAULT_DISPLAY, daj).widthPixels);
+        assertEquals(overrideHeight, resourcesManager.getDisplayMetrics(
+                Display.DEFAULT_DISPLAY, daj).heightPixels);
     }
 
     @Test

@@ -16,12 +16,17 @@
 
 package com.android.server.wm;
 
+import android.app.ActivityOptions;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
+import android.os.Build;
 import android.os.InputConfig;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+
+import com.android.window.flags.Flags;
 
 /**
  * Creates a InputWindowHandle that catches all touches that would otherwise pass through an
@@ -35,6 +40,20 @@ class ActivityRecordInputSink {
     @ChangeId
     static final long ENABLE_TOUCH_OPAQUE_ACTIVITIES = 194480991L;
 
+    /**
+     * If the app's target SDK is 36+, pass-through touches from a cross-uid overlaying activity is
+     * blocked by default. The activity may opt in to receive pass-through touches using
+     * {@link ActivityOptions#setAllowPassThroughOnTouchOutside}, which allows the to-be-launched
+     * cross-uid overlaying activity and other activities in that app to pass through touches. The
+     * activity needs to ensure that it trusts the overlaying app and its content is not vulnerable
+     * to UI redressing attacks.
+     *
+     * @see ActivityOptions#setAllowPassThroughOnTouchOutside
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
+    static final long ENABLE_OVERLAY_TOUCH_PASS_THROUGH_OPT_IN_ENFORCEMENT = 358129114L;
+
     private final ActivityRecord mActivityRecord;
     private final boolean mIsCompatEnabled;
     private final String mName;
@@ -42,13 +61,24 @@ class ActivityRecordInputSink {
     private InputWindowHandleWrapper mInputWindowHandleWrapper;
     private SurfaceControl mSurfaceControl;
 
-    ActivityRecordInputSink(ActivityRecord activityRecord, ActivityRecord sourceRecord) {
+    ActivityRecordInputSink(ActivityRecord activityRecord, ActivityRecord sourceRecord,
+            boolean appOptInTouchPassThrough) {
         mActivityRecord = activityRecord;
         mIsCompatEnabled = CompatChanges.isChangeEnabled(ENABLE_TOUCH_OPAQUE_ACTIVITIES,
                 mActivityRecord.getUid());
         mName = Integer.toHexString(System.identityHashCode(this)) + " ActivityRecordInputSink "
                 + mActivityRecord.mActivityComponent.flattenToShortString();
-        if (sourceRecord != null) {
+
+        if (sourceRecord == null) {
+            return;
+        }
+        // If the source activity has target sdk 36+, it is required to opt in to receive
+        // pass-through touches from the overlaying activity.
+        final boolean isTouchPassThroughOptInEnforced = CompatChanges.isChangeEnabled(
+                ENABLE_OVERLAY_TOUCH_PASS_THROUGH_OPT_IN_ENFORCEMENT,
+                sourceRecord.getUid());
+        if (!Flags.touchPassThroughOptIn() || !isTouchPassThroughOptInEnforced
+                || appOptInTouchPassThrough) {
             sourceRecord.mAllowedTouchUid = mActivityRecord.getUid();
         }
     }

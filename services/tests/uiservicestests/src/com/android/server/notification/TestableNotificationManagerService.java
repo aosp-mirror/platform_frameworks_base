@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +27,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
+import com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,6 +54,17 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         public long lifetime;
     }
     public SensitiveLog lastSensitiveLog = null;
+
+    private static class ClassificationChannelLog {
+        public boolean hasPosted;
+        public boolean isAlerting;
+        public long classification;
+        public long lifetime;
+        public long eventId;
+        public long instanceId;
+        public long uid;
+    }
+    public ClassificationChannelLog  lastClassificationChannelLog = null;
 
     TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
             InstanceIdSequence notificationInstanceIdSequence) {
@@ -210,5 +224,47 @@ public class TestableNotificationManagerService extends NotificationManagerServi
 
     public interface ComponentPermissionChecker {
         int check(String permission, int uid, int owningUid, boolean exported);
+    }
+
+    @Override
+    protected void logClassificationChannelAdjustmentReceived(NotificationRecord r,
+                                                              boolean hasPosted,
+                                                              int classification) {
+
+        boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+        int instanceId = r.getSbn().getInstanceId() == null
+                ? 0 : r.getSbn().getInstanceId().getId();
+        int lifetimeMs = r.getLifespanMs(System.currentTimeMillis());
+        int uid = r.getUid();
+
+        lastClassificationChannelLog = new ClassificationChannelLog();
+        lastClassificationChannelLog.hasPosted = hasPosted;
+        lastClassificationChannelLog.isAlerting = isAlerting;
+        lastClassificationChannelLog.classification = classification;
+        lastClassificationChannelLog.lifetime = lifetimeMs;
+        lastClassificationChannelLog.eventId =
+                NotificationReportedEvent.NOTIFICATION_ADJUSTED.getId();
+        lastClassificationChannelLog.instanceId = instanceId;
+        lastClassificationChannelLog.uid = uid;
+    }
+
+    /**
+     * Returns true if the last recorded classification channel log has all the values specified.
+     */
+    public boolean checkLastClassificationChannelLog(boolean hasPosted, boolean isAlerting,
+                                                     int classification, int lifetime,
+                                                     int eventId, int instanceId,
+                                                     int uid) {
+        if (lastClassificationChannelLog == null) {
+            return false;
+        }
+
+        return hasPosted == lastClassificationChannelLog.hasPosted
+                && isAlerting == lastClassificationChannelLog.isAlerting
+                && classification == lastClassificationChannelLog.classification
+                && lifetime == lastClassificationChannelLog.lifetime
+                && eventId == lastClassificationChannelLog.eventId
+                && instanceId == lastClassificationChannelLog.instanceId
+                && uid == lastClassificationChannelLog.uid;
     }
 }

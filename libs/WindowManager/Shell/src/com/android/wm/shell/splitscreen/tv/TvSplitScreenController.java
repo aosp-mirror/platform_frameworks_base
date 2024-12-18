@@ -32,6 +32,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -52,6 +53,7 @@ public class TvSplitScreenController extends SplitScreenController {
     private final SyncTransactionQueue mSyncQueue;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
+    private final ShellExecutor mBgExecutor;
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -60,6 +62,7 @@ public class TvSplitScreenController extends SplitScreenController {
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
     private final LaunchAdjacentController mLaunchAdjacentController;
+    private final SplitState mSplitState;
 
     private final Handler mMainHandler;
     private final SystemWindows mSystemWindows;
@@ -80,20 +83,23 @@ public class TvSplitScreenController extends SplitScreenController {
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             MultiInstanceHelper multiInstanceHelper,
+            SplitState splitState,
             ShellExecutor mainExecutor,
             Handler mainHandler,
+            ShellExecutor bgExecutor,
             SystemWindows systemWindows) {
         super(context, shellInit, shellCommandHandler, shellController, shellTaskOrganizer,
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
                 displayInsetsController, null, transitions, transactionPool,
                 iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
-                Optional.empty(), null /* stageCoordinator */, multiInstanceHelper, mainExecutor,
-                mainHandler);
-
+                Optional.empty(), null /* stageCoordinator */, multiInstanceHelper, splitState,
+                mainExecutor, mainHandler, bgExecutor);
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
         mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -102,8 +108,7 @@ public class TvSplitScreenController extends SplitScreenController {
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
-
-        mMainHandler = mainHandler;
+        mSplitState = splitState;
         mSystemWindows = systemWindows;
     }
 
@@ -116,8 +121,8 @@ public class TvSplitScreenController extends SplitScreenController {
         return new TvStageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
-                mIconProvider, mMainExecutor, mMainHandler,
-                mRecentTasksOptional, mLaunchAdjacentController, mSystemWindows);
+                mIconProvider, mMainExecutor, mMainHandler, mBgExecutor,
+                mRecentTasksOptional, mLaunchAdjacentController, mSplitState, mSystemWindows);
     }
 
 }

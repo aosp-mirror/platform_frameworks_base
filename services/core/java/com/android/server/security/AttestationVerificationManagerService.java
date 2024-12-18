@@ -17,10 +17,10 @@
 package com.android.server.security;
 
 import static android.Manifest.permission.USE_ATTESTATION_VERIFICATION_SERVICE;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_UNSUPPORTED_PROFILE;
 import static android.security.attestationverification.AttestationVerificationManager.PROFILE_PEER_DEVICE;
 import static android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -88,8 +88,8 @@ public class AttestationVerificationManagerService extends SystemService {
         public void verifyToken(VerificationToken token, ParcelDuration parcelDuration,
                 AndroidFuture resultCallback) throws RemoteException {
             enforceUsePermission();
-            // TODO(b/201696614): Implement
-            resultCallback.complete(RESULT_UNKNOWN);
+
+            throw new UnsupportedOperationException();
         }
 
         private void enforceUsePermission() {
@@ -123,9 +123,9 @@ public class AttestationVerificationManagerService extends SystemService {
             AttestationProfile profile, int localBindingType, Bundle requirements,
             byte[] attestation, AndroidFuture<IVerificationResult> resultCallback) {
         IVerificationResult result = new IVerificationResult();
-        // TODO(b/201696614): Implement
         result.token = null;
-        switch (profile.getAttestationProfileId()) {
+        int profileId = profile.getAttestationProfileId();
+        switch (profileId) {
             case PROFILE_SELF_TRUSTED:
                 Slog.d(TAG, "Verifying Self Trusted profile.");
                 try {
@@ -133,7 +133,7 @@ public class AttestationVerificationManagerService extends SystemService {
                             AttestationVerificationSelfTrustedVerifierForTesting.getInstance()
                                     .verifyAttestation(localBindingType, requirements, attestation);
                 } catch (Throwable t) {
-                    result.resultCode = RESULT_FAILURE;
+                    result.resultCode = FLAG_FAILURE_CERTS;
                 }
                 break;
             case PROFILE_PEER_DEVICE:
@@ -142,8 +142,8 @@ public class AttestationVerificationManagerService extends SystemService {
                         localBindingType, requirements, attestation);
                 break;
             default:
-                Slog.d(TAG, "No profile found, defaulting.");
-                result.resultCode = RESULT_UNKNOWN;
+                Slog.e(TAG, "Profile [" + profileId + "] is not supported.");
+                result.resultCode = FLAG_FAILURE_UNSUPPORTED_PROFILE;
         }
         resultCallback.complete(result);
     }

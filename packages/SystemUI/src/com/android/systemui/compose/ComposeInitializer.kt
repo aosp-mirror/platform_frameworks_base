@@ -22,7 +22,7 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import com.android.compose.animation.ViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.android.systemui.lifecycle.ViewLifecycleOwner
 
 /**
@@ -88,13 +88,13 @@ object ComposeInitializer {
         // Set the owners on the root. They will be reused by any ComposeView inside the root
         // hierarchy.
         root.setViewTreeLifecycleOwner(lifecycleOwner)
-        ViewTreeSavedStateRegistryOwner.set(root, savedStateRegistryOwner)
+        root.setViewTreeSavedStateRegistryOwner(savedStateRegistryOwner)
     }
 
     /** Function to be called on your window root view's [View.onDetachedFromWindow] function. */
     fun onDetachedFromWindow(root: View) {
         (root.findViewTreeLifecycleOwner() as ViewLifecycleOwner).onDestroy()
         root.setViewTreeLifecycleOwner(null)
-        ViewTreeSavedStateRegistryOwner.set(root, null)
+        root.setViewTreeSavedStateRegistryOwner(null)
     }
 }

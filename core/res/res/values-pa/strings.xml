@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ਪ੍ਰਤਿਬੰਧਿਤ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ਇਹ ਐਪ 16 KB ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। APK ਦੀ ਇਕਸਾਰਤਾ ਦੀ ਜਾਂਚ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ। ਇਹ ਐਪ ਪੰਨੇ ਦੇ ਆਕਾਰ ਦੇ ਅਨੁਰੂਪ ਮੋਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਚੱਲੇਗੀ। ਬਿਹਤਰ ਅਨੁਰੂਪਤਾ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ 16 KB ਵਾਲੇ ਪੰਨਿਆਂ ਨਾਲ ਐਪਲੀਕੇਸ਼ਨ ਦਾ ਮੁੜ-ਸੰਕਲਨ ਕਰੋ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ਦੇਖੋ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ਇਹ ਐਪ 16 KB ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। ELF ਦੀ ਇਕਸਾਰਤਾ ਦੀ ਜਾਂਚ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ। ਇਹ ਐਪ ਪੰਨੇ ਦੇ ਆਕਾਰ ਦੇ ਅਨੁਰੂਪ ਮੋਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਚੱਲੇਗੀ। ਬਿਹਤਰ ਅਨੁਰੂਪਤਾ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ 16 KB ਵਾਲੇ ਪੰਨਿਆਂ ਨਾਲ ਐਪਲੀਕੇਸ਼ਨ ਦਾ ਮੁੜ-ਸੰਕਲਨ ਕਰੋ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ਦੇਖੋ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ਇਹ ਐਪ 16 KB ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। APK ਅਤੇ ELF ਦੀ ਇਕਸਾਰਤਾ ਦੀ ਜਾਂਚ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ। ਇਹ ਐਪ ਪੰਨੇ ਦੇ ਆਕਾਰ ਦੇ ਅਨੁਰੂਪ ਮੋਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਚੱਲੇਗੀ। ਬਿਹਤਰ ਅਨੁਰੂਪਤਾ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ 16 KB ਵਾਲੇ ਪੰਨਿਆਂ ਨਾਲ ਐਪਲੀਕੇਸ਼ਨ ਦਾ ਮੁੜ-ਸੰਕਲਨ ਕਰੋ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ਦੇਖੋ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ਤੁਸੀਂ ਕਾਲਰ ਆਈ.ਡੀ. ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ਡਾਟੇ ਨੂੰ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਗਿਆ"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਅਲਟ੍ਰਾ-ਵਾਈਡਬੈਂਡ ਡੀਵਾਈਸਾਂ ਦੇ ਵਿਚਾਲੇ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨੂੰ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ਨਜ਼ਦੀਕੀ ਵਾਈ-ਫਾਈ ਡੀਵਾਈਸਾਂ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰੋ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਵਾਈ-ਫਾਈ ਡੀਵਾਈਸਾਂ \'ਤੇ ਵਿਗਿਆਪਨ ਦੇਣ, ਕਨੈਕਟ ਕਰਨ ਅਤੇ ਉਨ੍ਹਾਂ ਦੀ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨੂੰ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸਾਂ ਵਿਚਾਲੇ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨਿਰਧਾਰਿਤ ਕਰੋ"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸਾਂ ਦੇ ਵਿਚਾਲੇ ਸੰਬੰਧਿਤ ਸਥਿਤੀ ਨੂੰ ਨਿਰਧਾਰਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
@@ -1153,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ ਵਿੱਚ"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ਦਿਨ ਵਿੱਚ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> ਸਾਲ ਵਿੱਚ"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ ਪਹਿਲਾਂ"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ ਪਹਿਲਾਂ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> ਦਿਨ ਪਹਿਲਾਂ"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> ਸਾਲ ਪਹਿਲਾਂ"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟਾ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ਦਿਨ"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ਸਾਲ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ ਵਿੱਚ"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟੇ ਵਿੱਚ"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> ਦਿਨ ਵਿੱਚ"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> ਸਾਲ ਵਿੱਚ"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> ਮਿੰਟ ਪਹਿਲਾਂ"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ਘੰਟਾ ਪਹਿਲਾਂ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> ਦਿਨ ਪਹਿਲਾਂ"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> ਸਾਲ ਪਹਿਲਾਂ"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# ਮਿੰਟ ਪਹਿਲਾਂ}one{# ਮਿੰਟ ਪਹਿਲਾਂ}other{# ਮਿੰਟ ਪਹਿਲਾਂ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ਘੰਟਾ ਪਹਿਲਾਂ}one{# ਘੰਟਾ ਪਹਿਲਾਂ}other{# ਘੰਟੇ ਪਹਿਲਾਂ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ਦਿਨ ਪਹਿਲਾਂ}one{# ਦਿਨ ਪਹਿਲਾਂ}other{# ਦਿਨ ਪਹਿਲਾਂ}}"</string>
@@ -1746,8 +1767,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ਕੋਈ ਐਪ ਇਜਾਜ਼ਤ ਸੰਬੰਧੀ ਬੇਨਤੀ ਨੂੰ ਅਸਪਸ਼ਟ ਕਰ ਰਹੀ ਹੈ, ਇਸ ਲਈ ਤੁਹਾਡੇ ਜਵਾਬ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਦੇ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ਸ਼ਾਰਟਕੱਟਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
@@ -1939,11 +1959,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ਇਵੈਂਟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ਸੌਣ ਵੇਲੇ"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ਚਾਲੂ ਹੈ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ਬੰਦ ਹੈ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ਤੋਂ <xliff:g id="END">%2$s</xliff:g> ਤੱਕ"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ਕੋਈ ਵੀ ਕੈਲੰਡਰ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਕੁਝ ਧੁਨੀਆਂ ਨੂੰ ਮਿਊਟ ਕਰ ਰਹੀ ਹੈ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਹੈ ਅਤੇ ਇਹ ਅਸਥਿਰ ਹੋ ਸਕਦੀ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਨਹੀਂ ਕਰਦੇ।"</string>
@@ -2011,6 +2034,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ਆਪਣੀ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਵਰਤਣ ਲਈ, ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਨੂੰ ਮਿਟਾਉਣ ਲਈ, ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਸੈੱਟ ਕਰੋ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਇਸ ਵੇਲੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -2129,11 +2153,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਦੀ ਥਰਥਰਾਹਟ ਹੋਵੇਗੀ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਨੂੰ ਮਿਊਟ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ਸਿਸਟਮ ਬਦਲਾਅ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ਨਵਾਂ: \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਮੋਡ ਸੂਚਨਾਵਾਂ ਨੂੰ ਲੁਕਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ਹੋਰ ਜਾਣਨ ਲਈ ਅਤੇ ਬਦਲਾਅ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਕਲਪ ਬਦਲ ਗਿਆ ਹੈ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ ਦੀ ਸਮੀਖਿਆ ਕਰੋ"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 ਜਾਂ ਇਸ ਤੋਂ ਬਾਅਦ ਵਾਲੇ ਵਰਜਨਾਂ ਵਿੱਚ, ਤੁਹਾਡੇ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਜਾਣ ਵਾਲੀਆਂ ਐਪਾਂ ਨੂੰ ਸੂਚਨਾਵਾਂ ਭੇਜਣ ਲਈ ਤੁਹਾਡੀ ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਮੌਜੂਦਾ ਐਪਾਂ ਲਈ ਇਸ ਇਜਾਜ਼ਤ ਨੂੰ ਬਦਲਣ ਵਾਸਤੇ ਟੈਪ ਕਰੋ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ਬਾਅਦ ਵਿੱਚ ਯਾਦ ਕਰਵਾਓ"</string>
@@ -2429,7 +2448,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਨੈੱਟਵਰਕ ਚੁਣੋ\" ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਜਾ ਕੇ \"ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਨੈੱਟਵਰਕ ਚੁਣੋ\" ਨੂੰ ਚਾਲੂ ਕਰੋ, ਤਾਂ ਜੋ ਤੁਹਾਡਾ ਫ਼ੋਨ ਅਜਿਹਾ ਨੈੱਟਵਰਕ ਲੱਭ ਸਕੇ ਜੋ ਸੈਟੇਲਾਈਟ ਨਾਲ ਕੰਮ ਕਰਦਾ ਹੋਵੇ"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ਚਾਲੂ ਕਰੋ"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ਵਾਪਸ ਜਾਓ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ਵਿਚਾਰ-ਅਧੀਨ..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਹੁਣ ਉਪਲਬਧ ਹੈ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾ ਹੋਣ \'ਤੇ, ਤੁਸੀਂ ਐਮਰਜੈਂਸੀ ਸੇਵਾਵਾਂ ਨੂੰ ਸੁਨੇਹਾ ਭੇਜ ਸਕਦੇ ਹੋ। Google Messages ਤੁਹਾਡੀ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੁਨੇਹਾ ਐਪ ਹੋਣੀ ਲਾਜ਼ਮੀ ਹੈ।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਦਾ ਸੈੱਟ ਅੱਪ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਸੀਂ ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਹੋ ਅਤੇ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਇਸ ਦੇਸ਼ ਜਾਂ ਖੇਤਰ ਵਿੱਚ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਦਾ ਸੈੱਟ ਅੱਪ ਨਹੀਂ ਹੋਇਆ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ਸੈਟੇਲਾਈਟ ਰਾਹੀਂ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, Google Messages ਨੂੰ ਆਪਣੀ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੁਨੇਹਾ ਐਪ ਵਜੋਂ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ਇਸਦੀ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿ ਇਸ ਦੇਸ਼ ਜਾਂ ਖੇਤਰ ਵਿੱਚ ਸੈਟੇਲਾਈਟ SOS ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਹੈ, ਟਿਕਾਣਾ ਸੈਟਿੰਗਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਹੈ"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾ ਹੋਣ \'ਤੇ, ਤੁਸੀਂ ਸੈਟੇਲਾਈਟ ਰਾਹੀਂ ਸੁਨੇਹੇ ਭੇਜ ਸਕਦੇ ਹੋ। Google Messages ਤੁਹਾਡੀ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੁਨੇਹਾ ਐਪ ਹੋਣੀ ਲਾਜ਼ਮੀ ਹੈ।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ਪੱਕਾ ਕਰੋ ਕਿ ਤੁਸੀਂ ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਹੋ ਅਤੇ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ਇਸ ਦੇਸ਼ ਜਾਂ ਖੇਤਰ ਵਿੱਚ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ਸੈਟੇਲਾਈਟ ਰਾਹੀਂ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, Google Messages ਨੂੰ ਆਪਣੀ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਸੁਨੇਹਾ ਐਪ ਵਜੋਂ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ਇਹ ਜਾਂਚ ਕਰਨ ਲਈ ਕਿ ਇਸ ਦੇਸ਼ ਜਾਂ ਖੇਤਰ ਵਿੱਚ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਹੈ ਜਾਂ ਨਹੀਂ, ਟਿਕਾਣਾ ਸੈਟਿੰਗਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਅਣਲਾਕ ਦਾ ਦੁਬਾਰਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ਅਤੇ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ਦੀ ਹੁਣ ਪਛਾਣ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ।"</string>

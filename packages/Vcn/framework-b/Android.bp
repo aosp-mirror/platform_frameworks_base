@@ -1,0 +1,191 @@
+//
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package {
+    default_team: "trendy_team_enigma",
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+filegroup {
+    name: "vcn-utils-platform-sources",
+    srcs: [
+        "src/android/net/vcn/persistablebundleutils/**/*.java",
+        "src/android/net/vcn/util/**/*.java",
+    ],
+    path: "src",
+    visibility: [
+        "//frameworks/base", // For VpnProfile.java and Vpn.java
+    ],
+}
+
+java_defaults {
+    name: "framework-connectivity-b-defaults-base",
+    sdk_version: "module_current",
+
+    defaults: ["framework-module-defaults"], // This is a boot jar
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.aidl",
+    ],
+
+    libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "framework-wifi.stubs.module_lib",
+        "unsupportedappusage",
+    ],
+
+    aidl: {
+        include_dirs: [
+            // For connectivity-framework classes such as Network.aidl, NetworkCapabilities.aidl
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+}
+
+soong_config_module_type {
+    name: "framework_connectivity_b_defaults_soong_config",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "is_vcn_in_mainline",
+    ],
+    properties: [
+        "min_sdk_version",
+        "static_libs",
+        "apex_available",
+    ],
+}
+
+framework_connectivity_b_defaults_soong_config {
+    name: "framework-connectivity-b-defaults",
+    defaults: [
+        "framework-connectivity-b-defaults-base",
+    ],
+    soong_config_variables: {
+        is_vcn_in_mainline: {
+            //TODO: b/380155299 Make it Baklava when aidl tool can understand it
+            min_sdk_version: "current",
+            static_libs: ["android.net.vcn.flags-aconfig-java"],
+            apex_available: ["com.android.tethering"],
+
+            conditions_default: {
+                min_sdk_version: "35",
+                static_libs: ["android.net.vcn.flags-aconfig-java-export"],
+                apex_available: ["//apex_available:platform"],
+            },
+        },
+    },
+}
+
+soong_config_module_type {
+    name: "framework_connectivity_b_java_sdk_library_defaults_soong_config",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "is_vcn_in_mainline",
+    ],
+    properties: [
+        "aconfig_declarations",
+        "jarjar_rules",
+    ],
+}
+
+framework_connectivity_b_java_sdk_library_defaults_soong_config {
+    name: "framework-connectivity-b-java-sdk-library-defaults",
+    soong_config_variables: {
+        is_vcn_in_mainline: {
+            aconfig_declarations: ["android.net.vcn.flags-aconfig-java"],
+
+            // TODO: b/375213246 Use the connectivity jarjar rule generator to create the
+            // jarjar rules. In the end state, use "framework-connectivity-jarjar-rules"
+            // after VCN code is moved to the Connectivity folder
+            jarjar_rules: "framework-vcn-jarjar-rules.txt",
+
+            conditions_default: {
+                aconfig_declarations: ["android.net.vcn.flags-aconfig-java-export"],
+
+                // Use "android.net.connectivity" as prefix would trigger
+                // "Hidden API flags are inconsistent" build error
+                jarjar_rules: "framework-vcn-jarjar-rules-platform.txt",
+            },
+        },
+    },
+}
+
+java_sdk_library {
+    name: "framework-connectivity-b",
+    defaults: [
+        "framework-connectivity-b-defaults",
+        "framework-connectivity-b-java-sdk-library-defaults",
+    ],
+
+    permitted_packages: [
+        "android.net",
+        "android.net.vcn",
+        "com.android.server.vcn.util",
+
+    ],
+    api_packages: [
+        "android.net",
+        "android.net.vcn",
+    ],
+
+    // Allow VCN APIs to reference APIs in IKE and Connectivity
+    stub_only_libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
+    ],
+
+    // To use non-jarjard names of utilities such as android.util.IndentingPrintWriter
+    impl_only_libs: [
+        "framework-connectivity-pre-jarjar",
+    ],
+
+    impl_library_visibility: [
+        // Using for test only
+        "//cts/tests/netlegacy22.api",
+        "//cts/tests/tests/vcn",
+        "//external/sl4a:__subpackages__",
+        "//frameworks/base/core/tests/bandwidthtests",
+        "//frameworks/base/core/tests/benchmarks",
+        "//frameworks/base/core/tests/utillib",
+        "//frameworks/base/services/tests/VpnTests",
+        "//frameworks/base/tests/vcn",
+        "//frameworks/opt/telephony/tests/telephonytests",
+        "//packages/modules/CaptivePortalLogin/tests",
+        "//packages/modules/Connectivity/staticlibs/testutils",
+        "//packages/modules/Connectivity/staticlibs/tests:__subpackages__",
+        "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
+        "//packages/modules/Connectivity/tests:__subpackages__",
+        "//packages/modules/Connectivity/thread/tests:__subpackages__",
+        "//packages/modules/IPsec/tests/iketests",
+        "//packages/modules/NetworkStack",
+        "//packages/modules/NetworkStack/tests:__subpackages__",
+        "//packages/modules/Wifi/service/tests/wifitests",
+    ],
+
+    visibility: ["//packages/modules/Connectivity:__subpackages__"],
+}
+
+java_library {
+    name: "framework-connectivity-b-pre-jarjar",
+    defaults: ["framework-connectivity-b-defaults"],
+    installable: false,
+    libs: [
+        "framework-connectivity-pre-jarjar",
+    ],
+}

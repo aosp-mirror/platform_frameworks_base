@@ -29,6 +29,7 @@ android_test {
 
     srcs: [
         "**/*.java",
+        "**/*.kt",
     ],
 
     static_libs: [
@@ -41,15 +42,16 @@ android_test {
         "androidx.test.ext.junit",
         "flag-junit",
         "mockito-target-extended-minus-junit4",
+        "mockito-kotlin-nodeps",
         "truth",
         "testables",
         "platform-test-annotations",
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     // These are not normally accessible from apps so they must be explicitly included.
@@ -61,4 +63,11 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+test_module_config {
+    name: "WMJetpackUnitTests_Presubmit",
+    base: "WMJetpackUnitTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
 }

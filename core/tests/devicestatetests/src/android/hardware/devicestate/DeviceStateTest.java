@@ -21,17 +21,16 @@ import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_AVAILABLE
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
-import junit.framework.Assert;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.util.HashSet;
 import java.util.List;
@@ -39,28 +38,32 @@ import java.util.Set;
 
 /**
  * Unit tests for {@link android.hardware.devicestate.DeviceState}.
- * <p/>
- * Run with <code>atest DeviceStateTest</code>.
+ *
+ * <p> Build/Install/Run:
+ * atest FrameworksCoreDeviceStateManagerTests:DeviceStateTest
  */
 @Presubmit
-@RunWith(JUnit4.class)
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public final class DeviceStateTest {
     @Test
     public void testConstruct() {
-        DeviceState.Configuration config = new DeviceState.Configuration.Builder(
+        final DeviceState.Configuration config = new DeviceState.Configuration.Builder(
                 MINIMUM_DEVICE_STATE_IDENTIFIER, "TEST_CLOSED")
                 .setSystemProperties(
                         new HashSet<>(List.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)))
                 .build();
+
         final DeviceState state = new DeviceState(config);
-        assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE_IDENTIFIER);
-        assertEquals(state.getName(), "TEST_CLOSED");
-        assertTrue(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS));
+
+        assertThat(state.getIdentifier()).isEqualTo(MINIMUM_DEVICE_STATE_IDENTIFIER);
+        assertThat(state.getName()).isEqualTo("TEST_CLOSED");
+        assertThat(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)).isTrue();
     }
 
     @Test
     public void testHasProperties() {
-        DeviceState.Configuration config = new DeviceState.Configuration.Builder(
+        final DeviceState.Configuration config = new DeviceState.Configuration.Builder(
                 MINIMUM_DEVICE_STATE_IDENTIFIER, "TEST")
                 .setSystemProperties(new HashSet<>(List.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
                         PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST)))
@@ -68,10 +71,10 @@ public final class DeviceStateTest {
 
         final DeviceState state = new DeviceState(config);
 
-        assertTrue(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS));
-        assertTrue(state.hasProperty(PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST));
-        assertTrue(state.hasProperties(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
-                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST));
+        assertThat(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)).isTrue();
+        assertThat(state.hasProperty(PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST)).isTrue();
+        assertThat(state.hasProperties(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST)).isTrue();
     }
 
     @Test
@@ -91,7 +94,7 @@ public final class DeviceStateTest {
         final DeviceState.Configuration stateConfiguration =
                 DeviceState.Configuration.CREATOR.createFromParcel(parcel);
 
-        Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
+        assertThat(originalState).isEqualTo(new DeviceState(stateConfiguration));
     }
 
     @Test
@@ -109,6 +112,6 @@ public final class DeviceStateTest {
         final DeviceState.Configuration stateConfiguration =
                 DeviceState.Configuration.CREATOR.createFromParcel(parcel);
 
-        Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
+        assertThat(originalState).isEqualTo(new DeviceState(stateConfiguration));
     }
 }

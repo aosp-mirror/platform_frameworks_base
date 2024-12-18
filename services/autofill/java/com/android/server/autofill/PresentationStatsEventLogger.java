@@ -45,6 +45,7 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_NO_FOCUS;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_REQUEST_TIMEOUT;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SESSION_COMMITTED_PREMATURELY;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE;
@@ -98,6 +99,7 @@ public final class PresentationStatsEventLogger {
             NOT_SHOWN_REASON_REQUEST_FAILED,
             NOT_SHOWN_REASON_NO_FOCUS,
             NOT_SHOWN_REASON_SESSION_COMMITTED_PREMATURELY,
+            NOT_SHOWN_REASON_SUGGESTION_FILTERED,
             NOT_SHOWN_REASON_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -178,6 +180,8 @@ public final class PresentationStatsEventLogger {
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SESSION_COMMITTED_PREMATURELY;
     public static final int NOT_SHOWN_REASON_UNKNOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
+    public static final int NOT_SHOWN_REASON_SUGGESTION_FILTERED =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT;
 
     public static final int AUTHENTICATION_TYPE_UNKNOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
@@ -286,12 +290,43 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Call this when first entering the View. It will check if there are pre-existing characters
+     * in the view, and sets NOT_SHOWN_REASON_SUGGESTION_FILTERED if there is
+     */
+    public void maybeSetNoPresentationEventReasonSuggestionsFiltered(AutofillValue value) {
+        mEventInternal.ifPresent(
+                event -> {
+                    if (value == null || !value.isText()) {
+                        return;
+                    }
+
+                    int length = value.getTextValue().length();
+
+                    if (length > 0) {
+                        maybeSetNoPresentationEventReason(NOT_SHOWN_REASON_SUGGESTION_FILTERED);
+                    }
+                });
+    }
+
     public void maybeSetNoPresentationEventReasonIfNoReasonExists(@NotShownReason int reason) {
-        mEventInternal.ifPresent(event -> {
-            if (event.mCountShown == 0 && event.mNoPresentationReason == NOT_SHOWN_REASON_UNKNOWN) {
-                event.mNoPresentationReason = reason;
-            }
-        });
+        mEventInternal.ifPresent(
+                event -> {
+                    if (event.mCountShown != 0) {
+                        return;
+                    }
+
+                    // The only events that can be overwritten.
+                    // NOT_SHOWN_REASON_UNKNOWN is the default for inline/dropdown
+                    // NOT_SHOWN_REASON_NO_FOCUS is the default for fill dialog
+                    if (event.mNoPresentationReason != NOT_SHOWN_REASON_UNKNOWN
+                            || event.mNoPresentationReason != NOT_SHOWN_REASON_NO_FOCUS) {
+                        Slog.d(TAG, "Not setting no presentation reason because it already exists");
+                        return;
+                    }
+
+                    event.mNoPresentationReason = reason;
+                });
     }
 
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
@@ -732,6 +767,7 @@ public final class PresentationStatsEventLogger {
             // These autofill id's are being refilled, so they had failed previously.
             // Note that these autofillIds correspond to the new autofill ids after relayout.
             event.mFailedAutofillIds = new ArraySet<>(autofillIds);
+            setHasRelayoutLog();
         });
     }
 
@@ -753,6 +789,7 @@ public final class PresentationStatsEventLogger {
             int failureCount = ids.size();
             if (isRefill) {
                 event.mViewFailedOnRefillCount = failureCount;
+                setHasRelayoutLog();
             } else {
                 event.mViewFillFailureCount = failureCount;
                 event.mViewFailedPriorToRefillCount = failureCount;
@@ -834,6 +871,19 @@ public final class PresentationStatsEventLogger {
     }
 
     /**
+     * Set the log contains relayout metrics.
+     * This is being added as a temporary measure to add logging.
+     * In future, when we map Session's old view states to the new autofill id's as part of fixing
+     * save for relayout cases, we no longer would need this. But till then, this is needed to set
+     * autofill logs for relayout cases.
+     */
+    private void setHasRelayoutLog() {
+        mEventInternal.ifPresent(event -> {
+            event.mHasRelayoutLog = true;
+        });
+    }
+
+    /**
      * Finish and log the event.
      */
     public void logAndEndEvent(String caller) {
@@ -842,9 +892,15 @@ public final class PresentationStatsEventLogger {
                     + "event");
             return;
         }
+
         PresentationStatsEventInternal event = mEventInternal.get();
+        boolean ignoreLogging = !event.mIsDatasetAvailable
+                && !event.mHasRelayoutLog
+                && !(event.mFixExpireResponseDuringAuthCount > 0)
+                && !(event.mNotifyViewEnteredIgnoredDuringAuthCount > 0);
         if (sVerbose) {
             Slog.v(TAG, "(" + caller + ") "
+                    + (ignoreLogging ? "IGNORING - following event won't be logged: " : "")
                     + "Log AutofillPresentationEventReported:"
                     + " requestId=" + event.mRequestId
                     + " sessionId=" + mSessionId
@@ -907,7 +963,8 @@ public final class PresentationStatsEventLogger {
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
-        if (!event.mIsDatasetAvailable) {
+        if (ignoreLogging) {
+            Slog.w(TAG, "Empty dataset. Autofill ignoring log");
             mEventInternal = Optional.empty();
             return;
         }
@@ -1027,8 +1084,9 @@ public final class PresentationStatsEventLogger {
         ArraySet<AutofillId> mFailedAutofillIds = new ArraySet<>();
         ArraySet<AutofillId> mAlreadyFilledAutofillIds = new ArraySet<>();
 
-        // Not logged - used for internal logic
+        // Following are not logged and used only for internal logic
         boolean shouldResetShownCount = false;
+        boolean mHasRelayoutLog = false;
         PresentationStatsEventInternal() {}
     }
 

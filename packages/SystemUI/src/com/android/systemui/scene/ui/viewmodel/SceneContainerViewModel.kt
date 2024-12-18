@@ -17,11 +17,15 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.runtime.getValue
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SwipeSourceDetector
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.classifier.Classifier
@@ -33,12 +37,18 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 /** Models UI state for the scene container. */
 class SceneContainerViewModel
@@ -47,7 +57,12 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    shadeInteractor: ShadeInteractor,
+    private val remoteInputInteractor: RemoteInputInteractor,
+    private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
+    hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
+    @Assisted view: View,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
 
@@ -59,6 +74,24 @@ constructor(
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
 
+    val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
+
+    private val hapticsViewModel = hapticsViewModelFactory.create(view)
+
+    /**
+     * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
+     * [UserAction]s for this container.
+     */
+    val edgeDetector: SwipeSourceDetector by
+        hydrator.hydratedStateOf(
+            traceName = "edgeDetector",
+            initialValue = DefaultEdgeDetector,
+            source =
+                shadeInteractor.shadeMode.map {
+                    if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
+                },
+        )
+
     override suspend fun onActivated(): Nothing {
         try {
             // Sends a MotionEventHandler to the owner of the view-model so they can report
@@ -69,13 +102,21 @@ constructor(
                         this@SceneContainerViewModel.onMotionEvent(motionEvent)
                     }
 
+                    override fun onEmptySpaceMotionEvent(motionEvent: MotionEvent) {
+                        this@SceneContainerViewModel.onEmptySpaceMotionEvent(motionEvent)
+                    }
+
                     override fun onMotionEventComplete() {
                         this@SceneContainerViewModel.onMotionEventComplete()
                     }
                 }
             )
 
-            hydrator.activate()
+            coroutineScope {
+                launch { hydrator.activate() }
+                launch("SceneContainerHapticsViewModel") { hapticsViewModel.activate() }
+            }
+            awaitCancellation()
         } finally {
             // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
             // their reference to it.
@@ -111,6 +152,23 @@ constructor(
     }
 
     /**
+     * Notifies that a [MotionEvent] has propagated through the entire [SharedNotificationContainer]
+     * and Composable scene container hierarchy without being handled.
+     *
+     * Call this after the [MotionEvent] has finished propagating through the UI hierarchy.
+     */
+    fun onEmptySpaceMotionEvent(event: MotionEvent) {
+        // check if the touch is outside the window and if remote input is active.
+        // If true, close any active remote inputs.
+        if (
+            event.action == MotionEvent.ACTION_OUTSIDE &&
+                (remoteInputInteractor.isRemoteInputActive as StateFlow).value
+        ) {
+            remoteInputInteractor.closeRemoteInputs()
+        }
+    }
+
+    /**
      * Notifies that a scene container user interaction has begun.
      *
      * This is a user interaction that has reached the Composable hierarchy of the scene container,
@@ -142,10 +200,8 @@ constructor(
             when (toScene) {
                 Scenes.Bouncer -> Classifier.BOUNCER_UNLOCK
                 Scenes.Gone -> Classifier.UNLOCK
-                Scenes.NotificationsShade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.Shade -> Classifier.NOTIFICATION_DRAG_DOWN
                 Scenes.QuickSettings -> Classifier.QUICK_SETTINGS
-                Scenes.QuickSettingsShade -> Classifier.QUICK_SETTINGS
                 else -> null
             }
 
@@ -179,7 +235,7 @@ constructor(
      * resolution target.
      */
     fun resolveSceneFamilies(
-        actionResultMap: Map<UserAction, UserActionResult>,
+        actionResultMap: Map<UserAction, UserActionResult>
     ): Map<UserAction, UserActionResult> {
         return actionResultMap.mapValues { (_, actionResult) ->
             when (actionResult) {
@@ -193,9 +249,10 @@ constructor(
                         )
                     }
                 }
+                // Overlay transitions don't use scene families, nothing to resolve.
                 is UserActionResult.ShowOverlay,
                 is UserActionResult.HideOverlay,
-                is UserActionResult.ReplaceByOverlay -> TODO("b/353679003: Support overlays")
+                is UserActionResult.ReplaceByOverlay -> null
             } ?: actionResult
         }
     }
@@ -223,10 +280,23 @@ constructor(
         }
     }
 
+    /**
+     * Returns a filtered version of [unfiltered], without action-result entries that would navigate
+     * to disabled scenes.
+     */
+    fun filteredUserActions(
+        unfiltered: Flow<Map<UserAction, UserActionResult>>
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return sceneInteractor.filteredUserActions(unfiltered)
+    }
+
     /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */
         fun onMotionEvent(motionEvent: MotionEvent)
+
+        /** Notifies that a [MotionEvent] has occurred outside the root window. */
+        fun onEmptySpaceMotionEvent(motionEvent: MotionEvent)
 
         /**
          * Notifies that the previous [MotionEvent] reported by [onMotionEvent] has finished
@@ -238,6 +308,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
+            view: View,
             motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel
     }

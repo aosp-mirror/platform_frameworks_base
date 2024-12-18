@@ -12,44 +12,19 @@
       ]
     },
     {
-      "name": "CtsAssistTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAssistTestCases"
     },
     {
-      "name": "CtsVoiceInteractionHostTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVoiceInteractionHostTestCases"
     },
     {
-      "name": "CtsLocalVoiceInteraction",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsLocalVoiceInteraction"
     },
     {
-      "name": "FrameworksVoiceInteractionTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksVoiceInteractionTests"
     },
     {
-      "name": "CtsSoundTriggerTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsSoundTriggerTestCases"
     }
   ]
 }

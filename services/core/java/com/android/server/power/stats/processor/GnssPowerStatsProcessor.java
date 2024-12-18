@@ -23,7 +23,6 @@ import android.os.Process;
 
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
-import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.UsageBasedPowerEstimator;
 import com.android.server.power.stats.format.GnssPowerStatsLayout;
 
@@ -40,10 +39,9 @@ class GnssPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
     private final long[] mGnssSignalDurations =
             new long[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
 
-    GnssPowerStatsProcessor(PowerProfile powerProfile, PowerStatsUidResolver uidResolver) {
-        super(BatteryConsumer.POWER_COMPONENT_GNSS, uidResolver,
-                powerProfile.getAveragePower(PowerProfile.POWER_GPS_ON),
-                sStatsLayout);
+    GnssPowerStatsProcessor(PowerProfile powerProfile) {
+        super(BatteryConsumer.POWER_COMPONENT_GNSS,
+                powerProfile.getAveragePower(PowerProfile.POWER_GPS_ON), sStatsLayout);
 
         boolean useSignalLevelEstimators = false;
         for (int level = 0; level < GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS; level++) {

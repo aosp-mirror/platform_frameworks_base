@@ -112,18 +112,6 @@ public final class VirtualDisplay {
     }
 
     /**
-     * Sets the on/off state for a virtual display.
-     *
-     * @param isOn Whether the display should be on or off.
-     * @hide
-     */
-    public void setDisplayState(boolean isOn) {
-        if (mToken != null) {
-            mGlobal.setVirtualDisplayState(mToken, isOn);
-        }
-    }
-
-    /**
      * Sets the rotation of the virtual display.
      *
      * @param rotation the new rotation of the display. May be one of {@link Surface#ROTATION_0},

@@ -30,6 +30,7 @@ import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
 import android.net.TransportInfo;
 import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.VcnUtils;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
@@ -394,10 +395,7 @@ public class WifiStatusTracker {
 
         TransportInfo transportInfo = networkCapabilities.getTransportInfo();
         if (transportInfo instanceof VcnTransportInfo) {
-            // This VcnTransportInfo logic is copied from
-            // [com.android.settingslib.Utils.tryGetWifiInfoForVcn]. It's copied instead of
-            // re-used because it makes the logic here clearer.
-            return ((VcnTransportInfo) transportInfo).getWifiInfo();
+            return VcnUtils.getWifiInfoFromVcnCaps(mConnectivityManager, networkCapabilities);
         } else if (transportInfo instanceof WifiInfo) {
             return (WifiInfo) transportInfo;
         } else {

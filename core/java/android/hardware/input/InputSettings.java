@@ -20,15 +20,21 @@ import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FL
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
-import static com.android.hardware.input.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
-import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
-import static com.android.hardware.input.Flags.keyboardRepeatKeys;
-import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
+import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
+import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
+import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiKeyGestures;
+import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
+import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -68,6 +74,20 @@ public class InputSettings {
      */
     @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     public static final int DEFAULT_POINTER_SPEED = 0;
+
+    /**
+     * Bounce Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS = 500;
+
+    /**
+     * Slow Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS = 500;
 
     /**
      * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
@@ -345,12 +365,12 @@ public class InputSettings {
     }
 
     /**
-     * Returns true if the feature flag for touchpad tap dragging is enabled.
+     * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
      *
      * @hide
      */
-    public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
-        return touchpadTapDragging();
+    public static boolean isTouchpadSystemGestureDisableFeatureFlagEnabled() {
+        return touchpadSystemGestureDisable();
     }
 
     /**
@@ -360,6 +380,31 @@ public class InputSettings {
      */
     public static boolean isTouchpadVisualizerFeatureFlagEnabled() {
         return touchpadVisualizer();
+    }
+
+    /**
+     * Returns true if the feature flag for the touchpad three-finger tap shortcut is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
+        return isCustomizableInputGesturesFeatureFlagEnabled() && touchpadThreeFingerTapShortcut();
+    }
+
+    /**
+     * Returns true if the feature flag for mouse reverse vertical scrolling is enabled.
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingFeatureFlagEnabled() {
+        return mouseReverseVerticalScrolling();
+    }
+
+    /**
+     * Returns true if the feature flag for mouse swap primary button is enabled.
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonFeatureFlagEnabled() {
+        return mouseSwapPrimaryButton();
     }
 
     /**
@@ -406,9 +451,6 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadTapDragging(@NonNull Context context) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return false;
-        }
         return Settings.System.getIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, 0, UserHandle.USER_CURRENT) == 1;
     }
@@ -425,9 +467,6 @@ public class InputSettings {
      */
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return;
-        }
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
@@ -466,6 +505,59 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if three-finger taps on the touchpad should trigger a customizable shortcut
+     * rather than a middle click.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether three-finger taps should trigger the shortcut.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
+        int customizedShortcut = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
+        return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
+                && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+    }
+
+    /**
+     * Returns true if system gestures (three- and four-finger swipes) should be enabled for
+     * touchpads.
+     *
+     * @param context The application context.
+     * @return Whether system gestures on touchpads are enabled
+     *
+     * @hide
+     */
+    public static boolean useTouchpadSystemGestures(@NonNull Context context) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, 1, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets whether system gestures are enabled for touchpads.
+     *
+     * @param context The application context.
+     * @param enabled True to enable system gestures.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadSystemGesturesEnabled(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, enabled ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
      * Whether a pointer icon will be shown over the location of a stylus pointer.
      *
      * @hide
@@ -498,6 +590,86 @@ public class InputSettings {
      */
     public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
         return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
+    }
+
+    /**
+     * Whether mouse vertical scrolling is enabled, this applies only to connected mice.
+     *
+     * @param context The application context.
+     * @return Whether the mouse will have its vertical scrolling reversed
+     * (scroll down to move up).
+     *
+     * @hide
+     */
+    public static boolean isMouseReverseVerticalScrollingEnabled(@NonNull Context context) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether the connected mouse will have its vertical scrolling reversed.
+     *
+     * @param context The application context.
+     * @param reverseScrolling Whether reverse scrolling is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseReverseVerticalScrolling(@NonNull Context context,
+            boolean reverseScrolling) {
+        if (!isMouseReverseVerticalScrollingFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, reverseScrolling ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether the primary mouse button is swapped on connected mice.
+     *
+     * @param context The application context.
+     * @return Whether mice will have their primary buttons swapped, so that left clicking will
+     * perform the secondary action (e.g. show menu) and right clicking will perform the primary
+     * action.
+     *
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonEnabled(@NonNull Context context) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether mice will have their primary buttons swapped between left and right
+     * clicks.
+     *
+     * @param context The application context.
+     * @param swapPrimaryButton Whether swapping the primary button is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseSwapPrimaryButton(@NonNull Context context,
+            boolean swapPrimaryButton) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     /**
@@ -800,7 +972,7 @@ public class InputSettings {
      *
      * <p>
      * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
-     * key on the physical keyboard is held down. This accessibility feature allows the user
+     * key on the physical keyboard is held down. This feature allows the user
      * to configure the timeout before the key repeats begin as well as the delay
      * between successive key repeats.
      * </p>
@@ -812,7 +984,31 @@ public class InputSettings {
     }
 
     /**
-     * Get Accessibility repeat keys timeout duration in milliseconds.
+     * Whether "Repeat keys" feature is enabled.
+     * Repeat keys is ON by default.
+     * The repeat keys timeout and delay would have the default values in the default ON case.
+     *
+     * <p>
+     * 'Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    public static boolean isRepeatKeysEnabled(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Get repeat keys timeout duration in milliseconds.
      * The default key repeat timeout is {@link ViewConfiguration#DEFAULT_KEY_REPEAT_TIMEOUT_MS}.
      *
      * @param context The application context
@@ -823,7 +1019,7 @@ public class InputSettings {
      *
      * <p>
      * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
-     * key on the physical keyboard is held down. This accessibility feature allows the user
+     * key on the physical keyboard is held down. This feature allows the user
      * to configure the timeout before the key repeats begin as well as the delay
      * between successive key repeats.
      * </p>
@@ -832,14 +1028,17 @@ public class InputSettings {
      */
     @TestApi
     @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
-    public static int getAccessibilityRepeatKeysTimeout(@NonNull Context context) {
+    public static int getRepeatKeysTimeout(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return ViewConfiguration.getKeyRepeatTimeout();
+        }
         return Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
                 UserHandle.USER_CURRENT);
     }
 
     /**
-     * Get Accessibility repeat keys delay rate in milliseconds.
+     * Get repeat keys delay rate in milliseconds.
      * The default key repeat delay is {@link ViewConfiguration#DEFAULT_KEY_REPEAT_DELAY_MS}.
      *
      * @param context The application context
@@ -850,7 +1049,7 @@ public class InputSettings {
      *
      * <p>
      * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
-     * key on the physical keyboard is held down. This accessibility feature allows the user
+     * key on the physical keyboard is held down. This feature allows the user
      * to configure the timeout before the key repeats begin as well as the delay
      * between successive key repeats.
      * </p>
@@ -859,14 +1058,41 @@ public class InputSettings {
      */
     @TestApi
     @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
-    public static int getAccessibilityRepeatKeysDelay(@NonNull Context context) {
+    public static int getRepeatKeysDelay(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return ViewConfiguration.getKeyRepeatDelay();
+        }
         return Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
                 UserHandle.USER_CURRENT);
     }
 
     /**
-     * Set Accessibility repeat keys timeout duration in milliseconds.
+     * Set repeat keys feature enabled/disabled.
+     *
+     * <p>
+     * 'Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setRepeatKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_ENABLED, enabled ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set repeat keys timeout duration in milliseconds.
      *
      * @param timeoutTimeMillis time duration for which a key should be pressed after which the
      *                          pressed key will be repeated. The timeout must be between
@@ -875,7 +1101,7 @@ public class InputSettings {
      *
      *  <p>
      * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
-     * key on the physical keyboard is held down. This accessibility feature allows the user
+     * key on the physical keyboard is held down. This feature allows the user
      * to configure the timeout before the key repeats begin as well as the delay
      *  between successive key repeats.
      * </p>
@@ -885,8 +1111,12 @@ public class InputSettings {
     @TestApi
     @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public static void setAccessibilityRepeatKeysTimeout(@NonNull Context context,
+    public static void setRepeatKeysTimeout(@NonNull Context context,
             int timeoutTimeMillis) {
+        if (!isRepeatKeysFeatureFlagEnabled()
+                && !isRepeatKeysEnabled(context)) {
+            return;
+        }
         if (timeoutTimeMillis < MIN_KEY_REPEAT_TIMEOUT_MILLIS
                 || timeoutTimeMillis > MAX_KEY_REPEAT_TIMEOUT_MILLIS) {
             throw new IllegalArgumentException(
@@ -900,7 +1130,7 @@ public class InputSettings {
     }
 
     /**
-     * Set Accessibility repeat key delay duration in milliseconds.
+     * Set repeat key delay duration in milliseconds.
      *
      * @param delayTimeMillis Time duration between successive key repeats when a key is
      *                        pressed down. The delay duration must be between
@@ -908,7 +1138,7 @@ public class InputSettings {
      *                        {@link #MAX_KEY_REPEAT_DELAY_MILLIS}
      * <p>
      * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
-     * key on the physical keyboard is held down. This accessibility feature allows the user
+     * key on the physical keyboard is held down. This feature allows the user
      * to configure the timeout before the key repeats begin as well as the delay
      * between successive key repeats.
      * </p>
@@ -918,8 +1148,12 @@ public class InputSettings {
     @TestApi
     @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public static void setAccessibilityRepeatKeysDelay(@NonNull Context context,
+    public static void setRepeatKeysDelay(@NonNull Context context,
             int delayTimeMillis) {
+        if (!isRepeatKeysFeatureFlagEnabled()
+                && !isRepeatKeysEnabled(context)) {
+            return;
+        }
         if (delayTimeMillis < MIN_KEY_REPEAT_DELAY_MILLIS
                 || delayTimeMillis > MAX_KEY_REPEAT_DELAY_MILLIS) {
             throw new IllegalArgumentException(
@@ -930,5 +1164,28 @@ public class InputSettings {
         Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, delayTimeMillis,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether "Customizable key gestures" feature flag is enabled.
+     *
+     * <p>
+     * ‘Customizable key gestures’ is a feature which allows users to customize key based
+     * shortcuts on the physical keyboard.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isCustomizableInputGesturesFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && useKeyGestureEventHandler();
+    }
+
+    /**
+     * Whether multi-key gestures are supported using {@code KeyGestureEventHandler}
+     *
+     * @hide
+     */
+    public static boolean doesKeyGestureEventHandlerSupportMultiKeyGestures() {
+        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiKeyGestures();
     }
 }

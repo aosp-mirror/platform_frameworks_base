@@ -126,13 +126,16 @@ public class HdrBrightnessData {
     @Nullable
     public final Spline sdrToHdrRatioSpline;
 
+    public final float highestHdrSdrRatio;
+
     @VisibleForTesting
     public HdrBrightnessData(Map<Float, Float> maxBrightnessLimits,
             long brightnessIncreaseDebounceMillis, float screenBrightnessRampIncrease,
             long brightnessDecreaseDebounceMillis, float screenBrightnessRampDecrease,
             float hbmTransitionPoint,
             float minimumHdrPercentOfScreenForNbm, float minimumHdrPercentOfScreenForHbm,
-            boolean allowInLowPowerMode, @Nullable Spline sdrToHdrRatioSpline) {
+            boolean allowInLowPowerMode, @Nullable Spline sdrToHdrRatioSpline,
+            float highestHdrSdrRatio) {
         this.maxBrightnessLimits = maxBrightnessLimits;
         this.brightnessIncreaseDebounceMillis = brightnessIncreaseDebounceMillis;
         this.screenBrightnessRampIncrease = screenBrightnessRampIncrease;
@@ -143,6 +146,7 @@ public class HdrBrightnessData {
         this.minimumHdrPercentOfScreenForHbm = minimumHdrPercentOfScreenForHbm;
         this.allowInLowPowerMode = allowInLowPowerMode;
         this.sdrToHdrRatioSpline = sdrToHdrRatioSpline;
+        this.highestHdrSdrRatio = highestHdrSdrRatio;
     }
 
     @Override
@@ -158,6 +162,7 @@ public class HdrBrightnessData {
                 + ", minimumHdrPercentOfScreenForHbm: " + minimumHdrPercentOfScreenForHbm
                 + ", allowInLowPowerMode: " + allowInLowPowerMode
                 + ", sdrToHdrRatioSpline: " + sdrToHdrRatioSpline
+                + ", highestHdrSdrRatio: " + highestHdrSdrRatio
                 + "} ";
     }
 
@@ -198,7 +203,9 @@ public class HdrBrightnessData {
                 hdrConfig.getScreenBrightnessRampDecrease().floatValue(),
                 getTransitionPoint(hbmConfig, transitionPointProvider),
                 minHdrPercentForNbm, minHdrPercentForHbm, hdrConfig.getAllowInLowPowerMode(),
-                getSdrHdrRatioSpline(hdrConfig, config.getHighBrightnessMode()));
+                getSdrHdrRatioSpline(hdrConfig, config.getHighBrightnessMode()),
+                getHighestSdrHdrRatio(hdrConfig, config.getHighBrightnessMode())
+                );
     }
 
     private static float getTransitionPoint(@Nullable HighBrightnessMode hbm,
@@ -222,7 +229,8 @@ public class HdrBrightnessData {
                 0, DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET,
                 0, DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET,
                 getTransitionPoint(hbm, transitionPointProvider),
-                fallbackPercent, fallbackPercent, false, fallbackSpline);
+                fallbackPercent, fallbackPercent, false, fallbackSpline,
+                getFallbackHighestSdrHdrRatio(hbm));
     }
 
     private static float getFallbackHdrPercent(HighBrightnessMode hbm) {
@@ -250,5 +258,24 @@ public class HdrBrightnessData {
         }
         return DisplayDeviceConfigUtils.createSpline(fallbackMap.getPoint(),
                 SdrHdrRatioPoint::getSdrNits, SdrHdrRatioPoint::getHdrRatio);
+    }
+
+    private static float getHighestSdrHdrRatio(HdrBrightnessConfig hdrConfig,
+            HighBrightnessMode hbm) {
+        NonNegativeFloatToFloatMap sdrHdrRatioMap = hdrConfig.getSdrHdrRatioMap();
+        if (sdrHdrRatioMap == null) {
+            return getFallbackHighestSdrHdrRatio(hbm);
+        }
+        return DisplayDeviceConfigUtils.getHighestHdrSdrRatio(sdrHdrRatioMap.getPoint(),
+                NonNegativeFloatToFloatPoint::getSecond);
+    }
+
+    private static float getFallbackHighestSdrHdrRatio(HighBrightnessMode hbm) {
+        SdrHdrRatioMap fallbackMap = hbm != null ? hbm.getSdrHdrRatioMap_all() : null;
+        if (fallbackMap == null) {
+            return 1;
+        }
+        return DisplayDeviceConfigUtils.getHighestHdrSdrRatio(fallbackMap.getPoint(),
+                SdrHdrRatioPoint::getHdrRatio);
     }
 }

@@ -70,12 +70,33 @@ static void throwInvalidParameter(JNIEnv *env, jlong stmtPtr, jint index) {
     }
 }
 
+// If the last operation failed, throw an exception and return true.  Otherwise return false.
+static bool throwIfError(JNIEnv *env, jlong stmtPtr) {
+    switch (sqlite3_errcode(db(stmtPtr))) {
+        case SQLITE_OK:
+        case SQLITE_DONE:
+        case SQLITE_ROW: return false;
+    }
+    throw_sqlite3_exception(env, db(stmtPtr), nullptr);
+    return true;
+}
 
-// This throws a SQLiteBindOrColumnIndexOutOfRangeException if the column index is out
-// of bounds.  It returns true if an exception was thrown.
+// This throws a SQLiteBindOrColumnIndexOutOfRangeException if the column index is outside the
+// bounds of the row data set.  It throws SQLiteMisuseException if the statement's data column
+// count is zero; that generally occurs because the client has forgotten to call step() or the
+// client has stepped past the end of the query.  The function returns true if an exception was
+// thrown.
 static bool throwIfInvalidColumn(JNIEnv *env, jlong stmtPtr, jint col) {
-    if (col < 0 || col >= sqlite3_data_count(stmt(stmtPtr))) {
-        int count = sqlite3_data_count(stmt(stmtPtr));
+    int count = sqlite3_data_count(stmt(stmtPtr));
+    if (throwIfError(env, stmtPtr)) {
+        return true;
+    } else if (count == 0) {
+        // A count of zero indicates a misuse: the statement has never been step()'ed.
+        const char* message = "row has no data";
+        const char* errmsg = sqlite3_errstr(SQLITE_MISUSE);
+        throw_sqlite3_exception(env, SQLITE_MISUSE, errmsg, message);
+        return true;
+    } else if (col < 0 || col >= count) {
         std::string message = android::base::StringPrintf(
             "column index %d out of bounds [0,%d]", col, count - 1);
         char const * errmsg = sqlite3_errstr(SQLITE_RANGE);
@@ -86,15 +107,22 @@ static bool throwIfInvalidColumn(JNIEnv *env, jlong stmtPtr, jint col) {
     }
 }
 
-// If the last operation failed, throw an exception and return true.  Otherwise return false.
-static bool throwIfError(JNIEnv *env, jlong stmtPtr) {
-    switch (sqlite3_errcode(db(stmtPtr))) {
-        case SQLITE_OK:
-        case SQLITE_DONE:
-        case SQLITE_ROW: return false;
+// This throws a SQLiteBindOrColumnIndexOutOfRangeException if the column index is outside the
+// bounds of the result set.  (This is not the same as the data columns in a row).  The function
+// returns true if an exception was thrown.
+static bool throwIfInvalidResultColumn(JNIEnv *env, jlong stmtPtr, jint col) {
+    int count = sqlite3_column_count(stmt(stmtPtr));
+    if (throwIfError(env, stmtPtr)) {
+        return true;
+    } else if (col < 0 || col >= count) {
+        std::string message = android::base::StringPrintf(
+            "column index %d out of bounds [0,%d]", col, count - 1);
+        char const * errmsg = sqlite3_errstr(SQLITE_RANGE);
+        throw_sqlite3_exception(env, SQLITE_RANGE, errmsg, message.c_str());
+        return true;
+    } else {
+        return false;
     }
-    throw_sqlite3_exception(env, db(stmtPtr), nullptr);
-    return true;
 }
 
 static jint bindParameterCount(JNIEnv* env, jclass, jlong stmtPtr) {
@@ -226,7 +254,7 @@ static jint columnType(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
 }
 
 static jstring columnName(JNIEnv* env, jclass, jlong stmtPtr, jint col) {
-    if (throwIfInvalidColumn(env, stmtPtr, col)) {
+    if (throwIfInvalidResultColumn(env, stmtPtr, col)) {
         return nullptr;
     }
     const jchar* name = static_cast<const jchar*>(sqlite3_column_name16(stmt(stmtPtr), col));

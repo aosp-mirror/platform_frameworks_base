@@ -504,6 +504,11 @@ public class SoundTriggerService extends SystemService {
             pw.println("\n##Sound Model Stats dump:\n");
             mSoundModelStatTracker.dump(pw);
         }
+
+        @Override
+        protected void onUnhandledException(int code, int flags, Exception e) {
+            Slog.wtf(TAG, "Unhandled exception code: " + code, e);
+        }
     }
 
     class SoundTriggerSessionStub extends ISoundTriggerSession.Stub {
@@ -687,6 +692,7 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int startRecognitionForService(ParcelUuid soundModelId, Bundle params,
                 ComponentName detectionService, SoundTrigger.RecognitionConfig config) {
+            final UserHandle userHandle = Binder.getCallingUserHandle();
             mEventLogger.enqueue(new SessionEvent(Type.START_RECOGNITION_SERVICE,
                         getUuid(soundModelId)));
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
@@ -699,7 +705,7 @@ public class SoundTriggerService extends SystemService {
 
                 IRecognitionStatusCallback callback =
                         new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
-                                detectionService, Binder.getCallingUserHandle(), config);
+                                detectionService, userHandle, config);
 
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
@@ -1439,7 +1445,7 @@ public class SoundTriggerService extends SystemService {
                 runOrAddOperation(new Operation(
                         // always execute:
                         () -> {
-                            if (!mRecognitionConfig.allowMultipleTriggers) {
+                            if (!mRecognitionConfig.isMultipleTriggersAllowed()) {
                                 // Unregister this remoteService once op is done
                                 synchronized (mCallbacksLock) {
                                     mCallbacks.remove(mPuuid.getUuid());

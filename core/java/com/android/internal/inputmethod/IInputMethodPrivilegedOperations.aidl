@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.graphics.Region;
 import android.net.Uri;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodSubtype;
@@ -51,4 +52,5 @@ oneway interface IInputMethodPrivilegedOperations {
     void resetStylusHandwriting(int requestId);
     void switchKeyboardLayoutAsync(int direction);
     void setHandwritingSurfaceNotTouchable(boolean notTouchable);
+    void setHandwritingTouchableRegion(in Region region);
 }

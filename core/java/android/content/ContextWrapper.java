@@ -843,6 +843,13 @@ public class ContextWrapper extends Context {
         mBase.unregisterReceiver(receiver);
     }
 
+    /** @hide */
+    @Override
+    @NonNull
+    public List<IntentFilter> getRegisteredIntentFilters(@NonNull BroadcastReceiver receiver) {
+        return mBase.getRegisteredIntentFilters(receiver);
+    }
+
     @Override
     public @Nullable ComponentName startService(Intent service) {
         return mBase.startService(service);
@@ -953,7 +960,6 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    // TODO(b/347269120): Re-add @Nullable
     public Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
@@ -1004,6 +1010,12 @@ public class ContextWrapper extends Context {
     public void enforceCallingOrSelfPermission(
             String permission, @Nullable String message) {
         mBase.enforceCallingOrSelfPermission(permission, message);
+    }
+
+    /** @hide */
+    @Override
+    public int getPermissionRequestState(String permission) {
+        return mBase.getPermissionRequestState(permission);
     }
 
     @Override

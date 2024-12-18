@@ -31,7 +31,6 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.theme.PlatformTheme
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayout
@@ -43,30 +42,20 @@ private const val VolumePanelTestTag = "VolumePanel"
 private val padding = 24.dp
 
 @Composable
-fun VolumePanelRoot(
-    viewModel: VolumePanelViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun VolumePanelRoot(viewModel: VolumePanelViewModel, modifier: Modifier = Modifier) {
     val accessibilityTitle = stringResource(R.string.accessibility_volume_settings)
     val state: VolumePanelState by viewModel.volumePanelState.collectAsStateWithLifecycle()
     val components by viewModel.componentsLayout.collectAsStateWithLifecycle()
 
     with(VolumePanelComposeScope(state)) {
         components?.let { componentsState ->
-            PlatformTheme {
-                Components(
-                    componentsState,
-                    modifier
-                        .sysuiResTag(VolumePanelTestTag)
-                        .semantics { paneTitle = accessibilityTitle }
-                        .padding(
-                            start = padding,
-                            top = padding,
-                            end = padding,
-                            bottom = 20.dp,
-                        )
-                )
-            }
+            Components(
+                componentsState,
+                modifier
+                    .sysuiResTag(VolumePanelTestTag)
+                    .semantics { paneTitle = accessibilityTitle }
+                    .padding(start = padding, top = padding, end = padding, bottom = 20.dp),
+            )
         }
     }
 }
@@ -74,7 +63,7 @@ fun VolumePanelRoot(
 @Composable
 private fun VolumePanelComposeScope.Components(
     layout: ComponentsLayout,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val arrangement: Arrangement.Vertical =
         if (isLargeScreen) {
@@ -82,14 +71,11 @@ private fun VolumePanelComposeScope.Components(
         } else {
             if (isPortrait) Arrangement.spacedBy(padding) else Arrangement.spacedBy(4.dp)
         }
-    Column(
-        modifier = modifier,
-        verticalArrangement = arrangement,
-    ) {
+    Column(modifier = modifier, verticalArrangement = arrangement) {
         if (isPortrait || isLargeScreen) {
             VerticalVolumePanelContent(
                 modifier = Modifier.weight(weight = 1f, fill = false),
-                layout = layout
+                layout = layout,
             )
         } else {
             HorizontalVolumePanelContent(
@@ -97,23 +83,17 @@ private fun VolumePanelComposeScope.Components(
                 layout = layout,
             )
         }
-        BottomBar(
-            modifier = Modifier,
-            layout = layout,
-        )
+        BottomBar(modifier = Modifier, layout = layout)
     }
 }
 
 @Composable
 private fun VolumePanelComposeScope.BottomBar(
     layout: ComponentsLayout,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (layout.bottomBarComponent.isVisible) {
-        Box(
-            modifier = modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             with(layout.bottomBarComponent.component as ComposeVolumePanelUiComponent) {
                 Content(Modifier)
             }

@@ -3599,6 +3599,13 @@ class PackageManagerShellCommand extends ShellCommand {
                             .setCompilerFilter(sessionParams.dexoptCompilerFilter)
                             .build();
                     break;
+                case "--disable-auto-install-dependencies":
+                    if (Flags.sdkDependencyInstaller()) {
+                        sessionParams.setAutoInstallDependenciesEnabled(false);
+                    } else {
+                        throw new IllegalArgumentException("Unknown option " + opt);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -4805,6 +4812,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          https://source.android.com/docs/core/runtime/configure"
                 + "#compiler_filters");
         pw.println("          or 'skip'");
+        if (Flags.sdkDependencyInstaller()) {
+            pw.println("      --disable-auto-install-dependencies: if set, any missing shared");
+            pw.println("          library dependencies will not be auto-installed");
+        }
         pw.println("");
         pw.println("  install-existing [--user USER_ID|all|current]");
         pw.println("       [--instant] [--full] [--wait] [--restrict-permissions] PACKAGE");

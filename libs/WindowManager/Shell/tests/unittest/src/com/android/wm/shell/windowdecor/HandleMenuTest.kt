@@ -24,6 +24,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
@@ -33,6 +34,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.view.WindowInsets.Type.systemBars
 import android.view.WindowManager
 import androidx.core.graphics.toPointF
 import androidx.test.filters.SmallTest
@@ -48,6 +50,13 @@ import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UND
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -67,6 +76,7 @@ import org.mockito.kotlin.whenever
  * Build/Install/Run:
  * atest WMShellUnitTests:HandleMenuTest
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner::class)
@@ -80,14 +90,6 @@ class HandleMenuTest : ShellTestCase() {
     @Mock
     private lateinit var mockWindowManager: WindowManager
     @Mock
-    private lateinit var onClickListener: View.OnClickListener
-    @Mock
-    private lateinit var onTouchListener: View.OnTouchListener
-    @Mock
-    private lateinit var appIcon: Bitmap
-    @Mock
-    private lateinit var appName: CharSequence
-    @Mock
     private lateinit var displayController: DisplayController
     @Mock
     private lateinit var splitScreenController: SplitScreenController
@@ -95,6 +97,10 @@ class HandleMenuTest : ShellTestCase() {
     private lateinit var displayLayout: DisplayLayout
     @Mock
     private lateinit var mockSurfaceControlViewHost: SurfaceControlViewHost
+    @Mock
+    private lateinit var mockTaskResourceLoader: WindowDecorTaskResourceLoader
+    @Mock
+    private lateinit var mockAppIcon: Bitmap
 
     private lateinit var handleMenu: HandleMenu
 
@@ -134,8 +140,8 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
-    fun testFullscreenMenuUsesSystemViewContainer() {
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
+    fun testFullscreenMenuUsesSystemViewContainer() = runTest {
         createTaskInfo(WINDOWING_MODE_FULLSCREEN, SPLIT_POSITION_UNDEFINED)
         val handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
@@ -146,8 +152,8 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
-    fun testFreeformMenu_usesViewHostViewContainer() {
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
+    fun testFreeformMenu_usesViewHostViewContainer() = runTest {
         createTaskInfo(WINDOWING_MODE_FREEFORM, SPLIT_POSITION_UNDEFINED)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalViewHostViewContainer)
@@ -157,8 +163,8 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
-    fun testSplitLeftMenu_usesSystemViewContainer() {
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
+    fun testSplitLeftMenu_usesSystemViewContainer() = runTest {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_TOP_OR_LEFT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_TOP_OR_LEFT)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
@@ -172,8 +178,8 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
-    fun testSplitRightMenu_usesSystemViewContainer() {
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
+    fun testSplitRightMenu_usesSystemViewContainer() = runTest {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_BOTTOM_OR_RIGHT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_BOTTOM_OR_RIGHT)
         assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
@@ -186,13 +192,47 @@ class HandleMenuTest : ShellTestCase() {
         assertEquals(expected.toPointF(), handleMenu.handleMenuPosition)
     }
 
-    private fun createTaskInfo(windowingMode: Int, splitPosition: Int) {
+    @Test
+    fun testCreate_forceShowSystemBars_usesSystemViewContainer() = runTest {
+        createTaskInfo(WINDOWING_MODE_FREEFORM)
+
+        handleMenu = createAndShowHandleMenu(forceShowSystemBars = true)
+
+        // Only AdditionalSystemViewContainer supports force showing system bars.
+        assertTrue(handleMenu.handleMenuViewContainer is AdditionalSystemViewContainer)
+    }
+
+    @Test
+    fun testCreate_forceShowSystemBars() = runTest {
+        createTaskInfo(WINDOWING_MODE_FREEFORM)
+
+        handleMenu = createAndShowHandleMenu(forceShowSystemBars = true)
+
+        val types = (handleMenu.handleMenuViewContainer as AdditionalSystemViewContainer)
+            .lp.forciblyShownTypes
+        assertTrue((types and systemBars()) != 0)
+    }
+
+    @Test
+    fun testCreate_loadsAppInfoInBackground() = runTest {
+        createTaskInfo(WINDOWING_MODE_FREEFORM)
+
+        handleMenu = createAndShowHandleMenu()
+        advanceUntilIdle()
+
+        assertThat(handleMenu.handleMenuView!!.appNameView.text).isEqualTo(APP_NAME)
+        val drawable = handleMenu.handleMenuView!!.appIconView.drawable as BitmapDrawable
+        assertThat(drawable.bitmap).isEqualTo(mockAppIcon)
+    }
+
+    private fun createTaskInfo(windowingMode: Int, splitPosition: Int? = null) {
         val taskDescriptionBuilder = ActivityManager.TaskDescription.Builder()
             .setBackgroundColor(Color.YELLOW)
         val bounds = when (windowingMode) {
             WINDOWING_MODE_FULLSCREEN -> DISPLAY_BOUNDS
             WINDOWING_MODE_FREEFORM -> FREEFORM_BOUNDS
             WINDOWING_MODE_MULTI_WINDOW -> {
+                checkNotNull(splitPosition)
                 if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                     SPLIT_LEFT_BOUNDS
                 } else {
@@ -208,14 +248,23 @@ class HandleMenuTest : ShellTestCase() {
             .setBounds(bounds)
             .setVisible(true)
             .build()
-        whenever(splitScreenController.getSplitPosition(any())).thenReturn(splitPosition)
-        whenever(splitScreenController.getStageBounds(any(), any())).thenAnswer {
-            (it.arguments.first() as Rect).set(SPLIT_LEFT_BOUNDS)
-            (it.arguments[1] as Rect).set(SPLIT_RIGHT_BOUNDS)
+        if (windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            whenever(splitScreenController.getSplitPosition(any())).thenReturn(splitPosition)
+            whenever(splitScreenController.getStageBounds(any(), any())).thenAnswer {
+                (it.arguments.first() as Rect).set(SPLIT_LEFT_BOUNDS)
+                (it.arguments[1] as Rect).set(SPLIT_RIGHT_BOUNDS)
+            }
         }
+        whenever(mockTaskResourceLoader.getName(mockDesktopWindowDecoration.mTaskInfo))
+            .thenReturn(APP_NAME)
+        whenever(mockTaskResourceLoader.getHeaderIcon(mockDesktopWindowDecoration.mTaskInfo))
+            .thenReturn(mockAppIcon)
     }
 
-    private fun createAndShowHandleMenu(splitPosition: Int): HandleMenu {
+    private fun TestScope.createAndShowHandleMenu(
+        splitPosition: Int? = null,
+        forceShowSystemBars: Boolean = false
+    ): HandleMenu {
         val layoutId = if (mockDesktopWindowDecoration.mTaskInfo.isFreeform) {
             R.layout.desktop_mode_app_header
         } else {
@@ -225,22 +274,48 @@ class HandleMenuTest : ShellTestCase() {
             WINDOWING_MODE_FULLSCREEN -> (DISPLAY_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
             WINDOWING_MODE_FREEFORM -> 0
             WINDOWING_MODE_MULTI_WINDOW -> {
+                checkNotNull(splitPosition)
                 if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                     (SPLIT_LEFT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 } else {
-                    (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+                    SPLIT_LEFT_BOUNDS.width() + (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 }
             }
             else -> error("Invalid windowing mode")
         }
-        val handleMenu = HandleMenu(mockDesktopWindowDecoration,
+        val handleMenu = HandleMenu(
+            StandardTestDispatcher(testScheduler),
+            this,
+            mockDesktopWindowDecoration,
             WindowManagerWrapper(mockWindowManager),
-            layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
+            mockTaskResourceLoader,
+            layoutId,
+            splitScreenController,
+            shouldShowWindowingPill = true,
             shouldShowNewWindowButton = true,
-            null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
-            captionX = captionX
+            shouldShowManageWindowsButton = false,
+            shouldShowChangeAspectRatioButton = false,
+            shouldShowDesktopModeButton = true,
+            isBrowserApp = false,
+            null /* openInAppOrBrowserIntent */,
+            captionWidth = HANDLE_WIDTH,
+            captionHeight = 50,
+            captionX = captionX,
+            captionY = 0,
         )
-        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock())
+        handleMenu.show(
+            onToDesktopClickListener = mock(),
+            onToFullscreenClickListener = mock(),
+            onToSplitScreenClickListener = mock(),
+            onNewWindowClickListener = mock(),
+            onManageWindowsClickListener = mock(),
+            onChangeAspectRatioClickListener = mock(),
+            openInAppOrBrowserClickListener = mock(),
+            onOpenByDefaultClickListener = mock(),
+            onCloseMenuClickListener = mock(),
+            onOutsideTouchListener = mock(),
+            forceShowSystemBars = forceShowSystemBars
+        )
         return handleMenu
     }
 
@@ -256,5 +331,6 @@ class HandleMenuTest : ShellTestCase() {
         private const val MENU_PILL_ELEVATION = 2
         private const val MENU_PILL_SPACING_MARGIN = 4
         private const val HANDLE_WIDTH = 80
+        private const val APP_NAME = "Test App"
     }
 }

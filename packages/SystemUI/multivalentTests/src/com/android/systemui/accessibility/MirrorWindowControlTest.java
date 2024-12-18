@@ -30,11 +30,11 @@ import android.graphics.Point;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class MirrorWindowControlTest extends SysuiTestCase {
 
-    @Mock WindowManager mWindowManager;
+    @Mock ViewCaptureAwareWindowManager mWindowManager;
     View mView;
     int mViewWidth;
     int mViewHeight;

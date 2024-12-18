@@ -28,6 +28,7 @@ import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN;
 import static com.android.server.power.ScreenTimeoutOverridePolicy.RELEASE_REASON_USER_ACTIVITY_TOUCH;
 import static com.android.server.power.WakefulnessSessionObserver.OFF_REASON_POWER_BUTTON;
+import static com.android.server.power.WakefulnessSessionObserver.OFF_REASON_TIMEOUT;
 import static com.android.server.power.WakefulnessSessionObserver.OVERRIDE_OUTCOME_CANCEL_POWER_BUTTON;
 import static com.android.server.power.WakefulnessSessionObserver.OVERRIDE_OUTCOME_CANCEL_USER_INTERACTION;
 import static com.android.server.power.WakefulnessSessionObserver.OVERRIDE_OUTCOME_TIMEOUT_SUCCESS;
@@ -40,6 +41,7 @@ import static com.android.server.power.WakefulnessSessionObserver.POLICY_REASON_
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -90,6 +92,7 @@ public class WakefulnessSessionObserverTest {
             mWakefulnessSessionFrameworkStatsLogger;
     @Mock
     private DisplayManagerInternal mDisplayManagerInternal;
+    private MockContentResolver mContentResolver = new MockContentResolver();
 
     private TestHandler mHandler;
     @Before
@@ -106,10 +109,9 @@ public class WakefulnessSessionObserverTest {
                 R.integer.config_screenTimeoutOverride);
         when(mContext.getResources()).thenReturn(res);
         FakeSettingsProvider.clearSettingsProvider();
-        MockContentResolver mockContentResolver = new MockContentResolver();
-        mockContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
-        when(mContext.getContentResolver()).thenReturn(mockContentResolver);
-        Settings.System.putIntForUser(mockContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
+        Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
                 DEFAULT_SCREEN_OFF_TIMEOUT_MS, UserHandle.USER_CURRENT);
 
         final DisplayInfo info = new DisplayInfo();
@@ -509,6 +511,115 @@ public class WakefulnessSessionObserverTest {
                         userActivityTime, // last user activity timestamp
                         dimDurationMs, // dim duration ms
                         DEFAULT_SCREEN_OFF_TIMEOUT_MS); // default Timeout Ms
+    }
+
+    @Test
+    public void testScreenOffTimeout_normal_logSessionEventTriggered() {
+        int powerGroupId = 1;
+        int userActivity = PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY;
+        triggerLogSessionEvent(powerGroupId, userActivity);
+        verify(mWakefulnessSessionFrameworkStatsLogger)
+                .logSessionEvent(
+                        powerGroupId, // powerGroupId
+                        OFF_REASON_TIMEOUT, // interactiveStateOffReason
+                        0, // interactiveStateOnDurationMs
+                        userActivity, // userActivity
+                        0,  // lastUserActivityEventDurationMs
+                        DEFAULT_SCREEN_OFF_TIMEOUT_MS - OVERRIDE_SCREEN_OFF_TIMEOUT_MS
+                ); // reducedInteractiveStateOnDurationMs;
+    }
+
+    @Test
+    public void testScreenOffTimeout_zero_noLogSessionEventTriggered() {
+        // simulate adding an invalid screen_off_timeout value
+        Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                0, // invalid timeout value
+                UserHandle.USER_CURRENT);
+        mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+
+        try {
+            triggerLogSessionEvent();
+            verify(mWakefulnessSessionFrameworkStatsLogger, never())
+                    .logSessionEvent(anyInt(), anyInt(), anyLong(), anyInt(), anyLong(), anyInt());
+        } finally {
+            // rollback the original data
+            Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                    DEFAULT_SCREEN_OFF_TIMEOUT_MS, UserHandle.USER_CURRENT);
+            mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+        }
+    }
+
+    @Test
+    public void testScreenOffTimeout_negative_noLogSessionEventTriggered() {
+        // simulate adding an invalid screen_off_timeout value
+        Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                -1, // invalid timeout value
+                UserHandle.USER_CURRENT);
+        mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+
+        try {
+            triggerLogSessionEvent();
+            verify(mWakefulnessSessionFrameworkStatsLogger, never())
+                    .logSessionEvent(anyInt(), anyInt(), anyLong(), anyInt(), anyLong(), anyInt());
+        } finally {
+            // rollback the original data
+            Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                    DEFAULT_SCREEN_OFF_TIMEOUT_MS, UserHandle.USER_CURRENT);
+            mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+        }
+    }
+
+    @Test
+    public void testScreenOffTimeout_max_logSessionEventTriggered() {
+        // simulate adding the max screen_off_timeout value
+        int defaultTimeoutMs = Integer.MAX_VALUE;
+        Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                defaultTimeoutMs,
+                UserHandle.USER_CURRENT);
+        mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+
+        try {
+            int powerGroupId = 1;
+            int userActivity = PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY;
+            triggerLogSessionEvent(powerGroupId, userActivity);
+            verify(mWakefulnessSessionFrameworkStatsLogger)
+                    .logSessionEvent(
+                            powerGroupId, // powerGroupId
+                            OFF_REASON_TIMEOUT, // interactiveStateOffReason
+                            0, // interactiveStateOnDurationMs
+                            userActivity, // userActivity
+                            0,  // lastUserActivityEventDurationMs
+                            defaultTimeoutMs - OVERRIDE_SCREEN_OFF_TIMEOUT_MS
+                    ); // reducedInteractiveStateOnDurationMs;
+        } finally {
+            // rollback the original data
+            Settings.System.putIntForUser(mContentResolver, Settings.System.SCREEN_OFF_TIMEOUT,
+                    DEFAULT_SCREEN_OFF_TIMEOUT_MS, UserHandle.USER_CURRENT);
+            mWakefulnessSessionObserver.updateSettingScreenOffTimeout(mContext);
+        }
+    }
+
+    private void triggerLogSessionEvent() {
+        triggerLogSessionEvent(1, PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY);
+    }
+
+    private void triggerLogSessionEvent(int powerGroupId, int userActivity) {
+        mWakefulnessSessionObserver.onWakefulnessChangeStarted(
+                powerGroupId,
+                PowerManagerInternal.WAKEFULNESS_AWAKE,
+                WAKE_REASON_POWER_BUTTON,
+                mTestClock.now());
+        mWakefulnessSessionObserver.onWakeLockAcquired(
+                PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK);
+
+        long userActivityTime = mTestClock.now();
+        mWakefulnessSessionObserver.notifyUserActivity(
+                userActivityTime, powerGroupId, userActivity);
+        mWakefulnessSessionObserver.onWakefulnessChangeStarted(
+                powerGroupId,
+                PowerManagerInternal.WAKEFULNESS_DOZING,
+                GO_TO_SLEEP_REASON_TIMEOUT,
+                mTestClock.now());
     }
 
     private void advanceTime(long timeMs) {

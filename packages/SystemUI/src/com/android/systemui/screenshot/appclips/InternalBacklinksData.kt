@@ -27,16 +27,27 @@ import android.graphics.drawable.Drawable
  * represent error when necessary.
  */
 internal sealed class InternalBacklinksData(
-    open val appIcon: Drawable,
-    open var displayLabel: String
+    // Fields from this object are made accessible through accessors to keep call sites simpler.
+    private val backlinkDisplayInfo: BacklinkDisplayInfo,
 ) {
-    data class BacklinksData(val clipData: ClipData, override val appIcon: Drawable) :
-        InternalBacklinksData(appIcon, clipData.description.label.toString())
+    // Use separate field to access display label so that callers don't have to access through
+    // internal object.
+    var displayLabel: String
+        get() = backlinkDisplayInfo.displayLabel
+        set(value) {
+            backlinkDisplayInfo.displayLabel = value
+        }
 
-    data class CrossProfileError(
-        override val appIcon: Drawable,
-        override var displayLabel: String
-    ) : InternalBacklinksData(appIcon, displayLabel)
+    // Use separate field to access app icon so that callers don't have to access through internal
+    // object.
+    val appIcon: Drawable
+        get() = backlinkDisplayInfo.appIcon
+
+    data class BacklinksData(val clipData: ClipData, private val icon: Drawable) :
+        InternalBacklinksData(BacklinkDisplayInfo(icon, clipData.description.label.toString()))
+
+    data class CrossProfileError(private val icon: Drawable, private var label: String) :
+        InternalBacklinksData(BacklinkDisplayInfo(icon, label))
 }
 
 /**
@@ -54,11 +65,16 @@ internal data class InternalTaskInfo(
     val userId: Int,
     val packageManager: PackageManager
 ) {
-    fun getTopActivityNameForDebugLogging(): String = topActivityInfo.name
-
-    fun getTopActivityPackageName(): String = topActivityInfo.packageName
-
-    fun getTopActivityAppName(): String = topActivityInfo.loadLabel(packageManager).toString()
-
-    fun getTopActivityAppIcon(): Drawable = topActivityInfo.loadIcon(packageManager)
+    val topActivityNameForDebugLogging: String = topActivityInfo.name
+    val topActivityPackageName: String = topActivityInfo.packageName
+    val topActivityAppName: String by lazy { topActivityInfo.getAppName(packageManager) }
+    val topActivityAppIcon: Drawable by lazy { topActivityInfo.loadIcon(packageManager) }
 }
+
+internal fun ActivityInfo.getAppName(packageManager: PackageManager) =
+    loadLabel(packageManager).toString()
+
+internal fun ActivityInfo.getAppIcon(packageManager: PackageManager) = loadIcon(packageManager)
+
+/** A class to hold data that is used for displaying backlink to user in SysUI activity. */
+internal data class BacklinkDisplayInfo(val appIcon: Drawable, var displayLabel: String)

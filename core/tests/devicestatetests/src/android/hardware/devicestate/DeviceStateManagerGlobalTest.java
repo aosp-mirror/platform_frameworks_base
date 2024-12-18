@@ -16,12 +16,17 @@
 
 package android.hardware.devicestate;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -30,83 +35,157 @@ import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.util.ConcurrentUtils;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 /**
  * Unit tests for {@link DeviceStateManagerGlobal}.
- * <p/>
- * Run with <code>atest DeviceStateManagerGlobalTest</code>.
+ *
+ * <p> Build/Install/Run:
+ * atest FrameworksCoreDeviceStateManagerTests:DeviceStateManagerGlobalTest
  */
-@RunWith(JUnit4.class)
 @SmallTest
+@RunWith(ParameterizedAndroidJunit4.class)
 public final class DeviceStateManagerGlobalTest {
     private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(
             new DeviceState.Configuration.Builder(0 /* identifier */, "" /* name */).build());
     private static final DeviceState OTHER_DEVICE_STATE = new DeviceState(
             new DeviceState.Configuration.Builder(1 /* identifier */, "" /* name */).build());
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(Flags.FLAG_WLINFO_ONCREATE);
+    }
+
+    @NonNull
     private TestDeviceStateManagerService mService;
+    @NonNull
     private DeviceStateManagerGlobal mDeviceStateManagerGlobal;
+
+    public DeviceStateManagerGlobalTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() {
-        FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        final FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
         mService = new TestDeviceStateManagerService(permissionEnforcer);
         mDeviceStateManagerGlobal = new DeviceStateManagerGlobal(mService);
-        assertFalse(mService.mCallbacks.isEmpty());
+        assertThat(mService.mCallbacks).isNotEmpty();
     }
 
     @Test
-    public void registerCallback() {
-        DeviceStateCallback callback1 = mock(DeviceStateCallback.class);
-        DeviceStateCallback callback2 = mock(DeviceStateCallback.class);
+    @DisableFlags(Flags.FLAG_WLINFO_ONCREATE)
+    public void create_whenWlinfoOncreateIsDisabled_receivesDeviceStateInfoFromCallback() {
+        final FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        final TestDeviceStateManagerService service = new TestDeviceStateManagerService(
+                permissionEnforcer, true /* simulatePostCallback */);
+        final DeviceStateManagerGlobal dsmGlobal = new DeviceStateManagerGlobal(service);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        dsmGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback1,
-                ConcurrentUtils.DIRECT_EXECUTOR);
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback2,
-                ConcurrentUtils.DIRECT_EXECUTOR);
+        verify(callback, never()).onDeviceStateChanged(any());
 
-        // Verify initial callbacks
-        verify(callback1).onSupportedStatesChanged(eq(mService.getSupportedDeviceStates()));
-        verify(callback1).onDeviceStateChanged(eq(mService.getMergedState()));
-        verify(callback2).onDeviceStateChanged(eq(mService.getMergedState()));
+        // Simulate DeviceStateManagerService#registerProcess by notifying clients of current device
+        // state via callback.
+        service.notifyDeviceStateInfoChanged();
+        verify(callback).onDeviceStateChanged(eq(DEFAULT_DEVICE_STATE));
+    }
 
-        reset(callback1);
-        reset(callback2);
+    @Test
+    @EnableFlags(Flags.FLAG_WLINFO_ONCREATE)
+    public void create_whenWlinfoOncreateIsEnabled_returnsDeviceStateInfoFromRegistration() {
+        final FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        final IDeviceStateManager service = new TestDeviceStateManagerService(permissionEnforcer);
+        final DeviceStateManagerGlobal dsmGlobal = new DeviceStateManagerGlobal(service);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        dsmGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
-        // Change the supported states and verify callback
+        verify(callback).onDeviceStateChanged(eq(DEFAULT_DEVICE_STATE));
+    }
+
+    @Test
+    public void registerCallback_usesExecutorForCallbacks() {
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        final Executor executor = mock(Executor.class);
+        doAnswer(invocation -> {
+            Runnable runnable = (Runnable) invocation.getArguments()[0];
+            runnable.run();
+            return null;
+        }).when(executor).execute(any(Runnable.class));
+
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback, executor);
+        mService.setBaseState(OTHER_DEVICE_STATE);
+        mService.setSupportedStates(List.of(OTHER_DEVICE_STATE));
+
+        // Verify that the given executor is used for both initial and subsequent callbacks.
+        verify(executor, times(4)).execute(any(Runnable.class));
+    }
+
+    @Test
+    public void registerCallback_supportedStatesChanged() {
+        final DeviceStateCallback callback1 = mock(DeviceStateCallback.class);
+        final DeviceStateCallback callback2 = mock(DeviceStateCallback.class);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback1, DIRECT_EXECUTOR);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback2, DIRECT_EXECUTOR);
+
+        // Change the supported states and verify callback.
         mService.setSupportedStates(List.of(DEFAULT_DEVICE_STATE));
+
         verify(callback1).onSupportedStatesChanged(eq(mService.getSupportedDeviceStates()));
         verify(callback2).onSupportedStatesChanged(eq(mService.getSupportedDeviceStates()));
+    }
+
+    @Test
+    public void registerCallback_baseStateChanged() {
+        final DeviceStateCallback callback1 = mock(DeviceStateCallback.class);
+        final DeviceStateCallback callback2 = mock(DeviceStateCallback.class);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback1, DIRECT_EXECUTOR);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback2, DIRECT_EXECUTOR);
         mService.setSupportedStates(List.of(DEFAULT_DEVICE_STATE, OTHER_DEVICE_STATE));
 
-        reset(callback1);
-        reset(callback2);
-
-        // Change the base state and verify callback
+        // Change the base state and verify callback.
         mService.setBaseState(OTHER_DEVICE_STATE);
+
         verify(callback1).onDeviceStateChanged(eq(mService.getMergedState()));
         verify(callback2).onDeviceStateChanged(eq(mService.getMergedState()));
+    }
 
-        reset(callback1);
-        reset(callback2);
+    @Test
+    public void registerCallback_requestedStateChanged() {
+        final DeviceStateCallback callback1 = mock(DeviceStateCallback.class);
+        final DeviceStateCallback callback2 = mock(DeviceStateCallback.class);
+        final DeviceStateRequest request =
+                DeviceStateRequest.newBuilder(DEFAULT_DEVICE_STATE.getIdentifier()).build();
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback1, DIRECT_EXECUTOR);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback2, DIRECT_EXECUTOR);
 
-        // Change the requested state and verify callback
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(
-                DEFAULT_DEVICE_STATE.getIdentifier()).build();
+        // Change the requested state and verify callback.
         mDeviceStateManagerGlobal.requestState(request, null /* executor */, null /* callback */);
 
         verify(callback1).onDeviceStateChanged(eq(mService.getMergedState()));
@@ -115,10 +194,9 @@ public final class DeviceStateManagerGlobalTest {
 
     @Test
     public void unregisterCallback() {
-        DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
 
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback,
-                ConcurrentUtils.DIRECT_EXECUTOR);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
         // Verify initial callbacks
         verify(callback).onSupportedStatesChanged(eq(mService.getSupportedDeviceStates()));
@@ -134,15 +212,14 @@ public final class DeviceStateManagerGlobalTest {
 
     @Test
     public void submitRequest() {
-        DeviceStateCallback callback = mock(DeviceStateCallback.class);
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback,
-                ConcurrentUtils.DIRECT_EXECUTOR);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
         verify(callback).onDeviceStateChanged(eq(mService.getBaseState()));
         reset(callback);
 
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(
-                OTHER_DEVICE_STATE.getIdentifier()).build();
+        final DeviceStateRequest request =
+                DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE.getIdentifier()).build();
         mDeviceStateManagerGlobal.requestState(request, null /* executor */, null /* callback */);
 
         verify(callback).onDeviceStateChanged(eq(OTHER_DEVICE_STATE));
@@ -155,15 +232,14 @@ public final class DeviceStateManagerGlobalTest {
 
     @Test
     public void submitBaseStateOverrideRequest() {
-        DeviceStateCallback callback = mock(DeviceStateCallback.class);
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback,
-                ConcurrentUtils.DIRECT_EXECUTOR);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
         verify(callback).onDeviceStateChanged(eq(mService.getBaseState()));
         reset(callback);
 
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(
-                OTHER_DEVICE_STATE.getIdentifier()).build();
+        final DeviceStateRequest request =
+                DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE.getIdentifier()).build();
         mDeviceStateManagerGlobal.requestBaseStateOverride(request, null /* executor */,
                 null /* callback */);
 
@@ -177,28 +253,27 @@ public final class DeviceStateManagerGlobalTest {
 
     @Test
     public void submitBaseAndEmulatedStateOverride() {
-        DeviceStateCallback callback = mock(DeviceStateCallback.class);
-        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback,
-                ConcurrentUtils.DIRECT_EXECUTOR);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        mDeviceStateManagerGlobal.registerDeviceStateCallback(callback, DIRECT_EXECUTOR);
 
         verify(callback).onDeviceStateChanged(eq(mService.getBaseState()));
         reset(callback);
 
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(
-                OTHER_DEVICE_STATE.getIdentifier()).build();
+        final DeviceStateRequest request =
+                DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE.getIdentifier()).build();
         mDeviceStateManagerGlobal.requestBaseStateOverride(request, null /* executor */,
                 null /* callback */);
 
         verify(callback).onDeviceStateChanged(eq(OTHER_DEVICE_STATE));
-        assertEquals(OTHER_DEVICE_STATE, mService.getBaseState());
+        assertThat(mService.getBaseState()).isEqualTo(OTHER_DEVICE_STATE);
         reset(callback);
 
-        DeviceStateRequest secondRequest = DeviceStateRequest.newBuilder(
-                DEFAULT_DEVICE_STATE.getIdentifier()).build();
+        final DeviceStateRequest secondRequest =
+                DeviceStateRequest.newBuilder(DEFAULT_DEVICE_STATE.getIdentifier()).build();
 
         mDeviceStateManagerGlobal.requestState(secondRequest, null, null);
 
-        assertEquals(OTHER_DEVICE_STATE, mService.getBaseState());
+        assertThat(mService.getBaseState()).isEqualTo(OTHER_DEVICE_STATE);
         verify(callback).onDeviceStateChanged(eq(DEFAULT_DEVICE_STATE));
         reset(callback);
 
@@ -214,12 +289,12 @@ public final class DeviceStateManagerGlobalTest {
 
     @Test
     public void verifyDeviceStateRequestCallbacksCalled() {
-        DeviceStateRequest.Callback callback = mock(TestDeviceStateRequestCallback.class);
+        final DeviceStateRequest.Callback callback = mock(TestDeviceStateRequestCallback.class);
 
-        DeviceStateRequest request = DeviceStateRequest.newBuilder(
-                OTHER_DEVICE_STATE.getIdentifier()).build();
+        final DeviceStateRequest request =
+                DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE.getIdentifier()).build();
         mDeviceStateManagerGlobal.requestState(request,
-                ConcurrentUtils.DIRECT_EXECUTOR /* executor */,
+                DIRECT_EXECUTOR /* executor */,
                 callback /* callback */);
 
         verify(callback).onRequestActivated(eq(request));
@@ -232,52 +307,62 @@ public final class DeviceStateManagerGlobalTest {
 
     public static class TestDeviceStateRequestCallback implements DeviceStateRequest.Callback {
         @Override
-        public void onRequestActivated(DeviceStateRequest request) { }
+        public void onRequestActivated(@NonNull DeviceStateRequest request) { }
 
         @Override
-        public void onRequestCanceled(DeviceStateRequest request) { }
+        public void onRequestCanceled(@NonNull DeviceStateRequest request) { }
 
         @Override
-        public void onRequestSuspended(DeviceStateRequest request) { }
+        public void onRequestSuspended(@NonNull DeviceStateRequest request) { }
     }
 
     private static final class TestDeviceStateManagerService extends IDeviceStateManager.Stub {
-        public static final class Request {
-            public final IBinder token;
-            public final int state;
-            public final int flags;
+        static final class Request {
+            @NonNull
+            final IBinder mToken;
+            final int mState;
 
-            private Request(IBinder token, int state, int flags) {
-                this.token = token;
-                this.state = state;
-                this.flags = flags;
+            private Request(@NonNull IBinder token, int state) {
+                this.mToken = token;
+                this.mState = state;
             }
         }
 
-        private List<DeviceState> mSupportedDeviceStates = List.of(DEFAULT_DEVICE_STATE,
-                OTHER_DEVICE_STATE);
-
+        @NonNull
+        private List<DeviceState> mSupportedDeviceStates =
+                List.of(DEFAULT_DEVICE_STATE, OTHER_DEVICE_STATE);
+        @NonNull
         private DeviceState mBaseState = DEFAULT_DEVICE_STATE;
+        @Nullable
         private Request mRequest;
+        @Nullable
         private Request mBaseStateRequest;
 
+        private final boolean mSimulatePostCallback;
         private final Set<IDeviceStateManagerCallback> mCallbacks = new HashSet<>();
 
-        TestDeviceStateManagerService(FakePermissionEnforcer enforcer) {
-            super(enforcer);
+        TestDeviceStateManagerService(@NonNull FakePermissionEnforcer enforcer) {
+            this(enforcer, false /* simulatePostCallback */);
         }
 
+        TestDeviceStateManagerService(@NonNull FakePermissionEnforcer enforcer,
+                boolean simulatePostCallback) {
+            super(enforcer);
+            mSimulatePostCallback = simulatePostCallback;
+        }
+
+        @NonNull
         private DeviceStateInfo getInfo() {
             final int mergedBaseState = mBaseStateRequest == null
-                    ? mBaseState.getIdentifier() : mBaseStateRequest.state;
-            final int mergedState = mRequest == null
-                    ? mergedBaseState : mRequest.state;
+                    ? mBaseState.getIdentifier() : mBaseStateRequest.mState;
+            final int mergedState = mRequest == null ? mergedBaseState : mRequest.mState;
 
+            final ArrayList<DeviceState> supportedStates = new ArrayList<>(mSupportedDeviceStates);
             final DeviceState baseState = new DeviceState(
                     new DeviceState.Configuration.Builder(mergedBaseState, "" /* name */).build());
             final DeviceState state = new DeviceState(
                     new DeviceState.Configuration.Builder(mergedState, "" /* name */).build());
-            return new DeviceStateInfo(new ArrayList<>(mSupportedDeviceStates), baseState, state);
+            return new DeviceStateInfo(supportedStates, baseState, state);
         }
 
         private void notifyDeviceStateInfoChanged() {
@@ -291,38 +376,47 @@ public final class DeviceStateManagerGlobalTest {
             }
         }
 
+        @NonNull
         @Override
         public DeviceStateInfo getDeviceStateInfo() {
             return getInfo();
         }
 
+        @Nullable
         @Override
-        public void registerCallback(IDeviceStateManagerCallback callback) {
+        public DeviceStateInfo registerCallback(IDeviceStateManagerCallback callback) {
             if (mCallbacks.contains(callback)) {
                 throw new SecurityException("Callback is already registered.");
             }
 
             mCallbacks.add(callback);
-            try {
-                callback.onDeviceStateInfoChanged(getInfo());
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+            if (Flags.wlinfoOncreate()) {
+                return getInfo();
             }
+
+            if (!mSimulatePostCallback) {
+                try {
+                    callback.onDeviceStateInfoChanged(getInfo());
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            }
+            return null;
         }
 
         @Override
-        public void requestState(IBinder token, int state, int flags) {
+        public void requestState(@NonNull IBinder token, int state, int unusedFlags) {
             if (mRequest != null) {
                 for (IDeviceStateManagerCallback callback : mCallbacks) {
                     try {
-                        callback.onRequestCanceled(mRequest.token);
+                        callback.onRequestCanceled(mRequest.mToken);
                     } catch (RemoteException e) {
                         e.rethrowFromSystemServer();
                     }
                 }
             }
 
-            final Request request = new Request(token, state, flags);
+            final Request request = new Request(token, state);
             mRequest = request;
             notifyDeviceStateInfoChanged();
 
@@ -337,7 +431,7 @@ public final class DeviceStateManagerGlobalTest {
 
         @Override
         public void cancelStateRequest() {
-            IBinder token = mRequest.token;
+            final IBinder token = mRequest.mToken;
             mRequest = null;
             for (IDeviceStateManagerCallback callback : mCallbacks) {
                 try {
@@ -350,19 +444,18 @@ public final class DeviceStateManagerGlobalTest {
         }
 
         @Override
-        public void requestBaseStateOverride(IBinder token, int state, int flags) {
+        public void requestBaseStateOverride(@NonNull IBinder token, int state, int unusedFlags) {
             if (mBaseStateRequest != null) {
                 for (IDeviceStateManagerCallback callback : mCallbacks) {
                     try {
-                        callback.onRequestCanceled(mBaseStateRequest.token);
+                        callback.onRequestCanceled(mBaseStateRequest.mToken);
                     } catch (RemoteException e) {
                         e.rethrowFromSystemServer();
                     }
                 }
             }
 
-            final Request request = new Request(token, state, flags);
-            mBaseStateRequest = request;
+            mBaseStateRequest = new Request(token, state);
             notifyDeviceStateInfoChanged();
 
             for (IDeviceStateManagerCallback callback : mCallbacks) {
@@ -376,7 +469,7 @@ public final class DeviceStateManagerGlobalTest {
 
         @Override
         public void cancelBaseStateOverride() throws RemoteException {
-            IBinder token = mBaseStateRequest.token;
+            final IBinder token = mBaseStateRequest.mToken;
             mBaseStateRequest = null;
             for (IDeviceStateManagerCallback callback : mCallbacks) {
                 try {
@@ -396,24 +489,27 @@ public final class DeviceStateManagerGlobalTest {
             onStateRequestOverlayDismissed_enforcePermission();
         }
 
-        public void setSupportedStates(List<DeviceState> states) {
+        public void setSupportedStates(@NonNull List<DeviceState> states) {
             mSupportedDeviceStates = states;
             notifyDeviceStateInfoChanged();
         }
 
+        @NonNull
         public List<DeviceState> getSupportedDeviceStates() {
             return mSupportedDeviceStates;
         }
 
-        public void setBaseState(DeviceState state) {
+        public void setBaseState(@NonNull DeviceState state) {
             mBaseState = state;
             notifyDeviceStateInfoChanged();
         }
 
+        @NonNull
         public DeviceState getBaseState() {
             return getInfo().baseState;
         }
 
+        @NonNull
         public DeviceState getMergedState() {
             return getInfo().currentState;
         }

@@ -29,6 +29,7 @@ import android.annotation.TestApi;
 import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.hardware.camera2.CameraCaptureSession;
@@ -43,6 +44,7 @@ import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
@@ -596,6 +598,10 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mTimestampBase = TIMESTAMP_BASE_DEFAULT;
         mMirrorMode = MIRROR_MODE_AUTO;
+        mMirrorModeForSurfaces = new IntArray();
+        if (Flags.mirrorModeSharedSurfaces()) {
+            mMirrorModeForSurfaces.add(mMirrorMode);
+        }
         mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
         mUsage = 0;
@@ -827,6 +833,7 @@ public final class OutputConfiguration implements Parcelable {
 
         mSurfaceGroupId = SURFACE_GROUP_ID_NONE;
         mSurfaces = new ArrayList<Surface>();
+        mMirrorModeForSurfaces = new IntArray();
         mRotation = ROTATION_0;
         mConfiguredSize = surfaceSize;
         mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(ImageFormat.PRIVATE);
@@ -971,6 +978,9 @@ public final class OutputConfiguration implements Parcelable {
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
         mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
+        mTimestampBase = TIMESTAMP_BASE_DEFAULT;
+        mMirrorMode = MIRROR_MODE_AUTO;
+        mMirrorModeForSurfaces = new IntArray();
         mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
         mUsage = usage;
@@ -1239,6 +1249,9 @@ public final class OutputConfiguration implements Parcelable {
         }
 
         mSurfaces.add(surface);
+        if (Flags.mirrorModeSharedSurfaces()) {
+            mMirrorModeForSurfaces.add(mMirrorMode);
+        }
     }
 
     /**
@@ -1266,8 +1279,15 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException(
                     "Cannot remove surface associated with this output configuration");
         }
-        if (!mSurfaces.remove(surface)) {
+
+        int surfaceIndex = mSurfaces.indexOf(surface);
+        if (surfaceIndex == -1) {
             throw new IllegalArgumentException("Surface is not part of this output configuration");
+        }
+
+        mSurfaces.remove(surfaceIndex);
+        if (Flags.mirrorModeSharedSurfaces()) {
+            mMirrorModeForSurfaces.remove(surfaceIndex);
         }
     }
 
@@ -1405,6 +1425,11 @@ public final class OutputConfiguration implements Parcelable {
      * ImageReader, MediaRecorder, or MediaCodec, the mirror mode has no effect. If mirroring is
      * needed for such outputs, the application needs to mirror the image buffers itself before
      * passing them onward.</p>
+     *
+     * <p>Starting from Android 16, this function sets the mirror modes for all of the output
+     * surfaces contained within this OutputConfiguration. To set the mirror mode for a particular
+     * output surface, the application can call {@link #setMirrorMode(Surface, int)}. Prior to
+     * Android 16, this function is only applicable if surface sharing is not enabled.</p>
      */
     public void setMirrorMode(@MirrorMode int mirrorMode) {
         // Verify that the value is in range
@@ -1413,6 +1438,9 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("Not a valid mirror mode " + mirrorMode);
         }
         mMirrorMode = mirrorMode;
+        for (int j = 0; j < mMirrorModeForSurfaces.size(); j++) {
+            mMirrorModeForSurfaces.set(j, mirrorMode);
+        }
     }
 
     /**
@@ -1425,6 +1453,72 @@ public final class OutputConfiguration implements Parcelable {
      */
     public @MirrorMode int getMirrorMode() {
         return mMirrorMode;
+    }
+
+    /**
+     * Set the mirroring mode for a surface belonging to this OutputConfiguration
+     *
+     * <p>This function is identical to {@link #setMirrorMode(int)} if {@code surface} is
+     * the only surface belonging to this OutputConfiguration.</p>
+     *
+     * <p>If this OutputConfiguration contains a deferred surface, the application can either
+     * call {@link #setMirrorMode(int)}, or call this function after calling {@link #addSurface}.
+     * </p>
+     *
+     * <p>If this OutputConfiguration contains shared surfaces, the application can set
+     * different mirroring modes for different surfaces.</p>
+     *
+     * <p>For efficiency, the mirror effect is applied as a transform flag, so it is only effective
+     * in some outputs. It works automatically for SurfaceView and TextureView outputs. For manual
+     * use of SurfaceTexture, it is reflected in the value of
+     * {@link android.graphics.SurfaceTexture#getTransformMatrix}. For other end points, such as
+     * ImageReader, MediaRecorder, or MediaCodec, the mirror mode has no effect. If mirroring is
+     * needed for such outputs, the application needs to mirror the image buffers itself before
+     * passing them onward.</p>
+     *
+     * @throws IllegalArgumentException If the {@code surface} doesn't belong to this
+     *                                  OutputConfiguration, or the {@code mirrorMode} value is
+     *                                  not valid.
+     */
+    @FlaggedApi(Flags.FLAG_MIRROR_MODE_SHARED_SURFACES)
+    public void setMirrorMode(@NonNull Surface surface, @MirrorMode int mirrorMode) {
+        checkNotNull(surface, "Surface must not be null");
+        // Verify that the value is in range
+        if (mirrorMode < MIRROR_MODE_AUTO || mirrorMode > MIRROR_MODE_V) {
+            throw new IllegalArgumentException("Not a valid mirror mode " + mirrorMode);
+        }
+        int surfaceIndex = mSurfaces.indexOf(surface);
+        if (surfaceIndex == -1) {
+            throw new IllegalArgumentException("Surface not part of the OutputConfiguration");
+        }
+
+        mMirrorModeForSurfaces.set(surfaceIndex, mirrorMode);
+    }
+
+    /**
+     * Get the current mirroring mode for an output surface
+     *
+     * <p>If no {@link #setMirrorMode} is called first, this function returns
+     * {@link #MIRROR_MODE_AUTO}.</p>
+     *
+     * <p>If only {@link #setMirrorMode(int)} is called, the mirroring mode set by that
+     * function will be returned here as long as the {@code surface} belongs to this
+     * output configuration.</p>
+     *
+     * @throws IllegalArgumentException If the {@code surface} doesn't belong to this
+     *                                  OutputConfiguration.
+     *
+     * @return The mirroring mode for the specified output surface
+     */
+    @FlaggedApi(Flags.FLAG_MIRROR_MODE_SHARED_SURFACES)
+    public @MirrorMode int getMirrorMode(@NonNull Surface surface) {
+        checkNotNull(surface, "Surface must not be null");
+
+        int surfaceIndex = mSurfaces.indexOf(surface);
+        if (surfaceIndex == -1) {
+            throw new IllegalArgumentException("Surface not part of the OutputConfiguration");
+        }
+        return mMirrorModeForSurfaces.get(surfaceIndex);
     }
 
     /**
@@ -1491,6 +1585,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mStreamUseCase = other.mStreamUseCase;
         this.mTimestampBase = other.mTimestampBase;
         this.mMirrorMode = other.mMirrorMode;
+        this.mMirrorModeForSurfaces = other.mMirrorModeForSurfaces.clone();
         this.mReadoutTimestampEnabled = other.mReadoutTimestampEnabled;
         this.mUsage = other.mUsage;
     }
@@ -1520,6 +1615,7 @@ public final class OutputConfiguration implements Parcelable {
 
         int timestampBase = source.readInt();
         int mirrorMode = source.readInt();
+        int[] mirrorModeForSurfaces = source.createIntArray();
         boolean readoutTimestampEnabled = source.readInt() == 1;
         int format = source.readInt();
         int dataSpace = source.readInt();
@@ -1531,7 +1627,6 @@ public final class OutputConfiguration implements Parcelable {
         mConfiguredSize = new Size(width, height);
         mIsDeferredConfig = isDeferred;
         mIsShared = isShared;
-        mSurfaces = surfaces;
         mUsage = 0;
         if (mSurfaces.size() > 0) {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
@@ -1560,6 +1655,7 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = streamUseCase;
         mTimestampBase = timestampBase;
         mMirrorMode = mirrorMode;
+        mMirrorModeForSurfaces = IntArray.wrap(mirrorModeForSurfaces);
         mReadoutTimestampEnabled = readoutTimestampEnabled;
     }
 
@@ -1631,6 +1727,79 @@ public final class OutputConfiguration implements Parcelable {
      */
     public Size getConfiguredSize() {
         return mConfiguredSize;
+    }
+
+    /**
+     * Get the configured format associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link android.graphics.ImageFormat#Format} associated with this
+     *         {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @Format int getConfiguredFormat() {
+        return mConfiguredFormat;
+    }
+
+    /**
+     * Get the usage flag associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link HardwareBuffer#Usage} associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @Usage long getUsage() {
+        return mUsage;
+    }
+
+    /**
+     * Get the surface type associated with this {@link OutputConfiguration}.
+     *
+     * @return The surface type associated with this {@link OutputConfiguration}.
+     *
+     * @see #SURFACE_TYPE_SURFACE_VIEW
+     * @see #SURFACE_TYPE_SURFACE_TEXTURE
+     * @see #SURFACE_TYPE_MEDIA_RECORDER
+     * @see #SURFACE_TYPE_MEDIA_CODEC
+     * @see #SURFACE_TYPE_IMAGE_READER
+     * @see #SURFACE_TYPE_UNKNOWN
+     * @hide
+     */
+    public int getSurfaceType() {
+        return mSurfaceType;
+    }
+
+    /**
+     * Get the sensor pixel modes associated with this {@link OutputConfiguration}.
+     *
+     * @return List of {@link #SensorPixelMode} associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @NonNull List<Integer> getSensorPixelModes() {
+        return mSensorPixelModesUsed;
+    }
+
+     /**
+     * Get the sharing mode associated with this {@link OutputConfiguration}.
+     *
+     * @return true if surface sharing is enabled with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public boolean isShared() {
+        return mIsShared;
+    }
+
+    /**
+     * Get the dataspace associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link Dataspace#NamedDataSpace} for this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @NamedDataSpace int getConfiguredDataspace() {
+        return mConfiguredDataspace;
     }
 
     /**
@@ -1706,6 +1875,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeLong(mStreamUseCase);
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
+        dest.writeIntArray(mMirrorModeForSurfaces.toArray());
         dest.writeInt(mReadoutTimestampEnabled ? 1 : 0);
         dest.writeInt(mConfiguredFormat);
         dest.writeInt(mConfiguredDataspace);
@@ -1756,6 +1926,16 @@ public final class OutputConfiguration implements Parcelable {
                     return false;
                 }
             }
+            if (Flags.mirrorModeSharedSurfaces()) {
+                if (mMirrorModeForSurfaces.size() != other.mMirrorModeForSurfaces.size()) {
+                    return false;
+                }
+                for (int j = 0; j < mMirrorModeForSurfaces.size(); j++) {
+                    if (mMirrorModeForSurfaces.get(j) != other.mMirrorModeForSurfaces.get(j)) {
+                        return false;
+                    }
+                }
+            }
             int minLen = Math.min(mSurfaces.size(), other.mSurfaces.size());
             for (int i = 0;  i < minLen; i++) {
                 if (mSurfaces.get(i) != other.mSurfaces.get(i))
@@ -1799,8 +1979,9 @@ public final class OutputConfiguration implements Parcelable {
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                     mDynamicRangeProfile, mColorSpace, mStreamUseCase,
-                    mTimestampBase, mMirrorMode, mReadoutTimestampEnabled ? 1 : 0,
-                    Long.hashCode(mUsage));
+                    mTimestampBase, mMirrorMode,
+                    HashCodeHelpers.hashCode(mMirrorModeForSurfaces.toArray()),
+                    mReadoutTimestampEnabled ? 1 : 0, Long.hashCode(mUsage));
         }
 
         return HashCodeHelpers.hashCode(
@@ -1810,7 +1991,9 @@ public final class OutputConfiguration implements Parcelable {
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                 mDynamicRangeProfile, mColorSpace, mStreamUseCase, mTimestampBase,
-                mMirrorMode, mReadoutTimestampEnabled ? 1 : 0, Long.hashCode(mUsage));
+                mMirrorMode, HashCodeHelpers.hashCode(mMirrorModeForSurfaces.toArray()),
+                mReadoutTimestampEnabled ? 1 : 0,
+                Long.hashCode(mUsage));
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -1852,6 +2035,8 @@ public final class OutputConfiguration implements Parcelable {
     private int mTimestampBase;
     // Mirroring mode
     private int mMirrorMode;
+    // Per-surface mirror modes
+    private IntArray mMirrorModeForSurfaces;
     // readout timestamp
     private boolean mReadoutTimestampEnabled;
     // Whether the timestamp base is set to READOUT_SENSOR

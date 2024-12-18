@@ -23,6 +23,7 @@ import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
 import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.settingslib.notification.modes.ZenMode
+import com.android.settingslib.notification.modes.ZenModeDescriptions
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -54,6 +55,7 @@ constructor(
     private val dialogEventLogger: ModesDialogEventLogger,
 ) {
     private val zenDialogMetricsLogger = QSZenModeDialogMetricsLogger(context)
+    private val zenModeDescriptions = ZenModeDescriptions(context)
 
     // Modes that should be displayed in the dialog
     private val visibleModes: Flow<List<ZenMode>> =
@@ -76,7 +78,7 @@ constructor(
                         // can be manually toggled on
                         mode.rule.isEnabled -> mode.isActive || mode.rule.isManualInvocationAllowed
                         // Mode was created as disabled, or disabled by the app that owns it ->
-                        // will be shown with a "Set up" text
+                        // will be shown with a "Not set" text
                         !mode.rule.isEnabled -> mode.status == ZenMode.Status.DISABLED_BY_OTHER
                         else -> false
                     }
@@ -92,7 +94,8 @@ constructor(
                         icon = zenModeInteractor.getModeIcon(mode).drawable().asIcon(),
                         text = mode.name,
                         subtext = getTileSubtext(mode),
-                        subtextDescription = getModeDescription(mode) ?: "",
+                        subtextDescription =
+                            getModeDescription(mode, forAccessibility = true) ?: "",
                         enabled = mode.isActive,
                         stateDescription =
                             context.getString(
@@ -120,7 +123,7 @@ constructor(
                         },
                         onLongClick = { openSettings(mode) },
                         onLongClickLabel =
-                            context.resources.getString(R.string.accessibility_long_click_tile)
+                            context.resources.getString(R.string.accessibility_long_click_tile),
                     )
                 }
             }
@@ -137,26 +140,29 @@ constructor(
 
     /**
      * Returns a description of the mode, which is:
-     *   * a prompt to set up the mode if it is not enabled
-     *   * if it cannot be manually activated, text that says so
-     *   * otherwise, the trigger description of the mode if it exists...
-     *   * ...or null if it doesn't
+     * * a prompt to set up the mode if it is not enabled
+     * * if it cannot be manually activated, text that says so
+     * * otherwise, the trigger description of the mode if it exists...
+     * * ...or null if it doesn't
      *
      * This description is used directly for the content description of a mode tile for screen
      * readers, and for the tile subtext will be augmented with the current status of the mode.
      */
-    private fun getModeDescription(mode: ZenMode): String? {
+    private fun getModeDescription(mode: ZenMode, forAccessibility: Boolean): String? {
         if (!mode.rule.isEnabled) {
             return context.resources.getString(R.string.zen_mode_set_up)
         }
         if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
             return context.resources.getString(R.string.zen_mode_no_manual_invocation)
         }
-        return mode.getDynamicDescription(context)
+        return if (forAccessibility)
+            zenModeDescriptions.getTriggerDescriptionForAccessibility(mode)
+                ?: zenModeDescriptions.getTriggerDescription(mode)
+        else zenModeDescriptions.getTriggerDescription(mode)
     }
 
     private fun getTileSubtext(mode: ZenMode): String {
-        val modeDescription = getModeDescription(mode)
+        val modeDescription = getModeDescription(mode, forAccessibility = false)
         return if (mode.isActive) {
             if (modeDescription != null) {
                 context.getString(R.string.zen_mode_on_with_details, modeDescription)
@@ -174,7 +180,7 @@ constructor(
                     context,
                     R.style.Theme_SystemUI_Dialog,
                     /* cancelIsNeutral= */ true,
-                    zenDialogMetricsLogger
+                    zenDialogMetricsLogger,
                 )
                 .createDialog()
         SystemUIDialog.applyFlags(dialog)

@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static com.android.server.display.DisplayDeviceInfo.TOUCH_NONE;
+import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
 import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELDS;
 import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 
@@ -227,6 +228,8 @@ final class LogicalDisplay {
      */
     private final boolean mIsAnisotropyCorrectionEnabled;
 
+    private boolean mCanHostTasks;
+
     LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         this(displayId, layerStack, primaryDisplayDevice, false, false);
     }
@@ -245,6 +248,7 @@ final class LogicalDisplay {
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
         mIsAnisotropyCorrectionEnabled = isAnisotropyCorrectionEnabled;
         mAlwaysRotateDisplayDeviceEnabled = isAlwaysRotateDisplayDeviceEnabled;
+        mCanHostTasks = (mDisplayId == Display.DEFAULT_DISPLAY);
     }
 
     public void setDevicePositionLocked(int position) {
@@ -506,18 +510,23 @@ final class LogicalDisplay {
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
+            mBaseDisplayInfo.hasArrSupport = deviceInfo.hasArrSupport;
+            mBaseDisplayInfo.frameRateCategoryRate = deviceInfo.frameRateCategoryRate;
+            mBaseDisplayInfo.supportedRefreshRates = Arrays.copyOf(
+                    deviceInfo.supportedRefreshRates, deviceInfo.supportedRefreshRates.length);
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.appsSupportedModes = syntheticModeManager.createAppSupportedModes(
-                    config, mBaseDisplayInfo.supportedModes
+                    config, mBaseDisplayInfo.supportedModes, mBaseDisplayInfo.hasArrSupport
             );
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
             mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.isForceSdr = deviceInfo.isForceSdr;
             mBaseDisplayInfo.userDisabledHdrTypes = mUserDisabledHdrTypes;
             mBaseDisplayInfo.minimalPostProcessingSupported =
                     deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
@@ -543,6 +552,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.brightnessDim = deviceInfo.brightnessDim;
             mBaseDisplayInfo.hdrSdrRatio = deviceInfo.hdrSdrRatio;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
@@ -562,6 +572,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.layoutLimitedRefreshRate = mLayoutLimitedRefreshRate;
             mBaseDisplayInfo.thermalRefreshRateThrottling = mThermalRefreshRateThrottling;
             mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
+            mBaseDisplayInfo.canHostTasks = mCanHostTasks;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
@@ -896,6 +907,84 @@ final class LogicalDisplay {
             mBaseDisplayInfo.userDisabledHdrTypes = userDisabledHdrTypes;
             mInfo.set(null);
         }
+    }
+
+    /**
+     * Checks whether display is of the type where HDR settings are relevant, and then sets
+     * whether Force SDR conversion mode is active.  isForceSdr is checked by the Display when
+     * returning HDR capabilities.
+     *
+     * @param isForceSdr Whether Force SDR conversion mode is active
+     * @return Whether Display Manager should call handleLogicalDisplayChangedLocked()
+     */
+    public boolean setIsForceSdr(boolean isForceSdr) {
+        int displayType = getDisplayInfoLocked().type;
+        boolean isTargetDisplayType = displayType == Display.TYPE_INTERNAL
+                || displayType == Display.TYPE_EXTERNAL
+                || displayType == Display.TYPE_OVERLAY;
+
+        boolean handleLogicalDisplayChangedLocked = false;
+        if (isTargetDisplayType && mBaseDisplayInfo.isForceSdr != isForceSdr) {
+            mBaseDisplayInfo.isForceSdr = isForceSdr;
+            mInfo.set(null);
+            handleLogicalDisplayChangedLocked = true;
+        }
+        return handleLogicalDisplayChangedLocked;
+    }
+
+    boolean canHostTasksLocked() {
+        return mCanHostTasks;
+    }
+
+    /**
+     * Sets whether the display can host tasks.
+     *
+     * @param canHostTasks Whether the display can host tasks according to the user's setting.
+     * @return Whether Display Manager should call sendDisplayEventIfEnabledLocked().
+     */
+    boolean setCanHostTasksLocked(boolean canHostTasks) {
+        canHostTasks = validateCanHostTasksLocked(canHostTasks);
+        if (mBaseDisplayInfo.canHostTasks == canHostTasks) {
+            return false;
+        }
+
+        mCanHostTasks = canHostTasks;
+        mBaseDisplayInfo.canHostTasks = canHostTasks;
+        mInfo.set(null);
+        return true;
+    }
+
+    /**
+     * Checks whether the display's ability to host tasks should be determined independently of the
+     * user's setting value. If so, returns the actual validated value based on the display's
+     * usage; otherwise, returns the user's setting value.
+     *
+     * @param canHostTasks Whether the display can host tasks according to the user's setting.
+     * @return Whether the display can actually host task after configuration.
+     */
+    private boolean validateCanHostTasksLocked(boolean canHostTasks) {
+        // The default display can always host tasks.
+        if (getDisplayIdLocked() == Display.DEFAULT_DISPLAY) {
+            return true;
+        }
+
+        // The display that should only mirror can never host tasks.
+        if (mPrimaryDisplayDevice.shouldOnlyMirror()) {
+            return false;
+        }
+
+        // The display that has its own content can always host tasks.
+        final boolean isRearDisplay = getDevicePositionLocked() == POSITION_REAR;
+        final boolean ownContent =
+                ((mPrimaryDisplayDevice.getDisplayDeviceInfoLocked().flags
+                        & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY)
+                        != 0)
+                        || isRearDisplay;
+        if (ownContent) {
+            return true;
+        }
+
+        return canHostTasks;
     }
 
     /**

@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -48,8 +49,8 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -85,14 +86,13 @@ constructor(
     private val repository: KeyguardRepository,
     powerInteractor: PowerInteractor,
     bouncerRepository: KeyguardBouncerRepository,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
     private val fromOccludedTransitionInteractor: Provider<FromOccludedTransitionInteractor>,
-    sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
     // TODO(b/296118689): move to a repository
@@ -103,15 +103,16 @@ constructor(
         SceneContainerFlag.assertInLegacyMode()
         combineTransform(
                 _notificationPlaceholderBounds,
-                sharedNotificationContainerInteractor.get().configurationBasedDimensions,
                 keyguardTransitionInteractor.isInTransition(
                     edge = Edge.create(from = LOCKSCREEN, to = AOD)
                 ),
-            ) { bounds, cfg, isTransitioningToAod ->
+                shadeRepository.isShadeLayoutWide,
+                configurationInteractor.dimensionPixelSize(R.dimen.keyguard_split_shade_top_margin),
+            ) { bounds, isTransitioningToAod, useSplitShade, keyguardSplitShadeTopMargin ->
                 if (isTransitioningToAod) {
                     // Keep bounds stable during this transition, to prevent cases like smartspace
                     // popping in and adjusting the bounds. A prime example would be media playing,
-                    // which then updates smartspace on transition to AOD
+                    // which then updates smartspace on transition to AOD.
                     return@combineTransform
                 }
 
@@ -119,8 +120,8 @@ constructor(
                 // legacy placement behavior within notifications for splitshade.
                 emit(
                     if (MigrateClocksToBlueprint.isEnabled) {
-                        if (cfg.useSplitShade) {
-                            bounds.copy(bottom = bounds.bottom - cfg.keyguardSplitShadeTopMargin)
+                        if (useSplitShade) {
+                            bounds.copy(bottom = bounds.bottom - keyguardSplitShadeTopMargin)
                         } else {
                             bounds
                         }
@@ -139,12 +140,6 @@ constructor(
         _notificationPlaceholderBounds.value = position
     }
 
-    /**
-     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
-     * all.
-     */
-    val dozeAmount: Flow<Float> = repository.linearDozeAmount
-
     /** Whether the system is in doze mode. */
     val isDozing: StateFlow<Boolean> = repository.isDozing
 
@@ -153,6 +148,23 @@ constructor(
 
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: StateFlow<Boolean> = repository.isAodAvailable
+
+    /**
+     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
+     * all.
+     */
+    val dozeAmount: Flow<Float> =
+        if (SceneContainerFlag.isEnabled) {
+            isAodAvailable.flatMapLatest { isAodAvailable ->
+                if (isAodAvailable) {
+                    keyguardTransitionInteractor.transitionValue(AOD)
+                } else {
+                    keyguardTransitionInteractor.transitionValue(DOZING)
+                }
+            }
+        } else {
+            repository.linearDozeAmount
+        }
 
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
@@ -163,22 +175,19 @@ constructor(
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
 
     /**
-     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
-     * but not vice-versa. Also accounts for [isDreamingWithOverlay]
+     * Whether the system is dreaming. [KeyguardRepository.isDreaming] will be always be true when
+     * [isDozing] is true, but not vice-versa. Also accounts for [isDreamingWithOverlay].
      */
     val isDreaming: StateFlow<Boolean> =
-        merge(
-                repository.isDreaming,
-                repository.isDreamingWithOverlay,
-            )
+        merge(repository.isDreaming, repository.isDreamingWithOverlay)
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
 
-    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
+    /** Whether any dreaming is running, including the doze dream. */
+    val isDreamingAny: Flow<Boolean> = repository.isDreaming
 
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> =
@@ -191,7 +200,10 @@ constructor(
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
      *
-     * Allow a brief moment to prevent rapidly oscillating between true/false signals.
+     * Allow a brief moment to prevent rapidly oscillating between true/false signals. The amount of
+     * time is [IS_ABLE_TO_DREAM_DELAY_MS] - consumers should consider waiting for that long before
+     * examining the value of this flow, to let other consumers have enough time to also see that
+     * same new value.
      */
     val isAbleToDream: Flow<Boolean> =
         dozeTransitionModel
@@ -203,7 +215,7 @@ constructor(
                     // do not immediately process any dreaming information when exiting AOD. It
                     // should actually be quite strange to leave AOD and then go straight to
                     // DREAMING so this should be fine.
-                    delay(500L)
+                    delay(IS_ABLE_TO_DREAM_DELAY_MS)
                     isDreaming
                         .sample(powerInteractor.isAwake) { isDreaming, isAwake ->
                             isDreaming && isAwake
@@ -232,7 +244,7 @@ constructor(
 
     /** Whether the keyguard is going away. */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.GONE")
-    val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
+    val isKeyguardGoingAway: StateFlow<Boolean> = repository.isKeyguardGoingAway.asStateFlow()
 
     /** Keyguard can be clipped at the top as the shade is dragged */
     val topClippingBounds: Flow<Int?> by lazy {
@@ -242,7 +254,7 @@ constructor(
                     .map { it == 1f }
                     .onStart { emit(false) }
                     .distinctUntilChanged(),
-                repository.topClippingBounds
+                repository.topClippingBounds,
             ) { isGone, topClippingBounds ->
                 if (!isGone) {
                     emit(topClippingBounds)
@@ -276,7 +288,7 @@ constructor(
         }
 
     /** Observable for the [StatusBarState] */
-    val statusBarState: Flow<StatusBarState> = repository.statusBarState
+    val statusBarState: StateFlow<StatusBarState> = repository.statusBarState
 
     /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
     val biometricUnlockState: StateFlow<BiometricUnlockModel> = repository.biometricUnlockState
@@ -285,21 +297,39 @@ constructor(
     val isKeyguardVisible: Flow<Boolean> =
         combine(isKeyguardShowing, isKeyguardOccluded) { showing, occluded -> showing && !occluded }
 
+    /**
+     * Event types that affect whether secure camera is active. Only used by [isSecureCameraActive].
+     */
+    private enum class SecureCameraRelatedEventType {
+        KeyguardBecameVisible,
+        PrimaryBouncerBecameVisible,
+        SecureCameraLaunched,
+    }
+
     /** Whether camera is launched over keyguard. */
-    val isSecureCameraActive: Flow<Boolean> by lazy {
-        combine(
-                isKeyguardVisible,
-                primaryBouncerShowing,
-                onCameraLaunchDetected,
-            ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
-                when {
-                    isKeyguardVisible -> false
-                    isPrimaryBouncerShowing -> false
-                    else -> cameraLaunchEvent.type == CameraLaunchType.POWER_DOUBLE_TAP
+    val isSecureCameraActive: Flow<Boolean> =
+        merge(
+                onCameraLaunchDetected
+                    .filter { it.type == CameraLaunchType.POWER_DOUBLE_TAP }
+                    .map { SecureCameraRelatedEventType.SecureCameraLaunched },
+                isKeyguardVisible
+                    .filter { it }
+                    .map { SecureCameraRelatedEventType.KeyguardBecameVisible },
+                primaryBouncerShowing
+                    .filter { it }
+                    .map { SecureCameraRelatedEventType.PrimaryBouncerBecameVisible },
+            )
+            .map {
+                when (it) {
+                    SecureCameraRelatedEventType.SecureCameraLaunched -> true
+                    // When secure camera is closed, either the keyguard or the primary bouncer will
+                    // have to show, so those events tell us that secure camera is no longer active.
+                    SecureCameraRelatedEventType.KeyguardBecameVisible -> false
+                    SecureCameraRelatedEventType.PrimaryBouncerBecameVisible -> false
                 }
             }
             .onStart { emit(false) }
-    }
+            .distinctUntilChanged()
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
     val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation
@@ -324,27 +354,29 @@ constructor(
     val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
             .sampleCombine(
-                statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
                 keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
+                keyguardTransitionInteractor.isFinishedIn(Scenes.Communal, GLANCEABLE_HUB),
             )
-            .filter { (_, _, _, step, _) -> !step.transitionState.isTransitioning() }
+            .filter { (_, _, step, _, _) -> !step.transitionState.isTransitioning() }
             .transform {
                 (
                     legacyShadeExpansion,
-                    statusBarState,
                     currentKeyguardState,
                     step,
-                    isKeyguardDismissible) ->
+                    isKeyguardDismissible,
+                    onGlanceableHub) ->
                 if (
-                    statusBarState == StatusBarState.KEYGUARD &&
+                    statusBarState.value == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
                         currentKeyguardState == LOCKSCREEN &&
                         legacyShadeExpansion != 1f
                 ) {
                     emit(MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, legacyShadeExpansion))
-                } else if (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) {
+                } else if (
+                    (legacyShadeExpansion == 0f || legacyShadeExpansion == 1f) && !onGlanceableHub
+                ) {
                     // Resets alpha state
                     emit(1f)
                 }
@@ -443,10 +475,6 @@ constructor(
         }
     }
 
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
-    }
-
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
@@ -511,7 +539,25 @@ constructor(
         repository.showDismissibleKeyguard()
     }
 
+    fun setShortcutAbsoluteTop(top: Float) {
+        repository.setShortcutAbsoluteTop(top)
+    }
+
+    fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
+        repository.isKeyguardGoingAway.value = isGoingAway
+    }
+
+    fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        repository.setNotificationStackAbsoluteBottom(bottom)
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
+        /**
+         * Amount of time that [KeyguardInteractor.isAbleToDream] is delayed; consumers of that flow
+         * should consider waiting this amount of time before check the value of this flow, to let
+         * other consumers have enough time to see the new value.
+         */
+        const val IS_ABLE_TO_DREAM_DELAY_MS = 500L
     }
 }

@@ -35,7 +35,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduStatsInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
@@ -60,6 +59,7 @@ import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wm.shell.back.BackAnimation
 import com.android.wm.shell.sysui.ShellInterface
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.Optional
@@ -121,9 +121,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-
-    @Mock
-    private lateinit var keyboardTouchpadEduStatsInteractor: KeyboardTouchpadEduStatsInteractor
+    @Mock private lateinit var backAnimation: Optional<BackAnimation>
 
     @Before
     fun setUp() {
@@ -146,9 +144,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
-        mSetFlagsRule.disableFlags(
-            com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-        )
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
 
         subject = createOverviewProxyService(context)
     }
@@ -283,6 +279,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             statusBarWinController,
             sysUiState,
             mock(),
+            mock(),
             userTracker,
             userManager,
             wakefulnessLifecycle,
@@ -294,7 +291,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             dumpManager,
             unfoldTransitionProgressForwarder,
             broadcastDispatcher,
-            keyboardTouchpadEduStatsInteractor
+            backAnimation,
         )
     }
 }

@@ -67,7 +67,6 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.CHARGING
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
-import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TEMPORARY_QUOTA_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA;
@@ -152,7 +151,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.platform.test.flag.util.FlagSetException;
@@ -436,8 +434,7 @@ public final class AlarmManagerServiceTest {
      */
     private void disableFlagsNotSetByAnnotation() {
         try {
-            mSetFlagsRule.disableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS,
-                    Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS);
+            mSetFlagsRule.disableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS);
         } catch (FlagSetException fse) {
             // Expected if the test about to be run requires this enabled.
         }
@@ -523,13 +520,11 @@ public final class AlarmManagerServiceTest {
 
         mService.onStart();
 
-        if (Flags.useFrozenStateToDropListenerAlarms()) {
-            final ArgumentCaptor<ActivityManager.UidFrozenStateChangedCallback> frozenCaptor =
-                    ArgumentCaptor.forClass(ActivityManager.UidFrozenStateChangedCallback.class);
-            verify(mActivityManager).registerUidFrozenStateChangedCallback(
-                    any(HandlerExecutor.class), frozenCaptor.capture());
-            mUidFrozenStateCallback = frozenCaptor.getValue();
-        }
+        final ArgumentCaptor<ActivityManager.UidFrozenStateChangedCallback> frozenCaptor =
+                ArgumentCaptor.forClass(ActivityManager.UidFrozenStateChangedCallback.class);
+        verify(mActivityManager).registerUidFrozenStateChangedCallback(
+                any(HandlerExecutor.class), frozenCaptor.capture());
+        mUidFrozenStateCallback = frozenCaptor.getValue();
 
         // Unable to mock mMockContext to return a mock stats manager.
         // So just mocking the whole MetricsHelper instance.
@@ -3744,79 +3739,11 @@ public final class AlarmManagerServiceTest {
         testTemporaryQuota_bumpedBeforeDeferral(STANDBY_BUCKET_RARE);
     }
 
-    @Test
-    public void exactListenerAlarmsRemovedOnCached() {
-        mockChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, true);
-
-        setTestAlarmWithListener(ELAPSED_REALTIME, 31, getNewListener(() -> {}), WINDOW_EXACT,
-                TEST_CALLING_UID);
-        setTestAlarmWithListener(RTC, 42, getNewListener(() -> {}), 56, TEST_CALLING_UID);
-        setTestAlarm(ELAPSED_REALTIME, 54, WINDOW_EXACT, getNewMockPendingIntent(), 0, 0,
-                TEST_CALLING_UID, null);
-        setTestAlarm(RTC, 49, 154, getNewMockPendingIntent(), 0, 0, TEST_CALLING_UID, null);
-
-        setTestAlarmWithListener(ELAPSED_REALTIME, 21, getNewListener(() -> {}), WINDOW_EXACT,
-                TEST_CALLING_UID_2);
-        setTestAlarmWithListener(RTC, 412, getNewListener(() -> {}), 561, TEST_CALLING_UID_2);
-        setTestAlarm(ELAPSED_REALTIME, 26, WINDOW_EXACT, getNewMockPendingIntent(), 0, 0,
-                TEST_CALLING_UID_2, null);
-        setTestAlarm(RTC, 549, 234, getNewMockPendingIntent(), 0, 0, TEST_CALLING_UID_2, null);
-
-        assertEquals(8, mService.mAlarmStore.size());
-
-        mListener.handleUidCachedChanged(TEST_CALLING_UID, true);
-        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
-        assertEquals(7, mService.mAlarmStore.size());
-
-        mListener.handleUidCachedChanged(TEST_CALLING_UID_2, true);
-        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
-        assertEquals(6, mService.mAlarmStore.size());
-    }
-
-    @Test
-    public void alarmCountOnListenerCached() {
-        mockChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, true);
-
-        // Set some alarms for TEST_CALLING_UID.
-        final int numExactListenerUid1 = 14;
-        for (int i = 0; i < numExactListenerUid1; i++) {
-            setTestAlarmWithListener(ALARM_TYPES[i % 4], mNowElapsedTest + i,
-                    getNewListener(() -> {}));
-        }
-        setTestAlarmWithListener(RTC, 42, getNewListener(() -> {}), 56, TEST_CALLING_UID);
-        setTestAlarm(ELAPSED_REALTIME, 54, getNewMockPendingIntent());
-        setTestAlarm(RTC, 49, 154, getNewMockPendingIntent(), 0, 0, TEST_CALLING_UID, null);
-
-        // Set some alarms for TEST_CALLING_UID_2.
-        final int numExactListenerUid2 = 9;
-        for (int i = 0; i < numExactListenerUid2; i++) {
-            setTestAlarmWithListener(ALARM_TYPES[i % 4], mNowElapsedTest + i,
-                    getNewListener(() -> {}), WINDOW_EXACT, TEST_CALLING_UID_2);
-        }
-        setTestAlarmWithListener(RTC, 412, getNewListener(() -> {}), 561, TEST_CALLING_UID_2);
-        setTestAlarm(RTC_WAKEUP, 26, WINDOW_EXACT, getNewMockPendingIntent(), 0, 0,
-                TEST_CALLING_UID_2, null);
-
-        assertEquals(numExactListenerUid1 + 3, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        assertEquals(numExactListenerUid2 + 2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
-
-        mListener.handleUidCachedChanged(TEST_CALLING_UID, true);
-        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
-        assertEquals(3, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        assertEquals(numExactListenerUid2 + 2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
-
-        mListener.handleUidCachedChanged(TEST_CALLING_UID_2, true);
-        assertAndHandleMessageSync(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED);
-        assertEquals(3, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
-        assertEquals(2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
-    }
-
     private void executeUidFrozenStateCallback(int[] uids, int[] frozenStates) {
         assertNotNull(mUidFrozenStateCallback);
         mUidFrozenStateCallback.onUidFrozenStateChanged(uids, frozenStates);
     }
 
-    @EnableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS)
     @DisableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS)
     @Test
     public void exactListenerAlarmsRemovedOnFrozen() {
@@ -3848,7 +3775,6 @@ public final class AlarmManagerServiceTest {
         assertEquals(6, mService.mAlarmStore.size());
     }
 
-    @EnableFlags(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS)
     @DisableFlags(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS)
     @Test
     public void alarmCountOnListenerFrozen() {

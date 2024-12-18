@@ -50,6 +50,10 @@ class LegacyAppOpStateParser {
     public int readState(AtomicFile file, SparseArray<SparseIntArray> uidModes,
             SparseArray<ArrayMap<String, SparseIntArray>> userPackageModes) {
         try (FileInputStream stream = file.openRead()) {
+            SparseArray<SparseIntArray> parsedUidModes = new SparseArray<>();
+            SparseArray<ArrayMap<String, SparseIntArray>> parsedUserPackageModes =
+                    new SparseArray<>();
+
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
@@ -75,26 +79,37 @@ class LegacyAppOpStateParser {
                     // version 2 has the structure pkg -> uid -> op ->
                     // in version 3, since pkg and uid states are kept completely
                     // independent we switch to user -> pkg -> op
-                    readPackage(parser, userPackageModes);
+                    readPackage(parser, parsedUserPackageModes);
                 } else if (tagName.equals("uid")) {
-                    readUidOps(parser, uidModes);
+                    readUidOps(parser, parsedUidModes);
                 } else if (tagName.equals("user")) {
-                    readUser(parser, userPackageModes);
+                    readUser(parser, parsedUserPackageModes);
                 } else {
                     Slog.w(TAG, "Unknown element under <app-ops>: "
                             + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
                 }
             }
+
+            // Parsing is complete, copy all parsed values to output
+            final int parsedUidModesSize = parsedUidModes.size();
+            for (int i = 0; i < parsedUidModesSize; i++) {
+                uidModes.put(parsedUidModes.keyAt(i), parsedUidModes.valueAt(i));
+            }
+            final int parsedUserPackageModesSize = parsedUserPackageModes.size();
+            for (int i = 0; i < parsedUserPackageModesSize; i++) {
+                userPackageModes.put(parsedUserPackageModes.keyAt(i),
+                                     parsedUserPackageModes.valueAt(i));
+            }
+
             return versionAtBoot;
         } catch (FileNotFoundException e) {
             Slog.i(TAG, "No existing app ops " + file.getBaseFile() + "; starting empty");
-            return NO_FILE_VERSION;
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            // All exceptions must be caught, otherwise device will not be able to boot
+            Slog.wtf(TAG, "Failed parsing " + e);
         }
+        return NO_FILE_VERSION;
     }
 
     private void readPackage(TypedXmlPullParser parser,

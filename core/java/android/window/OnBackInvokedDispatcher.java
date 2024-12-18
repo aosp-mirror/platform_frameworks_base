@@ -16,10 +16,13 @@
 
 package android.window;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +46,7 @@ public interface OnBackInvokedDispatcher {
     @IntDef({
             PRIORITY_DEFAULT,
             PRIORITY_OVERLAY,
+            PRIORITY_SYSTEM_NAVIGATION_OBSERVER,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Priority{}
@@ -67,6 +71,20 @@ public interface OnBackInvokedDispatcher {
     int PRIORITY_SYSTEM = -1;
 
     /**
+     * Priority level of {@link OnBackInvokedCallback}s designed to observe system-level back
+     * handling.
+     *
+     * <p>Callbacks registered with this priority do not consume back events. They receive back
+     * events whenever the system handles a back navigation and have no impact on the normal back
+     * navigation flow. Useful for logging or analytics.
+     *
+     * <p>Only one callback with {@link #PRIORITY_SYSTEM_NAVIGATION_OBSERVER} can be registered at a
+     * time.
+     */
+    @FlaggedApi(Flags.FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
+    int PRIORITY_SYSTEM_NAVIGATION_OBSERVER = -2;
+
+    /**
      * Registers a {@link OnBackInvokedCallback}.
      *
      * Within the same priority level, callbacks are invoked in the reverse order in which
@@ -76,7 +94,7 @@ public interface OnBackInvokedDispatcher {
      * @param callback The callback to be registered. If the callback instance has been already
      *                 registered, the existing instance (no matter its priority) will be
      *                 unregistered and registered again.
-     * @throws {@link IllegalArgumentException} if the priority is negative.
+     * @throws IllegalArgumentException if the priority is negative.
      */
     @SuppressLint({"ExecutorRegistration"})
     void registerOnBackInvokedCallback(

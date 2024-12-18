@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
@@ -195,10 +196,11 @@ class TransparentPolicy {
 
     // We evaluate the case when the policy should not be applied.
     private boolean shouldSkipTransparentPolicy(@Nullable ActivityRecord opaqueActivity) {
-        if (opaqueActivity == null || opaqueActivity.isEmbedded()) {
+        if (opaqueActivity == null || opaqueActivity.isEmbedded()
+                || !opaqueActivity.areBoundsLetterboxed()) {
             // We skip letterboxing if the translucent activity doesn't have any
             // opaque activities beneath or the activity below is embedded which
-            // never has letterbox.
+            // never has letterbox or the activity is not letterboxed at all.
             return true;
         }
         final AppCompatSizeCompatModePolicy scmPolicy = mActivityRecord.mAppCompatController
@@ -331,6 +333,11 @@ class TransparentPolicy {
         }
 
         private boolean isPolicyEnabled() {
+            // Disable transparent policy if task is null or in freeform.
+            final Task task = mActivityRecord.getTask();
+            if (task == null || task.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                return false;
+            }
             if (!mActivityRecord.mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
                 return true;
             }

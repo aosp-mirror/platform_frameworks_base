@@ -1742,6 +1742,16 @@ public final class PermissionManager {
         }
     }
 
+    private static int getPermissionRequestStateUncached(String packageName, String permission,
+            int deviceId) {
+        try {
+            return AppGlobals.getPermissionManager().getPermissionRequestState(
+                    packageName, permission, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Identifies a permission query.
      *
@@ -1795,13 +1805,85 @@ public final class PermissionManager {
         }
     }
 
-    /** @hide */
-    public static final String CACHE_KEY_PACKAGE_INFO = "cache_key.package_info";
+    private static final class PermissionRequestStateQuery {
+        final String mPackageName;
+        final String mPermission;
+        final int mDeviceId;
+
+        PermissionRequestStateQuery(@NonNull String packageName, @NonNull String permission,
+                int deviceId) {
+            mPackageName = packageName;
+            mPermission = permission;
+            mDeviceId = deviceId;
+        }
+
+        @Override
+        public String toString() {
+            return TextUtils.formatSimple("PermissionRequestStateQuery(package=\"%s\","
+                            + " permission=\"%s\", " + "deviceId=%d)",
+                    mPackageName, mPermission, mDeviceId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPackageName, mPermission, mDeviceId);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object rval) {
+            if (rval == null) {
+                return false;
+            }
+            PermissionRequestStateQuery other;
+            try {
+                other = (PermissionRequestStateQuery) rval;
+            } catch (ClassCastException ex) {
+                return false;
+            }
+            return mDeviceId == other.mDeviceId && Objects.equals(mPackageName, other.mPackageName)
+                    && Objects.equals(mPermission, other.mPermission);
+        }
+    }
+
+    // The legacy system property "package_info" had two purposes: to invalidate PIC caches and to
+    // signal that package information, and therefore permissions, might have changed.
+    // AudioSystem is the only client of the signaling behavior.  The "separate permissions
+    // notification" feature splits the two behaviors into two system property names.
+    //
+    // If the feature is disabled (legacy behavior) then the two system property names have the
+    // same value.  This means there is only one system property in use.
+    //
+    // If the feature is enabled, then the two system property names have different values, which
+    // means there is a system property used by PIC and a system property used for signaling.  The
+    // legacy value is hard-coded in native code that relies on the signaling behavior, so the
+    // system property name for signaling is the legacy property name, and the system property
+    // name for PIC is new.
+    private static String getPackageInfoCacheKey() {
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            return PropertyInvalidatedCache.createSystemCacheKey("package_info_cache");
+        } else {
+            return CACHE_KEY_PACKAGE_INFO_NOTIFY;
+        }
+    }
+
+    /**
+     * The system property that is used to notify clients that package information, and therefore
+     * permissions, may have changed.
+     * @hide
+     */
+    public static final String CACHE_KEY_PACKAGE_INFO_NOTIFY =
+            PropertyInvalidatedCache.createSystemCacheKey("package_info");
+
+    /**
+     * The system property that is used to invalidate PIC caches.
+     * @hide
+     */
+    public static final String CACHE_KEY_PACKAGE_INFO_CACHE = getPackageInfoCacheKey();
 
     /** @hide */
     private static final PropertyInvalidatedCache<PermissionQuery, Integer> sPermissionCache =
             new PropertyInvalidatedCache<PermissionQuery, Integer>(
-                    2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
+                    2048, CACHE_KEY_PACKAGE_INFO_CACHE, "checkPermission") {
                 @Override
                 public Integer recompute(PermissionQuery query) {
                     return checkPermissionUncached(query.permission, query.pid, query.uid,
@@ -1810,8 +1892,28 @@ public final class PermissionManager {
             };
 
     /** @hide */
+    private static final PropertyInvalidatedCache<PermissionRequestStateQuery, Integer>
+            sPermissionRequestStateCache =
+            new PropertyInvalidatedCache<>(
+                    512, CACHE_KEY_PACKAGE_INFO_CACHE, "getPermissionRequestState") {
+                @Override
+                public Integer recompute(PermissionRequestStateQuery query) {
+                    return getPermissionRequestStateUncached(query.mPackageName, query.mPermission,
+                            query.mDeviceId);
+                }
+            };
+
+    /** @hide */
     public static int checkPermission(@Nullable String permission, int pid, int uid, int deviceId) {
         return sPermissionCache.query(new PermissionQuery(permission, pid, uid, deviceId));
+    }
+
+    /** @hide */
+    @Context.PermissionRequestState
+    public int getPermissionRequestState(@NonNull String packageName, @NonNull String permission,
+            int deviceId) {
+        return sPermissionRequestStateCache.query(
+                new PermissionRequestStateQuery(packageName, permission, deviceId));
     }
 
     /**
@@ -1919,7 +2021,7 @@ public final class PermissionManager {
     private static PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>
             sPackageNamePermissionCache =
             new PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>(
-                    16, CACHE_KEY_PACKAGE_INFO, "checkPackageNamePermission") {
+                    16, CACHE_KEY_PACKAGE_INFO_CACHE, "checkPackageNamePermission") {
                 @Override
                 public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(

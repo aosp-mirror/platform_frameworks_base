@@ -927,12 +927,14 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     protected int handleVendorCommandWithId(HdmiCecMessage message) {
         byte[] params = message.getParams();
         int vendorId = HdmiUtils.threeBytesToInt(params);
-        if (message.getDestination() == Constants.ADDR_BROADCAST
-                || message.getSource() == Constants.ADDR_UNREGISTERED) {
-            Slog.v(TAG, "Wrong broadcast vendor command. Ignoring");
-        } else if (!mService.invokeVendorCommandListenersOnReceived(
+        if (!mService.invokeVendorCommandListenersOnReceived(
                 mDeviceType, message.getSource(), message.getDestination(), params, true)) {
-            return Constants.ABORT_REFUSED;
+            if (message.getDestination() == Constants.ADDR_BROADCAST
+                    || message.getSource() == Constants.ADDR_UNREGISTERED) {
+                Slog.v(TAG, "Broadcast vendor command with no listeners. Ignoring");
+            } else {
+                return Constants.ABORT_REFUSED;
+            }
         }
         return Constants.HANDLED;
     }

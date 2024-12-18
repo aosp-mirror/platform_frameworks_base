@@ -16,16 +16,21 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_SHORT_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -48,16 +53,11 @@ constructor(
     keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
     bouncerToGoneFlows: BouncerToGoneFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
-) {
+) : PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
-            .setup(
-                duration = TO_GONE_DURATION,
-                edge = Edge.INVALID,
-            )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = GONE),
-            )
+            .setup(duration = TO_GONE_DURATION, edge = Edge.INVALID)
+            .setupWithoutSceneContainer(edge = Edge.create(from = PRIMARY_BOUNCER, to = GONE))
 
     private var leaveShadeOpen: Boolean = false
     private var willRunDismissFromKeyguard: Boolean = false
@@ -85,7 +85,7 @@ constructor(
 
     /** Bouncer container alpha */
     val bouncerAlpha: Flow<Float> =
-        if (SceneContainerFlag.isEnabled) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen
@@ -96,7 +96,7 @@ constructor(
 
     private fun createBouncerAlphaFlow(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
         return transitionAnimation.sharedFlow(
-            duration = 200.milliseconds,
+            duration = TO_GONE_SHORT_DURATION,
             onStart = { willRunDismissFromKeyguard = willRunAnimationOnKeyguard() },
             onStep = {
                 if (willRunDismissFromKeyguard) {
@@ -108,9 +108,25 @@ constructor(
         )
     }
 
+    private fun createBouncerWindowBlurFlow(
+        willRunAnimationOnKeyguard: () -> Boolean
+    ): Flow<Float> {
+        return transitionAnimation.sharedFlow(
+            duration = TO_GONE_SHORT_DURATION,
+            onStart = { willRunDismissFromKeyguard = willRunAnimationOnKeyguard() },
+            onStep = {
+                if (willRunDismissFromKeyguard) {
+                    MIN_BACKGROUND_BLUR_RADIUS
+                } else {
+                    MathUtils.lerp(MAX_BACKGROUND_BLUR_RADIUS, MIN_BACKGROUND_BLUR_RADIUS, it)
+                }
+            },
+        )
+    }
+
     /** Lockscreen alpha */
     val lockscreenAlpha: Flow<Float> =
-        if (SceneContainerFlag.isEnabled) {
+        if (ComposeBouncerFlags.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen
@@ -136,6 +152,16 @@ constructor(
             onFinish = { 0f },
         )
     }
+
+    override val windowBlurRadius: Flow<Float> =
+        if (ComposeBouncerFlags.isEnabled) {
+            keyguardDismissActionInteractor
+                .get()
+                .willAnimateDismissActionOnLockscreen
+                .flatMapLatest { createBouncerWindowBlurFlow { it } }
+        } else {
+            createBouncerWindowBlurFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
+        }
 
     val scrimAlpha: Flow<ScrimAlpha> =
         bouncerToGoneFlows.scrimAlpha(TO_GONE_DURATION, PRIMARY_BOUNCER)

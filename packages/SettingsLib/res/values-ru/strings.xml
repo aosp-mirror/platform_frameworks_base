@@ -81,7 +81,7 @@
     <string name="speed_label_fast" msgid="2677719134596044051">"Быстрая"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Очень быстрая"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Срок действия истек"</string>
-    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Нет подключения"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
@@ -125,7 +125,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Профиль A2DP"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Профиль OPP"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Профиль HID"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Устройство ввода"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ к интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Разрешить доступ к контактам и журналу звонков"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Эти сведения нужны для оповещений о звонках и других функций"</string>
@@ -283,7 +283,7 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Разблокировка загрузчика"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Разрешить заводскую разблокировку?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ВНИМАНИЕ! Функции защиты не будут работать на устройстве, пока включен этот параметр."</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Включить улучшенный обмен данными"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Разрешить терминальный доступ к локальной оболочке"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Среда разработки Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Запустить терминал Linux в Android (экспериментальная функция)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Если отключить эту функцию, данные терминала Linux будут удалены"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Порядок проверки HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отладка"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будильники и напоминания"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Вы можете разрешить этому приложению устанавливать будильники и планировать запуск действий в определенное время. В этом случае оно будет работать в фоновом режиме и быстрее расходовать заряд батареи.\n\nЕсли отключить это разрешение, текущие будильники и созданные приложением события перестанут запускаться."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"установить, будильник, напоминание, часы"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Не беспокоить"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Не беспокоить"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Включить"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Включите режим \"Не беспокоить\""</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Этот планшет"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Встроенное"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Этот телевизор"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Колонка с док-станцией"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Внешнее устройство"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Подключенное устройство"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналоговый выход"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Невозможно воспроизвести на этом устройстве."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для переключения требуется премиум-аккаунт"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не удается воспроизвести скачанные файлы"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Подключено через ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Подключено через eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Стандартный выход на телевизоре"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Выход HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Внутренние динамики"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Встроенный динамик"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Аудиовыход телевизора"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ошибка подключения. Выключите и снова включите устройство."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Проводное аудиоустройство"</string>
     <string name="help_label" msgid="3528360748637781274">"Справка/отзыв"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Чтобы изменение вступило в силу, необходимо перезапустить устройство. Вы можете сделать это сейчас или позже."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Проводные наушники"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Проводные наушники"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Проводное аудиоустройство"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-аудиоустройство"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Проводной микрофон"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-микрофон"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Bluetooth-микрофон"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Вкл."</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Выкл."</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Сменить сеть"</string>

@@ -42,6 +42,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.FileDescriptor;
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -125,12 +126,12 @@ public class BinderDeathDispatcherTest {
         }
 
         @Override
-        public void addFrozenStateChangeCallback(IFrozenStateChangeCallback callback)
+        public void addFrozenStateChangeCallback(Executor e, FrozenStateChangeCallback callback)
                 throws RemoteException {
         }
 
         @Override
-        public boolean removeFrozenStateChangeCallback(IFrozenStateChangeCallback callback) {
+        public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
             return false;
         }
 

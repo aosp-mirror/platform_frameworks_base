@@ -43,6 +43,7 @@ flag {
     name: "virtual_display_insets"
     description: "APIs for specifying virtual display insets (via cutout)"
     bug: "350007135"
+    is_exported: true
 }
 
 flag {
@@ -88,6 +89,7 @@ flag {
     name: "virtual_display_rotation_api"
     description: "API for on-demand rotation of virtual displays"
     bug: "291748430"
+    is_exported: true
 }
 
 flag {
@@ -98,11 +100,11 @@ flag {
 }
 
 flag {
-  name: "camera_multiple_input_streams"
-  is_exported: true
-  namespace: "virtual_devices"
-  description: "Expose multiple surface for the virtual camera owner for different stream resolution"
-  bug: "341083465"
+    name: "camera_multiple_input_streams"
+    is_exported: true
+    namespace: "virtual_devices"
+    description: "Expose multiple surface for the virtual camera owner for different stream resolution"
+    bug: "341083465"
 }
 
 flag {
@@ -110,11 +112,59 @@ flag {
     name: "device_aware_display_power"
     description: "Device awareness in power and display APIs"
     bug: "285020111"
+    is_exported: true
 }
 
 flag {
-  name: "status_bar_and_insets"
-  namespace: "virtual_devices"
-  description: "Allow for status bar and insets on virtual devices"
-  bug: "350007866"
+    namespace: "virtual_devices"
+    name: "display_power_manager_apis"
+    description: "Make relevant PowerManager APIs display aware by default"
+    bug: "365042486"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "status_bar_and_insets"
+    namespace: "virtual_devices"
+    description: "Allow for status bar and insets on virtual devices"
+    bug: "350007866"
+    is_exported: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "camera_timestamp_from_surface"
+    description: "Pass the surface timestamp to the capture result"
+    bug: "351341245"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "enable_limited_vdm_role"
+    description: "New VDM role without trusted displays or input"
+    bug: "370657575"
+    is_exported: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "notifications_for_device_streaming"
+    description: "Add notifications permissions to device streaming role"
+    bug: "375240276"
+    is_exported: true
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "default_device_camera_access_policy"
+    description: "API for default device camera access policy"
+    bug: "371173368"
+    is_exported: true
+}
+
+flag {
+    name: "vdm_settings"
+    namespace: "virtual_devices"
+    description: "Show virtual devices in Settings"
+    bug: "338974320"
 }

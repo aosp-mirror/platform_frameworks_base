@@ -19,19 +19,21 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +41,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 @SysUISingleton
 class KeyguardBlueprintInteractor
@@ -48,7 +49,7 @@ constructor(
     private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
     @Application private val applicationScope: CoroutineScope,
     shadeInteractor: ShadeInteractor,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
     private val fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     private val smartspaceSection: SmartspaceSection,
 ) : CoreStartable {
@@ -64,7 +65,7 @@ constructor(
     /** Current BlueprintId */
     val blueprintId =
         shadeInteractor.isShadeLayoutWide.map { isShadeLayoutWide ->
-            val useSplitShade = isShadeLayoutWide && !ComposeLockscreen.isEnabled
+            val useSplitShade = isShadeLayoutWide && !SceneContainerFlag.isEnabled
             when {
                 useSplitShade -> SplitShadeKeyguardBlueprint.ID
                 else -> DefaultKeyguardBlueprint.DEFAULT
@@ -80,10 +81,7 @@ constructor(
         }
         applicationScope.launch {
             val refreshConfig =
-                Config(
-                    Type.NoTransition,
-                    rebuildSections = listOf(smartspaceSection),
-                )
+                Config(Type.NoTransition, rebuildSections = listOf(smartspaceSection))
             configurationInteractor.onAnyConfigurationChange.collect {
                 refreshBlueprint(refreshConfig)
             }

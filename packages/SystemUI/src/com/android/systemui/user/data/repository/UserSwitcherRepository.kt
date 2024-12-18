@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings.Global.USER_SWITCHER_ENABLED
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -40,7 +41,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 interface UserSwitcherRepository {
@@ -66,6 +66,9 @@ constructor(
 ) : UserSwitcherRepository {
     private val showUserSwitcherForSingleUser =
         context.resources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)
+
+    private val userSwitchingMustGoThroughLoginScreen =
+        context.resources.getBoolean(R.bool.config_userSwitchingMustGoThroughLoginScreen)
 
     override val isEnabled: Flow<Boolean> = conflatedCallbackFlow {
         suspend fun updateState() {
@@ -135,7 +138,13 @@ constructor(
 
     private suspend fun isUserSwitcherEnabled(): Boolean {
         return withContext(bgDispatcher) {
-            userManager.isUserSwitcherEnabled(showUserSwitcherForSingleUser)
+            // TODO(b/378068979): remove once login screen-specific logic
+            // is implemented at framework level.
+            if (userSwitchingMustGoThroughLoginScreen) {
+                false
+            } else {
+                userManager.isUserSwitcherEnabled(showUserSwitcherForSingleUser)
+            }
         }
     }
 

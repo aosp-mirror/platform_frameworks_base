@@ -40,6 +40,7 @@ import android.os.SharedMemory;
 import android.system.ErrnoException;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.UUID;
@@ -155,32 +156,33 @@ public class ConversionUtil {
     public static RecognitionConfig api2aidlRecognitionConfig(
             SoundTrigger.RecognitionConfig apiConfig) {
         RecognitionConfig aidlConfig = new RecognitionConfig();
-        aidlConfig.captureRequested = apiConfig.captureRequested;
-        // apiConfig.allowMultipleTriggers is ignored by the lower layers.
+        aidlConfig.captureRequested = apiConfig.isCaptureRequested();
+        // apiConfig.isMultipleTriggersAllowed() is ignored by the lower layers.
         aidlConfig.phraseRecognitionExtras =
-                new PhraseRecognitionExtra[apiConfig.keyphrases.length];
-        for (int i = 0; i < apiConfig.keyphrases.length; ++i) {
+                new PhraseRecognitionExtra[apiConfig.getKeyphrases().size()];
+        for (int i = 0; i < apiConfig.getKeyphrases().size(); ++i) {
             aidlConfig.phraseRecognitionExtras[i] = api2aidlPhraseRecognitionExtra(
-                    apiConfig.keyphrases[i]);
+                    apiConfig.getKeyphrases().get(i));
         }
-        aidlConfig.data = Arrays.copyOf(apiConfig.data, apiConfig.data.length);
-        aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.audioCapabilities);
+        aidlConfig.data = Arrays.copyOf(apiConfig.getData(), apiConfig.getData().length);
+        aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.getAudioCapabilities());
         return aidlConfig;
     }
 
     public static SoundTrigger.RecognitionConfig aidl2apiRecognitionConfig(
             RecognitionConfig aidlConfig) {
-        var keyphrases =
-            new SoundTrigger.KeyphraseRecognitionExtra[aidlConfig.phraseRecognitionExtras.length];
-        int i = 0;
+        var keyphrases = new ArrayList<SoundTrigger.KeyphraseRecognitionExtra>(
+            aidlConfig.phraseRecognitionExtras.length);
         for (var extras : aidlConfig.phraseRecognitionExtras) {
-            keyphrases[i++] = aidl2apiPhraseRecognitionExtra(extras);
+            keyphrases.add(aidl2apiPhraseRecognitionExtra(extras));
         }
-        return new SoundTrigger.RecognitionConfig(aidlConfig.captureRequested,
-                false /** allowMultipleTriggers **/,
-                keyphrases,
-                Arrays.copyOf(aidlConfig.data, aidlConfig.data.length),
-                aidl2apiAudioCapabilities(aidlConfig.audioCapabilities));
+        return new SoundTrigger.RecognitionConfig.Builder()
+            .setCaptureRequested(aidlConfig.captureRequested)
+            .setMultipleTriggersAllowed(false)
+            .setKeyphrases(keyphrases)
+            .setData(Arrays.copyOf(aidlConfig.data, aidlConfig.data.length))
+            .setAudioCapabilities(aidl2apiAudioCapabilities(aidlConfig.audioCapabilities))
+            .build();
     }
 
     public static PhraseRecognitionExtra api2aidlPhraseRecognitionExtra(

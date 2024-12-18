@@ -63,23 +63,46 @@ constructor(
             .logDiffsForTable(
                 tableLogBuffer = tableLogBuffer,
                 columnPrefix = "disabledReason",
-                initialValue = CommunalEnabledState()
+                initialValue = CommunalEnabledState(),
             )
             .map { model -> model.enabled }
             // Start this eagerly since the value is accessed synchronously in many places.
             .stateIn(scope = bgScope, started = SharingStarted.Eagerly, initialValue = false)
 
+    /** Whether or not screensaver (dreams) is enabled for the currently selected user. */
+    val isScreensaverEnabled: Flow<Boolean> =
+        userInteractor.selectedUserInfo.flatMapLatest { user ->
+            repository.getScreensaverEnabledState(user)
+        }
+
     /**
-     * Returns true if both the communal trunk-stable flag and resource flag are enabled.
+     * Returns true if any glanceable hub functionality should be enabled via configs and flags.
      *
-     * The trunk-stable flag is controlled by server rollout and is on all devices. The resource
-     * flag is enabled via resource overlay only on products we want the hub to be present on.
+     * This should be used for preventing basic glanceable hub functionality from running on devices
+     * that don't need it.
      *
      * If this is false, then the hub is definitely not available on the device. If this is true,
      * refer to [isCommunalEnabled] which takes into account other factors that can change at
      * runtime.
+     *
+     * If the glanceable_hub_v2 flag is enabled, checks the config_glanceableHubEnabled Android
+     * config boolean. Otherwise, checks the old config_communalServiceEnabled config and
+     * communal_hub flag.
      */
     fun isCommunalFlagEnabled(): Boolean = repository.getFlagEnabled()
+
+    /**
+     * Returns true if the Android config config_glanceableHubEnabled and the glanceable_hub_v2 flag
+     * are enabled.
+     *
+     * This should be used to flag off new glanceable hub or dream behavior that should launch
+     * together with the new hub experience that brings the hub to mobile.
+     *
+     * The trunk-stable flag is controlled by server rollout and is on all devices. The Android
+     * config flag is enabled via resource overlay only on products we want the hub to be present
+     * on.
+     */
+    fun isV2FlagEnabled(): Boolean = repository.getV2FlagEnabled()
 
     /** The type of background to use for the hub. Used to experiment with different backgrounds */
     val communalBackground: Flow<CommunalBackgroundType> =
@@ -120,6 +143,6 @@ constructor(
             .stateIn(
                 scope = bgScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = null
+                initialValue = null,
             )
 }

@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
+import android.os.IBinder;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -47,9 +48,21 @@ public final class BLASTBufferQueue {
             long frameNumber);
     private static native void nativeSetTransactionHangCallback(long ptr,
             TransactionHangCallback callback);
+    private static native void nativeSetApplyToken(long ptr, IBinder applyToken);
+    private static native void nativeSetWaitForBufferReleaseCallback(long ptr,
+            WaitForBufferReleaseCallback callback);
 
     public interface TransactionHangCallback {
         void onTransactionHang(String reason);
+    }
+
+
+    public interface WaitForBufferReleaseCallback {
+        /**
+         * Indicates that the client is waiting on buffer release
+         * due to no free buffers being available to render into.
+         */
+        void onWaitForBufferRelease();
     }
 
     /** Create a new connection with the surface flinger. */
@@ -203,5 +216,16 @@ public final class BLASTBufferQueue {
 
     public void setTransactionHangCallback(TransactionHangCallback hangCallback) {
         nativeSetTransactionHangCallback(mNativeObject, hangCallback);
+    }
+
+    public void setApplyToken(IBinder applyToken) {
+        nativeSetApplyToken(mNativeObject, applyToken);
+    }
+
+    /**
+     * Propagate callback about being blocked on buffer release.
+     */
+    public void setWaitForBufferReleaseCallback(WaitForBufferReleaseCallback waitCallback) {
+        nativeSetWaitForBufferReleaseCallback(mNativeObject, waitCallback);
     }
 }

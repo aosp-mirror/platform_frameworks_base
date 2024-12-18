@@ -28,7 +28,7 @@ public class TunerResourceBasic {
      * Handle of the current resource. Should not be changed and should be aligned with the driver
      * level implementation.
      */
-    final int mHandle;
+    final long mHandle;
 
     /**
      * If the current resource is in use.
@@ -44,7 +44,7 @@ public class TunerResourceBasic {
         this.mHandle = builder.mHandle;
     }
 
-    public int getHandle() {
+    public long getHandle() {
         return mHandle;
     }
 
@@ -78,9 +78,9 @@ public class TunerResourceBasic {
      * Builder class for {@link TunerResourceBasic}.
      */
     public static class Builder {
-        private final int mHandle;
+        private final long mHandle;
 
-        Builder(int handle) {
+        Builder(long handle) {
             this.mHandle = handle;
         }
 

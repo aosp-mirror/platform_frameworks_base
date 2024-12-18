@@ -85,6 +85,18 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".NonResizeablePortraitActivity");
     }
 
+    public static class NonResizeableFixedAspectRatioPortraitActivity {
+        public static final String LABEL = "NonResizeableFixedAspectRatioPortraitActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".NonResizeableFixedAspectRatioPortraitActivity");
+    }
+
+    public static class StartMediaProjectionActivity {
+        public static final String LABEL = "StartMediaProjectionActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".StartMediaProjectionActivity");
+    }
+
     public static class PortraitImmersiveActivity {
         public static final String LABEL = "PortraitImmersiveActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
@@ -227,6 +239,21 @@ public class ActivityOptions {
 
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                 FLICKER_APP_PACKAGE + ".PipActivity");
+    }
+
+    public static class BottomHalfPip {
+        public static final String LAUNCHING_APP_LABEL = "BottomHalfPipLaunchingActivity";
+        // Test App > Bottom Half PIP Activity
+        public static final String LABEL = "BottomHalfPipActivity";
+
+        // Use the bottom half layout for PIP Activity
+        public static final String EXTRA_BOTTOM_HALF_LAYOUT = "bottom_half";
+
+        public static final ComponentName LAUNCHING_APP_COMPONENT = new ComponentName(
+                FLICKER_APP_PACKAGE, FLICKER_APP_PACKAGE + ".BottomHalfPipLaunchingActivity");
+
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".BottomHalfPipActivity");
     }
 
     public static class SplitScreen {

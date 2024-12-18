@@ -25,6 +25,7 @@ import android.media.AudioManager.OnCommunicationDeviceChangedListener
 import android.media.IVolumeController
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
 import com.android.settingslib.volume.data.model.VolumeControllerEvent
@@ -98,12 +99,14 @@ interface AudioRepository {
      */
     suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean): Boolean
 
-    suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode)
+    suspend fun setRingerModeInternal(audioStream: AudioStream, mode: RingerMode)
 
     /** Gets audio device category. */
     @AudioDeviceCategory suspend fun getBluetoothAudioDeviceCategory(bluetoothAddress: String): Int
 
     suspend fun notifyVolumeControllerVisible(isVisible: Boolean)
+
+    fun dispatchMediaKeyEvent(event: KeyEvent)
 }
 
 class AudioRepositoryImpl(
@@ -248,8 +251,8 @@ class AudioRepositoryImpl(
         }
     }
 
-    override suspend fun setRingerMode(audioStream: AudioStream, mode: RingerMode) {
-        withContext(backgroundCoroutineContext) { audioManager.ringerMode = mode.value }
+    override suspend fun setRingerModeInternal(audioStream: AudioStream, mode: RingerMode) {
+        withContext(backgroundCoroutineContext) { audioManager.ringerModeInternal = mode.value }
     }
 
     @AudioDeviceCategory
@@ -263,6 +266,10 @@ class AudioRepositoryImpl(
         withContext(backgroundCoroutineContext) {
             audioManager.notifyVolumeControllerVisible(volumeController, isVisible)
         }
+    }
+
+    override fun dispatchMediaKeyEvent(event: KeyEvent) {
+        audioManager.dispatchMediaKeyEvent(event)
     }
 
     private fun getMinVolume(stream: AudioStream): Int =
@@ -320,15 +327,9 @@ private class ProducingVolumeController : IVolumeController.Stub() {
         mutableEvents.tryEmit(VolumeControllerEvent.SetA11yMode(mode))
     }
 
-    override fun displayCsdWarning(
-        csdWarning: Int,
-        displayDurationMs: Int,
-    ) {
+    override fun displayCsdWarning(csdWarning: Int, displayDurationMs: Int) {
         mutableEvents.tryEmit(
-            VolumeControllerEvent.DisplayCsdWarning(
-                csdWarning,
-                displayDurationMs,
-            )
+            VolumeControllerEvent.DisplayCsdWarning(csdWarning, displayDurationMs)
         )
     }
 }

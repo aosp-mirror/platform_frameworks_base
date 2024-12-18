@@ -15,21 +15,17 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import java.util.List;
 
-/**
- * Interface for the companion operations
- */
+/** Interface for the companion operations */
 public interface CompanionOperation {
     /**
      * Read, create and add instance to operations
+     *
      * @param buffer data to read to create operation
      * @param operations command is to be added
      */
-    void read(WireBuffer buffer, List<Operation> operations);
-
-    // Debugging / Documentation utility functions
-    String name();
-    int id();
+    void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations);
 }
-

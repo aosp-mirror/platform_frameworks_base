@@ -16,55 +16,36 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.map
 
 class GoneUserActionsViewModel
 @AssistedInject
-constructor(
-    private val shadeInteractor: ShadeInteractor,
-) : UserActionsViewModel() {
+constructor(private val shadeInteractor: ShadeInteractor) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
-        shadeInteractor.shadeMode
-            .map { shadeMode ->
-                buildMap<UserAction, UserActionResult> {
-                    if (
-                        shadeMode is ShadeMode.Single ||
-                            // TODO(b/338577208): Remove this once we add Dual Shade invocation
-                            // zones.
-                            shadeMode is ShadeMode.Dual
-                    ) {
-                        put(
-                            Swipe(
-                                pointerCount = 2,
-                                fromSource = Edge.Top,
-                                direction = SwipeDirection.Down,
-                            ),
-                            UserActionResult(SceneFamilies.QuickSettings)
+        shadeInteractor.shadeMode.collect { shadeMode ->
+            setActions(
+                buildList {
+                        addAll(
+                            when (shadeMode) {
+                                ShadeMode.Single ->
+                                    singleShadeActions(requireTwoPointersForTopEdgeForQs = true)
+                                ShadeMode.Split -> splitShadeActions()
+                                ShadeMode.Dual -> dualShadeActions()
+                            }
                         )
                     }
-
-                    put(
-                        Swipe.Down,
-                        UserActionResult(
-                            SceneFamilies.NotifShade,
-                            ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                        )
-                    )
-                }
-            }
-            .collect { setActions(it) }
+                    .associate { it }
+            )
+        }
     }
 
     @AssistedFactory

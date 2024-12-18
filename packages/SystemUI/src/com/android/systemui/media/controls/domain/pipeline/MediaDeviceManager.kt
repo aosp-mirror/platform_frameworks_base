@@ -71,6 +71,7 @@ constructor(
     private val localBluetoothManager: Lazy<LocalBluetoothManager?>,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
+    private val logger: MediaDeviceLogger,
 ) : MediaDataManager.Listener {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
@@ -281,59 +282,38 @@ constructor(
         }
 
         override fun onBroadcastStarted(reason: Int, broadcastId: Int) {
-            if (DEBUG) {
-                Log.d(TAG, "onBroadcastStarted(), reason = $reason , broadcastId = $broadcastId")
-            }
+            logger.logBroadcastEvent("onBroadcastStarted", reason, broadcastId)
             updateCurrent()
         }
 
         override fun onBroadcastStartFailed(reason: Int) {
-            if (DEBUG) {
-                Log.d(TAG, "onBroadcastStartFailed(), reason = $reason")
-            }
+            logger.logBroadcastEvent("onBroadcastStartFailed", reason)
         }
 
         override fun onBroadcastMetadataChanged(
             broadcastId: Int,
             metadata: BluetoothLeBroadcastMetadata
         ) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "onBroadcastMetadataChanged(), broadcastId = $broadcastId , " +
-                        "metadata = $metadata"
-                )
-            }
+            logger.logBroadcastMetadataChanged(broadcastId, metadata.toString())
             updateCurrent()
         }
 
         override fun onBroadcastStopped(reason: Int, broadcastId: Int) {
-            if (DEBUG) {
-                Log.d(TAG, "onBroadcastStopped(), reason = $reason , broadcastId = $broadcastId")
-            }
+            logger.logBroadcastEvent("onBroadcastStopped", reason, broadcastId)
             updateCurrent()
         }
 
         override fun onBroadcastStopFailed(reason: Int) {
-            if (DEBUG) {
-                Log.d(TAG, "onBroadcastStopFailed(), reason = $reason")
-            }
+            logger.logBroadcastEvent("onBroadcastStopFailed", reason)
         }
 
         override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {
-            if (DEBUG) {
-                Log.d(TAG, "onBroadcastUpdated(), reason = $reason , broadcastId = $broadcastId")
-            }
+            logger.logBroadcastEvent("onBroadcastUpdated", reason, broadcastId)
             updateCurrent()
         }
 
         override fun onBroadcastUpdateFailed(reason: Int, broadcastId: Int) {
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "onBroadcastUpdateFailed(), reason = $reason , " + "broadcastId = $broadcastId"
-                )
-            }
+            logger.logBroadcastEvent("onBroadcastUpdateFailed", reason, broadcastId)
         }
 
         override fun onPlaybackStarted(reason: Int, broadcastId: Int) {}
@@ -381,12 +361,16 @@ constructor(
                                 name = context.getString(R.string.media_seamless_other_device),
                                 showBroadcastButton = false
                             )
+                    logger.logRemoteDevice(routingSession?.name, connectedDevice)
                 } else {
                     // Prefer SASS if available when playback is local.
-                    activeDevice = getSassDevice() ?: connectedDevice
+                    val sassDevice = getSassDevice()
+                    activeDevice = sassDevice ?: connectedDevice
+                    logger.logLocalDevice(sassDevice, connectedDevice)
                 }
 
                 current = activeDevice ?: EMPTY_AND_DISABLED_MEDIA_DEVICE_DATA
+                logger.logNewDeviceName(current?.name?.toString())
             } else {
                 val aboutToConnect = aboutToConnectDeviceOverride
                 if (
@@ -407,9 +391,7 @@ constructor(
                 val enabled = device != null && (controller == null || routingSession != null)
 
                 val name = getDeviceName(device, routingSession)
-                if (DEBUG) {
-                    Log.d(TAG, "new device name $name")
-                }
+                logger.logNewDeviceName(name)
                 current =
                     MediaDeviceData(
                         enabled,
@@ -463,14 +445,12 @@ constructor(
         ): String? {
             val selectedRoutes = routingSession?.let { mr2manager.get().getSelectedRoutes(it) }
 
-            if (DEBUG) {
-                Log.d(
-                    TAG,
-                    "device is $device, controller $controller," +
-                        " routingSession ${routingSession?.name}" +
-                        " or ${selectedRoutes?.firstOrNull()?.name}"
-                )
-            }
+            logger.logDeviceName(
+                device,
+                controller,
+                routingSession?.name,
+                selectedRoutes?.firstOrNull()?.name
+            )
 
             if (controller == null) {
                 // In resume state, we don't have a controller - just use the device name

@@ -54,6 +54,7 @@ public class AmbientStatusBarView extends ConstraintLayout {
             STATUS_ICON_MIC_CAMERA_DISABLED,
             STATUS_ICON_PRIORITY_MODE_ON,
             STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
+            STATUS_ICON_LOCATION_ACTIVE,
     })
     public @interface StatusIconType {}
     public static final int STATUS_ICON_NOTIFICATIONS = 0;
@@ -64,6 +65,7 @@ public class AmbientStatusBarView extends ConstraintLayout {
     public static final int STATUS_ICON_MIC_CAMERA_DISABLED = 5;
     public static final int STATUS_ICON_PRIORITY_MODE_ON = 6;
     public static final int STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE = 7;
+    public static final int STATUS_ICON_LOCATION_ACTIVE = 8;
 
     private final Map<Integer, View> mStatusIcons = new HashMap<>();
     private Context mContext;
@@ -73,8 +75,8 @@ public class AmbientStatusBarView extends ConstraintLayout {
     private ShadowInfo mAmbientShadowInfo;
     private int mDrawableSize;
     private int mDrawableInsetSize;
-    private static final float KEY_SHADOW_ALPHA = 0.35f;
-    private static final float AMBIENT_SHADOW_ALPHA = 0.4f;
+    private static final float KEY_SHADOW_ALPHA = 0.8f;
+    private static final float AMBIENT_SHADOW_ALPHA = 0.6f;
 
     public AmbientStatusBarView(Context context) {
         this(context, null);
@@ -136,6 +138,8 @@ public class AmbientStatusBarView extends ConstraintLayout {
                 addDoubleShadow(fetchStatusIconForResId(R.id.dream_overlay_priority_mode)));
         mStatusIcons.put(STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
                 fetchStatusIconForResId(R.id.dream_overlay_assistant_attention_indicator));
+        mStatusIcons.put(STATUS_ICON_LOCATION_ACTIVE,
+                fetchStatusIconForResId(R.id.dream_overlay_location_active));
 
         mSystemStatusViewGroup = findViewById(R.id.dream_overlay_system_status);
         mExtraSystemStatusViewGroup = findViewById(R.id.dream_overlay_extra_items);
@@ -151,17 +155,19 @@ public class AmbientStatusBarView extends ConstraintLayout {
             case STATUS_ICON_MIC_CAMERA_DISABLED -> "mic_camera_disabled";
             case STATUS_ICON_PRIORITY_MODE_ON -> "priority_mode_on";
             case STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE -> "assistant_attention_active";
+            case STATUS_ICON_LOCATION_ACTIVE -> "location_active";
             default -> type + "(unknown)";
         };
     }
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
         View icon = mStatusIcons.get(iconType);
-        if (icon == null) {
-            return;
-        }
+        if (icon == null) return;
+
         if (show && contentDescription != null) {
             icon.setContentDescription(contentDescription);
+            icon.setFocusable(true);
+            icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
         icon.setVisibility(show ? View.VISIBLE : View.GONE);
         mSystemStatusViewGroup.setVisibility(areAnyStatusIconsVisible() ? View.VISIBLE : View.GONE);
@@ -169,9 +175,12 @@ public class AmbientStatusBarView extends ConstraintLayout {
 
     void setExtraStatusBarItemViews(List<View> views) {
         removeAllExtraStatusBarItemViews();
-        views.forEach(view -> mExtraSystemStatusViewGroup.addView(view));
+        views.forEach(view -> {
+            view.setFocusable(true);
+            view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            mExtraSystemStatusViewGroup.addView(view);
+        });
     }
-
     private View fetchStatusIconForResId(int resId) {
         final View statusIcon = findViewById(resId);
         return Objects.requireNonNull(statusIcon);

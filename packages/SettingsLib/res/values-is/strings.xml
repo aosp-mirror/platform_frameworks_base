@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Virkjar eiginleika aukinnar tengigetu."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Þróunarumhverfi Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Á tilraunastigi) Keyrðu Linux-útstöð í Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ef þú slekkur á þessu verður gögnum í Linux-útstöð eytt"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-athugun"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Velja virkni HDCP-ath."</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Villuleit"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Vekjarar og áminningar"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leyfa þessu forriti að stilla vekjara og áætla aðgerðir sem þurfa að eiga sér stað innan ákveðins tímaramma. Þetta leyfir forritinu að keyra í bakgrunninum sem getur notað meiri rafhlöðuorku.\n\nEf slökkt er á þessari heimild munu núverandi vekjarar og tímasettir viðburðir sem þetta forrit stillir ekki virka."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"áætlun, vekjari, áminning, klukka"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ónáðið ekki"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ónáðið ekki"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Kveikja"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Kveikja á „Ónáðið ekki“"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Rétt í þessu"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Þessi sími"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Þessi spjaldtölva"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Þessi tölva (innbyggður)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Þetta sjónvarp"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Hátalaradokka"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ytra tæki"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Tengt tæki"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Þessi sími"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Hliðrænt"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ekki er hægt að spila í þessu tæki"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Uppfærðu reikninginn til að skipta"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Ekki er hægt að spila niðurhal hér"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Tengt með ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Tengt með eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Sjálfgefið í sjónvarpi"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-úttak"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Innri hátalarar"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Innbyggður hátalari"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Sjónvarpshljóð"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Vandamál í tengingu. Slökktu og kveiktu á tækinu"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Snúrutengt hljómtæki"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjálp og ábendingar"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slökkt"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Virkt"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Endurræsa þarf tækið til að þessi breyting taki gildi. Endurræstu núna eða hættu við."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Heyrnartól með snúru"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB-hljóð"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Hljóðnemi með snúru"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB-hljóðnemi"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT-hljóðnemi"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Kveikt"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Slökkt"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Skiptir um farsímakerfi"</string>
@@ -726,7 +735,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ef þú sendir út <xliff:g id="SWITCHAPP">%1$s</xliff:g> eða skiptir um úttak lýkur yfirstandandi útsendingu"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Senda út <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Skipta um úttak"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Hreyfimyndir flýtiritunar við bendinguna „til baka“"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Hreyfimyndir flýtiritunar við bendinguna „Til baka“"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Kveikja á hreyfimyndum í kerfinu til að sýna hreyfimyndir þegar bendingin „til baka“ er gerð."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Þessi stilling kveikir á hreyfimyndum í kerfinu til að sýna hreyfimyndir flýtiritunar með bendingum. Stillingin krefst þess að kveikt sé á enableOnBackInvokedCallback í upplýsingaskránni fyrir hvert forrit."</string>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>

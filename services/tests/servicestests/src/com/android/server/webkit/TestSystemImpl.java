@@ -19,7 +19,7 @@ package com.android.server.webkit;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.webkit.UserPackage;
 import android.webkit.WebViewProviderInfo;
 
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class TestSystemImpl implements SystemInterface {
     private String mUserProvider = null;
@@ -36,18 +37,17 @@ public class TestSystemImpl implements SystemInterface {
     Map<String, Map<Integer, PackageInfo>> mPackages = new HashMap();
     private final int mNumRelros;
     private final boolean mIsDebuggable;
-    private int mMultiProcessSetting;
-    private final boolean mMultiProcessDefault;
+    private Predicate<PackageInfo> mCompatibilityPredicate;
 
     public static final int PRIMARY_USER_ID = 0;
 
-    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, int numRelros, boolean isDebuggable,
-            boolean multiProcessDefault) {
+    public TestSystemImpl(WebViewProviderInfo[] packageConfigs, int numRelros,
+            boolean isDebuggable) {
         mPackageConfigs = packageConfigs;
         mNumRelros = numRelros;
         mIsDebuggable = isDebuggable;
         mUsers.add(PRIMARY_USER_ID);
-        mMultiProcessDefault = multiProcessDefault;
+        mCompatibilityPredicate = pi -> true;
     }
 
     public void addUser(int userId) {
@@ -132,19 +132,24 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
+    public boolean isCompatibleImplementationPackage(PackageInfo packageInfo) {
+        return mCompatibilityPredicate.test(packageInfo);
+    }
+
+    public void setCompatibilityPredicate(Predicate<PackageInfo> predicate) {
+        mCompatibilityPredicate = predicate;
+    }
+
+    @Override
     public List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo info) {
         Map<Integer, PackageInfo> userPackages = mPackages.get(info.packageName);
         List<UserPackage> ret = new ArrayList();
         // Loop over defined users, and find the corresponding package for each user.
         for (int userId : mUsers) {
-            ret.add(new UserPackage(createUserInfo(userId),
+            ret.add(new UserPackage(UserHandle.of(userId),
                     userPackages == null ? null : userPackages.get(userId)));
         }
         return ret;
-    }
-
-    private static UserInfo createUserInfo(int userId) {
-        return new UserInfo(userId, "User nr. " + userId, 0 /* flags */);
     }
 
     /**
@@ -185,25 +190,7 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public int getMultiProcessSetting() {
-        return mMultiProcessSetting;
-    }
-
-    @Override
-    public void setMultiProcessSetting(int value) {
-        mMultiProcessSetting = value;
-    }
-
-    @Override
-    public void notifyZygote(boolean enableMultiProcess) {}
-
-    @Override
     public void ensureZygoteStarted() {}
-
-    @Override
-    public boolean isMultiProcessDefaultEnabled() {
-        return mMultiProcessDefault;
-    }
 
     @Override
     public void pinWebviewIfRequired(ApplicationInfo appInfo) {}

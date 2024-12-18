@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "SkColorSpace.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -47,6 +49,10 @@ static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t
             break;
         case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
             colorType = kRGBA_1010102_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM:
+            colorType = kRGBA_10x6_SkColorType;
             alphaType = kPremul_SkAlphaType;
             break;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
@@ -86,6 +92,8 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             return AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
         case kRGBA_1010102_SkColorType:
             return AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM;
+        case kRGBA_10x6_SkColorType:
+            return AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM;
         case kARGB_4444_SkColorType:
             // Hardcoding the value from android::PixelFormat
             static constexpr uint64_t kRGBA4444 = 7;
@@ -108,6 +116,8 @@ SkColorType BufferFormatToColorType(uint32_t format) {
             return kRGB_565_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
             return kRGBA_1010102_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM:
+            return kRGBA_10x6_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
             return kRGBA_F16_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R8_UNORM:
@@ -207,9 +217,12 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         return HAL_DATASPACE_ADOBE_RGB;
     }
 
-    if (nearlyEqual(fn, SkNamedTransferFn::kRec2020) &&
-        nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
-        return HAL_DATASPACE_BT2020;
+    if (nearlyEqual(gamut, SkNamedGamut::kRec2020)) {
+        if (nearlyEqual(fn, SkNamedTransferFn::kRec2020)) {
+            return HAL_DATASPACE_BT2020;
+        } else if (nearlyEqual(fn, SkNamedTransferFn::kSRGB)) {
+            return static_cast<android_dataspace>(HAL_DATASPACE_DISPLAY_BT2020);
+        }
     }
 
     if (nearlyEqual(fn, k2Dot6) && nearlyEqual(gamut, kDCIP3)) {

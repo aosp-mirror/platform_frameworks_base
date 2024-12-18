@@ -329,7 +329,7 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         /**
          * Get the sampled region of interest from the sampled view
          * @param sampledView The view that this helper is attached to for convenience
-         * @return the region to be sampled in sceen coordinates. Return {@code null} to avoid
+         * @return the region to be sampled in screen coordinates. Return {@code null} to avoid
          * sampling in this frame
          */
         Rect getSampledRegion(View sampledView);

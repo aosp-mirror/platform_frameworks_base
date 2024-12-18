@@ -15,8 +15,6 @@
  */
 package android.system;
 
-import com.android.ravenwood.common.RavenwoodCommonUtils;
-
 /**
  * Copied from libcore's version, with the local changes:
  * - All the imports are removed. (they're only used in javadoc)
@@ -1252,8 +1250,6 @@ public class OsConstants {
     private static int placeholder() { return 0; }
     // ...because we want to initialize them at runtime.
     static {
-        // [ravenwood-change] Load the JNI lib.
-        RavenwoodCommonUtils.loadRavenwoodNativeRuntime();
         Native.initConstants();
     }
 }

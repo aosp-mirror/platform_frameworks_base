@@ -46,6 +46,8 @@ import android.util.TimingsTraceLog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.RoSystemFeatures;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.permission.PermissionAllowlist;
@@ -212,6 +214,30 @@ public class SystemConfig {
         }
     }
 
+    /**
+     * Utility class for testing interaction with compile-time defined system features.
+     * @hide
+    */
+    @VisibleForTesting
+    public static class Injector {
+        /** Whether a system feature is defined as enabled and available at compile-time. */
+        public boolean isReadOnlySystemEnabledFeature(String featureName, int version) {
+            return Boolean.TRUE.equals(RoSystemFeatures.maybeHasFeature(featureName, version));
+        }
+
+        /** Whether a system feature is defined as disabled and unavailable at compile-time. */
+        public boolean isReadOnlySystemDisabledFeature(String featureName, int version) {
+            return Boolean.FALSE.equals(RoSystemFeatures.maybeHasFeature(featureName, version));
+        }
+
+        /** The full set of system features defined as compile-time enabled and available. */
+        public ArrayMap<String, FeatureInfo> getReadOnlySystemEnabledFeatures() {
+            return RoSystemFeatures.getReadOnlySystemEnabledFeatures();
+        }
+    }
+
+    private final Injector mInjector;
+
     // These are the built-in shared libraries that were read from the
     // system configuration files. Keys are the library names; values are
     // the individual entries that contain information such as filename
@@ -220,7 +246,7 @@ public class SystemConfig {
 
     // These are the features this devices supports that were read from the
     // system configuration files.
-    final ArrayMap<String, FeatureInfo> mAvailableFeatures = new ArrayMap<>();
+    final ArrayMap<String, FeatureInfo> mAvailableFeatures;
 
     // These are the features which this device doesn't support; the OEM
     // partition uses these to opt-out of features from the system image.
@@ -602,12 +628,26 @@ public class SystemConfig {
     public ArrayMap<String, Integer> getOemDefinedUids() {
         return mOemDefinedUids;
     }
+
     /**
      * Only use for testing. Do NOT use in production code.
      * @param readPermissions false to create an empty SystemConfig; true to read the permissions.
      */
     @VisibleForTesting
     public SystemConfig(boolean readPermissions) {
+        this(readPermissions, new Injector());
+    }
+
+    /**
+     * Only use for testing. Do NOT use in production code.
+     * @param readPermissions false to create an empty SystemConfig; true to read the permissions.
+     * @param injector Additional dependency injection for testing.
+     */
+    @VisibleForTesting
+    public SystemConfig(boolean readPermissions, Injector injector) {
+        mInjector = injector;
+        mAvailableFeatures = mInjector.getReadOnlySystemEnabledFeatures();
+
         if (readPermissions) {
             Slog.w(TAG, "Constructing a test SystemConfig");
             readAllPermissions();
@@ -617,6 +657,9 @@ public class SystemConfig {
     }
 
     SystemConfig() {
+        mInjector = new Injector();
+        mAvailableFeatures = mInjector.getReadOnlySystemEnabledFeatures();
+
         TimingsTraceLog log = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
         log.traceBegin("readAllPermissions");
         try {
@@ -628,6 +671,17 @@ public class SystemConfig {
     }
 
     private void readAllPermissions() {
+        readAllPermissionsFromXml();
+        readAllPermissionsFromEnvironment();
+
+        // Apply global feature removal last, after all features have been read.
+        // This only needs to happen once.
+        for (String featureName : mUnavailableFeatures) {
+            removeFeature(featureName);
+        }
+    }
+
+    private void readAllPermissionsFromXml() {
         final XmlPullParser parser = Xml.newPullParser();
 
         // Read configuration from system
@@ -727,10 +781,8 @@ public class SystemConfig {
             return;
         }
         // Read configuration of features, libs and priv-app permissions from apex module.
-        int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS;
-        if (android.permission.flags.Flags.apexSignaturePermissionAllowlistEnabled()) {
-            apexPermissionFlag |= ALLOW_SIGNATURE_PERMISSIONS;
-        }
+        int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
+                | ALLOW_SIGNATURE_PERMISSIONS;
         // TODO: Use a solid way to filter apex module folders?
         for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
             if (f.isFile() || f.getPath().contains("@")) {
@@ -1266,6 +1318,7 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "disabled-in-sku":
                     case "disabled-until-used-preinstalled-carrier-app": {
                         if (allowAppConfigs) {
                             String pkgname = parser.getAttributeValue(null, "package");
@@ -1276,6 +1329,24 @@ public class SystemConfig {
                                                 + parser.getPositionDescription());
                             } else {
                                 mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "enabled-in-sku-override": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG,
+                                        "<" + name + "> without "
+                                                + "package in " + permFile + " at "
+                                                + parser.getPositionDescription());
+                            } else if (!mDisabledUntilUsedPreinstalledCarrierApps.remove(pkgname)) {
+                                Slog.w(TAG,
+                                        "<" + name + "> packagename:" + pkgname + " not included"
+                                                + "in disabled-in-sku");
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
@@ -1690,7 +1761,13 @@ public class SystemConfig {
         } finally {
             IoUtils.closeQuietly(permReader);
         }
+    }
 
+    // Add features or permission dependent on global system properties (as
+    // opposed to XML permission files).
+    // This only needs to be called once after all features have been parsed
+    // from various partition/apex sources.
+    private void readAllPermissionsFromEnvironment() {
         // Some devices can be field-converted to FBE, so offer to splice in
         // those features if not already defined by the static config
         if (StorageManager.isFileEncrypted()) {
@@ -1730,10 +1807,6 @@ public class SystemConfig {
             } else if (isKernelVersionAtLeast(4, 19)) {
                 addFeature(PackageManager.FEATURE_EROFS_LEGACY, 0);
             }
-        }
-
-        for (String featureName : mUnavailableFeatures) {
-            removeFeature(featureName);
         }
     }
 
@@ -1777,6 +1850,10 @@ public class SystemConfig {
     }
 
     private void addFeature(String name, int version) {
+        if (mInjector.isReadOnlySystemDisabledFeature(name, version)) {
+            Slog.w(TAG, "Skipping feature addition for compile-time disabled feature: " + name);
+            return;
+        }
         FeatureInfo fi = mAvailableFeatures.get(name);
         if (fi == null) {
             fi = new FeatureInfo();
@@ -1789,6 +1866,10 @@ public class SystemConfig {
     }
 
     private void removeFeature(String name) {
+        if (mInjector.isReadOnlySystemEnabledFeature(name, /*version=*/0)) {
+            Slog.w(TAG, "Skipping feature removal for compile-time enabled feature: " + name);
+            return;
+        }
         if (mAvailableFeatures.remove(name) != null) {
             Slog.d(TAG, "Removed unavailable feature " + name);
         }
@@ -1939,6 +2020,13 @@ public class SystemConfig {
 
     private void readSplitPermission(XmlPullParser parser, File permFile)
             throws IOException, XmlPullParserException {
+        // If trunkstable feature flag disabled for this split permission, skip this tag.
+        if (ParsingPackageUtils.getAconfigFlags()
+            .skipCurrentElement(/* pkg= */ null, parser, /* allowNoNamespace= */ true)) {
+            XmlUtils.skipCurrentTag(parser);
+            return;
+        }
+
         String splitPerm = parser.getAttributeValue(null, "name");
         if (splitPerm == null) {
             Slog.w(TAG, "<split-permission> without name in " + permFile + " at "

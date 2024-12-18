@@ -65,6 +65,13 @@ ANDROID_API jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmap
 ANDROID_API int ABitmap_compress(const AndroidBitmapInfo* info, ADataSpace dataSpace, const void* pixels,
                      AndroidBitmapCompressFormat format, int32_t quality, void* userContext,
                      AndroidBitmap_CompressWriteFunc);
+// If gainmapPixels is null, then no gainmap is encoded, and hdrSdrRatio is
+// unused
+ANDROID_API int ABitmap_compressWithGainmap(const AndroidBitmapInfo* info, ADataSpace dataSpace,
+                                            const void* pixels, const void* gainmapPixels,
+                                            float hdrSdrRatio, AndroidBitmapCompressFormat format,
+                                            int32_t quality, void* userContext,
+                                            AndroidBitmap_CompressWriteFunc);
 /**
  *  Retrieve the native object associated with a HARDWARE Bitmap.
  *

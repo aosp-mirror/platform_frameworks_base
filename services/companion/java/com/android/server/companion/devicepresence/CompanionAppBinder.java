@@ -95,7 +95,9 @@ public class CompanionAppBinder {
     /**
      * On package changed.
      */
-    public void onPackagesChanged(@UserIdInt int userId) {
+    public void onPackageChanged(@UserIdInt int userId) {
+        // Note: To invalidate the user space for simplicity. We could alternatively manage each
+        //       package, but that would easily cause errors if one case is mis-handled.
         mCompanionServicesRegister.invalidate(userId);
     }
 
@@ -299,12 +301,14 @@ public class CompanionAppBinder {
 
     private class CompanionServicesRegister extends PerUser<Map<String, List<ComponentName>>> {
         @Override
-        public synchronized @NonNull Map<String, List<ComponentName>> forUser(
+        @NonNull
+        public synchronized Map<String, List<ComponentName>> forUser(
                 @UserIdInt int userId) {
             return super.forUser(userId);
         }
 
-        synchronized @NonNull List<ComponentName> forPackage(
+        @NonNull
+        synchronized List<ComponentName> forPackage(
                 @UserIdInt int userId, @NonNull String packageName) {
             return forUser(userId).getOrDefault(packageName, Collections.emptyList());
         }
@@ -314,7 +318,8 @@ public class CompanionAppBinder {
         }
 
         @Override
-        protected final @NonNull Map<String, List<ComponentName>> create(@UserIdInt int userId) {
+        @NonNull
+        protected final Map<String, List<ComponentName>> create(@UserIdInt int userId) {
             return PackageUtils.getCompanionServicesForUser(mContext, userId);
         }
     }

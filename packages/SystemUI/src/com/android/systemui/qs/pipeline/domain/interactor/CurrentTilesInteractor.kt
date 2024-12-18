@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -115,6 +115,9 @@ interface CurrentTilesInteractor : ProtoDumpable {
      * @see TileSpecRepository.setTiles
      */
     fun setTiles(specs: List<TileSpec>)
+
+    /** Requests that the list of tiles for the current user is changed to the default list. */
+    fun resetTiles()
 
     fun createTileSync(spec: TileSpec): QSTile?
 
@@ -204,7 +207,7 @@ constructor(
                 }
             }
 
-            launch(backgroundDispatcher) {
+            launch(context = backgroundDispatcher) {
                 userAndTiles.collectLatest {
                     val newUser = it.userId
                     val newTileList = it.tiles
@@ -222,7 +225,7 @@ constructor(
                                         .TILE_NOT_PRESENT_IN_NEW_USER
                                 } else {
                                     QSPipelineLogger.TileDestroyedReason.TILE_REMOVED
-                                }
+                                },
                             )
                             (entry.value as TileOrNotInstalled.Tile).tile.destroy()
                         }
@@ -245,7 +248,7 @@ constructor(
                                             tileSpec,
                                             specsToTiles.getValue(tileSpec),
                                             userChanged,
-                                            newUser
+                                            newUser,
                                         ) ?: createTile(tileSpec)
                                     } else {
                                         createTile(tileSpec)
@@ -268,7 +271,7 @@ constructor(
                     _currentSpecsAndTiles.value = newResolvedTiles
                     logger.logTilesNotInstalled(
                         newTileMap.filter { it.value is TileOrNotInstalled.NotInstalled }.keys,
-                        newUser
+                        newUser,
                     )
                     if (newResolvedTiles.size < minTiles) {
                         // We ended up with not enough tiles (some may be not installed).
@@ -286,7 +289,7 @@ constructor(
     }
 
     override fun addTile(spec: TileSpec, position: Int) {
-        scope.launch(backgroundDispatcher) {
+        scope.launch(context = backgroundDispatcher) {
             // Block until the list is not empty
             currentTiles.filter { it.isNotEmpty() }.first()
             tileSpecRepository.addTile(userRepository.getSelectedUserInfo().id, spec, position)
@@ -315,6 +318,10 @@ constructor(
             toFree.forEach { onCustomTileRemoved(it.componentName, user) }
             scope.launch { tileSpecRepository.setTiles(user, specs) }
         }
+    }
+
+    override fun resetTiles() {
+        scope.launch { tileSpecRepository.resetToDefault(currentUser.value) }
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -384,7 +391,7 @@ constructor(
                     !qsTile.isAvailable -> {
                         logger.logTileDestroyed(
                             tileSpec,
-                            QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE
+                            QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE,
                         )
                         qsTile.destroy()
                         null
@@ -409,7 +416,7 @@ constructor(
                         qsTile.destroy()
                         logger.logTileDestroyed(
                             tileSpec,
-                            QSPipelineLogger.TileDestroyedReason.CUSTOM_TILE_USER_CHANGED
+                            QSPipelineLogger.TileDestroyedReason.CUSTOM_TILE_USER_CHANGED,
                         )
                         null
                     }
@@ -428,7 +435,7 @@ constructor(
 private data class UserTilesAndComponents(
     val userId: Int,
     val tiles: List<TileSpec>,
-    val installedComponents: Set<ComponentName>
+    val installedComponents: Set<ComponentName>,
 )
 
 private data class DataWithUserChange(
@@ -439,9 +446,4 @@ private data class DataWithUserChange(
 )
 
 private fun DataWithUserChange(data: UserTilesAndComponents, userChange: Boolean) =
-    DataWithUserChange(
-        data.userId,
-        data.tiles,
-        data.installedComponents,
-        userChange,
-    )
+    DataWithUserChange(data.userId, data.tiles, data.installedComponents, userChange)

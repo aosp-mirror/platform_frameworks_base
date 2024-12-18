@@ -15,60 +15,79 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
+/** The save the matrix state command */
 public class MatrixSave extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-
-    public MatrixSave() {
-
-    }
+    private static final int OP_CODE = Operations.MATRIX_SAVE;
+    private static final String CLASS_NAME = "MatrixSave";
 
     @Override
-    public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer);
+    public void write(@NonNull WireBuffer buffer) {
+        apply(buffer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "MatrixSave;";
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
+        MatrixSave op = new MatrixSave();
+        operations.add(op);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-            MatrixSave op = new MatrixSave();
-            operations.add(op);
-        }
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public String name() {
-            return "Matrix";
-        }
+    public static void apply(@NonNull WireBuffer buffer) {
+        buffer.start(Operations.MATRIX_SAVE);
+    }
 
-        @Override
-        public int id() {
-            return Operations.MATRIX_SAVE;
-        }
-
-        public void apply(WireBuffer buffer) {
-            buffer.start(Operations.MATRIX_SAVE);
-        }
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
+                .description("Save the matrix and clip to a stack");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.matrixSave();
     }
 }

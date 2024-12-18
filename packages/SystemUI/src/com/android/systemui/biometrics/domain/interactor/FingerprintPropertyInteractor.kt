@@ -24,6 +24,7 @@ import com.android.systemui.biometrics.shared.model.SensorLocation
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -42,7 +43,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     repository: FingerprintPropertyRepository,
-    configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
@@ -73,15 +74,12 @@ constructor(
      * - device's natural orientation
      */
     private val unscaledSensorLocation: Flow<SensorLocationInternal> =
-        combine(
-            repository.sensorLocations,
-            uniqueDisplayId,
-        ) { locations, displayId ->
+        combine(repository.sensorLocations, uniqueDisplayId) { locations, displayId ->
             // Devices without multiple physical displays do not use the display id as the key;
             // instead, the key is an empty string.
             locations.getOrDefault(
                 displayId,
-                locations.getOrDefault("", SensorLocationInternal.DEFAULT)
+                locations.getOrDefault("", SensorLocationInternal.DEFAULT),
             )
         }
 
@@ -92,16 +90,15 @@ constructor(
      * - device's natural orientation
      */
     val sensorLocation: Flow<SensorLocation> =
-        combine(
+        combine(unscaledSensorLocation, configurationInteractor.scaleForResolution) {
             unscaledSensorLocation,
-            configurationInteractor.scaleForResolution,
-        ) { unscaledSensorLocation, scale ->
+            scale ->
             val sensorLocation =
                 SensorLocation(
                     naturalCenterX = unscaledSensorLocation.sensorLocationX,
                     naturalCenterY = unscaledSensorLocation.sensorLocationY,
                     naturalRadius = unscaledSensorLocation.sensorRadius,
-                    scale = scale
+                    scale = scale,
                 )
             sensorLocation
         }

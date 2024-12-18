@@ -59,13 +59,16 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
     @GuardedBy("mLock")
     private final List<RadioManager.ModuleProperties> mV1Modules;
 
-    IRadioServiceHidlImpl(BroadcastRadioService service) {
+    IRadioServiceHidlImpl(BroadcastRadioService service,
+            RadioServiceUserController userController) {
         mService = Objects.requireNonNull(service, "broadcast radio service cannot be null");
-        mHal1Client = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
+        Objects.requireNonNull(userController, "user controller cannot be null");
+        mHal1Client = new com.android.server.broadcastradio.hal1.BroadcastRadioService(
+                userController);
         mV1Modules = mHal1Client.loadModules();
         OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
         mHal2Client = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
-                max.isPresent() ? max.getAsInt() + 1 : 0);
+                max.isPresent() ? max.getAsInt() + 1 : 0, userController);
     }
 
     @VisibleForTesting

@@ -49,6 +49,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.io.IOException;
@@ -258,7 +259,7 @@ public final class NfcAdapter {
     /**
      * Mandatory String extra field in {@link #ACTION_TRANSACTION_DETECTED}
      * Indicates the Secure Element on which the transaction occurred.
-     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC, etc.
+     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC/EUICC, etc.
      */
     public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
 
@@ -559,6 +560,18 @@ public final class NfcAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagIntentAppPreferenceResult {}
 
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOnMode(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_MODE_DEFAULT = 1;
+
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOnMode(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_DISABLE = 0;
+
     // Guarded by sLock
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
@@ -576,6 +589,7 @@ public final class NfcAdapter {
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
     static INfcFCardEmulation sNfcFCardEmulationService;
+    static IT4tNdefNfcee sNdefNfceeService;
 
     /**
      * The NfcAdapter object for each application context.
@@ -721,7 +735,7 @@ public final class NfcAdapter {
      *
      * @return List<String> containing secure elements on the device which supports
      *                      off host card emulation. eSE for Embedded secure element,
-     *                      SIM for UICC, eSIM for EUICC and so on.
+     *                      SIM for UICC/EUICC and so on.
      * @hide
      */
     public @NonNull List<String> getSupportedOffHostSecureElements() {
@@ -740,11 +754,6 @@ public final class NfcAdapter {
         }
         if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE)) {
             offHostSE.add("eSE");
-        }
-        if (Flags.enableCardEmulationEuicc()
-                && callServiceReturn(
-                        () -> sCardEmulationService.isEuiccSupported(), false)) {
-            offHostSE.add("eSIM");
         }
         return offHostSE;
     }
@@ -819,7 +828,13 @@ public final class NfcAdapter {
                     throw new UnsupportedOperationException();
                 }
             }
-
+            try {
+                sNdefNfceeService = sService.getT4tNdefNfceeInterface();
+            } catch (RemoteException e) {
+                sNdefNfceeService = null;
+                Log.e(TAG, "could not retrieve NDEF NFCEE service");
+                throw new UnsupportedOperationException();
+            }
             sIsInitialized = true;
         }
         NfcAdapter adapter = sNfcAdapters.get(context);
@@ -1143,8 +1158,9 @@ public final class NfcAdapter {
     }
 
     /**
-     * Pauses polling for a {@code timeoutInMs} millis. If polling must be resumed before timeout,
-     * use {@link #resumePolling()}.
+     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
+     * use {@link #resumePolling() to resume the polling.
      * @hide
      */
     public void pausePolling(int timeoutInMs) {
@@ -1203,9 +1219,8 @@ public final class NfcAdapter {
     }
 
     /**
-     * Resumes default polling for the current device state if polling is paused. Calling
-     * this while polling is not paused is a no-op.
-     *
+     * Resumes default NFC tag reader mode polling for the current device state if polling is
+     * paused. Calling this while already in polling is a no-op.
      * @hide
      */
     public void resumePolling() {
@@ -1774,6 +1789,11 @@ public final class NfcAdapter {
      * @param listenTechnology Flags indicating listen technologies.
      * @throws UnsupportedOperationException if FEATURE_NFC,
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF are unavailable.
+     *
+     * NOTE: This API overrides all technology flags regardless of the current device state,
+     *       it is incompatible with enableReaderMode() API and the others that either update
+     *       or assume any techlology flag set by the OS.
+     *       Please use with care.
      */
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)
@@ -2316,7 +2336,7 @@ public final class NfcAdapter {
      * <p>This API is for the NFCC internal state management. It allows to discriminate
      * the controller function from the NFC function by keeping the NFC controller on without
      * any NFC RF enabled if necessary.
-     * <p>This call is asynchronous. Register a listener {@link #ControllerAlwaysOnListener}
+     * <p>This call is asynchronous. Register a listener {@link ControllerAlwaysOnListener}
      * by {@link #registerControllerAlwaysOnListener} to find out when the operation is
      * complete.
      * <p>If this returns true, then either NFCC always on state has been set based on the value,
@@ -2330,7 +2350,8 @@ public final class NfcAdapter {
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
      * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
      * are unavailable
-     * @return void
+     * @return true if feature is supported by the device and operation has been initiated,
+     * false if the feature is not supported by the device.
      * @hide
      */
     @SystemApi
@@ -2339,8 +2360,13 @@ public final class NfcAdapter {
         if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
-        return callServiceReturn(() ->  sService.setControllerAlwaysOn(value), false);
-
+        int mode = value ? CONTROLLER_ALWAYS_ON_MODE_DEFAULT : CONTROLLER_ALWAYS_ON_DISABLE;
+        try {
+            callService(() -> sService.setControllerAlwaysOn(mode));
+        } catch (UnsupportedOperationException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -2492,22 +2518,22 @@ public final class NfcAdapter {
     }
 
     /**
-     * Checks if the device supports Tag application preference.
+     * Checks if the device supports Tag Intent App Preference functionality.
+     *
+     * When supported, {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED} or
+     * {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if
+     * {@link isTagIntentAllowed} returns {@code false}.
      *
      * @return {@code true} if the device supports Tag application preference, {@code false}
      * otherwise
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable
-     *
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
     public boolean isTagIntentAppPreferenceSupported() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
         return callServiceReturn(() ->  sService.isTagIntentAppPreferenceSupported(), false);
-
     }
 
    /**
@@ -2782,11 +2808,8 @@ public final class NfcAdapter {
             @IntRange(from = 0, to = 15) int gid, @IntRange(from = 0) int oid,
             @NonNull byte[] payload) {
         Objects.requireNonNull(payload, "Payload must not be null");
-        try {
-            return sService.sendVendorNciMessage(mt, gid, oid, payload);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return callServiceReturn(() ->  sService.sendVendorNciMessage(mt, gid, oid, payload),
+                SEND_VENDOR_NCI_STATUS_FAILED);
     }
 
     /**
@@ -2860,6 +2883,18 @@ public final class NfcAdapter {
     }
 
     /**
+     * Used by data migration to indicate data migration is in progrerss or not.
+     *
+     * Note: This is @hide intentionally since the client is inside the NFC apex.
+     * @param inProgress true if migration is in progress, false once done.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void indicateDataMigration(boolean inProgress) {
+        callService(() -> sService.indicateDataMigration(inProgress, mContext.getPackageName()));
+    }
+
+    /**
      * Returns an instance of {@link NfcOemExtension} associated with {@link NfcAdapter} instance.
      * @hide
      */
@@ -2872,5 +2907,43 @@ public final class NfcAdapter {
             }
         }
         return mNfcOemExtension;
+    }
+
+    /**
+     * Activity action: Bring up the settings page that allows the user to enable or disable tag
+     * intent reception for apps.
+     *
+     * <p>This will direct user to the settings page shows a list that asks users whether
+     * they want to allow or disallow the package to start an activity when a tag is discovered.
+     *
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
+    public static final String ACTION_CHANGE_TAG_INTENT_PREFERENCE =
+            "android.nfc.action.CHANGE_TAG_INTENT_PREFERENCE";
+
+    /**
+     * Checks whether the user has disabled the calling app from receiving NFC tag intents.
+     *
+     * <p>This method checks whether the caller package name is either not present in the user
+     * disabled list or is explicitly allowed by the user.
+     *
+     * @return {@code true} if an app is either not present in the list or is added to the list
+     * with the flag set to {@code true}. Otherwise, it returns {@code false}.
+     * It also returns {@code true} if {@link isTagIntentAppPreferenceSupported} returns
+     * {@code false}.
+     *
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
+    public boolean isTagIntentAllowed() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        if (!isTagIntentAppPreferenceSupported()) {
+            return true;
+        }
+        return callServiceReturn(() ->  sService.isTagIntentAllowed(mContext.getPackageName(),
+                UserHandle.myUserId()), false);
     }
 }

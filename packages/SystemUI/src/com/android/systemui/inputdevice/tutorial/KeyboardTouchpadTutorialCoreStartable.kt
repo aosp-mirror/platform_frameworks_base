@@ -16,9 +16,18 @@
 
 package com.android.systemui.inputdevice.tutorial
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
+import android.os.UserHandle
 import com.android.systemui.CoreStartable
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
 import com.android.systemui.shared.Flags.newTouchpadGesturesTutorial
 import dagger.Lazy
 import javax.inject.Inject
@@ -27,11 +36,35 @@ import javax.inject.Inject
 @SysUISingleton
 class KeyboardTouchpadTutorialCoreStartable
 @Inject
-constructor(private val tutorialNotificationCoordinator: Lazy<TutorialNotificationCoordinator>) :
-    CoreStartable {
+constructor(
+    private val tutorialNotificationCoordinator: Lazy<TutorialNotificationCoordinator>,
+    private val broadcastDispatcher: BroadcastDispatcher,
+    @Application private val applicationContext: Context,
+) : CoreStartable {
     override fun start() {
         if (newTouchpadGesturesTutorial()) {
             tutorialNotificationCoordinator.get().start()
+            registerTutorialBroadcastReceiver()
         }
+    }
+
+    private fun registerTutorialBroadcastReceiver() {
+        broadcastDispatcher.registerReceiver(
+            receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        val activityIntent =
+                            Intent(applicationContext, KeyboardTouchpadTutorialActivity::class.java)
+                        if (Build.IS_DEBUGGABLE) {
+                            // helpful for testing different cases but pointless for public builds
+                            intent.extras?.let { activityIntent.putExtras(it) }
+                        }
+                        applicationContext.startActivityAsUser(activityIntent, UserHandle.SYSTEM)
+                    }
+                },
+            filter = IntentFilter("com.android.systemui.action.KEYBOARD_TOUCHPAD_TUTORIAL"),
+            flags = Context.RECEIVER_EXPORTED,
+            user = UserHandle.ALL,
+        )
     }
 }

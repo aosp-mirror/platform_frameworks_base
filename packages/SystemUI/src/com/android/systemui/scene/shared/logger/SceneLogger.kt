@@ -22,6 +22,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
+import com.android.systemui.scene.data.model.SceneStack
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {
@@ -40,16 +41,11 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             },
             messagePrinter = {
                 "Scene framework is ${asWord(bool1)}${if (str1 != null) " $str1" else ""}"
-            }
+            },
         )
     }
 
-    fun logSceneChanged(
-        from: SceneKey,
-        to: SceneKey,
-        reason: String,
-        isInstant: Boolean,
-    ) {
+    fun logSceneChanged(from: SceneKey, to: SceneKey, reason: String, isInstant: Boolean) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,
@@ -123,11 +119,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logVisibilityChange(
-        from: Boolean,
-        to: Boolean,
-        reason: String,
-    ) {
+    fun logVisibilityChange(from: Boolean, to: Boolean, reason: String) {
         fun asWord(isVisible: Boolean): String {
             return if (isVisible) "visible" else "invisible"
         }
@@ -144,9 +136,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logRemoteUserInputStarted(
-        reason: String,
-    ) {
+    fun logRemoteUserInputStarted(reason: String) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,
@@ -164,11 +154,11 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneBackStack(backStack: Iterable<SceneKey>) {
+    fun logSceneBackStack(backStack: SceneStack) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,
-            messageInitializer = { str1 = backStack.joinToString(", ") { it.debugName } },
+            messageInitializer = { str1 = backStack.toString() },
             messagePrinter = { "back stack: $str1" },
         )
     }

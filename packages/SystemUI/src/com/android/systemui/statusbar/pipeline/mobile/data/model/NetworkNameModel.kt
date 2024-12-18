@@ -100,7 +100,14 @@ fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
     val showSpn = getBooleanExtra(EXTRA_SHOW_SPN, false)
     val spn =
         if (statusBarSwitchToSpnFromDataSpn()) {
-            getStringExtra(EXTRA_SPN)
+            // Context: b/358669494. Use DATA_SPN if it exists, since that allows carriers to
+            // customize the display name. Otherwise, fall back to the SPN
+            val dataSpn = getStringExtra(EXTRA_DATA_SPN)
+            if (dataSpn.isNullOrEmpty()) {
+                getStringExtra(EXTRA_SPN)
+            } else {
+                dataSpn
+            }
         } else {
             getStringExtra(EXTRA_DATA_SPN)
         }
@@ -109,10 +116,8 @@ fun Intent.toNetworkNameModel(separator: String): NetworkNameModel? {
     val plmn = getStringExtra(EXTRA_PLMN)
 
     val str = StringBuilder()
-    val strData = StringBuilder()
     if (showPlmn && plmn != null) {
         str.append(plmn)
-        strData.append(plmn)
     }
     if (showSpn && spn != null) {
         if (str.isNotEmpty()) {

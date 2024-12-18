@@ -55,7 +55,7 @@ constructor(
     qsLogger: QSLogger,
     private val keyguardStateController: KeyguardStateController,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>
+    private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>,
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -66,9 +66,9 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
-    private val icon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
+    private var icon: QSTile.Icon? = null
 
     override fun newTileState(): QSTile.State {
         return QSTile.State()
@@ -86,7 +86,7 @@ constructor(
                     expandable?.dialogTransitionController(
                         DialogCuj(
                             InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG
+                            INTERACTION_JANK_TAG,
                         )
                     )
                 controller?.let { dialogTransitionAnimator.show(dialog, controller) }
@@ -102,14 +102,18 @@ constructor(
                 /* cancelAction= */ null,
                 /* dismissShade= */ true,
                 /* afterKeyguardGone= */ true,
-                /* deferred= */ false
+                /* deferred= */ false,
             )
         }
     }
 
     override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
+        if (icon == null) {
+            icon = maybeLoadResourceIcon(R.drawable.ic_qs_font_scaling)
+        }
         state?.label = mContext.getString(R.string.quick_settings_font_scaling_label)
         state?.icon = icon
+        state?.contentDescription = state?.label
     }
 
     override fun getLongClickIntent(): Intent? {

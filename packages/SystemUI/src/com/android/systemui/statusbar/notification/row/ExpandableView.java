@@ -40,6 +40,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -199,6 +200,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public boolean isPinned() {
         return false;
+    }
+
+    @NonNull
+    public PinnedStatus getPinnedStatus() {
+        return PinnedStatus.NotPinned;
     }
 
     public boolean isHeadsUpAnimatingAway() {
@@ -856,15 +862,21 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
                 pw.println();
             }
             if (DUMP_VERBOSE) {
-                pw.println("mInRemovalAnimation: " + mInRemovalAnimation);
-                pw.println("mClipTopAmount: " + mClipTopAmount);
-                pw.println("mClipBottomAmount " + mClipBottomAmount);
-                pw.println("mClipToActualHeight: " + mClipToActualHeight);
-                pw.println("mExtraWidthForClipping: " + mExtraWidthForClipping);
-                pw.println("mMinimumHeightForClipping: " + mMinimumHeightForClipping);
-                pw.println("getClipBounds(): " + getClipBounds());
+                dumpClipping(pw, args);
             }
         });
+    }
+
+    protected void dumpClipping(IndentingPrintWriter pw, String[] args) {
+        pw.print("Clipping: ");
+        pw.print("mInRemovalAnimation", mInRemovalAnimation);
+        pw.print("mClipTopAmount", mClipTopAmount);
+        pw.print("mClipBottomAmount", mClipBottomAmount);
+        pw.print("mClipToActualHeight", mClipToActualHeight);
+        pw.print("mExtraWidthForClipping", mExtraWidthForClipping);
+        pw.print("mMinimumHeightForClipping", mMinimumHeightForClipping);
+        pw.print("getClipBounds()", getClipBounds());
+        pw.println();
     }
 
     /**

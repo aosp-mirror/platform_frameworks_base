@@ -20,12 +20,10 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 
 import com.android.internal.os.PowerProfile;
-import com.android.server.power.stats.PowerStatsUidResolver;
 
 class AudioPowerStatsProcessor extends BinaryStatePowerStatsProcessor {
-    AudioPowerStatsProcessor(PowerProfile powerProfile,
-            PowerStatsUidResolver uidResolver) {
-        super(BatteryConsumer.POWER_COMPONENT_AUDIO, uidResolver,
+    AudioPowerStatsProcessor(PowerProfile powerProfile) {
+        super(BatteryConsumer.POWER_COMPONENT_AUDIO,
                 powerProfile.getAveragePower(PowerProfile.POWER_AUDIO));
     }
 

@@ -61,7 +61,8 @@ private val AllDemos = listOf(
         )),
         DemoGroup("Materials", listOf(
                 Demo("Glass", GlassActivity::class),
-                Demo("Background Blur", BackgroundBlurActivity::class)
+                Demo("Background Blur", BackgroundBlurActivity::class),
+                Demo("View blur behind", R.layout.view_blur_behind, commonControls = false)
         ))
 )
 
@@ -71,6 +72,7 @@ class Main : Activity() {
         super.onCreate(savedInstanceState)
 
         val list = ExpandableListView(this)
+        list.setFitsSystemWindows(true)
 
         setContentView(list)
 

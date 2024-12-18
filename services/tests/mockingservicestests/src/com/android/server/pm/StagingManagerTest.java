@@ -72,7 +72,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -486,7 +485,7 @@ public class StagingManagerTest {
             FakeStagedSession session = new FakeStagedSession(239);
             session.setIsApex(true);
             // Call and verify
-            Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(session);
+            var result = mStagingManager.getStagedApexInfos(session);
             assertThat(result).isEmpty();
         }
         // Invalid session: destroyed
@@ -496,7 +495,7 @@ public class StagingManagerTest {
             session.setIsApex(true);
             session.setDestroyed(true);
             // Call and verify
-            Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(session);
+            var result = mStagingManager.getStagedApexInfos(session);
             assertThat(result).isEmpty();
         }
     }
@@ -520,8 +519,8 @@ public class StagingManagerTest {
         when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
 
         // Call and verify
-        Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(validSession);
-        assertThat(result).containsExactly(fakeApexInfos[0].moduleName, fakeApexInfos[0]);
+        List<ApexInfo> result = mStagingManager.getStagedApexInfos(validSession);
+        assertThat(result).containsExactly(fakeApexInfos[0]);
 
         ArgumentCaptor<ApexSessionParams> argumentCaptor =
                 ArgumentCaptor.forClass(ApexSessionParams.class);
@@ -544,9 +543,8 @@ public class StagingManagerTest {
         when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
 
         // Call and verify
-        Map<String, ApexInfo> result = mStagingManager.getStagedApexInfos(parentSession);
-        assertThat(result).containsExactly(fakeApexInfos[0].moduleName, fakeApexInfos[0],
-                fakeApexInfos[1].moduleName, fakeApexInfos[1]);
+        List<ApexInfo> result = mStagingManager.getStagedApexInfos(parentSession);
+        assertThat(result).containsExactly(fakeApexInfos[0], fakeApexInfos[1]);
 
         ArgumentCaptor<ApexSessionParams> argumentCaptor =
                 ArgumentCaptor.forClass(ApexSessionParams.class);
@@ -557,7 +555,7 @@ public class StagingManagerTest {
     }
 
     @Test
-    public void getStagedApexModuleNames_returnsStagedApexModules() throws Exception {
+    public void getStagedApexInfos_returnsStagedApexModules() throws Exception {
         FakeStagedSession validSession1 = new FakeStagedSession(239);
         validSession1.setIsApex(true);
         validSession1.setSessionReady();
@@ -575,8 +573,8 @@ public class StagingManagerTest {
 
         mockApexManagerGetStagedApexInfoWithSessionId();
 
-        List<String> result = mStagingManager.getStagedApexModuleNames();
-        assertThat(result).containsExactly("239", "123", "124");
+        List<StagedApexInfo> result = mStagingManager.getStagedApexInfos();
+        assertThat(result).containsExactly((Object[]) fakeStagedApexInfos("239", "123", "124"));
         verify(mApexManager, times(2)).getStagedApexInfos(any());
     }
 
@@ -605,26 +603,12 @@ public class StagingManagerTest {
         });
     }
 
-    @Test
-    public void getStagedApexInfo() throws Exception {
-        FakeStagedSession validSession1 = new FakeStagedSession(239);
-        validSession1.setIsApex(true);
-        validSession1.setSessionReady();
-        mStagingManager.createSession(validSession1);
-        ApexInfo[] fakeApexInfos = getFakeApexInfo(Arrays.asList("module1"));
-        when(mApexManager.getStagedApexInfos(any())).thenReturn(fakeApexInfos);
-
-        // Verify null is returned if module name is not found
-        StagedApexInfo result = mStagingManager.getStagedApexInfo("not found");
-        assertThat(result).isNull();
-        verify(mApexManager, times(1)).getStagedApexInfos(any());
-        // Otherwise, the correct object is returned
-        result = mStagingManager.getStagedApexInfo("module1");
-        assertThat(result.moduleName).isEqualTo(fakeApexInfos[0].moduleName);
-        assertThat(result.diskImagePath).isEqualTo(fakeApexInfos[0].modulePath);
-        assertThat(result.versionCode).isEqualTo(fakeApexInfos[0].versionCode);
-        assertThat(result.versionName).isEqualTo(fakeApexInfos[0].versionName);
-        verify(mApexManager, times(2)).getStagedApexInfos(any());
+    private StagedApexInfo[] fakeStagedApexInfos(String... moduleNames) {
+        return Arrays.stream(moduleNames).map(moduleName -> {
+            StagedApexInfo info = new StagedApexInfo();
+            info.moduleName = moduleName;
+            return info;
+        }).toArray(StagedApexInfo[]::new);
     }
 
     @Test
@@ -646,8 +630,8 @@ public class StagingManagerTest {
             ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
                     ApexStagedEvent.class);
             verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue().stagedApexModuleNames).isEqualTo(
-                    new String[]{"239"});
+            assertThat(argumentCaptor.getValue().stagedApexInfos).isEqualTo(
+                    fakeStagedApexInfos("239"));
         }
 
         // Create another staged session and verify observers are notified of union
@@ -662,8 +646,8 @@ public class StagingManagerTest {
             ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
                     ApexStagedEvent.class);
             verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
-            assertThat(argumentCaptor.getValue().stagedApexModuleNames).isEqualTo(
-                    new String[]{"239", "240"});
+            assertThat(argumentCaptor.getValue().stagedApexInfos).isEqualTo(
+                    fakeStagedApexInfos("239", "240"));
         }
 
         // Finally, verify that once unregistered, observer is not notified
@@ -699,7 +683,7 @@ public class StagingManagerTest {
         ArgumentCaptor<ApexStagedEvent> argumentCaptor = ArgumentCaptor.forClass(
                 ApexStagedEvent.class);
         verify(observer, times(1)).onApexStaged(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue().stagedApexModuleNames).hasLength(0);
+        assertThat(argumentCaptor.getValue().stagedApexInfos).hasLength(0);
     }
 
     @Test
@@ -756,7 +740,8 @@ public class StagingManagerTest {
                 /* isApplied */false,
                 /* stagedSessionErrorCode */ PackageManager.INSTALL_UNKNOWN,
                 /* stagedSessionErrorMessage */ "no error",
-                /* preVerifiedDomains */ null);
+                /* preVerifiedDomains */ null,
+                /* installDependencyHelper */ null);
 
         StagingManager.StagedSession stagedSession = spy(session.mStagedSession);
         doReturn(packageName).when(stagedSession).getPackageName();

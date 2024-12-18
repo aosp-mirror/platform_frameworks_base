@@ -56,14 +56,14 @@ public class AmbientDisplayPowerCalculatorTest {
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{300_000_000},
                 new int[]{Display.STATE_ON}, 0);
 
-        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
-                30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, Display.STATE_REASON_DEFAULT_POLICY,
+                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
 
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{200_000_000},
                 new int[]{Display.STATE_DOZE}, 30 * MINUTE_IN_MS);
 
-        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
-                120 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_DEFAULT_POLICY,
+                120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS);
 
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100_000_000},
                 new int[]{Display.STATE_OFF}, 120 * MINUTE_IN_MS);
@@ -79,8 +79,6 @@ public class AmbientDisplayPowerCalculatorTest {
         // 100,000,00 uC / 1000 (micro-/milli-) / 360 (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(27.777778);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -93,37 +91,37 @@ public class AmbientDisplayPowerCalculatorTest {
 
         final int[] screenStates = new int[] {Display.STATE_OFF, Display.STATE_OFF};
 
-        stats.noteScreenStateLocked(0, screenStates[0], 0, 0, 0);
-        stats.noteScreenStateLocked(1, screenStates[1], 0, 0, 0);
+        stats.noteScreenStateLocked(0, screenStates[0], Display.STATE_REASON_UNKNOWN, 0, 0, 0);
+        stats.noteScreenStateLocked(1, screenStates[1], Display.STATE_REASON_UNKNOWN, 0, 0, 0);
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{300, 400}, screenStates, 0);
 
         // Switch display0 to doze
         screenStates[0] = Display.STATE_DOZE;
-        stats.noteScreenStateLocked(0, screenStates[0], 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
-                30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, screenStates[0], Display.STATE_REASON_UNKNOWN,
+                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{200, 300},
                 screenStates, 30 * MINUTE_IN_MS);
 
         // Switch display1 to doze
         screenStates[1] = Display.STATE_DOZE;
-        stats.noteScreenStateLocked(1, Display.STATE_DOZE, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS,
-                90 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_DOZE, Display.STATE_REASON_UNKNOWN,
+                90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS);
         // 100,000,000 uC should be attributed to display 0 doze here.
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100_000_000, 700_000_000},
                 screenStates, 90 * MINUTE_IN_MS);
 
         // Switch display0 to off
         screenStates[0] = Display.STATE_OFF;
-        stats.noteScreenStateLocked(0, screenStates[0], 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
-                120 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, screenStates[0], Display.STATE_REASON_UNKNOWN,
+                120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS);
         // 40,000,000 and 70,000,000 uC should be attributed to display 0 and 1 doze here.
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{40_000_000, 70_000_000},
                 screenStates, 120 * MINUTE_IN_MS);
 
         // Switch display1 to off
         screenStates[1] = Display.STATE_OFF;
-        stats.noteScreenStateLocked(1, screenStates[1], 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS,
-                150 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, screenStates[1], Display.STATE_REASON_UNKNOWN,
+                150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS);
         stats.updateDisplayEnergyConsumerStatsLocked(new long[]{100, 90_000_000}, screenStates,
                 150 * MINUTE_IN_MS);
         // 90,000,000 uC should be attributed to display 1 doze here.
@@ -140,18 +138,16 @@ public class AmbientDisplayPowerCalculatorTest {
         // (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(83.33333);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
     public void testPowerProfileBasedModel() {
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
-                30 * MINUTE_IN_MS);
-        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
-                120 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, Display.STATE_REASON_UNKNOWN,
+                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
+                120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
                 new AmbientDisplayPowerCalculator(mStatsRule.getPowerProfile());
@@ -163,8 +159,6 @@ public class AmbientDisplayPowerCalculatorTest {
                 .isEqualTo(90 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(15.0);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -174,15 +168,15 @@ public class AmbientDisplayPowerCalculatorTest {
 
         BatteryStatsImpl stats = mStatsRule.getBatteryStats();
 
-        stats.noteScreenStateLocked(1, Display.STATE_OFF, 0, 0, 0);
-        stats.noteScreenStateLocked(0, Display.STATE_DOZE, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS,
-                30 * MINUTE_IN_MS);
-        stats.noteScreenStateLocked(1, Display.STATE_DOZE, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS,
-                90 * MINUTE_IN_MS);
-        stats.noteScreenStateLocked(0, Display.STATE_OFF, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS,
-                120 * MINUTE_IN_MS);
-        stats.noteScreenStateLocked(1, Display.STATE_OFF, 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS,
-                150 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN, 0, 0, 0);
+        stats.noteScreenStateLocked(0, Display.STATE_DOZE, Display.STATE_REASON_UNKNOWN,
+                30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_DOZE, Display.STATE_REASON_UNKNOWN,
+                90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS, 90 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(0, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
+                120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS, 120 * MINUTE_IN_MS);
+        stats.noteScreenStateLocked(1, Display.STATE_OFF, Display.STATE_REASON_UNKNOWN,
+                150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS, 150 * MINUTE_IN_MS);
 
         AmbientDisplayPowerCalculator calculator =
                 new AmbientDisplayPowerCalculator(mStatsRule.getPowerProfile());
@@ -195,7 +189,5 @@ public class AmbientDisplayPowerCalculatorTest {
                 .isEqualTo(120 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(35.0);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 }

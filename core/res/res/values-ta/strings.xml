@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்பட்டது என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்படவில்லை"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்படவில்லை என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்பட்டது"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"அழைப்பாளர் ஐடி ஆனது வரையறுக்கப்படவில்லை என்பதற்கு இயல்பாக அமைக்கப்பட்டது. அடுத்த அழைப்பு: வரையறுக்கப்படவில்லை"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"இந்த ஆப்ஸ் 16 KB இணக்கத்தன்மை வாய்ந்தது அல்ல. APK சீரமைவைச் சரிபார்க்க முடியவில்லை. பக்க அளவுடனான இணக்கத்தன்மைப் பயன்முறையைப் பயன்படுத்தி இந்த ஆப்ஸ் இயக்கப்படும். சிறந்த இணக்கத்தன்மைக்கு, ஆப்ஸை 16 KB ஆதரவுடன் ரீ-கம்பைல் செய்யவும். கூடுதல் தகவல்களுக்கு, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; எனும் பக்கத்தைப் பார்க்கவும்."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"இந்த ஆப்ஸ் 16 KB இணக்கத்தன்மை வாய்ந்தது அல்ல. ELF சீரமைவைச் சரிபார்க்க முடியவில்லை. பக்க அளவுடனான இணக்கத்தன்மைப் பயன்முறையைப் பயன்படுத்தி இந்த ஆப்ஸ் இயக்கப்படும். சிறந்த இணக்கத்தன்மைக்கு, ஆப்ஸை 16 KB ஆதரவுடன் ரீ-கம்பைல் செய்யவும். கூடுதல் தகவல்களுக்கு, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; எனும் பக்கத்தைப் பார்க்கவும்."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"இந்த ஆப்ஸ் 16 KB இணக்கத்தன்மை வாய்ந்தது அல்ல. APK மற்றும் ELF சீரமைவுகளைச் சரிபார்க்க முடியவில்லை. பக்க அளவுடனான இணக்கத்தன்மைப் பயன்முறையைப் பயன்படுத்தி இந்த ஆப்ஸ் இயக்கப்படும். சிறந்த இணக்கத்தன்மைக்கு, ஆப்ஸை 16 KB ஆதரவுடன் ரீ-கம்பைல் செய்யவும். கூடுதல் தகவல்களுக்கு, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; எனும் பக்கத்தைப் பார்க்கவும்."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"சேவை ஒதுக்கப்படவில்லை."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"அழைப்பாளர் ஐடி அமைப்பை மாற்ற முடியாது."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"டேட்டா <xliff:g id="CARRIERDISPLAY">%s</xliff:g>க்கு மாற்றப்பட்டது"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பு கொள்ளுதல்"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"அருகிலுள்ள வைஃபை சாதனங்களைத் தெரியப்படுத்தவும் இணைக்கவும் இருப்பிடத்தைத் தீர்மானிக்கவும் இது ஆப்ஸை அனுமதிக்கும்"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"அருகிலுள்ள சாதனங்களுக்கான தூரத்தைத் தீர்மானித்தல்"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"அருகிலுள்ள சாதனங்களுக்கு இடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
@@ -1153,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> நாட்களில்"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> ஆண்டில்"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> நி முன்பு"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ம.நே முன்பு"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> நா முன்பு"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> ஆண்டு முன்பு"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> நிமிடம்"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ம.நே"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> நா"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ஆண்டு"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> நிமிடத்தில்"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> நாளில்"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> ஆண்டில்"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> நிமிடம் முன்பு"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ம.நே முன்பு"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> நா முன்பு"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> ஆண்டுக்கு முன்பு"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# நிமிடத்திற்கு முன்பு}other{# நிமிடங்களுக்கு முன்பு}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# மணிநேரத்திற்கு முன்பு}other{# மணிநேரத்திற்கு முன்பு}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# நாளுக்கு முன்பு}other{# நாட்களுக்கு முன்பு}}"</string>
@@ -1746,8 +1767,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"அணுகல் கோரிக்கையை ஓர் ஆப்ஸ் மறைப்பதால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ஒரு அம்சத்தைப் பயன்படுத்த அதைத் தட்டவும்:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"அணுகல்தன்மை பட்டன் மூலம் பயன்படுத்த விரும்பும் அம்சங்களைத் தேர்வுசெய்யுங்கள்"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ஒலியளவு விசைகளுக்கான ஷார்ட்கட்டுடன் பயன்படுத்துவதற்கான அம்சங்களைத் தேர்வுசெய்யுங்கள்"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ஷார்ட்கட்களை மாற்று"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
@@ -1938,12 +1958,15 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"வார இரவு"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"வார இறுதி"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"நிகழ்வு"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"உறக்கத்தில்"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"உறங்குதல்"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"தொந்தரவு செய்ய வேண்டாம் (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"நிர்வகிப்பது: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ஆன்"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ஆஃப்"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> முதல் <xliff:g id="END">%2$s</xliff:g> வரை"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ஏதேனும் கேலெண்டர்"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> சில ஒலிகளை முடக்குகிறது"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
@@ -2011,6 +2034,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"திரைப் பூட்டை அமையுங்கள்"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"திரைப் பூட்டை அமை"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ரகசிய இடத்தைப் பயன்படுத்த, சாதனத்தில் திரைப் பூட்டை அமையுங்கள்"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ரகசிய இடத்தை நீக்க, இந்தச் சாதனத்தில் திரைப் பூட்டை அமையுங்கள்"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"இந்த ஆப்ஸ் இப்போது கிடைப்பதில்லை"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் இப்போது கிடைப்பதில்லை."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> இல்லை"</string>
@@ -2129,11 +2153,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு அதிரும்"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு ஒலியை முடக்கும்"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"சிஸ்டம் மாற்றங்கள்"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"தொந்தரவு செய்ய வேண்டாம்"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"புதியது: \'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறையானது அறிவிப்புகளைக் காட்டாமல் மறைக்கிறது"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"மேலும் அறிந்து மாற்ற, தட்டவும்."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"அறிவிப்பு அமைப்புகளை மதிப்பாய்வு செய்யுங்கள்"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 பதிப்பு முதல், நீங்கள் நிறுவுகின்ற ஆப்ஸ் உங்களுக்கு அறிவிப்புகளை அனுப்ப அனுமதி தேவை. ஏற்கெனவே உள்ள ஆப்ஸுக்கு இந்த அனுமதியை மாற்ற தட்டவும்."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"பின்னர் நினைவூட்டு"</string>
@@ -2429,7 +2448,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் மெசேஜ்களை அனுப்பலாம், பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"நெட்வொர்க்கைத் தானாகத் தேர்ந்தெடு\" என்பதை இயக்குங்கள்"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"அமைப்புகளில் \"நெட்வொர்க்கைத் தானாகத் தேர்ந்தெடு\" என்பதை இயக்கினால் செயற்கைக்கோள் மூலம் இயங்கும் நெட்வொர்க்கை உங்கள் மொபைல் கண்டறிய முடியும்"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"இயக்கு"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"பின்செல்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"சாட்டிலைட் SOS அம்சம் இப்போது கிடைக்கிறது"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"மொபைல்/வைஃபை நெட்வொர்க் இல்லையென்றால், அவசரகால சேவைகளுக்கு மெசேஜ் அனுப்பலாம். Google Messages உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக இருக்க வேண்டும்."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"சாட்டிலைட் SOS ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"இந்தச் சாதனத்தில் சாட்டிலைட் SOS ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"சாட்டிலைட் SOS அமைக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"இணையத்துடன் இணைக்கப்பட்டிருப்பதை உறுதிசெய்துகொண்டு மீண்டும் அமைக்க முயலுங்கள்"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"இந்த நாடு/பிராந்தியத்தில் சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"சாட்டிலைட் SOS அமைக்கப்படவில்லை"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"சாட்டிலைட் மூலம் மெசேஜ் செய்ய, Google Messages ஆப்ஸை உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக அமையுங்கள்"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"இந்த நாட்டிலோ பிராந்தியத்திலோ சாட்டிலைட் SOS கிடைக்கிறதா எனப் பார்க்க இருப்பிட அமைப்புகளை இயக்குங்கள்"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"சாட்டிலைட் மெசேஜிங் கிடைக்கிறது"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"மொபைல்/வைஃபை நெட்வொர்க் இல்லையென்றால் சாட்டிலைட் மூலம் மெசேஜ் அனுப்பலாம். Google Messages உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக இருக்க வேண்டும்."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"சாட்டிலைட் மெசேஜிங் ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"இந்தச் சாதனத்தில் சாட்டிலைட் மெசேஜிங் ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"சாட்டிலைட் மெசேஜிங் அமைக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"இணையத்துடன் இணைக்கப்பட்டிருப்பதை உறுதிசெய்துகொண்டு மீண்டும் அமைக்க முயலுங்கள்"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"இந்த நாடு/பிராந்தியத்தில் சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"சாட்டிலைட் மெசேஜிங் அமைக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"சாட்டிலைட் மூலம் மெசேஜ் செய்ய, Google Messages ஆப்ஸை உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக அமையுங்கள்"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"இந்த நாட்டிலோ பிராந்தியத்திலோ சாட்டிலைட் மெசேஜிங் கிடைக்கிறதா எனப் பார்க்க இருப்பிட அமைப்புகளை இயக்குங்கள்"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>ஐ இனி அடையாளம் காண முடியாது."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ஆகியவற்றை இனி அடையாளம் காண முடியாது."</string>

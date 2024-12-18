@@ -38,13 +38,7 @@ public class BatteryChargeCalculator extends PowerCalculator {
         builder.setDischargePercentage(
                 batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED));
 
-        int batteryCapacityMah = batteryStats.getLearnedBatteryCapacity() / 1000;
-        if (batteryCapacityMah <= 0) {
-            batteryCapacityMah = batteryStats.getMinLearnedBatteryCapacity() / 1000;
-            if (batteryCapacityMah <= 0) {
-                batteryCapacityMah = batteryStats.getEstimatedBatteryCapacity();
-            }
-        }
+        int batteryCapacityMah = batteryStats.getBatteryCapacity();
         builder.setBatteryCapacity(batteryCapacityMah);
 
         final double dischargedPowerLowerBoundMah =

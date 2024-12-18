@@ -58,12 +58,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -73,12 +74,6 @@ interface KeyguardRepository {
      * To learn more about doze state, please see [isDozing].
      */
     val animateBottomAreaDozingTransitions: StateFlow<Boolean>
-
-    /**
-     * Observable for the current amount of alpha that should be used for rendering the bottom area.
-     * UI.
-     */
-    val bottomAreaAlpha: StateFlow<Float>
 
     val keyguardAlpha: StateFlow<Float>
 
@@ -113,7 +108,7 @@ interface KeyguardRepository {
             "away' is isInTransitionToState(GONE), but consider using more specific flows " +
             "whenever possible."
     )
-    val isKeyguardGoingAway: Flow<Boolean>
+    val isKeyguardGoingAway: MutableStateFlow<Boolean>
 
     /**
      * Whether the keyguard is enabled, per [KeyguardService]. If the keyguard is not enabled, the
@@ -182,9 +177,6 @@ interface KeyguardRepository {
 
     /** Observable for whether the device is dreaming with an overlay, see [DreamOverlayService] */
     val isDreamingWithOverlay: Flow<Boolean>
-
-    /** Observable for device dreaming state and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: StateFlow<Boolean>
 
     /**
      * Observable for the amount of doze we are currently in.
@@ -268,6 +260,11 @@ interface KeyguardRepository {
      */
     val isEncryptedOrLockdown: Flow<Boolean>
 
+    /** The top of shortcut in screen, used by wallpaper to find remaining space in lockscreen */
+    val shortcutAbsoluteTop: StateFlow<Float>
+
+    val notificationStackAbsoluteBottom: StateFlow<Float>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -279,9 +276,6 @@ interface KeyguardRepository {
 
     /** Sets whether the bottom area UI should animate the transition out of doze state. */
     fun setAnimateDozingTransitions(animate: Boolean)
-
-    /** Sets the current amount of alpha that should be used for rendering the bottom area. */
-    @Deprecated("Deprecated as part of b/278057014") fun setBottomAreaAlpha(alpha: Float)
 
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
@@ -303,8 +297,6 @@ interface KeyguardRepository {
     fun setLastDozeTapToWakePosition(position: Point)
 
     fun setIsDozing(isDozing: Boolean)
-
-    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean)
 
     fun dozeTimeTick()
 
@@ -338,6 +330,14 @@ interface KeyguardRepository {
      * otherwise.
      */
     fun isShowKeyguardWhenReenabled(): Boolean
+
+    fun setShortcutAbsoluteTop(top: Float)
+
+    /**
+     * Set bottom of notifications from notification stack, and Magic Portrait will layout base on
+     * this value
+     */
+    fun setNotificationStackAbsoluteBottom(bottom: Float)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -382,9 +382,6 @@ constructor(
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
         _animateBottomAreaDozingTransitions.asStateFlow()
-
-    private val _bottomAreaAlpha = MutableStateFlow(1f)
-    override val bottomAreaAlpha = _bottomAreaAlpha.asStateFlow()
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
@@ -486,26 +483,41 @@ constructor(
 
     override val isDreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
-        val callback =
-            object : StatusBarStateController.StateListener {
-                override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                    trySendWithFailureLogging(linear, TAG, "updated dozeAmount")
-                }
+    private val _preSceneLinearDozeAmount: Flow<Float> =
+        if (SceneContainerFlag.isEnabled) {
+            emptyFlow()
+        } else {
+            conflatedCallbackFlow {
+                val callback =
+                    object : StatusBarStateController.StateListener {
+                        override fun onDozeAmountChanged(linear: Float, eased: Float) {
+                            trySendWithFailureLogging(linear, TAG, "updated dozeAmount")
+                        }
+                    }
+
+                statusBarStateController.addCallback(callback)
+                trySendWithFailureLogging(
+                    statusBarStateController.dozeAmount,
+                    TAG,
+                    "initial dozeAmount",
+                )
+
+                awaitClose { statusBarStateController.removeCallback(callback) }
             }
+        }
 
-        statusBarStateController.addCallback(callback)
-        trySendWithFailureLogging(statusBarStateController.dozeAmount, TAG, "initial dozeAmount")
-
-        awaitClose { statusBarStateController.removeCallback(callback) }
-    }
+    override val linearDozeAmount: Flow<Float>
+        get() {
+            SceneContainerFlag.assertInLegacyMode()
+            return _preSceneLinearDozeAmount
+        }
 
     override val dozeTransitionModel: Flow<DozeTransitionModel> = conflatedCallbackFlow {
         val callback =
             object : DozeTransitionCallback {
                 override fun onDozeTransition(
                     oldState: DozeMachine.State,
-                    newState: DozeMachine.State
+                    newState: DozeMachine.State,
                 ) {
                     trySendWithFailureLogging(
                         DozeTransitionModel(
@@ -513,7 +525,7 @@ constructor(
                             to = dozeMachineStateToModel(newState),
                         ),
                         TAG,
-                        "doze transition model"
+                        "doze transition model",
                     )
                 }
             }
@@ -525,7 +537,7 @@ constructor(
                 to = dozeMachineStateToModel(dozeTransitionListener.newState),
             ),
             TAG,
-            "initial doze transition model"
+            "initial doze transition model",
         )
 
         awaitClose { dozeTransitionListener.removeCallback(callback) }
@@ -563,7 +575,7 @@ constructor(
                             trySendWithFailureLogging(
                                 statusBarStateIntToObject(state),
                                 TAG,
-                                "state"
+                                "state",
                             )
                         }
                     }
@@ -574,7 +586,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
-                statusBarStateIntToObject(statusBarStateController.state)
+                statusBarStateIntToObject(statusBarStateController.state),
             )
 
     private val _biometricUnlockState: MutableStateFlow<BiometricUnlockModel> =
@@ -594,7 +606,7 @@ constructor(
             trySendWithFailureLogging(
                 authController.fingerprintSensorLocation,
                 TAG,
-                "AuthController.Callback#onFingerprintLocationChanged"
+                "AuthController.Callback#onFingerprintLocationChanged",
             )
         }
 
@@ -616,8 +628,11 @@ constructor(
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
 
-    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
-    override val isActiveDreamLockscreenHosted = _isActiveDreamLockscreenHosted.asStateFlow()
+    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
+    override val shortcutAbsoluteTop = _shortcutAbsoluteTop.asStateFlow()
+
+    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
+    override val notificationStackAbsoluteBottom = _notificationStackAbsoluteBottom.asStateFlow()
 
     init {
         val callback =
@@ -630,10 +645,6 @@ constructor(
 
                 override fun onUnlockedChanged() {
                     isKeyguardDismissible.value = keyguardStateController.isUnlocked
-                }
-
-                override fun onKeyguardGoingAwayChanged() {
-                    isKeyguardGoingAway.value = keyguardStateController.isKeyguardGoingAway
                 }
             }
 
@@ -652,10 +663,6 @@ constructor(
         _animateBottomAreaDozingTransitions.value = animate
     }
 
-    override fun setBottomAreaAlpha(alpha: Float) {
-        _bottomAreaAlpha.value = alpha
-    }
-
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
     }
@@ -672,10 +679,6 @@ constructor(
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
-    }
-
-    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
-        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
     }
 
     override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
@@ -703,6 +706,14 @@ constructor(
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
         }
+    }
+
+    override fun setShortcutAbsoluteTop(top: Float) {
+        _shortcutAbsoluteTop.value = top
+    }
+
+    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        _notificationStackAbsoluteBottom.value = bottom
     }
 
     private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {

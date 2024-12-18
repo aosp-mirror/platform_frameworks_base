@@ -17,16 +17,22 @@
 package com.android.systemui.accessibility.domain.interactor
 
 import com.android.systemui.accessibility.data.repository.CaptioningRepository
-import kotlinx.coroutines.flow.StateFlow
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
-class CaptioningInteractor(private val repository: CaptioningRepository) {
+@SysUISingleton
+class CaptioningInteractor @Inject constructor(private val repository: CaptioningRepository) {
 
-    val isSystemAudioCaptioningEnabled: StateFlow<Boolean>
-        get() = repository.isSystemAudioCaptioningEnabled
+    val isSystemAudioCaptioningEnabled: Flow<Boolean> =
+        repository.captioningModel.filterNotNull().map { it.isSystemAudioCaptioningEnabled }
 
-    val isSystemAudioCaptioningUiEnabled: StateFlow<Boolean>
-        get() = repository.isSystemAudioCaptioningUiEnabled
+    val isSystemAudioCaptioningUiEnabled: Flow<Boolean> =
+        repository.captioningModel.filterNotNull().map { it.isSystemAudioCaptioningUiEnabled }
 
-    suspend fun setIsSystemAudioCaptioningEnabled(enabled: Boolean) =
+    suspend fun setIsSystemAudioCaptioningEnabled(enabled: Boolean) {
         repository.setIsSystemAudioCaptioningEnabled(enabled)
+    }
 }

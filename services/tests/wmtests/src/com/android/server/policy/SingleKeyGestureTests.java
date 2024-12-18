@@ -141,7 +141,8 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onKeyUp(long eventTime, int multiPressCount, int displayId) {
+                    void onKeyUp(long eventTime, int multiPressCount, int displayId, int deviceId,
+                            int metaState) {
                         mKeyUpQueue.add(new KeyUpData(KEYCODE_POWER, multiPressCount));
                     }
                 });
@@ -177,7 +178,8 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onKeyUp(long eventTime, int multiPressCount, int displayId) {
+                    void onKeyUp(long eventTime, int multiPressCount, int displayId, int deviceId,
+                            int metaState) {
                         mKeyUpQueue.add(new KeyUpData(KEYCODE_BACK, multiPressCount));
                     }
 

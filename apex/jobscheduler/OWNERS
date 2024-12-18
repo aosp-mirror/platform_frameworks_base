@@ -1,8 +1,25 @@
-ctate@android.com
-ctate@google.com
-dplotnikov@google.com
-jji@google.com
-omakoto@google.com
-suprabh@google.com
-varunshah@google.com
-yamasani@google.com
+# For Job Scheduler and App Standby changes, JOB_OWNERS
+per-file JOB_OWNERS = file:/apex/jobscheduler/JOB_OWNERS
+per-file framework/aconfig/job.aconfig = file:/apex/jobscheduler/JOB_OWNERS
+per-file service/aconfig/job.aconfig = file:/apex/jobscheduler/JOB_OWNERS
+per-file service/aconfig/app_idle.aconfig = file:/apex/jobscheduler/JOB_OWNERS
+per-file *Job* = file:/apex/jobscheduler/JOB_OWNERS
+per-file *Standby* = file:/apex/jobscheduler/JOB_OWNERS
+per-file framework/java/android/app/job/* = file:/apex/jobscheduler/JOB_OWNERS
+per-file framework/java/com/android/server/job/* = file:/apex/jobscheduler/JOB_OWNERS
+per-file service/java/com/android/server/job/* = file:/apex/jobscheduler/JOB_OWNERS
+
+# For Alarm Manager changes, ALARM_OWNERS
+per-file ALARM_OWNERS = file:/apex/jobscheduler/ALARM_OWNERS
+per-file service/aconfig/alarm.aconfig = file:/apex/jobscheduler/ALARM_OWNERS
+per-file *Alarm* = file:/apex/jobscheduler/ALARM_OWNERS
+per-file service/java/com/android/server/alarm/* = file:/apex/jobscheduler/ALARM_OWNERS
+
+# For Device Idle changes, DEVICE_IDLE_OWNERS
+per-file DEVICE_IDLE_OWNERS = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
+per-file service/aconfig/device_idle.aconfig = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
+per-file *Idle* = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
+per-file service/java/com/android/server/deviceidle/* = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
+per-file framework/java/com/android/server/deviceidle/* = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
+
+suprabh@google.com #{LAST_RESORT_SUGGESTION}

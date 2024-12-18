@@ -23,6 +23,8 @@ import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LO
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
 
 import android.annotation.Nullable;
+import android.os.ServiceManager;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.IProtoLog;
@@ -37,6 +39,8 @@ import java.util.TreeMap;
  * A service for the ProtoLog logging system.
  */
 public class ProtoLogImpl {
+    private static final String LOG_TAG = "ProtoLogImpl";
+
     private static IProtoLog sServiceInstance = null;
 
     @ProtoLogToolInjected(VIEWER_CONFIG_PATH)
@@ -52,7 +56,7 @@ public class ProtoLogImpl {
     private static TreeMap<String, IProtoLogGroup> sLogGroups;
 
     @ProtoLogToolInjected(CACHE_UPDATER)
-    private static Runnable sCacheUpdater;
+    private static ProtoLogCacheUpdater sCacheUpdater;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
     public static void d(IProtoLogGroup group, long messageHash, int paramsMask, Object... args) {
@@ -89,7 +93,12 @@ public class ProtoLogImpl {
      * and log level.
      */
     public static boolean isEnabled(IProtoLogGroup group, LogLevel level) {
-        return getSingleInstance().isEnabled(group, level);
+        return isEnabled(getSingleInstance(), group, level);
+    }
+
+    private static boolean isEnabled(
+            IProtoLog protoLogInstance, IProtoLogGroup group, LogLevel level) {
+        return protoLogInstance.isEnabled(group, level);
     }
 
     /**
@@ -97,29 +106,48 @@ public class ProtoLogImpl {
      */
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
-            final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
+            Log.i(LOG_TAG, "Setting up " + ProtoLogImpl.class.getSimpleName() + " with "
+                    + "viewerConfigPath = " + sViewerConfigPath);
 
+            final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                File f = new File(sViewerConfigPath);
-                if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
+                var viewerConfigFile = new File(sViewerConfigPath);
+                if (!viewerConfigFile.exists()) {
                     // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
-                    // In some tests the viewer config file might not exist in which we don't
-                    // want to provide config path to the user
-                    sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater, groups);
+                    // In robolectric tests the viewer config file isn't current available, so we
+                    // cannot use the ProcessedPerfettoProtoLogImpl.
+                    Log.e(LOG_TAG, "Failed to find viewer config file " + sViewerConfigPath
+                            + " when setting up " + ProtoLogImpl.class.getSimpleName() + ". "
+                            + "ProtoLog will not work here!");
+
+                    sServiceInstance = new NoViewerConfigProtoLogImpl();
                 } else {
-                    sServiceInstance =
-                            new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
+                    var datasource = ProtoLog.getSharedSingleInstanceDataSource();
+                    try {
+                        var processedProtoLogImpl =
+                                new ProcessedPerfettoProtoLogImpl(datasource, sViewerConfigPath,
+                                        sCacheUpdater, groups);
+                        sServiceInstance = processedProtoLogImpl;
+                        processedProtoLogImpl.enable();
+                    } catch (ServiceManager.ServiceNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } else {
-                var protologImpl = new LegacyProtoLogImpl(
-                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
-                protologImpl.registerGroups(groups);
-                sServiceInstance = protologImpl;
+                sServiceInstance = createLegacyProtoLogImpl(groups);
             }
 
-            sCacheUpdater.run();
+            sCacheUpdater.update(sServiceInstance);
         }
         return sServiceInstance;
+    }
+
+    private static LegacyProtoLogImpl createLegacyProtoLogImpl(IProtoLogGroup[] groups) {
+        var protologImpl = new LegacyProtoLogImpl(
+                sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
+        protologImpl.registerGroups(groups);
+
+        return protologImpl;
     }
 
     @VisibleForTesting

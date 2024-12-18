@@ -17,6 +17,7 @@
 package com.android.systemui.classifier;
 
 import android.content.res.Resources;
+import android.hardware.devicestate.DeviceStateManager;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -24,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.phone.NotificationTapHelper;
+import com.android.systemui.util.Utils;
 
 import dagger.Binds;
 import dagger.Module;
@@ -104,12 +106,8 @@ public interface FalsingModule {
     /** */
     @Provides
     @Named(IS_FOLDABLE_DEVICE)
-    static boolean providesIsFoldableDevice(@Main Resources resources) {
-        try {
-            return resources.getIntArray(
-                    com.android.internal.R.array.config_foldedDeviceStates).length != 0;
-        } catch (Resources.NotFoundException e) {
-            return false;
-        }
+    static boolean providesIsFoldableDevice(@Main Resources resources,
+            DeviceStateManager deviceStateManager) {
+        return Utils.isDeviceFoldable(resources, deviceStateManager);
     }
 }

@@ -345,6 +345,18 @@ public class PermissionManagerServiceTracingDecorator implements PermissionManag
         }
     }
 
+
+    @Override
+    public int getPermissionRequestState(String packageName, String permName, String deviceId) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingPermissionManagerServiceImpl#checkUidPermissionState");
+        try {
+            return mService.getPermissionRequestState(packageName, permName, deviceId);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
     @Override
     public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
             @NonNull String deviceId, int userId) {

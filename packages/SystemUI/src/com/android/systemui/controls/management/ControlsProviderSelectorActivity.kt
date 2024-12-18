@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.management
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.Dialog
 import android.content.ComponentName
@@ -35,7 +36,6 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.res.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
@@ -43,40 +43,46 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
-/**
- * Activity to select an application to favorite the [Control] provided by them.
- */
-open class ControlsProviderSelectorActivity @Inject constructor(
+/** Activity to select an application to favorite the [Control] provided by them. */
+open class ControlsProviderSelectorActivity
+@Inject
+constructor(
     @Main private val executor: Executor,
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
     private val userTracker: UserTracker,
     private val authorizedPanelsRepository: AuthorizedPanelsRepository,
-    private val panelConfirmationDialogFactory: PanelConfirmationDialogFactory
-) : ComponentActivity() {
+    private val panelConfirmationDialogFactory: PanelConfirmationDialogFactory,
+) : ComponentActivity(), ControlsManagementActivity {
 
     companion object {
         private const val DEBUG = false
         private const val TAG = "ControlsProviderSelectorActivity"
         const val BACK_SHOULD_EXIT = "back_should_exit"
     }
+
+    override val activity: Activity
+        get() = this
+
     private var backShouldExit = false
     private lateinit var recyclerView: RecyclerView
-    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
-        private val startingUser = listingController.currentUserId
+    private val userTrackerCallback: UserTracker.Callback =
+        object : UserTracker.Callback {
+            private val startingUser = listingController.currentUserId
 
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            if (newUser != startingUser) {
-                userTracker.removeCallback(this)
-                finish()
+            override fun onUserChanged(newUser: Int, userContext: Context) {
+                if (newUser != startingUser) {
+                    userTracker.removeCallback(this)
+                    finish()
+                }
             }
         }
-    }
     private var dialog: Dialog? = null
 
     private val mOnBackInvokedCallback = OnBackInvokedCallback {
@@ -95,9 +101,11 @@ open class ControlsProviderSelectorActivity @Inject constructor(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,
-                intent
+                intent,
             )
         )
+
+        applyInsets(R.id.controls_management_root)
 
         requireViewById<ViewStub>(R.id.stub).apply {
             layoutResource = R.layout.controls_management_apps
@@ -114,9 +122,7 @@ open class ControlsProviderSelectorActivity @Inject constructor(
         requireViewById<Button>(R.id.other_apps).apply {
             visibility = View.VISIBLE
             setText(com.android.internal.R.string.cancel)
-            setOnClickListener {
-                onBackPressed()
-            }
+            setOnClickListener { onBackPressed() }
         }
         requireViewById<View>(R.id.done).visibility = View.GONE
 
@@ -125,9 +131,10 @@ open class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onBackPressed() {
         if (!backShouldExit) {
-            val i = Intent().apply {
-                component = ComponentName(applicationContext, ControlsActivity::class.java)
-            }
+            val i =
+                Intent().apply {
+                    component = ComponentName(applicationContext, ControlsActivity::class.java)
+                }
             startActivity(i, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
         }
         animateExitAndFinish()
@@ -138,33 +145,40 @@ open class ControlsProviderSelectorActivity @Inject constructor(
         userTracker.addCallback(userTrackerCallback, executor)
 
         recyclerView.alpha = 0.0f
-        recyclerView.adapter = AppAdapter(
-                backExecutor,
-                executor,
-                lifecycle,
-                listingController,
-                LayoutInflater.from(this),
-                ::onAppSelected,
-                FavoritesRenderer(resources, controlsController::countFavoritesForComponent),
-                resources,
-                authorizedPanelsRepository.getAuthorizedPanels()
-        ).apply {
-            registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                var hasAnimated = false
-                override fun onChanged() {
-                    if (!hasAnimated) {
-                        hasAnimated = true
-                        ControlsAnimations.enterAnimation(recyclerView).start()
-                    }
+        recyclerView.adapter =
+            AppAdapter(
+                    backExecutor,
+                    executor,
+                    lifecycle,
+                    listingController,
+                    LayoutInflater.from(this),
+                    ::onAppSelected,
+                    FavoritesRenderer(resources, controlsController::countFavoritesForComponent),
+                    resources,
+                    authorizedPanelsRepository.getAuthorizedPanels(),
+                )
+                .apply {
+                    registerAdapterDataObserver(
+                        object : RecyclerView.AdapterDataObserver() {
+                            var hasAnimated = false
+
+                            override fun onChanged() {
+                                if (!hasAnimated) {
+                                    hasAnimated = true
+                                    ControlsAnimations.enterAnimation(recyclerView).start()
+                                }
+                            }
+                        }
+                    )
                 }
-            })
-        }
 
         if (DEBUG) {
             Log.d(TAG, "Registered onBackInvokedCallback")
         }
         onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            mOnBackInvokedCallback,
+        )
     }
 
     override fun onStop() {
@@ -184,38 +198,45 @@ open class ControlsProviderSelectorActivity @Inject constructor(
             launchFavoritingActivity(serviceInfo.componentName)
         } else {
             val appName = serviceInfo.loadLabel() ?: ""
-            dialog = panelConfirmationDialogFactory.createConfirmationDialog(this, appName) { ok ->
-                if (ok) {
-                    authorizedPanelsRepository.addAuthorizedPanels(
-                            setOf(serviceInfo.componentName.packageName)
-                    )
-                    val selected = SelectedItem.PanelItem(appName, serviceInfo.componentName)
-                    controlsController.setPreferredSelection(selected)
-                    animateExitAndFinish()
-                    openControlsOrigin()
-                }
-                dialog = null
-            }.also { it.show() }
+            dialog =
+                panelConfirmationDialogFactory
+                    .createConfirmationDialog(this, appName) { ok ->
+                        if (ok) {
+                            authorizedPanelsRepository.addAuthorizedPanels(
+                                setOf(serviceInfo.componentName.packageName)
+                            )
+                            val selected =
+                                SelectedItem.PanelItem(appName, serviceInfo.componentName)
+                            controlsController.setPreferredSelection(selected)
+                            animateExitAndFinish()
+                            openControlsOrigin()
+                        }
+                        dialog = null
+                    }
+                    .also { it.show() }
         }
     }
 
     /**
      * Launch the [ControlsFavoritingActivity] for the specified component.
+     *
      * @param component a component name for a [ControlsProviderService]
      */
     private fun launchFavoritingActivity(component: ComponentName?) {
         executor.execute {
             component?.let {
-                val intent = Intent(applicationContext, ControlsFavoritingActivity::class.java)
-                        .apply {
-                    putExtra(ControlsFavoritingActivity.EXTRA_APP,
-                            listingController.getAppLabel(it))
-                    putExtra(Intent.EXTRA_COMPONENT_NAME, it)
-                    putExtra(
-                        ControlsFavoritingActivity.EXTRA_SOURCE,
-                        ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR,
-                    )
-                }
+                val intent =
+                    Intent(applicationContext, ControlsFavoritingActivity::class.java).apply {
+                        putExtra(
+                            ControlsFavoritingActivity.EXTRA_APP,
+                            listingController.getAppLabel(it),
+                        )
+                        putExtra(Intent.EXTRA_COMPONENT_NAME, it)
+                        putExtra(
+                            ControlsFavoritingActivity.EXTRA_SOURCE,
+                            ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR,
+                        )
+                    }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
             }
         }
@@ -228,8 +249,8 @@ open class ControlsProviderSelectorActivity @Inject constructor(
 
     private fun openControlsOrigin() {
         startActivity(
-                Intent(applicationContext, ControlsActivity::class.java),
-                ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+            Intent(applicationContext, ControlsActivity::class.java),
+            ActivityOptions.makeSceneTransitionAnimation(this).toBundle(),
         )
     }
 
@@ -242,7 +263,8 @@ open class ControlsProviderSelectorActivity @Inject constructor(
                     override fun run() {
                         finish()
                     }
-                }
-        ).start()
+                },
+            )
+            .start()
     }
 }

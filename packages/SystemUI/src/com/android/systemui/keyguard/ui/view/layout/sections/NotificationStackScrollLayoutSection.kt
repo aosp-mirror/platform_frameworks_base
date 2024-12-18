@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -55,20 +54,13 @@ constructor(
                 R.id.nssl_placeholder_barrier_bottom,
                 Barrier.TOP,
                 0,
-                *intArrayOf(
-                    R.id.device_entry_icon_view,
-                    R.id.lock_icon_view,
-                    R.id.ambient_indication_container
-                )
+                *intArrayOf(R.id.device_entry_icon_view, R.id.ambient_indication_container),
             )
             connect(placeHolderId, BOTTOM, R.id.nssl_placeholder_barrier_bottom, TOP)
         }
     }
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         // This moves the existing NSSL view to a different parent, as the controller is a
         // singleton and recreating it has other bad side effects.
         // In the SceneContainer, this is done by the NotificationSection composable.
@@ -82,10 +74,6 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         disposableHandle?.dispose()
         disposableHandle =
             sharedNotificationContainerBinder.bind(

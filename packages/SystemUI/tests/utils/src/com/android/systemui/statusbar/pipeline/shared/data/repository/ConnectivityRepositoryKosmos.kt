@@ -18,7 +18,5 @@ package com.android.systemui.statusbar.pipeline.shared.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.fakeConnectivityRepository: FakeConnectivityRepository by
-    Kosmos.Fixture { FakeConnectivityRepository() }
 val Kosmos.connectivityRepository: ConnectivityRepository by
-    Kosmos.Fixture { fakeConnectivityRepository }
+    Kosmos.Fixture { FakeConnectivityRepository() }

@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 private val KEY_TIMESTAMP = "appliedTimestamp"
 private val KNOWN_PLUGINS =
@@ -65,7 +66,7 @@ private val KNOWN_PLUGINS =
 private fun <TKey : Any, TVal : Any> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
     key: TKey,
     value: TVal,
-    onNew: (TVal) -> Unit
+    onNew: (TVal) -> Unit,
 ): TVal {
     val result = this.putIfAbsent(key, value)
     if (result == null) {
@@ -110,7 +111,7 @@ open class ClockRegistry(
                 selfChange: Boolean,
                 uris: Collection<Uri>,
                 flags: Int,
-                userId: Int
+                userId: Int,
             ) {
                 scope.launch(bgDispatcher) { querySettings() }
             }
@@ -180,7 +181,7 @@ open class ClockRegistry(
             override fun onPluginLoaded(
                 plugin: ClockProviderPlugin,
                 pluginContext: Context,
-                manager: PluginLifecycleManager<ClockProviderPlugin>
+                manager: PluginLifecycleManager<ClockProviderPlugin>,
             ) {
                 plugin.initialize(clockBuffers)
 
@@ -218,7 +219,7 @@ open class ClockRegistry(
 
             override fun onPluginUnloaded(
                 plugin: ClockProviderPlugin,
-                manager: PluginLifecycleManager<ClockProviderPlugin>
+                manager: PluginLifecycleManager<ClockProviderPlugin>,
             ) {
                 for (clock in plugin.getClocks()) {
                     val id = clock.clockId
@@ -290,16 +291,16 @@ open class ClockRegistry(
                         Settings.Secure.getStringForUser(
                             context.contentResolver,
                             Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-                            ActivityManager.getCurrentUser()
+                            ActivityManager.getCurrentUser(),
                         )
                     } else {
                         Settings.Secure.getString(
                             context.contentResolver,
-                            Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
+                            Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
                         )
                     }
 
-                ClockSettings.deserialize(json)
+                ClockSettings.fromJson(JSONObject(json))
             } catch (ex: Exception) {
                 logger.e("Failed to parse clock settings", ex)
                 null
@@ -312,21 +313,24 @@ open class ClockRegistry(
         assert.isNotMainThread()
 
         try {
-            value?.metadata?.put(KEY_TIMESTAMP, System.currentTimeMillis())
+            val json =
+                value?.let {
+                    it.metadata.put(KEY_TIMESTAMP, System.currentTimeMillis())
+                    ClockSettings.toJson(it)
+                } ?: ""
 
-            val json = ClockSettings.serialize(value)
             if (handleAllUsers) {
                 Settings.Secure.putStringForUser(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-                    json,
-                    ActivityManager.getCurrentUser()
+                    json.toString(),
+                    ActivityManager.getCurrentUser(),
                 )
             } else {
                 Settings.Secure.putString(
                     context.contentResolver,
                     Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE,
-                    json
+                    json.toString(),
                 )
             }
         } catch (ex: Exception) {
@@ -418,7 +422,7 @@ open class ClockRegistry(
         pluginManager.addPluginListener(
             pluginListener,
             ClockProviderPlugin::class.java,
-            /*allowMultiple=*/ true
+            /*allowMultiple=*/ true,
         )
 
         scope.launch(bgDispatcher) { querySettings() }
@@ -427,7 +431,7 @@ open class ClockRegistry(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
                 /*notifyForDescendants=*/ false,
                 settingObserver,
-                UserHandle.USER_ALL
+                UserHandle.USER_ALL,
             )
 
             ActivityManager.getService().registerUserSwitchObserver(userSwitchObserver, TAG)
@@ -435,7 +439,7 @@ open class ClockRegistry(
             context.contentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
                 /*notifyForDescendants=*/ false,
-                settingObserver
+                settingObserver,
             )
         }
     }
@@ -504,7 +508,7 @@ open class ClockRegistry(
         val isCurrent = currentClockId == info.metadata.clockId
         logger.log(
             if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
-            { "Connected $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+            { "Connected $str1 @$str2" + if (bool1) " (Current Clock)" else "" },
         ) {
             str1 = info.metadata.clockId
             str2 = info.manager.toString()
@@ -516,7 +520,7 @@ open class ClockRegistry(
         val isCurrent = currentClockId == info.metadata.clockId
         logger.log(
             if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
-            { "Loaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+            { "Loaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" },
         ) {
             str1 = info.metadata.clockId
             str2 = info.manager.toString()
@@ -532,7 +536,7 @@ open class ClockRegistry(
         val isCurrent = currentClockId == info.metadata.clockId
         logger.log(
             if (isCurrent) LogLevel.WARNING else LogLevel.DEBUG,
-            { "Unloaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+            { "Unloaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" },
         ) {
             str1 = info.metadata.clockId
             str2 = info.manager.toString()
@@ -548,7 +552,7 @@ open class ClockRegistry(
         val isCurrent = currentClockId == info.metadata.clockId
         logger.log(
             if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
-            { "Disconnected $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+            { "Disconnected $str1 @$str2" + if (bool1) " (Current Clock)" else "" },
         ) {
             str1 = info.metadata.clockId
             str2 = info.manager.toString()
@@ -557,14 +561,15 @@ open class ClockRegistry(
     }
 
     fun getClocks(): List<ClockMetadata> {
-        if (!isEnabled) {
-            return listOf(availableClocks[DEFAULT_CLOCK_ID]!!.metadata)
-        }
+        if (!isEnabled) return listOf(availableClocks[DEFAULT_CLOCK_ID]!!.metadata)
         return availableClocks.map { (_, clock) -> clock.metadata }
     }
 
-    fun getClockPickerConfig(clockId: ClockId): ClockPickerConfig? =
-        availableClocks[clockId]?.provider?.getClockPickerConfig(clockId)
+    fun getClockPickerConfig(clockId: ClockId): ClockPickerConfig? {
+        val clockSettings =
+            settings?.let { if (clockId == it.clockId) it else null } ?: ClockSettings(clockId)
+        return availableClocks[clockId]?.provider?.getClockPickerConfig(clockSettings)
+    }
 
     fun createExampleClock(clockId: ClockId): ClockController? = createClock(clockId)
 

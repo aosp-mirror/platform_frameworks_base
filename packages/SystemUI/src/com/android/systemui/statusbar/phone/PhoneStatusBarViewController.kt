@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.battery.BatteryMeterView
+import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -34,10 +35,17 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.StatusBarLongPressGestureDetector
+import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
+import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -48,6 +56,7 @@ import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.view.ViewUtil
+import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
@@ -65,6 +74,7 @@ private constructor(
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
     private val panelExpansionInteractor: PanelExpansionInteractor,
+    private val statusBarLongPressGestureDetector: Provider<StatusBarLongPressGestureDetector>,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
@@ -74,6 +84,8 @@ private constructor(
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
     private val darkIconDispatcher: DarkIconDispatcher,
     private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+    private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
+    private val shadeDisplaysRepository: ShadeDisplaysRepository,
 ) : ViewController<PhoneStatusBarView>(view) {
 
     private lateinit var battery: BatteryMeterView
@@ -113,6 +125,10 @@ private constructor(
         addDarkReceivers()
         addCursorSupportToIconContainers()
 
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled) {
+            mView.setLongPressGestureDetector(statusBarLongPressGestureDetector.get())
+        }
+
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
 
@@ -151,7 +167,11 @@ private constructor(
 
         startSideContainer = mView.requireViewById(R.id.status_bar_start_side_content)
         startSideContainer.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createDarkAwareListener(startSideContainer)
+            statusOverlayHoverListenerFactory.createDarkAwareListener(
+                startSideContainer,
+                topHoverMargin = 6,
+                bottomHoverMargin = 6,
+            )
         )
         startSideContainer.setOnTouchListener(iconsOnTouchListener)
     }
@@ -210,8 +230,11 @@ private constructor(
                 event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL
             centralSurfaces.setInteracting(
                 WINDOW_STATUS_BAR,
-                !upOrCancel || shadeController.isExpandedVisible
+                !upOrCancel || shadeController.isExpandedVisible,
             )
+        }
+        if (ShadeWindowGoesAround.isEnabled && event.action == MotionEvent.ACTION_DOWN) {
+            lazyStatusBarShadeDisplayPolicy.get().onStatusBarTouched(context.displayId)
         }
     }
 
@@ -247,7 +270,7 @@ private constructor(
                         String.format(
                             "onTouchForwardedFromStatusBar: panel disabled, " +
                                 "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"
-                        )
+                        ),
                     )
                 }
                 return false
@@ -266,7 +289,7 @@ private constructor(
                 if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(
                         event,
-                        "onTouchForwardedFromStatusBar: panel view disabled"
+                        "onTouchForwardedFromStatusBar: panel view disabled",
                     )
                     return true
                 }
@@ -276,7 +299,19 @@ private constructor(
                     return true
                 }
             }
-            return shadeViewController.handleExternalTouch(event)
+
+            // With the StatusBarConnectedDisplays changes, status bar touches should result in
+            // shade interaction only if ShadeWindowGoesAround.isEnabled or if touch is on the
+            // display which currently hosts the shade.
+            return if (
+                !StatusBarConnectedDisplays.isEnabled ||
+                    ShadeWindowGoesAround.isEnabled ||
+                    context.displayId == shadeDisplaysRepository.displayId.value
+            ) {
+                shadeViewController.handleExternalTouch(event)
+            } else {
+                false
+            }
         }
     }
 
@@ -323,13 +358,16 @@ private constructor(
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
         private val panelExpansionInteractor: PanelExpansionInteractor,
+        private val statusBarLongPressGestureDetector: Provider<StatusBarLongPressGestureDetector>,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
-        private val darkIconDispatcher: DarkIconDispatcher,
-        private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+        @DisplaySpecific private val darkIconDispatcher: DarkIconDispatcher,
+        private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
+        private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
+        private val shadeDisplaysRepository: ShadeDisplaysRepository,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -347,6 +385,7 @@ private constructor(
                 shadeController,
                 shadeViewController,
                 panelExpansionInteractor,
+                statusBarLongPressGestureDetector,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,
@@ -355,7 +394,9 @@ private constructor(
                 configurationController,
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore.defaultDisplay,
+                lazyStatusBarShadeDisplayPolicy,
+                shadeDisplaysRepository,
             )
         }
     }

@@ -22,7 +22,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.DisableFlagsRepositoryLog
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +72,7 @@ constructor(
                                     // [QuickSettingsInteractor]-type class. However, that's out of
                                     // scope for the CentralSurfaces removal project.
                                     remoteInputQuickSettingsDisabler.adjustDisableFlags(state2),
+                                    animate,
                                 )
                             )
                         }
@@ -82,5 +83,5 @@ constructor(
             .distinctUntilChanged()
             .onEach { it.logChange(logBuffer, disableFlagsLogger) }
             // Use Eagerly because we always need to know about disable flags
-            .stateIn(scope, SharingStarted.Eagerly, DisableFlagsModel())
+            .stateIn(scope, SharingStarted.Eagerly, DisableFlagsModel(animate = false))
 }

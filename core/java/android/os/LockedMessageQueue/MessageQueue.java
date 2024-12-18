@@ -20,14 +20,17 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Handler;
-import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -44,9 +47,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "LockedMessageQueue";
     private static final boolean DEBUG = false;
@@ -294,6 +296,7 @@ public final class MessageQueue {
         * Keep this for manual debugging. It's easier to pepper the code with this function
         * than MessageQueue.dump()
         */
+        @NeverCompile
         void print() {
             Log.v(TAG, "heap num elem: " + mNumElements + " mHeap.length " + mHeap.length);
             for (int i = 0; i < mNumElements; i++) {
@@ -389,12 +392,18 @@ public final class MessageQueue {
     @UnsupportedAppUsage
     private int mNextBarrierToken;
 
+    @RavenwoodRedirect
     private native static long nativeInit();
+    @RavenwoodRedirect
     private native static void nativeDestroy(long ptr);
     @UnsupportedAppUsage
+    @RavenwoodRedirect
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
+    @RavenwoodRedirect
     private native static void nativeWake(long ptr);
+    @RavenwoodRedirect
     private native static boolean nativeIsPolling(long ptr);
+    @RavenwoodRedirect
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
@@ -1203,6 +1212,7 @@ public final class MessageQueue {
                 sMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     int dumpPriorityQueue(Printer pw, String prefix, Handler h, MessageHeap priorityQueue) {
         int n = 0;
         long now = SystemClock.uptimeMillis();
@@ -1216,6 +1226,7 @@ public final class MessageQueue {
         return n;
     }
 
+    @NeverCompile
     void dumpPriorityQueue(ProtoOutputStream proto, MessageHeap priorityQueue) {
         for (int i = 0; i < priorityQueue.numElements(); i++) {
             Message m = priorityQueue.getMessageAt(i);
@@ -1223,6 +1234,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             pw.println(prefix + "(MessageQueue is using Locked implementation)");
@@ -1234,6 +1246,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
         synchronized (this) {

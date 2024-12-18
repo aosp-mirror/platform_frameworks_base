@@ -84,6 +84,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -323,6 +324,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 });
 
         getLoaderManager().initLoader(LOADER_ID_ENABLED_PRINT_SERVICES, null, this);
+        getWindow().getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackInvoked);
     }
 
     private void onConnectedToPrintSpooler(final IBinder documentAdapter) {
@@ -460,7 +463,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
             event.startTracking();
             return true;
         }
@@ -479,17 +482,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return true;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_BACK
+        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking() && !event.isCanceled()) {
-            if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
-                    && !hasErrors()) {
-                mPrintPreviewController.closeOptions();
-            } else {
-                cancelPrint();
-            }
+            onBackInvoked();
             return true;
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    private void onBackInvoked() {
+        if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
+                && !hasErrors()) {
+            mPrintPreviewController.closeOptions();
+        } else {
+            cancelPrint();
+        }
     }
 
     @Override
@@ -514,8 +521,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
 
         setState(STATE_UPDATE_FAILED);
-
-        mPrintedDocument.kill(message);
+        if (DEBUG) {
+            Log.i(LOG_TAG, "PrintJob state[" +  PrintJobInfo.STATE_FAILED + "] reason: " + message);
+        }
+        PrintSpoolerService spooler = mSpoolerProvider.getSpooler();
+        spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_FAILED, message);
+        mPrintedDocument.finish();
     }
 
     @Override

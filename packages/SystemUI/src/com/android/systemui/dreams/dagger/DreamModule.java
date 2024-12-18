@@ -32,12 +32,14 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.SystemDialogsCloser;
-import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
-import com.android.systemui.dreams.homecontrols.DreamServiceDelegate;
-import com.android.systemui.dreams.homecontrols.DreamServiceDelegateImpl;
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
+import com.android.systemui.dreams.homecontrols.dagger.HomeControlsDataSourceModule;
+import com.android.systemui.dreams.homecontrols.dagger.HomeControlsRemoteServiceComponent;
+import com.android.systemui.dreams.homecontrols.system.HomeControlsRemoteService;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.shared.model.TileCategory;
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
@@ -60,13 +62,15 @@ import javax.inject.Named;
  * Dagger Module providing Dream-related functionality.
  */
 @Module(includes = {
-            RegisteredComplicationsModule.class,
-            LowLightDreamModule.class,
-            ScrimModule.class
-        },
+        RegisteredComplicationsModule.class,
+        LowLightDreamModule.class,
+        ScrimModule.class,
+        HomeControlsDataSourceModule.class,
+},
         subcomponents = {
-            ComplicationComponent.class,
-            DreamOverlayComponent.class,
+                DreamComplicationComponent.class,
+                DreamOverlayComponent.class,
+                HomeControlsRemoteServiceComponent.class,
         })
 public interface DreamModule {
     String DREAM_ONLY_ENABLED_FOR_DOCK_USER = "dream_only_enabled_for_dock_user";
@@ -110,6 +114,15 @@ public interface DreamModule {
     @ClassKey(HomeControlsDreamService.class)
     Service bindHomeControlsDreamService(
             HomeControlsDreamService service);
+
+    /**
+     * Provides Home Controls Remote Service
+     */
+    @Binds
+    @IntoMap
+    @ClassKey(HomeControlsRemoteService.class)
+    Service bindHomeControlsRemoteService(
+            HomeControlsRemoteService service);
 
     /**
      * Provides a touch inset manager for dreams.
@@ -196,14 +209,9 @@ public interface DreamModule {
                         R.drawable.ic_qs_screen_saver,
                         R.string.quick_settings_screensaver_label),
                 uiEventLogger.getNewInstanceId(),
+                TileCategory.UTILITIES,
                 tileSpec.getSpec(),
                 QSTilePolicy.NoRestrictions.INSTANCE
                 );
     }
-
-
-    /** Provides delegate to allow for testing of dream service */
-    @Binds
-    DreamServiceDelegate bindDreamDelegate(DreamServiceDelegateImpl impl);
-
 }

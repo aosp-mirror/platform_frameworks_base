@@ -107,8 +107,7 @@ class UiAutomationManager {
                 Binder.getCallingUserHandle().getIdentifier());
         if (mUiAutomationService != null) {
             throw new IllegalStateException(
-                    "UiAutomationService " + mUiAutomationService.mServiceInterface
-                            + "already registered!");
+                    "UiAutomationService " + mUiAutomationService.mClient + "already registered!");
         }
 
         try {
@@ -130,10 +129,9 @@ class UiAutomationManager {
                 mainHandler, mLock, securityPolicy, systemSupport, trace, windowManagerInternal,
                 systemActionPerformer, awm);
         mUiAutomationServiceOwner = owner;
-        mUiAutomationService.mServiceInterface = serviceClient;
+        mUiAutomationService.mClient = serviceClient;
         try {
-            mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
-                    0);
+            mUiAutomationService.mClient.asBinder().linkToDeath(mUiAutomationService, 0);
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Failed registering death link: " + re);
             destroyUiAutomationService();
@@ -149,10 +147,10 @@ class UiAutomationManager {
         synchronized (mLock) {
             if (useAccessibility()
                     && ((mUiAutomationService == null)
-                    || (serviceClient == null)
-                    || (mUiAutomationService.mServiceInterface == null)
-                    || (serviceClient.asBinder()
-                    != mUiAutomationService.mServiceInterface.asBinder()))) {
+                            || (serviceClient == null)
+                            || (mUiAutomationService.mClient == null)
+                            || (serviceClient.asBinder()
+                                    != mUiAutomationService.mClient.asBinder()))) {
                 throw new IllegalStateException("UiAutomationService " + serviceClient
                         + " not registered!");
             }
@@ -230,8 +228,7 @@ class UiAutomationManager {
     private void destroyUiAutomationService() {
         synchronized (mLock) {
             if (mUiAutomationService != null) {
-                mUiAutomationService.mServiceInterface.asBinder().unlinkToDeath(
-                        mUiAutomationService, 0);
+                mUiAutomationService.mClient.asBinder().unlinkToDeath(mUiAutomationService, 0);
                 mUiAutomationService.onRemoved();
                 mUiAutomationService.resetLocked();
                 mUiAutomationService = null;
@@ -271,40 +268,48 @@ class UiAutomationManager {
 
         void connectServiceUnknownThread() {
             // This needs to be done on the main thread
-            mMainHandler.post(() -> {
-                try {
-                    final IAccessibilityServiceClient serviceInterface;
-                    final UiAutomationService uiAutomationService;
-                    synchronized (mLock) {
-                        serviceInterface = mServiceInterface;
-                        uiAutomationService = mUiAutomationService;
-                        if (serviceInterface == null) {
-                            mService = null;
-                        } else {
-                            mService = mServiceInterface.asBinder();
-                            mService.linkToDeath(this, 0);
+            mMainHandler.post(
+                    () -> {
+                        try {
+                            final IAccessibilityServiceClient client;
+                            final UiAutomationService uiAutomationService;
+                            synchronized (mLock) {
+                                client = mClient;
+                                uiAutomationService = mUiAutomationService;
+                                if (client == null) {
+                                    mClientBinder = null;
+                                } else {
+                                    mClientBinder = mClient.asBinder();
+                                    mClientBinder.linkToDeath(this, 0);
+                                }
+                            }
+                            // If the client is null, the UiAutomation has been shut down on
+                            // another thread.
+                            if (client != null && uiAutomationService != null) {
+                                uiAutomationService.addWindowTokensForAllDisplays();
+                                if (mTrace.isA11yTracingEnabledForTypes(
+                                        AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
+                                    mTrace.logTrace(
+                                            "UiAutomationService.connectServiceUnknownThread",
+                                            AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT,
+                                            "serviceConnection="
+                                                    + this
+                                                    + ";connectionId="
+                                                    + mId
+                                                    + "windowToken="
+                                                    + mOverlayWindowTokens.get(
+                                                            Display.DEFAULT_DISPLAY));
+                                }
+                                client.init(
+                                        this,
+                                        mId,
+                                        mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
+                            }
+                        } catch (RemoteException re) {
+                            Slog.w(LOG_TAG, "Error initializing connection", re);
+                            destroyUiAutomationService();
                         }
-                    }
-                    // If the serviceInterface is null, the UiAutomation has been shut down on
-                    // another thread.
-                    if (serviceInterface != null && uiAutomationService != null) {
-                        uiAutomationService.addWindowTokensForAllDisplays();
-                        if (mTrace.isA11yTracingEnabledForTypes(
-                                AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
-                            mTrace.logTrace("UiAutomationService.connectServiceUnknownThread",
-                                    AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT,
-                                    "serviceConnection=" + this + ";connectionId=" + mId
-                                    + "windowToken="
-                                    + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
-                        }
-                        serviceInterface.init(this, mId,
-                                mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
-                    }
-                } catch (RemoteException re) {
-                    Slog.w(LOG_TAG, "Error initializing connection", re);
-                    destroyUiAutomationService();
-                }
-            });
+                    });
         }
 
         @Override

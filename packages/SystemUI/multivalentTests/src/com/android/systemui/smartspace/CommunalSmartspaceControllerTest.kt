@@ -31,6 +31,7 @@ import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.withArgCaptor
@@ -52,6 +53,10 @@ import org.mockito.kotlin.never
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class CommunalSmartspaceControllerTest : SysuiTestCase() {
+    @Mock private lateinit var userTracker: UserTracker
+
+    @Mock private lateinit var userContextPrimary: Context
+
     @Mock private lateinit var smartspaceManager: SmartspaceManager
 
     @Mock private lateinit var execution: Execution
@@ -106,6 +111,8 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
         override fun getCurrentCardTopPadding(): Int {
             return 0
         }
+
+        override fun setHorizontalPaddings(horizontalPadding: Int) {}
     }
 
     @Before
@@ -113,15 +120,18 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(session)
 
+        `when`(userTracker.userContext).thenReturn(userContextPrimary)
+        `when`(userContextPrimary.getSystemService(SmartspaceManager::class.java))
+            .thenReturn(smartspaceManager)
+
         controller =
             CommunalSmartspaceController(
-                context,
-                smartspaceManager,
+                userTracker,
                 execution,
                 uiExecutor,
                 precondition,
                 Optional.of(targetFilter),
-                Optional.of(plugin)
+                Optional.of(plugin),
             )
     }
 

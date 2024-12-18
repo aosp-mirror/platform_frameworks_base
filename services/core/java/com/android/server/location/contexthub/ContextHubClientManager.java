@@ -236,16 +236,17 @@ import java.util.function.Consumer;
         }
 
         if (message.isBroadcastMessage()) {
-            if (Flags.reliableMessageImplementation() && message.isReliable()) {
-                Log.e(TAG, "Received reliable broadcast message from " + message.getNanoAppId());
+            if (message.isReliable()) {
+                Log.e(TAG, "Received reliable broadcast message from 0x"
+                        + Long.toHexString(message.getNanoAppId()));
                 return ErrorCode.PERMANENT_ERROR;
             }
 
             // Broadcast messages shouldn't be sent with any permissions tagged per CHRE API
             // requirements.
             if (!messagePermissions.isEmpty()) {
-                Log.e(TAG, "Received broadcast message with permissions from "
-                        + message.getNanoAppId());
+                Log.e(TAG, "Received broadcast message with permissions from 0x"
+                        + Long.toHexString(message.getNanoAppId()));
                 return ErrorCode.PERMANENT_ERROR;
             }
 

@@ -24,6 +24,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsEventLogger
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
@@ -43,7 +44,8 @@ class IssueRecordingMapperTest : SysuiTestCase() {
         QSTileConfig(
             TileSpec.create(RecordIssueModule.TILE_SPEC),
             uiConfig,
-            kosmos.qsEventLogger.getNewInstanceId()
+            kosmos.qsEventLogger.getNewInstanceId(),
+            TileCategory.UTILITIES,
         )
     private val resources = kosmos.mainResources
     private val theme = resources.newTheme()

@@ -63,7 +63,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     public void showGlobalActions(GlobalActionsManager manager) {
         if (mDisabled) return;
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned(), null /* view */);
+                mDeviceProvisionedController.isDeviceProvisioned(), null /* view */,
+                mContext.getDisplayId());
     }
 
     @Override

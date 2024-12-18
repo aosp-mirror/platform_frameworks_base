@@ -17,6 +17,8 @@
 package com.android.systemui.education.data.repository
 
 import android.content.Context
+import android.hardware.input.InputManager
+import android.hardware.input.KeyGestureEvent
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -25,23 +27,31 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduDataStoreScope
 import com.android.systemui.education.data.model.EduDeviceConnectionTime
 import com.android.systemui.education.data.model.GestureEduModel
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Instant
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.properties.Delegates.notNull
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /**
@@ -64,6 +74,8 @@ interface ContextualEducationRepository {
     suspend fun updateEduDeviceConnectionTime(
         transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
     )
+
+    val keyboardShortcutTriggered: Flow<GestureType>
 }
 
 /**
@@ -75,9 +87,13 @@ class UserContextualEducationRepository
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    @EduDataStoreScope private val dataStoreScopeProvider: Provider<CoroutineScope>
+    @EduDataStoreScope private val dataStoreScopeProvider: Provider<CoroutineScope>,
+    private val inputManager: InputManager,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : ContextualEducationRepository {
     companion object {
+        const val TAG = "UserContextualEducationRepository"
+
         const val SIGNAL_COUNT_SUFFIX = "_SIGNAL_COUNT"
         const val NUMBER_OF_EDU_SHOWN_SUFFIX = "_NUMBER_OF_EDU_SHOWN"
         const val LAST_SHORTCUT_TRIGGERED_TIME_SUFFIX = "_LAST_SHORTCUT_TRIGGERED_TIME"
@@ -97,6 +113,30 @@ constructor(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val prefData: Flow<Preferences> = datastore.filterNotNull().flatMapLatest { it.data }
+
+    override val keyboardShortcutTriggered: Flow<GestureType> =
+        conflatedCallbackFlow {
+                val listener =
+                    InputManager.KeyGestureEventListener { event ->
+                        // Only store keyboard shortcut time for gestures providing keyboard
+                        // education
+                        val shortcutType =
+                            when (event.keyGestureType) {
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS -> ALL_APPS
+
+                                else -> null
+                            }
+
+                        if (shortcutType != null) {
+                            trySendWithFailureLogging(shortcutType, TAG)
+                        }
+                    }
+
+                inputManager.registerKeyGestureEventListener(Executor(Runnable::run), listener)
+                awaitClose { inputManager.unregisterKeyGestureEventListener(listener) }
+            }
+            .flowOn(backgroundDispatcher)
 
     override fun setUser(userId: Int) {
         dataStoreScope?.cancel()
@@ -136,7 +176,8 @@ constructor(
                 preferences[getLastEducationTimeKey(gestureType)]?.let {
                     Instant.ofEpochSecond(it)
                 },
-            userId = userId
+            userId = userId,
+            gestureType = gestureType,
         )
     }
 

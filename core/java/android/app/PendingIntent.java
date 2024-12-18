@@ -1094,6 +1094,9 @@ public final class PendingIntent implements Parcelable {
             @Nullable String requiredPermission, @Nullable Bundle options)
             throws CanceledException {
         try {
+            if (intent != null) {
+                intent.collectExtraIntentKeys();
+            }
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;

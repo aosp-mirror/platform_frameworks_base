@@ -24,71 +24,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Begin to cleanup after CL merges
-
-filegroup {
-    name: "FlickerTestsOtherCommon-src",
-    srcs: ["src/**/ActivityEmbeddingTestBase.kt"],
-}
-
-filegroup {
-    name: "FlickerTestsOtherOpen-src",
-    srcs: ["src/**/open/*"],
-}
-
-filegroup {
-    name: "FlickerTestsOtherRotation-src",
-    srcs: ["src/**/rotation/*"],
-}
-
-java_library {
-    name: "FlickerTestsOtherCommon",
-    defaults: ["FlickerTestsDefault"],
-    srcs: [":FlickerTestsOtherCommon-src"],
-    static_libs: ["FlickerTestsBase"],
-}
-
-java_defaults {
-    name: "FlickerTestsOtherDefaults",
-    defaults: ["FlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.server.wm.flicker",
-    instrumentation_target_package: "com.android.server.wm.flicker",
-    test_config_template: "AndroidTestTemplate.xml",
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsOtherCommon",
-    ],
-    data: ["trace_config/*"],
-}
-
-android_test {
-    name: "FlickerTestsOtherOpen",
-    defaults: ["FlickerTestsOtherDefaults"],
-    srcs: [":FlickerTestsOtherOpen-src"],
-}
-
-android_test {
-    name: "FlickerTestsOtherRotation",
-    defaults: ["FlickerTestsOtherDefaults"],
-    srcs: [":FlickerTestsOtherRotation-src"],
-}
-
-android_test {
-    name: "FlickerTestsOther",
-    defaults: ["FlickerTestsOtherDefaults"],
-    srcs: ["src/**/*"],
-    exclude_srcs: [
-        ":FlickerTestsOtherOpen-src",
-        ":FlickerTestsOtherRotation-src",
-        ":FlickerTestsOtherCommon-src",
-    ],
-}
-
-// End to cleanup after CL merges
-////////////////////////////////////////////////////////////////////////////////
-
 android_test {
     name: "FlickerTestsActivityEmbedding",
     defaults: ["FlickerTestsDefault"],
@@ -97,10 +32,7 @@ android_test {
     instrumentation_target_package: "com.android.server.wm.flicker",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
-    static_libs: [
-        "FlickerTestsBase",
-        "FlickerTestsOtherCommon",
-    ],
+    static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
 

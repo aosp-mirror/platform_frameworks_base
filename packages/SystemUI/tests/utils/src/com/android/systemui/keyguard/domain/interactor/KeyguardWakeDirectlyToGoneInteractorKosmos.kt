@@ -41,5 +41,8 @@ val Kosmos.keyguardWakeDirectlyToGoneInteractor by
             lockPatternUtils,
             fakeSettings,
             selectedUserInteractor,
+            keyguardEnabledInteractor,
+            keyguardServiceLockNowInteractor,
+            keyguardInteractor,
         )
     }

@@ -201,6 +201,9 @@ public final class Zygote {
      */
     public static final int DEBUG_ENABLE_PTRACE = 1 << 25;
 
+    /** Load 4KB ELF files on 16KB device using appcompat mode */
+    public static final int ENABLE_PAGE_SIZE_APP_COMPAT = 1 << 26;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */

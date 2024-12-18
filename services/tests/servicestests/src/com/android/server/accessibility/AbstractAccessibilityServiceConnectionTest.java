@@ -174,8 +174,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private AccessibilityTrace mMockA11yTrace;
     @Mock private WindowManagerInternal mMockWindowManagerInternal;
     @Mock private SystemActionPerformer mMockSystemActionPerformer;
-    @Mock private IBinder mMockService;
-    @Mock private IAccessibilityServiceClient mMockServiceInterface;
+    @Mock private IBinder mMockClientBinder;
+    @Mock private IAccessibilityServiceClient mMockClient;
     @Mock private KeyEventDispatcher mMockKeyEventDispatcher;
     @Mock private IAccessibilityInteractionConnection mMockIA11yInteractionConnection;
     @Mock private IAccessibilityInteractionConnectionCallback mMockCallback;
@@ -247,9 +247,9 @@ public class AbstractAccessibilityServiceConnectionTest {
                 mSpyServiceInfo, SERVICE_ID, mHandler, new Object(), mMockSecurityPolicy,
                 mMockSystemSupport, mMockA11yTrace, mMockWindowManagerInternal,
                 mMockSystemActionPerformer, mMockA11yWindowManager);
-        // Assume that the service is connected
-        mServiceConnection.mService = mMockService;
-        mServiceConnection.mServiceInterface = mMockServiceInterface;
+        // Assume that the client is connected
+        mServiceConnection.mClientBinder = mMockClientBinder;
+        mServiceConnection.mClient = mMockClient;
 
         // Update security policy for this service
         when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(true);
@@ -273,7 +273,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         final KeyEvent mockKeyEvent = mock(KeyEvent.class);
 
         mServiceConnection.onKeyEvent(mockKeyEvent, sequenceNumber);
-        verify(mMockServiceInterface).onKeyEvent(mockKeyEvent, sequenceNumber);
+        verify(mMockClient).onKeyEvent(mockKeyEvent, sequenceNumber);
     }
 
     @Test

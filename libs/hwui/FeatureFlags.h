@@ -25,22 +25,6 @@ namespace android {
 
 namespace text_feature {
 
-inline bool fix_double_underline() {
-#ifdef __ANDROID__
-    return com_android_text_flags_fix_double_underline();
-#else
-    return true;
-#endif  // __ANDROID__
-}
-
-inline bool deprecate_ui_fonts() {
-#ifdef __ANDROID__
-    return com_android_text_flags_deprecate_ui_fonts();
-#else
-    return true;
-#endif  // __ANDROID__
-}
-
 inline bool letter_spacing_justification() {
 #ifdef __ANDROID__
     return com_android_text_flags_letter_spacing_justification();
@@ -49,9 +33,9 @@ inline bool letter_spacing_justification() {
 #endif  // __ANDROID__
 }
 
-inline bool typeface_redesign() {
+inline bool typeface_redesign_readonly() {
 #ifdef __ANDROID__
-    static bool flag = com_android_text_flags_typeface_redesign();
+    static bool flag = com_android_text_flags_typeface_redesign_readonly();
     return flag;
 #else
     return true;

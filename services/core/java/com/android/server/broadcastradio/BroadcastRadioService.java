@@ -32,8 +32,9 @@ public final class BroadcastRadioService extends SystemService {
     public BroadcastRadioService(Context context) {
         super(context);
         ArrayList<String> serviceNameList = IRadioServiceAidlImpl.getServicesNames();
-        mServiceImpl = serviceNameList.isEmpty() ? new IRadioServiceHidlImpl(this)
-                : new IRadioServiceAidlImpl(this, serviceNameList);
+        RadioServiceUserController userController = new RadioServiceUserControllerImpl();
+        mServiceImpl = serviceNameList.isEmpty() ? new IRadioServiceHidlImpl(this, userController)
+                : new IRadioServiceAidlImpl(this, serviceNameList, userController);
     }
 
     @Override

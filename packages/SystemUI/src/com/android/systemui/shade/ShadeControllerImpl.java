@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import dagger.Lazy;
 
@@ -62,9 +62,10 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final StatusBarWindowControllerStore mStatusBarWindowControllerStore;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
+    private final Lazy<NotificationShadeWindowViewController> mNotifShadeWindowViewController;
     private final Lazy<NotificationPanelViewController> mNpvc;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
@@ -72,7 +73,6 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private boolean mExpandedVisible;
     private boolean mLockscreenOrShadeVisible;
 
-    private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private ShadeVisibilityListener mShadeVisibilityListener;
 
     @Inject
@@ -83,10 +83,11 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowControllerStore statusBarWindowControllerStore,
             DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
             @DisplayId int displayId,
+            Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewController,
             Lazy<NotificationPanelViewController> shadeViewControllerLazy,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<NotificationGutsManager> gutsManager
@@ -101,10 +102,11 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mNpvc = shadeViewControllerLazy;
         mStatusBarStateController = statusBarStateController;
-        mStatusBarWindowController = statusBarWindowController;
+        mStatusBarWindowControllerStore = statusBarWindowControllerStore;
         mDeviceProvisionedController = deviceProvisionedController;
         mGutsManager = gutsManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotifShadeWindowViewController = notificationShadeWindowViewController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mDisplayId = displayId;
         mKeyguardStateController = keyguardStateController;
@@ -139,7 +141,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
-            mNotificationShadeWindowViewController.cancelExpandHelper();
+            mNotifShadeWindowViewController.get().cancelExpandHelper();
             getNpvc().collapse(true, delayed, speedUpFactor);
         }
     }
@@ -242,7 +244,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     @Override
     public void cancelExpansionAndCollapseShade() {
         if (getNpvc().isTracking()) {
-            mNotificationShadeWindowViewController.cancelCurrentTouch();
+            mNotifShadeWindowViewController.get().cancelCurrentTouch();
         }
         if (getNpvc().isPanelExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE) {
@@ -313,7 +315,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
 
         // Update the visibility of notification shade and status bar window.
         mNotificationShadeWindowController.setPanelVisible(false);
-        mStatusBarWindowController.setForceStatusBarVisible(false);
+        mStatusBarWindowControllerStore.getDefaultDisplay().setForceStatusBarVisible(false);
 
         // Close any guts that might be visible
         mGutsManager.get().closeAndSaveGuts(
@@ -367,14 +369,8 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mShadeVisibilityListener.expandedVisibleChanged(expandedVisible);
     }
 
-    @Override
-    public void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController controller) {
-        mNotificationShadeWindowViewController = controller;
-    }
-
     private NotificationShadeWindowView getNotificationShadeWindowView() {
-        return mNotificationShadeWindowViewController.getView();
+        return mNotifShadeWindowViewController.get().getView();
     }
 
     private NotificationPanelViewController getNpvc() {

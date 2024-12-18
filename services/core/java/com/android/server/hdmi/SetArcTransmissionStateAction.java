@@ -60,6 +60,12 @@ final class SetArcTransmissionStateAction extends HdmiCecFeatureAction {
     boolean start() {
         // Seq #37.
         if (mEnabled) {
+            // Avoid triggering duplicate RequestSadAction events.
+            // This could lead to unexpected responses from the AVR and cause the TV to receive data
+            // out of order. The SAD report does not provide information about the order of events.
+            if ((tv().hasAction(RequestSadAction.class))) {
+                return true;
+            }
             // Request SADs before enabling ARC
             RequestSadAction action = new RequestSadAction(
                     localDevice(), Constants.ADDR_AUDIO_SYSTEM,

@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.widget.mainswitch.R;
 
@@ -40,7 +43,7 @@ import java.util.List;
 /**
  * MainSwitchBar is a View with a customized Switch.
  * This component is used as the main switch of the page
- * to enable or disable the prefereces on the page.
+ * to enable or disable the preferences on the page.
  */
 public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListener {
 
@@ -52,8 +55,11 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     private int mBackgroundActivatedColor;
 
     protected TextView mTextView;
+    protected TextView mSummaryView;
     protected CompoundButton mSwitch;
     private final View mFrameView;
+
+    private @Nullable PreChangeListener mPreChangeListener;
 
     public MainSwitchBar(Context context) {
         this(context, null);
@@ -71,7 +77,11 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        LayoutInflater.from(context).inflate(R.layout.settingslib_main_switch_bar, this);
+        boolean isExpressive = SettingsThemeHelper.isExpressiveTheme(context);
+        int resId = isExpressive
+                ? R.layout.settingslib_expressive_main_switch_bar
+                : R.layout.settingslib_main_switch_bar;
+        LayoutInflater.from(context).inflate(resId, this);
 
         if (Build.VERSION.SDK_INT < VERSION_CODES.S) {
             TypedArray a;
@@ -93,6 +103,9 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
 
         mFrameView = findViewById(R.id.frame);
         mTextView = findViewById(R.id.switch_text);
+        if (isExpressive) {
+            mSummaryView = findViewById(R.id.switch_summary);
+        }
         mSwitch = findViewById(android.R.id.switch_widget);
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
@@ -109,6 +122,12 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
             final CharSequence title = a.getText(
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
+            //TODO(b/369470034): update to next version
+            if (isExpressive && Build.VERSION.SDK_INT >= VERSION_CODES.VANILLA_ICE_CREAM) {
+                CharSequence summary = a.getText(
+                        androidx.preference.R.styleable.Preference_android_summary);
+                setSummary(summary);
+            }
             a.recycle();
         }
 
@@ -122,8 +141,18 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
 
     @Override
     public boolean performClick() {
-        mSwitch.performClick();
+        if (callPreChangeListener()) {
+            mSwitch.performClick();
+        }
         return super.performClick();
+    }
+
+    protected boolean callPreChangeListener() {
+        return mPreChangeListener == null || mPreChangeListener.preChange(!mSwitch.isChecked());
+    }
+
+    public void setPreChangeListener(@Nullable PreChangeListener preChangeListener) {
+        mPreChangeListener = preChangeListener;
     }
 
     /**
@@ -149,6 +178,18 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     public void setTitle(CharSequence text) {
         if (mTextView != null) {
             mTextView.setText(text);
+        }
+    }
+
+    /**
+     * Set the summary text
+     */
+    @RequiresApi(VERSION_CODES.VANILLA_ICE_CREAM)
+    //TODO(b/369470034): update to next version
+    public void setSummary(CharSequence text) {
+        if (mSummaryView != null) {
+            mSummaryView.setText(text);
+            mSummaryView.setVisibility(TextUtils.isEmpty(text) ? GONE : VISIBLE);
         }
     }
 
@@ -219,6 +260,12 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
             mFrameView.setEnabled(enabled);
             mFrameView.setActivated(isChecked());
         }
+
+        if (SettingsThemeHelper.isExpressiveTheme(getContext())) {
+            if (mSummaryView != null) {
+                mSummaryView.setEnabled(enabled);
+            }
+        }
     }
 
     private void propagateChecked(boolean isChecked) {
@@ -237,7 +284,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         }
     }
 
-    static class SavedState extends BaseSavedState {
+    public static class SavedState extends BaseSavedState {
         boolean mChecked;
         boolean mVisible;
 
@@ -306,5 +353,17 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         mSwitch.setOnCheckedChangeListener(ss.mVisible ? this : null);
 
         requestLayout();
+    }
+
+    /**
+     * Listener callback before switch is toggled.
+     */
+    public interface PreChangeListener {
+        /**
+         * Returns if the new value can be set.
+         *
+         * When false is return, the switch toggle is not triggered at all.
+         */
+        boolean preChange(boolean isCheck);
     }
 }

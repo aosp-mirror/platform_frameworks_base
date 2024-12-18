@@ -50,12 +50,14 @@ class AmbientDisplayPowerStatsProcessor extends PowerStatsProcessor {
             return;
         }
 
-        if (mScreenPowerStatsDescriptor == null) {
-            mScreenPowerStatsDescriptor = screenStats.getPowerStatsDescriptor();
-            if (mScreenPowerStatsDescriptor == null) {
-                return;
-            }
+        PowerStats.Descriptor screenDescriptor = screenStats.getPowerStatsDescriptor();
+        if (screenDescriptor == null) {
+            return;
+        }
 
+        if (mScreenPowerStatsDescriptor == null
+                || !mScreenPowerStatsDescriptor.equals(screenDescriptor)) {
+            mScreenPowerStatsDescriptor = screenDescriptor;
             mScreenPowerStatsLayout = new ScreenPowerStatsLayout(mScreenPowerStatsDescriptor);
             mTmpScreenStats = new long[mScreenPowerStatsDescriptor.statsArrayLength];
         }

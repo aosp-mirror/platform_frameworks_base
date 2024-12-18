@@ -20,7 +20,6 @@ import android.platform.test.annotations.DisableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
@@ -31,7 +30,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
@@ -61,8 +59,6 @@ import platform.test.runner.parameterized.Parameters
 class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-
-    private val bottomAreaInteractor = kosmos.keyguardBottomAreaInteractor
     private lateinit var underTest: KeyguardIndicationAreaViewModel
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val communalSceneRepository = kosmos.fakeCommunalSceneRepository
@@ -87,12 +83,6 @@ class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiT
 
     @Before
     fun setUp() {
-        val bottomAreaViewModel =
-            mock<KeyguardBottomAreaViewModel> {
-                on { startButton } doReturn startButtonFlow
-                on { endButton } doReturn endButtonFlow
-                on { alpha } doReturn alphaFlow
-            }
         val burnInInteractor =
             mock<BurnInInteractor> {
                 on { burnIn(anyInt(), anyInt()) } doReturn flowOf(BurnInModel())
@@ -109,8 +99,6 @@ class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiT
         underTest =
             KeyguardIndicationAreaViewModel(
                 keyguardInteractor = kosmos.keyguardInteractor,
-                bottomAreaInteractor = bottomAreaInteractor,
-                keyguardBottomAreaViewModel = bottomAreaViewModel,
                 burnInHelperWrapper = burnInHelperWrapper,
                 burnInInteractor = burnInInteractor,
                 shortcutsCombinedViewModel = shortcutsCombinedViewModel,
@@ -123,23 +111,6 @@ class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiT
     }
 
     @Test
-    fun alpha() =
-        testScope.runTest {
-            val alpha by collectLastValue(underTest.alpha)
-
-            assertThat(alpha).isEqualTo(1f)
-            alphaFlow.value = 0.1f
-            assertThat(alpha).isEqualTo(0.1f)
-            alphaFlow.value = 0.5f
-            assertThat(alpha).isEqualTo(0.5f)
-            alphaFlow.value = 0.2f
-            assertThat(alpha).isEqualTo(0.2f)
-            alphaFlow.value = 0f
-            assertThat(alpha).isEqualTo(0f)
-        }
-
-    @Test
-    @DisableFlags(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
     fun isIndicationAreaPadded() =
         testScope.runTest {
             keyguardRepository.setKeyguardShowing(true)
@@ -154,23 +125,6 @@ class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiT
             assertThat(isIndicationAreaPadded).isTrue()
             endButtonFlow.value = endButtonFlow.value.copy(isVisible = false)
             assertThat(isIndicationAreaPadded).isFalse()
-        }
-
-    @Test
-    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-    fun indicationAreaTranslationX() =
-        testScope.runTest {
-            val translationX by collectLastValue(underTest.indicationAreaTranslationX)
-
-            assertThat(translationX).isEqualTo(0f)
-            bottomAreaInteractor.setClockPosition(100, 100)
-            assertThat(translationX).isEqualTo(100f)
-            bottomAreaInteractor.setClockPosition(200, 100)
-            assertThat(translationX).isEqualTo(200f)
-            bottomAreaInteractor.setClockPosition(200, 200)
-            assertThat(translationX).isEqualTo(200f)
-            bottomAreaInteractor.setClockPosition(300, 100)
-            assertThat(translationX).isEqualTo(300f)
         }
 
     @Test
@@ -236,7 +190,6 @@ class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiT
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
             return FlagsParameterization.allCombinationsOf(
-                FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
                 FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
             )
         }

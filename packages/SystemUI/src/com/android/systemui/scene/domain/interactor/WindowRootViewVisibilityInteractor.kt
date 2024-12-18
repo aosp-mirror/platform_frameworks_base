@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -25,15 +26,17 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.init.NotificationsController
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -42,9 +45,9 @@ import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** Business logic about the visibility of various parts of the window root view. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WindowRootViewVisibilityInteractor
 @Inject
@@ -80,9 +83,9 @@ constructor(
                         is ObservableTransitionState.Idle ->
                             flowOf(
                                 state.currentScene == Scenes.Shade ||
-                                    state.currentScene == Scenes.NotificationsShade ||
-                                    state.currentScene == Scenes.QuickSettingsShade ||
-                                    state.currentScene == Scenes.Lockscreen
+                                    state.currentScene == Scenes.Lockscreen ||
+                                    Overlays.NotificationsShade in state.currentOverlays ||
+                                    Overlays.QuickSettingsShade in state.currentOverlays
                             )
                         is ObservableTransitionState.Transition ->
                             if (
@@ -94,12 +97,12 @@ constructor(
                             } else {
                                 flowOf(
                                     state.toContent == Scenes.Shade ||
-                                        state.toContent == Scenes.NotificationsShade ||
-                                        state.toContent == Scenes.QuickSettingsShade ||
+                                        state.toContent == Overlays.NotificationsShade ||
+                                        state.toContent == Overlays.QuickSettingsShade ||
                                         state.toContent == Scenes.Lockscreen ||
                                         state.fromContent == Scenes.Shade ||
-                                        state.fromContent == Scenes.NotificationsShade ||
-                                        state.fromContent == Scenes.QuickSettingsShade ||
+                                        state.fromContent == Overlays.NotificationsShade ||
+                                        state.fromContent == Overlays.QuickSettingsShade ||
                                         state.fromContent == Scenes.Lockscreen
                                 )
                             }
@@ -115,10 +118,9 @@ constructor(
      * false if the device is asleep.
      */
     val isLockscreenOrShadeVisibleAndInteractive: StateFlow<Boolean> =
-        combine(
-                isLockscreenOrShadeVisible,
-                powerInteractor.isAwake,
-            ) { isKeyguardAodOrShadeVisible, isAwake ->
+        combine(isLockscreenOrShadeVisible, powerInteractor.isAwake) {
+                isKeyguardAodOrShadeVisible,
+                isAwake ->
                 isKeyguardAodOrShadeVisible && isAwake
             }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)

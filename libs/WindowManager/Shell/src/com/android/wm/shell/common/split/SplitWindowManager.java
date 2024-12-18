@@ -36,7 +36,6 @@ import android.view.InsetsState;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 
@@ -68,6 +67,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
         void onLeashReady(SurfaceControl leash);
+        /** Inflates the given touch zone on the appropriate stage root. */
+        void inflateOnStageRoot(OffscreenTouchZone touchZone);
     }
 
     public SplitWindowManager(String windowName, Context context, Configuration config,
@@ -98,7 +99,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     @Override
     protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         // Can't set position for the ViewRootImpl SC directly. Create a leash to manipulate later.
-        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName(TAG)
                 .setHidden(true)

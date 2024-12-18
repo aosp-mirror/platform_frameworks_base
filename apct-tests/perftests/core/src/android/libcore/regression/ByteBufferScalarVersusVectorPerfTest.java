@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -35,7 +35,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class ByteBufferScalarVersusVectorPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -112,7 +112,7 @@ public class ByteBufferScalarVersusVectorPerfTest {
             throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
         ByteBuffer dst = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(0);
             dst.position(0);
@@ -127,7 +127,7 @@ public class ByteBufferScalarVersusVectorPerfTest {
     public void timeByteBufferBulkGet(boolean aligned) throws Exception {
         ByteBuffer src = ByteBuffer.allocate(aligned ? 8192 : 8192 + 1);
         byte[] dst = new byte[8192];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             src.get(dst, 0, dst.length);
@@ -139,7 +139,7 @@ public class ByteBufferScalarVersusVectorPerfTest {
     public void timeDirectByteBufferBulkGet(boolean aligned) throws Exception {
         ByteBuffer src = ByteBuffer.allocateDirect(aligned ? 8192 : 8192 + 1);
         byte[] dst = new byte[8192];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             src.get(dst, 0, dst.length);

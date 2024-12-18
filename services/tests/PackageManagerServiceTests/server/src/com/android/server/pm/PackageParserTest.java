@@ -20,6 +20,7 @@ import static android.content.UriRelativeFilter.QUERY;
 import static android.content.UriRelativeFilter.FRAGMENT;
 import static android.content.UriRelativeFilterGroup.ACTION_ALLOW;
 import static android.content.UriRelativeFilterGroup.ACTION_BLOCK;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS;
 import static android.os.PatternMatcher.PATTERN_ADVANCED_GLOB;
 import static android.os.PatternMatcher.PATTERN_LITERAL;
 import static android.os.PatternMatcher.PATTERN_PREFIX;
@@ -110,6 +111,8 @@ import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageUserStateInternal;
+
+import com.google.android.collect.Sets;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -209,6 +212,30 @@ public class PackageParserTest {
 
         pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, false /* useCaches */);
         assertEquals("android", pkg.getPackageName());
+    }
+
+    @Test
+    public void testParse_withCache_hiddenApiAllowlist() throws Exception {
+        CachePackageNameParser pp = new CachePackageNameParser(null);
+
+        pp.setCacheDir(mTmpDir);
+        // The first parse will write this package to the cache.
+        pp.parsePackage(FRAMEWORK, 0 /* parseFlags */, true /* useCaches */);
+
+        // Now attempt to parse the package again, should return the
+        // cached result.
+        ParsedPackage pkg = pp.parsePackage(FRAMEWORK, 0 /* parseFlags */,
+                true /* useCaches */);
+        assertEquals("cache_android", pkg.getPackageName());
+
+        // Create application info
+        pkg.hideAsFinal();
+        ApplicationInfo aInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
+                PackageUserStateInternal.DEFAULT, 0, mockPkgSetting(pkg));
+
+        // verify ext flag for hidden APIs allowlist
+        assertEquals(PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS,
+                aInfo.privateFlagsExt & PRIVATE_FLAG_EXT_ALLOWLISTED_FOR_HIDDEN_APIS);
     }
 
     @Test
@@ -856,35 +883,37 @@ public class PackageParserTest {
      */
     public static class CachePackageNameParser extends PackageParser2 {
 
+        private static final Callback CALLBACK = new Callback() {
+            @Override
+            public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
+                return true;
+            }
+
+            @Override
+            public boolean hasFeature(String feature) {
+                return false;
+            }
+
+            @Override
+            public Set<String> getHiddenApiWhitelistedApps() {
+                return Sets.newArraySet("cache_android");
+            }
+
+            @Override
+            public Set<String> getInstallConstraintsAllowlist() {
+                return new ArraySet<>();
+            }
+        };
+
         CachePackageNameParser(@Nullable File cacheDir) {
-            super(null, null, null, new Callback() {
-                @Override
-                public boolean isChangeEnabled(long changeId, @NonNull ApplicationInfo appInfo) {
-                    return true;
-                }
-
-                @Override
-                public boolean hasFeature(String feature) {
-                    return false;
-                }
-
-                @Override
-                public Set<String> getHiddenApiWhitelistedApps() {
-                    return new ArraySet<>();
-                }
-
-                @Override
-                public Set<String> getInstallConstraintsAllowlist() {
-                    return new ArraySet<>();
-                }
-            });
+            super(null, null, null, CALLBACK);
             if (cacheDir != null) {
                 setCacheDir(cacheDir);
             }
         }
 
         void setCacheDir(@NonNull File cacheDir) {
-            this.mCacher = new PackageCacher(cacheDir) {
+            this.mCacher = new PackageCacher(cacheDir, CALLBACK) {
                 @Override
                 public ParsedPackage fromCacheEntry(byte[] cacheEntry) {
                     ParsedPackage parsed = super.fromCacheEntry(cacheEntry);

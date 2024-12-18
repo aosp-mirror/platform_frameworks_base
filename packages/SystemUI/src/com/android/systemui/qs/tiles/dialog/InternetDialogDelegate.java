@@ -71,6 +71,8 @@ import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wifitrackerlib.WifiEntry;
@@ -105,6 +107,7 @@ public class InternetDialogDelegate implements
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final boolean mAboveStatusBar;
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
+    private final ShadeDialogContextInteractor mShadeDialogContextInteractor;
 
     @VisibleForTesting
     protected InternetAdapter mAdapter;
@@ -190,7 +193,7 @@ public class InternetDialogDelegate implements
 
     @AssistedInject
     public InternetDialogDelegate(
-            Context context,
+            @ShadeDisplayAware Context context,
             InternetDialogManager internetDialogManager,
             InternetDialogController internetDialogController,
             @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigMobileData,
@@ -202,9 +205,11 @@ public class InternetDialogDelegate implements
             @Main Handler handler,
             @Background Executor executor,
             KeyguardStateController keyguardStateController,
-            SystemUIDialog.Factory systemUIDialogFactory) {
+            SystemUIDialog.Factory systemUIDialogFactory,
+            ShadeDialogContextInteractor shadeDialogContextInteractor) {
         mAboveStatusBar = aboveStatusBar;
         mSystemUIDialogFactory = systemUIDialogFactory;
+        mShadeDialogContextInteractor = shadeDialogContextInteractor;
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
         }
@@ -227,7 +232,8 @@ public class InternetDialogDelegate implements
 
     @Override
     public SystemUIDialog createDialog() {
-        SystemUIDialog dialog = mSystemUIDialogFactory.create(this);
+        SystemUIDialog dialog = mSystemUIDialogFactory.create(this,
+                mShadeDialogContextInteractor.getContext());
         if (!mAboveStatusBar) {
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
@@ -415,9 +421,10 @@ public class InternetDialogDelegate implements
         internetContent.mHasEthernet = mInternetDialogController.hasEthernet();
         internetContent.mIsWifiEnabled = mInternetDialogController.isWifiEnabled();
         internetContent.mHasActiveSubIdOnDds = mInternetDialogController.hasActiveSubIdOnDds();
-        internetContent.mIsMobileDataEnabled = mInternetDialogController.isMobileDataEnabled();
         internetContent.mIsDeviceLocked = mInternetDialogController.isDeviceLocked();
         internetContent.mIsWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
+        internetContent.mActiveAutoSwitchNonDdsSubId =
+                mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
         return internetContent;
     }
 
@@ -432,7 +439,11 @@ public class InternetDialogDelegate implements
 
     private void setOnClickListener(SystemUIDialog dialog) {
         mMobileNetworkLayout.setOnClickListener(v -> {
-            int autoSwitchNonDdsSubId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+            int autoSwitchNonDdsSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+            if (mDataInternetContent.getValue() != null) {
+                autoSwitchNonDdsSubId =
+                        mDataInternetContent.getValue().mActiveAutoSwitchNonDdsSubId;
+            }
             if (autoSwitchNonDdsSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 showTurnOffAutoDataSwitchDialog(dialog, autoSwitchNonDdsSubId);
             }
@@ -523,7 +534,7 @@ public class InternetDialogDelegate implements
             }
         } else {
             mMobileNetworkLayout.setVisibility(View.VISIBLE);
-            mMobileDataToggle.setChecked(internetContent.mIsMobileDataEnabled);
+            mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
             mMobileTitleText.setText(getMobileNetworkTitle(mDefaultDataSubId));
             String summary = getMobileNetworkSummary(mDefaultDataSubId);
             if (!TextUtils.isEmpty(summary)) {
@@ -548,9 +559,9 @@ public class InternetDialogDelegate implements
                     ? R.color.connected_network_primary_color
                     : R.color.disconnected_network_primary_color;
             mMobileToggleDivider.setBackgroundColor(dialog.getContext().getColor(primaryColor));
-
             // Display the info for the non-DDS if it's actively being used
-            int autoSwitchNonDdsSubId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+            int autoSwitchNonDdsSubId = internetContent.mActiveAutoSwitchNonDdsSubId;
+
             int nonDdsVisibility = autoSwitchNonDdsSubId
                     != SubscriptionManager.INVALID_SUBSCRIPTION_ID ? View.VISIBLE : View.GONE;
 
@@ -982,8 +993,8 @@ public class InternetDialogDelegate implements
         boolean mIsCarrierNetworkActive = false;
         boolean mIsWifiEnabled = false;
         boolean mHasActiveSubIdOnDds = false;
-        boolean mIsMobileDataEnabled = false;
         boolean mIsDeviceLocked = false;
         boolean mIsWifiScanEnabled = false;
+        int mActiveAutoSwitchNonDdsSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 }

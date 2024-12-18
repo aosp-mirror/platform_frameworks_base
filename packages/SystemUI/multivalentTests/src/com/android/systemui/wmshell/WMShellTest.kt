@@ -53,7 +53,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.wm.shell.desktopmode.DesktopMode
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
 import com.android.wm.shell.onehanded.OneHanded
 import com.android.wm.shell.onehanded.OneHandedEventCallback
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback

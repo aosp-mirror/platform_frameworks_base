@@ -17,10 +17,13 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -28,6 +31,8 @@ import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.sdk.Flags;
+import android.sysprop.BackportedFixesProperties;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -36,10 +41,12 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
-import com.android.internal.ravenwood.RavenwoodEnvironment;
+import com.android.internal.util.FrameworkStatsLog;
 
 import dalvik.system.VMRuntime;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,10 +58,6 @@ import java.util.stream.Collectors;
  */
 @RavenwoodKeepWholeClass
 public class Build {
-    static {
-        // Set up the default system properties.
-        RavenwoodEnvironment.ensureRavenwoodInitialized();
-    }
     private static final String TAG = "Build";
 
     /** Value used for when a build property is unknown. */
@@ -399,10 +402,42 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
+         * This constant records the major version of Android. Use {@link
+         * #SDK_INT_FULL} if you need to consider the minor version of Android
+         * as well.
+         * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
+         * @see #SDK_INT_FULL
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
+
+        /**
+         * The major and minor SDK version of the software currently running on
+         * this hardware device. This value never changes while a device is
+         * booted, but it may increase when the hardware manufacturer provides
+         * an OTA update.
+         * <p>
+         * <code>SDK_INT</code> is increased on new Android dessert releases,
+         * also called major releases. Between these, Android may also release
+         * minor releases where <code>SDK_INT</code> remains unchanged. Minor
+         * releases can add new APIs, and have stricter guarantees around
+         * backwards compatibility (e.g. no changes gated by
+         * <code>targetSdkVersion</code>) compared to major releases.
+         * <p>
+         * <code>SDK_INT_FULL</code> is increased on every release.
+         * <p>
+         * Possible values are defined in {@link
+         * android.os.Build.VERSION_CODES_FULL}.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int SDK_INT_FULL;
+
+        static {
+            SDK_INT_FULL = VERSION_CODES_FULL.SDK_INT_MULTIPLIER
+                * SystemProperties.getInt("ro.build.version.sdk", 0)
+                + SystemProperties.getInt("ro.build.version.sdk_minor", 0);
+        }
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
@@ -1236,6 +1271,342 @@ public class Build {
          * Vanilla Ice Cream.
          */
         public static final int VANILLA_ICE_CREAM = 35;
+
+        /**
+         * Baklava.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int BAKLAVA = CUR_DEVELOPMENT;
+    }
+
+    /** @hide */
+    @IntDef(value = {
+        VERSION_CODES_FULL.BASE,
+        VERSION_CODES_FULL.BASE_1_1,
+        VERSION_CODES_FULL.CUPCAKE,
+        VERSION_CODES_FULL.DONUT,
+        VERSION_CODES_FULL.ECLAIR,
+        VERSION_CODES_FULL.ECLAIR_0_1,
+        VERSION_CODES_FULL.ECLAIR_MR1,
+        VERSION_CODES_FULL.FROYO,
+        VERSION_CODES_FULL.GINGERBREAD,
+        VERSION_CODES_FULL.GINGERBREAD_MR1,
+        VERSION_CODES_FULL.HONEYCOMB,
+        VERSION_CODES_FULL.HONEYCOMB_MR1,
+        VERSION_CODES_FULL.HONEYCOMB_MR2,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH,
+        VERSION_CODES_FULL.ICE_CREAM_SANDWICH_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN,
+        VERSION_CODES_FULL.JELLY_BEAN_MR1,
+        VERSION_CODES_FULL.JELLY_BEAN_MR2,
+        VERSION_CODES_FULL.KITKAT,
+        VERSION_CODES_FULL.KITKAT_WATCH,
+        VERSION_CODES_FULL.LOLLIPOP,
+        VERSION_CODES_FULL.LOLLIPOP_MR1,
+        VERSION_CODES_FULL.M,
+        VERSION_CODES_FULL.N,
+        VERSION_CODES_FULL.N_MR1,
+        VERSION_CODES_FULL.O,
+        VERSION_CODES_FULL.O_MR1,
+        VERSION_CODES_FULL.P,
+        VERSION_CODES_FULL.Q,
+        VERSION_CODES_FULL.R,
+        VERSION_CODES_FULL.S,
+        VERSION_CODES_FULL.S_V2,
+        VERSION_CODES_FULL.TIRAMISU,
+        VERSION_CODES_FULL.UPSIDE_DOWN_CAKE,
+        VERSION_CODES_FULL.VANILLA_ICE_CREAM,
+        VERSION_CODES_FULL.BAKLAVA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SdkIntFull {}
+
+    /**
+     * Enumeration of the currently known SDK major and minor version codes.
+     * The numbers increase for every release, and are guaranteed to be ordered
+     * by the release date of each release. The actual values should be
+     * considered an implementation detail, and the current encoding scheme may
+     * change in the future.
+     *
+     * @see android.os.Build.VERSION#SDK_INT_FULL
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    @SuppressLint("AcronymName")
+    public static class VERSION_CODES_FULL {
+        private VERSION_CODES_FULL() {}
+
+        // Use the last 5 digits for the minor version. This allows the
+        // minor version to be set to CUR_DEVELOPMENT.
+        private static final int SDK_INT_MULTIPLIER = 100000;
+
+        /**
+         * Android 1.0.
+         */
+        public static final int BASE = VERSION_CODES.BASE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 2.0.
+         */
+        public static final int BASE_1_1 = VERSION_CODES.BASE_1_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 3.0.
+         */
+        public static final int CUPCAKE = VERSION_CODES.CUPCAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 4.0.
+         */
+        public static final int DONUT = VERSION_CODES.DONUT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 5.0.
+         */
+        public static final int ECLAIR = VERSION_CODES.ECLAIR * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 6.0.
+         */
+        public static final int ECLAIR_0_1 = VERSION_CODES.ECLAIR_0_1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 7.0.
+         */
+        public static final int ECLAIR_MR1 = VERSION_CODES.ECLAIR_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 8.0.
+         */
+        public static final int FROYO = VERSION_CODES.FROYO * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 9.0.
+         */
+        public static final int GINGERBREAD = VERSION_CODES.GINGERBREAD * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 10.0.
+         */
+        public static final int GINGERBREAD_MR1 =
+                VERSION_CODES.GINGERBREAD_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 11.0.
+         */
+        public static final int HONEYCOMB = VERSION_CODES.HONEYCOMB * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 12.0.
+         */
+        public static final int HONEYCOMB_MR1 = VERSION_CODES.HONEYCOMB_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 13.0.
+         */
+        public static final int HONEYCOMB_MR2 = VERSION_CODES.HONEYCOMB_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 14.0.
+         */
+        public static final int ICE_CREAM_SANDWICH =
+                VERSION_CODES.ICE_CREAM_SANDWICH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 15.0.
+         */
+        public static final int ICE_CREAM_SANDWICH_MR1 =
+                VERSION_CODES.ICE_CREAM_SANDWICH_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 16.0.
+         */
+        public static final int JELLY_BEAN = VERSION_CODES.JELLY_BEAN * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 17.0.
+         */
+        public static final int JELLY_BEAN_MR1 = VERSION_CODES.JELLY_BEAN_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 18.0.
+         */
+        public static final int JELLY_BEAN_MR2 = VERSION_CODES.JELLY_BEAN_MR2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 19.0.
+         */
+        public static final int KITKAT = VERSION_CODES.KITKAT * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 20.0.
+         */
+        public static final int KITKAT_WATCH = VERSION_CODES.KITKAT_WATCH * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 21.0.
+         */
+        public static final int LOLLIPOP = VERSION_CODES.LOLLIPOP * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 22.0.
+         */
+        public static final int LOLLIPOP_MR1 = VERSION_CODES.LOLLIPOP_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 23.0.
+         */
+        public static final int M = VERSION_CODES.M * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 24.0.
+         */
+        public static final int N = VERSION_CODES.N * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 25.0.
+         */
+        public static final int N_MR1 = VERSION_CODES.N_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 26.0.
+         */
+        public static final int O = VERSION_CODES.O * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 27.0.
+         */
+        public static final int O_MR1 = VERSION_CODES.O_MR1 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 28.0.
+         */
+        public static final int P = VERSION_CODES.P * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 29.0.
+         */
+        public static final int Q = VERSION_CODES.Q * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 30.0.
+         */
+        public static final int R = VERSION_CODES.R * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 31.0.
+         */
+        public static final int S = VERSION_CODES.S * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 32.0.
+         */
+        public static final int S_V2 = VERSION_CODES.S_V2 * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 33.0.
+         */
+        public static final int TIRAMISU = VERSION_CODES.TIRAMISU * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 34.0.
+         */
+        public static final int UPSIDE_DOWN_CAKE =
+                VERSION_CODES.UPSIDE_DOWN_CAKE * SDK_INT_MULTIPLIER;
+
+        /**
+         * Android 35.0.
+         */
+        public static final int VANILLA_ICE_CREAM =
+                VERSION_CODES.VANILLA_ICE_CREAM * SDK_INT_MULTIPLIER;
+
+        /**
+         * The upcoming, not yet finalized, version of Android.
+         */
+        public static final int BAKLAVA = VERSION_CODES.BAKLAVA * SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Obtain the major version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The major version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMajorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull / VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Obtain the minor version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The minor version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMinorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull % VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Convert a major.minor version String like "36.1" to an int that
+     * represents both major and minor version.
+     *
+     * @param version the String to parse
+     * @return an int encoding the major and minor version
+     * @throws IllegalArgumentException if the string could not be converted into an int
+     *
+     * @hide
+     */
+    @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    @SuppressLint("InlinedApi")
+    public static @SdkIntFull int parseFullVersion(@NonNull String version) {
+        int index = version.indexOf('.');
+        int major;
+        int minor = 0;
+        try {
+            if (index == -1) {
+                major = Integer.parseInt(version);
+            } else {
+                major = Integer.parseInt(version.substring(0, index));
+                minor = Integer.parseInt(version.substring(index + 1));
+            }
+            if (major < 0) {
+                throw new NumberFormatException("negative major version");
+            }
+            if (major >= 21474) {
+                throw new NumberFormatException("major version too large, must be less than 21474");
+            }
+            if (minor < 0) {
+                throw new NumberFormatException("negative minor version");
+            }
+            if (minor >= VERSION_CODES_FULL.SDK_INT_MULTIPLIER) {
+                throw new NumberFormatException("minor version too large, must be less than "
+                        + VERSION_CODES_FULL.SDK_INT_MULTIPLIER);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("failed to parse '" + version
+                    + "' as a major.minor version code", e);
+        }
+        return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
+    }
+
+    /**
+     * Convert an int representing a major.minor version like SDK_INT_FULL to a
+     * human readable string. The returned string is only intended for debug
+     * and error messages.
+     *
+     * @param version the int to convert to a string
+     * @return a String representing the same major.minor version as the int passed in
+     * @throws IllegalArgumentException if {@code version} is negative
+     *
+     * @hide
+     */
+    public static String fullVersionToString(@SdkIntFull int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("failed to convert '" + version
+                    + "' to string: not a valid major.minor version code");
+        }
+        return String.format("%d.%d", getMajorSdkVersion(version), getMinorSdkVersion(version));
     }
 
     /**
@@ -1258,6 +1629,77 @@ public class Build {
 
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
+
+    /** The status of the known issue on this device is not known. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_UNKNOWN = 0;
+    /** The known issue is fixed on this device. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_FIXED = 1;
+    /**
+     * The known issue is not applicable to this device.
+     *
+     * <p>For example if the issue only affects a specific brand, devices
+     * from other brands would report not applicable.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_NOT_APPLICABLE = 2;
+    /** The known issue is not fixed on this device. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_NOT_FIXED = 3;
+
+    /**
+     * The status of the backported fix for a known issue on this device.
+     *
+     * @hide
+     */
+    @IntDef(
+            prefix = {"BACKPORTED_FIX_STATUS_"},
+            value = {
+                    BACKPORTED_FIX_STATUS_UNKNOWN,
+                    BACKPORTED_FIX_STATUS_FIXED,
+                    BACKPORTED_FIX_STATUS_NOT_APPLICABLE,
+                    BACKPORTED_FIX_STATUS_NOT_FIXED,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BackportedFixStatus {
+    }
+
+    /**
+     * The status of the backported fix for a known issue on this device.
+     *
+     * @param id The id of the known issue to check.
+     * @return {@link #BACKPORTED_FIX_STATUS_FIXED} if the known issue is
+     * fixed on this device,
+     * {@link #BACKPORTED_FIX_STATUS_NOT_FIXED} if the known issue is not
+     * fixed on this device,
+     * {@link #BACKPORTED_FIX_STATUS_NOT_APPLICABLE} if the known issue is
+     * is not applicable on this device,
+     * otherwise {@link #BACKPORTED_FIX_STATUS_UNKNOWN}.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static @BackportedFixStatus int getBackportedFixStatus(long id) {
+        @BackportedFixStatus int status = BACKPORTED_FIX_STATUS_UNKNOWN;
+        int uid = Binder.getCallingUid();
+        if (id > 0 && id <= 1023) {
+            status = isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                    ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.BACKPORTED_FIX_STATUS_REPORTED, uid, id, status);
+        return status;
+    }
+
+    private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {
+        // Because java.util.BitSet is not threadsafe do the calculations here instead.
+        if (bitIndex < 0) {
+            return false;
+        }
+        int arrayIndex = bitIndex >> 6;
+        if (bitsetLongArray.size() <= arrayIndex) {
+            return false;
+        }
+        return (bitsetLongArray.get(arrayIndex) & (1L << bitIndex)) != 0;
+    }
 
     /**
      * Some devices split the fingerprint components between multiple

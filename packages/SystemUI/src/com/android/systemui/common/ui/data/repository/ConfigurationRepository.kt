@@ -25,11 +25,15 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.wrapper.DisplayUtilsWrapper
 import dagger.Binds
 import dagger.Module
-import javax.inject.Inject
+import dagger.Provides
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -49,7 +53,11 @@ interface ConfigurationRepository {
     val onConfigurationChange: Flow<Unit>
 
     val scaleForResolution: Flow<Float>
+
     val configurationValues: Flow<Configuration>
+
+    /** Emits the latest display this configuration controller has been moved to. */
+    val onMovedToDisplay: Flow<Int>
 
     fun getResolutionScale(): Float
 
@@ -57,66 +65,76 @@ interface ConfigurationRepository {
     fun getDimensionPixelSize(id: Int): Int
 }
 
-@SysUISingleton
 class ConfigurationRepositoryImpl
-@Inject
+@AssistedInject
 constructor(
-    private val configurationController: ConfigurationController,
-    private val context: Context,
+    @Assisted private val configurationController: ConfigurationController,
+    @Assisted private val context: Context,
     @Application private val scope: CoroutineScope,
     private val displayUtils: DisplayUtilsWrapper,
 ) : ConfigurationRepository {
     private val displayInfo = MutableStateFlow(DisplayInfo())
 
-    override val onAnyConfigurationChange: Flow<Unit> =
-        conflatedCallbackFlow {
-            val callback =
-                object : ConfigurationController.ConfigurationListener {
-                    override fun onUiModeChanged() {
-                        sendUpdate("ConfigurationRepository#onUiModeChanged")
-                    }
-
-                    override fun onThemeChanged() {
-                        sendUpdate("ConfigurationRepository#onThemeChanged")
-                    }
-
-                    override fun onConfigChanged(newConfig: Configuration) {
-                        sendUpdate("ConfigurationRepository#onConfigChanged")
-                    }
-
-                    fun sendUpdate(reason: String) {
-                        trySendWithFailureLogging(Unit, reason)
-                    }
+    override val onAnyConfigurationChange: Flow<Unit> = conflatedCallbackFlow {
+        val callback =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onUiModeChanged() {
+                    sendUpdate("ConfigurationRepository#onUiModeChanged")
                 }
-            configurationController.addCallback(callback)
-            awaitClose { configurationController.removeCallback(callback) }
-        }
 
-    override val onConfigurationChange: Flow<Unit> =
-        conflatedCallbackFlow {
-            val callback =
-                object : ConfigurationController.ConfigurationListener {
-                    override fun onConfigChanged(newConfig: Configuration) {
-                        trySendWithFailureLogging(Unit, "ConfigurationRepository#onConfigChanged")
-                    }
+                override fun onThemeChanged() {
+                    sendUpdate("ConfigurationRepository#onThemeChanged")
                 }
-            configurationController.addCallback(callback)
-            awaitClose { configurationController.removeCallback(callback) }
-        }
 
-    override val configurationValues: Flow<Configuration> =
-            conflatedCallbackFlow {
-                val callback =
-                        object : ConfigurationController.ConfigurationListener {
-                            override fun onConfigChanged(newConfig: Configuration) {
-                                trySend(newConfig)
-                            }
-                        }
+                override fun onConfigChanged(newConfig: Configuration) {
+                    sendUpdate("ConfigurationRepository#onConfigChanged")
+                }
 
-                trySend(context.resources.configuration)
-                configurationController.addCallback(callback)
-                awaitClose { configurationController.removeCallback(callback) }
+                fun sendUpdate(reason: String) {
+                    trySendWithFailureLogging(Unit, reason)
+                }
             }
+        configurationController.addCallback(callback)
+        awaitClose { configurationController.removeCallback(callback) }
+    }
+
+    override val onConfigurationChange: Flow<Unit> = conflatedCallbackFlow {
+        val callback =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration) {
+                    trySendWithFailureLogging(Unit, "ConfigurationRepository#onConfigChanged")
+                }
+            }
+        configurationController.addCallback(callback)
+        awaitClose { configurationController.removeCallback(callback) }
+    }
+
+    override val configurationValues: Flow<Configuration> = conflatedCallbackFlow {
+        val callback =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration) {
+                    trySend(newConfig)
+                }
+            }
+
+        trySend(context.resources.configuration)
+        configurationController.addCallback(callback)
+        awaitClose { configurationController.removeCallback(callback) }
+    }
+    override val onMovedToDisplay: Flow<Int>
+        get() = conflatedCallbackFlow {
+            val callback =
+                object : ConfigurationController.ConfigurationListener {
+                    override fun onMovedToDisplay(
+                        newDisplayId: Int,
+                        newConfiguration: Configuration?,
+                    ) {
+                        trySend(newDisplayId)
+                    }
+                }
+            configurationController.addCallback(callback)
+            awaitClose { configurationController.removeCallback(callback) }
+        }
 
     override val scaleForResolution: StateFlow<Float> =
         onConfigurationChange
@@ -134,7 +152,7 @@ constructor(
                     maxDisplayMode.physicalWidth,
                     maxDisplayMode.physicalHeight,
                     displayInfo.value.naturalWidth,
-                    displayInfo.value.naturalHeight
+                    displayInfo.value.naturalHeight,
                 )
             return if (scaleFactor == Float.POSITIVE_INFINITY) 1f else scaleFactor
         }
@@ -144,9 +162,40 @@ constructor(
     override fun getDimensionPixelSize(@DimenRes id: Int): Int {
         return context.resources.getDimensionPixelSize(id)
     }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            context: Context,
+            configurationController: ConfigurationController,
+        ): ConfigurationRepositoryImpl
+    }
 }
 
 @Module
-interface ConfigurationRepositoryModule {
-    @Binds fun bindImpl(impl: ConfigurationRepositoryImpl): ConfigurationRepository
+abstract class ConfigurationRepositoryModule {
+
+    /**
+     * For compatibility reasons. Ideally, only the an annotated [ConfigurationRepository] should be
+     * injected.
+     */
+    @Binds
+    @Deprecated("Use the ConfigurationRepository annotated with @Main instead.")
+    @SysUISingleton
+    abstract fun provideDefaultConfigRepository(
+        @Main configurationRepository: ConfigurationRepository
+    ): ConfigurationRepository
+
+    companion object {
+        @Provides
+        @Main
+        @SysUISingleton
+        fun provideGlobalConfigRepository(
+            context: Context,
+            @Main configurationController: ConfigurationController,
+            factory: ConfigurationRepositoryImpl.Factory,
+        ): ConfigurationRepository {
+            return factory.create(context, configurationController)
+        }
+    }
 }

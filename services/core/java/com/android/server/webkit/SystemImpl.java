@@ -16,8 +16,6 @@
 
 package com.android.server.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -36,12 +34,14 @@ import android.util.Log;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
+import android.webkit.WebViewFactoryProvider;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewZygote;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
+import com.android.server.pinner.PinnedFile;
+import com.android.server.pinner.PinnerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -247,48 +247,18 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
+    public boolean isCompatibleImplementationPackage(PackageInfo packageInfo) {
+        return WebViewFactoryProvider.isCompatibleImplementationPackage(packageInfo);
+    }
+
+    @Override
     public List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo configInfo) {
         return UserPackage.getPackageInfosAllUsers(mContext, configInfo.packageName, PACKAGE_FLAGS);
     }
 
     @Override
-    public int getMultiProcessSetting() {
-        if (updateServiceV2()) {
-            throw new IllegalStateException(
-                    "getMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
-        }
-        return Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
-    }
-
-    @Override
-    public void setMultiProcessSetting(int value) {
-        if (updateServiceV2()) {
-            throw new IllegalStateException(
-                    "setMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
-        }
-        Settings.Global.putInt(
-                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
-    }
-
-    @Override
-    public void notifyZygote(boolean enableMultiProcess) {
-        if (updateServiceV2()) {
-            throw new IllegalStateException(
-                    "notifyZygote shouldn't be called if update_service_v2 flag is set.");
-        }
-        WebViewZygote.setMultiprocessEnabled(enableMultiProcess);
-    }
-
-    @Override
     public void ensureZygoteStarted() {
         WebViewZygote.getProcess();
-    }
-
-    @Override
-    public boolean isMultiProcessDefaultEnabled() {
-        // Multiprocess is enabled by default for all devices.
-        return true;
     }
 
     @Override
@@ -318,8 +288,9 @@ public class SystemImpl implements SystemInterface {
             if (webviewPinQuota <= 0) {
                 break;
             }
-            int bytesPinned = pinnerService.pinFile(apk, webviewPinQuota, appInfo, PIN_GROUP);
-            webviewPinQuota -= bytesPinned;
+            PinnedFile pf = pinnerService.pinFile(
+                    apk, webviewPinQuota, appInfo, PIN_GROUP, /*pinOptimizedDeps=*/true);
+            webviewPinQuota -= pf.bytesPinned;
         }
     }
 

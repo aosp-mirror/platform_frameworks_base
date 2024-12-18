@@ -37,18 +37,13 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.SystemClock;
-import android.platform.test.ravenwood.RavenwoodRule;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class UriPermissionTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     @Mock
     private UriGrantsManagerInternal mService;
 

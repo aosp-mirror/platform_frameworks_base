@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Enables the Enhanced Connectivity feature."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Local terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Enable terminal app that offers local shell access"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux development environment"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Run Linux terminal on Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"If you disable, Linux terminal data will be cleared"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP checking"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Set HDCP checking behavior"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Debugging"</string>
@@ -582,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"This phone"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"This tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"This computer (internal)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"This TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dock speaker"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"External Device"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Connected device"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"This phone"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Cant play on this device"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade account to switch"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Cant play downloads here"</string>
@@ -600,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connected via ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connected via eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV default"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI output"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Internal speakers"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Built-in speaker"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV Audio"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem connecting. Turn device off &amp; back on"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired audio device"</string>
     <string name="help_label" msgid="3528360748637781274">"Help and feedback"</string>
@@ -684,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Disabled"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphone"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Wired headphone"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Wired audio"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB audio"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Wired microphone"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB microphone"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT microphone"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"On"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Off"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Carrier network changing"</string>

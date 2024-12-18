@@ -76,6 +76,7 @@ Typeface* Typeface::createRelative(Typeface* src, Typeface::Style style) {
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = style;
         result->fStyle = computeRelativeStyle(result->fBaseWeight, style);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
@@ -88,12 +89,13 @@ Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = computeAPIStyle(weight, italic);
         result->fStyle = computeMinikinStyle(weight, italic);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
 
-Typeface* Typeface::createFromTypefaceWithVariation(
-        Typeface* src, const std::vector<minikin::FontVariation>& variations) {
+Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
+                                                    const minikin::VariationSettings& variations) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
     Typeface* result = new Typeface();
     if (result != nullptr) {
@@ -109,6 +111,7 @@ Typeface* Typeface::createFromTypefaceWithVariation(
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = resolvedFace->fAPIStyle;
         result->fStyle = resolvedFace->fStyle;
+        result->fIsVariationInstance = true;
     }
     return result;
 }
@@ -121,6 +124,7 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
         result->fBaseWeight = weight;
         result->fAPIStyle = resolvedFace->fAPIStyle;
         result->fStyle = computeRelativeStyle(weight, result->fAPIStyle);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
@@ -170,6 +174,7 @@ Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::Font
     result->fBaseWeight = weight;
     result->fAPIStyle = computeAPIStyle(weight, italic);
     result->fStyle = computeMinikinStyle(weight, italic);
+    result->fIsVariationInstance = false;
     return result;
 }
 
@@ -192,9 +197,8 @@ void Typeface::setRobotoTypefaceForTest() {
     sk_sp<SkTypeface> typeface = fm->makeFromStream(std::move(fontData));
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
-    std::shared_ptr<minikin::MinikinFont> font =
-            std::make_shared<MinikinFontSkia>(std::move(typeface), 0, data, st.st_size, kRobotoFont,
-                                              0, std::vector<minikin::FontVariation>());
+    std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
+            std::move(typeface), 0, data, st.st_size, kRobotoFont, 0, minikin::VariationSettings());
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
 

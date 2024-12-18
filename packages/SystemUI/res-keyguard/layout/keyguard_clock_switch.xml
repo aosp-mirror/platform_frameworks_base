@@ -26,7 +26,7 @@
     android:clipChildren="false"
     android:layout_gravity="center_horizontal|top">
     <com.android.keyguard.KeyguardClockFrame
-        android:id="@+id/lockscreen_clock_view"
+        android:id="@id/lockscreen_clock_view"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/small_clock_height"
         android:layout_alignParentStart="true"
@@ -35,7 +35,7 @@
         android:paddingStart="@dimen/clock_padding_start"
         android:visibility="invisible" />
     <com.android.keyguard.KeyguardClockFrame
-        android:id="@+id/lockscreen_clock_view_large"
+        android:id="@id/lockscreen_clock_view_large"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"

@@ -243,10 +243,6 @@ public class Task {
 
     public Rect appBounds;
 
-    // Last snapshot data, only used for recent tasks
-    public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
-            new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
-
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isVisible;
 
@@ -283,7 +279,6 @@ public class Task {
     public Task(Task other) {
         this(other.key, other.colorPrimary, other.colorBackground, other.isDockable,
                 other.isLocked, other.taskDescription, other.topActivity);
-        lastSnapshotData.set(other.lastSnapshotData);
         positionInParent = other.positionInParent;
         appBounds = other.appBounds;
         isVisible = other.isVisible;
@@ -315,31 +310,8 @@ public class Task {
                 : key.baseIntent.getComponent();
     }
 
-    public void setLastSnapshotData(ActivityManager.RecentTaskInfo rawTask) {
-        lastSnapshotData.set(rawTask.lastSnapshotData);
-    }
-
     public TaskKey getKey() {
         return key;
-    }
-
-    /**
-     * Returns the visible width to height ratio. Returns 0f if snapshot data is not available.
-     */
-    public float getVisibleThumbnailRatio(boolean clipInsets) {
-        if (lastSnapshotData.taskSize == null || lastSnapshotData.contentInsets == null) {
-            return 0f;
-        }
-
-        float availableWidth = lastSnapshotData.taskSize.x;
-        float availableHeight = lastSnapshotData.taskSize.y;
-        if (clipInsets) {
-            availableWidth -=
-                    (lastSnapshotData.contentInsets.left + lastSnapshotData.contentInsets.right);
-            availableHeight -=
-                    (lastSnapshotData.contentInsets.top + lastSnapshotData.contentInsets.bottom);
-        }
-        return availableWidth / availableHeight;
     }
 
     @Override
@@ -355,6 +327,11 @@ public class Task {
         // Check that the id matches
         Task t = (Task) o;
         return key.equals(t.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
     }
 
     @Override

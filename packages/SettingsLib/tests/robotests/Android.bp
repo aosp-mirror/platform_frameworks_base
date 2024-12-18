@@ -76,7 +76,6 @@ java_genrule {
     tools: ["soong_zip"],
     cmd: "mkdir -p $(genDir)/META-INF/services/ && touch $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider &&" +
         "echo -e 'org.robolectric.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
-        "echo -e 'org.robolectric.shadows.multidex.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
         "echo -e 'org.robolectric.shadows.httpclient.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
         //"echo -e 'com.android.settings.testutils.shadow.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
         "echo -e 'com.android.settingslib.testutils.shadow.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +

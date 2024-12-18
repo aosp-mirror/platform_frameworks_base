@@ -200,6 +200,15 @@ public final class SatelliteCapabilities implements Parcelable {
     }
 
     /**
+     * Setting the maximum number of bytes per datagram that can be sent over satellite.
+     *
+     * @hide
+     */
+    public void setMaxBytesPerOutgoingDatagram(int maxBytesPerOutgoingDatagram) {
+        mMaxBytesPerOutgoingDatagram = maxBytesPerOutgoingDatagram;
+    }
+
+    /**
      * Antenna Position received from satellite modem which gives information about antenna
      * direction to be used with satellite communication and suggested device hold positions.
      * @return Map key: {@link SatelliteManager.DeviceHoldPosition} value: AntennaPosition

@@ -43,7 +43,7 @@ class PromptIconViewModel(
     enum class AuthType {
         Fingerprint,
         Face,
-        Coex
+        Coex,
     }
 
     /**
@@ -53,7 +53,7 @@ class PromptIconViewModel(
     val activeAuthType: Flow<AuthType> =
         combine(
             promptViewModel.modalities.distinctUntilChanged(),
-            promptViewModel.faceMode.distinctUntilChanged()
+            promptViewModel.faceMode.distinctUntilChanged(),
         ) { modalities, faceMode ->
             if (modalities.hasFaceAndFingerprint && !faceMode) {
                 AuthType.Coex
@@ -102,7 +102,7 @@ class PromptIconViewModel(
                         promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
-                        promptViewModel.showingError
+                        promptViewModel.showingError,
                     ) {
                         rotation: DisplayRotation,
                         isInRearDisplayMode: Boolean,
@@ -117,13 +117,13 @@ class PromptIconViewModel(
                                     isInRearDisplayMode,
                                     authState.isAuthenticated,
                                     isAuthenticating,
-                                    showingError
+                                    showingError,
                                 )
                             else ->
                                 getFingerprintIconViewAsset(
                                     authState.isAuthenticated,
                                     isAuthenticating,
-                                    showingError
+                                    showingError,
                                 )
                         }
                     }
@@ -132,7 +132,7 @@ class PromptIconViewModel(
                         promptViewModel.isAuthenticated.distinctUntilChanged(),
                         promptViewModel.isAuthenticating.distinctUntilChanged(),
                         promptViewModel.isPendingConfirmation.distinctUntilChanged(),
-                        promptViewModel.showingError.distinctUntilChanged()
+                        promptViewModel.showingError.distinctUntilChanged(),
                     ) {
                         authState: PromptAuthState,
                         isAuthenticating: Boolean,
@@ -142,7 +142,7 @@ class PromptIconViewModel(
                             authState,
                             isAuthenticating,
                             isPendingConfirmation,
-                            showingError
+                            showingError,
                         )
                     }
                 AuthType.Coex ->
@@ -170,14 +170,14 @@ class PromptIconViewModel(
                                     authState,
                                     isAuthenticating,
                                     isPendingConfirmation,
-                                    showingError
+                                    showingError,
                                 )
                             else ->
                                 getCoexIconViewAsset(
                                     authState,
                                     isAuthenticating,
                                     isPendingConfirmation,
-                                    showingError
+                                    showingError,
                                 )
                         }
                     }
@@ -187,7 +187,7 @@ class PromptIconViewModel(
     private fun getFingerprintIconViewAsset(
         isAuthenticated: Boolean,
         isAuthenticating: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int {
         return if (isAuthenticated) {
             if (_previousIconWasError.value) {
@@ -214,7 +214,7 @@ class PromptIconViewModel(
         isInRearDisplayMode: Boolean,
         isAuthenticated: Boolean,
         isAuthenticating: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int {
         return if (isAuthenticated) {
             if (_previousIconWasError.value) {
@@ -240,7 +240,7 @@ class PromptIconViewModel(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
         isPendingConfirmation: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int {
         return if (authState.isAuthenticated && isPendingConfirmation) {
             R.raw.face_dialog_wink_from_dark
@@ -262,7 +262,7 @@ class PromptIconViewModel(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
         isPendingConfirmation: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int {
         return if (authState.isAuthenticatedAndExplicitlyConfirmed) {
             R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
@@ -298,7 +298,7 @@ class PromptIconViewModel(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
         isPendingConfirmation: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int {
         return if (authState.isAuthenticatedAndExplicitlyConfirmed) {
             R.raw.biometricprompt_sfps_unlock_to_success
@@ -338,7 +338,7 @@ class PromptIconViewModel(
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
                         promptViewModel.isPendingConfirmation,
-                        promptViewModel.showingError
+                        promptViewModel.showingError,
                     ) {
                         sensorType: FingerprintSensorType,
                         authState: PromptAuthState,
@@ -350,7 +350,7 @@ class PromptIconViewModel(
                             authState.isAuthenticated,
                             isAuthenticating,
                             isPendingConfirmation,
-                            showingError
+                            showingError,
                         )
                     }
                 AuthType.Face ->
@@ -370,7 +370,7 @@ class PromptIconViewModel(
         isAuthenticated: Boolean,
         isAuthenticating: Boolean,
         isPendingConfirmation: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int =
         if (isPendingConfirmation) {
             when (sensorType) {
@@ -381,7 +381,7 @@ class PromptIconViewModel(
             when (sensorType) {
                 FingerprintSensorType.POWER_BUTTON ->
                     R.string.security_settings_sfps_enroll_find_sensor_message
-                else -> R.string.fingerprint_dialog_touch_sensor
+                else -> R.string.accessibility_fingerprint_label
             }
         } else if (showingError) {
             R.string.biometric_dialog_try_again
@@ -392,7 +392,7 @@ class PromptIconViewModel(
     private fun getFaceIconContentDescriptionId(
         authState: PromptAuthState,
         isAuthenticating: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ): Int =
         if (authState.isAuthenticatedAndExplicitlyConfirmed) {
             R.string.biometric_dialog_face_icon_description_confirmed
@@ -415,7 +415,7 @@ class PromptIconViewModel(
                         promptSelectorInteractor.fingerprintSensorType,
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
-                        promptViewModel.showingError
+                        promptViewModel.showingError,
                     ) {
                         sensorType: FingerprintSensorType,
                         authState: PromptAuthState,
@@ -427,7 +427,7 @@ class PromptIconViewModel(
                                 shouldAnimateFingerprintIconView(
                                     authState.isAuthenticated,
                                     isAuthenticating,
-                                    showingError
+                                    showingError,
                                 )
                         }
                     }
@@ -435,7 +435,7 @@ class PromptIconViewModel(
                     combine(
                         promptViewModel.isAuthenticated,
                         promptViewModel.isAuthenticating,
-                        promptViewModel.showingError
+                        promptViewModel.showingError,
                     ) { authState: PromptAuthState, isAuthenticating: Boolean, showingError: Boolean
                         ->
                         isAuthenticating ||
@@ -463,7 +463,7 @@ class PromptIconViewModel(
                                     authState.isAuthenticated,
                                     isAuthenticating,
                                     isPendingConfirmation,
-                                    showingError
+                                    showingError,
                                 )
                         }
                     }
@@ -483,14 +483,14 @@ class PromptIconViewModel(
     private fun shouldAnimateFingerprintIconView(
         isAuthenticated: Boolean,
         isAuthenticating: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ) = (isAuthenticating && _previousIconWasError.value) || isAuthenticated || showingError
 
     private fun shouldAnimateCoexIconView(
         isAuthenticated: Boolean,
         isAuthenticating: Boolean,
         isPendingConfirmation: Boolean,
-        showingError: Boolean
+        showingError: Boolean,
     ) =
         (isAuthenticating && _previousIconWasError.value) ||
             isPendingConfirmation ||
@@ -522,7 +522,7 @@ class PromptIconViewModel(
         listOf(
             R.raw.biometricprompt_sfps_fingerprint_authenticating,
             R.raw.biometricprompt_sfps_rear_display_fingerprint_authenticating,
-            R.raw.biometricprompt_sfps_rear_display_fingerprint_authenticating
+            R.raw.biometricprompt_sfps_rear_display_fingerprint_authenticating,
         )
 
     /** Called on configuration changes */
@@ -579,7 +579,7 @@ class PromptIconViewModel(
                 R.raw.fingerprint_dialogue_error_to_success_lottie,
                 R.raw.fingerprint_dialogue_fingerprint_to_success_lottie,
                 R.raw.fingerprint_dialogue_error_to_fingerprint_lottie,
-                R.raw.fingerprint_dialogue_fingerprint_to_error_lottie
+                R.raw.fingerprint_dialogue_fingerprint_to_error_lottie,
             )
         }
 
@@ -620,7 +620,7 @@ class PromptIconViewModel(
                 R.raw.fingerprint_dialogue_error_to_fingerprint_lottie,
                 R.raw.fingerprint_dialogue_error_to_success_lottie,
                 R.raw.fingerprint_dialogue_fingerprint_to_error_lottie,
-                R.raw.fingerprint_dialogue_fingerprint_to_success_lottie
+                R.raw.fingerprint_dialogue_fingerprint_to_success_lottie,
             )
         }
 
@@ -632,7 +632,7 @@ class PromptIconViewModel(
             R.raw.face_dialog_dark_to_error,
             R.raw.face_dialog_error_to_idle,
             R.raw.face_dialog_idle_static,
-            R.raw.face_dialog_authenticating
+            R.raw.face_dialog_authenticating,
         )
 
     private fun getSfpsAsset_fingerprintAuthenticating(isInRearDisplayMode: Boolean): Int =
@@ -644,7 +644,7 @@ class PromptIconViewModel(
 
     private fun getSfpsAsset_fingerprintToError(
         rotation: DisplayRotation,
-        isInRearDisplayMode: Boolean
+        isInRearDisplayMode: Boolean,
     ): Int =
         if (isInRearDisplayMode) {
             when (rotation) {
@@ -668,7 +668,7 @@ class PromptIconViewModel(
 
     private fun getSfpsAsset_errorToFingerprint(
         rotation: DisplayRotation,
-        isInRearDisplayMode: Boolean
+        isInRearDisplayMode: Boolean,
     ): Int =
         if (isInRearDisplayMode) {
             when (rotation) {
@@ -692,7 +692,7 @@ class PromptIconViewModel(
 
     private fun getSfpsAsset_fingerprintToUnlock(
         rotation: DisplayRotation,
-        isInRearDisplayMode: Boolean
+        isInRearDisplayMode: Boolean,
     ): Int =
         if (isInRearDisplayMode) {
             when (rotation) {
@@ -716,7 +716,7 @@ class PromptIconViewModel(
 
     private fun getSfpsAsset_fingerprintToSuccess(
         rotation: DisplayRotation,
-        isInRearDisplayMode: Boolean
+        isInRearDisplayMode: Boolean,
     ): Int =
         if (isInRearDisplayMode) {
             when (rotation) {

@@ -23,7 +23,6 @@ import android.os.UserManager;
 import com.android.internal.R;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.settingslib.notification.modes.ZenIconLoader;
-import com.android.systemui.common.ui.GlobalConfig;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -37,6 +36,7 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.NetworkControllerImpl;
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
+import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.statusbar.policy.BatteryControllerLogger;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
@@ -110,7 +110,7 @@ public interface StatusBarPolicyModule {
      * wrong updates in case of secondary displays.
      */
     @Binds
-    ConfigurationController bindConfigurationController(@GlobalConfig ConfigurationController impl);
+    ConfigurationController bindConfigurationController(@Main ConfigurationController impl);
 
     /** */
     @Binds
@@ -186,9 +186,16 @@ public interface StatusBarPolicyModule {
             DevicePostureControllerImpl devicePostureControllerImpl);
 
     /** */
+    @Binds
+    @SysUISingleton
+    @Main
+    ConfigurationForwarder provideGlobalConfigurationForwarder(
+            @Main ConfigurationController configurationController);
+
+    /** */
     @Provides
     @SysUISingleton
-    @GlobalConfig
+    @Main
     static ConfigurationController provideGlobalConfigurationController(
             @Application Context context, ConfigurationControllerImpl.Factory factory) {
         return factory.create(context);
@@ -198,12 +205,14 @@ public interface StatusBarPolicyModule {
     @SysUISingleton
     @Provides
     static AccessPointControllerImpl  provideAccessPointControllerImpl(
+            @Application Context context,
             UserManager userManager,
             UserTracker userTracker,
             @Main Executor mainExecutor,
             WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
         AccessPointControllerImpl controller = new AccessPointControllerImpl(
+                context,
                 userManager,
                 userTracker,
                 mainExecutor,

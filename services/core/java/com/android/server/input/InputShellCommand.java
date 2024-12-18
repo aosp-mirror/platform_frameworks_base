@@ -89,6 +89,9 @@ public class InputShellCommand extends ShellCommand {
     private static final int DEFAULT_FLAGS = 0;
     private static final boolean INJECT_ASYNC = true;
     private static final boolean INJECT_SYNC = false;
+    private static final long SECOND_IN_MILLISECONDS = 1000;
+
+    public static final int SWIPE_EVENT_HZ_DEFAULT = 120;
 
     /** Modifier key to meta state */
     private static final Map<Integer, Integer> MODIFIER;
@@ -472,6 +475,7 @@ public class InputShellCommand extends ShellCommand {
                 }
             }
         }
+        event = KeyEvent.changeTimeRepeat(event, SystemClock.uptimeMillis(), 0);
         injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP), async);
     }
 
@@ -519,11 +523,30 @@ public class InputShellCommand extends ShellCommand {
         }
         long now = SystemClock.uptimeMillis();
         final long endTime = down + duration;
+        final float swipeEventPeriodMillis =
+                (float) SECOND_IN_MILLISECONDS / SWIPE_EVENT_HZ_DEFAULT;
+        int injected = 1;
         while (now < endTime) {
-            final long elapsedTime = now - down;
+            // Ensure that we inject at most at the frequency of SWIPE_EVENT_HZ_DEFAULT
+            // by waiting an additional delta between the actual time and expected time.
+            long elapsedTime = now - down;
+            final long errorMillis =
+                    (long) Math.floor(injected * swipeEventPeriodMillis - elapsedTime);
+            if (errorMillis > 0) {
+                // Make sure not to exceed the duration and inject an extra event.
+                if (errorMillis > endTime - now) {
+                    sleep(endTime - now);
+                    break;
+                }
+                sleep(errorMillis);
+            }
+
+            now = SystemClock.uptimeMillis();
+            elapsedTime = now - down;
             final float alpha = (float) elapsedTime / duration;
             injectMotionEvent(inputSource, MotionEvent.ACTION_MOVE, down, now,
                     lerp(x1, x2, alpha), lerp(y1, y2, alpha), 1.0f, displayId);
+            injected++;
             now = SystemClock.uptimeMillis();
         }
         injectMotionEvent(inputSource, MotionEvent.ACTION_UP, down, now, x2, y2, 0.0f,

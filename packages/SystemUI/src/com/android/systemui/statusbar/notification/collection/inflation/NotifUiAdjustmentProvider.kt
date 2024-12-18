@@ -27,6 +27,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
@@ -79,7 +80,7 @@ constructor(
             secureSettings.registerContentObserverForUserSync(
                 SHOW_NOTIFICATION_SNOOZE,
                 settingsObserver,
-                UserHandle.USER_ALL
+                UserHandle.USER_ALL,
             )
         }
         dirtyListeners.addIfAbsent(listener)
@@ -140,10 +141,15 @@ constructor(
             isConversation = entry.ranking.isConversation,
             isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
             isMinimized = isEntryMinimized(entry),
-            needsRedaction =
-                lockscreenUserManager.needsRedaction(entry) ||
-                    (screenshareNotificationHiding() &&
-                        sensitiveNotifProtectionController.shouldProtectNotification(entry)),
+            redactionType =
+                if (
+                    screenshareNotificationHiding() &&
+                        sensitiveNotifProtectionController.shouldProtectNotification(entry)
+                ) {
+                    REDACTION_TYPE_PUBLIC
+                } else {
+                    lockscreenUserManager.getRedactionType(entry)
+                },
             isChildInGroup = entry.hasEverBeenGroupChild(),
             isGroupSummary = entry.hasEverBeenGroupSummary(),
         )

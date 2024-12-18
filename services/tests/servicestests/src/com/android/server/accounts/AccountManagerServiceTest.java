@@ -1163,6 +1163,16 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
         Bundle result = mBundleCaptor.getValue();
+        Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
+        assertNotNull(sessionBundle);
+        // Assert that session bundle is decrypted and hence data is visible.
+        assertEquals(AccountManagerServiceTestFixtures.SESSION_DATA_VALUE_1,
+                sessionBundle.getString(AccountManagerServiceTestFixtures.SESSION_DATA_NAME_1));
+        // Assert finishSessionAsUser added calling uid and pid into the sessionBundle
+        assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_UID));
+        assertTrue(sessionBundle.containsKey(AccountManager.KEY_CALLER_PID));
+        assertEquals(sessionBundle.getString(
+                AccountManager.KEY_ANDROID_PACKAGE_NAME), "APCT.package");
 
         // Verify response data
         assertNull(result.getString(AccountManager.KEY_AUTHTOKEN, null));
@@ -2111,6 +2121,12 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 result.getString(AccountManager.KEY_ACCOUNT_NAME));
         assertEquals(AccountManagerServiceTestFixtures.ACCOUNT_TYPE_1,
                 result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+
+        Bundle optionBundle = result.getParcelable(
+                AccountManagerServiceTestFixtures.KEY_OPTIONS_BUNDLE);
+        // Assert addAccountAsUser added calling uid and pid into the option bundle
+        assertTrue(optionBundle.containsKey(AccountManager.KEY_CALLER_UID));
+        assertTrue(optionBundle.containsKey(AccountManager.KEY_CALLER_PID));
     }
 
     @SmallTest
@@ -3439,52 +3455,6 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertTrue("Errors: " + errors, errors.isEmpty());
         Log.i(TAG, "testConcurrencyRead: readTotalTime=" + readTotalTime + " avg="
                 + (readTotalTime.doubleValue() / readerCount / loopSize));
-    }
-
-    @SmallTest
-    public void testSanitizeBundle_expectedFields() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(AccountManager.KEY_ACCOUNT_NAME, "name");
-        bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, "type");
-        bundle.putString(AccountManager.KEY_AUTHTOKEN, "token");
-        bundle.putString(AccountManager.KEY_AUTH_TOKEN_LABEL, "label");
-        bundle.putString(AccountManager.KEY_ERROR_MESSAGE, "error message");
-        bundle.putString(AccountManager.KEY_PASSWORD, "password");
-        bundle.putString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN, "status");
-
-        bundle.putLong(AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY, 123L);
-        bundle.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
-        bundle.putInt(AccountManager.KEY_ERROR_CODE, 456);
-
-        Bundle sanitizedBundle = AccountManagerService.sanitizeBundle(bundle);
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_ACCOUNT_NAME), "name");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_ACCOUNT_TYPE), "type");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_AUTHTOKEN), "token");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_AUTH_TOKEN_LABEL), "label");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_ERROR_MESSAGE), "error message");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_PASSWORD), "password");
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_ACCOUNT_STATUS_TOKEN), "status");
-
-        assertEquals(sanitizedBundle.getLong(
-                AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY, 0), 123L);
-        assertEquals(sanitizedBundle.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false), true);
-        assertEquals(sanitizedBundle.getInt(AccountManager.KEY_ERROR_CODE, 0), 456);
-    }
-
-    @SmallTest
-    public void testSanitizeBundle_filtersUnexpectedFields() throws Exception {
-        Bundle bundle = new Bundle();
-        bundle.putString(AccountManager.KEY_ACCOUNT_NAME, "name");
-        bundle.putString("unknown_key", "value");
-        Bundle sessionBundle = new Bundle();
-        bundle.putBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE, sessionBundle);
-
-        Bundle sanitizedBundle = AccountManagerService.sanitizeBundle(bundle);
-
-        assertEquals(sanitizedBundle.getString(AccountManager.KEY_ACCOUNT_NAME), "name");
-        assertFalse(sanitizedBundle.containsKey("unknown_key"));
-        // It is a valid response from Authenticator which will be accessed using original Bundle
-        assertFalse(sanitizedBundle.containsKey(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE));
     }
 
     private void waitForCyclicBarrier(CyclicBarrier cyclicBarrier) {

@@ -515,33 +515,27 @@ public class StagedInstallInternalTest {
                 Install.single(APEX_V2));
     }
 
-    @Test
-    public void testGetStagedModuleNames() throws Exception {
-        // Before staging a session
-        String[] result = getPackageManagerNative().getStagedApexModuleNames();
-        assertThat(result).hasLength(0);
-        // Stage an apex
-        int sessionId = Install.single(APEX_V2).setStaged().commit();
-        result = getPackageManagerNative().getStagedApexModuleNames();
-        assertThat(result).hasLength(1);
-        assertThat(result).isEqualTo(new String[]{SHIM_APEX_PACKAGE_NAME});
-        // Abandon the session
-        InstallUtils.openPackageInstallerSession(sessionId).abandon();
-        result = getPackageManagerNative().getStagedApexModuleNames();
-        assertThat(result).hasLength(0);
+    private StagedApexInfo findStagedApexInfo(StagedApexInfo[] infos, String moduleName) {
+        for (StagedApexInfo info: infos) {
+            if (info.moduleName.equals(moduleName)) {
+                return info;
+            }
+        }
+        return null;
     }
 
     @Test
-    public void testGetStagedApexInfo() throws Exception {
-        // Ask for non-existing module
-        StagedApexInfo result = getPackageManagerNative().getStagedApexInfo("not found");
-        assertThat(result).isNull();
+    public void testGetStagedApexInfos() throws Exception {
+        // Not found before staging
+        StagedApexInfo[] result = getPackageManagerNative().getStagedApexInfos();
+        assertThat(findStagedApexInfo(result, TEST_APEX_PACKAGE_NAME)).isNull();
         // Stage an apex
         int sessionId = Install.single(TEST_APEX_CLASSPATH).setStaged().commit();
         // Query proper module name
-        result = getPackageManagerNative().getStagedApexInfo(TEST_APEX_PACKAGE_NAME);
-        assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
-        assertThat(result.hasClassPathJars).isTrue();
+        result = getPackageManagerNative().getStagedApexInfos();
+        StagedApexInfo found = findStagedApexInfo(result, TEST_APEX_PACKAGE_NAME);
+        assertThat(found).isNotNull();
+        assertThat(found.hasClassPathJars).isTrue();
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
     }
 
@@ -573,14 +567,15 @@ public class StagedInstallInternalTest {
         int sessionId = Install.single(APEX_V2).setStaged().commit();
         ArgumentCaptor<ApexStagedEvent> captor = ArgumentCaptor.forClass(ApexStagedEvent.class);
         verify(observer, timeout(5000)).onApexStaged(captor.capture());
-        assertThat(captor.getValue().stagedApexModuleNames).isEqualTo(
-                new String[] {SHIM_APEX_PACKAGE_NAME});
+        StagedApexInfo found =
+                findStagedApexInfo(captor.getValue().stagedApexInfos, SHIM_APEX_PACKAGE_NAME);
+        assertThat(found).isNotNull();
 
         // Abandon and verify observer is called
         Mockito.clearInvocations(observer);
         InstallUtils.openPackageInstallerSession(sessionId).abandon();
         verify(observer, timeout(5000)).onApexStaged(captor.capture());
-        assertThat(captor.getValue().stagedApexModuleNames).hasLength(0);
+        assertThat(captor.getValue().stagedApexInfos).hasLength(0);
     }
 
     @Test

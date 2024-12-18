@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
@@ -44,11 +46,13 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,6 +112,8 @@ public class FingerprintInternalEnumerateClientTest {
             mClient.onEnumerationResult(new Fingerprint("three", 3, 1), 0);
             return null;
         }).when(mSession).enumerateEnrollments();
+        final ArgumentCaptor<int[]> captorHalIds = ArgumentCaptor.forClass(int[].class);
+        final ArgumentCaptor<int[]> captorFwIds = ArgumentCaptor.forClass(int[].class);
         mClient.start(mCallback);
 
         verify(mSession).enumerateEnrollments();
@@ -116,6 +122,17 @@ public class FingerprintInternalEnumerateClientTest {
                 .collect(Collectors.toList())).containsExactly(2, 3);
         assertThat(mNotificationSent).isTrue();
         verify(mBiometricUtils).removeBiometricForUser(mContext, USER_ID, 1);
+        verify(mBiometricLogger).logOnEnumerated(eq(USER_ID),
+                eq(BiometricsProtoEnums.ENUMERATION_RESULT_DANGLING_BOTH), captorHalIds.capture(),
+                captorFwIds.capture());
+        assertThat(captorHalIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(2, 3);
+        assertThat(captorFwIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(1);
         verify(mCallback).onClientFinished(mClient, true);
     }
 
@@ -125,12 +142,25 @@ public class FingerprintInternalEnumerateClientTest {
             mClient.onEnumerationResult(new Fingerprint("one", 1, 1), 0);
             return null;
         }).when(mSession).enumerateEnrollments();
+        final ArgumentCaptor<int[]> captorHalIds = ArgumentCaptor.forClass(int[].class);
+        final ArgumentCaptor<int[]> captorFwIds = ArgumentCaptor.forClass(int[].class);
         mClient.start(mCallback);
 
         verify(mSession).enumerateEnrollments();
         assertThat(mClient.getUnknownHALTemplates().size()).isEqualTo(0);
         assertThat(mNotificationSent).isFalse();
         verify(mBiometricUtils, never()).removeBiometricForUser(any(), anyInt(), anyInt());
+        verify(mBiometricLogger).logOnEnumerated(eq(USER_ID),
+                eq(BiometricsProtoEnums.ENUMERATION_RESULT_OK), captorHalIds.capture(),
+                captorFwIds.capture());
+        assertThat(captorHalIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(1);
+        assertThat(captorFwIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(1);
         verify(mCallback).onClientFinished(mClient, true);
     }
 }

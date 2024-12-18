@@ -15,6 +15,9 @@
 */
 package com.android.server.notification;
 
+import static android.service.notification.Adjustment.KEY_TYPE;
+import static android.service.notification.Flags.notificationForceGrouping;
+
 import android.content.Context;
 import android.util.Slog;
 
@@ -24,6 +27,7 @@ import android.util.Slog;
 public class NotificationAdjustmentExtractor implements NotificationSignalExtractor {
     private static final String TAG = "AdjustmentExtractor";
     private static final boolean DBG = false;
+    private GroupHelper mGroupHelper;
 
 
     public void initialize(Context ctx, NotificationUsageStats usageStats) {
@@ -35,7 +39,26 @@ public class NotificationAdjustmentExtractor implements NotificationSignalExtrac
             if (DBG) Slog.d(TAG, "skipping empty notification");
             return null;
         }
+
+        final boolean hasAdjustedClassification = record.hasAdjustment(KEY_TYPE);
         record.applyAdjustments();
+
+        if (notificationForceGrouping()
+                && android.service.notification.Flags.notificationClassification()) {
+            // Classification adjustments trigger regrouping
+            if (mGroupHelper != null && hasAdjustedClassification) {
+                return new RankingReconsideration(record.getKey(), 0) {
+                    @Override
+                    public void work() {
+                    }
+
+                    @Override
+                    public void applyChangesLocked(NotificationRecord record) {
+                        mGroupHelper.onChannelUpdated(record);
+                    }
+                };
+            }
+        }
 
         return null;
     }
@@ -48,5 +71,10 @@ public class NotificationAdjustmentExtractor implements NotificationSignalExtrac
     @Override
     public void setZenHelper(ZenModeHelper helper) {
 
+    }
+
+    @Override
+    public void setGroupHelper(GroupHelper groupHelper) {
+        mGroupHelper = groupHelper;
     }
 }

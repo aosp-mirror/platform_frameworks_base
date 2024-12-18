@@ -16,17 +16,15 @@
 
 package android.platform.test.ravenwood;
 
-import static android.os.Process.FIRST_APPLICATION_UID;
-import static android.os.Process.SYSTEM_UID;
-import static android.os.UserHandle.SYSTEM;
-
 import static com.android.ravenwood.common.RavenwoodCommonUtils.log;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.annotations.EnabledOnRavenwood;
+
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
@@ -34,27 +32,14 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
- * {@code @Rule} that configures the Ravenwood test environment. This rule has no effect when
- * tests are run on non-Ravenwood test environments.
- *
- * This rule initializes and resets the Ravenwood environment between each test method to offer a
- * hermetic testing environment.
- *
- * By default, all tests are executed on Ravenwood, but annotations such as
- * {@link DisabledOnRavenwood} and {@link EnabledOnRavenwood} can be used at both the method
- * and class level to "ignore" tests that may not be ready. When needed, a
- * {@link RavenwoodClassRule} can be used in addition to a {@link RavenwoodRule} to ignore tests
- * before a test class is fully initialized.
+ * Reach out to g/ravenwood if you need any features in it.
  */
-public class RavenwoodRule implements TestRule {
-    private static final String TAG = "RavenwoodRule";
+public final class RavenwoodRule implements TestRule {
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
@@ -105,72 +90,44 @@ public class RavenwoodRule implements TestRule {
         }
     }
 
-    private static final int NOBODY_UID = 9999;
-
-    private static final AtomicInteger sNextPid = new AtomicInteger(100);
-
-    int mCurrentUser = SYSTEM.getIdentifier();
-
-    /**
-     * Unless the test author requests differently, run as "nobody", and give each collection of
-     * tests its own unique PID.
-     */
-    int mUid = NOBODY_UID;
-    int mPid = sNextPid.getAndIncrement();
-
-    String mPackageName;
-
-    boolean mProvideMainThread = false;
-
-    final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
-
-    final List<Class<?>> mServicesRequired = new ArrayList<>();
-
-    volatile Context mContext;
-    volatile Instrumentation mInstrumentation;
-
-    public RavenwoodRule() {
-    }
+    final RavenwoodTestProperties mProperties = new RavenwoodTestProperties();
 
     public static class Builder {
-        private RavenwoodRule mRule = new RavenwoodRule();
+
+        private final RavenwoodRule mRule = new RavenwoodRule();
 
         public Builder() {
         }
 
         /**
-         * Configure the identity of this process to be the system UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessSystem() {
-            mRule.mUid = SYSTEM_UID;
             return this;
         }
 
         /**
-         * Configure the identity of this process to be an app UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessApp() {
-            mRule.mUid = FIRST_APPLICATION_UID;
             return this;
         }
 
         /**
-         * Configure the identity of this process to be the given package name for the duration
-         * of the test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used.
          */
-        public Builder setPackageName(/* @NonNull */ String packageName) {
-            mRule.mPackageName = Objects.requireNonNull(packageName);
+        @Deprecated
+        public Builder setPackageName(@NonNull String packageName) {
             return this;
         }
 
         /**
-         * Configure a "main" thread to be available for the duration of the test, as defined
-         * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. Main thread is always available.
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
-            mRule.mProvideMainThread = provideMainThread;
             return this;
         }
 
@@ -184,10 +141,9 @@ public class RavenwoodRule implements TestRule {
          *
          * Has no effect on non-Ravenwood environments.
          */
-        public Builder setSystemPropertyImmutable(/* @NonNull */ String key,
-                /* @Nullable */ Object value) {
-            mRule.mSystemProperties.setValue(key, value);
-            mRule.mSystemProperties.setAccessReadOnly(key);
+        public Builder setSystemPropertyImmutable(@NonNull String key, @Nullable Object value) {
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadOnly(key);
             return this;
         }
 
@@ -201,27 +157,17 @@ public class RavenwoodRule implements TestRule {
          *
          * Has no effect on non-Ravenwood environments.
          */
-        public Builder setSystemPropertyMutable(/* @NonNull */ String key,
-                /* @Nullable */ Object value) {
-            mRule.mSystemProperties.setValue(key, value);
-            mRule.mSystemProperties.setAccessReadWrite(key);
+        public Builder setSystemPropertyMutable(@NonNull String key, @Nullable Object value) {
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadWrite(key);
             return this;
         }
 
         /**
-         * Configure the set of system services that are required for this test to operate.
-         *
-         * For example, passing {@code android.hardware.SerialManager.class} as an argument will
-         * ensure that the underlying service is created, initialized, and ready to use for the
-         * duration of the test. The {@code SerialManager} instance can be obtained via
-         * {@code RavenwoodRule.getContext()} and {@code Context.getSystemService()}, and
-         * {@code SerialManagerInternal} can be obtained via {@code LocalServices.getService()}.
+         * @deprecated no longer used. All supported services are available.
          */
-        public Builder setServicesRequired(Class<?>... services) {
-            mRule.mServicesRequired.clear();
-            for (Class<?> service : services) {
-                mRule.mServicesRequired.add(service);
-            }
+        @Deprecated
+        public Builder setServicesRequired(@NonNull Class<?>... services) {
             return this;
         }
 
@@ -245,42 +191,45 @@ public class RavenwoodRule implements TestRule {
         return IS_ON_RAVENWOOD;
     }
 
+    private static void ensureOnRavenwood(String featureName) {
+        if (!IS_ON_RAVENWOOD) {
+            throw new RuntimeException(featureName + " is only supported on Ravenwood.");
+        }
+    }
+
     /**
-     * Return a {@code Context} available for usage during the currently running test case.
-     *
-     * Each test should obtain needed information or references via this method;
-     * references must not be stored beyond the scope of a test case.
+     * @deprecated Use
+     * {@code androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getContext()}
+     * instead.
      */
+    @Deprecated
     public Context getContext() {
-        return Objects.requireNonNull(mContext,
-                "Context is only available during @Test execution");
+        return InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     /**
-     * Return a {@code Instrumentation} available for usage during the currently running test case.
-     *
-     * Each test should obtain needed information or references via this method;
-     * references must not be stored beyond the scope of a test case.
+     * @deprecated Use
+     * {@code androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()}
+     * instead.
      */
+    @Deprecated
     public Instrumentation getInstrumentation() {
-        return Objects.requireNonNull(mInstrumentation,
-                "Instrumentation is only available during @Test execution");
+        return InstrumentationRegistry.getInstrumentation();
     }
-
 
     @Override
     public Statement apply(Statement base, Description description) {
-        // TODO: Here, we're calling init() / reset() once for each rule.
-        // That means if a test class has multiple rules -- even if they refer to the same
-        // rule instance -- we're calling them multiple times. We need to fix it.
+        if (!IS_ON_RAVENWOOD) {
+            return base;
+        }
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                RavenwoodRuleImpl.init(RavenwoodRule.this);
+                RavenwoodAwareTestRunner.onRavenwoodRuleEnter(description, RavenwoodRule.this);
                 try {
                     base.evaluate();
                 } finally {
-                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
+                    RavenwoodAwareTestRunner.onRavenwoodRuleExit(description, RavenwoodRule.this);
                 }
             }
         };
@@ -295,6 +244,40 @@ public class RavenwoodRule implements TestRule {
      */
     public long realCurrentTimeMillis() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * Equivalent to setting the ANDROID_LOG_TAGS environmental variable.
+     *
+     * See https://developer.android.com/tools/logcat#filteringOutput for the string format.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setAndroidLogTags(@Nullable String androidLogTags) {
+        ensureOnRavenwood("RavenwoodRule.setAndroidLogTags()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevels", String.class);
+            setter.invoke(null, androidLogTags);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Set a log level for a given tag. Pass NULL to {@code tag} to change the default level.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setLogLevel(@Nullable String tag, int level) {
+        ensureOnRavenwood("RavenwoodRule.setLogLevel()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevel", String.class, int.class);
+            setter.invoke(null, tag, level);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Below are internal to ravenwood. Don't use them from normal tests...

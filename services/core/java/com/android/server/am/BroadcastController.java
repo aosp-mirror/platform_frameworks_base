@@ -57,6 +57,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.app.BroadcastStickyCache;
 import android.app.IApplicationThread;
 import android.app.compat.CompatChanges;
 import android.appwidget.AppWidgetManager;
@@ -183,6 +184,13 @@ class BroadcastController {
     final HashMap<IBinder, ReceiverList> mRegisteredReceivers = new HashMap<>();
 
     /**
+     * If {@code false} invalidate the list of {@link android.os.IpcDataCache} present inside the
+     * {@link BroadcastStickyCache} class.
+     * The invalidation is required to start caching of the sticky broadcast in the client side.
+     */
+    private volatile boolean mAreStickyCachesInvalidated = false;
+
+    /**
      * Resolver for broadcast intents to registered receivers.
      * Holds BroadcastFilter (subclass of IntentFilter).
      */
@@ -257,6 +265,7 @@ class BroadcastController {
             final StringBuilder sb = new StringBuilder("registerReceiver: ");
             sb.append(Binder.getCallingUid()); sb.append('/');
             sb.append(receiverId == null ? "null" : receiverId); sb.append('/');
+            sb.append("p:"); sb.append(filter.getPriority()); sb.append('/');
             final int actionsCount = filter.safeCountActions();
             if (actionsCount > 0) {
                 for (int i = 0; i < actionsCount; ++i) {
@@ -287,6 +296,11 @@ class BroadcastController {
             IIntentReceiver receiver, IntentFilter filter, String permission,
             int userId, int flags) {
         mService.enforceNotIsolatedCaller("registerReceiver");
+
+        if (!mAreStickyCachesInvalidated) {
+            BroadcastStickyCache.invalidateAllCaches();
+            mAreStickyCachesInvalidated = true;
+        }
         ArrayList<StickyBroadcast> stickyBroadcasts = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps =
@@ -302,8 +316,7 @@ class BroadcastController {
                 return null;
             }
             if (callerApp.info.uid != SYSTEM_UID
-                    && !callerApp.getPkgList().containsKey(callerPackage)
-                    && !"android".equals(callerPackage)) {
+                    && !callerApp.getPkgList().containsKey(callerPackage)) {
                 throw new SecurityException("Given caller package " + callerPackage
                         + " is not running in process " + callerApp);
             }
@@ -552,7 +565,7 @@ class BroadcastController {
             }
             BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, callerFeatureId,
                     receiverId, permission, callingUid, userId, instantApp, visibleToInstantApps,
-                    exported);
+                    exported, callerApp.info, mService.mPlatformCompat);
             if (rl.containsFilter(filter)) {
                 Slog.w(TAG, "Receiver with filter " + filter
                         + " already registered for pid " + rl.pid
@@ -591,7 +604,7 @@ class BroadcastController {
                             originalStickyCallingUid, BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
                             null /* filterExtrasForReceiver */,
-                            broadcast.originalCallingAppProcessState);
+                            broadcast.originalCallingAppProcessState, mService.mPlatformCompat);
                     queue.enqueueBroadcastLocked(r);
                 }
             }
@@ -677,6 +690,21 @@ class BroadcastController {
         }
     }
 
+    List<IntentFilter> getRegisteredIntentFilters(IIntentReceiver receiver) {
+        synchronized (mService) {
+            final ReceiverList rl = mRegisteredReceivers.get(receiver.asBinder());
+            if (rl == null) {
+                return null;
+            }
+            final ArrayList<IntentFilter> filters = new ArrayList<>();
+            final int count = rl.size();
+            for (int i = 0; i < count; ++i) {
+                filters.add(rl.get(i));
+            }
+            return filters;
+        }
+    }
+
     int broadcastIntentWithFeature(IApplicationThread caller, String callingFeatureId,
             Intent intent, String resolvedType, IIntentReceiver resultTo,
             int resultCode, String resultData, Bundle resultExtras,
@@ -684,6 +712,7 @@ class BroadcastController {
             String[] excludedPackages, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         mService.enforceNotIsolatedCaller("broadcastIntent");
+        final int result;
 
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
@@ -706,7 +735,7 @@ class BroadcastController {
 
             final long origId = Binder.clearCallingIdentity();
             try {
-                return broadcastIntentLocked(callerApp,
+                result = broadcastIntentLocked(callerApp,
                         callerApp != null ? callerApp.info.packageName : null, callingFeatureId,
                         intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
                         resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
@@ -717,6 +746,11 @@ class BroadcastController {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
+
+        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
+            BroadcastStickyCache.invalidateCache(intent.getAction());
+        }
+        return result;
     }
 
     // Not the binder call surface
@@ -727,6 +761,7 @@ class BroadcastController {
             boolean serialized, boolean sticky, int userId,
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList) {
+        final int result;
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
 
@@ -734,7 +769,7 @@ class BroadcastController {
             String[] requiredPermissions = requiredPermission == null ? null
                     : new String[] {requiredPermission};
             try {
-                return broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
+                result =  broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
                         resultToApp, resultTo, resultCode, resultData, resultExtras,
                         requiredPermissions, null, null, OP_NONE, bOptions, serialized, sticky, -1,
                         uid, realCallingUid, realCallingPid, userId,
@@ -744,6 +779,11 @@ class BroadcastController {
                 Binder.restoreCallingIdentity(origId);
             }
         }
+
+        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
+            BroadcastStickyCache.invalidateCache(intent.getAction());
+        }
+        return result;
     }
 
     @GuardedBy("mService")
@@ -1442,6 +1482,7 @@ class BroadcastController {
                     list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
                             callingUid, callerAppProcessState, resolvedType));
                 }
+                BroadcastStickyCache.invalidateCache(intent.getAction());
             }
         }
 
@@ -1603,7 +1644,7 @@ class BroadcastController {
                     receivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId,
                     backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
-                    callerAppProcessState);
+                    callerAppProcessState, mService.mPlatformCompat);
             broadcastSentEventRecord.setBroadcastRecord(r);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
@@ -1708,6 +1749,7 @@ class BroadcastController {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
+        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
             ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
@@ -1724,11 +1766,15 @@ class BroadcastController {
                     if (list.size() <= 0) {
                         stickies.remove(intent.getAction());
                     }
+                    changedStickyBroadcasts.add(intent.getAction());
                 }
                 if (stickies.size() <= 0) {
                     mStickyBroadcasts.remove(userId);
                 }
             }
+        }
+        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
+            BroadcastStickyCache.invalidateCache(changedStickyBroadcasts.get(i));
         }
     }
 
@@ -2108,8 +2154,17 @@ class BroadcastController {
     }
 
     void removeStickyBroadcasts(int userId) {
+        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
+            final ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
+                    mStickyBroadcasts.get(userId);
+            if (stickies != null) {
+                changedStickyBroadcasts.addAll(stickies.keySet());
+            }
             mStickyBroadcasts.remove(userId);
+        }
+        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
+            BroadcastStickyCache.invalidateCache(changedStickyBroadcasts.get(i));
         }
     }
 

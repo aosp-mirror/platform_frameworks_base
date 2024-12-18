@@ -18,14 +18,11 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
-import android.platform.test.annotations.DisableFlags
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.LegacyLockIconViewController
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FakeFeatureFlags
@@ -34,6 +31,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -59,7 +57,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
     @Mock private lateinit var notificationPanelView: NotificationPanelView
     private lateinit var featureFlags: FakeFeatureFlags
-    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var deviceEntryIconViewModel: DeviceEntryIconViewModel
     private lateinit var underTest: DefaultDeviceEntrySection
@@ -67,8 +64,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         featureFlags =
             FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
@@ -80,57 +75,24 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 context,
                 notificationPanelView,
                 featureFlags,
-                { lockIconViewController },
                 { deviceEntryIconViewModel },
                 { mock(DeviceEntryForegroundViewModel::class.java) },
                 { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
                 { mock(VibratorHelper::class.java) },
+                logcatLogBuffer(),
             )
     }
 
     @Test
-    fun addViewsConditionally_migrateFlagOn() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+    fun addViewsConditionally() {
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
     }
 
     @Test
-    fun addViewsConditionally_migrateAndRefactorFlagsOn() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
-        assertThat(constraintLayout.childCount).isGreaterThan(0)
-    }
-
-    @Test
-    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-    fun addViewsConditionally_migrateFlagOff() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
-        assertThat(constraintLayout.childCount).isEqualTo(0)
-    }
-
-    @Test
-    fun applyConstraints_udfps_refactor_off() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        val cs = ConstraintSet()
-        underTest.applyConstraints(cs)
-
-        val constraint = cs.getConstraint(R.id.lock_icon_view)
-
-        assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
-    }
-
-    @Test
-    fun applyConstraints_udfps_refactor_on() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    fun applyConstraints() {
         whenever(deviceEntryIconViewModel.isUdfpsSupported).thenReturn(MutableStateFlow(false))
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
@@ -142,24 +104,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCenterIcon_udfps_refactor_off() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
-        val cs = ConstraintSet()
-        underTest.centerIcon(Point(5, 6), 1F, cs)
-
-        val constraint = cs.getConstraint(R.id.lock_icon_view)
-
-        assertThat(constraint.layout.mWidth).isEqualTo(2)
-        assertThat(constraint.layout.mHeight).isEqualTo(2)
-        assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.topMargin).isEqualTo(5)
-        assertThat(constraint.layout.startMargin).isEqualTo(4)
-    }
-
-    @Test
-    fun testCenterIcon_udfps_refactor_on() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+    fun testCenterIcon() {
         val cs = ConstraintSet()
         underTest.centerIcon(Point(5, 6), 1F, cs)
 

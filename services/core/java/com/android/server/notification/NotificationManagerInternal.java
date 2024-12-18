@@ -19,10 +19,14 @@ package com.android.server.notification;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.backup.BackupRestoreEventLogger;
 import android.service.notification.DeviceEffectsApplier;
+
+import com.android.internal.annotations.Keep;
 
 import java.util.Set;
 
+@Keep
 public interface NotificationManagerInternal {
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId);
     NotificationChannelGroup getNotificationChannelGroup(String pkg, int uid, String channelId);
@@ -43,7 +47,7 @@ public interface NotificationManagerInternal {
 
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 
-    /** Get the number of notification channels for a given package */
+    /** Get the number of app created notification channels for a given package */
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
 
     /** Does the specified package/uid have permission to post notifications? */
@@ -73,4 +77,9 @@ public interface NotificationManagerInternal {
      * Otherwise an {@link IllegalStateException} will be thrown.
      */
     void setDeviceEffectsApplier(DeviceEffectsApplier applier);
+
+    // Backup/restore interface
+    byte[] getBackupPayload(int user, BackupRestoreEventLogger logger);
+
+    void applyRestore(byte[] payload, int user, BackupRestoreEventLogger logger);
 }

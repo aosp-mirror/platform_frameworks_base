@@ -32,6 +32,34 @@
         android:id="@+id/min_edge_guideline"
         app:layout_constraintGuide_begin="@dimen/overlay_action_container_minimum_edge_spacing"
         android:orientation="vertical"/>
+    <!-- This toast-like indication layout was forked from text_toast.xml and will have the same
+         appearance as system toast. -->
+    <FrameLayout
+        android:id="@+id/indication_container"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxWidth="@*android:dimen/toast_width"
+        android:background="@android:drawable/toast_frame"
+        android:elevation="@*android:dimen/toast_elevation"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:layout_marginEnd="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginBottom="@dimen/overlay_action_container_margin_bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <TextView
+            android:id="@+id/indication_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:textAppearance="@*android:style/TextAppearance.Toast"/>
+    </FrameLayout>
     <!-- Negative horizontal margin because this container background must render beyond the thing
          it's constrained by (the actions themselves). -->
     <FrameLayout
@@ -47,7 +75,7 @@
         app:layout_constraintStart_toStartOf="@id/min_edge_guideline"
         app:layout_constraintTop_toTopOf="@id/actions_container"
         app:layout_constraintEnd_toEndOf="@id/actions_container"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toTopOf="@id/indication_container"/>
     <HorizontalScrollView
         android:id="@+id/actions_container"
         android:layout_width="0dp"
@@ -144,7 +172,7 @@
         android:visibility="gone"
         android:elevation="7dp"
         android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/indication_container"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
         android:layout_marginBottom="@dimen/overlay_action_container_margin_bottom"
@@ -194,8 +222,8 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
             android:background="@drawable/circular_background"
-            android:backgroundTint="?androidprv:attr/materialColorPrimaryFixedDim"
-            android:tint="?androidprv:attr/materialColorOnPrimaryFixed"
+            android:backgroundTint="@androidprv:color/materialColorPrimaryFixedDim"
+            android:tint="@androidprv:color/materialColorOnPrimaryFixed"
             android:padding="4dp"
             android:src="@drawable/ic_close"/>
     </FrameLayout>

@@ -16,19 +16,11 @@
 
 package com.android.server.broadcastradio;
 
-import android.app.ActivityManager;
-import android.os.Binder;
-import android.os.UserHandle;
-
 /**
- * Controller to handle users in {@link com.android.server.broadcastradio.BroadcastRadioService}
+ * Controller interface to handle users in
+ * {@link com.android.server.broadcastradio.BroadcastRadioService}
  */
-public final class RadioServiceUserController {
-
-    private RadioServiceUserController() {
-        throw new UnsupportedOperationException(
-                "RadioServiceUserController class is noninstantiable");
-    }
+public interface RadioServiceUserController {
 
     /**
      * Check if the user calling the method in Broadcast Radio Service is the current user or the
@@ -37,26 +29,20 @@ public final class RadioServiceUserController {
      * @return {@code true} if the user calling this method is the current user of system user,
      * {@code false} otherwise.
      */
-    public static boolean isCurrentOrSystemUser() {
-        int callingUser = Binder.getCallingUserHandle().getIdentifier();
-        return callingUser == getCurrentUser() || callingUser == UserHandle.USER_SYSTEM;
-    }
+    boolean isCurrentOrSystemUser();
 
     /**
      * Get current foreground user for Broadcast Radio Service
      *
      * @return foreground user id.
      */
-    public static int getCurrentUser() {
-        int userId = UserHandle.USER_NULL;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            userId = ActivityManager.getCurrentUser();
-        } catch (RuntimeException e) {
-            // Activity manager not running, nothing we can do assume user 0.
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return userId;
-    }
+    int getCurrentUser();
+
+    /**
+     * Get id of the user handle assigned to the process that sent the binder transaction that is
+     * being processed
+     *
+     * @return Id of the user handle
+     */
+    int getCallingUserId();
 }

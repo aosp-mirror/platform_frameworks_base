@@ -20,7 +20,10 @@ import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.compose.animation.scene.UserActionResult.HideOverlay
+import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -32,8 +35,10 @@ class NotificationsShadeOverlayActionsViewModel @AssistedInject constructor() :
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         setActions(
             mapOf(
-                Swipe.Up to UserActionResult.HideOverlay(Overlays.NotificationsShade),
-                Back to UserActionResult.HideOverlay(Overlays.NotificationsShade),
+                Swipe.Up to HideOverlay(Overlays.NotificationsShade),
+                Back to HideOverlay(Overlays.NotificationsShade),
+                Swipe.Down(fromSource = SceneContainerEdge.TopRight) to
+                    ReplaceByOverlay(Overlays.QuickSettingsShade),
             )
         )
     }

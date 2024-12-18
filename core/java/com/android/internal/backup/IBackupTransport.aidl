@@ -410,4 +410,15 @@ oneway interface IBackupTransport {
      * however backups initiated by the framework will call this method to retrieve one.
      */
     void getBackupManagerMonitor(in AndroidFuture<IBackupManagerMonitor> resultFuture);
+
+    /**
+     * Ask the transport whether packages that are about to be backed up or restored should not be
+     * put into a restricted mode by the framework and started normally instead. The
+     * {@code resultFuture} should be completed with a subset of the packages passed in, indicating
+     * which packages should NOT be put into restricted mode for the given operation type.
+     *
+     * @param operationType 0 for backup, 1 for restore.
+     */
+    void getPackagesThatShouldNotUseRestrictedMode(in List<String> packageNames, int operationType,
+            in AndroidFuture<List<String>> resultFuture);
 }

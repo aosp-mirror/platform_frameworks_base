@@ -1,0 +1,52 @@
+package: "android.app"
+container: "system"
+
+flag {
+     namespace: "system_performance"
+     name: "pic_uses_shared_memory"
+     is_exported: true
+     is_fixed_read_only: true
+     description: "PropertyInvalidatedCache uses shared memory for nonces."
+     bug: "360897450"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "enforce_pic_testmode_protocol"
+     is_exported: true
+     is_fixed_read_only: true
+     description: "Enforce PropertyInvalidatedCache.setTestMode() protocol"
+     bug: "360897450"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "pic_isolate_cache_by_uid"
+     is_fixed_read_only: true
+     description: "Ensure that different UIDs use different caches"
+     bug: "373752556"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "pic_isolated_cache_statistics"
+     is_fixed_read_only: true
+     description: "Collects statistics for cache UID isolation strategies"
+     bug: "373752556"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "pic_separate_permission_notifications"
+     is_fixed_read_only: true
+     description: "Seperate PermissionManager notifications from cache udpates"
+     bug: "379699402"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "pic_cache_nulls"
+     is_fixed_read_only: true
+     description: "Cache null returns from binder calls"
+     bug: "372923336"
+}

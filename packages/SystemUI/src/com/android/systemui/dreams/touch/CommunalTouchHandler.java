@@ -31,6 +31,9 @@ import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dreams.touch.dagger.CommunalTouchModule;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import kotlinx.coroutines.Job;
@@ -42,6 +45,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 
 /** {@link TouchHandler} responsible for handling touches to open communal hub. **/
 public class CommunalTouchHandler implements TouchHandler {
@@ -51,6 +55,8 @@ public class CommunalTouchHandler implements TouchHandler {
     private final CommunalInteractor mCommunalInteractor;
 
     private final ConfigurationInteractor mConfigurationInteractor;
+    private final SceneInteractor mSceneInteractor;
+    private final WindowRootView mWindowRootView;
     private Boolean mIsEnabled = false;
 
     private ArrayList<Job> mFlows = new ArrayList<>();
@@ -69,12 +75,16 @@ public class CommunalTouchHandler implements TouchHandler {
             @Named(CommunalTouchModule.COMMUNAL_GESTURE_INITIATION_WIDTH) int initiationWidth,
             CommunalInteractor communalInteractor,
             ConfigurationInteractor configurationInteractor,
+            SceneInteractor sceneInteractor,
+            Optional<Provider<WindowRootView>> windowRootViewProvider,
             Lifecycle lifecycle) {
         mInitiationWidth = initiationWidth;
         mCentralSurfaces = centralSurfaces;
         mLifecycle = lifecycle;
         mCommunalInteractor = communalInteractor;
         mConfigurationInteractor = configurationInteractor;
+        mSceneInteractor = sceneInteractor;
+        mWindowRootView = windowRootViewProvider.get().get();
 
         mFlows.add(collectFlow(
                 mLifecycle,
@@ -125,8 +135,15 @@ public class CommunalTouchHandler implements TouchHandler {
     private void handleSessionStart(CentralSurfaces surfaces, TouchSession session) {
         // Notification shade window has its own logic to be visible if the hub is open, no need to
         // do anything here other than send touch events over.
+        if (SceneContainerFlag.isEnabled()) {
+            mSceneInteractor.onRemoteUserInputStarted("communal touch handler");
+        }
         session.registerInputListener(ev -> {
-            surfaces.handleCommunalHubTouch((MotionEvent) ev);
+            if (SceneContainerFlag.isEnabled()) {
+                mWindowRootView.dispatchTouchEvent((MotionEvent) ev);
+            } else {
+                surfaces.handleCommunalHubTouch((MotionEvent) ev);
+            }
             if (ev != null && ((MotionEvent) ev).getAction() == MotionEvent.ACTION_UP) {
                 var unused = session.pop();
             }

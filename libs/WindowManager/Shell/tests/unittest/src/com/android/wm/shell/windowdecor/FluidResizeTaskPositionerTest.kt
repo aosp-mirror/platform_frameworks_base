@@ -47,6 +47,7 @@ import org.mockito.kotlin.doReturn
 import java.util.function.Supplier
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.times
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -66,7 +67,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockWindowDecoration: WindowDecoration<*>
     @Mock
-    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
+    private lateinit var mockDragEventListener: DragPositioningCallbackUtility.DragEventListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -121,6 +122,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             displayId = DISPLAY_ID
             configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
             configuration.windowConfiguration.displayRotation = ROTATION_90
+            isResizeable = true
         }
         `when`(mockWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockWindowDecoration.mDisplay = mockDisplay
@@ -139,7 +141,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 mockTransitions,
                 mockWindowDecoration,
                 mockDisplayController,
-                mockDragStartListener,
+                mockDragEventListener,
                 mockTransactionFactory
         )
     }
@@ -148,11 +150,13 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_notMove_skipsTransitionOnEnd() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
 
         taskPositioner.onDragPositioningEnd(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat() + 10,
                 STARTING_BOUNDS.top.toFloat() + 10
         )
@@ -169,11 +173,13 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_noEffectiveMove_skipsTransitionOnMoveAndEnd() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
 
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -186,6 +192,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         })
 
         taskPositioner.onDragPositioningEnd(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat() + 10,
                 STARTING_BOUNDS.top.toFloat() + 10
         )
@@ -202,11 +209,13 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_hasEffectiveMove_issuesTransitionOnMoveAndEnd() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
 
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat() + 10,
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -219,8 +228,10 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                         change.configuration.windowConfiguration.bounds == rectAfterMove
             }
         })
+        verify(mockDragEventListener, times(1)).onDragMove(eq(TASK_ID))
 
         taskPositioner.onDragPositioningEnd(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat() + 10,
                 STARTING_BOUNDS.top.toFloat() + 10
         )
@@ -239,6 +250,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_move_skipsDragResizingFlag() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // Move
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -247,11 +259,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.left.toFloat() + 10
         val newY = STARTING_BOUNDS.top.toFloat()
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -273,6 +286,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setsDragResizingFlag() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -281,11 +295,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() + 10
         val newY = STARTING_BOUNDS.top.toFloat()
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -307,6 +322,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsDoesNotChangeHeightWhenLessThanMin() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -315,11 +331,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 5
         val newY = STARTING_BOUNDS.top.toFloat() + 95
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -337,6 +354,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsDoesNotChangeWidthWhenLessThanMin() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -345,11 +363,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 95
         val newY = STARTING_BOUNDS.top.toFloat() + 5
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -367,6 +386,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsDoesNotChangeHeightWhenNegative() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -375,11 +395,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 5
         val newY = STARTING_BOUNDS.top.toFloat() + 105
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -397,6 +418,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsDoesNotChangeWidthWhenNegative() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -405,11 +427,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 105
         val newY = STARTING_BOUNDS.top.toFloat() + 5
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -427,6 +450,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsRunsWhenResizeBoundsValid() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -435,11 +459,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 80
         val newY = STARTING_BOUNDS.top.toFloat() + 80
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -453,6 +478,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_setBoundsDoesNotRunWithNegativeHeightAndWidth() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -461,11 +487,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 95
         val newY = STARTING_BOUNDS.top.toFloat() + 95
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -481,6 +508,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -489,11 +517,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 97
         val newY = STARTING_BOUNDS.top.toFloat() + 97
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -507,6 +536,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_resize_useMinWidthWhenValid() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_TOP, // Resize right and top
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -515,11 +545,12 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         val newX = STARTING_BOUNDS.right.toFloat() - 93
         val newY = STARTING_BOUNDS.top.toFloat() + 93
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newX,
                 newY
         )
 
-        taskPositioner.onDragPositioningEnd(newX, newY)
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newX, newY)
 
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
@@ -532,6 +563,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     fun testDragResize_toDisallowedBounds_freezesAtLimit() {
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM, // Resize right-bottom corner
+                DISPLAY_ID,
                 STARTING_BOUNDS.right.toFloat(),
                 STARTING_BOUNDS.bottom.toFloat()
         )
@@ -543,6 +575,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 STARTING_BOUNDS.right + 10,
                 STARTING_BOUNDS.bottom + 10)
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newBounds.right.toFloat(),
                 newBounds.bottom.toFloat()
         )
@@ -556,11 +589,13 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 DISALLOWED_RESIZE_AREA.top
         )
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 newBounds2.right.toFloat(),
                 newBounds2.bottom.toFloat()
         )
 
-        taskPositioner.onDragPositioningEnd(newBounds2.right.toFloat(), newBounds2.bottom.toFloat())
+        taskPositioner.onDragPositioningEnd(DISPLAY_ID, newBounds2.right.toFloat(),
+            newBounds2.bottom.toFloat())
 
         // The first resize falls in the allowed area, verify there's a change for it.
         verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
@@ -623,9 +658,10 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -639,9 +675,10 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() {
-        mockWindowDecoration.mTaskInfo.isFocused = true
+        mockWindowDecoration.mHasGlobalFocus = true
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -655,9 +692,10 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_drag_draggedTaskNotReorderedToTop() {
-        mockWindowDecoration.mTaskInfo.isFocused = false
+        mockWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // drag
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -726,11 +764,13 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
 
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_TOP or CTRL_TYPE_RIGHT,
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
 
         taskPositioner.onDragPositioningMove(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat() - 20,
                 STARTING_BOUNDS.top.toFloat() - 20
         )
@@ -739,6 +779,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         assertTrue(taskPositioner.isResizingOrAnimating)
 
         taskPositioner.onDragPositioningEnd(
+                DISPLAY_ID,
                 STARTING_BOUNDS.left.toFloat(),
                 STARTING_BOUNDS.top.toFloat()
         )
@@ -782,15 +823,18 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
     ) {
         taskPositioner.onDragPositioningStart(
             ctrlType,
+            DISPLAY_ID,
             startX,
             startY
         )
         taskPositioner.onDragPositioningMove(
+            DISPLAY_ID,
             endX,
             endY
         )
 
         taskPositioner.onDragPositioningEnd(
+            DISPLAY_ID,
             endX,
             endY
         )

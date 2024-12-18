@@ -23,19 +23,18 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
- * Provides privacy dot views for each orientation. The PrivacyDot orientation and visibility
- * of the privacy dot views are controlled by the PrivacyDotViewController.
+ * Provides privacy dot views for each orientation. The PrivacyDot orientation and visibility of the
+ * privacy dot views are controlled by the PrivacyDotViewController.
  */
 @SysUISingleton
-open class PrivacyDotDecorProviderFactory @Inject constructor(
-    @Main private val res: Resources
-) : DecorProviderFactory() {
+open class PrivacyDotDecorProviderFactory @Inject constructor(@Main private val res: Resources) :
+    DecorProviderFactory {
 
     private val isPrivacyDotEnabled: Boolean
         get() = res.getBoolean(R.bool.config_enablePrivacyDot)
@@ -51,22 +50,26 @@ open class PrivacyDotDecorProviderFactory @Inject constructor(
                         viewId = R.id.privacy_dot_top_left_container,
                         alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
                         alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                        layoutId = R.layout.privacy_dot_top_left),
+                        layoutId = R.layout.privacy_dot_top_left,
+                    ),
                     PrivacyDotCornerDecorProviderImpl(
                         viewId = R.id.privacy_dot_top_right_container,
                         alignedBound1 = DisplayCutout.BOUNDS_POSITION_TOP,
                         alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                        layoutId = R.layout.privacy_dot_top_right),
+                        layoutId = R.layout.privacy_dot_top_right,
+                    ),
                     PrivacyDotCornerDecorProviderImpl(
                         viewId = R.id.privacy_dot_bottom_left_container,
                         alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
                         alignedBound2 = DisplayCutout.BOUNDS_POSITION_LEFT,
-                        layoutId = R.layout.privacy_dot_bottom_left),
+                        layoutId = R.layout.privacy_dot_bottom_left,
+                    ),
                     PrivacyDotCornerDecorProviderImpl(
                         viewId = R.id.privacy_dot_bottom_right_container,
                         alignedBound1 = DisplayCutout.BOUNDS_POSITION_BOTTOM,
                         alignedBound2 = DisplayCutout.BOUNDS_POSITION_RIGHT,
-                        layoutId = R.layout.privacy_dot_bottom_right)
+                        layoutId = R.layout.privacy_dot_bottom_right,
+                    ),
                 )
             } else {
                 emptyList()
@@ -78,7 +81,7 @@ class PrivacyDotCornerDecorProviderImpl(
     override val viewId: Int,
     @DisplayCutout.BoundsPosition override val alignedBound1: Int,
     @DisplayCutout.BoundsPosition override val alignedBound2: Int,
-    private val layoutId: Int
+    val layoutId: Int,
 ) : CornerDecorProvider() {
 
     override fun onReloadResAndMeasure(
@@ -86,7 +89,7 @@ class PrivacyDotCornerDecorProviderImpl(
         reloadToken: Int,
         rotation: Int,
         tintColor: Int,
-        displayUniqueId: String?
+        displayUniqueId: String?,
     ) {
         // Do nothing here because it is handled inside PrivacyDotViewController
     }
@@ -95,7 +98,7 @@ class PrivacyDotCornerDecorProviderImpl(
         context: Context,
         parent: ViewGroup,
         @Surface.Rotation rotation: Int,
-        tintColor: Int
+        tintColor: Int,
     ): View {
         LayoutInflater.from(context).inflate(layoutId, parent, true)
         return parent.getChildAt(parent.childCount - 1 /* latest new added child */)

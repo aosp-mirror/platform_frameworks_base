@@ -2,13 +2,15 @@ package com.android.systemui.statusbar.policy
 
 import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 
 /** Fake implementation of [ConfigurationController] for tests. */
 @SysUISingleton
-class FakeConfigurationController @Inject constructor() : ConfigurationController {
+class FakeConfigurationController @Inject constructor() :
+    ConfigurationController, StatusBarConfigurationController {
 
     private var listeners = mutableListOf<ConfigurationController.ConfigurationListener>()
     private var isRtl = false
@@ -21,8 +23,12 @@ class FakeConfigurationController @Inject constructor() : ConfigurationControlle
         listeners -= listener
     }
 
-    override fun onConfigurationChanged(newConfiguration: Configuration?) {
+    override fun onConfigurationChanged(newConfiguration: Configuration) {
         listeners.forEach { it.onConfigChanged(newConfiguration) }
+    }
+
+    override fun dispatchOnMovedToDisplay(newDisplayId: Int, newConfiguration: Configuration) {
+        listeners.forEach { it.onMovedToDisplay(newDisplayId, newConfiguration) }
     }
 
     override fun notifyThemeChanged() {
@@ -34,7 +40,7 @@ class FakeConfigurationController @Inject constructor() : ConfigurationControlle
     }
 
     fun notifyConfigurationChanged() {
-        onConfigurationChanged(newConfiguration = null)
+        onConfigurationChanged(newConfiguration = Configuration())
     }
 
     fun notifyLayoutDirectionChanged(isRtl: Boolean) {
@@ -43,6 +49,7 @@ class FakeConfigurationController @Inject constructor() : ConfigurationControlle
     }
 
     override fun isLayoutRtl(): Boolean = isRtl
+
     override fun getNightModeName(): String = "undefined"
 }
 

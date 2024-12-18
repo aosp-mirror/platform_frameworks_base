@@ -716,8 +716,8 @@ public class AppWidgetHostView extends FrameLayout implements AppWidgetHost.AppW
                         mCurrentSize);
             } else {
                 applyContent(null, false, e);
+                mLastExecutionSignal = null;
             }
-            mLastExecutionSignal = null;
         }
     }
 

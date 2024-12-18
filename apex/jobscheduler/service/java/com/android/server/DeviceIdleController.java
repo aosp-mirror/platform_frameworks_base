@@ -620,8 +620,8 @@ public class DeviceIdleController extends SystemService
      * the network and acquire wakelocks. Times are in milliseconds.
      */
     @GuardedBy("this")
-    private final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes
-            = new SparseArray<>();
+    @VisibleForTesting
+    final SparseArray<Pair<MutableLong, String>> mTempWhitelistAppIdEndTimes = new SparseArray<>();
 
     private NetworkPolicyManagerInternal mNetworkPolicyManagerInternal;
 
@@ -666,7 +666,12 @@ public class DeviceIdleController extends SystemService
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
+            final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
+            switch (action) {
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
                     updateConnectivityState(intent);
                 } break;
@@ -1936,7 +1941,8 @@ public class DeviceIdleController extends SystemService
     private static final int MSG_REPORT_IDLE_ON_LIGHT = 3;
     private static final int MSG_REPORT_IDLE_OFF = 4;
     private static final int MSG_REPORT_ACTIVE = 5;
-    private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
+    @VisibleForTesting
+    static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
     @VisibleForTesting
     static final int MSG_REPORT_STATIONARY_STATUS = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
@@ -2504,6 +2510,11 @@ public class DeviceIdleController extends SystemService
         /** Returns the current elapsed realtime in milliseconds. */
         long getElapsedRealtime() {
             return SystemClock.elapsedRealtime();
+        }
+
+        /** Returns the current elapsed realtime in milliseconds. */
+        long getUptimeMillis() {
+            return SystemClock.uptimeMillis();
         }
 
         LocationManager getLocationManager() {
@@ -3259,7 +3270,8 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempWhitelistAppDirectInternal(int callingUid, int uid,
             long duration, @TempAllowListType int tempAllowListType, boolean sync,
             @ReasonCode int reasonCode, @Nullable String reason) {
-        final long timeNow = SystemClock.elapsedRealtime();
+        final long timeNow = Flags.useCpuTimeForTempAllowlist() ? mInjector.getUptimeMillis()
+                : mInjector.getElapsedRealtime();
         boolean informWhitelistChanged = false;
         int appId = UserHandle.getAppId(uid);
         synchronized (this) {
@@ -3345,7 +3357,8 @@ public class DeviceIdleController extends SystemService
     }
 
     void checkTempAppWhitelistTimeout(int uid) {
-        final long timeNow = SystemClock.elapsedRealtime();
+        final long timeNow = Flags.useCpuTimeForTempAllowlist() ? mInjector.getUptimeMillis()
+                : mInjector.getElapsedRealtime();
         final int appId = UserHandle.getAppId(uid);
         if (DEBUG) {
             Slog.d(TAG, "checkTempAppWhitelistTimeout: uid=" + uid + ", timeNow=" + timeNow);
@@ -3568,7 +3581,7 @@ public class DeviceIdleController extends SystemService
             Slog.i(TAG, "becomeActiveLocked, reason=" + activeReason
                     + ", changeLightIdle=" + changeLightIdle);
         }
-        if (mState != STATE_ACTIVE || mLightState != STATE_ACTIVE) {
+        if (mState != STATE_ACTIVE || mLightState != LIGHT_STATE_ACTIVE) {
             moveToStateLocked(STATE_ACTIVE, activeReason);
             mInactiveTimeout = newInactiveTimeout;
             resetIdleManagementLocked();
@@ -5214,6 +5227,17 @@ public class DeviceIdleController extends SystemService
             }
         }
 
+        pw.println("  Flags:");
+        pw.print("    ");
+        pw.print(Flags.FLAG_USE_CPU_TIME_FOR_TEMP_ALLOWLIST);
+        pw.print("=");
+        pw.println(Flags.useCpuTimeForTempAllowlist());
+        pw.print("    ");
+        pw.print(Flags.FLAG_REMOVE_IDLE_LOCATION);
+        pw.print("=");
+        pw.println(Flags.removeIdleLocation());
+        pw.println();
+
         synchronized (this) {
             mConstants.dump(pw);
 
@@ -5444,7 +5468,8 @@ public class DeviceIdleController extends SystemService
                 pw.println("  Temp whitelist schedule:");
                 prefix = "    ";
             }
-            final long timeNow = SystemClock.elapsedRealtime();
+            final long timeNow = Flags.useCpuTimeForTempAllowlist() ? mInjector.getUptimeMillis()
+                    : mInjector.getElapsedRealtime();
             for (int i = 0; i < size; i++) {
                 pw.print(prefix);
                 pw.print("UID=");

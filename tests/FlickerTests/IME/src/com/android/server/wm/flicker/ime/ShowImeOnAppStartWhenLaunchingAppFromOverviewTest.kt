@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window opening transitions.
- * To run this test: `atest FlickerTestsIme2:ShowImeOnAppStartWhenLaunchingAppFromOverviewTest`
+ * To run this test: `atest FlickerTestsIme:ShowImeOnAppStartWhenLaunchingAppFromOverviewTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

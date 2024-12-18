@@ -37,7 +37,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -699,14 +699,37 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (win != null) {
-                ImeTracker.forLogging().onProgress(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
+                final Task task = win.getTask();
+                if (task != null) {
+                    task.dispatchTaskInfoChangedIfNeeded(/* forced= */ true);
+                }
             } else {
-                ImeTracker.forLogging().onFailed(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    embeddedWindow = mService.mEmbeddedWindowController.getByWindowToken(
+                            window.asBinder());
+                }
+                if (embeddedWindow != null) {
+                    // If there is no WindowState for the IWindow, it could be still an
+                    // EmbeddedWindow. Therefore, check the EmbeddedWindowController as well
+                    // TODO(b/353463205) Use different phase here
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                    embeddedWindow.setRequestedVisibleTypes(
+                            requestedVisibleTypes & WindowInsets.Type.ime());
+                    embeddedWindow.getDisplayContent().getInsetsPolicy()
+                            .onRequestedVisibleTypesChanged(embeddedWindow, imeStatsToken);
+                } else {
+                    ImeTracker.forLogging().onFailed(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
             }
         }
     }
@@ -986,6 +1009,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT);
+            }
+        }
+    }
+
+    @Override
+    public void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running) {
+        synchronized (mService.mGlobalLock) {
+            final WindowState win = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (win != null) {
+                win.notifyInsetsAnimationRunningStateChanged(running);
             }
         }
     }

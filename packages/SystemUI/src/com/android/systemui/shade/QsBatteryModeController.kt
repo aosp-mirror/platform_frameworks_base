@@ -2,9 +2,9 @@ package com.android.systemui.shade
 
 import android.content.Context
 import android.view.DisplayCutout
-import com.android.systemui.res.R
 import com.android.systemui.battery.BatteryMeterView
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import javax.inject.Inject
 
 /**
@@ -14,9 +14,11 @@ import javax.inject.Inject
 class QsBatteryModeController
 @Inject
 constructor(
-    private val context: Context,
-    private val insetsProvider: StatusBarContentInsetsProvider,
+    @ShadeDisplayAware private val context: Context,
+    insetsProviderStore: StatusBarContentInsetsProviderStore,
 ) {
+
+    private val insetsProvider = insetsProviderStore.defaultDisplay
 
     private companion object {
         // MotionLayout frames are in [0, 100]. Where 0 and 100 are reserved for start and end
@@ -65,6 +67,5 @@ constructor(
     private fun hasCenterCutout(cutout: DisplayCutout?): Boolean =
         cutout?.let {
             !insetsProvider.currentRotationHasCornerCutout() && !it.boundingRectTop.isEmpty
-        }
-            ?: false
+        } ?: false
 }

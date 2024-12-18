@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ნაგულისხმებად დაყენებულია ნომრის დაფარვა. შემდეგი ზარი: არ არის დაფარული."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: დაფარულია."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: არ არის დაფარული."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ეს აპი არ არის თავსებადი 16 კბაიტისთვის. APK გასწორების შემოწმება ვერ მოხერხდა. ეს აპი გაიშვება გვერდის ზომის თავსებადი რეჟიმის გამოყენებით. საუკეთესო თავსებადობისთვის, ხელახლა შექმენით აპლიკაცია 16 კბაიტი მხარდაჭერით. დამატებითი ინფორმაციისთვის იხილეთ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ეს აპი არ არის თავსებადი 16 კბაიტისთვის. ELF გასწორების შემოწმება ვერ მოხერხდა. ეს აპი გაიშვება გვერდის ზომის თავსებადი რეჟიმის გამოყენებით. საუკეთესო თავსებადობისთვის, ხელახლა შექმენით აპლიკაცია 16 კბაიტი მხარდაჭერით. დამატებითი ინფორმაციისთვის იხილეთ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ეს აპი არ არის თავსებადი 16 კბაიტისთვის. APK და ELF გასწორების შემოწმება ვერ მოხერხდა. ეს აპი გაიშვება გვერდის ზომის თავსებადი რეჟიმის გამოყენებით. საუკეთესო თავსებადობისთვის, ხელახლა შექმენით აპლიკაცია 16 კბაიტი მხარდაჭერით. დამატებითი ინფორმაციისთვის იხილეთ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"სერვისი არ არის მიწოდებული."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"არ შეგიძლიათ აბონენტის ID პარამეტრების შეცვლა."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"მონაცემები გადართულია <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ზე"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ნებას რთავს აპს, დაადგინოს შედარებითი პოზიცია ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ინტერაქცია ახლომახლო Wi-Fi მოწყობილობებთან"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"საშუალებას აძლევს აპს, განაცხადოს ახლომახლო Wi-Fi მოწყობილობების შესახებ, დაუკავშირდეს მათ და განსაზღვროს მათი შედარებითი პოზიცია"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ახლომახლო მოწყობილობებთან მიმართ. პოზიციის დადგენა"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"აპისთვის ახლომახლო მოწყობილობებთან მიმართებაში პოზიციის დადგენის ნების დართვა"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"უპირატესი NFC გადახდის სერვისის ინფორმაცია"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
@@ -1153,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> საათში"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> დღეში"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> წელში"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> წთ.-ის წინ"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> სთ.-ის წინ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> დღის წინ"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> წლის წინ"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> წთ."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> სთ."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> დღე"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> წელი"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> წთ.-ში"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> სთ.-ში"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> დღეში"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> წელში"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> წთ.-ის წინ"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> სთ.-ის წინ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> დღის წინ"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> წლის წინ"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# წუთის წინ}other{# წუთის წინ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# საათის წინ}other{# საათის წინ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# დღის წინ}other{# დღის წინ}}"</string>
@@ -1406,7 +1427,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ USB გამართვის გამოსართავად"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
@@ -1746,8 +1767,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"აპი მალავს ნებართვის მოთხოვნას, ასე რომ, თქვენი პასუხი ვერ დადასტურდება."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"შეეხეთ ფუნქციას მისი გამოყენების დასაწყებად:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"აირჩიეთ ფუნქციები, რომელთა გამოყენებაც გსურთ მარტივი წვდომის ღილაკით"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"ხმის კლავიშების მალსახმობების მეშვეობით გამოსაყენებელი ფუნქციების არჩევა"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> გამორთულია"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"მალსახმობების რედაქტირება"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"მზადაა"</string>
@@ -1939,11 +1959,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენა"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ძილისას"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"არ შემაწუხოთ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"მართავს <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ჩართული"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"გამორთული"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ნებისმიერი კალენდარი"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
@@ -2011,6 +2034,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ეკრანის დაბლოკვის დაყენება"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ეკრანის დაბლოკვის დაყენება"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"კერძო სივრცის გამოსაყენებლად დააყენეთ ამ მოწყობილობაზე ეკრანის დაბლოკვა"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"კერძო სივრცის წასაშლელად დააყენეთ ეკრანის დაბლოკვა ამ მოწყობილობაზე"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
@@ -2129,11 +2153,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ზარების და შეტყობინებების მიღებისას ვიბრაცია ჩაირთვება"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ზარები და შეტყობინებები დადუმებული იქნება"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"სისტემის ცვლილებები"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"არ შემაწუხოთ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ახალი: „არ შემაწუხოთ“ რეჟიმი მალავს შეტყობინებებს"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"შეეხეთ მეტის გასაგებად და შესაცვლელად."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„არ შემაწუხოთ“ რეჟიმი შეცვლილია"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"შეტყობინების პარამეტრების შემოწმება"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-ზე შეტყობინებების გასაგზავნად საჭიროა თქვენ მიერ დაინსტალირებული აპებისთვის ნებართვის მინიჭება. არსებული აპებისთვის ამ ნებართვის შესაცვლელად შეეხეთ."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"შემახსენე მოგვიან."</string>
@@ -2429,7 +2448,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"შეტყობინებების გაგზავნა და მიღება მობილური ან Wi-Fi ქსელის გარეშე"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"მუშაობის პრინციპი"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"„ქსელის ავტომატურად არჩევის“ ჩართვა"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ჩართეთ „ქსელის ავტომატურად არჩევა“ პარამეტრებში, რათა თქვენმა ტელეფონმა სატელიტთან თავსებადი ქსელის პოვნა შეძლოს"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ჩართვა"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"უკან დაბრუნება"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"მომლოდინე..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"სატელიტური SOS ახლა ხელმისაწვდომია"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"შეგიძლიათ, შეტყობინება გაუგზავნოთ გადაუდებელი დახმარების სამსახურებს, თუ მობილური ან Wi-Fi ქსელი არ არის ხელმისაწვდომი. საჭიროა, რომ Google Messages იყოს თქვენი ნაგულისხმევი შეტყობინებების აპი."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"სატელიტური SOS არ არის მხარდაჭერილი"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"სატელიტური SOS არ არის მხარდაჭერილი ამ მოწყობილობაზე"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"სატელიტური SOS არ არის დაყენებული"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"დარწმუნდით, რომ დაკავშირებული ხართ ინტერნეტთან და ცადეთ ხელახლა დაყენება"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"სატელიტური SOS არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"სატელიტური SOS ამ ქვეყანასა თუ რეგიონში არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"სატელიტური SOS არ არის დაყენებული"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"შეტყობინებების სატელიტური მიმოცვლისთვის თქვენს ნაგულისხმევ შეტყობინებების აპად დააყენეთ Google Messages"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"სატელიტური SOS არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ამ ქვეყანაში ან რეგიონში სატელიტური SOS-ის ხელმისაწვდომობის შესამოწმებლად ჩართეთ მდებარეობის პარამეტრები"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"შეტყობინებების სატელიტური მიმოცვლა ხელმისაწვდომია"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"შეტყობინების გაგზავნა სატელიტის საშუალებით შეგიძლიათ, თუ მობილურზე ან Wi-Fi ქსელზე წვდომა არ გაქვთ. საჭიროა, რომ Google Messages იყოს თქვენი ნაგულისხმევი შეტყობინებების აპი."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"შეტყობინებების სატელიტური მიმოცვლა მხარდაჭერილი არ არის"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ამ მოწყობილობაზე შეტყობინებების სატელიტური მიმოცვლა არ არის მხარდაჭერილი"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"შეტყობინებების სატელიტური მიმოცვლა დაყენებული არ არის"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"დარწმუნდით, რომ დაკავშირებული ხართ ინტერნეტთან და ცადეთ ხელახლა დაყენება"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ამ ქვეყანაში ან რეგიონში შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"შეტყობინებების სატელიტური მიმოცვლა დაყენებული არ არის"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"შეტყობინებების სატელიტური მიმოცვლისთვის თქვენს ნაგულისხმევ შეტყობინებების აპად დააყენეთ Google Messages"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ამ ქვეყანაში ან რეგიონში შეტყობინებების სატელიტური მიმოცვლის ხელმისაწვდომობის შესამოწმებლად ჩართეთ მდებარეობის პარამეტრები"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ანაბეჭდით განბლოკვის ხელახლა დაყენება"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>-ისა და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>

@@ -19,8 +19,10 @@ package com.android.settingslib.datastore
 import androidx.annotation.AnyThread
 import androidx.annotation.GuardedBy
 import androidx.collection.MutableScatterMap
+import com.google.errorprone.annotations.CanIgnoreReturnValue
 import java.util.WeakHashMap
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Callback to be informed of changes in [KeyedObservable] object.
@@ -62,8 +64,9 @@ interface KeyedObservable<K> {
      *
      * @param observer observer to be notified
      * @param executor executor to run the callback
+     * @return if the observer is newly added
      */
-    fun addObserver(observer: KeyedObserver<K?>, executor: Executor)
+    @CanIgnoreReturnValue fun addObserver(observer: KeyedObserver<K?>, executor: Executor): Boolean
 
     /**
      * Adds an observer on given key.
@@ -73,14 +76,24 @@ interface KeyedObservable<K> {
      * @param key key to observe
      * @param observer observer to be notified
      * @param executor executor to run the callback
+     * @return if the observer is newly added
      */
-    fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor)
+    @CanIgnoreReturnValue
+    fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor): Boolean
 
-    /** Removes observer. */
-    fun removeObserver(observer: KeyedObserver<K?>)
+    /**
+     * Removes observer.
+     *
+     * @return if the observer is found and removed
+     */
+    @CanIgnoreReturnValue fun removeObserver(observer: KeyedObserver<K?>): Boolean
 
-    /** Removes observer on given key. */
-    fun removeObserver(key: K, observer: KeyedObserver<K>)
+    /**
+     * Removes observer on given key.
+     *
+     * @return if the observer is found and removed
+     */
+    @CanIgnoreReturnValue fun removeObserver(key: K, observer: KeyedObserver<K>): Boolean
 
     /**
      * Notifies all observers that a change occurs.
@@ -102,6 +115,10 @@ interface KeyedObservable<K> {
     fun notifyChange(key: K, reason: Int)
 }
 
+/** Delegation of [KeyedObservable]. */
+open class KeyedObservableDelegate<K>(delegate: KeyedObservable<K>) :
+    KeyedObservable<K> by delegate
+
 /** A thread safe implementation of [KeyedObservable]. */
 open class KeyedDataObservable<K> : KeyedObservable<K> {
     // Instead of @GuardedBy("this"), guarded by itself because KeyedDataObservable object could be
@@ -111,14 +128,17 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
     @GuardedBy("itself")
     private val keyedObservers = MutableScatterMap<K, WeakHashMap<KeyedObserver<K>, Executor>>()
 
-    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) {
+    @CanIgnoreReturnValue
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor): Boolean {
         val oldExecutor = synchronized(observers) { observers.put(observer, executor) }
         if (oldExecutor != null && oldExecutor != executor) {
             throw IllegalStateException("Add $observer twice, old=$oldExecutor, new=$executor")
         }
+        return oldExecutor == null
     }
 
-    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) {
+    @CanIgnoreReturnValue
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor): Boolean {
         val oldExecutor =
             synchronized(keyedObservers) {
                 keyedObservers.getOrPut(key) { WeakHashMap() }.put(observer, executor)
@@ -126,20 +146,23 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
         if (oldExecutor != null && oldExecutor != executor) {
             throw IllegalStateException("Add $observer twice, old=$oldExecutor, new=$executor")
         }
+        return oldExecutor == null
     }
 
-    override fun removeObserver(observer: KeyedObserver<K?>) {
-        synchronized(observers) { observers.remove(observer) }
-    }
+    @CanIgnoreReturnValue
+    override fun removeObserver(observer: KeyedObserver<K?>) =
+        synchronized(observers) { observers.remove(observer) } != null
 
-    override fun removeObserver(key: K, observer: KeyedObserver<K>) {
+    @CanIgnoreReturnValue
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) =
         synchronized(keyedObservers) {
-            val observers = keyedObservers[key]
-            if (observers?.remove(observer) != null && observers.isEmpty()) {
+            val observers = keyedObservers[key] ?: return false
+            val removed = observers.remove(observer) != null
+            if (removed && observers.isEmpty()) {
                 keyedObservers.remove(key)
             }
+            removed
         }
-    }
 
     override fun notifyChange(reason: Int) {
         // make a copy to avoid potential ConcurrentModificationException
@@ -180,4 +203,84 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
             entry.value.execute { observer.onKeyChanged(key, reason) }
         }
     }
+
+    open fun hasAnyObserver(): Boolean {
+        synchronized(observers) { if (observers.isNotEmpty()) return true }
+        synchronized(keyedObservers) { if (keyedObservers.isNotEmpty()) return true }
+        return false
+    }
+}
+
+/** [KeyedDataObservable] that maintains a counter for the observers. */
+abstract class AbstractKeyedDataObservable<K> : KeyedDataObservable<K>() {
+    /**
+     * Counter of observers.
+     *
+     * The value is accurate only when [addObserver] and [removeObserver] are invoked in pairs.
+     */
+    private val counter = AtomicInteger()
+
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) =
+        if (super.addObserver(observer, executor)) {
+            onObserverAdded()
+            true
+        } else {
+            false
+        }
+
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) =
+        if (super.addObserver(key, observer, executor)) {
+            onObserverAdded()
+            true
+        } else {
+            false
+        }
+
+    private fun onObserverAdded() {
+        if (counter.getAndIncrement() == 0) onFirstObserverAdded()
+    }
+
+    /** Callbacks when the first observer is just added. */
+    protected abstract fun onFirstObserverAdded()
+
+    override fun removeObserver(observer: KeyedObserver<K?>) =
+        if (super.removeObserver(observer)) {
+            onObserverRemoved()
+            true
+        } else {
+            false
+        }
+
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) =
+        if (super.removeObserver(key, observer)) {
+            onObserverRemoved()
+            true
+        } else {
+            false
+        }
+
+    private fun onObserverRemoved() {
+        if (counter.decrementAndGet() == 0) onLastObserverRemoved()
+    }
+
+    /** Callbacks when the last observer is just removed. */
+    protected abstract fun onLastObserverRemoved()
+
+    override fun hasAnyObserver() = counter.get() > 0
+}
+
+/** [KeyedObservable] with no-op implementations for all interfaces. */
+open class NoOpKeyedObservable<K> : KeyedObservable<K> {
+
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) = true
+
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) = true
+
+    override fun removeObserver(observer: KeyedObserver<K?>) = true
+
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) = true
+
+    override fun notifyChange(reason: Int) {}
+
+    override fun notifyChange(key: K, reason: Int) {}
 }

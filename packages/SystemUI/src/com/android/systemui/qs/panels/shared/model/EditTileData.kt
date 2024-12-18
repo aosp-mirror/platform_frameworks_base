@@ -19,12 +19,14 @@ package com.android.systemui.qs.panels.shared.model
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 
 data class EditTileData(
     val tileSpec: TileSpec,
     val icon: Icon,
     val label: Text,
     val appName: Text?,
+    val category: TileCategory,
 ) {
     init {
         check(

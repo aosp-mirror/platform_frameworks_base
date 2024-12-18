@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STOR
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
@@ -61,6 +62,7 @@ import static com.android.server.pm.PackageManagerShellCommandDataLoader.Metadat
 
 import android.Manifest;
 import android.annotation.AnyThread;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -87,6 +89,7 @@ import android.content.pm.DataLoaderManager;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.FileSystemControlParcel;
+import android.content.pm.Flags;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IOnChecksumsReadyListener;
@@ -107,6 +110,7 @@ import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
@@ -131,6 +135,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.Process;
@@ -186,6 +191,7 @@ import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
+import com.android.server.art.ArtManagedInstallFileHelper;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -405,6 +411,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     private final StagingManager mStagingManager;
 
+    private final InstallDependencyHelper mInstallDependencyHelper;
+
     final int sessionId;
     final int userId;
     final SessionParams params;
@@ -533,6 +541,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private DomainSet mPreVerifiedDomains;
+
+    private AtomicBoolean mDependencyInstallerEnabled = new AtomicBoolean();
+    private AtomicInteger mMissingSharedLibraryCount = new AtomicInteger();
 
     static class FileEntry {
         private final int mIndex;
@@ -848,7 +859,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             if (file.getName().endsWith(V4Signature.EXT)) return false;
             if (isAppMetadata(file)) return false;
-            if (DexMetadataHelper.isDexMetadataFile(file)) return false;
+            if (com.android.art.flags.Flags.artServiceV3()) {
+                if (ArtManagedInstallFileHelper.isArtManaged(file.getPath())) return false;
+            } else {
+                if (DexMetadataHelper.isDexMetadataFile(file)) return false;
+            }
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
             if (ApkChecksums.isDigestOrDigestSignatureFile(file)) return false;
             return true;
@@ -870,6 +885,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.isDirectory()) return false;
             if (!file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             return true;
+        }
+    };
+    private static final FileFilter sArtManagedFilter = new FileFilter() {
+        @Override
+        public boolean accept(File file) {
+            return !file.isDirectory() && com.android.art.flags.Flags.artServiceV3()
+                    && ArtManagedInstallFileHelper.isArtManaged(file.getPath());
         }
     };
 
@@ -1060,6 +1082,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallDpcPackagesPermissionGranted = (snapshot.checkUidPermission(
                 android.Manifest.permission.INSTALL_DPC_PACKAGES, mInstallerUid)
                 == PackageManager.PERMISSION_GRANTED);
+        boolean isInstallDependencyPackagesPermissionGranted = false;
+        if (Flags.sdkDependencyInstaller()) {
+            isInstallDependencyPackagesPermissionGranted = (snapshot.checkUidPermission(
+                    android.Manifest.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES, mInstallerUid)
+                    == PackageManager.PERMISSION_GRANTED);
+        }
         // Also query the package uid for archived packages, so that the user confirmation
         // dialog can be displayed for updating archived apps.
         final int targetPackageUid = snapshot.getPackageUid(packageName,
@@ -1081,10 +1109,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isEmergencyInstall =
                 isEmergencyInstallerEnabled(packageName, snapshot, userId, mInstallerUid);
+        boolean isSdkOrStaticLibraryInstall = false;
+        synchronized (mLock) {
+            if (mPackageLite != null) {
+                isSdkOrStaticLibraryInstall =
+                        mPackageLite.isIsSdkLibrary() || mPackageLite.isIsStaticLibrary();
+            }
+        }
         final boolean isPermissionGranted = isInstallPermissionGranted
                 || (isUpdatePermissionGranted && isUpdate)
                 || (isSelfUpdatePermissionGranted && isSelfUpdate)
-                || (isInstallDpcPackagesPermissionGranted && hasDeviceAdminReceiver);
+                || (isInstallDpcPackagesPermissionGranted && hasDeviceAdminReceiver)
+                || (isInstallDependencyPackagesPermissionGranted && isSdkOrStaticLibraryInstall);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
@@ -1156,7 +1192,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             boolean prepared, boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int sessionErrorCode,
-            String sessionErrorMessage, DomainSet preVerifiedDomains) {
+            String sessionErrorMessage, DomainSet preVerifiedDomains,
+            InstallDependencyHelper installDependencyHelper) {
         mCallback = callback;
         mContext = context;
         mPm = pm;
@@ -1165,6 +1202,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mSilentUpdatePolicy = silentUpdatePolicy;
         mHandler = new Handler(looper, mHandlerCallback);
         mStagingManager = stagingManager;
+        mInstallDependencyHelper = installDependencyHelper;
 
         this.sessionId = sessionId;
         this.userId = userId;
@@ -1380,6 +1418,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.packageSource = params.packageSource;
             info.applicationEnabledSettingPersistent = params.applicationEnabledSettingPersistent;
             info.pendingUserActionReason = userActionRequirementToReason(mUserActionRequirement);
+            info.isAutoInstallingDependenciesEnabled = params.isAutoInstallDependenciesEnabled;
         }
         return info;
     }
@@ -1583,6 +1622,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private List<File> getAddedApksLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sAddedApkFilter);
+    }
+
+    @GuardedBy("mLock")
+    private List<String> getArtManagedFilePathsLocked() {
+        String[] names = getNamesLocked();
+        ArrayList<String> result = new ArrayList<>(names.length);
+        for (String name : names) {
+            File file = new File(stageDir, name);
+            if (sArtManagedFilter.accept(file)) {
+                result.add(file.getPath());
+            }
+        }
+        return result;
     }
 
     @GuardedBy("mLock")
@@ -2567,6 +2619,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         maybeFinishChildSessions(error, msg);
     }
 
+    private void onSessionDependencyResolveFailure(int error, String msg) {
+        Slog.e(TAG, "Failed to resolve dependency for session " + sessionId);
+        // Dispatch message to remove session from PackageInstallerService.
+        dispatchSessionFinished(error, msg, null);
+        maybeFinishChildSessions(error, msg);
+    }
+
     private void onSystemDataLoaderUnrecoverable() {
         final String packageName = getPackageName();
         if (TextUtils.isEmpty(packageName)) {
@@ -2821,6 +2880,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // since installation is in progress.
             activate();
         }
+        try {
+            List<PackageInstallerSession> children = getChildSessions();
+            if (isMultiPackage()) {
+                for (PackageInstallerSession child : children) {
+                    child.prepareInheritedFiles();
+                    child.parseApk();
+                }
+            } else {
+                prepareInheritedFiles();
+                parseApk();
+            }
+        }  catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            final String errorMsg = PackageManager.installStatusToString(e.error, completeMsg);
+            setSessionFailed(e.error, errorMsg);
+            onSessionVerificationFailure(e.error, errorMsg);
+        }
 
         if (mVerificationInProgress) {
             Slog.w(TAG, "Verification is already in progress for session " + sessionId);
@@ -2840,12 +2916,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             List<PackageInstallerSession> children = getChildSessions();
             if (isMultiPackage()) {
                 for (PackageInstallerSession child : children) {
-                    child.prepareInheritedFiles();
-                    child.parseApkAndExtractNativeLibraries();
+                    child.extractNativeLibraries();
                 }
             } else {
-                prepareInheritedFiles();
-                parseApkAndExtractNativeLibraries();
+                extractNativeLibraries();
             }
             verifyNonStaged();
         } catch (PackageManagerException e) {
@@ -2962,7 +3036,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStageDirInUse = true;
     }
 
-    private void parseApkAndExtractNativeLibraries() throws PackageManagerException {
+    private void parseApk() throws PackageManagerException {
         synchronized (mLock) {
             if (mStageDirInUse) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -2995,12 +3069,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // stage dir here.
                 // Besides, PackageLite may be null for staged sessions that don't complete
                 // pre-reboot verification.
-                result = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
             } else {
-                result = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
             }
-            if (result != null) {
-                mPackageLite = result;
+        }
+    }
+
+    private void extractNativeLibraries() throws PackageManagerException {
+        synchronized (mLock) {
+            if (mPackageLite != null) {
                 if (!isApexSession()) {
                     synchronized (mProgressLock) {
                         mInternalProgress = 0.5f;
@@ -3155,7 +3233,56 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     /* extras= */ null, /* forPreapproval= */ false);
             return;
         }
-        install();
+
+        if (Flags.sdkDependencyInstaller()
+                && params.isAutoInstallDependenciesEnabled
+                && !isMultiPackage()) {
+            mDependencyInstallerEnabled.set(true);
+            resolveLibraryDependenciesIfNeeded();
+        } else {
+            install();
+        }
+    }
+
+
+    private void resolveLibraryDependenciesIfNeeded() {
+        synchronized (mLock) {
+            List<SharedLibraryInfo> missingLibraries = new ArrayList<>();
+            try {
+                missingLibraries = mInstallDependencyHelper.getMissingSharedLibraries(mPackageLite);
+            } catch (PackageManagerException e) {
+                handleDependencyResolutionFailure(e);
+            } catch (Exception e) {
+                handleDependencyResolutionFailure(
+                        new PackageManagerException(
+                                INSTALL_FAILED_MISSING_SHARED_LIBRARY, e.getMessage()));
+            }
+
+            mMissingSharedLibraryCount.set(missingLibraries.size());
+            mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(missingLibraries,
+                    mPackageLite, mPm.snapshotComputer(), userId, mHandler,
+                    new OutcomeReceiver<>() {
+
+                        @Override
+                        public void onResult(Void result) {
+                            install();
+                        }
+
+                        @Override
+                        public void onError(@NonNull PackageManagerException e) {
+                            handleDependencyResolutionFailure(e);
+                        }
+                    });
+        }
+    }
+
+    private void handleDependencyResolutionFailure(@NonNull PackageManagerException e) {
+        final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+        setSessionFailed(e.error, completeMsg);
+        onSessionDependencyResolveFailure(e.error, completeMsg);
+        PackageMetrics.onDependencyInstallationFailure(
+                sessionId, getPackageName(), e.error, mInstallerUid, params,
+                mMissingSharedLibraryCount.get());
     }
 
     /**
@@ -3225,7 +3352,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
                     user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm,
-                    mHasAppMetadataFile);
+                    mHasAppMetadataFile, mDependencyInstallerEnabled.get(),
+                    mMissingSharedLibraryCount.get());
         }
     }
 
@@ -3377,7 +3505,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final File targetFile = new File(stageDir, targetName);
-        resolveAndStageFileLocked(addedFile, targetFile, null);
+        resolveAndStageFileLocked(addedFile, targetFile, null, List.of() /* artManagedFilePaths */);
         mResolvedBaseFile = targetFile;
 
         // Populate package name of the apex session
@@ -3470,6 +3598,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     TextUtils.formatSimple("Session: %d. No packages staged in %s", sessionId,
                           stageDir.getAbsolutePath()));
         }
+        final List<String> artManagedFilePaths = getArtManagedFilePathsLocked();
 
         // Verify that all staged packages are internally consistent
         final ArraySet<String> stagedSplits = new ArraySet<>();
@@ -3526,7 +3655,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final File targetFile = new File(stageDir, targetName);
             if (!isArchivedInstallation()) {
                 final File sourceFile = new File(apk.getPath());
-                resolveAndStageFileLocked(sourceFile, targetFile, apk.getSplitName());
+                resolveAndStageFileLocked(
+                        sourceFile, targetFile, apk.getSplitName(), artManagedFilePaths);
             }
 
             // Base is coming from session
@@ -3687,7 +3817,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Inherit base if not overridden.
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                inheritFileLocked(mResolvedBaseFile);
+                inheritFileLocked(mResolvedBaseFile, artManagedFilePaths);
                 // Collect the requiredSplitTypes from base
                 CollectionUtils.addAll(requiredSplitTypes, existing.getBaseRequiredSplitTypes());
             } else if ((params.installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
@@ -3706,7 +3836,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     final boolean splitReplaced = stagedSplits.contains(splitName);
                     if (!splitReplaced && !splitRemoved) {
-                        inheritFileLocked(splitFile);
+                        inheritFileLocked(splitFile, artManagedFilePaths);
                         // Collect the requiredSplitTypes and staged splitTypes from splits
                         CollectionUtils.addAll(requiredSplitTypes,
                                 existing.getRequiredSplitTypes()[i]);
@@ -3892,6 +4022,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 DexMetadataHelper.isFsVerityRequired());
     }
 
+    @FlaggedApi(com.android.art.flags.Flags.FLAG_ART_SERVICE_V3)
+    @GuardedBy("mLock")
+    private void maybeStageArtManagedInstallFilesLocked(File origFile, File targetFile,
+            List<String> artManagedFilePaths) throws PackageManagerException {
+        for (String path : ArtManagedInstallFileHelper.filterPathsForApk(
+                     artManagedFilePaths, origFile.getPath())) {
+            File artManagedFile = new File(path);
+            if (!FileUtils.isValidExtFilename(artManagedFile.getName())) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INVALID_APK, "Invalid filename: " + artManagedFile);
+            }
+            File targetArtManagedFile = new File(
+                    ArtManagedInstallFileHelper.getTargetPathForApk(path, targetFile.getPath()));
+            stageFileLocked(artManagedFile, targetArtManagedFile);
+        }
+    }
+
     private IncrementalFileStorages getIncrementalFileStorages() {
         synchronized (mLock) {
             return mIncrementalFileStorages;
@@ -3989,8 +4136,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName)
-            throws PackageManagerException {
+    private void resolveAndStageFileLocked(File origFile, File targetFile, String splitName,
+            List<String> artManagedFilePaths) throws PackageManagerException {
         stageFileLocked(origFile, targetFile);
 
         // Stage APK's fs-verity signature if present.
@@ -4001,8 +4148,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && VerityUtils.isFsVeritySupported()) {
             maybeStageV4SignatureLocked(origFile, targetFile);
         }
-        // Stage dex metadata (.dm) and corresponding fs-verity signature if present.
-        maybeStageDexMetadataLocked(origFile, targetFile);
+        // Stage ART managed install files (e.g., dex metadata (.dm)) and corresponding fs-verity
+        // signature if present.
+        if (com.android.art.flags.Flags.artServiceV3()) {
+            maybeStageArtManagedInstallFilesLocked(origFile, targetFile, artManagedFilePaths);
+        } else {
+            maybeStageDexMetadataLocked(origFile, targetFile);
+        }
         // Stage checksums (.digests) if present.
         maybeStageDigestsLocked(origFile, targetFile, splitName);
     }
@@ -4027,7 +4179,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @GuardedBy("mLock")
-    private void inheritFileLocked(File origFile) {
+    private void inheritFileLocked(File origFile, List<String> artManagedFilePaths) {
         mResolvedInheritedFiles.add(origFile);
 
         maybeInheritFsveritySignatureLocked(origFile);
@@ -4035,12 +4187,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             maybeInheritV4SignatureLocked(origFile);
         }
 
-        // Inherit the dex metadata if present.
-        final File dexMetadataFile =
-                DexMetadataHelper.findDexMetadataForFile(origFile);
-        if (dexMetadataFile != null) {
-            mResolvedInheritedFiles.add(dexMetadataFile);
-            maybeInheritFsveritySignatureLocked(dexMetadataFile);
+        // Inherit ART managed install files (e.g., dex metadata (.dm)) if present.
+        if (com.android.art.flags.Flags.artServiceV3()) {
+            for (String path : ArtManagedInstallFileHelper.filterPathsForApk(
+                         artManagedFilePaths, origFile.getPath())) {
+                File artManagedFile = new File(path);
+                mResolvedInheritedFiles.add(artManagedFile);
+                maybeInheritFsveritySignatureLocked(artManagedFile);
+            }
+        } else {
+            final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(origFile);
+            if (dexMetadataFile != null) {
+                mResolvedInheritedFiles.add(dexMetadataFile);
+                maybeInheritFsveritySignatureLocked(dexMetadataFile);
+            }
         }
         // Inherit the digests if present.
         final File digestsFile = ApkChecksums.findDigestsForFile(origFile);
@@ -4207,9 +4367,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return the uid of the owner this session
      */
     public int getInstallerUid() {
-        synchronized (mLock) {
-            return mInstallerUid;
-        }
+        return mInstallerUid;
     }
 
     /**
@@ -5768,7 +5926,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull PackageManagerService pm, Looper installerThread,
             @NonNull StagingManager stagingManager, @NonNull File sessionsDir,
             @NonNull PackageSessionProvider sessionProvider,
-            @NonNull SilentUpdatePolicy silentUpdatePolicy)
+            @NonNull SilentUpdatePolicy silentUpdatePolicy,
+            @NonNull InstallDependencyHelper installDependencyHelper)
             throws IOException, XmlPullParserException {
         final int sessionId = in.getAttributeInt(null, ATTR_SESSION_ID);
         final int userId = in.getAttributeInt(null, ATTR_USER_ID);
@@ -5972,6 +6131,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,
                 stageCid, fileArray, checksumsMap, prepared, committed, destroyed, sealed,
                 childSessionIdsArray, parentSessionId, isReady, isFailed, isApplied,
-                sessionErrorCode, sessionErrorMessage, preVerifiedDomains);
+                sessionErrorCode, sessionErrorMessage, preVerifiedDomains,
+                installDependencyHelper);
     }
 }

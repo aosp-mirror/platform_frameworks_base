@@ -53,13 +53,14 @@ per-file res/values/config_battery_saver.xml = file:/services/core/java/com/andr
 per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNERS
 
 # Device Idle
-per-file res/values/config_device_idle.xml = file:/apex/jobscheduler/OWNERS
+per-file res/values/config_device_idle.xml = file:/apex/jobscheduler/DEVICE_IDLE_OWNERS
 
 # Display Manager
 per-file res/values/config_display.xml = file:/services/core/java/com/android/server/display/OWNERS
 
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
+per-file res/*-watch-v*/* = file:/WEAR_OWNERS
 
 # Performance
 per-file res/values/config.xml = file:/PERFORMANCE_OWNERS

@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.ViewNodeBuilder;
@@ -37,6 +38,7 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.OutcomeReceiver;
 import android.os.Parcel;
+import android.os.PooledStringWriter;
 import android.os.SystemClock;
 import android.text.InputFilter;
 import android.util.Log;
@@ -353,6 +355,18 @@ public class AssistStructureTest {
         assertBigView(clone.getViewNode());
         assertControlFlags(clone.getViewNode());
 
+    }
+
+    @Test
+    public void testParcelTransferWriter_writeNull() {
+        AssistStructure structure = new AssistStructure(mActivity, FOR_AUTOFILL, NO_FLAGS);
+        Parcel parcel = Parcel.obtain();
+        AssistStructure.ParcelTransferWriter writer =
+                new AssistStructure.ParcelTransferWriter(structure, parcel);
+        writer.writeView(null, parcel, new PooledStringWriter(parcel), 0);
+
+        // No throw any exception.
+        assertTrue(true);
     }
 
     private EditText newSmallView() {

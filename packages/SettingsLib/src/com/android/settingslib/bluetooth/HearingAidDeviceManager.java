@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHearingAid;
-import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.le.ScanFilter;
@@ -94,6 +93,14 @@ public class HearingAidDeviceManager {
     boolean setSubDeviceIfNeeded(CachedBluetoothDevice newDevice) {
         final long hiSyncId = newDevice.getHiSyncId();
         if (isValidHiSyncId(hiSyncId)) {
+            // The remote device supports CSIP, the other ear should be processed as a member
+            // device. Ignore hiSyncId grouping from ASHA here.
+            if (newDevice.getProfiles().stream().anyMatch(
+                    profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                Log.w(TAG, "Skip ASHA grouping since this device supports CSIP");
+                return false;
+            }
+
             final CachedBluetoothDevice hearingAidDevice = getCachedDevice(hiSyncId);
             // Just add one of the hearing aids from a pair in the list that is shown in the UI.
             // Once there is another device with the same hiSyncId, to add new device as sub
@@ -161,6 +168,7 @@ public class HearingAidDeviceManager {
             // device. Ignore hiSyncId grouping from ASHA here.
             if (cachedDevice.getProfiles().stream().anyMatch(
                     profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                Log.w(TAG, "Skip ASHA grouping since this device supports CSIP");
                 continue;
             }
 
@@ -299,6 +307,10 @@ public class HearingAidDeviceManager {
         }
     }
 
+    void clearLocalDataIfNeeded(CachedBluetoothDevice device) {
+        HearingDeviceLocalDataManager.clear(mContext, device.getDevice());
+    }
+
     private void setAudioRoutingConfig(CachedBluetoothDevice device) {
         AudioDeviceAttributes hearingDeviceAttributes =
                 mRoutingHelper.getMatchedHearingDeviceAttributes(device);
@@ -419,8 +431,7 @@ public class HearingAidDeviceManager {
                 p -> p instanceof HapClientProfile)) {
             int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
             int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
-            if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
-                    && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
+            if (hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
                 final HearingAidInfo info = new HearingAidInfo.Builder()
                         .setLeAudioLocation(audioLocation)
                         .setHapDeviceType(hearingAidType)

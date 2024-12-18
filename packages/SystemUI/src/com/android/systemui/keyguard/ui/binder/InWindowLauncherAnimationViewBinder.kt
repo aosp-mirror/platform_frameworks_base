@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.keyguard.ui.viewmodel.InWindowLauncherAnimationViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Binds the [InWindowLauncherUnlockAnimationManager] "view", which manages the lifecycle and state

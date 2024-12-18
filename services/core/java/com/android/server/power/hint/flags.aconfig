@@ -14,3 +14,17 @@ flag {
     description: "Feature flag for adding session tag to hint session atom"
     bug: "345011125"
 }
+
+flag {
+    name: "reset_on_fork_enabled"
+    namespace: "game"
+    description: "Set reset_on_fork flag."
+    bug: "370988407"
+}
+
+flag {
+    name: "cpu_headroom_affinity_check"
+    namespace: "game"
+    description: "Check affinity on CPU headroom."
+    bug: "346604998"
+}

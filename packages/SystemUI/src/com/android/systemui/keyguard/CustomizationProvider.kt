@@ -30,12 +30,13 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.util.Log
-import com.android.app.tracing.coroutines.runBlocking
+import com.android.app.tracing.coroutines.runBlockingTraced as runBlocking
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCallback
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,6 +45,7 @@ class CustomizationProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
+    @Inject lateinit var shadeModeInteractor: ShadeModeInteractor
     @Inject lateinit var previewManager: KeyguardRemotePreviewManager
     @Inject @Main lateinit var mainDispatcher: CoroutineDispatcher
 
@@ -54,28 +56,29 @@ class CustomizationProvider :
             addURI(
                 Contract.AUTHORITY,
                 Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                    Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME,
+                    Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME
                 ),
                 MATCH_CODE_ALL_SLOTS,
             )
             addURI(
                 Contract.AUTHORITY,
                 Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                    Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME,
+                    Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME
                 ),
                 MATCH_CODE_ALL_AFFORDANCES,
             )
             addURI(
                 Contract.AUTHORITY,
                 Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                    Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME,
+                    Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME
                 ),
                 MATCH_CODE_ALL_SELECTIONS,
             )
+            addURI(Contract.AUTHORITY, Contract.FlagsTable.TABLE_NAME, MATCH_CODE_ALL_FLAGS)
             addURI(
                 Contract.AUTHORITY,
-                Contract.FlagsTable.TABLE_NAME,
-                MATCH_CODE_ALL_FLAGS,
+                Contract.RuntimeValuesTable.TABLE_NAME,
+                MATCH_CODE_ALL_RUNTIME_VALUES,
             )
         }
 
@@ -98,7 +101,8 @@ class CustomizationProvider :
                 MATCH_CODE_ALL_SLOTS,
                 MATCH_CODE_ALL_AFFORDANCES,
                 MATCH_CODE_ALL_FLAGS,
-                MATCH_CODE_ALL_SELECTIONS -> "vnd.android.cursor.dir/vnd."
+                MATCH_CODE_ALL_SELECTIONS,
+                MATCH_CODE_ALL_RUNTIME_VALUES -> "vnd.android.cursor.dir/vnd."
                 else -> null
             }
 
@@ -106,17 +110,18 @@ class CustomizationProvider :
             when (uriMatcher.match(uri)) {
                 MATCH_CODE_ALL_SLOTS ->
                     Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                        Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME,
+                        Contract.LockScreenQuickAffordances.SlotTable.TABLE_NAME
                     )
                 MATCH_CODE_ALL_AFFORDANCES ->
                     Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                        Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME,
+                        Contract.LockScreenQuickAffordances.AffordanceTable.TABLE_NAME
                     )
                 MATCH_CODE_ALL_SELECTIONS ->
                     Contract.LockScreenQuickAffordances.qualifiedTablePath(
-                        Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME,
+                        Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME
                     )
                 MATCH_CODE_ALL_FLAGS -> Contract.FlagsTable.TABLE_NAME
+                MATCH_CODE_ALL_RUNTIME_VALUES -> Contract.RuntimeValuesTable.TABLE_NAME
                 else -> null
             }
 
@@ -128,6 +133,7 @@ class CustomizationProvider :
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
+        if (!::mainDispatcher.isInitialized) return null
         if (uriMatcher.match(uri) != MATCH_CODE_ALL_SELECTIONS) {
             throw UnsupportedOperationException()
         }
@@ -142,12 +148,14 @@ class CustomizationProvider :
         selectionArgs: Array<out String>?,
         sortOrder: String?,
     ): Cursor? {
+        if (!::mainDispatcher.isInitialized) return null
         return runBlocking("$TAG#query", mainDispatcher) {
             when (uriMatcher.match(uri)) {
                 MATCH_CODE_ALL_AFFORDANCES -> queryAffordances()
                 MATCH_CODE_ALL_SLOTS -> querySlots()
                 MATCH_CODE_ALL_SELECTIONS -> querySelections()
                 MATCH_CODE_ALL_FLAGS -> queryFlags()
+                MATCH_CODE_ALL_RUNTIME_VALUES -> queryRuntimeValues()
                 else -> null
             }
         }
@@ -163,11 +171,8 @@ class CustomizationProvider :
         return 0
     }
 
-    override fun delete(
-        uri: Uri,
-        selection: String?,
-        selectionArgs: Array<out String>?,
-    ): Int {
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
+        if (!::mainDispatcher.isInitialized) return 0
         if (uriMatcher.match(uri) != MATCH_CODE_ALL_SELECTIONS) {
             throw UnsupportedOperationException()
         }
@@ -232,11 +237,7 @@ class CustomizationProvider :
             throw IllegalArgumentException("Cannot insert selection, affordance ID was empty!")
         }
 
-        val success =
-            interactor.select(
-                slotId = slotId,
-                affordanceId = affordanceId,
-            )
+        val success = interactor.select(slotId = slotId, affordanceId = affordanceId)
 
         return if (success) {
             Log.d(TAG, "Successfully selected $affordanceId for slot $slotId")
@@ -318,22 +319,14 @@ class CustomizationProvider :
             )
             .apply {
                 interactor.getSlotPickerRepresentations().forEach { representation ->
-                    addRow(
-                        arrayOf(
-                            representation.id,
-                            representation.maxSelectedAffordances,
-                        )
-                    )
+                    addRow(arrayOf(representation.id, representation.maxSelectedAffordances))
                 }
             }
     }
 
     private suspend fun queryFlags(): Cursor {
         return MatrixCursor(
-                arrayOf(
-                    Contract.FlagsTable.Columns.NAME,
-                    Contract.FlagsTable.Columns.VALUE,
-                )
+                arrayOf(Contract.FlagsTable.Columns.NAME, Contract.FlagsTable.Columns.VALUE)
             )
             .apply {
                 interactor.getPickerFlags().forEach { flag ->
@@ -351,10 +344,24 @@ class CustomizationProvider :
             }
     }
 
-    private suspend fun deleteSelection(
-        uri: Uri,
-        selectionArgs: Array<out String>?,
-    ): Int {
+    private fun queryRuntimeValues(): Cursor {
+        return MatrixCursor(
+                arrayOf(
+                    Contract.RuntimeValuesTable.Columns.NAME,
+                    Contract.RuntimeValuesTable.Columns.VALUE,
+                )
+            )
+            .apply {
+                addRow(
+                    arrayOf(
+                        Contract.RuntimeValuesTable.KEY_IS_SHADE_LAYOUT_WIDE,
+                        if (shadeModeInteractor.isShadeLayoutWide.value) 1 else 0,
+                    )
+                )
+            }
+    }
+
+    private suspend fun deleteSelection(uri: Uri, selectionArgs: Array<out String>?): Int {
         if (selectionArgs == null) {
             throw IllegalArgumentException(
                 "Cannot delete selection, selection arguments not included!"
@@ -372,11 +379,7 @@ class CustomizationProvider :
                     )
             }
 
-        val deleted =
-            interactor.unselect(
-                slotId = slotId,
-                affordanceId = affordanceId,
-            )
+        val deleted = interactor.unselect(slotId = slotId, affordanceId = affordanceId)
 
         return if (deleted) {
             Log.d(TAG, "Successfully unselected $affordanceId for slot $slotId")
@@ -394,5 +397,6 @@ class CustomizationProvider :
         private const val MATCH_CODE_ALL_AFFORDANCES = 2
         private const val MATCH_CODE_ALL_SELECTIONS = 3
         private const val MATCH_CODE_ALL_FLAGS = 4
+        private const val MATCH_CODE_ALL_RUNTIME_VALUES = 5
     }
 }

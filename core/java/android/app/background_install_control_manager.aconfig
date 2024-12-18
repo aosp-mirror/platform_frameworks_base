@@ -9,3 +9,10 @@ flag {
      is_fixed_read_only: true
      bug: "287507984"
 }
+
+flag {
+    name: "background_install_control_callback_api"
+    namespace: "preload_safety"
+    description: "Feature flag to enable the use of push API in background install control service"
+    bug: "369382811"
+}

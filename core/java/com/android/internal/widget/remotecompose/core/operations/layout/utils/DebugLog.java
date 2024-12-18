@@ -15,22 +15,23 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.utils;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 
-/**
- * Internal utility debug class
- */
+/** Internal utility debug class */
 public class DebugLog {
 
     public static final boolean DEBUG_LAYOUT_ON = false;
 
     public static class Node {
-        public Node parent;
-        public String name;
-        public String endString;
-        public ArrayList<Node> list = new ArrayList<>();
+        @Nullable public Node parent;
+        @NonNull public String name;
+        @NonNull public String endString;
+        @NonNull public ArrayList<Node> list = new ArrayList<>();
 
-        public Node(Node parent, String name) {
+        public Node(@Nullable Node parent, @NonNull String name) {
             this.parent = parent;
             this.name = name;
             this.endString = name + " DONE";
@@ -39,32 +40,32 @@ public class DebugLog {
             }
         }
 
-        public void add(Node node) {
+        public void add(@NonNull Node node) {
             list.add(node);
         }
     }
 
     public static class LogNode extends Node {
-        public LogNode(Node parent, String name) {
+        public LogNode(@Nullable Node parent, @NonNull String name) {
             super(parent, name);
         }
     }
 
-    public static Node node = new Node(null, "Root");
-    public static Node currentNode = node;
+    @NonNull public static Node node = new Node(null, "Root");
+    @NonNull public static Node currentNode = node;
 
     public static void clear() {
         node = new Node(null, "Root");
         currentNode = node;
     }
 
-    public static void s(StringValueSupplier valueSupplier) {
+    public static void s(@NonNull StringValueSupplier valueSupplier) {
         if (DEBUG_LAYOUT_ON) {
             currentNode = new Node(currentNode, valueSupplier.getString());
         }
     }
 
-    public static void log(StringValueSupplier valueSupplier) {
+    public static void log(@NonNull StringValueSupplier valueSupplier) {
         if (DEBUG_LAYOUT_ON) {
             new LogNode(currentNode, valueSupplier.getString());
         }
@@ -80,7 +81,7 @@ public class DebugLog {
         }
     }
 
-    public static void e(StringValueSupplier valueSupplier) {
+    public static void e(@NonNull StringValueSupplier valueSupplier) {
         if (DEBUG_LAYOUT_ON) {
             currentNode.endString = valueSupplier.getString();
             if (currentNode.parent != null) {
@@ -91,7 +92,7 @@ public class DebugLog {
         }
     }
 
-    public static void printNode(int indent, Node node, StringBuilder builder) {
+    public static void printNode(int indent, @NonNull Node node, @NonNull StringBuilder builder) {
         if (DEBUG_LAYOUT_ON) {
             StringBuilder indentationBuilder = new StringBuilder();
             for (int i = 0; i < indent; i++) {
@@ -109,8 +110,12 @@ public class DebugLog {
                 if (node instanceof LogNode) {
                     builder.append(indentation).append("     ").append(node.name).append("\n");
                 } else {
-                    builder.append(indentation).append("-- ").append(node.name)
-                            .append(" : ").append(node.endString).append("\n");
+                    builder.append(indentation)
+                            .append("-- ")
+                            .append(node.name)
+                            .append(" : ")
+                            .append(node.endString)
+                            .append("\n");
                 }
             }
         }
@@ -124,4 +129,3 @@ public class DebugLog {
         }
     }
 }
-

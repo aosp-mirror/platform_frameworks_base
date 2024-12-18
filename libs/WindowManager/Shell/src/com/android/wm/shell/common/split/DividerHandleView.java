@@ -103,7 +103,8 @@ public class DividerHandleView extends View {
         mHoveringHeight = mHeight > mWidth ? ((int) (mHeight * 1.5f)) : mHeight;
     }
 
-    void setIsLeftRightSplit(boolean isLeftRightSplit) {
+    /** sets whether it's a left/right or top/bottom split */
+    public void setIsLeftRightSplit(boolean isLeftRightSplit) {
         mIsLeftRightSplit = isLeftRightSplit;
         updateDimens();
     }

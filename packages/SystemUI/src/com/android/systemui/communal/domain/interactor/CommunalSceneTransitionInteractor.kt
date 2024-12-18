@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * This class listens to [SceneTransitionLayout] transitions and manages keyguard transition
@@ -73,7 +73,7 @@ constructor(
     private var progressJob: Job? = null
 
     private val currentToState: KeyguardState
-        get() = internalTransitionInteractor.currentTransitionInfoInternal.value.to
+        get() = internalTransitionInteractor.currentTransitionInfoInternal().to
 
     /**
      * The next keyguard state to trigger when exiting [CommunalScenes.Communal]. This is only used
@@ -87,7 +87,9 @@ constructor(
      */
     private val nextKeyguardStateInternal =
         combine(
-                keyguardInteractor.isAbleToDream,
+                // Don't use delayed dreaming signal as otherwise we might go to occluded or lock
+                // screen when closing hub if dream just started under the hub.
+                keyguardInteractor.isDreamingWithOverlay,
                 keyguardInteractor.isKeyguardOccluded,
                 keyguardInteractor.isKeyguardGoingAway,
                 keyguardInteractor.isKeyguardShowing,
@@ -156,7 +158,7 @@ constructor(
 
     private suspend fun handleIdle(
         prevTransition: ObservableTransitionState,
-        idle: ObservableTransitionState.Idle
+        idle: ObservableTransitionState.Idle,
     ) {
         if (
             prevTransition is ObservableTransitionState.Transition &&
@@ -186,7 +188,7 @@ constructor(
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
-            TransitionState.FINISHED
+            TransitionState.FINISHED,
         )
         resetTransitionData()
     }
@@ -195,7 +197,7 @@ constructor(
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
-                from = internalTransitionInteractor.currentTransitionInfoInternal.value.to,
+                from = internalTransitionInteractor.currentTransitionInfoInternal().to,
                 to = state,
                 animator = null,
                 modeOnCanceled = TransitionModeOnCanceled.REVERSE,
@@ -204,7 +206,7 @@ constructor(
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
-            TransitionState.FINISHED
+            TransitionState.FINISHED,
         )
         resetTransitionData()
     }
@@ -217,7 +219,7 @@ constructor(
 
     private suspend fun handleTransition(
         prevTransition: ObservableTransitionState,
-        transition: ObservableTransitionState.Transition
+        transition: ObservableTransitionState.Transition,
     ) {
         if (
             prevTransition.isTransitioning(from = transition.fromContent, to = transition.toContent)
@@ -271,7 +273,7 @@ constructor(
     }
 
     private suspend fun startTransitionToGlanceableHub() {
-        val currentState = internalTransitionInteractor.currentTransitionInfoInternal.value.to
+        val currentState = internalTransitionInteractor.currentTransitionInfoInternal().to
         val newTransition =
             TransitionInfo(
                 ownerName = this::class.java.simpleName,
@@ -295,7 +297,7 @@ constructor(
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             progress.coerceIn(0f, 1f),
-            TransitionState.RUNNING
+            TransitionState.RUNNING,
         )
     }
 }

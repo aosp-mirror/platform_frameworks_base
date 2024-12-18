@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item type="id" name="lockscreen_clock_view_large" />
+    <item type="id" name="lockscreen_clock_view" />
+
     <!-- View ids for elements in large weather clock -->
     <item type="id" name="weather_clock_time" />
     <item type="id" name="weather_clock_date" />
     <item type="id" name="weather_clock_weather_icon" />
     <item type="id" name="weather_clock_temperature" />
     <item type="id" name="weather_clock_alarm_dnd" />
+
+    <item type="id" name="HOUR_DIGIT_PAIR"/>
+    <item type="id" name="MINUTE_DIGIT_PAIR"/>
+    <item type="id" name="HOUR_FIRST_DIGIT"/>
+    <item type="id" name="HOUR_SECOND_DIGIT"/>
+    <item type="id" name="MINUTE_FIRST_DIGIT"/>
+    <item type="id" name="MINUTE_SECOND_DIGIT"/>
+    <item type="id" name="TIME_FULL_FORMAT"/>
+    <item type="id" name="DATE_FORMAT"/>
 </resources>

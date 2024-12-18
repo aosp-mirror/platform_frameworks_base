@@ -70,16 +70,17 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
 import com.android.server.art.ArtManagerLocal;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.ReasonMapping;
 import com.android.server.art.model.ArtFlags;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
+import com.android.server.pinner.PinnerService;
 import com.android.server.pm.PackageDexOptimizer.DexOptResult;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -88,6 +89,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -789,16 +791,6 @@ public final class DexOptHelper {
             }
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-
-                // This mirrors logic from commitReconciledScanResultLocked, where the library
-                // files needed for dexopt are assigned.
-                PackageSetting realPkgSetting = installRequest.getRealPackageSetting();
-                // Unfortunately, the updated system app flag is only tracked on this
-                // PackageSetting
-                boolean isUpdatedSystemApp =
-                        installRequest.getScannedPackageSetting().isUpdatedSystemApp();
-                realPkgSetting.getPkgState().setUpdatedSystemApp(isUpdatedSystemApp);
-
                 DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
                         installRequest, dexoptOptions);
                 installRequest.onDexoptFinished(dexOptResult);
@@ -819,10 +811,16 @@ public final class DexOptHelper {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final String packageName = ps.getPackageName();
 
+        PackageSetting uncommittedPs = null;
+        if (Flags.improveInstallFreeze()) {
+            uncommittedPs = ps;
+        }
+
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
         try (PackageManagerLocal.FilteredSnapshot snapshot =
-                     packageManagerLocal.withFilteredSnapshot()) {
+                     PackageManagerLocalImpl.withFilteredSnapshot(packageManagerLocal,
+                uncommittedPs)) {
             boolean ignoreDexoptProfile =
                     (installRequest.getInstallFlags()
                             & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
@@ -886,7 +884,8 @@ public final class DexOptHelper {
 
         @Override
         public void onApexStaged(@NonNull ApexStagedEvent event) {
-            mArtManager.onApexStaged(event.stagedApexModuleNames);
+            mArtManager.onApexStaged(Arrays.stream(event.stagedApexInfos)
+                    .map(info -> info.moduleName).toArray(String[]::new));
         }
     }
 }

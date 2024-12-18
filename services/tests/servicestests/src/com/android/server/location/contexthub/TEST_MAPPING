@@ -6,23 +6,7 @@
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.location.contexthub."
-        },
-        {
-          // I believe this include annotation is preventing tests from being run
-          // as there are no matching tests with the Postsubmit annotation.
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksServicesTests_com_android_server_location_contexthub"
     }
   ]
 }

@@ -28,6 +28,8 @@ val Kosmos.mediaTimeoutListener by
     Kosmos.Fixture {
         MediaTimeoutListener(
             mediaControllerFactory = fakeMediaControllerFactory,
+            bgExecutor = fakeExecutor,
+            uiExecutor = fakeExecutor,
             mainExecutor = fakeExecutor,
             logger = MediaTimeoutLogger(logcatLogBuffer("MediaTimeoutLogBuffer")),
             statusBarStateController = statusBarStateController,

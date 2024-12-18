@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Manages the priority which lets {@link TileServices} make decisions about which tiles
  * to bind.  Also holds on to and manages the {@link TileLifecycleManager}, informing it
- * of when it is allowed to bind based on decisions frome the {@link TileServices}.
+ * of when it is allowed to bind based on decisions from the {@link TileServices}.
  */
 public class TileServiceManager {
 

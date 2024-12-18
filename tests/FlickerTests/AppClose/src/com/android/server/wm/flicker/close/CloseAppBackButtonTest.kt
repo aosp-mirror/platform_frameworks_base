@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized
 /**
  * Test app closes by pressing back button
  *
- * To run this test: `atest FlickerTests:CloseAppBackButtonTest`
+ * To run this test: `atest FlickerTestsAppClose:CloseAppBackButtonTest`
  *
  * Actions:
  * ```

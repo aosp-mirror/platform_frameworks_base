@@ -2,47 +2,6 @@ package: "com.android.text.flags"
 container: "system"
 
 flag {
-  name: "vendor_custom_locale_fallback"
-  namespace: "text"
-  description: "A feature flag that adds custom locale fallback to the vendor customization XML. This enables vendors to add their locale specific fonts, e.g. Japanese font."
-  is_fixed_read_only: true
-  bug: "278768958"
-}
-
-flag {
-  name: "new_fonts_fallback_xml"
-  is_exported: true
-  namespace: "text"
-  description: "Feature flag for deprecating fonts.xml. By setting true for this feature flag, the new font configuration XML, /system/etc/font_fallback.xml is used. The new XML has a new syntax and flexibility of variable font declarations, but it is not compatible with the apps that reads fonts.xml. So, fonts.xml is maintained as a subset of the font_fallback.xml"
-  # Make read only, as it could be used before the Settings provider is initialized.
-  is_fixed_read_only: true
-  bug: "281769620"
-}
-
-flag {
-  name: "fix_double_underline"
-  namespace: "text"
-  description: "Feature flag for fixing double underline because of the multiple font used in the single line."
-  bug: "297336724"
-}
-
-flag {
-  name: "fix_line_height_for_locale"
-  is_exported: true
-  namespace: "text"
-  description: "Feature flag that preserve the line height of the TextView and EditText even if the the locale is different from Latin"
-  bug: "303326708"
-}
-
-flag {
-  name: "no_break_no_hyphenation_span"
-  is_exported: true
-  namespace: "text"
-  description: "A feature flag that adding new spans that prevents line breaking and hyphenation."
-  bug: "283193586"
-}
-
-flag {
   name: "use_optimized_boottime_font_loading"
   namespace: "text"
   description: "Feature flag ensuring that font is loaded once and asynchronously."
@@ -63,44 +22,6 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
-}
-
-flag {
-  name: "phrase_strict_fallback"
-  namespace: "text"
-  description: "Feature flag for automatic fallback from phrase based line break to strict line break."
-  bug: "281970875"
-}
-
-flag {
-  name: "use_bounds_for_width"
-  is_exported: true
-  namespace: "text"
-  description: "Feature flag for preventing horizontal clipping."
-  bug: "63938206"
-}
-
-flag {
-  name: "deprecate_ui_fonts"
-  namespace: "text"
-  description: "Feature flag for deprecating UI fonts. By setting true for this feature flag, the elegant text height of will be turned on by default unless explicitly setting it to false by attribute or Java API call."
-  bug: "279646685"
-}
-
-flag {
-  name: "word_style_auto"
-  is_exported: true
-  namespace: "text"
-  description: "A feature flag that implements line break word style auto."
-  bug: "280005585"
-}
-
-flag {
-  name: "letter_spacing_justification"
-  is_exported: true
-  namespace: "text"
-  description: "A feature flag that implement inter character justification."
-  bug: "283193133"
 }
 
 flag {
@@ -142,22 +63,6 @@ flag {
 }
 
 flag {
-  name: "icu_bidi_migration"
-  namespace: "text"
-  description: "A flag for replacing AndroidBidi with android.icu.text.Bidi."
-  bug: "317144801"
-}
-
-flag {
-  name: "lazy_variation_instance"
-  namespace: "text"
-  description: "A flag for enabling lazy variation instance creation."
-  # Make read only, as it could be used before the Settings provider is initialized.
-  is_fixed_read_only: true
-  bug: "324676775"
-}
-
-flag {
   name: "handwriting_end_of_line_tap"
   namespace: "text"
   description: "Initiate handwriting when stylus taps at the end of a line in a focused non-empty TextView with the cursor at the end of that line"
@@ -179,27 +84,6 @@ flag {
 }
 
 flag {
-  name: "fix_font_update_failure"
-  namespace: "text"
-  description: "There was a bug of updating system font from Android 13 to 14. This flag for fixing the migration failure."
-  is_fixed_read_only: true
-  bug: "331717791"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "fix_misaligned_context_menu"
-  namespace: "text"
-  description: "Fix the context menu misalignment and incosistent icon size."
-  bug: "332542108"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "missing_getter_apis"
   namespace: "text"
   description: "Fix the lint warning about missing getters."
@@ -207,6 +91,7 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+  is_exported: true
 }
 
 flag {
@@ -249,26 +134,6 @@ flag {
 }
 
 flag {
-  name: "portuguese_hyphenator"
-  namespace: "text"
-  description: "Portuguese taiored hyphenator"
-  bug: "344656282"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "dont_break_email_in_nobreak_tag"
-  namespace: "text"
-  description: "Prevent line break inside email."
-  bug: "350691716"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "handwriting_gesture_with_transformation"
   namespace: "text"
   description: "Fix handwriting gesture is not working when view has transformation."
@@ -299,8 +164,54 @@ flag {
 }
 
 flag {
-  name: "typeface_redesign"
+  name: "typeface_redesign_readonly"
   namespace: "text"
   description: "Decouple variation settings, weight and style information from Typeface class"
   bug: "361260253"
+  # This feature does not support runtime flag switch which leads crash in System UI.
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "handwriting_track_disabled"
+  namespace: "text"
+  description: "Handwriting initiator tracks focused view even if handwriting is disabled to fix initiation bug."
+  bug: "361256391"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "handwriting_unsupported_show_soft_input_fix"
+  namespace: "text"
+  description: "Don't show soft keyboard on stylus input if text field doesn't support handwriting and getShowSoftInputOnFocus() returns false."
+  bug: "363180475"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "tts_span_duration"
+  namespace: "text"
+  description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
+  bug: "337103893"
+  is_exported: true
+}
+
+flag {
+  name: "deprecate_elegant_text_height_api"
+  namespace: "text"
+  description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
+  bug: "349519475"
+  is_exported: true
+}
+
+flag {
+  name: "vertical_text_layout"
+  namespace: "text"
+  description: "Make Paint class work for vertical layout text."
+  bug: "355296926"
+  is_exported: true
 }

@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherCo
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @OptIn(InternalCoroutinesApi::class)
 object StatusBarUserChipViewBinder {

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.util.Log
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -51,7 +52,13 @@ constructor(
     fun startDismissKeyguardTransition(reason: String = "") {
         if (SceneContainerFlag.isEnabled) return
         Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
-        when (val startedState = repository.currentTransitionInfoInternal.value.to) {
+        val startedState =
+            if (transitionRaceCondition()) {
+                repository.currentTransitionInfo.to
+            } else {
+                repository.currentTransitionInfoInternal.value.to
+            }
+        when (startedState) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.dismissKeyguard()
             PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.dismissPrimaryBouncer()
             ALTERNATE_BOUNCER -> fromAlternateBouncerTransitionInteractor.dismissAlternateBouncer()
@@ -61,7 +68,7 @@ constructor(
             KeyguardState.GONE ->
                 Log.i(
                     TAG,
-                    "Already transitioning to GONE; ignoring startDismissKeyguardTransition."
+                    "Already transitioning to GONE; ignoring startDismissKeyguardTransition.",
                 )
             else -> Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
         }

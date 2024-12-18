@@ -23,6 +23,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 
 import java.util.function.Consumer;
 
@@ -53,7 +54,11 @@ public class PowerStatsAggregator {
         return mAggregatedPowerStatsConfig;
     }
 
-    void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
+    /**
+     * Marks the power component as enabled for PowerStats aggregation
+     */
+    @VisibleForTesting
+    public void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
         synchronized (this) {
             if (mStats != null) {
                 mStats = null;
@@ -81,29 +86,35 @@ public class PowerStatsAggregator {
                 mStats = new AggregatedPowerStats(mAggregatedPowerStatsConfig, mEnabledComponents);
             }
 
-            mStats.start(startTimeMs);
-
-            boolean clockUpdateAdded = false;
+            boolean startedSession = false;
             long baseTime = startTimeMs > 0 ? startTimeMs : UNINITIALIZED;
             long lastTime = 0;
             int lastStates = 0xFFFFFFFF;
             int lastStates2 = 0xFFFFFFFF;
+            int lastBatteryLevel = 0;
             try (BatteryStatsHistoryIterator iterator = history.iterate(startTimeMs, endTimeMs)) {
                 while (iterator.hasNext()) {
                     BatteryStats.HistoryItem item = iterator.next();
 
-                    if (!clockUpdateAdded) {
+                    if (!startedSession) {
+                        mStats.start(item.time);
                         mStats.addClockUpdate(item.time, item.currentTime);
                         if (baseTime == UNINITIALIZED) {
                             baseTime = item.time;
                         }
-                        clockUpdateAdded = true;
+                        startedSession = true;
                     } else if (item.cmd == BatteryStats.HistoryItem.CMD_CURRENT_TIME
                                || item.cmd == BatteryStats.HistoryItem.CMD_RESET) {
                         mStats.addClockUpdate(item.time, item.currentTime);
                     }
 
                     lastTime = item.time;
+
+                    if (item.batteryLevel != lastBatteryLevel) {
+                        mStats.noteBatteryLevel(item.batteryLevel, item.batteryChargeUah,
+                                item.time);
+                        lastBatteryLevel = item.batteryLevel;
+                    }
 
                     int batteryState =
                             (item.states & BatteryStats.HistoryItem.STATE_BATTERY_PLUGGED_FLAG) != 0
@@ -159,10 +170,15 @@ public class PowerStatsAggregator {
                     }
                 }
             }
-            if (lastTime > baseTime) {
-                mStats.setDuration(lastTime - baseTime);
-                mStats.finish(lastTime);
-                consumer.accept(mStats);
+            if (startedSession) {
+                if (endTimeMs != MonotonicClock.UNDEFINED) {
+                    lastTime = endTimeMs;
+                }
+                if (lastTime > baseTime) {
+                    mStats.setDuration(lastTime - baseTime);
+                    mStats.finish(lastTime);
+                    consumer.accept(mStats);
+                }
             }
 
             mStats.reset();     // to free up memory

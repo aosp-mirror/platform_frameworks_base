@@ -61,6 +61,7 @@ public class OomAdjusterTests {
     private static final long USAGE_STATS_INTERACTION = 10 * 60 * 1000L;
     private static final long SERVICE_USAGE_INTERACTION = 60 * 1000;
 
+    @SuppressWarnings("GuardedBy")
     @BeforeClass
     public static void setUpOnce() {
         sContext = getInstrumentation().getTargetContext();
@@ -92,8 +93,11 @@ public class OomAdjusterTests {
                     return true;
                 }
             };
-            sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList, null,
-                    injector);
+            sService.mProcessStateController = new ProcessStateController.Builder(sService,
+                    sService.mProcessList, null)
+                    .setOomAdjusterInjector(injector)
+                    .build();
+            sService.mOomAdjuster = sService.mProcessStateController.getOomAdjuster();
             LocalServices.addService(UsageStatsManagerInternal.class,
                     mock(UsageStatsManagerInternal.class));
             sService.mUsageStatsService = LocalServices.getService(UsageStatsManagerInternal.class);

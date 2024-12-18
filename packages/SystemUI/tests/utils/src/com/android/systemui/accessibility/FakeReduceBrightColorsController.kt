@@ -47,14 +47,6 @@ class FakeReduceBrightColorsController : ReduceBrightColorsController {
         }
     }
 
-    override fun setReduceBrightColorsFeatureAvailable(enabled: Boolean) {
-        // do nothing
-    }
-
-    override fun isReduceBrightColorsFeatureAvailable(): Boolean {
-        return true
-    }
-
     override fun isInUpgradeMode(resources: Resources?): Boolean {
         if (resources != null) {
             return Flags.evenDimmer() &&

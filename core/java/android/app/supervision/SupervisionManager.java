@@ -16,7 +16,10 @@
 
 package android.app.supervision;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
+import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.RemoteException;
@@ -31,9 +34,7 @@ public class SupervisionManager {
     private final Context mContext;
     private final ISupervisionManager mService;
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @UnsupportedAppUsage
     public SupervisionManager(Context context, ISupervisionManager service) {
         mContext = context;
@@ -45,13 +46,27 @@ public class SupervisionManager {
      *
      * @hide
      */
+    @UserHandleAware
     public boolean isSupervisionEnabled() {
+        return isSupervisionEnabledForUser(mContext.getUserId());
+    }
+
+    /**
+     * Returns whether the device is supervised.
+     *
+     * <p>The caller must be from the same user as the target or hold the {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            value = android.Manifest.permission.INTERACT_ACROSS_USERS,
+            conditional = true)
+    public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
         try {
-            return mService.isSupervisionEnabled();
+            return mService.isSupervisionEnabledForUser(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
-
-
 }

@@ -58,15 +58,18 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -286,6 +289,8 @@ public class NotificationLockscreenUserManagerImpl implements
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
 
+    private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -305,7 +310,8 @@ public class NotificationLockscreenUserManagerImpl implements
             SecureSettings secureSettings,
             DumpManager dumpManager,
             LockPatternUtils lockPatternUtils,
-            FeatureFlagsClassic featureFlags) {
+            FeatureFlagsClassic featureFlags,
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -325,6 +331,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mSecureSettings = secureSettings;
         mKeyguardStateController = keyguardStateController;
         mFeatureFlags = featureFlags;
+        mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
 
         mLockScreenUris.add(SHOW_LOCKSCREEN);
         mLockScreenUris.add(SHOW_PRIVATE_LOCKSCREEN);
@@ -647,8 +654,13 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
-    /** @return true if the entry needs redaction when on the lockscreen. */
-    public boolean needsRedaction(NotificationEntry ent) {
+    /**
+     * Determine what type of redaction is needed, if any. Returns REDACTION_TYPE_NONE if no
+     * redaction type is needed, REDACTION_TYPE_PUBLIC if private notifications are blocked, and
+     * REDACTION_TYPE_SENSITIVE_CONTENT if sensitive content is detected, and REDACTION_TYPE_PUBLIC
+     * doesn't apply.
+     */
+    public @RedactionType int getRedactionType(NotificationEntry ent) {
         int userId = ent.getSbn().getUserId();
 
         boolean isCurrentUserRedactingNotifs =
@@ -668,13 +680,19 @@ public class NotificationLockscreenUserManagerImpl implements
                 ent.isNotificationVisibilityPrivate();
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
-        if (keyguardPrivateNotifications()) {
-            return !mKeyguardAllowingNotifications || isNotifSensitive
-                    || userForcesRedaction || (notificationRequestsRedaction && isNotifRedacted);
-        } else {
-            return userForcesRedaction || isNotifSensitive
-                    || (notificationRequestsRedaction && isNotifRedacted);
+        if (userForcesRedaction) {
+            return REDACTION_TYPE_PUBLIC;
         }
+        if (notificationRequestsRedaction && isNotifRedacted) {
+            return REDACTION_TYPE_PUBLIC;
+        }
+        if (keyguardPrivateNotifications() && !mKeyguardAllowingNotifications) {
+            return REDACTION_TYPE_PUBLIC;
+        }
+        if (isNotifSensitive) {
+            return REDACTION_TYPE_SENSITIVE_CONTENT;
+        }
+        return REDACTION_TYPE_NONE;
     }
 
     private boolean packageHasVisibilityOverride(String key) {
@@ -748,8 +766,13 @@ public class NotificationLockscreenUserManagerImpl implements
         // camera on the keyguard has a state of SHADE but the keyguard is still showing.
         final boolean showingKeyguard = mState != StatusBarState.SHADE
                 || mKeyguardStateController.isShowing();
-        final boolean devicePublic = showingKeyguard && mKeyguardStateController.isMethodSecure();
-
+        final boolean devicePublic;
+        if (SceneContainerFlag.isEnabled()) {
+            devicePublic = !mDeviceUnlockedInteractorLazy.get()
+                    .getDeviceUnlockStatus().getValue().isUnlocked();
+        } else {
+            devicePublic = showingKeyguard && mKeyguardStateController.isMethodSecure();
+        }
 
         // Look for public mode users. Users are considered public in either case of:
         //   - device keyguard is shown in secure mode;
@@ -802,11 +825,17 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private void notifyNotificationStateChanged() {
         if (!Looper.getMainLooper().isCurrentThread()) {
-            mMainExecutor.execute(() -> {
+            if (Flags.checkLockscreenGoneTransition()) {
                 for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
-                    listener.onNotificationStateChanged();
+                    mMainExecutor.execute(listener::onNotificationStateChanged);
                 }
-            });
+            } else {
+                mMainExecutor.execute(() -> {
+                    for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
+                        listener.onNotificationStateChanged();
+                    }
+                });
+            }
         } else {
             for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
                 listener.onNotificationStateChanged();

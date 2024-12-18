@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"이 앱은 16KB와 호환되지 않습니다. APK 정렬 검사에 실패했습니다. 이 앱은 페이지 크기 호환 모드를 사용하여 실행됩니다. 최상의 호환성을 위해 16KB를 지원하도록 애플리케이션을 다시 컴파일하세요. 자세한 내용은 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;를 참고하세요."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"이 앱은 16KB와 호환되지 않습니다. ELF 정렬 검사에 실패했습니다. 이 앱은 페이지 크기 호환 모드를 사용하여 실행됩니다. 최상의 호환성을 위해 16KB를 지원하도록 애플리케이션을 다시 컴파일하세요. 자세한 내용은 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;를 참고하세요."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"이 앱은 16KB와 호환되지 않습니다. APK 및 ELF 정렬 검사에 실패했습니다. 이 앱은 페이지 크기 호환 모드를 사용하여 실행됩니다. 최상의 호환성을 위해 16KB를 지원하도록 애플리케이션을 다시 컴파일하세요. 자세한 내용은 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;를 참고하세요."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"발신자 번호 설정을 변경할 수 없습니다."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> 이동통신사로 데이터가 변경됨"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"앱이 근처의 초광대역 기기 간 상대적 위치를 파악하도록 허용"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"근처 Wi‑Fi 기기와 상호작용"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"앱이 광역 신호를 보내 근처에 있는 Wi‑Fi 기기의 상대적인 위치를 확인하고 연결할 수 있도록 허용합니다."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"근처 기기 간 상대 위치 파악"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"앱이 근처 기기 간 상대 위치를 파악하도록 허용"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -655,7 +660,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서를 세게 누르세요"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"지문을 인식할 수 없습니다. 다시 시도해 주세요"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서를 세게 누르세요"</string>
@@ -1153,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>시간 후"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>일 후"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>년 후"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>분 전"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>시간 전"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>일 전"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>년 전"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>분"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>시간"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>일"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>년"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g>분 후"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g>시간 후"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g>일 후"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g>년 후"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>분 전"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>시간 전"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>일 전"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>년 전"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{#분 전}other{#분 전}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{#시간 전}other{#시간 전}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{#일 전}other{#일 전}}"</string>
@@ -1746,8 +1767,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"앱에서 권한 요청을 가려서 응답을 확인할 수 없습니다."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"기능을 사용하려면 탭하세요"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"접근성 버튼으로 사용할 기능 선택"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"볼륨 키 바로가기로 사용할 기능 선택"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>이(가) 사용 중지됨"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"단축키 수정"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"완료"</string>
@@ -1939,11 +1959,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"주말"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"캘린더 일정"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"수면 시간"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"방해 금지 모드(<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"관리자: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"사용"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"사용 중지"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>~<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>~<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"모든 캘린더"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
@@ -2011,6 +2034,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"화면 잠금 설정"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"화면 잠금 설정"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"비공개 스페이스를 사용하려면 이 기기에 화면 잠금을 설정하세요"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"비공개 스페이스를 삭제하려면 이 기기에 화면 잠금을 설정하세요"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
@@ -2129,11 +2153,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"전화 및 알림이 오면 진동이 사용됩니다."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"시스템 변경사항"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"방해 금지 모드"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"새로운 기능: 방해 금지 모드로 알림 숨기기"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"자세히 알아보고 변경하려면 탭하세요."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"방해 금지 모드 변경"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"알림 설정 검토"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13부터 설치된 앱에는 알림을 전송하기 위한 권한이 필요합니다. 기존 앱의 알림 전송 권한을 변경하려면 탭하세요."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"나중에 알림"</string>
@@ -2429,7 +2448,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"모바일 또는 Wi-Fi 네트워크 없이 메시지 주고받기"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"작동 방식"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\'네트워크 자동 선택\' 사용 설정"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"휴대전화에서 위성과 연결되는 네트워크를 찾을 수 있도록 \'설정\'에서 \'네트워크 자동 선택\'을 사용 설정하세요"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"사용"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"뒤로"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"대기 중…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"이제 위성 긴급 SOS를 사용할 수 있음"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"모바일 또는 Wi-Fi 네트워크가 없는 경우 응급 서비스로 메시지를 보낼 수 있습니다. Google 메시지가 기본 메시지 앱으로 설정되어 있어야 합니다."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"위성 긴급 SOS가 지원되지 않음"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"이 기기에서는 위성 긴급 SOS가 지원되지 않습니다."</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"위성 긴급 SOS가 설정되지 않음"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"인터넷에 연결되어 있는지 확인한 후 다시 설정해 보세요."</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"위성 긴급 SOS를 사용할 수 없음"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"이 국가 또는 지역에서는 위성 긴급 SOS를 사용할 수 없습니다."</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"위성 긴급 SOS가 설정되지 않음"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"위성으로 메시지를 보내려면 Google 메시지를 기본 메시지 앱으로 설정하세요."</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"위성 긴급 SOS를 사용할 수 없음"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"이 국가 또는 지역에서 위성 긴급 SOS를 사용할 수 있는지 확인하려면 위치 설정을 사용 설정하세요."</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"위성 메시지 사용 가능"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"모바일 또는 Wi-Fi 네트워크가 없는 경우 위성으로 메시지를 보낼 수 있습니다. Google 메시지가 기본 메시지 앱으로 설정되어 있어야 합니다."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"위성 메시지가 지원되지 않음"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"이 기기에서는 위성 메시지가 지원되지 않습니다."</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"위성 메시지가 설정되지 않음"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"인터넷에 연결되어 있는지 확인한 후 다시 설정해 보세요."</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"위성 메시지를 사용할 수 없음"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"이 국가 또는 지역에서는 위성 메시지를 사용할 수 없습니다."</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"위성 메시지가 설정되지 않음"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"위성으로 메시지를 보내려면 Google 메시지를 기본 메시지 앱으로 설정하세요."</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"위성 메시지를 사용할 수 없음"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"이 국가 또는 지역에서 위성 메시지를 사용할 수 있는지 확인하려면 위치 설정을 사용 설정하세요."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"지문 잠금 해제 다시 설정"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> 지문을 더 이상 인식할 수 없습니다."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> 및 <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> 지문을 더 이상 인식할 수 없습니다."</string>

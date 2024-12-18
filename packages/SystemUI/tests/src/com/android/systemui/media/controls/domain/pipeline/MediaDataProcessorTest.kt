@@ -69,6 +69,8 @@ import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
+import com.android.systemui.media.controls.shared.mediaLogger
+import com.android.systemui.media.controls.shared.mockMediaLogger
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
 import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -88,6 +90,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Before
@@ -100,7 +103,6 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -110,6 +112,7 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -140,7 +143,7 @@ private fun <T> anyObject(): T {
 @RunWith(ParameterizedAndroidJunit4::class)
 @EnableSceneContainer
 class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().apply { mediaLogger = mockMediaLogger }
     private val testDispatcher = kosmos.testDispatcher
     private val testScope = kosmos.testScope
     private val settings = kosmos.fakeSettings
@@ -210,7 +213,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         Settings.Secure.getInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            1
+            1,
         )
 
     private lateinit var staticMockSession: MockitoSession
@@ -231,7 +234,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            1
+            1,
         )
         mediaDataProcessor =
             MediaDataProcessor(
@@ -257,6 +260,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
                 mediaDataRepository = kosmos.mediaDataRepository,
                 mediaDataLoader = { kosmos.mediaDataLoader },
+                mediaLogger = kosmos.mediaLogger,
             )
         mediaDataProcessor.start()
         testScope.runCurrent()
@@ -271,7 +275,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 mediaDataCombineLatest = mediaDataCombineLatest,
                 mediaDataFilter = mediaDataFilter,
                 mediaFilterRepository = mediaFilterRepository,
-                mediaFlags = kosmos.mediaFlags
+                mediaFlags = kosmos.mediaFlags,
             )
         mediaCarouselInteractor.start()
         verify(mediaTimeoutListener).stateCallback = capture(stateCallbackCaptor)
@@ -308,6 +312,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             }
         verify(smartspaceManager).createSmartspaceSession(capture(smartSpaceConfigBuilderCaptor))
         mediaControllerFactory.setControllerForToken(session.sessionToken, controller)
+        whenever(controller.sessionToken).thenReturn(session.sessionToken)
         whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
         whenever(controller.metadata).thenReturn(metadataBuilder.build())
@@ -353,7 +358,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            originalSmartspaceSetting
+            originalSmartspaceSetting,
         )
     }
 
@@ -383,7 +388,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
 
         testScope.runCurrent()
@@ -396,7 +401,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
 
         mediaDataProcessor.setInactive(PACKAGE_NAME, timedOut = true)
@@ -422,7 +427,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 metadataBuilder
                     .putLong(
                         MediaConstants.METADATA_KEY_IS_EXPLICIT,
-                        MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+                        MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
                     )
                     .build()
             )
@@ -437,7 +442,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.isExplicit).isTrue()
     }
@@ -454,7 +459,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.isExplicit).isFalse()
     }
@@ -467,7 +472,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_LOCAL)
+                eq(MediaData.PLAYBACK_LOCAL),
             )
     }
 
@@ -482,7 +487,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.active).isTrue()
     }
@@ -498,7 +503,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 anyInt(),
                 eq(SYSTEM_PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_CAST_REMOTE)
+                eq(MediaData.PLAYBACK_CAST_REMOTE),
             )
     }
 
@@ -526,7 +531,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
 
         assertThat(mediaDataCaptor.value!!.app).isEqualTo(subName)
@@ -592,7 +597,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     fun testOnNotificationAdded_emptyTitle_hasPlaceholder() {
         // When the manager has a notification with an empty title, and the app is not
         // required to include a non-empty title
-        val mockPackageManager = mock(PackageManager::class.java)
+        val mockPackageManager = mock<PackageManager>()
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
         whenever(controller.metadata)
@@ -612,7 +617,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
@@ -622,7 +627,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     fun testOnNotificationAdded_blankTitle_hasPlaceholder() {
         // GIVEN that the manager has a notification with a blank title, and the app is not
         // required to include a non-empty title
-        val mockPackageManager = mock(PackageManager::class.java)
+        val mockPackageManager = mock<PackageManager>()
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
         whenever(controller.metadata)
@@ -642,7 +647,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
@@ -652,7 +657,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     fun testOnNotificationAdded_emptyMetadata_usesNotificationTitle() {
         // When the app sets the metadata title fields to empty strings, but does include a
         // non-blank notification title
-        val mockPackageManager = mock(PackageManager::class.java)
+        val mockPackageManager = mock<PackageManager>()
         context.setMockPackageManager(mockPackageManager)
         whenever(mockPackageManager.getApplicationLabel(any())).thenReturn(APP_NAME)
         whenever(controller.metadata)
@@ -683,7 +688,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.song).isEqualTo(SESSION_TITLE)
     }
@@ -698,7 +703,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         mediaDataProcessor.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(song = SESSION_EMPTY_TITLE, resumeAction = Runnable {})
+            data.copy(song = SESSION_EMPTY_TITLE, resumeAction = Runnable {}),
         )
 
         // WHEN the notification is removed
@@ -713,7 +718,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(instanceId))
@@ -731,7 +736,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         mediaDataProcessor.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(song = SESSION_BLANK_TITLE, resumeAction = Runnable {})
+            data.copy(song = SESSION_BLANK_TITLE, resumeAction = Runnable {}),
         )
 
         // WHEN the notification is removed
@@ -746,7 +751,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(instanceId))
@@ -771,7 +776,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
@@ -792,7 +797,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isFalse()
@@ -804,7 +809,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val data2 = mediaDataCaptor.value
         assertThat(data2.resumption).isFalse()
@@ -822,7 +827,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         verify(listener, never()).onMediaDataRemoved(eq(KEY), anyBoolean())
@@ -836,7 +841,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         verify(listener).onMediaDataRemoved(eq(KEY_2), eq(false))
@@ -857,7 +862,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_CAST_LOCAL)
+                eq(MediaData.PLAYBACK_CAST_LOCAL),
             )
 
         // WHEN the notification is removed
@@ -893,7 +898,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
     }
@@ -947,7 +952,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
@@ -984,7 +989,8 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         verify(logger).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
@@ -996,7 +1002,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         // WHEN resumption controls are added with explicit indicator
         bundle.putLong(
             MediaConstants.METADATA_KEY_IS_EXPLICIT,
-            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
         )
         val desc =
             MediaDescription.Builder().run {
@@ -1011,7 +1017,8 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
         assertThat(data.app).isEqualTo(APP_NAME)
-        assertThat(data.actions).hasSize(1)
+        // resume button is a semantic action.
+        assertThat(data.actions).hasSize(0)
         assertThat(data.semanticActions!!.playOrPause).isNotNull()
         assertThat(data.lastActive).isAtLeast(currentTime)
         assertThat(data.isExplicit).isTrue()
@@ -1028,7 +1035,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED,
                 )
                 putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, progress)
             }
@@ -1054,7 +1061,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED,
                 )
             }
         val desc =
@@ -1079,7 +1086,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED,
                 )
             }
         val desc =
@@ -1131,7 +1138,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
 
         // Resumption controls are not added.
@@ -1143,7 +1150,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1164,7 +1171,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
 
         // Resumption controls are not added.
@@ -1176,7 +1183,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1243,7 +1250,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1269,7 +1276,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1293,7 +1300,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1325,7 +1332,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1372,7 +1379,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1406,7 +1413,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1437,7 +1444,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
         verify(listener, never()).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
     }
@@ -1469,7 +1476,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1531,7 +1538,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
     }
@@ -1558,7 +1565,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
@@ -1578,7 +1585,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         mediaDataProcessor.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(resumeAction = Runnable {}, active = false)
+            data.copy(resumeAction = Runnable {}, active = false),
         )
 
         // WHEN the notification is removed
@@ -1594,7 +1601,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTime)
@@ -1604,6 +1611,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyCompactActions_isTruncated() {
         // GIVEN a notification where too many compact actions were specified
@@ -1634,12 +1642,13 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size)
             .isEqualTo(MediaDataProcessor.MAX_COMPACT_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyNotificationActions_isTruncated() {
         // GIVEN a notification where too many notification actions are added
@@ -1669,12 +1678,13 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.actions.size)
             .isEqualTo(MediaDataProcessor.MAX_NOTIFICATION_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
@@ -1700,7 +1710,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
 
         assertThat(mediaDataCaptor.value!!.semanticActions).isNull()
@@ -1708,6 +1718,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(mediaDataCaptor.value!!.actions[0]!!.contentDescription).isEqualTo(desc)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1751,6 +1762,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
@@ -1783,6 +1795,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[3])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_connecting() {
         val stateActions = PlaybackState.ACTION_PLAY
@@ -1868,6 +1881,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .isNotEqualTo(firstSemanticActions.prevOrCustom?.icon)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1906,6 +1920,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(actions.reservePrev).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_playPause_hasButton() {
         val stateActions = PlaybackState.ACTION_PLAY_PAUSE
@@ -1939,7 +1954,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(instanceId),
-                eq(MediaData.PLAYBACK_CAST_LOCAL)
+                eq(MediaData.PLAYBACK_CAST_LOCAL),
             )
 
         // update to remote cast
@@ -1950,7 +1965,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 anyInt(),
                 eq(SYSTEM_PACKAGE_NAME),
                 eq(instanceId),
-                eq(MediaData.PLAYBACK_CAST_REMOTE)
+                eq(MediaData.PLAYBACK_CAST_REMOTE),
             )
     }
 
@@ -1961,7 +1976,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         // Callback gets an updated state
         val state = PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 1f).build()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        testScope.onStateUpdated(KEY, state)
 
         // Listener is notified of updated state
         verify(listener)
@@ -1971,7 +1986,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isTrue()
     }
@@ -1982,7 +1997,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         // No media added with this key
 
-        stateCallbackCaptor.value.invoke(KEY, state)
+        testScope.onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -1999,7 +2014,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         val state = PlaybackState.Builder().build()
 
         // Then no changes are made
-        stateCallbackCaptor.value.invoke(KEY, state)
+        testScope.onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -2010,7 +2025,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         whenever(controller.playbackState).thenReturn(state)
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        testScope.onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -2019,7 +2034,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
@@ -2047,13 +2062,13 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
         testScope.runCurrent()
         backgroundExecutor.runAllReady()
         foregroundExecutor.runAllReady()
 
-        stateCallbackCaptor.value.invoke(PACKAGE_NAME, state)
+        testScope.onStateUpdated(PACKAGE_NAME, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -2062,12 +2077,13 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackStateNull_Pause_keyExists_callsListener() {
         whenever(controller.playbackState).thenReturn(null)
@@ -2078,7 +2094,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .build()
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        testScope.onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -2087,7 +2103,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNull()
@@ -2126,6 +2142,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.isClearable).isFalse()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_notifRemoved_setToResume() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2144,7 +2161,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2152,10 +2169,11 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_sessionDestroyed_doesNotChange() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2174,6 +2192,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_removeWhileActive_fullyRemoved() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2211,7 +2230,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2219,7 +2238,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2263,7 +2282,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2271,7 +2290,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2315,7 +2334,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2323,7 +2342,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2349,7 +2368,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -2391,7 +2410,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2399,7 +2418,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2425,7 +2444,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                     any(),
                     any(),
                     anyInt(),
-                    anyInt()
+                    anyInt(),
                 )
             )
             .thenReturn(1)
@@ -2455,7 +2474,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                     any(),
                     any(),
                     anyInt(),
-                    anyInt()
+                    anyInt(),
                 )
             )
             .thenThrow(SecurityException("Test no permission"))
@@ -2476,9 +2495,59 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
         assertThat(mediaDataCaptor.value.artwork).isNull()
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_doesNotCallListeners() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
+
+        testScope.assertRunAllReady(foreground = 0, background = 1)
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false),
+            )
+        verify(kosmos.mediaLogger).logDuplicateMediaNotification(eq(KEY))
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_POSTS_OPTIMIZATION)
+    fun postDuplicateNotification_callsListeners() {
+        whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
+        whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
+
+        mediaDataProcessor.addInternalListener(mediaDataFilter)
+        mediaDataFilter.mediaDataProcessor = mediaDataProcessor
+        addNotificationAndLoad()
+        reset(listener)
+        mediaDataProcessor.onNotificationAdded(KEY, mediaNotification)
+        testScope.assertRunAllReady(foreground = 1, background = 1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false),
+            )
+        verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
+    }
+
     private fun TestScope.assertRunAllReady(foreground: Int = 0, background: Int = 0) {
         runCurrent()
         if (Flags.mediaLoadMetadataViaMediaDataLoader()) {
+            advanceUntilIdle()
             // It doesn't make much sense to count tasks when we use coroutines in loader
             // so this check is skipped in that scenario.
             backgroundExecutor.runAllReady()
@@ -2509,7 +2578,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -2524,7 +2593,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
     /** Helper function to add a resumption control and capture the resulting MediaData */
     private fun addResumeControlAndLoad(
         desc: MediaDescription,
-        packageName: String = PACKAGE_NAME
+        packageName: String = PACKAGE_NAME,
     ) {
         mediaDataProcessor.addResumptionControls(
             USER_ID,
@@ -2533,7 +2602,7 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            packageName
+            packageName,
         )
         testScope.assertRunAllReady(foreground = 1, background = 1)
 
@@ -2544,7 +2613,14 @@ class MediaDataProcessorTest(flags: FlagsParameterization) : SysuiTestCase() {
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
+    }
+
+    /** Helper function to update state and run executors */
+    private fun TestScope.onStateUpdated(key: String, state: PlaybackState) {
+        stateCallbackCaptor.value.invoke(key, state)
+        runCurrent()
+        advanceUntilIdle()
     }
 }

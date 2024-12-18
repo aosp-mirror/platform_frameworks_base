@@ -158,6 +158,15 @@ public:
     SkSamplingOptions sampling() const {
         return SkSamplingOptions(this->filterMode());
     }
+    bool isVerticalText() const { return mVerticalText; }
+
+    void setVariationOverride(minikin::VariationSettings&& varSettings) {
+        mFontVariationOverride = std::move(varSettings);
+    }
+
+    const minikin::VariationSettings& getFontVariationOverride() const {
+        return mFontVariationOverride;
+    }
 
     // The Java flags (Paint.java) no longer fit into the native apis directly.
     // These methods handle converting to and from them and the native representations
@@ -179,6 +188,7 @@ private:
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
     std::vector<minikin::FontFeature> mFontFeatureSettings;
+    minikin::VariationSettings mFontVariationOverride;
     uint32_t mMinikinLocaleListId;
     std::optional<minikin::FamilyVariant> mFamilyVariant;
     uint32_t mHyphenEdit = 0;
@@ -193,6 +203,7 @@ private:
     bool mUnderline = false;
     bool mDevKern = false;
     minikin::RunFlag mRunFlag = minikin::RunFlag::NONE;
+    bool mVerticalText = false;
 };
 
 }  // namespace android

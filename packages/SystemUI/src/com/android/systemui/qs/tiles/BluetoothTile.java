@@ -32,7 +32,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Switch;
+import android.widget.Button;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -43,6 +43,7 @@ import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.satellite.SatelliteDialogUtils;
 import com.android.systemui.animation.Expandable;
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsViewModel;
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -51,6 +52,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.qs.TileDetailsViewModel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
@@ -63,6 +65,7 @@ import kotlinx.coroutines.Job;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -121,6 +124,21 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
+        handleClickWithSatelliteCheck(() -> handleClickEvent(expandable));
+    }
+
+    @Override
+    public boolean getDetailsViewModel(Consumer<TileDetailsViewModel> callback) {
+        handleClickWithSatelliteCheck(() ->
+                callback.accept(new BluetoothDetailsViewModel(() -> {
+                    longClick(null);
+                    return null;
+                }))
+        );
+        return true;
+    }
+
+    private void handleClickWithSatelliteCheck(Runnable clickCallback) {
         if (com.android.internal.telephony.flags.Flags.oemEnabledSatelliteFlag()) {
             if (mClickJob != null && !mClickJob.isCompleted()) {
                 return;
@@ -130,12 +148,12 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         if (!isAllowClick) {
                             return null;
                         }
-                        handleClickEvent(expandable);
+                        clickCallback.run();
                         return null;
                     });
             return;
         }
-        handleClickEvent(expandable);
+        clickCallback.run();
     }
 
     private void handleClickEvent(@Nullable Expandable expandable) {
@@ -146,6 +164,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             toggleBluetooth();
         }
     }
+
+
 
     @Override
     public Intent getLongClickIntent() {
@@ -199,7 +219,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
         if (enabled) {
             if (connected) {
-                state.icon = ResourceIcon.get(R.drawable.qs_bluetooth_icon_on);
+                state.icon = maybeLoadResourceIcon(R.drawable.qs_bluetooth_icon_on);
                 if (!TextUtils.isEmpty(mController.getConnectedDeviceName())) {
                     state.label = mController.getConnectedDeviceName();
                 }
@@ -207,21 +227,19 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         mContext.getString(R.string.accessibility_bluetooth_name, state.label)
                                 + ", " + state.secondaryLabel;
             } else if (state.isTransient) {
-                state.icon = ResourceIcon.get(
-                        R.drawable.qs_bluetooth_icon_search);
+                state.icon = maybeLoadResourceIcon(R.drawable.qs_bluetooth_icon_search);
                 state.stateDescription = state.secondaryLabel;
             } else {
-                state.icon =
-                        ResourceIcon.get(R.drawable.qs_bluetooth_icon_off);
+                state.icon = maybeLoadResourceIcon(R.drawable.qs_bluetooth_icon_off);
                 state.stateDescription = mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
-            state.icon = ResourceIcon.get(R.drawable.qs_bluetooth_icon_off);
+            state.icon = maybeLoadResourceIcon(R.drawable.qs_bluetooth_icon_off);
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
     }
 

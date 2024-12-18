@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.Flags.improveInstallFreeze;
 import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
@@ -170,6 +169,10 @@ final class InstallRequest {
 
     private final boolean mHasAppMetadataFileFromInstaller;
 
+    private boolean mKeepArtProfile = false;
+    private final boolean mDependencyInstallerEnabled;
+    private final int mMissingSharedLibraryCount;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
@@ -189,6 +192,8 @@ final class InstallRequest {
         mRequireUserAction = params.mRequireUserAction;
         mPreVerifiedDomains = params.mPreVerifiedDomains;
         mHasAppMetadataFileFromInstaller = params.mHasAppMetadataFile;
+        mDependencyInstallerEnabled = params.mDependencyInstallerEnabled;
+        mMissingSharedLibraryCount = params.mMissingSharedLibraryCount;
     }
 
     // Install existing package as user
@@ -208,6 +213,8 @@ final class InstallRequest {
         mInstallerUidForInstallExisting = installerUid;
         mSystem = isSystem;
         mHasAppMetadataFileFromInstaller = false;
+        mDependencyInstallerEnabled = false;
+        mMissingSharedLibraryCount = 0;
     }
 
     // addForInit
@@ -230,6 +237,8 @@ final class InstallRequest {
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mDisabledPs = disabledPs;
         mHasAppMetadataFileFromInstaller = false;
+        mDependencyInstallerEnabled = false;
+        mMissingSharedLibraryCount = 0;
     }
 
     @Nullable
@@ -613,6 +622,20 @@ final class InstallRequest {
     public List<SharedLibraryInfo> getDynamicSharedLibraryInfos() {
         assertScanResultExists();
         return mScanResult.mDynamicSharedLibraryInfos;
+    }
+
+    public void updateAllCodePaths(List<String> paths) {
+        if (mScanResult.mSdkSharedLibraryInfo != null) {
+            mScanResult.mSdkSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mStaticSharedLibraryInfo != null) {
+            mScanResult.mStaticSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mDynamicSharedLibraryInfos != null) {
+            for (SharedLibraryInfo info : mScanResult.mDynamicSharedLibraryInfos) {
+                info.setAllCodePaths(paths);
+            }
+        }
     }
 
     @Nullable
@@ -1036,14 +1059,30 @@ final class InstallRequest {
     }
 
     public void onFreezeStarted() {
-        if (mPackageMetrics != null && improveInstallFreeze()) {
+        if (mPackageMetrics != null) {
             mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }
 
     public void onFreezeCompleted() {
-        if (mPackageMetrics != null && improveInstallFreeze()) {
+        if (mPackageMetrics != null) {
             mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
+    }
+
+    void setKeepArtProfile(boolean keepArtProfile) {
+        mKeepArtProfile = keepArtProfile;
+    }
+
+    boolean isKeepArtProfile() {
+        return mKeepArtProfile;
+    }
+
+    int getMissingSharedLibraryCount() {
+        return mMissingSharedLibraryCount;
+    }
+
+    boolean isDependencyInstallerEnabled() {
+        return mDependencyInstallerEnabled;
     }
 }

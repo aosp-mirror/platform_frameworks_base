@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWi
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * This class serves as a bridge between the old UI classes and the new data pipeline.

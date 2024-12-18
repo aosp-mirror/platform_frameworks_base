@@ -44,7 +44,7 @@ import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.util.children
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a user switcher to its view-model. */
 object UserSwitcherViewBinder {

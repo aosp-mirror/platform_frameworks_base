@@ -60,4 +60,23 @@ public class DisplayDeviceConfigUtils {
 
         return Spline.createSpline(x, y);
     }
+
+    /**
+     * Get the highest HDR/SDR ratio from the given map.
+     * @param points The map of brightness values to HDR/SDR ratios
+     * @param extractor Used to retrieve the ratio from the map element
+     * @return The highest HDR/SDR ratio
+     * @param <T> The type of the map elements
+     */
+    public static <T> float getHighestHdrSdrRatio(List<T> points,
+            Function<T, BigDecimal> extractor) {
+        float highestRatio = 1;
+        for (T point : points) {
+            float ratio = extractor.apply(point).floatValue();
+            if (ratio > highestRatio) {
+                highestRatio = ratio;
+            }
+        }
+        return highestRatio;
+    }
 }

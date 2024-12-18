@@ -35,6 +35,7 @@ Commands are sent as string extras with key ```command``` (required). Possible v
 |                      | ```fully```                |                  | Sets MCS state to fully connected (```true```, ```false```)
 |                      | ```wifi```                 |                  | ```show``` to show icon, any other value to hide
 |                      |                            | ```level```      | Sets wifi level (null or 0-4)
+|                      |                            | ```hotspot```    | Sets the wifi to be from an Instant Hotspot. Values: ```none```, ```unknown```, ```phone```, ```tablet```, ```laptop```, ```watch```, ```auto```. (See `DemoModeWifiDataSource.kt`.)
 |                      | ```mobile```               |                  | ```show``` to show icon, any other value to hide
 |                      |                            | ```datatype```   | Values: ```1x```, ```3g```, ```4g```, ```e```, ```g```, ```h```, ```lte```, ```roam```, any other value to hide
 |                      |                            | ```level```      | Sets mobile signal strength level (null or 0-4)

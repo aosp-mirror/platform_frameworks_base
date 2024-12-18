@@ -22,32 +22,10 @@
       ]
     },
     {
-      "name": "CtsAppFgsTestCases",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAppFgsTestCases_pm_Presubmit"
     },
     {
-      "name": "CtsShortFgsTestCases",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsShortFgsTestCases_pm_Presubmit"
     },
     {
       "name": "FrameworksServicesTests_android_server_am_Presubmit"
@@ -73,33 +51,19 @@
     },
     {
       "file_patterns": ["Broadcast.*"],
-      "name": "CtsBroadcastTestCases",
-      "options": [
-        { "exclude-annotation": "androidx.test.filters.LargeTest" },
-        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
-        { "exclude-annotation": "org.junit.Ignore" }
-      ]
+      "name": "CtsBroadcastTestCases_android_server_am"
     },
     {
-      "name": "CtsBRSTestCases",
       "file_patterns": [
         "ActivityManagerService\\.java",
         "BroadcastQueue\\.java"
       ],
-      "options": [
-        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
-        { "exclude-annotation": "org.junit.Ignore" }
-      ]
+      "name": "CtsBRSTestCases"
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.am."
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_am"
     },
     {
       "name": "CtsAppDataIsolationHostTestCases"
@@ -115,13 +79,7 @@
       ]
     },
     {
-      "name": "CtsStatsdAtomHostTestCases",
-      "options": [
-        { "include-filter": "android.cts.statsdatom.appexit.AppExitHostTest" },
-        { "exclude-annotation": "androidx.test.filters.LargeTest" },
-        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
-        { "exclude-annotation": "org.junit.Ignore" }
-      ]
+      "name": "CtsStatsdAtomHostTestCases_appexit_appexithosttest"
     },
     {
       "name": "CtsContentTestCases",

@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -40,7 +41,7 @@ class LockscreenToOccludedTransitionViewModel
 @Inject
 constructor(
     shadeDependentFlows: ShadeDependentFlows,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
@@ -52,18 +53,26 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
-            onStep = { 1f - it },
-            name = "LOCKSCREEN->OCCLUDED: lockscreenAlpha",
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    name = "LOCKSCREEN->OCCLUDED: lockscreenAlpha",
+                ),
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
-            onStep = { 1 - it },
-            onFinish = { 0f },
-            onCancel = { 1f },
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = 250.milliseconds,
+                    onStep = { 1f - it },
+                    onFinish = { 0f },
+                    onCancel = { 1f },
+                ),
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     /** Lockscreen views y-translation */

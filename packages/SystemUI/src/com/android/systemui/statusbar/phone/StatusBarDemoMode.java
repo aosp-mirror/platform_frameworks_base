@@ -21,7 +21,7 @@ import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_SE
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_WARNING;
-import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.OPERATOR_NAME_VIEW;
+import static com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarModule.OPERATOR_NAME_VIEW;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
@@ -32,7 +32,7 @@ import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarScope;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.util.ViewController;
 
@@ -48,7 +48,7 @@ import javax.inject.Named;
  * This class extends ViewController not because it controls a specific view, but because we want it
  * to get torn down and re-created in line with the view's lifecycle.
  */
-@StatusBarFragmentScope
+@HomeStatusBarScope
 public class StatusBarDemoMode extends ViewController<View> implements DemoMode {
     private final Clock mClockView;
     private final View mOperatorNameView;

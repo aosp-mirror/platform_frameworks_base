@@ -40,8 +40,8 @@ import libcore.util.EmptyArray;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,7 +71,8 @@ public abstract class Transport {
      * the future to allow multiple listeners to receive callbacks for the same message type, the
      * value of the map can be a list.
      */
-    private final Map<Integer, IOnMessageReceivedListener> mListeners;
+    @GuardedBy("mListeners")
+    private final SparseArray<Set<IOnMessageReceivedListener>> mListeners = new SparseArray<>();
 
     private OnTransportClosedListener mOnTransportClosed;
 
@@ -98,7 +99,6 @@ public abstract class Transport {
         mRemoteIn = new ParcelFileDescriptor.AutoCloseInputStream(fd);
         mRemoteOut = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
         mContext = context;
-        mListeners = new HashMap<>();
     }
 
     /**
@@ -107,7 +107,12 @@ public abstract class Transport {
      * @param listener Execute when a message with the type is received
      */
     public void addListener(int message, IOnMessageReceivedListener listener) {
-        mListeners.put(message, listener);
+        synchronized (mListeners) {
+            if (!mListeners.contains(message)) {
+                mListeners.put(message, new HashSet<IOnMessageReceivedListener>());
+            }
+            mListeners.get(message).add(listener);
+        }
     }
 
     public int getAssociationId() {
@@ -281,12 +286,19 @@ public abstract class Transport {
     }
 
     private void callback(int message, byte[] data) {
-        if (mListeners.containsKey(message)) {
+        Set<IOnMessageReceivedListener> listenersToCall;
+        synchronized (mListeners) {
+            if (!mListeners.contains(message)) {
+                return;
+            }
+            listenersToCall = mListeners.get(message);
+        }
+        Slog.d(TAG, "Message 0x" + Integer.toHexString(message)
+                + " is received from associationId " + mAssociationId
+                + ", sending data length " + data.length + " to the listener(s).");
+        for (IOnMessageReceivedListener listener: listenersToCall) {
             try {
-                mListeners.get(message).onMessageReceived(getAssociationId(), data);
-                Slog.d(TAG, "Message 0x" + Integer.toHexString(message)
-                        + " is received from associationId " + mAssociationId
-                        + ", sending data length " + data.length + " to the listener.");
+                listener.onMessageReceived(getAssociationId(), data);
             } catch (RemoteException ignored) {
             }
         }

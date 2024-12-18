@@ -16,7 +16,7 @@ android_test {
         "compatibility-device-util-axt",
         "junit",
     ],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     platform_apis: true,
     certificate: "platform",
 }

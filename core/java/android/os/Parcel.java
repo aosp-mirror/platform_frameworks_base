@@ -27,8 +27,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.ravenwood.annotation.RavenwoodClassLoadHook;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
 import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.text.TextUtils;
@@ -233,8 +233,7 @@ import java.util.function.IntFunction;
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
+@RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;
@@ -389,10 +388,8 @@ public final class Parcel {
     @CriticalNative
     private static native void nativeMarkSensitive(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeMarkForBinder(long nativePtr, IBinder binder);
     @CriticalNative
-    @RavenwoodThrow
     private static native boolean nativeIsForRpc(long nativePtr);
     @CriticalNative
     private static native int nativeDataSize(long nativePtr);
@@ -424,14 +421,12 @@ public final class Parcel {
     private static native int nativeWriteFloat(long nativePtr, float val);
     @CriticalNative
     private static native int nativeWriteDouble(long nativePtr, double val);
-    @RavenwoodThrow
     private static native void nativeSignalExceptionForError(int error);
     @FastNative
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
     private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
@@ -452,7 +447,6 @@ public final class Parcel {
     @FastNative
     private static native String nativeReadString16(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
@@ -477,17 +471,13 @@ public final class Parcel {
     private static native boolean nativeHasBinders(long nativePtr);
     private static native boolean nativeHasBindersInRange(
             long nativePtr, int offset, int length);
-    @RavenwoodThrow
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
-    @RavenwoodThrow
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
     @CriticalNative
-    @RavenwoodThrow
     private static native boolean nativeReplaceCallingWorkSourceUid(
             long nativePtr, int workSourceUid);
     @CriticalNative
-    @RavenwoodThrow
     private static native int nativeReadCallingWorkSourceUid(long nativePtr);
 
     /** Last time exception with a stack trace was written */
@@ -496,7 +486,6 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
-    @RavenwoodThrow
     private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
@@ -660,12 +649,10 @@ public final class Parcel {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RavenwoodThrow
     public static native long getGlobalAllocSize();
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RavenwoodThrow
     public static native long getGlobalAllocCount();
 
     /**
@@ -905,6 +892,12 @@ public final class Parcel {
 
     /**
      * Report whether the parcel contains any marshalled file descriptors.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      */
     public boolean hasFileDescriptors() {
         return nativeHasFileDescriptors(mNativePtr);
@@ -913,6 +906,12 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled file descriptors in the range defined by
      * {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *     {@link #dataSize()}.
@@ -933,6 +932,12 @@ public final class Parcel {
      *
      * <p>For most cases, it will use the self-reported {@link Parcelable#describeContents()} method
      * for that.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @throws IllegalArgumentException if you provide any object not supported by above methods
      *     (including if the unsupported object is inside a nested container).
@@ -1003,6 +1008,13 @@ public final class Parcel {
      *
      * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
      *                                       invoked in case of Binder RPC protocol.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
+     *
      * @hide
      */
     public boolean hasBinders() {
@@ -1012,6 +1024,12 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
      * defined by {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *               {@link #dataSize()}.
@@ -1257,6 +1275,7 @@ public final class Parcel {
      * @hide
      */
     @UnsupportedAppUsage
+    @RavenwoodThrow(blockedBy = android.text.Spanned.class)
     public final void writeCharSequence(@Nullable CharSequence val) {
         TextUtils.writeToParcel(val, this, 0);
     }
@@ -1383,7 +1402,6 @@ public final class Parcel {
         writeInt(N);
         if (DEBUG_ARRAY_MAP) {
             RuntimeException here =  new RuntimeException("here");
-            here.fillInStackTrace();
             Log.d(TAG, "Writing " + N + " ArrayMap entries", here);
         }
         int startPos;
@@ -2996,7 +3014,7 @@ public final class Parcel {
      * @see #writeNoException
      * @see #readException
      */
-    @RavenwoodReplace
+    @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeException(@NonNull Exception e) {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -3035,10 +3053,15 @@ public final class Parcel {
         }
     }
 
-    /** @hide */
-    public final void writeException$ravenwood(@NonNull Exception e) {
-        // Ravenwood doesn't support IPC, no transaction headers needed
-        writeInt(getExceptionCode(e));
+    private void writeException$ravenwood(@NonNull Exception e) {
+        int code = getExceptionCode(e);
+        writeInt(code);
+        if (code == 0) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
         writeString(e.getMessage());
         writeInt(0);
     }
@@ -3096,7 +3119,7 @@ public final class Parcel {
      * @see #writeException
      * @see #readException
      */
-    @RavenwoodReplace
+    @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeNoException() {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -3127,9 +3150,7 @@ public final class Parcel {
         }
     }
 
-    /** @hide */
-    public final void writeNoException$ravenwood() {
-        // Ravenwood doesn't support IPC, no transaction headers needed
+    private void writeNoException$ravenwood() {
         writeInt(0);
     }
 
@@ -4629,7 +4650,7 @@ public final class Parcel {
      * @hide
      */
     @Nullable
-    public Object readLazyValue(@Nullable ClassLoader loader) {
+    private Object readLazyValue(@Nullable ClassLoaderProvider loaderProvider) {
         int start = dataPosition();
         int type = readInt();
         if (isLengthPrefixed(type)) {
@@ -4640,10 +4661,15 @@ public final class Parcel {
             int end = MathUtils.addOrThrow(dataPosition(), objectLength);
             int valueLength = end - start;
             setDataPosition(end);
-            return new LazyValue(this, start, valueLength, type, loader);
+            return new LazyValue(this, start, valueLength, type, loaderProvider);
         } else {
-            return readValue(type, loader, /* clazz */ null);
+            return readValue(type, getClassLoader(loaderProvider), /* clazz */ null);
         }
+    }
+
+    @Nullable
+    private static ClassLoader getClassLoader(@Nullable ClassLoaderProvider loaderProvider) {
+        return loaderProvider == null ? null : loaderProvider.getClassLoader();
     }
 
 
@@ -4659,7 +4685,12 @@ public final class Parcel {
         private final int mPosition;
         private final int mLength;
         private final int mType;
-        @Nullable private final ClassLoader mLoader;
+        // this member is set when a bundle that includes a LazyValue is unparceled. But it is used
+        // when apply method is called. Between these 2 events, the bundle's ClassLoader could have
+        // changed. Let the bundle be a ClassLoaderProvider allows the bundle provides its current
+        // ClassLoader at the time apply method is called.
+        @NonNull
+        private final ClassLoaderProvider mLoaderProvider;
         @Nullable private Object mObject;
 
         /**
@@ -4670,12 +4701,13 @@ public final class Parcel {
          */
         @Nullable private volatile Parcel mSource;
 
-        LazyValue(Parcel source, int position, int length, int type, @Nullable ClassLoader loader) {
+        LazyValue(Parcel source, int position, int length, int type,
+                @NonNull ClassLoaderProvider loaderProvider) {
             mSource = requireNonNull(source);
             mPosition = position;
             mLength = length;
             mType = type;
-            mLoader = loader;
+            mLoaderProvider = loaderProvider;
         }
 
         @Override
@@ -4688,7 +4720,8 @@ public final class Parcel {
                         int restore = source.dataPosition();
                         try {
                             source.setDataPosition(mPosition);
-                            mObject = source.readValue(mLoader, clazz, itemTypes);
+                            mObject = source.readValue(mLoaderProvider.getClassLoader(), clazz,
+                                    itemTypes);
                         } finally {
                             source.setDataPosition(restore);
                         }
@@ -4761,7 +4794,8 @@ public final class Parcel {
                 return Objects.equals(mObject, value.mObject);
             }
             // Better safely fail here since this could mean we get different objects.
-            if (!Objects.equals(mLoader, value.mLoader)) {
+            if (!Objects.equals(mLoaderProvider.getClassLoader(),
+                    value.mLoaderProvider.getClassLoader())) {
                 return false;
             }
             // Otherwise compare metadata prior to comparing payload.
@@ -4775,8 +4809,22 @@ public final class Parcel {
         @Override
         public int hashCode() {
             // Accessing mSource first to provide memory barrier for mObject
-            return Objects.hash(mSource == null, mObject, mLoader, mType, mLength);
+            return Objects.hash(mSource == null, mObject, mLoaderProvider.getClassLoader(), mType,
+                    mLength);
         }
+    }
+
+    /**
+     * Provides a ClassLoader.
+     * @hide
+     */
+    public interface ClassLoaderProvider {
+        /**
+         * Returns a ClassLoader.
+         *
+         * @return ClassLoader
+         */
+        ClassLoader getClassLoader();
     }
 
     /** Same as {@link #readValue(ClassLoader, Class, Class[])} without any item types. */
@@ -5516,8 +5564,8 @@ public final class Parcel {
     }
 
     private void readArrayMapInternal(@NonNull ArrayMap<? super String, Object> outVal,
-            int size, @Nullable ClassLoader loader) {
-        readArrayMap(outVal, size, /* sorted */ true, /* lazy */ false, loader);
+            int size, @Nullable ClassLoaderProvider loaderProvider) {
+        readArrayMap(outVal, size, /* sorted */ true, /* lazy */ false, loaderProvider, null);
     }
 
     /**
@@ -5527,17 +5575,17 @@ public final class Parcel {
      * @param lazy   Whether to populate the map with lazy {@link Function} objects for
      *               length-prefixed values. See {@link Parcel#readLazyValue(ClassLoader)} for more
      *               details.
-     * @return a count of the lazy values in the map
+     * @param lazyValueCount number of lazy values added here
      * @hide
      */
-    int readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
-            boolean lazy, @Nullable ClassLoader loader) {
-        int lazyValues = 0;
+    void readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
+            boolean lazy, @Nullable ClassLoaderProvider loaderProvider, int[] lazyValueCount) {
         while (size > 0) {
             String key = readString();
-            Object value = (lazy) ? readLazyValue(loader) : readValue(loader);
+            Object value = (lazy) ? readLazyValue(loaderProvider) : readValue(
+                    getClassLoader(loaderProvider));
             if (value instanceof LazyValue) {
-                lazyValues++;
+                lazyValueCount[0]++;
             }
             if (sorted) {
                 map.append(key, value);
@@ -5549,7 +5597,6 @@ public final class Parcel {
         if (sorted) {
             map.validate();
         }
-        return lazyValues;
     }
 
     /**
@@ -5557,12 +5604,12 @@ public final class Parcel {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void readArrayMap(@NonNull ArrayMap<? super String, Object> outVal,
-            @Nullable ClassLoader loader) {
+            @Nullable ClassLoaderProvider loaderProvider) {
         final int N = readInt();
         if (N < 0) {
             return;
         }
-        readArrayMapInternal(outVal, N, loader);
+        readArrayMapInternal(outVal, N, loaderProvider);
     }
 
     /**

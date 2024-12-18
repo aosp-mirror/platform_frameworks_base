@@ -70,4 +70,6 @@ oneway interface IAutoFillManager {
     void notifyNotExpiringResponseDuringAuth(int sessionId, int userId);
     void notifyViewEnteredIgnoredDuringAuthCount(int sessionId, int userId);
     void setAutofillIdsAttemptedForRefill(int sessionId, in List<AutofillId> ids, int userId);
+    void notifyImeAnimationStart(int sessionId, long startTimeMs, int userId);
+    void notifyImeAnimationEnd(int sessionId, long endTimeMs, int userId);
 }

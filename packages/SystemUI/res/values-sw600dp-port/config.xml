@@ -21,8 +21,20 @@
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">3</integer>
 
+    <!-- The number of rows in the paginated grid QuickSettings -->
+    <integer name="quick_settings_paginated_grid_num_rows">3</integer>
+
+    <!-- The number of rows in the paginated grid QuickQuickSettings -->
+    <integer name="quick_qs_paginated_grid_num_rows">2</integer>
+
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">3</integer>
+
+    <!-- The number of columns in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_num_columns">6</integer>
+
+    <!-- The maximum width of large tiles in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_tile_max_width">3</integer>
 
     <integer name="power_menu_lite_max_columns">2</integer>
     <integer name="power_menu_lite_max_rows">3</integer>

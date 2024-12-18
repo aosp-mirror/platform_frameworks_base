@@ -31,6 +31,12 @@
 
             <!-- A header for selfManaged devices only. -->
             <include layout="@layout/vendor_header" />
+            <!-- A device icon for selfManaged devices only. -->
+            <ImageView
+                android:id="@+id/device_icon"
+                android:visibility="gone"
+                android:contentDescription="@null"
+                style="@style/DeviceIcon" />
 
             <!-- Do NOT change the ID of the root LinearLayout above:
             it's referenced in CTS tests. -->

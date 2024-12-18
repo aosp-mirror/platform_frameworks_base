@@ -78,8 +78,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testAvailableMediaDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = availableMediaDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
@@ -89,8 +88,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testConnectedDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = connectedDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
@@ -100,8 +98,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testSavedDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = savedDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
@@ -111,8 +108,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem =
             AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
                 .create(context, cachedDevice)
@@ -133,36 +129,26 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_flagOff_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING off or the device doesn't support broadcast
-         // source or assistant.
-        `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(false)
-
         assertThat(
                 AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
-                    .isFilterMatched(context, cachedDevice, audioManager)
+                    .isFilterMatched(context, cachedDevice, audioManager, false)
             )
             .isFalse()
     }
 
     @Test
-    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isActiveDevice_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
-        `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
+    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isActiveDevice_false() {
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(true)
 
         assertThat(
                 AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
-                    .isFilterMatched(context, cachedDevice, audioManager)
+                    .isFilterMatched(context, cachedDevice, audioManager, true)
             )
             .isFalse()
     }
 
     @Test
-    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isNotAvailable_returnsFalse() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
-        `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
+    fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_isNotAvailable_false() {
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(false)
         `when`(BluetoothUtils.isAvailableMediaBluetoothDevice(any(), any())).thenReturn(true)
         `when`(BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(any(), any()))
@@ -170,16 +156,13 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
         assertThat(
                 AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
-                    .isFilterMatched(context, cachedDevice, audioManager)
+                    .isFilterMatched(context, cachedDevice, audioManager, true)
             )
             .isFalse()
     }
 
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_isFilterMatched_returnsTrue() {
-         // Flags.FLAG_ENABLE_LE_AUDIO_SHARING on and the device support broadcast source and
-         // assistant.
-        `when`(BluetoothUtils.isAudioSharingEnabled()).thenReturn(true)
         `when`(BluetoothUtils.isActiveMediaDevice(any())).thenReturn(false)
         `when`(BluetoothUtils.isAvailableMediaBluetoothDevice(any(), any())).thenReturn(true)
         `when`(BluetoothUtils.isAvailableAudioSharingMediaBluetoothDevice(any(), any()))
@@ -187,7 +170,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
         assertThat(
                 AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
-                    .isFilterMatched(context, cachedDevice, audioManager)
+                    .isFilterMatched(context, cachedDevice, audioManager, true)
             )
             .isTrue()
     }

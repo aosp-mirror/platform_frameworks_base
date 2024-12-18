@@ -16,13 +16,15 @@
 
 package android.media;
 
-import static android.media.Utils.intersectSortedDistinctRanges;
-import static android.media.Utils.sortDistinctRanges;
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
 import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
 import static android.media.codec.Flags.FLAG_HLG_EDITING;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.codec.Flags.FLAG_APV_SUPPORT;
+import static android.media.Utils.intersectSortedDistinctRanges;
+import static android.media.Utils.sortDistinctRanges;
 import static android.media.MediaCodec.GetFlag;
 
 import android.annotation.FlaggedApi;
@@ -461,6 +463,33 @@ public final class MediaCodecInfo {
          */
         @SuppressLint("AllUpper")
         public static final int COLOR_FormatYUVP010                 = 54;
+
+        /**
+         * P210 is 10-bit-per component 4:2:2 YCbCr semiplanar format.
+         * <p>
+         * This format uses 32 allocated bits per pixel with 20 bits of
+         * data per pixel. Chroma planes are subsampled by 2 both
+         * horizontally. Each chroma and luma component
+         * has 16 allocated bits in little-endian configuration with 10
+         * MSB of actual data.
+         *
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     UNUSED      |      Y/Cb/Cr                |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0               5 6   7 0                    7
+         * bit
+         * </pre>
+         *
+         * Use this format with {@link Image}. This format corresponds
+         * to {@link android.graphics.ImageFormat#YCBCR_P210}.
+         * <p>
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(android.media.codec.Flags.FLAG_P210_FORMAT_SUPPORT)
+        public static final int COLOR_FormatYUVP210                 = 60;
 
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
@@ -1848,6 +1877,8 @@ public final class MediaCodecInfo {
      * Codecs with this security model is not included in
      * {@link MediaCodecList#REGULAR_CODECS}, but included in
      * {@link MediaCodecList#ALL_CODECS}.
+     *
+     * @hide
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final int SECURITY_MODEL_TRUSTED_CONTENT_ONLY = 2;
@@ -4468,6 +4499,398 @@ public final class MediaCodecInfo {
         /** AC-4 codec level corresponding to mdcompat 4 as per ETSI TS 103 190-2 v1.2.1 */
         @SuppressLint("AllUpper")
         public static final int AC4Level4       = 0x10;
+
+        // Profiles and levels/bands for APV Codec, corresponding to the definitions in
+        // "Advanced Professional Video", 10.1.3 Profiles, 10.1.4 Levels and Bands
+        // found at https://www.ietf.org/archive/id/draft-lim-apv-02.html
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10 =  0x01;
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         * with HDR10.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10HDR10 =  0x1000;
+
+        /**
+         * APV codec profile 422-10 as per IETF lim-apv-02, 10.1.3.1.1
+         * with HDR10Plus.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVProfile422_10HDR10Plus =  0x2000;
+
+        // For APV Levels, the numerical values are constructed as follows:
+        //   ((0x100 << (level_num - 1)) | (1 << band))
+        // where:
+        //   - "level_num" is the APV Level numbered consecutively
+        //     (i.e., Level 1 == 1, Level 1.1 == 2, etc.)
+        //   - "band" is the APV Band
+
+        /** APV Codec Level 1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band0 =  0x101;
+        /** APV Codec Level 1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band1 =  0x102;
+        /** APV Codec Level 1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band2 =  0x104;
+        /** APV Codec Level 1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel1Band3 =  0x108;
+        /** APV Codec Level 1.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band0 = 0x201;
+        /** APV Codec Level 1.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band1 = 0x202;
+        /** APV Codec Level 1.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band2 = 0x204;
+        /** APV Codec Level 1.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel11Band3 = 0x208;
+        /** APV Codec Level 2, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band0 =  0x401;
+        /** APV Codec Level 2, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band1 =  0x402;
+        /** APV Codec Level 2, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band2 =  0x404;
+        /** APV Codec Level 2, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel2Band3 =  0x408;
+        /** APV Codec Level 2.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band0 = 0x801;
+        /** APV Codec Level 2.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band1 = 0x802;
+        /** APV Codec Level 2.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band2 = 0x804;
+        /** APV Codec Level 2.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel21Band3 = 0x808;
+        /** APV Codec Level 3, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band0 =  0x1001;
+        /** APV Codec Level 3, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band1 =  0x1002;
+        /** APV Codec Level 3, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band2 =  0x1004;
+        /** APV Codec Level 3, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel3Band3 =  0x1008;
+        /** APV Codec Level 3.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band0 = 0x2001;
+        /** APV Codec Level 3.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band1 = 0x2002;
+        /** APV Codec Level 3.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band2 = 0x2004;
+        /** APV Codec Level 3.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel31Band3 = 0x2008;
+        /** APV Codec Level 4, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band0 =  0x4001;
+        /** APV Codec Level 4, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band1 =  0x4002;
+        /** APV Codec Level 4, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band2 =  0x4004;
+        /** APV Codec Level 4, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel4Band3 =  0x4008;
+        /** APV Codec Level 4.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band0 = 0x8001;
+        /** APV Codec Level 4.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band1 = 0x8002;
+        /** APV Codec Level 4.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band2 = 0x8004;
+        /** APV Codec Level 4.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel41Band3 = 0x8008;
+        /** APV Codec Level 5, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band0 =  0x10001;
+        /** APV Codec Level 5, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band1 =  0x10002;
+        /** APV Codec Level 5, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band2 =  0x10004;
+        /** APV Codec Level 5, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel5Band3 =  0x10008;
+        /** APV Codec Level 5.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band0 = 0x20001;
+        /** APV Codec Level 5.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band1 = 0x20002;
+        /** APV Codec Level 5.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band2 = 0x20004;
+        /** APV Codec Level 5.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel51Band3 = 0x20008;
+        /** APV Codec Level 6, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band0 =  0x40001;
+        /** APV Codec Level 6, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band1 =  0x40002;
+        /** APV Codec Level 6, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band2 =  0x40004;
+        /** APV Codec Level 6, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel6Band3 =  0x40008;
+        /** APV Codec Level 6.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band0 = 0x80001;
+        /** APV Codec Level 6.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band1 = 0x80002;
+        /** APV Codec Level 6.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band2 = 0x80004;
+        /** APV Codec Level 6.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel61Band3 = 0x80008;
+        /** APV Codec Level 7, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band0 =  0x100001;
+        /** APV Codec Level 7, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band1 =  0x100002;
+        /** APV Codec Level 7, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band2 =  0x100004;
+        /** APV Codec Level 7, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel7Band3 =  0x100008;
+        /** APV Codec Level 7.1, Band 0 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band0 = 0x200001;
+        /** APV Codec Level 7.1, Band 1 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band1 = 0x200002;
+        /** APV Codec Level 7.1, Band 2 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band2 = 0x200004;
+        /** APV Codec Level 7.1, Band 3 as per IETF lim-apv-02, 10.1.4 */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_APV_SUPPORT)
+        public static final int APVLevel71Band3 = 0x200008;
+
+        // IAMF profiles are defined as the combination of the (listed from LSB to MSB):
+        //  - audio codec (2 bytes)
+        //  - profile (1 byte, offset 16)
+        //  - specification version (1 byte, offset 24)
+        private static final int IAMF_CODEC_OPUS = 0x1;
+        private static final int IAMF_CODEC_AAC  = 0x1 << 1;
+        private static final int IAMF_CODEC_FLAC = 0x1 << 2;
+        private static final int IAMF_CODEC_PCM  = 0x1 << 3;
+        private static final int IAMF_PROFILE_SIMPLE        = 0x1 << 16;
+        private static final int IAMF_PROFILE_BASE          = 0x1 << 17;
+        private static final int IAMF_PROFILE_BASE_ENHANCED = 0x1 << 18;
+        private static final int IAMF_v1 = 0x1 << 24;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleOpus =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleAac =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleFlac =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimplePcm =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_PCM;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseOpus =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseAac =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseFlac =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBasePcm =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_PCM;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedOpus =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedAac =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedFlac =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedPcm =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_PCM;
 
         /**
          * The profile of the media content. Depending on the type of media this can be

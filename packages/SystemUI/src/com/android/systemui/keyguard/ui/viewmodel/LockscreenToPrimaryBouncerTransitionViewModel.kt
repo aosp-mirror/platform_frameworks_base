@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -23,9 +24,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.transitions.FROM_LOCK_SCREEN_TO_BOUNCER_FADE_FRACTION
+import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,21 +46,19 @@ class LockscreenToPrimaryBouncerTransitionViewModel
 constructor(
     shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
                 duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
                 edge = Edge.create(from = LOCKSCREEN, to = Scenes.Bouncer),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = LOCKSCREEN, to = PRIMARY_BOUNCER),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = LOCKSCREEN, to = PRIMARY_BOUNCER))
 
     private val alphaForAnimationStep: (Float) -> Float =
         when {
             SceneContainerFlag.isEnabled -> { step ->
-                    1f - Math.min((step / FROM_LOCK_SCREEN_TO_BOUNCER_FADE_FRACTION), 1f)
+                    1f - Math.min((step / TO_BOUNCER_FADE_FRACTION), 1f)
                 }
             else -> { step -> 1f - step }
         }
@@ -64,7 +66,7 @@ constructor(
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            onStep = alphaForAnimationStep
+            onStep = alphaForAnimationStep,
         )
 
     val lockscreenAlpha: Flow<Float> = shortcutsAlpha
@@ -76,8 +78,20 @@ constructor(
                     duration = 250.milliseconds,
                     onStep = { 1f - it },
                     onCancel = { 0f },
-                    onFinish = { 0f }
+                    onFinish = { 0f },
                 ),
-            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f)
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
+        )
+    override val windowBlurRadius: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsExpanded =
+                transitionAnimation.immediatelyTransitionTo(MAX_BACKGROUND_BLUR_RADIUS),
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+                    onStep = {
+                        MathUtils.lerp(MIN_BACKGROUND_BLUR_RADIUS, MAX_BACKGROUND_BLUR_RADIUS, it)
+                    },
+                ),
         )
 }

@@ -197,7 +197,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
                 /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                .scheduleTransactionItems(mActivity.app.getThread(),
                         refreshCallbackItem, resumeActivityItem);
     }
 

@@ -81,6 +81,8 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardServiceLockNowInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardStateCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardWakeDirectlyToGoneInteractor;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
 import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
@@ -126,6 +128,7 @@ public class KeyguardService extends Service {
     private final Lazy<DeviceEntryInteractor> mDeviceEntryInteractorLazy;
     private final Executor mMainExecutor;
     private final Lazy<KeyguardStateCallbackStartable> mKeyguardStateCallbackStartableLazy;
+    private final KeyguardStateCallbackInteractor mKeyguardStateCallbackInteractor;
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
@@ -327,6 +330,7 @@ public class KeyguardService extends Service {
             return new FoldGracePeriodProvider();
         }
     };
+    private final KeyguardServiceLockNowInteractor mKeyguardServiceLockNowInteractor;
 
     @Inject
     public KeyguardService(
@@ -350,7 +354,9 @@ public class KeyguardService extends Service {
             Lazy<KeyguardStateCallbackStartable> keyguardStateCallbackStartableLazy,
             KeyguardWakeDirectlyToGoneInteractor keyguardWakeDirectlyToGoneInteractor,
             KeyguardDismissInteractor keyguardDismissInteractor,
-            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy) {
+            Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
+            KeyguardStateCallbackInteractor keyguardStateCallbackInteractor,
+            KeyguardServiceLockNowInteractor keyguardServiceLockNowInteractor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -363,6 +369,7 @@ public class KeyguardService extends Service {
         mSceneInteractorLazy = sceneInteractorLazy;
         mMainExecutor = mainExecutor;
         mKeyguardStateCallbackStartableLazy = keyguardStateCallbackStartableLazy;
+        mKeyguardStateCallbackInteractor = keyguardStateCallbackInteractor;
         mDeviceEntryInteractorLazy = deviceEntryInteractorLazy;
 
         if (KeyguardWmStateRefactor.isEnabled()) {
@@ -381,6 +388,7 @@ public class KeyguardService extends Service {
         mKeyguardEnabledInteractor = keyguardEnabledInteractor;
         mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
         mKeyguardDismissInteractor = keyguardDismissInteractor;
+        mKeyguardServiceLockNowInteractor = keyguardServiceLockNowInteractor;
     }
 
     @Override
@@ -455,6 +463,8 @@ public class KeyguardService extends Service {
             checkPermission();
             if (SceneContainerFlag.isEnabled()) {
                 mKeyguardStateCallbackStartableLazy.get().addCallback(callback);
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardStateCallbackInteractor.addCallback(callback);
             } else {
                 mKeyguardViewMediator.addStateMonitorCallback(callback);
             }
@@ -650,6 +660,13 @@ public class KeyguardService extends Service {
         public void doKeyguardTimeout(Bundle options) {
             trace("doKeyguardTimeout");
             checkPermission();
+
+            if (SceneContainerFlag.isEnabled()) {
+                mDeviceEntryInteractorLazy.get().lockNow();
+            } else if (KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(options);
+            }
+
             mKeyguardViewMediator.doKeyguardTimeout(options);
         }
 

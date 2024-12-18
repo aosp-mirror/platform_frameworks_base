@@ -199,6 +199,21 @@
     <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call or in general. -->
     <string name="CLIRDefaultOffNextCallOff">Caller ID defaults to not restricted. Next call: Not restricted</string>
 
+    <!-- Message displayed in dialog when APK is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_warning">This app isn’t 16 KB compatible. APK alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; </string>
+
+    <!-- Message displayed in dialog when ELF is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_elf_warning">This app isn’t 16 KB compatible. ELF alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
+    <!-- Message displayed in dialog when APK and ELF are not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_and_elf_warning">This app isn’t 16 KB compatible. APK and ELF alignment checks failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
 
     <!-- Displayed to tell the user that caller ID is not provisioned for their SIM. -->
     <string name="serviceNotProvisioned">Service not provisioned.</string>
@@ -1766,6 +1781,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=140]-->
     <string name="permdesc_nearby_wifi_devices">Allows the app to advertise, connect, and determine the relative position of nearby Wi\u2011Fi devices</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_ranging">determine relative position between nearby devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_ranging">Allow the app to determine relative position between nearby devices</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3113,6 +3133,86 @@
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <string name="duration_years_shortest_future">
         in <xliff:g id="count">%d</xliff:g>y
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_minutes_shortest_past">
+        <xliff:g id="count">%d</xliff:g>m ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_hours_shortest_past">
+        <xliff:g id="count">%d</xliff:g>h ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_days_shortest_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_years_shortest_past">
+        <xliff:g id="count">%d</xliff:g>y ago
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_minutes_medium">
+        <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_hours_medium">
+        <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_days_medium">
+       <xliff:g id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_years_medium">
+        <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_future">
+        in <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_future">
+        in <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_future">
+        in <xliff:g example="1" id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_future">
+        in <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_past">
+        <xliff:g id="count">%d</xliff:g>min ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_past">
+        <xliff:g id="count">%d</xliff:g>hr ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_past">
+        <xliff:g id="count">%d</xliff:g>yr ago
     </string>
 
     <!-- Phrase describing a relative time using minutes in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
@@ -5337,7 +5437,9 @@
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
-    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <!-- Implicit zen mode - Name of the rule, indicating which app owns it. [CHAR_LIMIT=30] -->
+    <string name="zen_mode_implicit_name">Do Not Disturb (<xliff:g id="app_name" example="Gmail">%1$s</xliff:g>)</string>
+    <!-- Implicit zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
     <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
     <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
     <string name="zen_mode_implicit_activated">On</string>
@@ -5348,6 +5450,10 @@
     <string name="zen_mode_trigger_summary_divider_text">,\u0020</string>
     <!-- [CHAR LIMIT=40] General template for a symbolic start - end range in a text summary, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=40] General template for a start - end range in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_range_words"><xliff:g id="start" example="Sunday">%1$s</xliff:g> to <xliff:g id="end" example="Thursday">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] General template for combining a days of week start-end range with a time-based start-end range, for example: "Sun-Thurs, 10:00 PM - 7:00 AM" -->
+    <string name="zen_mode_trigger_summary_combined"><xliff:g id="days" example="Sat-Thurs">%1$s</xliff:g>,\u0020<xliff:g id="times" example="10:00 PM - 7:00 AM">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 
@@ -5508,6 +5614,9 @@
     <string name="set_up_screen_lock_action_label">Set screen lock</string>
     <!-- Message shown in the dialog prompting the user to set up a screen lock to access private space [CHAR LIMIT=120] -->
     <string name="private_space_set_up_screen_lock_message">To use your private space, set a screen lock on this device</string>
+
+    <!-- Message shown in the dialog prompting the user to set up a screen lock to delete private space from Reset Options [CHAR LIMIT=120] -->
+    <string name="private_space_set_up_screen_lock_for_reset">To delete private space, set a screen lock on this device</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -5815,16 +5924,6 @@
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
-    <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
-    <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
-    <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
-    <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
-    <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
 
     <!-- Notification permission informational notification text -->
     <!-- Title for notification inviting users to review their notification settings [CHAR LIMIT=NONE] -->
@@ -6515,8 +6614,64 @@ ul.</string>
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->
     <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Popup title when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_title">Turn on \"Automatically select network\"</string>
+    <!-- Popup message when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_message">Turn on \"Automatically select network\" in Settings so your phone can find a network that works with satellite</string>
+    <!-- Popup button for set network selection automatic -->
+    <string name="satellite_manual_selection_state_popup_ok">Turn on</string>
+    <!-- Popup button for cancel satellite request -->
+    <string name="satellite_manual_selection_state_popup_cancel">Go back</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_sos_available_notification_title">Satellite SOS is now available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_available_notification_summary">You can message emergency services if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_sos_not_supported_notification_title">Satellite SOS isn\'t supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_supported_notification_summary">Satellite SOS isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_title">Satellite SOS isn\'t set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_sos_not_in_allowed_region_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_in_allowed_region_notification_summary">Satellite SOS isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title">Satellite SOS not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_sos_location_disabled_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_location_disabled_notification_summary">To check if satellite SOS is available in this country or region, turn on location settings</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_messaging_available_notification_title">Satellite messaging available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_available_notification_summary">You can message by satellite if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_messaging_not_supported_notification_title">Satellite messaging not supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_supported_notification_summary">Satellite messaging isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary">Satellite messaging isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_messaging_location_disabled_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_location_disabled_notification_summary">To check if satellite messaging is available in this country or region, turn on location settings</string>
 
     <!-- Fingerprint dangling notification title -->
     <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>

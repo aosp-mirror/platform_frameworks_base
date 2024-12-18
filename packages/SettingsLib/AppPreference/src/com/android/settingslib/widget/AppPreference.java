@@ -18,11 +18,8 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.app.R;
 
@@ -31,51 +28,30 @@ import com.android.settingslib.widget.preference.app.R;
  */
 public class AppPreference extends Preference {
 
-    private int mProgress;
-    private boolean mProgressVisible;
-
     public AppPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppPreference(Context context) {
         super(context);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
     public AppPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setLayoutResource(R.layout.preference_app);
+        init(context);
     }
 
-    /**
-     * Sets the current progress.
-     * @param amount the current progress
-     *
-     * @see ProgressBar#setProgress(int)
-     */
-    public void setProgress(int amount) {
-        mProgress = amount;
-        mProgressVisible = true;
-        notifyChanged();
-    }
-
-    @Override
-    public void onBindViewHolder(PreferenceViewHolder view) {
-        super.onBindViewHolder(view);
-
-        final ProgressBar progress = (ProgressBar) view.findViewById(android.R.id.progress);
-        if (mProgressVisible) {
-            progress.setProgress(mProgress);
-            progress.setVisibility(View.VISIBLE);
-        } else {
-            progress.setVisibility(View.GONE);
-        }
+    private void init(Context context) {
+        int resId = SettingsThemeHelper.isExpressiveTheme(context)
+                ? com.android.settingslib.widget.theme.R.layout.settingslib_expressive_preference
+                : R.layout.preference_app;
+        setLayoutResource(resId);
     }
 }

@@ -22,7 +22,6 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.util.Log
 import android.view.MotionEvent
@@ -44,7 +43,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
-import com.android.systemui.Flags.bpIconA11y
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
@@ -64,7 +63,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
 
@@ -93,7 +91,7 @@ object BiometricViewBinder {
         val attributes =
             view.context.obtainStyledAttributes(
                 R.style.TextAppearance_AuthCredential_Indicator,
-                intArrayOf(android.R.attr.textColor)
+                intArrayOf(android.R.attr.textColor),
             )
         val textColorHint = attributes.getColor(0, 0)
         attributes.recycle()
@@ -130,13 +128,13 @@ object BiometricViewBinder {
             object : AccessibilityDelegateCompat() {
                 override fun onInitializeAccessibilityNodeInfo(
                     host: View,
-                    info: AccessibilityNodeInfoCompat
+                    info: AccessibilityNodeInfoCompat,
                 ) {
                     super.onInitializeAccessibilityNodeInfo(host, info)
                     info.addAction(
                         AccessibilityActionCompat(
                             AccessibilityNodeInfoCompat.ACTION_CLICK,
-                            view.context.getString(R.string.biometric_dialog_cancel_authentication)
+                            view.context.getString(R.string.biometric_dialog_cancel_authentication),
                         )
                     )
                 }
@@ -189,13 +187,11 @@ object BiometricViewBinder {
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
 
-            if (Flags.customBiometricPrompt()) {
-                BiometricCustomizedViewBinder.bind(
-                    customizedViewContainer,
-                    viewModel.contentView.first(),
-                    legacyCallback
-                )
-            }
+            BiometricCustomizedViewBinder.bind(
+                customizedViewContainer,
+                viewModel.contentView.first(),
+                legacyCallback,
+            )
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -233,10 +229,7 @@ object BiometricViewBinder {
             lifecycleScope.launch {
                 viewModel.hideSensorIcon.collect { showWithoutIcon ->
                     if (!showWithoutIcon) {
-                        PromptIconViewBinder.bind(
-                            iconView,
-                            viewModel,
-                        )
+                        PromptIconViewBinder.bind(iconView, viewModel)
                     }
                 }
             }
@@ -333,31 +326,30 @@ object BiometricViewBinder {
 
                 // reuse the icon as a confirm button
                 launch {
-                    if (bpIconA11y()) {
-                        viewModel.isIconConfirmButton.collect { isButton ->
-                            if (isButton) {
-                                iconView.onTouchListener { _: View, event: MotionEvent ->
-                                    viewModel.onOverlayTouch(event)
-                                }
+                    viewModel.isIconConfirmButton.collect { isButton ->
+                        if (isButton && !accessibilityManager.isEnabled) {
+                            iconView.onTouchListener { _: View, event: MotionEvent ->
+                                viewModel.onOverlayTouch(event)
+                            }
+                        } else {
+                            iconView.setOnTouchListener(null)
+                        }
+                    }
+                }
+
+                launch {
+                    combine(viewModel.isIconConfirmButton, viewModel.isAuthenticated, ::Pair)
+                        .collect { (isIconConfirmButton, authState) ->
+                            // Only use the icon as a button for talkback when coex and pending
+                            // confirmation
+                            if (
+                                accessibilityManager.isEnabled &&
+                                    isIconConfirmButton &&
+                                    authState.isAuthenticated
+                            ) {
                                 iconView.setOnClickListener { viewModel.confirmAuthenticated() }
-                            } else {
-                                iconView.setOnTouchListener(null)
-                                iconView.setOnClickListener(null)
                             }
                         }
-                    } else {
-                        viewModel.isIconConfirmButton
-                            .map { isPending ->
-                                when {
-                                    isPending && modalities.hasFaceAndFingerprint ->
-                                        View.OnTouchListener { _: View, event: MotionEvent ->
-                                            viewModel.onOverlayTouch(event)
-                                        }
-                                    else -> null
-                                }
-                            }
-                            .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
-                    }
                 }
 
                 // dismiss prompt when authenticated and confirmed
@@ -371,22 +363,8 @@ object BiometricViewBinder {
                             backgroundView.setOnClickListener(null)
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
-
-                            // Allow icon to be used as confirmation button with udfps and a11y
-                            // enabled
-                            if (
-                                !bpIconA11y() &&
-                                    accessibilityManager.isTouchExplorationEnabled &&
-                                    modalities.hasUdfps
-                            ) {
-                                iconView.setOnClickListener { viewModel.confirmAuthenticated() }
-                            }
                         }
                         if (authState.isAuthenticatedAndConfirmed) {
-                            view.announceForAccessibility(
-                                view.resources.getString(R.string.biometric_dialog_authenticated)
-                            )
-
                             launch {
                                 delay(authState.delay)
                                 if (authState.isAuthenticatedAndExplicitlyConfirmed) {
@@ -421,7 +399,7 @@ object BiometricViewBinder {
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,
-                            accessibilityManager.isTouchExplorationEnabled
+                            accessibilityManager.isTouchExplorationEnabled,
                         )
                     }
                     false
@@ -444,10 +422,7 @@ object BiometricViewBinder {
                                         haptics.flag,
                                     )
                                 } else {
-                                    vibratorHelper.performHapticFeedback(
-                                        view,
-                                        haptics.constant,
-                                    )
+                                    vibratorHelper.performHapticFeedback(view, haptics.constant)
                                 }
                             }
                             is PromptViewModel.HapticsToPlay.MSDL -> {
@@ -561,14 +536,12 @@ class Spaghetti(
             viewModel.showAuthenticated(
                 modality = authenticatedModality,
                 dismissAfterDelay = 500,
-                helpMessage = if (msgId != null) applicationContext.getString(msgId) else ""
+                helpMessage = if (msgId != null) applicationContext.getString(msgId) else "",
             )
         }
     }
 
-    private fun getHelpForSuccessfulAuthentication(
-        authenticatedModality: BiometricModality,
-    ): Int? {
+    private fun getHelpForSuccessfulAuthentication(authenticatedModality: BiometricModality): Int? {
         // for coex, show a message when face succeeds after fingerprint has also started
         if (authenticatedModality != BiometricModality.Face) {
             return null

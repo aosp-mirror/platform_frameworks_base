@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.server.notification.Flags.screenshareNotificationHiding;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -37,6 +37,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -86,7 +87,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     @Inject
     public NotificationRowBinderImpl(
-            Context context,
+            @ShadeDisplayAware Context context,
             NotificationMessagingUtil notificationMessagingUtil,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
@@ -255,9 +256,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseMinimized(isMinimized);
-        boolean needsRedaction = screenshareNotificationHiding()
-                ? inflaterParams.getNeedsRedaction()
-                : mNotificationLockscreenUserManager.needsRedaction(entry);
+        // TODO b/358403414: use the different types of redaction
+        boolean needsRedaction = inflaterParams.getRedactionType() != REDACTION_TYPE_NONE;
 
         if (needsRedaction) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
@@ -275,7 +275,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             }
         }
 
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
+
             if (inflaterParams.isChildInGroup() && needsRedaction) {
                 params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
             } else {

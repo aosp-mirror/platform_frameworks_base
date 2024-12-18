@@ -17,11 +17,13 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
 import static com.android.server.wm.AppCompatOrientationOverrides.OrientationOverridesState.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
@@ -31,6 +33,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.compat.testing.PlatformCompatChangeRule;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -228,6 +231,25 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testOverrideRespectRequestedOrientationIsEnabled_bottomOrientationIsRespected() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.setIgnoreOrientationRequest(true);
+                a.createActivityWithComponentInNewTask();
+                robot.setOverrideRespectRequestedOrientationEnabled(true);
+                a.configureUnresizableTopActivity(SCREEN_ORIENTATION_LANDSCAPE);
+                robot.checkDisplayShouldIgnoreOrientationRequest(SCREEN_ORIENTATION_LANDSCAPE,
+                        /* expected */ false);
+
+                a.createActivityWithComponentInNewTask();
+                a.setTopActivityInFreeformWindowingMode(true);
+            });
+            robot.checkDisplayShouldIgnoreOrientationRequest(SCREEN_ORIENTATION_LANDSCAPE,
+                    /* expected */ false);
+        });
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -289,6 +311,22 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
             for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
                 consumer.accept(i);
             }
+        }
+
+        void setOverrideRespectRequestedOrientationEnabled(boolean override) {
+            spyOn(getTopOrientationOverrides());
+            doReturn(override).when(getTopOrientationOverrides())
+                    .isOverrideRespectRequestedOrientationEnabled();
+        }
+
+        void checkDisplayShouldIgnoreOrientationRequest(@ScreenOrientation int candidate,
+                boolean expected) {
+            assertEquals(expected, activity().displayContent()
+                    .shouldIgnoreOrientationRequest(candidate));
+        }
+
+        void checkExpectedDisplayOrientation(@ScreenOrientation int expected) {
+            assertEquals(expected, activity().displayContent().getOrientation());
         }
 
         void checkShouldUseDisplayLandscapeNaturalOrientation(boolean expected) {

@@ -27,6 +27,7 @@ import android.net.wifi.WifiManager
 import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
 import android.os.Bundle
 import android.os.SystemClock
+import android.security.advancedprotection.AdvancedProtectionManager
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
@@ -498,7 +499,13 @@ open class WifiUtils {
         ): Job =
             coroutineScope.launch {
                 val wifiManager = context.getSystemService(WifiManager::class.java) ?: return@launch
-                if (wifiManager.isWepSupported == true && wifiManager.queryWepAllowed()) {
+                val aapmManager = context.getSystemService(AdvancedProtectionManager::class.java)
+                if (isAdvancedProtectionEnabled(aapmManager)) {
+                    val intent = aapmManager.createSupportIntent(
+                        AdvancedProtectionManager.FEATURE_ID_DISALLOW_WEP,
+                        AdvancedProtectionManager.SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION)
+                    onStartActivity(intent)
+                } else if (wifiManager.isWepSupported == true && wifiManager.queryWepAllowed()) {
                     onAllowed()
                 } else {
                     val intent = Intent(Intent.ACTION_MAIN).apply {
@@ -520,6 +527,18 @@ open class WifiUtils {
                         continuation.resume(it)
                     }
                 }
+            }
+
+        private suspend fun isAdvancedProtectionEnabled(
+            aapmManager: AdvancedProtectionManager?
+        ): Boolean =
+            if (android.security.Flags.aapmApi() &&
+                    com.android.wifi.flags.Flags.wepDisabledInApm() &&
+                    aapmManager != null
+            ) {
+                withContext(Dispatchers.Default) { aapmManager.isAdvancedProtectionEnabled() }
+            } else {
+                false
             }
 
         const val SSID = "ssid"

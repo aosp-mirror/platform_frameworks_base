@@ -29,16 +29,24 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * The GameManager allows system apps to modify and query the game mode of apps.
+ *
+ * <p><b>Note:</b> After {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, some devices
+ * that do not support the GameManager features <i>may</i> not publish a GameManager instance.
+ * These device types include:
+ * <ul>
+ *      <li> Wear devices ({@link PackageManager#FEATURE_WATCH})
+ * </ul>
+ *
+ * <p>Therefore, you should always do a {@code null} check on the return value of
+ * {@link Context#getSystemService(Class)} and {@link Context#getSystemService(String)} when trying
+ * to obtain an instance of GameManager on the aforementioned device types.
  */
 @SystemService(Context.GAME_SERVICE)
 public final class GameManager {
@@ -46,7 +54,7 @@ public final class GameManager {
     private static final String TAG = "GameManager";
 
     private final @Nullable Context mContext;
-    private final IGameManagerService mService;
+    private final @Nullable IGameManagerService mService;
 
     /** @hide */
     @IntDef(flag = false, prefix = {"GAME_MODE_"}, value = {
@@ -92,10 +100,9 @@ public final class GameManager {
      */
     public static final int GAME_MODE_CUSTOM = 4;
 
-    GameManager(Context context, Handler handler) throws ServiceNotFoundException {
+    GameManager(Context context, @Nullable IGameManagerService service) {
         mContext = context;
-        mService = IGameManagerService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.GAME_SERVICE));
+        mService = service;
     }
 
     /**
@@ -145,6 +152,7 @@ public final class GameManager {
     // we don't want a binder call each time to check on behalf of an app using CompatChange.
     @SuppressWarnings("AndroidFrameworkCompatChange")
     private @GameMode int getGameModeImpl(@NonNull String packageName, int targetSdkVersion) {
+        if (mService == null) return GAME_MODE_UNSUPPORTED;
         final int gameMode;
         try {
             gameMode = mService.getGameMode(packageName,
@@ -176,6 +184,7 @@ public final class GameManager {
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @Nullable GameModeInfo getGameModeInfo(@NonNull String packageName) {
+        if (mService == null) return null;
         try {
             return mService.getGameModeInfo(packageName, mContext.getUserId());
         } catch (RemoteException e) {
@@ -196,6 +205,7 @@ public final class GameManager {
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void setGameMode(@NonNull String packageName, @GameMode int gameMode) {
+        if (mService == null) return;
         try {
             mService.setGameMode(packageName, gameMode, mContext.getUserId());
         } catch (RemoteException e) {
@@ -212,6 +222,7 @@ public final class GameManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int[] getAvailableGameModes(@NonNull String packageName) {
+        if (mService == null) return new int[0];
         try {
             return mService.getAvailableGameModes(packageName, mContext.getUserId());
         } catch (RemoteException e) {
@@ -232,6 +243,7 @@ public final class GameManager {
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public boolean isAngleEnabled(@NonNull String packageName) {
+        if (mService == null) return false;
         try {
             return mService.isAngleEnabled(packageName, mContext.getUserId());
         } catch (RemoteException e) {
@@ -246,6 +258,7 @@ public final class GameManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void notifyGraphicsEnvironmentSetup() {
+        if (mService == null) return;
         try {
             mService.notifyGraphicsEnvironmentSetup(
                     mContext.getPackageName(), mContext.getUserId());
@@ -259,6 +272,7 @@ public final class GameManager {
      * @param gameState An object set to the current state.
      */
     public void setGameState(@NonNull GameState gameState) {
+        if (mService == null) return;
         try {
             mService.setGameState(mContext.getPackageName(), gameState, mContext.getUserId());
         } catch (RemoteException e) {
@@ -275,6 +289,7 @@ public final class GameManager {
      */
     @TestApi
     public void setGameServiceProvider(@Nullable String packageName) {
+        if (mService == null) return;
         try {
             mService.setGameServiceProvider(packageName);
         } catch (RemoteException e) {
@@ -296,6 +311,7 @@ public final class GameManager {
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public void updateCustomGameModeConfiguration(@NonNull String packageName,
             @NonNull GameModeConfiguration gameModeConfig) {
+        if (mService == null) return;
         try {
             mService.updateCustomGameModeConfiguration(packageName, gameModeConfig,
                     mContext.getUserId());

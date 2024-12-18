@@ -192,21 +192,20 @@ public final class SuspendPackageHelper {
             }
         });
 
-        final Computer newSnapshot = mPm.snapshotComputer();
         if (!notifyPackagesList.isEmpty()) {
             final String[] changedPackages =
                     notifyPackagesList.toArray(new String[0]);
-            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(mPm::snapshotComputer,
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
                     changedPackages, notifyUids.toArray(), quarantined, targetUserId);
-            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(newSnapshot, changedPackages,
-                    suspended, targetUserId);
+            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(mPm::snapshotComputer,
+                    changedPackages, suspended, targetUserId);
             mPm.scheduleWritePackageRestrictions(targetUserId);
         }
         // Send the suspension changed broadcast to ensure suspension state is not stale.
         if (!changedPackagesList.isEmpty()) {
-            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(mPm::snapshotComputer,
                     Intent.ACTION_PACKAGES_SUSPENSION_CHANGED,
                     changedPackagesList.toArray(new String[0]), changedUids.toArray(), quarantined,
                     targetUserId);
@@ -343,13 +342,12 @@ public final class SuspendPackageHelper {
         });
 
         mPm.scheduleWritePackageRestrictions(targetUserId);
-        final Computer newSnapshot = mPm.snapshotComputer();
         if (!unsuspendedPackages.isEmpty()) {
             final String[] packageArray = unsuspendedPackages.toArray(
                     new String[unsuspendedPackages.size()]);
-            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(newSnapshot, packageArray,
-                    false, targetUserId);
-            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(newSnapshot,
+            mBroadcastHelper.sendMyPackageSuspendedOrUnsuspended(mPm::snapshotComputer,
+                    packageArray, false, targetUserId);
+            mBroadcastHelper.sendPackagesSuspendedOrUnsuspendedForUser(mPm::snapshotComputer,
                     Intent.ACTION_PACKAGES_UNSUSPENDED,
                     packageArray, unsuspendedUids.toArray(), false, targetUserId);
         }

@@ -31,6 +31,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,8 +47,6 @@ import androidx.window.extensions.core.util.function.Predicate;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
-
-import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,14 +146,23 @@ class TaskContainer {
 
     /** This is only used when restoring it from a {@link ParcelableTaskContainerData}. */
     TaskContainer(@NonNull ParcelableTaskContainerData data,
-            @NonNull SplitController splitController) {
+            @NonNull SplitController splitController,
+            @NonNull ArrayMap<IBinder, TaskFragmentInfo> taskFragmentInfoMap) {
         mParcelableTaskContainerData = new ParcelableTaskContainerData(data, this);
+        mInfo = new TaskFragmentParentInfo(new Configuration(), 0 /* displayId */, -1 /* taskId */,
+                false /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
         mSplitController = splitController;
         for (ParcelableTaskFragmentContainerData tfData :
                 data.getParcelableTaskFragmentContainerDataList()) {
-            final TaskFragmentContainer container =
-                    new TaskFragmentContainer(tfData, splitController, this);
-            mContainers.add(container);
+            final TaskFragmentInfo info = taskFragmentInfoMap.remove(tfData.mToken);
+            if (info != null && !info.isEmpty()) {
+                final TaskFragmentContainer container =
+                        new TaskFragmentContainer(tfData, splitController, this);
+                container.setInfo(new WindowContainerTransaction(), info);
+                mContainers.add(container);
+            } else {
+                Log.d(TAG, "Drop " + tfData + " while restoring Task " + data.mTaskId);
+            }
         }
     }
 
@@ -174,8 +182,15 @@ class TaskContainer {
 
     @NonNull
     List<ParcelableSplitContainerData> getParcelableSplitContainerDataList() {
-        final List<ParcelableSplitContainerData> data = new ArrayList<>(mSplitContainers.size());
+        final int size =
+                mSplitPinContainer != null ? mSplitContainers.size() - 1 : mSplitContainers.size();
+        final List<ParcelableSplitContainerData> data = new ArrayList<>(size);
         for (SplitContainer splitContainer : mSplitContainers) {
+            if (splitContainer == mSplitPinContainer) {
+                // Skip SplitPinContainer as it cannot be restored because the SplitPinRule is
+                // set while pinning the container in runtime.
+                continue;
+            }
             data.add(splitContainer.getParcelableData());
         }
         return data;
@@ -367,8 +382,16 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
-        return getContainer(container -> container.hasAppearedActivity(activityToken)
-                || container.hasPendingAppearedActivity(activityToken));
+        // When the new activity is launched to the topmost TF because the source activity
+        // was in that TF, and the source activity is finished before resolving the new activity,
+        // we will try to see if the new activity match a rule with the split activities below.
+        // If matched, it can be reparented.
+        final TaskFragmentContainer taskFragmentContainer
+                = getContainer(container -> container.hasPendingAppearedActivity(activityToken));
+        if (taskFragmentContainer != null) {
+            return taskFragmentContainer;
+        }
+        return getContainer(container -> container.hasAppearedActivity(activityToken));
     }
 
     @Nullable
@@ -616,11 +639,7 @@ class TaskContainer {
         // pin container.
         updateAlwaysOnTopOverlayIfNecessary();
 
-        // TODO(b/289875940): Making backup-restore as an opt-in solution, before the flag goes
-        //  to next-food.
-        if (Flags.aeBackStackRestore()) {
-            mSplitController.scheduleBackup();
-        }
+        mSplitController.scheduleBackup();
     }
 
     private void updateAlwaysOnTopOverlayIfNecessary() {

@@ -16,11 +16,17 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.FileDescriptor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Base interface for a remotable object, the core part of a lightweight
@@ -377,23 +383,57 @@ public interface IBinder {
      */
     public boolean unlinkToDeath(@NonNull DeathRecipient recipient, int flags);
 
-    /** @hide */
-    interface IFrozenStateChangeCallback {
-        enum State {FROZEN, UNFROZEN};
+    /**
+     * A callback interface for receiving frozen state change events.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    interface FrozenStateChangeCallback {
+        /**
+         * @hide
+         */
+        @IntDef(prefix = {"STATE_"}, value = {
+                STATE_FROZEN,
+                STATE_UNFROZEN,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface State {
+        }
+
+        /**
+         * Represents the frozen state of the remote process.
+         *
+         * While in this state, the remote process won't be able to receive and handle a
+         * transaction. Therefore, any asynchronous transactions will be buffered and delivered when
+         * the process is unfrozen, and any synchronous transactions will result in an error.
+         *
+         * Buffered transactions may be stale by the time that the process is unfrozen and handles
+         * them. To avoid overwhelming the remote process with stale events or overflowing their
+         * buffers, it's best to avoid sending binder transactions to a frozen process.
+         */
+        int STATE_FROZEN = 0;
+
+        /**
+         * Represents the unfrozen state of the remote process.
+         *
+         * In this state, the process hosting the object can execute and is not restricted
+         * by the freezer from using the CPU or responding to binder transactions.
+         */
+        int STATE_UNFROZEN = 1;
 
         /**
          * Interface for receiving a callback when the process hosting an IBinder
          * has changed its frozen state.
+         *
          * @param who The IBinder whose hosting process has changed state.
          * @param state The latest state.
          */
-        void onFrozenStateChanged(@NonNull IBinder who, State state);
+        void onFrozenStateChanged(@NonNull IBinder who, @State int state);
     }
 
     /**
-     * {@link addFrozenStateChangeCallback} provides a callback mechanism to notify about process
-     * frozen/unfrozen events. Upon registration and any subsequent state changes, the callback is
-     * invoked with the latest process frozen state.
+     * This method provides a callback mechanism to notify about process frozen/unfrozen events.
+     * Upon registration and any subsequent state changes, the callback is invoked with the latest
+     * process frozen state.
      *
      * <p>If the listener process (the one using this API) is itself frozen, state change events
      * might be combined into a single one with the latest frozen state. This single event would
@@ -408,21 +448,37 @@ public interface IBinder {
      * <p>You will only receive state change notifications for remote binders, as local binders by
      * definition can't be frozen without you being frozen too.</p>
      *
+     * @param executor The executor on which to run the callback.
+     * @param callback The callback used to deliver state change notifications.
+     *
      * <p>@throws {@link UnsupportedOperationException} if the kernel binder driver does not support
      * this feature.
-     * @hide
      */
-    default void addFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback)
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    default void addFrozenStateChangeCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull FrozenStateChangeCallback callback)
             throws RemoteException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Unregister a {@link IFrozenStateChangeCallback}. The callback will no longer be invoked when
-     * the hosting process changes its frozen state.
+     * Same as {@link #addFrozenStateChangeCallback(Executor, FrozenStateChangeCallback)} except
+     * that callbacks are invoked on a binder thread.
+     *
      * @hide
      */
-    default boolean removeFrozenStateChangeCallback(@NonNull IFrozenStateChangeCallback callback) {
+    default void addFrozenStateChangeCallback(@NonNull FrozenStateChangeCallback callback)
+            throws RemoteException {
+        addFrozenStateChangeCallback(Runnable::run, callback);
+    }
+
+    /**
+     * Unregister a {@link FrozenStateChangeCallback}. The callback will no longer be invoked when
+     * the hosting process changes its frozen state.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    default boolean removeFrozenStateChangeCallback(@NonNull FrozenStateChangeCallback callback) {
         throw new UnsupportedOperationException();
     }
 }

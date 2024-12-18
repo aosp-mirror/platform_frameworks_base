@@ -22,6 +22,7 @@ import android.os.Build;
 
 import com.android.aconfig.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,8 +61,27 @@ public class AudioDevicePort extends AudioPort {
                 /* encapsulationMetadataTypes= */ null);
     }
 
+    /** @hide */
+    // TODO: b/316864909 - Remove this method once there's a way to fake audio device ports further
+    // down the stack.
+    @VisibleForTesting
+    public static AudioDevicePort createForTesting(int speakerLayoutChannelMask) {
+        return new AudioDevicePort(
+                new AudioHandle(/* id= */ 0),
+                /* name= */ "testAudioDevicePort",
+                /* profiles= */ new ArrayList<>(),
+                /* gains= */ null,
+                /* type= */ AudioManager.DEVICE_OUT_SPEAKER,
+                /* address= */ "testAddress",
+                /* speakerLayoutChannelMask= */ speakerLayoutChannelMask,
+                /* encapsulationModes= */ null,
+                /* encapsulationMetadataTypes= */ null,
+                /* descriptors= */ new ArrayList<>());
+    }
+
     private final int mType;
     private final String mAddress;
+    private final int mSpeakerLayoutChannelMask;
     private final int[] mEncapsulationModes;
     private final int[] mEncapsulationMetadataTypes;
 
@@ -76,12 +96,20 @@ public class AudioDevicePort extends AudioPort {
              deviceName, samplingRates, channelMasks, channelIndexMasks, formats, gains);
         mType = type;
         mAddress = address;
+        mSpeakerLayoutChannelMask = AudioFormat.CHANNEL_INVALID;
         mEncapsulationModes = encapsulationModes;
         mEncapsulationMetadataTypes = encapsulationMetadataTypes;
     }
 
-    AudioDevicePort(AudioHandle handle, String deviceName, List<AudioProfile> profiles,
-            AudioGain[] gains, int type, String address, int[] encapsulationModes,
+    AudioDevicePort(
+            AudioHandle handle,
+            String deviceName,
+            List<AudioProfile> profiles,
+            AudioGain[] gains,
+            int type,
+            String address,
+            int speakerLayoutChannelMask,
+            int[] encapsulationModes,
             @AudioTrack.EncapsulationMetadataType int[] encapsulationMetadataTypes,
             List<AudioDescriptor> descriptors) {
         super(handle,
@@ -89,6 +117,7 @@ public class AudioDevicePort extends AudioPort {
                 deviceName, profiles, gains, descriptors);
         mType = type;
         mAddress = address;
+        mSpeakerLayoutChannelMask = speakerLayoutChannelMask;
         mEncapsulationModes = encapsulationModes;
         mEncapsulationMetadataTypes = encapsulationMetadataTypes;
     }
@@ -117,6 +146,16 @@ public class AudioDevicePort extends AudioPort {
      */
     public String address() {
         return mAddress;
+    }
+
+    /** Get the channel mask representing the physical output speaker layout of the device.
+     *
+     * The layout channel mask only indicates which speaker channels are present, the
+     * physical layout of the speakers should be informed by a standard for multi-channel
+     * sound playback systems, such as ITU-R BS.2051.
+    */
+    public int speakerLayoutChannelMask() {
+        return mSpeakerLayoutChannelMask;
     }
 
     /**
@@ -169,6 +208,27 @@ public class AudioDevicePort extends AudioPort {
             return false;
         }
         return super.equals(o);
+    }
+
+    /**
+     * Returns true if the AudioDevicePort passed as argument represents the same device (same
+     * type and same address). This is different from equals() in that the port IDs are not compared
+     * which allows matching devices across native audio server restarts.
+     * @param other the other audio device port to compare to.
+     * @return true if both device port correspond to the same audio device, false otherwise.
+     * @hide
+     */
+    public boolean isSameAs(AudioDevicePort other) {
+        if (mType != other.type()) {
+            return false;
+        }
+        if (mAddress == null && other.address() != null) {
+            return false;
+        }
+        if (!mAddress.equals(other.address())) {
+            return false;
+        }
+        return true;
     }
 
     @Override

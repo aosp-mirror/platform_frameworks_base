@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import static android.app.job.JobParameters.OVERRIDE_HANDLE_ABANDONED_JOBS;
+
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.safelyScaleBytesToKBForHistogram;
@@ -129,6 +131,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
     };
+    private static final String TRACE_ABANDONED_JOB = "abandonedJob:";
+    private static final String TRACE_ABANDONED_JOB_DELIMITER = "#";
 
     // States that a job occupies while interacting with the client.
     static final int VERB_BINDING = 0;
@@ -289,6 +293,11 @@ public final class JobServiceContext implements ServiceConnection {
         @Override
         public void jobFinished(int jobId, boolean reschedule) {
             doJobFinished(this, jobId, reschedule);
+        }
+
+        @Override
+        public void handleAbandonedJob(int jobId) {
+            doHandleAbandonedJob(this, jobId);
         }
 
         @Override
@@ -539,7 +548,12 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getNumAppliedFlexibleConstraints(),
                     job.getNumDroppedFlexibleConstraints(),
                     job.getFilteredTraceTag(),
-                    job.getFilteredDebugTags());
+                    job.getFilteredDebugTags(),
+                    job.getNumAbandonedFailures(),
+                    /* 0 is reserved for UNKNOWN_POLICY */
+                    job.getJob().getBackoffPolicy() + 1,
+                    mService.shouldUseAggressiveBackoff(
+                            job.getNumAbandonedFailures(), job.getSourceUid()));
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -609,6 +623,26 @@ public final class JobServiceContext implements ServiceConnection {
     @Nullable
     JobStatus getRunningJobLocked() {
         return mRunningJob;
+    }
+
+    @VisibleForTesting
+    void setRunningJobLockedForTest(JobStatus job) {
+        mRunningJob = job;
+    }
+
+    @VisibleForTesting
+    void setJobParamsLockedForTest(JobParameters params) {
+        mParams = params;
+    }
+
+    @VisibleForTesting
+    void setRunningCallbackLockedForTest(JobCallback callback) {
+        mRunningCallback = callback;
+    }
+
+    @VisibleForTesting
+    void setPendingStopReasonLockedForTest(int stopReason) {
+        mPendingStopReason = stopReason;
     }
 
     @JobConcurrencyManager.WorkType
@@ -756,6 +790,36 @@ public final class JobServiceContext implements ServiceConnection {
                         JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
                         "app called jobFinished");
                 doCallbackLocked(reschedule, "app called jobFinished");
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * This method just adds traces to evaluate jobs that leak jobparameters at the client.
+     * It does not stop the job.
+     */
+    void doHandleAbandonedJob(JobCallback cb, int jobId) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            final JobStatus executing;
+            synchronized (mLock) {
+                // not the current job, presumably it has finished in some way already
+                if (!verifyCallerLocked(cb)) {
+                    return;
+                }
+
+                executing = getRunningJobLocked();
+            }
+            if (executing != null && jobId == executing.getJobId()) {
+                executing.setAbandoned(true);
+                final StringBuilder stateSuffix = new StringBuilder();
+                stateSuffix.append(TRACE_ABANDONED_JOB);
+                stateSuffix.append(executing.getBatteryName());
+                stateSuffix.append(TRACE_ABANDONED_JOB_DELIMITER);
+                stateSuffix.append(executing.getJobId());
+                Trace.instant(Trace.TRACE_TAG_POWER, stateSuffix.toString());
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1328,8 +1392,9 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     /** Process MSG_TIMEOUT here. */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void handleOpTimeoutLocked() {
+    void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
                 // The system may have been too busy. Don't drop the job or trigger an ANR.
@@ -1391,9 +1456,28 @@ public final class JobServiceContext implements ServiceConnection {
                     // Not an error - client ran out of time.
                     Slog.i(TAG, "Client timed out while executing (no jobFinished received)."
                             + " Sending onStop: " + getRunningJobNameLocked());
-                    mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                            JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
-                    sendStopMessageLocked("timeout while executing");
+
+                    final JobStatus executing = getRunningJobLocked();
+                    int stopReason = JobParameters.STOP_REASON_TIMEOUT;
+                    int internalStopReason = JobParameters.INTERNAL_STOP_REASON_TIMEOUT;
+                    final StringBuilder stopMessage = new StringBuilder("timeout while executing");
+                    final StringBuilder debugStopReason = new StringBuilder("client timed out");
+
+                    if (android.app.job.Flags.handleAbandonedJobs()
+                            && executing != null
+                            && !CompatChanges.isChangeEnabled(
+                                    OVERRIDE_HANDLE_ABANDONED_JOBS, executing.getSourceUid())
+                            && executing.isAbandoned()) {
+                        final String abandonedMessage = " and maybe abandoned";
+                        stopReason = JobParameters.STOP_REASON_TIMEOUT_ABANDONED;
+                        internalStopReason = JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED;
+                        stopMessage.append(abandonedMessage);
+                        debugStopReason.append(abandonedMessage);
+                    }
+
+                    mParams.setStopReason(stopReason,
+                                    internalStopReason, debugStopReason.toString());
+                    sendStopMessageLocked(stopMessage.toString());
                 } else if (nowElapsed >= earliestStopTimeElapsed) {
                     // We've given the app the minimum execution time. See if we should stop it or
                     // let it continue running
@@ -1443,8 +1527,9 @@ public final class JobServiceContext implements ServiceConnection {
      * Already running, need to stop. Will switch {@link #mVerb} from VERB_EXECUTING ->
      * VERB_STOPPING.
      */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private void sendStopMessageLocked(@Nullable String reason) {
+    void sendStopMessageLocked(@Nullable String reason) {
         removeOpTimeOutLocked();
         if (mVerb != VERB_EXECUTING) {
             Slog.e(TAG, "Sending onStopJob for a job that isn't started. " + mRunningJob);
@@ -1606,7 +1691,12 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getNumAppliedFlexibleConstraints(),
                 completedJob.getNumDroppedFlexibleConstraints(),
                 completedJob.getFilteredTraceTag(),
-                completedJob.getFilteredDebugTags());
+                completedJob.getFilteredDebugTags(),
+                completedJob.getNumAbandonedFailures(),
+                /* 0 is reserved for UNKNOWN_POLICY */
+                completedJob.getJob().getBackoffPolicy() + 1,
+                mService.shouldUseAggressiveBackoff(
+                        completedJob.getNumAbandonedFailures(), completedJob.getSourceUid()));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER,
                     JobSchedulerService.TRACE_TRACK_NAME, getId());

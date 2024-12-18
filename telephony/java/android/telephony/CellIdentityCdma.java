@@ -18,11 +18,13 @@ package android.telephony;
 
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.telephony.cdma.CdmaCellLocation;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
@@ -30,7 +32,11 @@ import java.util.Objects;
 
 /**
  * CellIdentity is to represent a unique CDMA cell
+ *
+ * @deprecated Legacy CDMA is unsupported.
  */
+@FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+@Deprecated
 public final class CellIdentityCdma extends CellIdentity {
     private static final String TAG = CellIdentityCdma.class.getSimpleName();
     private static final boolean DBG = false;
@@ -99,20 +105,30 @@ public final class CellIdentityCdma extends CellIdentity {
      */
     public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat,
             @Nullable String alphal, @Nullable String alphas) {
-        super(TAG, CellInfo.TYPE_CDMA, null, null, alphal, alphas);
-        mNetworkId = inRangeOrUnavailable(nid, 0, NETWORK_ID_MAX);
-        mSystemId = inRangeOrUnavailable(sid, 0, SYSTEM_ID_MAX);
-        mBasestationId = inRangeOrUnavailable(bid, 0, BASESTATION_ID_MAX);
-        lat = inRangeOrUnavailable(lat, LATITUDE_MIN, LATITUDE_MAX);
-        lon = inRangeOrUnavailable(lon, LONGITUDE_MIN, LONGITUDE_MAX);
-
-        if (!isNullIsland(lat, lon)) {
-            mLongitude = lon;
-            mLatitude = lat;
+        super(TAG, CellInfo.TYPE_CDMA, null, null, Flags.cleanupCdma() ? null : alphal,
+                Flags.cleanupCdma() ? null : alphas);
+        if (Flags.cleanupCdma()) {
+            mNetworkId = CellInfo.UNAVAILABLE;
+            mSystemId = CellInfo.UNAVAILABLE;
+            mBasestationId = CellInfo.UNAVAILABLE;
+            mLongitude = CellInfo.UNAVAILABLE;
+            mLatitude = CellInfo.UNAVAILABLE;
+            mGlobalCellId = null;
         } else {
-            mLongitude = mLatitude = CellInfo.UNAVAILABLE;
+            mNetworkId = inRangeOrUnavailable(nid, 0, NETWORK_ID_MAX);
+            mSystemId = inRangeOrUnavailable(sid, 0, SYSTEM_ID_MAX);
+            mBasestationId = inRangeOrUnavailable(bid, 0, BASESTATION_ID_MAX);
+            lat = inRangeOrUnavailable(lat, LATITUDE_MIN, LATITUDE_MAX);
+            lon = inRangeOrUnavailable(lon, LONGITUDE_MIN, LONGITUDE_MAX);
+
+            if (!isNullIsland(lat, lon)) {
+                mLongitude = lon;
+                mLatitude = lat;
+            } else {
+                mLongitude = mLatitude = CellInfo.UNAVAILABLE;
+            }
+            updateGlobalCellId();
         }
-        updateGlobalCellId();
     }
 
     private CellIdentityCdma(@NonNull CellIdentityCdma cid) {
@@ -124,7 +140,11 @@ public final class CellIdentityCdma extends CellIdentity {
         return new CellIdentityCdma(this);
     }
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @Override
     public @NonNull CellIdentityCdma sanitizeLocationInfo() {
         return new CellIdentityCdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
@@ -157,7 +177,11 @@ public final class CellIdentityCdma extends CellIdentity {
     /**
      * @return Network Id 0..65535, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
      *         if unavailable.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public int getNetworkId() {
         return mNetworkId;
     }
@@ -165,7 +189,11 @@ public final class CellIdentityCdma extends CellIdentity {
     /**
      * @return System Id 0..32767, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
      *         if unavailable.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public int getSystemId() {
         return mSystemId;
     }
@@ -173,7 +201,10 @@ public final class CellIdentityCdma extends CellIdentity {
     /**
      * @return Base Station Id 0..65535, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
      *         if unavailable.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public int getBasestationId() {
         return mBasestationId;
     }
@@ -184,7 +215,11 @@ public final class CellIdentityCdma extends CellIdentity {
      * of 0.25 seconds and ranges from -2592000 to 2592000, both
      * values inclusive (corresponding to a range of -180
      * to +180 degrees). {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public int getLongitude() {
         return mLongitude;
     }
@@ -195,7 +230,11 @@ public final class CellIdentityCdma extends CellIdentity {
      * of 0.25 seconds and ranges from -1296000 to 1296000, both
      * values inclusive (corresponding to a range of -90
      * to +90 degrees). {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public int getLatitude() {
         return mLatitude;
     }
@@ -206,7 +245,11 @@ public final class CellIdentityCdma extends CellIdentity {
                 super.hashCode());
     }
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @NonNull
     @Override
     public CdmaCellLocation asCellLocation() {
@@ -267,17 +310,43 @@ public final class CellIdentityCdma extends CellIdentity {
     /** Construct from Parcel, type has already been processed */
     private CellIdentityCdma(Parcel in) {
         super(TAG, CellInfo.TYPE_CDMA, in);
-        mNetworkId = in.readInt();
-        mSystemId = in.readInt();
-        mBasestationId = in.readInt();
-        mLongitude = in.readInt();
-        mLatitude = in.readInt();
 
-        updateGlobalCellId();
-        if (DBG) log(toString());
+        if (Flags.cleanupCdma()) {
+            in.readInt();
+            mNetworkId = CellInfo.UNAVAILABLE;
+
+            in.readInt();
+            mSystemId = CellInfo.UNAVAILABLE;
+
+            in.readInt();
+            mBasestationId = CellInfo.UNAVAILABLE;
+
+            in.readInt();
+            mLongitude = CellInfo.UNAVAILABLE;
+
+            in.readInt();
+            mLatitude = CellInfo.UNAVAILABLE;
+
+            mGlobalCellId = null;
+        } else {
+            mNetworkId = in.readInt();
+            mSystemId = in.readInt();
+            mBasestationId = in.readInt();
+            mLongitude = in.readInt();
+            mLatitude = in.readInt();
+
+            updateGlobalCellId();
+            if (DBG) log(toString());
+        }
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     *
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SuppressWarnings("hiding")
     public static final @android.annotation.NonNull Creator<CellIdentityCdma> CREATOR =
             new Creator<CellIdentityCdma>() {

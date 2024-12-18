@@ -62,6 +62,8 @@ collect_stats() {
 
         dump "framework-minus-apex" hoststubgen_framework-minus-apex_stats.csv
         dump "service.core"  hoststubgen_services.core_stats.csv
+        dump "framework-configinfrastructure"  framework-configinfrastructure_stats.csv
+        dump "framework-statsd"  framework-statsd_stats.csv
     } > "$out"
 
     echo "Stats CVS created at $out"
@@ -76,6 +78,8 @@ collect_apis() {
 
         dump "framework-minus-apex"  hoststubgen_framework-minus-apex_apis.csv
         dump "service.core"  hoststubgen_services.core_apis.csv
+        dump "framework-configinfrastructure"  framework-configinfrastructure_apis.csv
+        dump "framework-statsd"  framework-statsd_apis.csv
     } > "$out"
 
     echo "API CVS created at $out"

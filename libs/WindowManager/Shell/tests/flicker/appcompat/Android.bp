@@ -15,7 +15,7 @@
 //
 
 package {
-    default_team: "trendy_team_app_compat",
+    default_team: "trendy_team_lse_app_compat",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -23,31 +23,6 @@ package {
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Begin cleanup after gcl merge
-
-filegroup {
-    name: "WMShellFlickerTestsAppCompat-src",
-    srcs: [
-        "src/**/*.kt",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsOther",
-    defaults: ["WMShellFlickerTestsDefault"],
-    manifest: "AndroidManifest.xml",
-    package_name: "com.android.wm.shell.flicker",
-    instrumentation_target_package: "com.android.wm.shell.flicker",
-    test_config_template: "AndroidTestTemplate.xml",
-    srcs: [":WMShellFlickerTestsAppCompat-src"],
-    static_libs: ["WMShellFlickerTestsBase"],
-    data: ["trace_config/*"],
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// End cleanup after gcl merge
 
 android_test {
     name: "WMShellFlickerTestsAppCompat",

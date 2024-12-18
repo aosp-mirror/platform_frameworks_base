@@ -22,19 +22,15 @@ package {
     default_applicable_licenses: ["frameworks_base_packages_SystemUI_license"],
 }
 
-android_library {
+java_library {
     name: "SystemUILogLib",
-    use_resource_processor: true,
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
     static_libs: [
-        "androidx.core_core-ktx",
-        "androidx.annotation_annotation",
         "error_prone_annotations",
         "SystemUICommon",
     ],
-    manifest: "AndroidManifest.xml",
     kotlincflags: ["-Xjvm-default=all"],
 }

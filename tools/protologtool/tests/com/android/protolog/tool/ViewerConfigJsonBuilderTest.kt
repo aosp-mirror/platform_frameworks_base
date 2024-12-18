@@ -36,6 +36,8 @@ class ViewerConfigJsonBuilderTest {
         private val GROUP_DISABLED = LogGroup("DEBUG_GROUP", false, true, TAG2)
         private val GROUP_TEXT_DISABLED = LogGroup("DEBUG_GROUP", true, false, TAG2)
         private const val PATH = "/tmp/test.java"
+
+        private val GROUPS = listOf(GROUP1, GROUP2, GROUP3)
     }
 
     private val configBuilder = ViewerConfigJsonBuilder()
@@ -48,12 +50,12 @@ class ViewerConfigJsonBuilderTest {
     fun processClass() {
         val logCallRegistry = ProtoLogTool.LogCallRegistry()
         logCallRegistry.addLogCalls(listOf(
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
-                LogCall(TEST2.messageString, LogLevel.DEBUG, GROUP2, PATH),
-                LogCall(TEST3.messageString, LogLevel.ERROR, GROUP3, PATH)))
+                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH, 123),
+                LogCall(TEST2.messageString, LogLevel.DEBUG, GROUP2, PATH, 456),
+                LogCall(TEST3.messageString, LogLevel.ERROR, GROUP3, PATH, 789)))
 
         val parsedConfig = parseConfig(
-            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
+            configBuilder.build(GROUPS, logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(3, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH,
 	           TEST1.messageString, LogLevel.INFO, GROUP1)])
@@ -67,12 +69,12 @@ class ViewerConfigJsonBuilderTest {
     fun processClass_nonUnique() {
         val logCallRegistry = ProtoLogTool.LogCallRegistry()
         logCallRegistry.addLogCalls(listOf(
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH),
-                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH)))
+                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH, 123),
+                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH, 456),
+                LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH, 789)))
 
         val parsedConfig = parseConfig(
-            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
+            configBuilder.build(GROUPS, logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(1, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH, TEST1.messageString,
             LogLevel.INFO, GROUP1)])

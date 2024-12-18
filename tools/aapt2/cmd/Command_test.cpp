@@ -19,6 +19,7 @@
 #include "test/Test.h"
 
 using ::testing::Eq;
+using namespace std::literals;
 
 namespace aapt {
 
@@ -93,5 +94,28 @@ TEST(CommandTest, LongFullyQualifiedPathWindows) {
   ASSERT_THAT(non_path_flag, Eq(kLongPath));
 }
 #endif
+
+TEST(CommandTest, OptionsWithValues) {
+  TestCommand command;
+  std::string flag;
+  command.AddRequiredFlag("--flag", "", &flag);
+
+  ASSERT_EQ(0, command.Execute({"--flag"s, "1"s}, &std::cerr));
+  EXPECT_STREQ("1", flag.c_str());
+
+  ASSERT_EQ(0, command.Execute({"--flag=1"s}, &std::cerr));
+  EXPECT_STREQ("1", flag.c_str());
+
+  ASSERT_EQ(0, command.Execute({"--flag"s, "=2"s}, &std::cerr));
+  EXPECT_STREQ("=2", flag.c_str());
+
+  ASSERT_EQ(0, command.Execute({"--flag"s, "--flag"s}, &std::cerr));
+  EXPECT_STREQ("--flag", flag.c_str());
+
+  EXPECT_NE(0, command.Execute({"--flag"s}, &std::cerr));
+  EXPECT_NE(0, command.Execute({"--flag="s}, &std::cerr));
+  EXPECT_NE(0, command.Execute({"--flag1=2"s}, &std::cerr));
+  EXPECT_NE(0, command.Execute({"--flag1"s, "2"s}, &std::cerr));
+}
 
 }  // namespace aapt

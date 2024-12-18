@@ -80,6 +80,9 @@ import static android.view.WindowLayoutParamsProto.WINDOW_ANIMATIONS;
 import static android.view.WindowLayoutParamsProto.X;
 import static android.view.WindowLayoutParamsProto.Y;
 
+import static com.android.hardware.input.Flags.FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
+import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
+
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -107,6 +110,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1425,6 +1429,39 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
     /**
+     * Application or Activity level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that specifies whether this package or activity can declare or request
+     * {@link android.R.attr#screenOrientation fixed orientation},
+     * {@link android.R.attr#minAspectRatio max aspect ratio},
+     * {@link android.R.attr#maxAspectRatio min aspect ratio}
+     * {@link android.R.attr#resizeableActivity unresizable} on large screen devices with the
+     * ignore orientation request display setting enabled since Android 16 (API level 36) or higher.
+     *
+     * <p>The default value is {@code false}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>or
+     * <pre>
+     * &lt;activity&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+     *     android:value="true"/&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/357141415): Remove this from sdk 37
+    String PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY =
+            "android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY";
+
+    /**
      * @hide
      */
     public static final String PARCEL_KEY_SHORTCUTS_ARRAY = "shortcuts_array";
@@ -2371,7 +2408,7 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_SECURE_SYSTEM_OVERLAY = FIRST_SYSTEM_WINDOW+15;
 
         /**
-         * Window type: the drag-and-drop pseudowindow.  There is only one
+         * Window type: the drag-and-drop pseudowindow. There is only one
          * drag layer (at most), and it is placed on top of all other windows.
          * In multiuser systems shows only on the owning user's window.
          * @hide
@@ -2381,7 +2418,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from over the status bar
          * In multiuser systems shows on all users' windows. These windows
-         * are displayed on top of the stauts bar and any {@link #TYPE_STATUS_BAR_PANEL}
+         * are displayed on top of the status bar and any {@link #TYPE_STATUS_BAR_PANEL}
          * windows.
          * @hide
          */
@@ -4431,6 +4468,29 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SENSITIVE_FOR_PRIVACY = 1 << 3;
 
         /**
+         * Input feature used to indicate that the system should send power key events to this
+         * window when it's in the foreground. The window can override the double press power key
+         * gesture behavior.
+         *
+         * A double press gesture is defined as two
+         * {@link KeyEvent.Callback#onKeyDown(int, KeyEvent)} events within a time span defined by
+         *  {@link ViewConfiguration#getMultiPressTimeout()}.
+         *
+         * Note: While the window may receive all power key {@link KeyEvent}s, it can only
+         * override the double press gesture behavior. The system will perform default behavior for
+         * single, long-press and other multi-press gestures, regardless of if the app handles the
+         * key or not.
+         *
+         * To override the default behavior for double press, the app must return true for the
+         * second {@link KeyEvent.Callback#onKeyDown(int, KeyEvent)}. If the app returns false, the
+         * system behavior will be performed for double press.
+         * @hide
+         */
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public static final int
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS = 1 << 4;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * NOTE: These are not the same as {@link android.os.InputConfig} flags.
@@ -4443,6 +4503,7 @@ public interface WindowManager extends ViewManager {
                 INPUT_FEATURE_DISABLE_USER_ACTIVITY,
                 INPUT_FEATURE_SPY,
                 INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS
         })
         public @interface InputFeatureFlags {
         }
@@ -4649,6 +4710,30 @@ public interface WindowManager extends ViewManager {
         public InsetsFrameProvider[] providedInsets;
 
         /**
+         * Sets the insets to be provided by the window.
+         *
+         * @param insetsParams The parameters for the insets to be provided by the window.
+         *
+         * @hide
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+        @SystemApi
+        public void setInsetsParams(@NonNull List<InsetsParams> insetsParams) {
+            if (insetsParams.isEmpty()) {
+                providedInsets = null;
+            } else {
+                providedInsets = new InsetsFrameProvider[insetsParams.size()];
+                for (int i = 0; i < insetsParams.size(); ++i) {
+                    final InsetsParams params = insetsParams.get(i);
+                    providedInsets[i] =
+                            new InsetsFrameProvider(/* owner= */ this, /* index= */ i,
+                                    params.getType())
+                                    .setInsetsSize(params.getInsetsSize());
+                }
+            }
+        }
+
+        /**
          * Specifies which {@link InsetsType}s should be forcibly shown. The types shown by this
          * method won't affect the app's layout. This field only takes effects if the caller has
          * {@link android.Manifest.permission#STATUS_BAR_SERVICE} or the caller has the same uid as
@@ -4705,6 +4790,44 @@ public interface WindowManager extends ViewManager {
         public void setFitInsetsIgnoringVisibility(boolean ignore) {
             mFitInsetsIgnoringVisibility = ignore;
             privateFlags |= PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+        }
+
+        /**
+         * Specifies if the system should send power key events to this window when it's in the
+         * foreground, with only the double tap gesture behavior being overrideable.
+         *
+         * @param enabled if true, the system should send power key events to this window when it's
+         *              in the foreground, with only the power key double tap gesture being
+         *              overrideable.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        @FlaggedApi(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public void setReceivePowerKeyDoublePressEnabled(boolean enabled) {
+            if (enabled) {
+                inputFeatures
+                        |= INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+            } else {
+                inputFeatures
+                        &= ~INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+            }
+        }
+
+        /**
+         * Returns whether or not the system should send power key events to this window when it's
+         * in the foreground, with only the double tap gesture being overrideable.
+         *
+         * @return if the system should send power key events to this window when it's in the
+         * foreground, with only the double tap gesture being overrideable.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        @FlaggedApi(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public boolean isReceivePowerKeyDoublePressEnabled() {
+            return (inputFeatures
+                    & INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS) != 0;
         }
 
         /**
@@ -6099,6 +6222,16 @@ public interface WindowManager extends ViewManager {
                 inputFeatures &= ~INPUT_FEATURE_SPY;
                 features.add("INPUT_FEATURE_SPY");
             }
+            if (overridePowerKeyBehaviorInFocusedWindow()) {
+                if ((inputFeatures
+                        & INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS)
+                        != 0) {
+                    inputFeatures
+                            &=
+                            ~INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+                    features.add("INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS");
+                }
+            }
             if (inputFeatures != 0) {
                 features.add(Integer.toHexString(inputFeatures));
             }
@@ -6113,6 +6246,56 @@ public interface WindowManager extends ViewManager {
          */
         public boolean isModal() {
             return (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+        }
+    }
+
+    /**
+     * Specifies the parameters of the insets provided by a window.
+     *
+     * @see WindowManager.LayoutParams#setInsetsParams(List)
+     * @see android.graphics.Insets
+     *
+     * @hide
+     */
+    @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_STATUS_BAR_AND_INSETS)
+    @SystemApi
+    public static class InsetsParams {
+
+        private final @InsetsType int mType;
+        private @Nullable Insets mInsets;
+
+        /**
+         * Creates an instance of InsetsParams.
+         *
+         * @param type the type of insets to provide, e.g. {@link WindowInsets.Type#statusBars()}.
+         * @see WindowInsets.Type
+         */
+        public InsetsParams(@InsetsType int type) {
+            mType = type;
+        }
+
+        /**
+         * Sets the size of the provided insets. If {@code null}, then the provided insets will
+         * have the same size as the window frame.
+         */
+        public @NonNull InsetsParams setInsetsSize(@Nullable Insets insets) {
+            mInsets = insets;
+            return this;
+        }
+
+        /**
+         * Returns the type of provided insets.
+         */
+        public @InsetsType int getType() {
+            return mType;
+        }
+
+        /**
+         * Returns the size of the provided insets. May be {@code null} if the provided insets have
+         * the same size as the window frame.
+         */
+        public @Nullable Insets getInsetsSize() {
+            return mInsets;
         }
     }
 

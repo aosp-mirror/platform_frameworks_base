@@ -27,6 +27,7 @@ val Kosmos.promptSelectorInteractor by Fixture {
         fingerprintPropertyRepository = fingerprintPropertyRepository,
         displayStateInteractor = displayStateInteractor,
         promptRepository = promptRepository,
-        lockPatternUtils = lockPatternUtils
+        credentialInteractor = FakeCredentialInteractor(),
+        lockPatternUtils = lockPatternUtils,
     )
 }

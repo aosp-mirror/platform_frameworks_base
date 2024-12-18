@@ -19,6 +19,7 @@ package com.android.server.vcn;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY;
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
@@ -26,7 +27,6 @@ import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED
 
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,7 +55,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.vcn.VcnManager;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.test.TestLooper;
@@ -71,6 +70,8 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.HandlerExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -206,7 +207,7 @@ public class TelephonySubscriptionTrackerTest {
                 .getAllSubscriptionInfoList();
 
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
-        setPrivilegedPackagesForMock(Collections.singletonList(PACKAGE_NAME));
+        setPrivilegedPackagesForMock(Collections.singleton(PACKAGE_NAME));
     }
 
     private IntentFilter getIntentFilter() {
@@ -293,7 +294,7 @@ public class TelephonySubscriptionTrackerTest {
                 Collections.singletonMap(TEST_SUBSCRIPTION_ID_1, TEST_CARRIER_CONFIG_WRAPPER));
     }
 
-    private void setPrivilegedPackagesForMock(@NonNull List<String> privilegedPackages) {
+    private void setPrivilegedPackagesForMock(@NonNull Set<String> privilegedPackages) {
         doReturn(privilegedPackages).when(mTelephonyManager).getPackagesWithCarrierPrivileges();
     }
 
@@ -390,7 +391,7 @@ public class TelephonySubscriptionTrackerTest {
     @Test
     public void testOnSubscriptionsChangedFired_onActiveSubIdsChanged() throws Exception {
         setupReadySubIds();
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
 
         doReturn(TEST_SUBSCRIPTION_ID_2).when(mDeps).getActiveDataSubscriptionId();
         final ActiveDataSubscriptionIdListener listener = getActiveDataSubscriptionIdListener();
@@ -411,7 +412,7 @@ public class TelephonySubscriptionTrackerTest {
     public void testOnSubscriptionsChangedFired_WithReadySubidsNoPrivilegedPackages()
             throws Exception {
         setupReadySubIds();
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
 
         final OnSubscriptionsChangedListener listener = getOnSubscriptionsChangedListener();
         listener.onSubscriptionsChanged();
@@ -567,7 +568,7 @@ public class TelephonySubscriptionTrackerTest {
         verify(mCallback).onNewSnapshot(eq(buildExpectedSnapshot(TEST_PRIVILEGED_PACKAGES)));
 
         // Simulate a loss of carrier privileges
-        setPrivilegedPackagesForMock(Collections.emptyList());
+        setPrivilegedPackagesForMock(Collections.emptySet());
         listener.onSubscriptionsChanged();
         mTestLooper.dispatchAll();
 

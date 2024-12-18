@@ -31,6 +31,9 @@
     <!-- The dark background color behind the shade -->
     <color name="shade_scrim_background_dark">@androidprv:color/system_under_surface_light</color>
 
+    <!-- Colors for notification shade/scrim -->
+    <color name="shade_panel">@android:color/system_accent1_800</color>
+
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
 
@@ -124,7 +127,7 @@
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_light</color>
-    <color name="ksh_key_item_background">?androidprv:attr/materialColorSurfaceContainerHighest</color>
+    <color name="ksh_key_item_background">@androidprv:color/materialColorSurfaceContainerHighest</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 

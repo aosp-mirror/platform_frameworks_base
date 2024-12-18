@@ -18,13 +18,8 @@ package com.android.systemui.util.wakelock;
 
 import android.content.Context;
 import android.os.PowerManager;
-import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
-
-import com.android.systemui.Flags;
-
-import java.util.HashMap;
 
 import javax.inject.Inject;
 
@@ -114,59 +109,7 @@ public interface WakeLock {
     @VisibleForTesting
     static WakeLock wrap(
             final PowerManager.WakeLock inner, WakeLockLogger logger, long maxTimeout) {
-        if (Flags.delayedWakelockReleaseOnBackgroundThread()) {
-            return new ClientTrackingWakeLock(inner, logger, maxTimeout);
-        }
-
-        // Non-thread safe implementation, remove when flag above is removed.
-        return new WakeLock() {
-            private final HashMap<String, Integer> mActiveClients = new HashMap<>();
-
-            /** @see PowerManager.WakeLock#acquire() */
-            public void acquire(String why) {
-                mActiveClients.putIfAbsent(why, 0);
-                int count = mActiveClients.get(why) + 1;
-                mActiveClients.put(why, count);
-                if (logger != null) {
-                    logger.logAcquire(inner, why, count);
-                }
-                if (maxTimeout == Builder.NO_TIMEOUT) {
-                    inner.acquire();
-                } else {
-                    inner.acquire(maxTimeout);
-                }
-            }
-
-            /** @see PowerManager.WakeLock#release() */
-            public void release(String why) {
-                Integer count = mActiveClients.get(why);
-                if (count == null) {
-                    Log.wtf(TAG, "Releasing WakeLock with invalid reason: " + why,
-                            new Throwable());
-                    return;
-                }
-                count--;
-                if (count == 0) {
-                    mActiveClients.remove(why);
-                } else {
-                    mActiveClients.put(why, count);
-                }
-                if (logger != null) {
-                    logger.logRelease(inner, why, count);
-                }
-                inner.release();
-            }
-
-            /** @see PowerManager.WakeLock#wrap(Runnable) */
-            public Runnable wrap(Runnable runnable) {
-                return wrapImpl(this, runnable);
-            }
-
-            @Override
-            public String toString() {
-                return "active clients= " + mActiveClients;
-            }
-        };
+        return new ClientTrackingWakeLock(inner, logger, maxTimeout);
     }
 
     /**

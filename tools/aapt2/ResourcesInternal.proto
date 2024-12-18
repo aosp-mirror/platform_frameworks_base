@@ -49,4 +49,9 @@ message CompiledFile {
 
   // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
   repeated Symbol exported_symbol = 5;
+
+  // The status of the flag the file is behind if any
+  uint32 flag_status = 6;
+  bool flag_negated = 7;
+  string flag_name = 8;
 }

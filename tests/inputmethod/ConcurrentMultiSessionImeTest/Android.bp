@@ -21,7 +21,7 @@ android_test {
     name: "ConcurrentMultiSessionImeTest",
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs"],
     static_libs: [
         "androidx.core_core",
         "androidx.test.ext.junit",
@@ -38,6 +38,9 @@ android_test {
     ],
     test_suites: [
         "general-tests",
+        // This is an equivalent of general-tests for automotive.
+        // It helps manage the build time on automotive branches.
+        "automotive-general-tests",
     ],
     sdk_version: "test_current",
 

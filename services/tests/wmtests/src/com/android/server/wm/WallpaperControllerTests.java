@@ -31,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.window.flags.Flags.multiCrop;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -410,6 +411,49 @@ public class WallpaperControllerTests extends WindowTestsBase {
         dc.mTransitionController.finishTransition(ActionChain.testFinish(transit));
         assertFalse(wallpaperWindow.isVisible());
         assertFalse(token.isVisible());
+    }
+
+    @Test
+    public void testWallpaperTokenVisibilityWithTarget() {
+        mSetFlagsRule.enableFlags(
+                com.android.window.flags.Flags.FLAG_ENSURE_WALLPAPER_IN_TRANSITIONS);
+        final DisplayContent dc = mDisplayContent;
+        final WindowState wallpaperWindow = createWallpaperWindow(dc);
+        final WallpaperWindowToken wallpaperToken = wallpaperWindow.mToken.asWallpaperToken();
+        final WindowState wallpaperTarget = createWallpaperTargetWindow(dc);
+        dc.mWallpaperController.adjustWallpaperWindows();
+        assertEquals(wallpaperTarget, dc.mWallpaperController.getWallpaperTarget());
+        assertTrue(wallpaperToken.isVisibleRequested());
+        assertTrue(wallpaperToken.isVisible());
+
+        registerTestTransitionPlayer();
+        // Assume that another activity is opening and occludes the wallpaper target activity.
+        Transition transition = dc.mTransitionController.createTransition(TRANSIT_OPEN);
+        transition.start();
+        wallpaperTarget.mActivityRecord.setVisibility(false);
+        assertTrue(wallpaperToken.inTransition());
+        waitUntilHandlersIdle();
+        assertFalse("Invisible requested with target", wallpaperToken.isVisibleRequested());
+        assertTrue(wallpaperToken.isVisible());
+
+        transition.onTransactionReady(transition.getSyncId(), mTransaction);
+        dc.mTransitionController.finishTransition(ActionChain.testFinish(transition));
+        assertFalse(wallpaperToken.isVisibleRequested());
+        assertFalse("Commit wallpaper to invisible", wallpaperToken.isVisible());
+        assertTrue((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0);
+        dc.pendingLayoutChanges = 0;
+        dc.mWallpaperController.adjustWallpaperWindows();
+        assertNull(dc.mWallpaperController.getWallpaperTarget());
+
+        // Assume that top activity is closing and the wallpaper target activity becomes visible.
+        transition = dc.mTransitionController.createTransition(TRANSIT_CLOSE);
+        transition.start();
+        wallpaperTarget.mActivityRecord.setVisibility(true);
+        assertTrue((dc.pendingLayoutChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0);
+        dc.mWallpaperController.adjustWallpaperWindows();
+        assertTrue(wallpaperToken.inTransition());
+        assertTrue("Visible requested with target", wallpaperToken.isVisibleRequested());
+        assertEquals(wallpaperTarget, dc.mWallpaperController.getWallpaperTarget());
     }
 
     private static void prepareSmallerSecondDisplay(DisplayContent dc, int width, int height) {

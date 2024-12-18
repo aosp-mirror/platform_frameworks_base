@@ -23,13 +23,13 @@ import android.test.AndroidTestCase;
 import android.util.Pair;
 import android.util.Xml;
 
-import com.android.internal.util.FastXmlSerializer;
 import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
@@ -121,6 +121,22 @@ public class CacheQuotaStrategyTest extends AndroidTestCase {
         assertThat(output.first).isEqualTo(1000);
         assertThat(output.second).containsExactly(buildCacheQuotaHint("uuid", 0, 100),
                 buildCacheQuotaHint("uuid2", 10, 250));
+    }
+
+    @Test
+    public void testReadInvalidInput() throws Exception {
+        String input = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n" +
+                "<cache-info previousBytes=\"1000\">\n"
+                + "<quota/>\n"
+                + "</cache-info>\n";
+
+        try {
+            CacheQuotaStrategy.readFromXml(new ByteArrayInputStream(
+                    input.getBytes("UTF-8")));
+            fail("Expected XML parsing exception");
+        } catch (XmlPullParserException e) {
+            // Expected XmlPullParserException exception
+        }
     }
 
     private CacheQuotaHint buildCacheQuotaHint(String volumeUuid, int uid, long quota) {

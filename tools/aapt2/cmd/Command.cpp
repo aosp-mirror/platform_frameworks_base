@@ -213,15 +213,28 @@ int Command::Execute(const std::vector<StringPiece>& args, std::ostream* out_err
 
     bool match = false;
     for (Flag& flag : flags_) {
-      if (arg == flag.name) {
+      // Allow both "--arg value" and "--arg=value" syntax.
+      if (arg.starts_with(flag.name) &&
+          (arg.size() == flag.name.size() || (flag.num_args > 0 && arg[flag.name.size()] == '='))) {
         if (flag.num_args > 0) {
-          i++;
-          if (i >= args.size()) {
-            *out_error << flag.name << " missing argument.\n\n";
-            Usage(out_error);
-            return false;
+          if (arg.size() == flag.name.size()) {
+            i++;
+            if (i >= args.size()) {
+              *out_error << flag.name << " missing argument.\n\n";
+              Usage(out_error);
+              return 1;
+            }
+            arg = args[i];
+          } else {
+            arg.remove_prefix(flag.name.size() + 1);
+            // Disallow empty arguments after '='.
+            if (arg.empty()) {
+              *out_error << flag.name << " has empty argument.\n\n";
+              Usage(out_error);
+              return 1;
+            }
           }
-          flag.action(args[i]);
+          flag.action(arg);
         } else {
           flag.action({});
         }

@@ -24,7 +24,7 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.systemGestures;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
 import static com.android.server.wm.DisplayContentProto.IME_INSETS_SOURCE_PROVIDER;
 import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 
@@ -219,7 +219,7 @@ class InsetsStateController {
         }
     }
 
-    void onRequestedVisibleTypesChanged(InsetsControlTarget caller,
+    void onRequestedVisibleTypesChanged(InsetsTarget caller,
             @Nullable ImeTracker.Token statsToken) {
         boolean changed = false;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
@@ -228,17 +228,15 @@ class InsetsStateController {
             changed |= provider.updateClientVisibility(caller,
                     isImeProvider ? statsToken : null);
         }
-        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
-            if (changed) {
-                notifyInsetsChanged();
-                mDisplayContent.updateSystemGestureExclusion();
+        if (changed) {
+            notifyInsetsChanged();
+            mDisplayContent.updateSystemGestureExclusion();
 
-                mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
-            }
+            mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
 
-    @InsetsType int getFakeControllingTypes(InsetsControlTarget target) {
+    @InsetsType int getFakeControllingTypes(InsetsTarget target) {
         @InsetsType int types = 0;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
@@ -317,9 +315,9 @@ class InsetsStateController {
             // aborted.
             provider.updateFakeControlTarget(target);
         } else {
-            // TODO(b/329229469) if the IME controlTarget changes, any pending requests should fail
+            // TODO(b/353463205) if the IME controlTarget changes, any pending requests should fail
             provider.updateControlForTarget(target, false /* force */,
-                    null /* TODO(b/329229469) check if needed here */);
+                    null /* TODO(b/353463205) check if needed here */);
 
             // Get control target again in case the provider didn't accept the one we passed to it.
             target = provider.getControlTarget();
@@ -380,7 +378,6 @@ class InsetsStateController {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             notifyInsetsChanged();
             mDisplayContent.updateSystemGestureExclusion();
-            mDisplayContent.updateKeepClearAreas();
             mDisplayContent.getDisplayPolicy().updateSystemBarAttributes();
         }
     }
@@ -421,7 +418,7 @@ class InsetsStateController {
                 final ArrayList<InsetsSourceProvider> providers = pendingControlMap.valueAt(i);
                 for (int p = providers.size() - 1; p >= 0; p--) {
                     final InsetsSourceProvider provider = providers.get(p);
-                    if (provider.isLeashReadyForDispatching(target)) {
+                    if (provider.isLeashInitialized() || provider.getControlTarget() != target) {
                         // Stop waiting for this provider.
                         providers.remove(p);
                     }
@@ -457,6 +454,12 @@ class InsetsStateController {
 
     void notifyInsetsChanged() {
         mDisplayContent.notifyInsetsChanged(mDispatchInsetsChanged);
+    }
+
+    void notifyInsetsChanged(ArraySet<WindowState> changedWindows) {
+        for (int i = changedWindows.size() - 1; i >= 0; i--) {
+            mDispatchInsetsChanged.accept(changedWindows.valueAt(i));
+        }
     }
 
     /**

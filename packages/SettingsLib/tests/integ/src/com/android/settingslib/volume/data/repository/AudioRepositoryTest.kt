@@ -74,6 +74,8 @@ class AudioRepositoryTest {
 
     private lateinit var underTest: AudioRepository
 
+    private var ringerModeInternal: RingerMode = RingerMode(AudioManager.RINGER_MODE_NORMAL)
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -82,7 +84,7 @@ class AudioRepositoryTest {
         `when`(audioManager.communicationDevice).thenReturn(communicationDevice)
         `when`(audioManager.getStreamMinVolume(anyInt())).thenReturn(MIN_VOLUME)
         `when`(audioManager.getStreamMaxVolume(anyInt())).thenReturn(MAX_VOLUME)
-        `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
+        `when`(audioManager.ringerModeInternal).then { ringerModeInternal.value }
         `when`(audioManager.setStreamVolume(anyInt(), anyInt(), anyInt())).then {
             val streamType = it.arguments[0] as Int
             volumeByStream[it.arguments[0] as Int] = it.arguments[1] as Int
@@ -102,6 +104,10 @@ class AudioRepositoryTest {
         }
         `when`(audioManager.isStreamMute(anyInt())).thenAnswer {
             isMuteByStream.getOrDefault(it.arguments[0] as Int, false)
+        }
+        `when`(audioManager.setRingerModeInternal(anyInt())).then {
+            ringerModeInternal = RingerMode(it.arguments[0] as Int)
+            Unit
         }
 
         underTest =
@@ -137,7 +143,7 @@ class AudioRepositoryTest {
             underTest.ringerMode.onEach { modes.add(it) }.launchIn(backgroundScope)
             runCurrent()
 
-            `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_SILENT)
+            ringerModeInternal = RingerMode(AudioManager.RINGER_MODE_SILENT)
             triggerEvent(AudioManagerEvent.InternalRingerModeChanged)
             runCurrent()
 
@@ -146,6 +152,19 @@ class AudioRepositoryTest {
                     RingerMode(AudioManager.RINGER_MODE_NORMAL),
                     RingerMode(AudioManager.RINGER_MODE_SILENT),
                 )
+        }
+    }
+
+    @Test
+    fun changingRingerMode_changesRingerModeInternal() {
+        testScope.runTest {
+            underTest.setRingerModeInternal(
+                AudioStream(AudioManager.STREAM_SYSTEM),
+                RingerMode(AudioManager.RINGER_MODE_SILENT),
+            )
+            runCurrent()
+
+            assertThat(ringerModeInternal).isEqualTo(RingerMode(AudioManager.RINGER_MODE_SILENT))
         }
     }
 

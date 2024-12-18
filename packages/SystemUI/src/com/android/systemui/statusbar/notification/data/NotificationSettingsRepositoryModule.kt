@@ -16,19 +16,24 @@
 
 package com.android.systemui.statusbar.notification.data
 
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.settings.SecureSettingsRepositoryModule
-import com.android.systemui.settings.SystemSettingsRepositoryModule
+import com.android.systemui.settings.UserSettingsRepositoryModule
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
 import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
-@Module(includes = [SecureSettingsRepositoryModule::class, SystemSettingsRepositoryModule::class])
+@Module(includes = [UserSettingsRepositoryModule::class])
 object NotificationSettingsRepositoryModule {
     @Provides
     @SysUISingleton
@@ -42,6 +47,20 @@ object NotificationSettingsRepositoryModule {
             backgroundScope,
             backgroundDispatcher,
             secureSettingsRepository,
-            systemSettingsRepository
+            systemSettingsRepository,
         )
+
+    @Provides
+    @IntoMap
+    @ClassKey(NotificationSettingsRepository::class)
+    @SysUISingleton
+    fun provideCoreStartable(
+        @Application applicationScope: CoroutineScope,
+        repository: NotificationSettingsRepository,
+        logger: VisualInterruptionDecisionLogger,
+    ) = CoreStartable {
+        applicationScope.launch {
+            repository.isCooldownEnabled.collect { value -> logger.logCooldownSetting(value) }
+        }
+    }
 }

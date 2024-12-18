@@ -165,6 +165,10 @@ import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.instrumentation.ExecutableMethodFileOffsets;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
+import android.os.instrumentation.MethodDescriptorParser;
 import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -230,12 +234,14 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.DebugStore;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -255,6 +261,7 @@ import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
 import libcore.io.Os;
 import libcore.net.event.NetworkEventDispatcher;
+import libcore.util.NativeAllocationRegistry;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
@@ -1300,6 +1307,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 long[] disabledCompatChanges,
                 long[] loggableCompatChanges,
                 SharedMemory serializedSystemFontMap,
+                FileDescriptor applicationSharedMemoryFd,
                 long startRequestedElapsedTime,
                 long startRequestedUptime) {
             if (services != null) {
@@ -1326,6 +1334,16 @@ public final class ActivityThread extends ClientTransactionHandler
 
                 // Setup the service cache in the ServiceManager
                 ServiceManager.initServiceCache(services);
+            }
+
+            // This must be initialized as early as possible to ensure availability for any
+            // downstream callers.
+            if (com.android.internal.os.Flags.applicationSharedMemoryEnabled()) {
+                ApplicationSharedMemory instance =
+                        ApplicationSharedMemory.fromFileDescriptor(
+                                applicationSharedMemoryFd, /* mutable= */ false);
+                instance.closeFileDescriptor();
+                ApplicationSharedMemory.setInstance(instance);
             }
 
             setCoreSettings(coreSettings);
@@ -1358,7 +1376,8 @@ public final class ActivityThread extends ClientTransactionHandler
             data.startRequestedElapsedTime = startRequestedElapsedTime;
             data.startRequestedUptime = startRequestedUptime;
             updateCompatOverrideScale(compatInfo);
-            CompatibilityInfo.applyOverrideScaleIfNeeded(config);
+            updateCompatOverrideDisplayRotation(compatInfo);
+            CompatibilityInfo.applyOverrideIfNeeded(config);
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -1369,6 +1388,15 @@ public final class ActivityThread extends ClientTransactionHandler
             } else {
                 CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
                         /* densityInvertScale */1f);
+            }
+        }
+
+        private void updateCompatOverrideDisplayRotation(@NonNull CompatibilityInfo info) {
+            if (info.isOverrideDisplayRotationRequired()) {
+                CompatibilityInfo.setOverrideDisplayRotation(info.applicationDisplayRotation);
+            } else {
+                CompatibilityInfo.setOverrideDisplayRotation(
+                        WindowConfiguration.ROTATION_UNDEFINED);
             }
         }
 
@@ -1610,6 +1638,32 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @NeverCompile
+        private void dumpMemInfoNativeAllocations(PrintWriter pw) {
+            pw.println(" ");
+            pw.println(" Native Allocations");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "Count", "", "Total(kB)");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "------", "", "------");
+
+            for (NativeAllocationRegistry.Metrics m : NativeAllocationRegistry.getMetrics()) {
+                // group into 3 major categories: Bitmap, HardwareBuffer and Other
+                final String className = switch (m.getClassName()) {
+                    case "android.graphics.Bitmap" -> "Bitmap";
+                    case "android.hardware.HardwareBuffer" -> "HardwareBuffer";
+                    default -> "Other";
+                };
+
+                if (m.getMallocedCount() != 0 || m.getMallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (malloced):",
+                        m.getMallocedCount(), "", m.getMallocedBytes() / 1024);
+                }
+                if (m.getNonmallocedCount() != 0 || m.getNonmallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (nonmalloced):",
+                        m.getNonmallocedCount(), "", m.getNonmallocedBytes() / 1024);
+                }
+            }
+        }
+
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
                 boolean dumpUnreachable, boolean dumpAllocatorStats) {
@@ -1706,6 +1760,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     "Parcel count:", parcelCount);
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
+
+            if (com.android.libcore.readonly.Flags.nativeMetrics()) {
+                dumpMemInfoNativeAllocations(pw);
+            }
 
             // SQLite mem info
             pw.println(" ");
@@ -1917,8 +1975,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
-            IoUtils.closeQuietly(pfd);
+            try {
+                PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
+                BroadcastStickyCache.dumpCacheInfo(pfd);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
         }
 
         private File getDatabasesDir(Context context) {
@@ -1992,6 +2054,7 @@ public final class ActivityThread extends ClientTransactionHandler
             ucd.pkg = pkg;
             ucd.info = info;
             updateCompatOverrideScale(info);
+            updateCompatOverrideDisplayRotation(info);
             sendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
 
@@ -2180,6 +2243,29 @@ public final class ActivityThread extends ClientTransactionHandler
             args.arg5 = viewIds;
             args.arg6 = uiTranslationSpec;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
+        }
+
+        @Override
+        public void getExecutableMethodFileOffsets(
+                @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback resultCallback) {
+            Method method = MethodDescriptorParser.parseMethodDescriptor(
+                    getClass().getClassLoader(), methodDescriptor);
+            VMDebug.ExecutableMethodFileOffsets location =
+                    VMDebug.getExecutableMethodFileOffsets(method);
+            try {
+                if (location == null) {
+                    resultCallback.onResult(null);
+                    return;
+                }
+                ExecutableMethodFileOffsets ret = new ExecutableMethodFileOffsets();
+                ret.containerPath = location.getContainerPath();
+                ret.containerOffset = location.getContainerOffset();
+                ret.methodOffset = location.getMethodOffset();
+                resultCallback.onResult(ret);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -2633,7 +2719,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleUnstableProviderDied((IBinder)msg.obj, false);
                     break;
                 case REQUEST_ASSIST_CONTEXT_EXTRAS:
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            "handleRequestAssistContextExtras");
                     handleRequestAssistContextExtras((RequestAssistContextExtras)msg.obj);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case TRANSLUCENT_CONVERSION_COMPLETE:
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
@@ -3047,6 +3136,19 @@ public final class ActivityThread extends ClientTransactionHandler
     @UnsupportedAppUsage
     ActivityThread() {
         mResourcesManager = ResourcesManager.getInstance();
+    }
+
+    /**
+     * Creates and initialize a new system activity thread, to be used for testing. This does not
+     * call {@link #attach}, so it does not modify static state.
+     */
+    @VisibleForTesting
+    @NonNull
+    public static ActivityThread createSystemActivityThreadForTesting() {
+        final var thread = new ActivityThread();
+        thread.mSystemThread = true;
+        initializeSystemThread(thread);
+        return thread;
     }
 
     @UnsupportedAppUsage
@@ -3794,6 +3896,18 @@ public final class ActivityThread extends ClientTransactionHandler
         return activityRecord != null ? activityRecord.activity : null;
     }
 
+    /**
+     * Returns the most recent created activity that's still running.
+     */
+    @Nullable
+    public Activity getLastCreatedActivity() {
+        if (mActivities.isEmpty()) {
+            return null;
+        }
+
+        return mActivities.valueAt(mActivities.size() - 1).activity;
+    }
+
     @Override
     public ActivityClientRecord getActivityClient(IBinder token) {
         return mActivities.get(token);
@@ -3835,12 +3949,7 @@ public final class ActivityThread extends ClientTransactionHandler
             if (mLastProcessState == processState) {
                 return;
             }
-            // Do not issue a transitional GC if we are transitioning between 2 cached states.
-            // Only update if the state flips between cached and uncached or vice versa
-            if (ActivityManager.isProcStateCached(mLastProcessState)
-                    != ActivityManager.isProcStateCached(processState)) {
-                updateVmProcessState(processState);
-            }
+            updateVmProcessState(mLastProcessState, processState);
             mLastProcessState = processState;
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
@@ -3849,18 +3958,21 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    /** Converts a process state to a VM process state. */
+    private static int toVmProcessState(int processState) {
+        final int state = ActivityManager.isProcStateJankPerceptible(processState)
+                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
+        return state;
+    }
+
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
-    // Currently ART VM only uses state updates for Transitional GC, and thus
-    // this function initiates a Transitional GC for transitions into Cached apps states.
-    private void updateVmProcessState(int processState) {
-        // Only a transition into Cached state should result in a Transitional GC request
-        // to the ART runtime. Update VM state to JANK_IMPERCEPTIBLE in that case.
-        // Note that there are 4 possible cached states currently, all of which are
-        // JANK_IMPERCEPTIBLE from GC point of view.
-        final int state = ActivityManager.isProcStateCached(processState)
-                ? VM_PROCESS_STATE_JANK_IMPERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_PERCEPTIBLE;
-        VMRuntime.getRuntime().updateProcessState(state);
+    private void updateVmProcessState(int lastProcessState, int newProcessState) {
+        final int state = toVmProcessState(newProcessState);
+        if (lastProcessState == PROCESS_STATE_UNKNOWN
+                || state != toVmProcessState(lastProcessState)) {
+            VMRuntime.getRuntime().updateProcessState(state);
+        }
     }
 
     @Override
@@ -5087,7 +5199,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 try {
                     if (doRebind) {
                         ActivityManager.getService().unbindFinished(
-                                data.token, data.intent, doRebind);
+                                data.token, data.intent);
                     } else {
                         ActivityManager.getService().serviceDoneExecuting(
                                 data.token, SERVICE_DONE_EXECUTING_UNBIND, 0, 0, data.intent);
@@ -6238,7 +6350,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.mPreserveWindow = tmp.mPreserveWindow;
+        r.mPreserveWindow = r.activity.mWindowAdded && tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
 
@@ -6743,6 +6855,16 @@ public final class ActivityThread extends ClientTransactionHandler
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
         }
+        if (android.content.res.Flags.systemContextHandleAppInfoChanged() && mSystemThread) {
+            final var systemContext = getSystemContext();
+            if (systemContext.getPackageName().equals(ai.packageName)) {
+                // The system package is not tracked directly, but still needs to receive updates to
+                // its application info.
+                final ArrayList<String> oldPaths = new ArrayList<>();
+                LoadedApk.makePaths(this, systemContext.getApplicationInfo(), oldPaths);
+                systemContext.mPackageInfo.updateApplicationInfo(ai, oldPaths);
+            }
+        }
 
         ResourcesImpl beforeImpl = getApplication().getResources().getImpl();
 
@@ -6913,21 +7035,44 @@ public final class ActivityThread extends ClientTransactionHandler
 
     final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
         if (start) {
-            try {
-                switch (profileType) {
-                    default:
+            switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    VMDebug.startLowOverheadTrace();
+                    break;
+                default:
+                    try {
                         mProfiler.setProfiler(profilerInfo);
                         mProfiler.startProfiling();
                         break;
-                }
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
-                        + " -- can the process access this path?");
-            } finally {
-                profilerInfo.closeFd();
+                    } catch (RuntimeException e) {
+                        Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
+                                + " -- can the process access this path?");
+                    } finally {
+                        profilerInfo.closeFd();
+                    }
             }
         } else {
             switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        if (profilerInfo != null) {
+                            profilerInfo.closeFd();
+                        }
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    if (profilerInfo != null) {
+                        FileDescriptor fd = profilerInfo.profileFd.getFileDescriptor();
+                        VMDebug.TraceDestination dst =
+                                VMDebug.TraceDestination.fromFileDescriptor(fd);
+                        VMDebug.dumpLowOverheadTrace(dst);
+                    }
+                    VMDebug.stopLowOverheadTrace();
+                    break;
                 default:
                     mProfiler.stopProfiling();
                     break;
@@ -6953,12 +7098,9 @@ public final class ActivityThread extends ClientTransactionHandler
             System.runFinalization();
             System.gc();
         }
-        if (dhd.dumpBitmaps != null) {
-            Bitmap.dumpAll(dhd.dumpBitmaps);
-        }
         try (ParcelFileDescriptor fd = dhd.fd) {
             if (dhd.managed) {
-                Debug.dumpHprofData(dhd.path, fd.getFileDescriptor());
+                Debug.dumpHprofData(dhd.path, fd.getFileDescriptor(), dhd.dumpBitmaps);
             } else if (dhd.mallocInfo) {
                 Debug.dumpNativeMallocInfo(fd.getFileDescriptor());
             } else {
@@ -6982,9 +7124,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         if (dhd.finishCallback != null) {
             dhd.finishCallback.sendResult(null);
-        }
-        if (dhd.dumpBitmaps != null) {
-            Bitmap.dumpAll(null); // clear dump
         }
     }
 
@@ -7287,6 +7426,8 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        VMDebug.setUserId(UserHandle.myUserId());
+        VMDebug.addApplication(data.appInfo.packageName);
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName,
@@ -7614,6 +7755,18 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
             }
         });
+
+        // Register callback to report native memory metrics post GC cleanup
+        // Note: we do not report memory metrics of isolated processes unless
+        // their native allocations become more significant
+        if (!Process.isIsolated() && Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
     }
 
     @UnsupportedAppUsage
@@ -7809,9 +7962,20 @@ public final class ActivityThread extends ClientTransactionHandler
             file.getParentFile().mkdirs();
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
+
+        if (ii.packageName != null) {
+            VMDebug.addApplication(ii.packageName);
+        }
     }
 
     private void handleFinishInstrumentationWithoutRestart() {
+        LoadedApk loadedApk = getApplication().mLoadedApk;
+        // Only remove instrumentation app if this was not a self-testing app.
+        if (mInstrumentationPackageName != null && loadedApk != null && !mInstrumentationPackageName
+                .equals(loadedApk.mPackageName)) {
+            VMDebug.removeApplication(mInstrumentationPackageName);
+        }
+
         mInstrumentation.onDestroy();
         mInstrumentationPackageName = null;
         mInstrumentationAppDir = null;
@@ -8288,12 +8452,12 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             Context c = null;
             ApplicationInfo ai = info.applicationInfo;
-            if (context.getPackageName().equals(ai.packageName)) {
+            if (context != null && context.getPackageName().equals(ai.packageName)) {
                 c = context;
             } else if (mInitialApplication != null &&
                     mInitialApplication.getPackageName().equals(ai.packageName)) {
                 c = mInitialApplication;
-            } else {
+            } else if (context != null) {
                 try {
                     c = context.createPackageContext(ai.packageName,
                             Context.CONTEXT_INCLUDE_CODE);
@@ -8472,17 +8636,7 @@ public final class ActivityThread extends ClientTransactionHandler
             // we can't display an alert, we just want to die die die.
             android.ddm.DdmHandleAppName.setAppName("system_process",
                     UserHandle.myUserId());
-            try {
-                mInstrumentation = new Instrumentation();
-                mInstrumentation.basicInit(this);
-                ContextImpl context = ContextImpl.createAppContext(
-                        this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
-                mInitialApplication.onCreate();
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Unable to instantiate Application():" + e.toString(), e);
-            }
+            initializeSystemThread(this);
         }
 
         ViewRootImpl.ConfigChangedCallback configChangedCallback = (Configuration globalConfig) -> {
@@ -8505,6 +8659,28 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         };
         ViewRootImpl.addConfigCallback(configChangedCallback);
+    }
+
+    /**
+     * Initializes the given system activity thread, setting up its instrumentation and initial
+     * application. This only has an effect if the given thread is a {@link #mSystemThread}.
+     *
+     * @param thread the given system activity thread to initialize.
+     */
+    private static void initializeSystemThread(@NonNull ActivityThread thread) {
+        if (!thread.mSystemThread) {
+            return;
+        }
+        try {
+            thread.mInstrumentation = new Instrumentation();
+            thread.mInstrumentation.basicInit(thread);
+            ContextImpl context = ContextImpl.createAppContext(
+                    thread, thread.getSystemContext().mPackageInfo);
+            thread.mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
+            thread.mInitialApplication.onCreate();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to instantiate Application():" + e, e);
+        }
     }
 
     @UnsupportedAppUsage
@@ -8724,9 +8900,9 @@ public final class ActivityThread extends ClientTransactionHandler
         // Call per-process mainline module initialization.
         initializeMainlineModules();
 
-        Process.setArgV0("<pre-initialized>");
-
         Looper.prepareMainLooper();
+
+        Process.setArgV0("<pre-initialized>");
 
         // Find the value for {@link #PROC_START_SEQ_IDENT} if provided on the command line.
         // It will be in the format "seq=114"
@@ -8843,6 +9019,11 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ignored) {
         }
         return false;
+    }
+
+    void addApplication(@NonNull Application app) {
+        mAllApplications.add(app);
+        VMDebug.addApplication(app.mLoadedApk.mPackageName);
     }
 
     @Override

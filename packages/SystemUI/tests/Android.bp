@@ -35,9 +35,9 @@ android_test {
         "libstaticjvmtiagent",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
         "telephony-common",
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
     aaptflags: [
         "--extra-packages com.android.systemui",

@@ -32,6 +32,7 @@ import androidx.annotation.WorkerThread
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.android.systemui.Flags
 import com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.FalsingManager
@@ -92,7 +93,7 @@ constructor(
             scrubbing = false,
             elapsedTime = null,
             duration = 0,
-            listening = false
+            listening = false,
         )
         set(value) {
             val enabledChanged = value.enabled != field.enabled
@@ -102,9 +103,11 @@ constructor(
             }
             _progress.postValue(value)
         }
+
     private val _progress = MutableLiveData<Progress>().apply { postValue(_data) }
     val progress: LiveData<Progress>
         get() = _progress
+
     private var controller: MediaController? = null
         set(value) {
             if (field?.sessionToken != value?.sessionToken) {
@@ -113,6 +116,7 @@ constructor(
                 field = value
             }
         }
+
     private var playbackState: PlaybackState? = null
     private var callback =
         object : MediaController.Callback() {
@@ -127,6 +131,14 @@ constructor(
 
             override fun onSessionDestroyed() {
                 clearController()
+            }
+
+            override fun onMetadataChanged(metadata: MediaMetadata?) {
+                if (!Flags.mediaControlsPostsOptimization()) return
+                val (enabled, duration) = getEnabledStateAndDuration(metadata)
+                if (_data.duration != duration) {
+                    _data = _data.copy(enabled = enabled, duration = duration)
+                }
             }
         }
     private var cancel: Runnable? = null
@@ -233,22 +245,13 @@ constructor(
     fun updateController(mediaController: MediaController?) {
         controller = mediaController
         playbackState = controller?.playbackState
-        val mediaMetadata = controller?.metadata
+        val (enabled, duration) = getEnabledStateAndDuration(controller?.metadata)
         val seekAvailable = ((playbackState?.actions ?: 0L) and PlaybackState.ACTION_SEEK_TO) != 0L
         val position = playbackState?.position?.toInt()
-        val duration = mediaMetadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt() ?: 0
         val playing =
             NotificationMediaManager.isPlayingState(
                 playbackState?.state ?: PlaybackState.STATE_NONE
             )
-        val enabled =
-            if (
-                playbackState == null ||
-                    playbackState?.getState() == PlaybackState.STATE_NONE ||
-                    (duration <= 0)
-            )
-                false
-            else true
         _data = Progress(enabled, seekAvailable, playing, scrubbing, position, duration, listening)
         checkIfPollingNeeded()
     }
@@ -319,7 +322,7 @@ constructor(
                     bgExecutor.executeRepeatedly(
                         this::checkPlaybackPosition,
                         0L,
-                        POSITION_UPDATE_INTERVAL_MILLIS
+                        POSITION_UPDATE_INTERVAL_MILLIS,
                     )
                 cancel = Runnable {
                     cancelPolling.run()
@@ -327,6 +330,7 @@ constructor(
                 }
             }
         } else {
+            checkPlaybackPosition()
             cancel?.run()
             cancel = null
         }
@@ -366,6 +370,16 @@ constructor(
         if (listener == enabledChangeListener) {
             enabledChangeListener = null
         }
+    }
+
+    /** returns a pair of whether seekbar is enabled and the duration of media. */
+    private fun getEnabledStateAndDuration(metadata: MediaMetadata?): Pair<Boolean, Int> {
+        val duration = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt() ?: 0
+        val enabled =
+            !(playbackState == null ||
+                playbackState?.state == PlaybackState.STATE_NONE ||
+                (duration <= 0))
+        return Pair(enabled, duration)
     }
 
     /**
@@ -528,7 +542,7 @@ constructor(
             eventStart: MotionEvent?,
             event: MotionEvent,
             distanceX: Float,
-            distanceY: Float
+            distanceY: Float,
         ): Boolean {
             return shouldGoToSeekBar
         }
@@ -542,7 +556,7 @@ constructor(
             eventStart: MotionEvent?,
             event: MotionEvent,
             velocityX: Float,
-            velocityY: Float
+            velocityY: Float,
         ): Boolean {
             if (Math.abs(velocityX) > flingVelocity || Math.abs(velocityY) > flingVelocity) {
                 viewModel.onSeekFalse()

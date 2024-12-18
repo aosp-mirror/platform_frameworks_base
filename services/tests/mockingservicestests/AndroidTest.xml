@@ -23,6 +23,12 @@
         <option name="test-file-name" value="FrameworksMockingServicesTests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true"/>
+        <option name="push-file" key="HelloWorldUsingSdk1And2.apk"
+            value="/data/local/tmp/tests/smockingservicestest/pm/HelloWorldUsingSdk1And2.apk"/>
+    </target_preparer>
+
     <option name="test-tag" value="FrameworksMockingServicesTests" />
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >

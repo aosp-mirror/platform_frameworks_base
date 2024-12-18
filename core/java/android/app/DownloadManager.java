@@ -493,6 +493,9 @@ public class DownloadManager {
          * {@link Environment#getExternalStoragePublicDirectory(String)} with
          * {@link Environment#DIRECTORY_DOWNLOADS}).
          *
+         * All non-visible downloads that are not modified in the last 7 days will be deleted during
+         * idle runs.
+         *
          * @param uri a file {@link Uri} indicating the destination for the downloaded file.
          * @return this object
          */
@@ -796,7 +799,9 @@ public class DownloadManager {
          * public Downloads directory (as returned by
          * {@link Environment#getExternalStoragePublicDirectory(String)} with
          * {@link Environment#DIRECTORY_DOWNLOADS}) will be visible in system's Downloads UI
-         * and the rest will not be visible.
+         * and the rest will not be visible. All non-visible downloads that are not modified
+         * in the last 7 days will be deleted during idle runs.
+         *
          * (e.g. {@link Context#getExternalFilesDir(String)}) will not be visible.
          */
         @Deprecated

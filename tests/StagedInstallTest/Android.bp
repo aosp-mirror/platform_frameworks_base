@@ -55,7 +55,7 @@ java_test_host {
         "frameworks-base-hostutils",
         "cts-install-lib-host",
     ],
-    data: [
+    device_common_data: [
         ":StagedInstallInternalTestApp",
         ":apex.apexd_test",
         ":com.android.apex.apkrollback.test_v1",

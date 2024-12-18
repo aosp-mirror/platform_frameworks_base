@@ -16,17 +16,24 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.app.Instrumentation;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Handler;
-import android.os.Process;
-import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -42,9 +49,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.MessageQueue_host")
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "MessageQueue";
     private static final boolean DEBUG = false;
@@ -79,17 +85,45 @@ public final class MessageQueue {
     @UnsupportedAppUsage
     private int mNextBarrierToken;
 
+    @RavenwoodRedirect
     private native static long nativeInit();
+    @RavenwoodRedirect
     private native static void nativeDestroy(long ptr);
     @UnsupportedAppUsage
+    @RavenwoodRedirect
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
+    @RavenwoodRedirect
     private native static void nativeWake(long ptr);
+    @RavenwoodRedirect
     private native static boolean nativeIsPolling(long ptr);
+    @RavenwoodRedirect
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static void throwIfNotTest() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            // Only tests can reach here.
+            return;
+        }
+        final Instrumentation instrumentation = activityThread.getInstrumentation();
+        if (instrumentation == null) {
+            // Only tests can reach here.
+            return;
+        }
+        if (instrumentation.isInstrumenting()) {
+            return;
+        }
+        throw new IllegalStateException("Test-only API called not from a test!");
+    }
+
+    private static void throwIfNotTest$ravenwood() {
+        return;
     }
 
     @Override
@@ -706,6 +740,116 @@ public final class MessageQueue {
         return true;
     }
 
+    private Message legacyPeekOrPoll(boolean peek) {
+        synchronized (this) {
+            // Try to retrieve the next message.  Return if found.
+            final long now = SystemClock.uptimeMillis();
+            Message prevMsg = null;
+            Message msg = mMessages;
+            if (msg != null && msg.target == null) {
+                // Stalled by a barrier.  Find the next asynchronous message in the queue.
+                do {
+                    prevMsg = msg;
+                    msg = msg.next;
+                } while (msg != null && !msg.isAsynchronous());
+            }
+            if (msg != null) {
+                if (now >= msg.when) {
+                    // Got a message.
+                    mBlocked = false;
+                    if (peek) {
+                        return msg;
+                    }
+                    if (prevMsg != null) {
+                        prevMsg.next = msg.next;
+                        if (prevMsg.next == null) {
+                            mLast = prevMsg;
+                        }
+                    } else {
+                        mMessages = msg.next;
+                        if (msg.next == null) {
+                            mLast = null;
+                        }
+                    }
+                    msg.next = null;
+                    msg.markInUse();
+                    if (msg.isAsynchronous()) {
+                        mAsyncMessageCount--;
+                    }
+                    if (TRACE) {
+                        Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
+                    }
+                    return msg;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the timestamp of the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery.
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    Long peekWhenForTest() {
+        throwIfNotTest();
+        Message ret = legacyPeekOrPoll(true);
+        return ret != null ? ret.when : null;
+    }
+
+    /**
+     * Return the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    @Nullable
+    Message pollForTest() {
+        throwIfNotTest();
+        return legacyPeekOrPoll(false);
+    }
+
+    /**
+     * @return true if we are blocked on a sync barrier
+     *
+     * Calls to this method must not be allowed to race with `next`.
+     * Specifically, the Looper thread must be paused before calling this method,
+     * and may not be resumed until after returning from this method.
+     */
+    boolean isBlockedOnSyncBarrier() {
+        throwIfNotTest();
+        Message msg = mMessages;
+        if (msg != null && msg.target == null) {
+            Message iter = msg;
+            /* Look for a deliverable async node */
+            do {
+                iter = iter.next;
+            } while (iter != null && !iter.isAsynchronous());
+
+            long now = SystemClock.uptimeMillis();
+            if (iter != null && now >= iter.when) {
+                return false;
+            }
+            /*
+                * Look for a deliverable sync node. In this case, if one exists we are blocked
+                * since the barrier prevents delivery of the Message.
+                */
+            iter = msg;
+            do {
+                iter = iter.next;
+            } while (iter != null && (iter.target == null || iter.isAsynchronous()));
+
+            if (iter != null && now >= iter.when) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     boolean hasMessages(Handler h, int what, Object object) {
         if (h == null) {
             return false;
@@ -1101,6 +1245,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             pw.println(prefix + "(MessageQueue is using Legacy implementation)");
@@ -1117,6 +1262,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
         synchronized (this) {

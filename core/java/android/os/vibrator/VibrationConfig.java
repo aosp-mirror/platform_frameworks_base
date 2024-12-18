@@ -86,6 +86,7 @@ public class VibrationConfig {
     private final int mDefaultKeyboardVibrationIntensity;
 
     private final boolean mKeyboardVibrationSettingsSupported;
+    private final int mVibrationPipelineMaxDurationMs;
 
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
@@ -106,6 +107,8 @@ public class VibrationConfig {
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger);
         mKeyboardVibrationSettingsSupported = loadBoolean(resources,
                 com.android.internal.R.bool.config_keyboardVibrationSettingsSupported);
+        mVibrationPipelineMaxDurationMs = loadInteger(resources,
+                com.android.internal.R.integer.config_vibrationPipelineMaxDuration, 0);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -218,6 +221,23 @@ public class VibrationConfig {
             return 0;
         }
         return mRampStepDurationMs;
+    }
+
+    /**
+     * The max duration, in milliseconds, allowed for pipelining vibration requests.
+     *
+     * <p>If the ongoing vibration duration is shorter than this threshold then it should be allowed
+     * to finish before the next vibration can start. If the ongoing vibration is longer than this
+     * then it should be cancelled when it's superseded for the new one.
+     *
+     * @return the max duration allowed for vibration effect to finish before the next request, or
+     * zero to disable effect pipelining.
+     */
+    public int getVibrationPipelineMaxDurationMs() {
+        if (mVibrationPipelineMaxDurationMs < 0) {
+            return 0;
+        }
+        return mVibrationPipelineMaxDurationMs;
     }
 
     /**

@@ -16,6 +16,10 @@
 
 package com.android.server.accounts;
 
+import static android.Manifest.permission.COPY_ACCOUNTS;
+import static android.Manifest.permission.REMOVE_ACCOUNTS;
+import static android.app.admin.flags.Flags.splitCreateManagedProfileEnabled;
+
 import android.Manifest;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -112,6 +116,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.expresslog.Histogram;
@@ -1226,7 +1231,17 @@ public class AccountManagerService
                 // been re-enabled (after being updated for example), then we just overwrite the old
                 // values.
                 for (Entry<String, Integer> entry : knownAuth.entrySet()) {
-                    accountsDb.insertOrReplaceMetaAuthTypeAndUid(entry.getKey(), entry.getValue());
+                    String type = entry.getKey();
+                    Integer newUid = entry.getValue();
+                    if (!Objects.equals(metaAuthUid.get(type), newUid)) {
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                                type,
+                                newUid,
+                                FrameworkStatsLog
+                                        .ACCOUNT_MANAGER_EVENT__EVENT_TYPE__AUTHENTICATOR_ADDED);
+                    }
+                    accountsDb.insertOrReplaceMetaAuthTypeAndUid(type, newUid);
                 }
 
                 final Map<Long, Account> accountsMap = accountsDb.findAllDeAccounts();
@@ -1728,9 +1743,11 @@ public class AccountManagerService
     public void copyAccountToUser(final IAccountManagerResponse response, final Account account,
             final int userFrom, int userTo) {
         int callingUid = Binder.getCallingUid();
-        if (isCrossUser(callingUid, UserHandle.USER_ALL)) {
+        if (isCrossUser(callingUid, UserHandle.USER_ALL)
+                && !hasCopyAccountsPermission()) {
             throw new SecurityException("Calling copyAccountToUser requires "
-                    + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                    + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+                    + " or " + COPY_ACCOUNTS);
         }
         final UserAccounts fromAccounts = getUserAccounts(userFrom);
         final UserAccounts toAccounts = getUserAccounts(userTo);
@@ -1773,14 +1790,19 @@ public class AccountManagerService
                         // Create a Session for the target user and pass in the bundle
                         completeCloningAccount(response, result, account, toAccounts, userFrom);
                     } else {
-                        // Bundle format is not defined.
-                        super.onResultSkipSanitization(result);
+                        super.onResult(result);
                     }
                 }
             }.bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private boolean hasCopyAccountsPermission() {
+        return splitCreateManagedProfileEnabled()
+                && mContext.checkCallingOrSelfPermission(COPY_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -1861,8 +1883,7 @@ public class AccountManagerService
                     // account to avoid retries?
                     // TODO: what we do with the visibility?
 
-                    // Bundle format is not defined.
-                    super.onResultSkipSanitization(result);
+                    super.onResult(result);
                 }
 
                 @Override
@@ -1947,6 +1968,11 @@ public class AccountManagerService
                     }
                     accounts.accountsDb.setTransactionSuccessful();
 
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                            account.type,
+                            callingUid,
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__ACCOUNT_ADDED);
                     logRecord(AccountsDb.DEBUG_ACTION_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
                             accountId,
                             accounts, callingUid);
@@ -2108,7 +2134,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 try {
@@ -2169,6 +2194,9 @@ public class AccountManagerService
             Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
                     + " performing rename account");
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
+            if (resultingAccount == null) {
+                resultingAccount = accountToRename;
+            }
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);
@@ -2330,7 +2358,8 @@ public class AccountManagerService
         UserHandle user = UserHandle.of(userId);
         if (!isAccountManagedByCaller(account.type, callingUid, user.getIdentifier())
                 && !isSystemUid(callingUid)
-                && !isProfileOwner(callingUid)) {
+                && !isProfileOwner(callingUid)
+                && !hasRemoveAccountsPermission()) {
             String msg = String.format(
                     "uid %s cannot remove accounts of type: %s",
                     callingUid,
@@ -2390,6 +2419,12 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private boolean hasRemoveAccountsPermission() {
+        return splitCreateManagedProfileEnabled()
+                && mContext.checkCallingOrSelfPermission(REMOVE_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -2459,7 +2494,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
                 final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
@@ -2545,6 +2579,11 @@ public class AccountManagerService
                     }
                     String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
                             : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                            account.type,
+                            callingUid,
+                            FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__ACCOUNT_REMOVED);
                     logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
                 }
             }
@@ -2807,6 +2846,14 @@ public class AccountManagerService
                                 : AccountsDb.DEBUG_ACTION_SET_PASSWORD;
                         logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts,
                                 callingUid);
+
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                                account.type,
+                                callingUid,
+                                TextUtils.isEmpty(password)
+                                ? FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_REMOVED
+                                : FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_CHANGED);
                     }
                 } finally {
                     accounts.accountsDb.endTransaction();
@@ -2873,7 +2920,7 @@ public class AccountManagerService
             if (!accountExistsCache(accounts, account)) {
                 return;
             }
-            setUserdataInternal(accounts, account, key, value);
+            setUserdataInternal(accounts, account, key, value, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2893,7 +2940,7 @@ public class AccountManagerService
     }
 
     private void setUserdataInternal(UserAccounts accounts, Account account, String key,
-            String value) {
+            String value, int callingUid) {
         synchronized (accounts.dbLock) {
             accounts.accountsDb.beginTransaction();
             try {
@@ -2919,6 +2966,11 @@ public class AccountManagerService
                 AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                account.type,
+                callingUid,
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__USER_DATA_CHANGED);
     }
 
     private void onResult(IAccountManagerResponse response, Bundle result) {
@@ -2974,7 +3026,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     if (result != null) {
                         String label = result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL);
                         Bundle bundle = new Bundle();
@@ -3152,7 +3203,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     if (result != null) {
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
                             Intent intent = newGrantCredentialsPermissionIntent(
@@ -3624,12 +3674,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            Bundle sessionBundle = null;
-            if (result != null) {
-                // Session bundle will be removed from result.
-                sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
-            }
-            result = sanitizeBundle(result);
             mNumResults++;
             Intent intent = null;
             if (result != null) {
@@ -3691,6 +3735,7 @@ public class AccountManagerService
             // bundle contains data necessary for finishing the session
             // later. The session bundle will be encrypted here and
             // decrypted later when trying to finish the session.
+            Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
             if (sessionBundle != null) {
                 String accountType = sessionBundle.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (TextUtils.isEmpty(accountType)
@@ -4078,7 +4123,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     IAccountManagerResponse response = getResponseAndClose();
                     if (response == null) {
                         return;
@@ -4392,7 +4436,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             mNumResults++;
             if (result == null) {
                 onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
@@ -4949,68 +4992,6 @@ public class AccountManagerService
                 callback, resultReceiver);
     }
 
-
-    // All keys for Strings passed from AbstractAccountAuthenticator using Bundle.
-    private static final String[] sStringBundleKeys = new String[] {
-        AccountManager.KEY_ACCOUNT_NAME,
-        AccountManager.KEY_ACCOUNT_TYPE,
-        AccountManager.KEY_AUTHTOKEN,
-        AccountManager.KEY_AUTH_TOKEN_LABEL,
-        AccountManager.KEY_ERROR_MESSAGE,
-        AccountManager.KEY_PASSWORD,
-        AccountManager.KEY_ACCOUNT_STATUS_TOKEN};
-
-    /**
-     * Keep only documented fields in a Bundle received from AbstractAccountAuthenticator.
-     */
-    protected static Bundle sanitizeBundle(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-        Bundle sanitizedBundle = new Bundle();
-        Bundle.setDefusable(sanitizedBundle, true);
-        int updatedKeysCount = 0;
-        for (String stringKey : sStringBundleKeys) {
-            if (bundle.containsKey(stringKey)) {
-                String value = bundle.getString(stringKey);
-                sanitizedBundle.putString(stringKey, value);
-                updatedKeysCount++;
-            }
-        }
-        String key = AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY;
-        if (bundle.containsKey(key)) {
-            long expiryMillis = bundle.getLong(key, 0L);
-            sanitizedBundle.putLong(key, expiryMillis);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_BOOLEAN_RESULT;
-        if (bundle.containsKey(key)) {
-            boolean booleanResult = bundle.getBoolean(key, false);
-            sanitizedBundle.putBoolean(key, booleanResult);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_ERROR_CODE;
-        if (bundle.containsKey(key)) {
-            int errorCode = bundle.getInt(key, 0);
-            sanitizedBundle.putInt(key, errorCode);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_INTENT;
-        if (bundle.containsKey(key)) {
-            Intent intent = bundle.getParcelable(key, Intent.class);
-            sanitizedBundle.putParcelable(key, intent);
-            updatedKeysCount++;
-        }
-        if (bundle.containsKey(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE)) {
-            // The field is not copied in sanitized bundle.
-            updatedKeysCount++;
-        }
-        if (updatedKeysCount != bundle.size()) {
-            Log.w(TAG, "Size mismatch after sanitizeBundle call.");
-        }
-        return sanitizedBundle;
-    }
-
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
             implements IBinder.DeathRecipient, ServiceConnection {
         private final Object mSessionLock = new Object();
@@ -5134,6 +5115,8 @@ public class AccountManagerService
                     Log.e(TAG, String.format(tmpl, activityName, pkgName, mAccountType));
                     return false;
                 }
+                intent.setComponent(targetActivityInfo.getComponentName());
+                bundle.putParcelable(AccountManager.KEY_INTENT, intent);
                 return true;
             } finally {
                 Binder.restoreCallingIdentity(bid);
@@ -5155,14 +5138,15 @@ public class AccountManagerService
             Bundle simulateBundle = p.readBundle();
             p.recycle();
             Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT, Intent.class);
-            if (intent != null && intent.getClass() != Intent.class) {
-                return false;
-            }
             Intent simulateIntent = simulateBundle.getParcelable(AccountManager.KEY_INTENT,
                     Intent.class);
             if (intent == null) {
                 return (simulateIntent == null);
             }
+            if (intent.getClass() != Intent.class || simulateIntent.getClass() != Intent.class) {
+                return false;
+            }
+
             if (!intent.filterEquals(simulateIntent)) {
                 return false;
             }
@@ -5301,14 +5285,9 @@ public class AccountManagerService
                 }
             }
         }
+
         @Override
         public void onResult(Bundle result) {
-            Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
-            onResultSkipSanitization(result);
-        }
-
-        public void onResultSkipSanitization(Bundle result) {
             Bundle.setDefusable(result, true);
             mNumResults++;
             Intent intent = null;

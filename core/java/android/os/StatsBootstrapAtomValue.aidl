@@ -19,11 +19,36 @@ package android.os;
  *
  * @hide
  */
-union StatsBootstrapAtomValue {
-    boolean boolValue;
-    int intValue;
-    long longValue;
-    float floatValue;
-    String stringValue;
-    byte[] bytesValue;
+parcelable StatsBootstrapAtomValue {
+    union Primitive {
+        boolean boolValue;
+        int intValue;
+        long longValue;
+        float floatValue;
+        String stringValue;
+        byte[] bytesValue;
+	String[] stringArrayValue;
+    }
+
+    Primitive value;
+
+    parcelable Annotation {
+        // Match the definitions in
+        // packages/modules/StatsD/framework/java/android/util/StatsLog.java
+        // Only supports UIDs for now.
+        @Backing(type="byte")
+        enum Id {
+            NONE,
+            IS_UID,
+        }
+        Id id;
+
+        union Primitive {
+            boolean boolValue;
+            int intValue;
+        }
+        Primitive value;
+    }
+
+    Annotation[] annotations;
 }

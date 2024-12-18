@@ -488,7 +488,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             // WHEN we set up carrier merged info
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 3,
                 )
@@ -499,7 +499,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             // WHEN we update the info
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 1,
                 )
@@ -538,7 +538,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             // WHEN isCarrierMerged is set to true
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 3,
                 )
@@ -550,7 +550,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             // WHEN the carrier merge network is updated
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 4,
                 )
@@ -602,7 +602,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             // THEN updates to the carrier merged level aren't logged
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 4,
                 )
@@ -610,7 +610,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(dumpBuffer()).doesNotContain("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}4")
 
             wifiRepository.setWifiNetwork(
-                WifiNetworkModel.CarrierMerged(
+                WifiNetworkModel.CarrierMerged.of(
                     SUB_ID,
                     level = 3,
                 )

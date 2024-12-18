@@ -47,6 +47,9 @@ public interface SystemInterface {
     boolean systemIsDebuggable();
     PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException;
+    /** Check if the given package is a compatible WebView implementation for the OS. */
+    boolean isCompatibleImplementationPackage(PackageInfo packageInfo);
+
     /**
      * Get the PackageInfos of all users for the package represented by {@param configInfo}.
      * @return an array of UserPackages for a certain package, each UserPackage being belonging to a
@@ -55,12 +58,8 @@ public interface SystemInterface {
      */
     List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo configInfo);
 
-    int getMultiProcessSetting();
-    void setMultiProcessSetting(int value);
-    void notifyZygote(boolean enableMultiProcess);
     /** Start the zygote if it's not already running. */
     void ensureZygoteStarted();
-    boolean isMultiProcessDefaultEnabled();
 
     void pinWebviewIfRequired(ApplicationInfo appInfo);
 }

@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -94,6 +95,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     @Mock private lateinit var activityTransitionAnimator: ActivityTransitionAnimator
     @Mock private lateinit var lockScreenUserManager: NotificationLockscreenUserManager
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var statusBarWindowControllerStore: StatusBarWindowControllerStore
     @Mock private lateinit var notifShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock private lateinit var keyguardStateController: KeyguardStateController
@@ -112,6 +114,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        `when`(statusBarWindowControllerStore.defaultDisplay).thenReturn(statusBarWindowController)
         underTest =
             LegacyActivityStarterInternalImpl(
                 centralSurfacesOptLazy = { Optional.of(centralSurfaces) },
@@ -128,7 +131,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 context = context,
                 displayId = DISPLAY_ID,
                 lockScreenUserManager = lockScreenUserManager,
-                statusBarWindowController = statusBarWindowController,
+                statusBarWindowControllerStore = statusBarWindowControllerStore,
                 wakefulnessLifecycle = wakefulnessLifecycle,
                 keyguardStateController = keyguardStateController,
                 statusBarStateController = statusBarStateController,

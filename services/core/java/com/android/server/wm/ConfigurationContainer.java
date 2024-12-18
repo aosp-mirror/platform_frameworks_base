@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -268,7 +269,16 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
             }
             final DisplayPolicy.DecorInsets.Info decor =
                     displayContent.getDisplayPolicy().getDecorInsetsInfo(rotation, dw, dh);
-            outAppBounds.intersectUnchecked(decor.mOverrideNonDecorFrame);
+            if (!outAppBounds.intersect(decor.mOverrideNonDecorFrame)) {
+                // TODO (b/364883053): When a split screen is requested from an app intent for a new
+                //  task, the bounds is not the final bounds, and this is also not a bounds change
+                //  event handled correctly with the offset. Revert back to legacy method for this
+                //  case.
+                if (inOutConfig.windowConfiguration.getWindowingMode()
+                        == WINDOWING_MODE_MULTI_WINDOW) {
+                    outAppBounds.inset(decor.mOverrideNonDecorInsets);
+                }
+            }
             if (task != null && (task.mOffsetYForInsets != 0 || task.mOffsetXForInsets != 0)) {
                 outAppBounds.offset(-task.mOffsetXForInsets, -task.mOffsetYForInsets);
             }

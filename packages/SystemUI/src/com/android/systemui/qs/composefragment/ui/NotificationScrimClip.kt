@@ -17,101 +17,54 @@
 package com.android.systemui.qs.composefragment.ui
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ClipOp
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.node.DrawModifierNode
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.layer.CompositingStrategy
+import androidx.compose.ui.graphics.layer.drawLayer
 
 /**
  * Clipping modifier for clipping out the notification scrim as it slides over QS. It will clip out
  * ([ClipOp.Difference]) a `RoundRect(-leftInset, top, width + rightInset, bottom, radius, radius)`
  * from the QS container.
  */
-fun Modifier.notificationScrimClip(
-    leftInset: Int,
-    top: Int,
-    rightInset: Int,
-    bottom: Int,
-    radius: Int
-): Modifier {
-    return this then NotificationScrimClipElement(leftInset, top, rightInset, bottom, radius)
-}
-
-private class NotificationScrimClipNode(
-    var leftInset: Float,
-    var top: Float,
-    var rightInset: Float,
-    var bottom: Float,
-    var radius: Float,
-) : DrawModifierNode, Modifier.Node() {
-    private val path = Path()
-
-    var invalidated = true
-
-    override fun ContentDrawScope.draw() {
-        if (invalidated) {
-            path.rewind()
-            path
-                .asAndroidPath()
-                .addRoundRect(
-                    -leftInset,
-                    top,
-                    size.width + rightInset,
-                    bottom,
-                    radius,
-                    radius,
-                    android.graphics.Path.Direction.CW
-                )
-            invalidated = false
+fun Modifier.notificationScrimClip(clipParams: () -> NotificationScrimClipParams): Modifier {
+    return this.drawWithCache {
+            val params = clipParams()
+            val left = -params.leftInset.toFloat()
+            val right = size.width + params.rightInset.toFloat()
+            val top = params.top.toFloat()
+            val bottom = params.bottom.toFloat()
+            val graphicsLayer = obtainGraphicsLayer()
+            graphicsLayer.compositingStrategy = CompositingStrategy.Offscreen
+            graphicsLayer.record {
+                drawContent()
+                clipRect {
+                    drawRoundRect(
+                        color = Color.Black,
+                        cornerRadius = CornerRadius(params.radius.toFloat()),
+                        blendMode = BlendMode.Clear,
+                        topLeft = Offset(left, top),
+                        size = Size(right - left, bottom - top),
+                    )
+                }
+            }
+            onDrawWithContent {
+                drawLayer(graphicsLayer)
+            }
         }
-        clipPath(path, ClipOp.Difference) { this@draw.drawContent() }
-    }
 }
 
-private data class NotificationScrimClipElement(
-    val leftInset: Int,
-    val top: Int,
-    val rightInset: Int,
-    val bottom: Int,
-    val radius: Int,
-) : ModifierNodeElement<NotificationScrimClipNode>() {
-    override fun create(): NotificationScrimClipNode {
-        return NotificationScrimClipNode(
-            leftInset.toFloat(),
-            top.toFloat(),
-            rightInset.toFloat(),
-            bottom.toFloat(),
-            radius.toFloat(),
-        )
-    }
-
-    override fun update(node: NotificationScrimClipNode) {
-        val changed =
-            node.leftInset != leftInset.toFloat() ||
-                node.top != top.toFloat() ||
-                node.rightInset != rightInset.toFloat() ||
-                node.bottom != bottom.toFloat() ||
-                node.radius != radius.toFloat()
-        if (changed) {
-            node.leftInset = leftInset.toFloat()
-            node.top = top.toFloat()
-            node.rightInset = rightInset.toFloat()
-            node.bottom = bottom.toFloat()
-            node.radius = radius.toFloat()
-            node.invalidated = true
-        }
-    }
-
-    override fun InspectorInfo.inspectableProperties() {
-        name = "notificationScrimClip"
-        properties["leftInset"] = leftInset
-        properties["top"] = top
-        properties["rightInset"] = rightInset
-        properties["bottom"] = bottom
-        properties["radius"] = radius
-    }
-}
+/** Params for [notificationScrimClip]. */
+data class NotificationScrimClipParams(
+    val top: Int = 0,
+    val bottom: Int = 0,
+    val leftInset: Int = 0,
+    val rightInset: Int = 0,
+    val radius: Int = 0,
+)

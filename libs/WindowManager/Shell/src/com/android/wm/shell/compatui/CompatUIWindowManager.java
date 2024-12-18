@@ -26,7 +26,9 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.SurfaceControl;
 import android.view.View;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
@@ -37,7 +39,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import com.android.wm.shell.compatui.api.CompatUIEvent;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.util.function.Consumer;
@@ -70,6 +71,9 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     private final float mHideScmTolerance;
 
+    @NonNull
+    private final Rect mLayoutBounds = new Rect();
+
     CompatUIWindowManager(@NonNull Context context, @NonNull TaskInfo taskInfo,
                           @NonNull SyncTransactionQueue syncQueue,
                           @NonNull Consumer<CompatUIEvent> callback,
@@ -83,7 +87,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DesktopModeStatus.canEnterDesktopMode(context)
-                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+                && DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -105,6 +109,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected void removeLayout() {
+        mLayoutBounds.setEmpty();
         mLayout = null;
     }
 
@@ -139,7 +144,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
+                && DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -171,18 +176,21 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     @VisibleForTesting
     public void updateSurfacePosition() {
-        if (mLayout == null) {
+        updateLayoutBounds();
+        if (mLayoutBounds.isEmpty()) {
             return;
         }
-        // Position of the button in the container coordinate.
-        final Rect taskBounds = getTaskBounds();
-        final Rect taskStableBounds = getTaskStableBounds();
-        final int positionX = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                ? taskStableBounds.left - taskBounds.left
-                : taskStableBounds.right - taskBounds.left - mLayout.getMeasuredWidth();
-        final int positionY = taskStableBounds.bottom - taskBounds.top
-                - mLayout.getMeasuredHeight();
-        updateSurfacePosition(positionX, positionY);
+        updateSurfacePosition(mLayoutBounds.left, mLayoutBounds.top);
+    }
+
+    @Override
+    @VisibleForTesting
+    public void updateSurfacePosition(@NonNull SurfaceControl.Transaction tx) {
+        updateLayoutBounds();
+        if (mLayoutBounds.isEmpty()) {
+            return;
+        }
+        updateSurfaceBounds(tx, mLayoutBounds);
     }
 
     @VisibleForTesting
@@ -217,6 +225,23 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final float percentageAreaOfLetterboxInTask = (float) letterboxArea / taskArea * 100;
 
         return percentageAreaOfLetterboxInTask < mHideScmTolerance;
+    }
+
+    private void updateLayoutBounds() {
+        if (mLayout == null) {
+            mLayoutBounds.setEmpty();
+            return;
+        }
+        // Position of the button in the container coordinate.
+        final Rect taskBounds = getTaskBounds();
+        final Rect taskStableBounds = getTaskStableBounds();
+        final int layoutWidth = mLayout.getMeasuredWidth();
+        final int layoutHeight = mLayout.getMeasuredHeight();
+        final int positionX = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
+                ? taskStableBounds.left - taskBounds.left
+                : taskStableBounds.right - taskBounds.left - layoutWidth;
+        final int positionY = taskStableBounds.bottom - taskBounds.top - layoutHeight;
+        mLayoutBounds.set(positionX, positionY, positionX + layoutWidth, positionY + layoutHeight);
     }
 
     private void updateVisibilityOfViews() {

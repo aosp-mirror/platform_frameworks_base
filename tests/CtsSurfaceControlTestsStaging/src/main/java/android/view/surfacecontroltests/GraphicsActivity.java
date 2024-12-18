@@ -819,7 +819,7 @@ public class GraphicsActivity extends Activity {
     private List<Float> getExpectedFrameRateForCompatibility(int compatibility) {
         assumeTrue("**** testSurfaceControlFrameRateCompatibility SKIPPED for compatibility "
                         + compatibility,
-                compatibility == Surface.FRAME_RATE_COMPATIBILITY_GTE);
+                compatibility == Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST);
 
         Display display = getDisplay();
         List<Float> expectedFrameRates = getRefreshRates(display.getMode(), display)

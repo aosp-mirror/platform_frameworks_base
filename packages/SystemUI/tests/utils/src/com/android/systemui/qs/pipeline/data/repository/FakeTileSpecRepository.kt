@@ -63,7 +63,7 @@ class FakeTileSpecRepository(
 
     override suspend fun reconcileRestore(
         restoreData: RestoreData,
-        currentAutoAdded: Set<TileSpec>
+        currentAutoAdded: Set<TileSpec>,
     ) {
         with(getFlow(restoreData.userId)) {
             value = UserTileSpecRepository.reconcileTiles(value, currentAutoAdded, restoreData)
@@ -72,5 +72,9 @@ class FakeTileSpecRepository(
 
     override suspend fun prependDefault(userId: Int) {
         with(getFlow(userId)) { value = defaultTilesRepository.defaultTiles + value }
+    }
+
+    override suspend fun resetToDefault(userId: Int) {
+        with(getFlow(userId)) { value = defaultTilesRepository.defaultTiles }
     }
 }

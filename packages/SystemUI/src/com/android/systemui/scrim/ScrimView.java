@@ -16,6 +16,8 @@
 
 package com.android.systemui.scrim;
 
+import static com.android.systemui.Flags.notificationShadeBlur;
+
 import static java.lang.Float.isNaN;
 
 import android.annotation.NonNull;
@@ -39,6 +41,7 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
@@ -249,6 +252,13 @@ public class ScrimView extends View {
             int mainTinted = mTintColor;
             if (mBlendWithMainColor) {
                 mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor, tintAmount);
+            }
+            if (notificationShadeBlur()) {
+                int layerAbove = ColorUtils.setAlphaComponent(
+                        getResources().getColor(R.color.shade_panel, null),
+                        (int) (0.4f * 255));
+                int layerBelow = ColorUtils.setAlphaComponent(Color.WHITE, (int) (0.1f * 255));
+                mainTinted = ColorUtils.compositeColors(layerAbove, layerBelow);
             }
             drawable.setColor(mainTinted, animated);
         } else {

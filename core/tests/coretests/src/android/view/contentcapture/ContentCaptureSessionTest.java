@@ -266,6 +266,11 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
+        void internalNotifySessionFlushEvent(int sessionId) {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
         void internalNotifyChildSessionStarted(int parentSessionId, int childSessionId,
                 @NonNull ContentCaptureContext clientContext) {
             throw new UnsupportedOperationException("should not have been called");

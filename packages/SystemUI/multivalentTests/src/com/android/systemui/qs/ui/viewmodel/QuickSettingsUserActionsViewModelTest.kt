@@ -22,7 +22,6 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -37,7 +36,6 @@ import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
-import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -46,7 +44,6 @@ import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -61,7 +58,7 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
+    private val qsFlexiglassAdapter = kosmos.fakeQsSceneAdapter
 
     private val sceneInteractor = kosmos.sceneInteractor
     private val sceneBackInteractor = kosmos.sceneBackInteractor
@@ -100,11 +97,8 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
-                        Swipe(
-                            fromSource = Edge.Bottom,
-                            direction = SwipeDirection.Up,
-                        ) to UserActionResult(SceneFamilies.Home)
+                        Swipe.Up to UserActionResult(Scenes.Shade),
+                        Swipe.Up(fromSource = Edge.Bottom) to UserActionResult(SceneFamilies.Home),
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Gone)
@@ -129,11 +123,8 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Lockscreen),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Lockscreen),
-                        Swipe(
-                            fromSource = Edge.Bottom,
-                            direction = SwipeDirection.Up,
-                        ) to UserActionResult(SceneFamilies.Home)
+                        Swipe.Up to UserActionResult(Scenes.Lockscreen),
+                        Swipe.Up(fromSource = Edge.Bottom) to UserActionResult(SceneFamilies.Home),
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
@@ -160,11 +151,8 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
-                        Swipe(
-                            fromSource = Edge.Bottom,
-                            direction = SwipeDirection.Up,
-                        ) to UserActionResult(SceneFamilies.Home)
+                        Swipe.Up to UserActionResult(Scenes.Shade),
+                        Swipe.Up(fromSource = Edge.Bottom) to UserActionResult(SceneFamilies.Home),
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Gone)
@@ -186,11 +174,8 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
-                        Swipe(
-                            fromSource = Edge.Bottom,
-                            direction = SwipeDirection.Up,
-                        ) to UserActionResult(SceneFamilies.Home)
+                        Swipe.Up to UserActionResult(Scenes.Shade),
+                        Swipe.Up(fromSource = Edge.Bottom) to UserActionResult(SceneFamilies.Home),
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
@@ -224,11 +209,8 @@ class QuickSettingsUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     mapOf(
                         Back to UserActionResult(Scenes.Shade),
-                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
-                        Swipe(
-                            fromSource = Edge.Bottom,
-                            direction = SwipeDirection.Up,
-                        ) to UserActionResult(SceneFamilies.Home)
+                        Swipe.Up to UserActionResult(Scenes.Shade),
+                        Swipe.Up(fromSource = Edge.Bottom) to UserActionResult(SceneFamilies.Home),
                     )
                 )
             assertThat(homeScene).isEqualTo(Scenes.Gone)

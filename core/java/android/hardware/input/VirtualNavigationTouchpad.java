@@ -17,7 +17,6 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
@@ -51,7 +50,6 @@ public class VirtualNavigationTouchpad extends VirtualInputDevice {
      *
      * @param event the event to send
      */
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendTouchEvent(@NonNull VirtualTouchEvent event) {
         try {
             if (!mVirtualDevice.sendTouchEvent(mToken, event)) {

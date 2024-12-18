@@ -26,6 +26,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
+import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,19 +42,32 @@ import androidx.annotation.Nullable;
  *
  * All touch events must be passed through this class to track a drag event.
  */
-class DragDetector {
+public class DragDetector {
     private final MotionEventHandler mEventHandler;
 
     private final PointF mInputDownPoint = new PointF();
     private int mTouchSlop;
     private boolean mIsDragEvent;
     private int mDragPointerId = -1;
+    private final long mHoldToDragMinDurationMs;
+    private boolean mDidStrayBeforeFullHold;
+    private boolean mDidHoldForMinDuration;
 
     private boolean mResultOfDownAction;
 
-    DragDetector(MotionEventHandler eventHandler) {
+    /**
+     * Initialises a drag detector.
+     *
+     * @param eventHandler drag event handler.
+     * @param holdToDragMinDurationMs hold to drag duration.
+     * @param touchSlop touch slope threshold.
+     */
+    public DragDetector(@NonNull MotionEventHandler eventHandler, long holdToDragMinDurationMs,
+            int touchSlop) {
         resetState();
         mEventHandler = eventHandler;
+        mHoldToDragMinDurationMs = holdToDragMinDurationMs;
+        mTouchSlop = touchSlop;
     }
 
     /**
@@ -62,7 +76,7 @@ class DragDetector {
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
      */
-    boolean onMotionEvent(MotionEvent ev) {
+    public boolean onMotionEvent(MotionEvent ev) {
         return onMotionEvent(null /* view */, ev);
     }
 
@@ -72,7 +86,7 @@ class DragDetector {
      * @return the result returned by {@link #mEventHandler}, or the result when
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
      */
-    boolean onMotionEvent(View v, MotionEvent ev) {
+    public boolean onMotionEvent(View v, MotionEvent ev) {
         final boolean isTouchScreen =
                 (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
         if (!isTouchScreen) {
@@ -101,9 +115,26 @@ class DragDetector {
                 if (!mIsDragEvent) {
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
+                    final float dt = ev.getEventTime() - ev.getDownTime();
+                    final boolean pastTouchSlop = Math.hypot(dx, dy) > mTouchSlop;
+                    final boolean withinHoldRegion = !pastTouchSlop;
+
+                    if (mHoldToDragMinDurationMs <= 0) {
+                        mDidHoldForMinDuration = true;
+                    } else {
+                        if (!withinHoldRegion && dt < mHoldToDragMinDurationMs) {
+                            // Mark as having strayed so that in case the (x,y) ends up in the
+                            // original position we know it's not actually valid.
+                            mDidStrayBeforeFullHold = true;
+                        }
+                        if (!mDidStrayBeforeFullHold && dt >= mHoldToDragMinDurationMs) {
+                            mDidHoldForMinDuration = true;
+                        }
+                    }
+
                     // Touches generate noisy moves, so only once the move is past the touch
                     // slop threshold should it be considered a drag.
-                    mIsDragEvent = Math.hypot(dx, dy) > mTouchSlop;
+                    mIsDragEvent = mDidHoldForMinDuration && pastTouchSlop;
                 }
                 // The event handler should only be notified about 'move' events if a drag has been
                 // detected.
@@ -162,9 +193,20 @@ class DragDetector {
         mInputDownPoint.set(0, 0);
         mDragPointerId = -1;
         mResultOfDownAction = false;
+        mDidStrayBeforeFullHold = false;
+        mDidHoldForMinDuration = false;
     }
 
-    interface MotionEventHandler {
+    /**
+     * Interface to be implemented by the class using the DragDetector for callback.
+     */
+    public interface MotionEventHandler {
+        /**
+         * Called back when drag is detected to notify the implementing class to handle drag events.
+         * @param v view on which the input arrived.
+         * @param ev motion event that resulted in drag.
+         * @return whether this was a drag event or not.
+         */
         boolean handleMotionEvent(@Nullable View v, MotionEvent ev);
     }
 }

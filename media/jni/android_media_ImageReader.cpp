@@ -942,6 +942,11 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         return static_cast<jint>(PublicFormat::PRIVATE);
     } else {
         BufferItem* buffer = Image_getBufferItem(env, thiz);
+        if (buffer == nullptr) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                    "Image is not initialized");
+            return -1;
+        }
         int readerHalFormat = mapPublicFormatToHalFormat(static_cast<PublicFormat>(readerFormat));
         int32_t fmt = applyFormatOverrides(
                 buffer->mGraphicBuffer->getPixelFormat(), readerHalFormat);
@@ -960,6 +965,11 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
 
 static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
     BufferItem* buffer = Image_getBufferItem(env, thiz);
+    if (buffer == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Image is not initialized");
+        return NULL;
+    }
     AHardwareBuffer* b = AHardwareBuffer_from_GraphicBuffer(buffer->mGraphicBuffer.get());
     // don't user the public AHardwareBuffer_toHardwareBuffer() because this would force us
     // to link against libandroid.so

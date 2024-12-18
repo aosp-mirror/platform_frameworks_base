@@ -47,6 +47,8 @@ struct CompileOptions {
   bool verbose = false;
   std::optional<std::string> product_;
   FeatureFlagValues feature_flag_values;
+  std::optional<std::string> png_compression_level;
+  int png_compression_level_int = 9;
 };
 
 /** Parses flags and compiles resources to be used in linking.  */
@@ -65,6 +67,9 @@ class CompileCommand : public Command {
     AddOptionalSwitch("--pseudo-localize", "Generate resources for pseudo-locales "
         "(en-XA and ar-XB)", &options_.pseudolocalize);
     AddOptionalSwitch("--no-crunch", "Disables PNG processing", &options_.no_png_crunch);
+    AddOptionalFlag("--png-compression-level",
+                    "Set the zlib compression level for crunched PNG images, [0-9], 9 by default.",
+                    &options_.png_compression_level);
     AddOptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
         &options_.legacy_mode);
     AddOptionalSwitch("--preserve-visibility-of-styleables",

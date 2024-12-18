@@ -21,16 +21,21 @@ import android.content.ComponentName
 import android.graphics.drawable.TestStubDrawable
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.ui.compose.toAnnotatedString
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.FakeQSFactory
 import com.android.systemui.qs.FakeQSTile
+import com.android.systemui.qs.QSEditEvent
 import com.android.systemui.qs.panels.data.repository.stockTilesRepository
 import com.android.systemui.qs.panels.domain.interactor.FakeTileAvailabilityInteractor
 import com.android.systemui.qs.panels.domain.interactor.tileAvailabilityInteractorsMap
@@ -41,7 +46,10 @@ import com.android.systemui.qs.pipeline.data.repository.fakeInstalledTilesReposi
 import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesRepository
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.pipeline.shared.metricSpec
 import com.android.systemui.qs.qsTileFactory
+import com.android.systemui.qs.shared.model.TileCategory
+import com.android.systemui.qs.tiles.impl.airplane.qsAirplaneModeTileConfig
 import com.android.systemui.qs.tiles.impl.alarm.qsAlarmTileConfig
 import com.android.systemui.qs.tiles.impl.battery.qsBatterySaverTileConfig
 import com.android.systemui.qs.tiles.impl.flashlight.qsFlashlightTileConfig
@@ -84,6 +92,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 qsFlashlightTileConfig,
                 qsBatterySaverTileConfig,
                 qsAlarmTileConfig,
+                qsAirplaneModeTileConfig,
                 qsCameraSensorPrivacyToggleTileConfig,
                 qsMicrophoneSensorPrivacyToggleTileConfig,
             )
@@ -114,7 +123,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             fakeInstalledTilesRepository.setInstalledServicesForUser(
                 userTracker.userId,
-                listOf(serviceInfo1, serviceInfo2)
+                listOf(serviceInfo1, serviceInfo2),
             )
 
             with(fakeQSTileConfigProvider) { configs.forEach { putConfig(it.tileSpec, it) } }
@@ -190,7 +199,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     .forEach {
                         val data = getEditTileData(it.tileSpec)
 
-                        assertThat(it.label).isEqualTo(data.label)
+                        assertThat(it.label).isEqualTo(data.label.toAnnotatedString(context))
                         assertThat(it.icon).isEqualTo(data.icon)
                         assertThat(it.appName).isNull()
                     }
@@ -224,15 +233,19 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
                 // service1
                 val model1 = tiles!!.first { it.tileSpec == TileSpec.create(component1) }
-                assertThat(model1.label).isEqualTo(Text.Loaded(tileService1))
-                assertThat(model1.appName).isEqualTo(Text.Loaded(appName1))
+                assertThat(model1.label)
+                    .isEqualTo(Text.Loaded(tileService1).toAnnotatedString(context))
+                assertThat(model1.appName)
+                    .isEqualTo(Text.Loaded(appName1).toAnnotatedString(context))
                 assertThat(model1.icon)
                     .isEqualTo(Icon.Loaded(drawable1, ContentDescription.Loaded(tileService1)))
 
                 // service2
                 val model2 = tiles!!.first { it.tileSpec == TileSpec.create(component2) }
-                assertThat(model2.label).isEqualTo(Text.Loaded(tileService2))
-                assertThat(model2.appName).isEqualTo(Text.Loaded(appName2))
+                assertThat(model2.label)
+                    .isEqualTo(Text.Loaded(tileService2).toAnnotatedString(context))
+                assertThat(model2.appName)
+                    .isEqualTo(Text.Loaded(appName2).toAnnotatedString(context))
                 assertThat(model2.icon)
                     .isEqualTo(Icon.Loaded(drawable2, ContentDescription.Loaded(tileService2)))
             }
@@ -418,10 +431,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             testScope.runTest {
                 val tiles by collectLastValue(underTest.tiles)
                 val currentTiles =
-                    mutableListOf(
-                        TileSpec.create("flashlight"),
-                        TileSpec.create("airplane"),
-                    )
+                    mutableListOf(TileSpec.create("flashlight"), TileSpec.create("airplane"))
                 currentTilesInteractor.setTiles(currentTiles)
                 assertThat(currentTiles.size).isLessThan(minNumberOfTiles)
 
@@ -543,6 +553,156 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             }
         }
 
+    // UI EVENT TESTS
+
+    @Test
+    fun startEditing_onlyOneEvent() =
+        kosmos.runTest {
+            underTest.startEditing()
+            underTest.startEditing()
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+
+            assertThat(uiEventLoggerFake[0].eventId).isEqualTo(QSEditEvent.QS_EDIT_OPEN.id)
+        }
+
+    @Test
+    fun stopEditing_notEditing_noEvent() =
+        kosmos.runTest {
+            underTest.stopEditing()
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(0)
+        }
+
+    @Test
+    fun stopEditing_whenEditing_correctEvent() =
+        kosmos.runTest {
+            underTest.startEditing()
+            underTest.stopEditing()
+
+            assertThat(uiEventLoggerFake[1].eventId).isEqualTo(QSEditEvent.QS_EDIT_CLOSED.id)
+        }
+
+    @Test
+    fun addTile_correctPackageAndPosition() =
+        kosmos.runTest {
+            val flashlightTile = TileSpec.create("flashlight")
+            val airplaneTile = TileSpec.create("airplane")
+            val internetTile = TileSpec.create("internet")
+            val customTile = TileSpec.create(component2)
+            currentTilesInteractor.setTiles(listOf(flashlightTile))
+            runCurrent()
+
+            underTest.addTile(airplaneTile)
+            underTest.addTile(internetTile, position = 0)
+            underTest.addTile(customTile, position = 1)
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(3)
+
+            with(uiEventLoggerFake[0]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_ADD.id)
+                assertThat(packageName).isEqualTo(airplaneTile.metricSpec)
+                assertThat(position).isEqualTo(-1)
+            }
+            with(uiEventLoggerFake[1]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_ADD.id)
+                assertThat(packageName).isEqualTo(internetTile.metricSpec)
+                assertThat(position).isEqualTo(0)
+            }
+            with(uiEventLoggerFake[2]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_ADD.id)
+                assertThat(packageName).isEqualTo(customTile.metricSpec)
+                assertThat(position).isEqualTo(1)
+            }
+        }
+
+    @Test
+    fun addTile_alreadyThere_usesMoveEvent() =
+        kosmos.runTest {
+            val flashlightTile = TileSpec.create("flashlight")
+            val airplaneTile = TileSpec.create("airplane")
+            val internetTile = TileSpec.create("internet")
+            currentTilesInteractor.setTiles(listOf(flashlightTile, airplaneTile, internetTile))
+            runCurrent()
+
+            underTest.addTile(flashlightTile) // adding at the end, should use correct position
+            underTest.addTile(internetTile, 0)
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
+
+            with(uiEventLoggerFake[0]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_MOVE.id)
+                assertThat(packageName).isEqualTo(flashlightTile.metricSpec)
+                // adding at the end, should use correct position
+                assertThat(position).isEqualTo(2)
+            }
+            with(uiEventLoggerFake[1]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_MOVE.id)
+                assertThat(packageName).isEqualTo(internetTile.metricSpec)
+                assertThat(position).isEqualTo(0)
+            }
+        }
+
+    @Test
+    fun removeTileEvent() =
+        kosmos.runTest {
+            val flashlightTile = TileSpec.create("flashlight")
+            val airplaneTile = TileSpec.create("airplane")
+            val internetTile = TileSpec.create("internet")
+            currentTilesInteractor.setTiles(listOf(flashlightTile, airplaneTile, internetTile))
+            runCurrent()
+
+            underTest.removeTile(airplaneTile)
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+
+            with(uiEventLoggerFake[0]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_REMOVE.id)
+                assertThat(packageName).isEqualTo(airplaneTile.metricSpec)
+            }
+        }
+
+    @Test
+    fun setTiles_emitsCorrectOperation_individualOperations() =
+        kosmos.runTest {
+            val flashlightTile = TileSpec.create("flashlight")
+            val airplaneTile = TileSpec.create("airplane")
+            val internetTile = TileSpec.create("internet")
+            val alarmTile = TileSpec.create("alarm")
+
+            currentTilesInteractor.setTiles(listOf(flashlightTile, airplaneTile, internetTile))
+            runCurrent()
+
+            // 0. Move flashlightTile to position 2
+            underTest.setTiles(listOf(airplaneTile, internetTile, flashlightTile))
+            runCurrent()
+
+            // 1. Add alarm tile at position 1
+            underTest.setTiles(listOf(airplaneTile, alarmTile, internetTile, flashlightTile))
+            runCurrent()
+
+            // 2. Remove internetTile
+            underTest.setTiles(listOf(airplaneTile, alarmTile, flashlightTile))
+            runCurrent()
+
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(3)
+
+            with(uiEventLoggerFake[0]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_MOVE.id)
+                assertThat(packageName).isEqualTo(flashlightTile.metricSpec)
+                assertThat(position).isEqualTo(2)
+            }
+            with(uiEventLoggerFake[1]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_ADD.id)
+                assertThat(packageName).isEqualTo(alarmTile.metricSpec)
+                assertThat(position).isEqualTo(1)
+            }
+            with(uiEventLoggerFake[2]) {
+                assertThat(eventId).isEqualTo(QSEditEvent.QS_EDIT_REMOVE.id)
+                assertThat(packageName).isEqualTo(internetTile.metricSpec)
+            }
+        }
+
     companion object {
         private val drawable1 = TestStubDrawable("drawable1")
         private val appName1 = "App1"
@@ -559,7 +719,8 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 tileSpec = this,
                 icon = Icon.Resource(R.drawable.star_on, ContentDescription.Loaded(spec)),
                 label = Text.Loaded(spec),
-                appName = null
+                appName = null,
+                category = TileCategory.UNKNOWN,
             )
         }
 
@@ -570,6 +731,7 @@ class EditModeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                     Icon.Resource(uiConfig.iconRes, ContentDescription.Resource(uiConfig.labelRes)),
                 label = Text.Resource(uiConfig.labelRes),
                 appName = null,
+                category = category,
             )
         }
 

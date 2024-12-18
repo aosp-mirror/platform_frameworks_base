@@ -34,6 +34,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.animation.TypefaceVariantCacheImpl
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
@@ -62,6 +63,7 @@ constructor(
     // implement the get method and ensure a value is returned before initialization is complete.
     private var logger = DEFAULT_LOGGER
         get() = field ?: DEFAULT_LOGGER
+
     var messageBuffer: MessageBuffer
         get() = logger.buffer
         set(value) {
@@ -69,7 +71,6 @@ constructor(
         }
 
     var hasCustomPositionUpdatedAnimation: Boolean = false
-    var migratedClocks: Boolean = false
 
     private val time = Calendar.getInstance()
 
@@ -97,7 +98,8 @@ constructor(
 
     @VisibleForTesting
     var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator = { layout, invalidateCb ->
-        TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb)
+        val cache = TypefaceVariantCacheImpl(layout.paint.typeface, NUM_CLOCK_FONT_ANIMATION_STEPS)
+        TextAnimator(layout, cache, invalidateCb)
     }
 
     // Used by screenshot tests to provide stability
@@ -123,24 +125,24 @@ constructor(
                 attrs,
                 R.styleable.AnimatableClockView,
                 defStyleAttr,
-                defStyleRes
+                defStyleRes,
             )
 
         try {
             dozingWeightInternal =
                 animatableClockViewAttributes.getInt(
                     R.styleable.AnimatableClockView_dozeWeight,
-                    /* default = */ 100
+                    /* default = */ 100,
                 )
             lockScreenWeightInternal =
                 animatableClockViewAttributes.getInt(
                     R.styleable.AnimatableClockView_lockScreenWeight,
-                    /* default = */ 300
+                    /* default = */ 300,
                 )
             chargeAnimationDelay =
                 animatableClockViewAttributes.getInt(
                     R.styleable.AnimatableClockView_chargeAnimationDelay,
-                    /* default = */ 200
+                    /* default = */ 200,
                 )
         } finally {
             animatableClockViewAttributes.recycle()
@@ -151,14 +153,14 @@ constructor(
                 attrs,
                 android.R.styleable.TextView,
                 defStyleAttr,
-                defStyleRes
+                defStyleRes,
             )
 
         try {
             isSingleLineInternal =
                 textViewAttributes.getBoolean(
                     android.R.styleable.TextView_singleLine,
-                    /* default = */ false
+                    /* default = */ false,
                 )
         } finally {
             textViewAttributes.recycle()
@@ -225,11 +227,7 @@ constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure")
 
-        if (
-            migratedClocks &&
-                !isSingleLineInternal &&
-                MeasureSpec.getMode(heightMeasureSpec) == EXACTLY
-        ) {
+        if (!isSingleLineInternal && MeasureSpec.getMode(heightMeasureSpec) == EXACTLY) {
             // Call straight into TextView.setTextSize to avoid setting lastUnconstrainedTextSize
             val size = min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F)
             super.setTextSize(COMPLEX_UNIT_PX, size)
@@ -245,7 +243,7 @@ constructor(
                     }
             }
 
-        if (migratedClocks && hasCustomPositionUpdatedAnimation) {
+        if (hasCustomPositionUpdatedAnimation) {
             // Expand width to avoid clock being clipped during stepping animation
             val targetWidth = measuredWidth + MeasureSpec.getSize(widthMeasureSpec) / 2
 
@@ -280,7 +278,7 @@ constructor(
         text: CharSequence,
         start: Int,
         lengthBefore: Int,
-        lengthAfter: Int
+        lengthAfter: Int,
     ) {
         logger.d({ "onTextChanged($str1)" }) { str1 = text.toString() }
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
@@ -305,7 +303,7 @@ constructor(
             interpolator = null,
             duration = 0,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
         setTextStyle(
             weight = lockScreenWeight,
@@ -314,7 +312,7 @@ constructor(
             interpolator = null,
             duration = COLOR_ANIM_DURATION,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
     }
 
@@ -327,7 +325,7 @@ constructor(
             interpolator = null,
             duration = 0,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
         setTextStyle(
             weight = lockScreenWeight,
@@ -336,7 +334,7 @@ constructor(
             duration = APPEAR_ANIM_DURATION,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
     }
 
@@ -353,7 +351,7 @@ constructor(
             interpolator = null,
             duration = 0,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
         setTextStyle(
             weight = dozingWeightInternal,
@@ -362,7 +360,7 @@ constructor(
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             duration = ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
     }
 
@@ -381,7 +379,7 @@ constructor(
                 interpolator = null,
                 duration = CHARGE_ANIM_DURATION_PHASE_1,
                 delay = 0,
-                onAnimationEnd = null
+                onAnimationEnd = null,
             )
         }
         setTextStyle(
@@ -391,7 +389,7 @@ constructor(
             interpolator = null,
             duration = CHARGE_ANIM_DURATION_PHASE_0,
             delay = chargeAnimationDelay.toLong(),
-            onAnimationEnd = startAnimPhase2
+            onAnimationEnd = startAnimPhase2,
         )
     }
 
@@ -404,7 +402,7 @@ constructor(
             interpolator = null,
             duration = DOZE_ANIM_DURATION,
             delay = 0,
-            onAnimationEnd = null
+            onAnimationEnd = null,
         )
     }
 
@@ -444,7 +442,7 @@ constructor(
         interpolator: TimeInterpolator?,
         duration: Long,
         delay: Long,
-        onAnimationEnd: Runnable?
+        onAnimationEnd: Runnable?,
     ) {
         textAnimator?.let {
             it.setTextStyle(
@@ -454,7 +452,7 @@ constructor(
                 duration = duration,
                 interpolator = interpolator,
                 delay = delay,
-                onAnimationEnd = onAnimationEnd
+                onAnimationEnd = onAnimationEnd,
             )
             it.glyphFilter = glyphFilter
         }
@@ -468,7 +466,7 @@ constructor(
                         duration = duration,
                         interpolator = interpolator,
                         delay = delay,
-                        onAnimationEnd = onAnimationEnd
+                        onAnimationEnd = onAnimationEnd,
                     )
                     textAnimator.glyphFilter = glyphFilter
                 }
@@ -476,6 +474,7 @@ constructor(
     }
 
     fun refreshFormat() = refreshFormat(DateFormat.is24HourFormat(context))
+
     fun refreshFormat(use24HourFormat: Boolean) {
         Patterns.update(context)
 
@@ -560,18 +559,11 @@ constructor(
      * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
      *   it finished moving.
      */
-    fun offsetGlyphsForStepClockAnimation(
-        distance: Float,
-        fraction: Float,
-    ) {
+    fun offsetGlyphsForStepClockAnimation(distance: Float, fraction: Float) {
         for (i in 0 until NUM_DIGITS) {
             val dir = if (isLayoutRtl) -1 else 1
             val digitFraction =
-                getDigitFraction(
-                    digit = i,
-                    isMovingToCenter = distance > 0,
-                    fraction = fraction,
-                )
+                getDigitFraction(digit = i, isMovingToCenter = distance > 0, fraction = fraction)
             val moveAmountForDigit = dir * distance * digitFraction
             glyphOffsets[i] = moveAmountForDigit
 
@@ -585,12 +577,10 @@ constructor(
     }
 
     override fun onRtlPropertiesChanged(layoutDirection: Int) {
-        if (migratedClocks) {
-            if (layoutDirection == LAYOUT_DIRECTION_RTL) {
-                textAlignment = TEXT_ALIGNMENT_TEXT_END
-            } else {
-                textAlignment = TEXT_ALIGNMENT_TEXT_START
-            }
+        if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+            textAlignment = TEXT_ALIGNMENT_TEXT_END
+        } else {
+            textAlignment = TEXT_ALIGNMENT_TEXT_START
         }
         super.onRtlPropertiesChanged(layoutDirection)
     }

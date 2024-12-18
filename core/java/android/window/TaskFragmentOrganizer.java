@@ -69,6 +69,23 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     public static final String KEY_ERROR_CALLBACK_OP_TYPE = "operation_type";
 
     /**
+     * Key to bundle {@link TaskFragmentInfo}s from the system in
+     * {@link #registerOrganizer(boolean, Bundle)}
+     *
+     * @hide
+     */
+    public static final String KEY_RESTORE_TASK_FRAGMENTS_INFO = "key_restore_task_fragments_info";
+
+    /**
+     * Key to bundle {@link TaskFragmentParentInfo} from the system in
+     * {@link #registerOrganizer(boolean, Bundle)}
+     *
+     * @hide
+     */
+    public static final String KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO =
+            "key_restore_task_fragment_parent_info";
+
+    /**
      * No change set.
      */
     @WindowManager.TransitionType

@@ -25,6 +25,7 @@ import android.util.Dumpable
 import android.util.Log
 import android.util.Size
 import androidx.annotation.MainThread
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.R
 import com.android.internal.widget.NotificationDrawableConsumer
 import com.android.internal.widget.NotificationIconManager
@@ -32,6 +33,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.graphics.ImageLoader
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Empty
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.FullImage
 import com.android.systemui.statusbar.notification.row.BigPictureIconManager.DrawableState.Initial
@@ -44,7 +46,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "BigPicImageLoader"
@@ -61,12 +62,12 @@ private const val FREE_IMAGE_DELAY_MS = 3000L
 class BigPictureIconManager
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val imageLoader: ImageLoader,
     private val statsManager: BigPictureStatsManager,
     @Application private val scope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
-    @Background private val bgDispatcher: CoroutineDispatcher
+    @Background private val bgDispatcher: CoroutineDispatcher,
 ) : NotificationIconManager, Dumpable {
 
     private var lastLoadingJob: Job? = null
@@ -152,7 +153,7 @@ constructor(
 
     private fun checkPlaceHolderSizeForDrawable(
         displayedState: DrawableState,
-        newDrawable: Drawable
+        newDrawable: Drawable,
     ) {
         if (displayedState is PlaceHolder) {
             val (oldWidth, oldHeight) = displayedState.drawableSize
@@ -162,7 +163,7 @@ constructor(
                 Log.e(
                     TAG,
                     "Mismatch in dimensions, when replacing PlaceHolder " +
-                        "$oldWidth X $oldHeight with Drawable $newWidth X $newHeight."
+                        "$oldWidth X $oldHeight with Drawable $newWidth X $newHeight.",
                 )
             }
         }
@@ -183,9 +184,8 @@ constructor(
         displayedState = drawableAndState?.second ?: Empty
     }
 
-    private fun startLoadingJob(icon: Icon): Job = scope.launch {
-        statsManager.measure { loadImage(icon) }
-    }
+    private fun startLoadingJob(icon: Icon): Job =
+        scope.launch { statsManager.measure { loadImage(icon) } }
 
     private suspend fun loadImage(icon: Icon) {
         val drawableAndState = withContext(bgDispatcher) { loadImageSync(icon) }
@@ -253,9 +253,12 @@ constructor(
 
     private sealed class DrawableState(open val icon: Icon?) {
         data object Initial : DrawableState(null)
+
         data object Empty : DrawableState(null)
+
         data class PlaceHolder(override val icon: Icon, val drawableSize: Size) :
             DrawableState(icon)
+
         data class FullImage(override val icon: Icon, val drawableSize: Size) : DrawableState(icon)
     }
 }
@@ -297,7 +300,7 @@ private fun Size.resizeToMax(maxWidth: Int, maxHeight: Int): Size {
 }
 
 private val Drawable.intrinsicSize
-    get() = Size(/*width=*/ intrinsicWidth, /*height=*/ intrinsicHeight)
+    get() = Size(/* width= */ intrinsicWidth, /* height= */ intrinsicHeight)
 
 private operator fun Size.component1() = width
 

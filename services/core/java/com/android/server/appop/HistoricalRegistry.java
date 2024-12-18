@@ -474,7 +474,8 @@ final class HistoricalRegistry {
     void incrementOpAccessedCount(int op, int uid, @NonNull String packageName,
             @NonNull String deviceId, @Nullable String attributionTag, @UidState int uidState,
             @OpFlags int flags, long accessTime,
-            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
+            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
+            @DiscreteRegistry.AccessType int accessType) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -487,7 +488,7 @@ final class HistoricalRegistry {
 
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op,
                         attributionTag, flags, uidState, accessTime, -1, attributionFlags,
-                        attributionChainId);
+                        attributionChainId, accessType);
             }
         }
     }
@@ -510,7 +511,8 @@ final class HistoricalRegistry {
     void increaseOpAccessDuration(int op, int uid, @NonNull String packageName,
             @NonNull String deviceId, @Nullable String attributionTag, @UidState int uidState,
             @OpFlags int flags, long eventStartTime, long increment,
-            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId) {
+            @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
+            @DiscreteRegistry.AccessType int accessType) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -522,7 +524,7 @@ final class HistoricalRegistry {
                         attributionTag, uidState, flags, increment);
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op,
                         attributionTag, flags, uidState, eventStartTime, increment,
-                        attributionFlags, attributionChainId);
+                        attributionFlags, attributionChainId, accessType);
             }
         }
     }

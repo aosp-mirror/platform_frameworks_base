@@ -16,6 +16,8 @@
 
 package android.media.tv.tuner;
 
+import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
+
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -295,13 +297,13 @@ public class Tuner implements AutoCloseable  {
     private EventHandler mHandler;
     @Nullable
     private FrontendInfo mFrontendInfo;
-    private Integer mFrontendHandle;
+    private Long mFrontendHandle;
     private Tuner mFeOwnerTuner = null;
     private int mFrontendType = FrontendSettings.TYPE_UNDEFINED;
     private Integer mDesiredFrontendId = null;
     private int mUserId;
     private Lnb mLnb;
-    private Integer mLnbHandle;
+    private Long mLnbHandle;
     @Nullable
     private OnTuneEventListener mOnTuneEventListener;
     @Nullable
@@ -324,10 +326,10 @@ public class Tuner implements AutoCloseable  {
     private final ReentrantLock mDemuxLock = new ReentrantLock();
     private int mRequestedCiCamId;
 
-    private Integer mDemuxHandle;
-    private Integer mFrontendCiCamHandle;
+    private Long mDemuxHandle;
+    private Long mFrontendCiCamHandle;
     private Integer mFrontendCiCamId;
-    private Map<Integer, WeakReference<Descrambler>> mDescramblers = new HashMap<>();
+    private Map<Long, WeakReference<Descrambler>> mDescramblers = new HashMap<>();
     private List<WeakReference<Filter>> mFilters = new ArrayList<WeakReference<Filter>>();
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
@@ -751,6 +753,21 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceOwnershipRetention(boolean enabled) {
+        mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
+    }
+
+    /**
      * Checks if there is an unused frontend resource available.
      *
      * @param frontendType {@link android.media.tv.tuner.frontend.FrontendSettings.Type} for the
@@ -949,7 +966,7 @@ public class Tuner implements AutoCloseable  {
     private void releaseDescramblers() {
         synchronized (mDescramblers) {
             if (!mDescramblers.isEmpty()) {
-                for (Map.Entry<Integer, WeakReference<Descrambler>> d : mDescramblers.entrySet()) {
+                for (Map.Entry<Long, WeakReference<Descrambler>> d : mDescramblers.entrySet()) {
                     Descrambler descrambler = d.getValue().get();
                     if (descrambler != null) {
                         descrambler.close();
@@ -1010,7 +1027,7 @@ public class Tuner implements AutoCloseable  {
     /**
      * Native method to open frontend of the given ID.
      */
-    private native Frontend nativeOpenFrontendByHandle(int handle);
+    private native Frontend nativeOpenFrontendByHandle(long handle);
     private native int nativeShareFrontend(int id);
     private native int nativeUnshareFrontend();
     private native void nativeRegisterFeCbListener(long nativeContext);
@@ -1039,21 +1056,21 @@ public class Tuner implements AutoCloseable  {
     private native int nativeSetMaxNumberOfFrontends(int frontendType, int maxNumber);
     private native int nativeGetMaxNumberOfFrontends(int frontendType);
     private native int nativeRemoveOutputPid(int pid);
-    private native Lnb nativeOpenLnbByHandle(int handle);
+    private native Lnb nativeOpenLnbByHandle(long handle);
     private native Lnb nativeOpenLnbByName(String name);
     private native FrontendStatusReadiness[] nativeGetFrontendStatusReadiness(int[] statusTypes);
 
-    private native Descrambler nativeOpenDescramblerByHandle(int handle);
-    private native int nativeOpenDemuxByhandle(int handle);
+    private native Descrambler nativeOpenDescramblerByHandle(long handle);
+    private native int nativeOpenDemuxByhandle(long handle);
 
     private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
     private native DemuxCapabilities nativeGetDemuxCapabilities();
-    private native DemuxInfo nativeGetDemuxInfo(int demuxHandle);
+    private native DemuxInfo nativeGetDemuxInfo(long demuxHandle);
 
-    private native int nativeCloseDemux(int handle);
-    private native int nativeCloseFrontend(int handle);
+    private native int nativeCloseDemux(long handle);
+    private native int nativeCloseFrontend(long handle);
     private native int nativeClose();
 
     private static native SharedFilter nativeOpenSharedFilter(String token);
@@ -1371,7 +1388,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     private boolean requestFrontend() {
-        int[] feHandle = new int[1];
+        long[] feHandle = new long[1];
         boolean granted = false;
         try {
             TunerFrontendRequest request = new TunerFrontendRequest();
@@ -2379,7 +2396,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     private boolean requestLnb() {
-        int[] lnbHandle = new int[1];
+        long[] lnbHandle = new long[1];
         TunerLnbRequest request = new TunerLnbRequest();
         request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestLnb(request, lnbHandle);
@@ -2709,7 +2726,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     private boolean requestDemux() {
-        int[] demuxHandle = new int[1];
+        long[] demuxHandle = new long[1];
         TunerDemuxRequest request = new TunerDemuxRequest();
         request.clientId = mClientId;
         request.desiredFilterTypes = mDesiredDemuxInfo.getFilterTypes();
@@ -2722,14 +2739,14 @@ public class Tuner implements AutoCloseable  {
     }
 
     private Descrambler requestDescrambler() {
-        int[] descramblerHandle = new int[1];
+        long[] descramblerHandle = new long[1];
         TunerDescramblerRequest request = new TunerDescramblerRequest();
         request.clientId = mClientId;
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (!granted) {
             return null;
         }
-        int handle = descramblerHandle[0];
+        long handle = descramblerHandle[0];
         Descrambler descrambler = nativeOpenDescramblerByHandle(handle);
         if (descrambler != null) {
             synchronized (mDescramblers) {
@@ -2743,7 +2760,7 @@ public class Tuner implements AutoCloseable  {
     }
 
     private boolean requestFrontendCiCam(int ciCamId) {
-        int[] ciCamHandle = new int[1];
+        long[] ciCamHandle = new long[1];
         TunerCiCamRequest request = new TunerCiCamRequest();
         request.clientId = mClientId;
         request.ciCamId = ciCamId;

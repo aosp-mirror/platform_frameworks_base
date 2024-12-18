@@ -52,6 +52,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTi
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
@@ -63,6 +64,8 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -72,7 +75,6 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.jar.StrictJarFile;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ComponentMutateUtils;
@@ -105,6 +107,9 @@ import java.util.UUID;
  * Helper class that handles package scanning logic
  */
 final class ScanPackageUtils {
+
+    public static final int PAGE_SIZE_16KB = 16384;
+
     /**
      * Just scans the package without any side effects.
      *
@@ -114,10 +119,9 @@ final class ScanPackageUtils {
      * @param currentTime The current time, in millis
      * @return The results of the scan
      */
-    @GuardedBy("mPm.mInstallLock")
     @VisibleForTesting
     @NonNull
-    public static ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
+    public static ScanResult scanPackageOnly(@NonNull ScanRequest request,
             PackageManagerServiceInjector injector,
             boolean isUnderFactoryTest, long currentTime)
             throws PackageManagerException {
@@ -416,6 +420,37 @@ final class ScanPackageUtils {
                     + " primary=" + pkgSetting.getPrimaryCpuAbiLegacy()
                     + " secondary=" + pkgSetting.getSecondaryCpuAbiLegacy()
                     + " abiOverride=" + pkgSetting.getCpuAbiOverride());
+        }
+
+        boolean is16KbDevice = Os.sysconf(OsConstants._SC_PAGESIZE) == PAGE_SIZE_16KB;
+        if (Flags.appCompatOption16kb() && is16KbDevice) {
+            // Alignment checks are used decide whether this app should run in compat mode when
+            // nothing was specified in manifest. Manifest should always take precedence over
+            // something decided by platform.
+            if (parsedPackage.getPageSizeAppCompatFlags()
+                    > ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED) {
+                pkgSetting.setPageSizeAppCompatFlags(parsedPackage.getPageSizeAppCompatFlags());
+            } else {
+                // 16 KB is only support for 64 bit ABIs and for apps which are being installed
+                // Check alignment. System, Apex and Platform packages should be page-agnostic now
+                if ((Build.SUPPORTED_64_BIT_ABIS.length > 0)
+                        && !isSystemApp
+                        && !isApex
+                        && !isPlatformPackage) {
+                    int mode =
+                            packageAbiHelper.checkPackageAlignment(
+                                    parsedPackage,
+                                    pkgSetting.getLegacyNativeLibraryPath(),
+                                    parsedPackage.isNativeLibraryRootRequiresIsa(),
+                                    pkgSetting.getCpuAbiOverride());
+                    if (mode >= ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED) {
+                        pkgSetting.setPageSizeAppCompatFlags(mode);
+                    } else {
+                        Slog.e(TAG, "Error occurred while checking alignment of package : "
+                                + parsedPackage.getPackageName());
+                    }
+                }
+            }
         }
 
         if ((scanFlags & SCAN_BOOTING) == 0 && oldSharedUserSetting != null) {

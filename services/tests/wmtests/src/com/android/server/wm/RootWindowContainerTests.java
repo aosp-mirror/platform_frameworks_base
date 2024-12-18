@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -63,6 +64,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -77,12 +79,14 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -285,6 +289,52 @@ public class RootWindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskLayerRankFreeform() {
+        mSetFlagsRule.enableFlags(com.android.window.flags.Flags
+                .FLAG_PROCESS_PRIORITY_POLICY_FOR_MULTI_WINDOW_MODE);
+        final Task[] freeformTasks = new Task[3];
+        final WindowProcessController[] processes = new WindowProcessController[3];
+        for (int i = 0; i < freeformTasks.length; i++) {
+            freeformTasks[i] = new TaskBuilder(mSupervisor)
+                    .setWindowingMode(WINDOWING_MODE_FREEFORM).setCreateActivity(true).build();
+            final ActivityRecord r = freeformTasks[i].getTopMostActivity();
+            r.setState(RESUMED, "test");
+            processes[i] = r.app;
+        }
+        resizeDisplay(mDisplayContent, 2400, 2000);
+        // ---------
+        // | 2 | 1 |
+        // ---------
+        // | 0 |   |
+        // ---------
+        freeformTasks[2].setBounds(0, 0, 1000, 1000);
+        freeformTasks[1].setBounds(1000, 0, 2000, 1000);
+        freeformTasks[0].setBounds(0, 1000, 1000, 2000);
+        mRootWindowContainer.rankTaskLayers();
+        assertEquals(1, freeformTasks[2].mLayerRank);
+        assertEquals(2, freeformTasks[1].mLayerRank);
+        assertEquals(3, freeformTasks[0].mLayerRank);
+        assertFalse("Top doesn't need perceptible hint", (processes[2].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        assertTrue((processes[1].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        assertTrue((processes[0].getActivityStateFlags()
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+
+        // Make task2 occlude half of task0.
+        clearInvocations(mAtm);
+        freeformTasks[2].setBounds(0, 0, 1000, 1500);
+        waitHandlerIdle(mWm.mH);
+        // The process of task0 will demote from perceptible to visible.
+        final int stateFlags0 = processes[0].getActivityStateFlags();
+        assertTrue((stateFlags0
+                & WindowProcessController.ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE) != 0);
+        assertFalse((stateFlags0
+                & WindowProcessController.ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM) != 0);
+        verify(mAtm).updateOomAdj();
+    }
+
+    @Test
     public void testForceStopPackage() {
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
@@ -331,6 +381,9 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
+        mAtm.mInternal.preBindApplication(proc, proc.mInfo);
+        assertTrue(proc.registeredForActivityConfigChanges());
+        assertFalse(proc.mHasEverAttached);
         try {
             mRootWindowContainer.attachApplication(proc);
             verify(mSupervisor).realStartActivityLocked(eq(topActivity), eq(proc),
@@ -338,6 +391,15 @@ public class RootWindowContainerTests extends WindowTestsBase {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+
+        // Verify that onProcessRemoved won't clear the launching activities if an attached process
+        // is died. Because in real case, it should be handled from WindowProcessController's
+        // and ActivityRecord's handleAppDied to decide whether to remove the activities.
+        assertTrue(proc.mHasEverAttached);
+        assertTrue(mAtm.mStartingProcessActivities.isEmpty());
+        mAtm.mStartingProcessActivities.add(activity);
+        mAtm.mInternal.onProcessRemoved(proc.mName, proc.mUid);
+        assertFalse(mAtm.mStartingProcessActivities.isEmpty());
     }
 
     /**
@@ -635,6 +697,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testAwakeFromSleepingWithAppConfiguration() {
         final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        display.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.moveFocusableActivityToTop("test");
         assertTrue(activity.getRootTask().isFocusedRootTaskOnDisplay());
@@ -1271,6 +1334,38 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         assertNotNull(taskDisplayArea.getRootHomeTask());
         assertEquals(taskDisplayArea.getTopRootTask(), taskDisplayArea.getRootHomeTask());
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING)
+    @Test
+    public void testSwitchUser_withVisibleRootTasks_storesAllVisibleRootTasksForCurrentUser() {
+        // Set up root tasks
+        final Task rootTask1 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task rootTask2 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task rootTask3 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        doReturn(rootTask3).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+
+        // Set up user ids and visibility
+        rootTask1.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask2.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask3.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask1.mVisibleRequested = false;
+        rootTask2.mVisibleRequested = true;
+        rootTask3.mVisibleRequested = true;
+
+        // Switch to a different user
+        int currentUser = mRootWindowContainer.mCurrentUser;
+        int otherUser = currentUser + 1;
+        mRootWindowContainer.switchUser(otherUser, null);
+
+        // Verify that the previous user persists it's previous visible root tasks
+        assertArrayEquals(
+                new int[]{rootTask2.mTaskId, rootTask3.mTaskId},
+                mRootWindowContainer.mUserVisibleRootTasks.get(currentUser).toArray()
+        );
     }
 
     @Test

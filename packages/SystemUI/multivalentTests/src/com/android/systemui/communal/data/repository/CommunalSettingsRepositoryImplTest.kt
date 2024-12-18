@@ -22,21 +22,26 @@ import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.app.admin.devicePolicyManager
 import android.content.Intent
 import android.content.pm.UserInfo
+import android.content.res.mainResources
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.DisabledReason
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_BACKGROUND_SETTING
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.nullable
@@ -49,13 +54,20 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiTestCase() {
+    private val kosmos =
+        testKosmos().apply { mainResources = mContext.orCreateTestableResources.resources }
     private val testScope = kosmos.testScope
     private lateinit var underTest: CommunalSettingsRepository
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
@@ -67,6 +79,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun getFlagEnabled_bothEnabled() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
@@ -74,7 +87,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         assertThat(underTest.getFlagEnabled()).isTrue()
     }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun getFlagEnabled_bothDisabled() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
@@ -82,7 +95,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         assertThat(underTest.getFlagEnabled()).isFalse()
     }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun getFlagEnabled_onlyClassicFlagEnabled() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
@@ -91,11 +104,63 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun getFlagEnabled_onlyTrunkFlagEnabled() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
 
         assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_mobileConfigEnabled() {
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_glanceableHubEnabled,
+            true,
+        )
+
+        assertThat(underTest.getFlagEnabled()).isTrue()
+    }
+
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2, FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyMobileConfigEnabled() {
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_glanceableHubEnabled,
+            true,
+        )
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyMobileFlagEnabled() {
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_glanceableHubEnabled,
+            false,
+        )
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_oldFlagIgnored() {
+        // New config flag enabled.
+        mContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_glanceableHubEnabled,
+            true,
+        )
+
+        // Old config flag disabled.
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isTrue()
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
@@ -108,17 +173,17 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             assertThat(enabledState).containsExactly(DisabledReason.DISABLED_REASON_INVALID_USER)
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @EnableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun classicFlagIsDisabled() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+        kosmos.runTest {
+            setCommunalV2Enabled(false)
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
             assertThat(enabledState?.enabled).isFalse()
             assertThat(enabledState).containsExactly(DisabledReason.DISABLED_REASON_FLAG)
         }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun communalHubFlagIsDisabled() =
         testScope.runTest {
@@ -134,7 +199,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             kosmos.fakeSettings.putIntForUser(
                 Settings.Secure.GLANCEABLE_HUB_ENABLED,
                 0,
-                PRIMARY_USER.id
+                PRIMARY_USER.id,
             )
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
             assertThat(enabledState?.enabled).isFalse()
@@ -143,14 +208,14 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             kosmos.fakeSettings.putIntForUser(
                 Settings.Secure.GLANCEABLE_HUB_ENABLED,
                 1,
-                SECONDARY_USER.id
+                SECONDARY_USER.id,
             )
             assertThat(enabledState?.enabled).isFalse()
 
             kosmos.fakeSettings.putIntForUser(
                 Settings.Secure.GLANCEABLE_HUB_ENABLED,
                 1,
-                PRIMARY_USER.id
+                PRIMARY_USER.id,
             )
             assertThat(enabledState?.enabled).isTrue()
         }
@@ -201,7 +266,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             kosmos.fakeSettings.putIntForUser(
                 Settings.Secure.GLANCEABLE_HUB_ENABLED,
                 0,
-                PRIMARY_USER.id
+                PRIMARY_USER.id,
             )
             setKeyguardFeaturesDisabled(PRIMARY_USER, KEYGUARD_DISABLE_WIDGETS_ALL)
 
@@ -228,7 +293,7 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                 kosmos.fakeSettings.putIntForUser(
                     GLANCEABLE_HUB_BACKGROUND_SETTING,
                     type.value,
-                    PRIMARY_USER.id
+                    PRIMARY_USER.id,
                 )
                 assertWithMessage(
                         "Expected $type when $GLANCEABLE_HUB_BACKGROUND_SETTING is set to" +
@@ -237,6 +302,34 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                     .that(backgroundType)
                     .isEqualTo(type)
             }
+        }
+
+    @Test
+    fun screensaverDisabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                0,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isFalse()
+        }
+
+    @Test
+    fun screensaverEnabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                1,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isTrue()
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
@@ -253,12 +346,12 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             UserInfo(/* id= */ 0, /* name= */ "primary user", /* flags= */ UserInfo.FLAG_MAIN)
         val SECONDARY_USER = UserInfo(/* id= */ 1, /* name= */ "secondary user", /* flags= */ 0)
         val WORK_PROFILE =
-            UserInfo(
-                10,
-                "work",
-                /* iconPath= */ "",
-                /* flags= */ 0,
-                USER_TYPE_PROFILE_MANAGED,
-            )
+            UserInfo(10, "work", /* iconPath= */ "", /* flags= */ 0, USER_TYPE_PROFILE_MANAGED)
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_GLANCEABLE_HUB_V2)
+        }
     }
 }

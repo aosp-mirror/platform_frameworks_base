@@ -61,6 +61,7 @@ stubs_defaults {
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
+        ":framework-healthfitness-sources",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
         ":framework-nfc-updatable-sources",
@@ -129,7 +130,11 @@ droidstubs {
 droidstubs {
     name: "framework-doc-stubs",
     defaults: ["android-non-updatable-doc-stubs-defaults"],
-    srcs: [":all-modules-public-stubs-source"],
+    flags: [
+        // Ignore any compatibility errors, see check_api.last_released below for more information.
+        "--hide-category Compatibility",
+    ],
+    srcs: [":all-modules-public-stubs-source-exportable"],
     api_levels_module: "api_versions_public",
     aidl: {
         include_dirs: [
@@ -137,13 +142,39 @@ droidstubs {
             "packages/modules/Media/apex/aidl/stable",
         ],
     },
+
+    // Pass the previously released API to support reverting flagged APIs. Without this, reverting
+    // a flagged API will cause it to be removed, even if it had previously been released. This
+    // has the side effect of causing compatibility issues to be reported but they are already
+    // checked elsewhere so they will be ignored, see `--hide-category Compatibility` above.
+    check_api: {
+        last_released: {
+            api_file: ":android.api.combined.public.latest",
+            removed_api_file: ":android-removed.api.combined.public.latest",
+        },
+    },
 }
 
 droidstubs {
     name: "framework-doc-system-stubs",
     defaults: ["framework-doc-stubs-sources-default"],
-    flags: ["--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)"],
+    flags: [
+        "--show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\)",
+        // Ignore any compatibility errors, see check_api.last_released below for more information.
+        "--hide-category Compatibility",
+    ],
     api_levels_module: "api_versions_system",
+
+    // Pass the previously released API to support reverting flagged APIs. Without this, reverting
+    // a flagged API will cause it to be removed, even if it had previously been released. This
+    // has the side effect of causing compatibility issues to be reported but they are already
+    // checked elsewhere so they will be ignored, see `--hide-category Compatibility` above.
+    check_api: {
+        last_released: {
+            api_file: ":android.api.combined.system.latest",
+            removed_api_file: ":android-removed.api.combined.system.latest",
+        },
+    },
 }
 
 /////////////////////////////////////////////////////////////////////

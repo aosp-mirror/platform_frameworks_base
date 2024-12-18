@@ -69,7 +69,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.Set;
@@ -300,7 +300,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
                         .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
                 boolean userPublic = devicePublic
                         || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
-                boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
+                boolean needsRedaction = mLockscreenUserManager.getRedactionType(entry)
+                        != NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
                 if (userPublic && needsRedaction) {
                     // TODO(b/135046837): we can probably relax this with dynamic privacy
                     return true;
@@ -353,7 +354,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
                         return false;
                     }
 
-                    if (!mLockscreenUserManager.needsRedaction(entry)) {
+                    if (mLockscreenUserManager.getRedactionType(entry)
+                            == NotificationLockscreenUserManager.REDACTION_TYPE_NONE) {
                         return false;
                     }
 

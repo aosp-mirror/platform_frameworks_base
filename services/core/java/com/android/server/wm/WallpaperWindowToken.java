@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -33,6 +33,7 @@ import android.util.SparseArray;
 
 import com.android.internal.protolog.ProtoLog;
 
+import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -103,6 +104,7 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
+        stringName = null;
         // Move the window token to the front (private) or back (showWhenLocked). This is possible
         // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER windows.
         final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
@@ -286,13 +288,18 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     @Override
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
+        pw.print(prefix); pw.print("visibleRequested="); pw.print(mVisibleRequested);
+        pw.print(" visible="); pw.println(isVisible());
+    }
+
+    @Override
     public String toString() {
         if (stringName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("WallpaperWindowToken{");
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append(" token="); sb.append(token); sb.append('}');
-            stringName = sb.toString();
+            stringName = "WallpaperWindowToken{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " showWhenLocked=" + mShowWhenLocked + '}';
         }
         return stringName;
     }

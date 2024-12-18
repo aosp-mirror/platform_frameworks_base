@@ -32,6 +32,8 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.MediaDataProcessor
+import com.android.systemui.media.controls.domain.pipeline.getNotificationActions
+import com.android.systemui.media.controls.shared.MediaLogger
 import com.android.systemui.media.controls.shared.model.MediaControlModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger
@@ -58,6 +60,7 @@ constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val mediaOutputDialogManager: MediaOutputDialogManager,
     private val broadcastDialogController: BroadcastDialogController,
+    private val mediaLogger: MediaLogger,
 ) {
 
     val mediaControl: Flow<MediaControlModel?> =
@@ -65,14 +68,12 @@ constructor(
             .map { entries -> entries[instanceId]?.let { toMediaControlModel(it) } }
             .distinctUntilChanged()
 
-    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
-
     fun removeMediaControl(
         token: MediaSession.Token?,
         instanceId: InstanceId,
         delayMs: Long,
         eventId: Int,
-        location: Int
+        location: Int,
     ): Boolean {
         logSmartspaceUserEvent(eventId, location)
         val dismissed =
@@ -80,7 +81,7 @@ constructor(
         if (!dismissed) {
             Log.w(
                 TAG,
-                "Manager failed to dismiss media of instanceId=$instanceId, Token uid=${token?.uid}"
+                "Manager failed to dismiss media of instanceId=$instanceId, Token uid=${token?.uid}",
             )
         }
         return dismissed
@@ -102,7 +103,7 @@ constructor(
                 artwork = artwork,
                 deviceData = device,
                 semanticActionButtons = semanticActions,
-                notificationActionButtons = actions,
+                notificationActionButtons = getNotificationActions(data.actions, activityStarter),
                 actionsToShowInCollapsed = actionsToShowInCompact,
                 isDismissible = isClearable,
                 isResume = resumption,
@@ -119,20 +120,20 @@ constructor(
         expandable: Expandable,
         clickIntent: PendingIntent,
         eventId: Int,
-        location: Int
+        location: Int,
     ) {
         logSmartspaceUserEvent(eventId, location)
-        if (!launchOverLockscreen(clickIntent)) {
+        if (!launchOverLockscreen(expandable, clickIntent)) {
             activityStarter.postStartActivityDismissingKeyguard(
                 clickIntent,
-                expandable.activityTransitionController(Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER)
+                expandable.activityTransitionController(Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER),
             )
         }
     }
 
     fun startDeviceIntent(deviceIntent: PendingIntent) {
         if (deviceIntent.isActivity) {
-            if (!launchOverLockscreen(deviceIntent)) {
+            if (!launchOverLockscreen(expandable = null, deviceIntent)) {
                 activityStarter.postStartActivityDismissingKeyguard(deviceIntent)
             }
         } else {
@@ -140,20 +141,33 @@ constructor(
         }
     }
 
-    private fun launchOverLockscreen(pendingIntent: PendingIntent): Boolean {
+    private fun launchOverLockscreen(
+        expandable: Expandable?,
+        pendingIntent: PendingIntent,
+    ): Boolean {
         val showOverLockscreen =
             keyguardStateController.isShowing &&
                 activityIntentHelper.wouldPendingShowOverLockscreen(
                     pendingIntent,
-                    lockscreenUserManager.currentUserId
+                    lockscreenUserManager.currentUserId,
                 )
         if (showOverLockscreen) {
             try {
-                val options = BroadcastOptions.makeBasic()
-                options.isInteractive = true
-                options.pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                pendingIntent.send(options.toBundle())
+                if (expandable != null) {
+                    activityStarter.startPendingIntentMaybeDismissingKeyguard(
+                        pendingIntent,
+                        /* intentSentUiThreadCallback = */ null,
+                        expandable.activityTransitionController(
+                            Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER
+                        ),
+                    )
+                } else {
+                    val options = BroadcastOptions.makeBasic()
+                    options.isInteractive = true
+                    options.pendingIntentBackgroundActivityStartMode =
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    pendingIntent.send(options.toBundle())
+                }
             } catch (e: PendingIntent.CanceledException) {
                 Log.e(TAG, "pending intent of $instanceId was canceled")
             }
@@ -165,7 +179,7 @@ constructor(
     fun startMediaOutputDialog(
         expandable: Expandable,
         packageName: String,
-        token: MediaSession.Token? = null
+        token: MediaSession.Token? = null,
     ) {
         mediaOutputDialogManager.createAndShowWithController(
             packageName,
@@ -179,7 +193,7 @@ constructor(
         broadcastDialogController.createBroadcastDialogWithController(
             broadcastApp,
             packageName,
-            expandable.dialogTransitionController()
+            expandable.dialogTransitionController(),
         )
     }
 
@@ -187,8 +201,12 @@ constructor(
         repository.logSmartspaceCardUserEvent(
             eventId,
             MediaSmartspaceLogger.getSurface(location),
-            instanceId = instanceId
+            instanceId = instanceId,
         )
+    }
+
+    fun logMediaControlIsBound(artistName: CharSequence, songName: CharSequence) {
+        mediaLogger.logMediaControlIsBound(instanceId, artistName, songName)
     }
 
     private fun Expandable.dialogController(): DialogTransitionAnimator.Controller? {

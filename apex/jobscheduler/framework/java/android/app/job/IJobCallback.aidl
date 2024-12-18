@@ -85,6 +85,15 @@ interface IJobCallback {
      */
     @UnsupportedAppUsage
     void jobFinished(int jobId, boolean reschedule);
+
+    /*
+     * Inform JobScheduler that this job may have been abandoned because the client process
+     * has lost strong references to the JobParameters object without calling jobFinished.
+     *
+     * @param jobId Unique integer used to identify this job
+     */
+    void handleAbandonedJob(int jobId);
+
     /*
      * Inform JobScheduler of a change in the estimated transfer payload.
      *

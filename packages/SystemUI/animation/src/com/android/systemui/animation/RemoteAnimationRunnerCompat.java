@@ -22,7 +22,14 @@ import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.wm.shell.shared.TransitionUtil.isClosingMode;
+import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
+import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -157,6 +164,10 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                         t.show(wallpapers[i].leash);
                         t.setAlpha(wallpapers[i].leash, 1.f);
                     }
+                    if (ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue()
+                            || ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX.isTrue()) {
+                        resetLauncherAlphaOnDesktopExit(info, launcherTask, leashMap, t);
+                    }
                 } else {
                     if (launcherTask != null) {
                         counterLauncher.addChild(t, leashMap.get(launcherTask.getLeash()));
@@ -235,5 +246,35 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                 finishRunnable.run();
             }
         };
+    }
+
+    /**
+     * Reset the alpha of the Launcher leash to give the Launcher time to hide its Views before the
+     * exit-desktop animation starts.
+     *
+     * This method should only be called if the current transition is opening Launcher, otherwise we
+     * might not be exiting Desktop Mode.
+     */
+    private static void resetLauncherAlphaOnDesktopExit(
+            TransitionInfo info,
+            TransitionInfo.Change launcherChange,
+            ArrayMap<SurfaceControl, SurfaceControl> leashMap,
+            SurfaceControl.Transaction startTransaction
+    ) {
+        checkArgument(isOpeningMode(launcherChange.getMode()));
+        if (!isClosingType(info.getType())) {
+            return;
+        }
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            // skip changes that we didn't wrap
+            if (!leashMap.containsKey(change.getLeash())) continue;
+            // Only make the update if we are closing Desktop tasks.
+            if (change.getTaskInfo() != null && change.getTaskInfo().isFreeform()
+                    && isClosingMode(change.getMode())) {
+                startTransaction.setAlpha(leashMap.get(launcherChange.getLeash()), 0f);
+                return;
+            }
+        }
     }
 }

@@ -50,6 +50,7 @@ import android.text.style.LineBackgroundSpan;
 import android.text.style.LineBreakConfigSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.LocaleSpan;
+import android.text.style.NoWritingToolsSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
@@ -677,7 +678,7 @@ public class TextUtils {
      * @return true if a and b are equal
      */
     @android.ravenwood.annotation.RavenwoodKeep
-    public static boolean equals(CharSequence a, CharSequence b) {
+    public static boolean equals(@Nullable CharSequence a, @Nullable CharSequence b) {
         if (a == b) return true;
         int length;
         if (a != null && b != null && (length = a.length()) == b.length()) {
@@ -817,7 +818,9 @@ public class TextUtils {
     /** @hide */
     public static final int LINE_BREAK_CONFIG_SPAN = 30;
     /** @hide */
-    public static final int LAST_SPAN = LINE_BREAK_CONFIG_SPAN;
+    public static final int NO_WRITING_TOOLS_SPAN = 31;
+    /** @hide */
+    public static final int LAST_SPAN = NO_WRITING_TOOLS_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -1023,6 +1026,10 @@ public class TextUtils {
 
                 case LINE_BREAK_CONFIG_SPAN:
                     span = LineBreakConfigSpan.CREATOR.createFromParcel(p);
+                    break;
+
+                case NO_WRITING_TOOLS_SPAN:
+                    span = NoWritingToolsSpan.CREATOR.createFromParcel(p);
                     break;
 
                 default:

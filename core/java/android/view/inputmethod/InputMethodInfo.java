@@ -860,7 +860,7 @@ public final class InputMethodInfo implements Parcelable {
      * <p>e.g.<pre><code>startActivity(createStylusHandwritingSettingsActivityIntent());</code>
      * </pre></p>
      *
-     * @attr ref R.styleable#InputMethod_stylusHandwritingSettingsActivity
+     * @attr ref android.R.styleable#InputMethod_stylusHandwritingSettingsActivity
      * @see #getSettingsActivity()
      * @see #supportsStylusHandwriting()
      */
@@ -888,8 +888,8 @@ public final class InputMethodInfo implements Parcelable {
      * the IME language settings activity.</p>
      * <p>e.g.<pre><code>startActivity(createImeLanguageSettingsActivityIntent());</code></pre></p>
      *
-     * @attr ref R.styleable#InputMethod_languageSettingsActivity
-     * @attr ref R.styleable#InputMethod_settingsActivity
+     * @attr ref android.R.styleable#InputMethod_languageSettingsActivity
+     * @attr ref android.R.styleable#InputMethod_settingsActivity
      */
     @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     @Nullable

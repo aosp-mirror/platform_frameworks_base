@@ -86,7 +86,6 @@ import com.android.server.ServiceThread;
 
 import dalvik.annotation.optimization.NeverCompile;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -102,7 +101,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-public final class CachedAppOptimizer {
+public class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
@@ -2123,7 +2122,7 @@ public final class CachedAppOptimizer {
                     Slog.d(TAG_AM,
                             "Performing native compaction for pid=" + pid
                                     + " type=" + compactProfile.name());
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactNative");
                     try {
                         mProcessDependencies.performCompaction(compactProfile, pid);
                     } catch (Exception e) {
@@ -2318,6 +2317,7 @@ public final class CachedAppOptimizer {
                         Slog.d(TAG_AM, "Skipping freeze because process is marked "
                                 + "should not be frozen");
                     }
+                    reportProcessFreezableChangedLocked(proc);
                     return;
                 }
 

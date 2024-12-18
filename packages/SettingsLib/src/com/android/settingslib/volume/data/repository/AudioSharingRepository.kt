@@ -74,6 +74,8 @@ interface AudioSharingRepository {
     /** The headset groupId to volume map during audio sharing. */
     val volumeMap: StateFlow<GroupIdToVolumes>
 
+    suspend fun audioSharingAvailable(): Boolean
+
     /** Set the volume of secondary headset during audio sharing. */
     suspend fun setSecondaryVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())
@@ -216,6 +218,13 @@ class AudioSharingRepositoryImpl(
         }
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyMap())
 
+    override suspend fun audioSharingAvailable(): Boolean {
+        return withContext(backgroundCoroutineContext) {
+            BluetoothUtils.isAudioSharingEnabled()
+                    || BluetoothUtils.isAudioSharingPreviewEnabled(contentResolver)
+        }
+    }
+
     override suspend fun setSecondaryVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())
         volume: Int
@@ -261,6 +270,8 @@ class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
     override val secondaryGroupId: StateFlow<Int> =
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val volumeMap: StateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
+
+    override suspend fun audioSharingAvailable(): Boolean = false
 
     override suspend fun setSecondaryVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())

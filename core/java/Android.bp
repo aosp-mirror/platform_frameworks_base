@@ -19,14 +19,54 @@ filegroup {
     srcs: [
         "**/*.java",
         "**/*.aidl",
+        ":systemfeatures-gen-srcs",
         ":framework-nfc-non-updatable-sources",
         ":messagequeue-gen",
+        ":ranging_stack_mock_initializer",
     ],
     // Exactly one MessageQueue.java will be added to srcs by messagequeue-gen
     exclude_srcs: [
         "android/os/*MessageQueue/**/*.java",
+        "android/ranging/**/*.java",
+        ":dynamic_instrumentation_manager_aidl_sources",
     ],
     visibility: ["//frameworks/base"],
+}
+
+//Mock to allow service registry for ranging stack.
+//TODO(b/331206299): Remove this after RELEASE_RANGING_STACK is ramped up to next.
+soong_config_module_type {
+    name: "ranging_stack_framework_mock_init",
+    module_type: "genrule",
+    config_namespace: "bootclasspath",
+    bool_variables: [
+        "release_ranging_stack",
+    ],
+    properties: [
+        "srcs",
+        "cmd",
+        "out",
+    ],
+}
+
+// The actual RangingFrameworkInitializer is present in packages/modules/Uwb/ranging/framework.
+// Mock RangingFrameworkInitializer does nothing and allows to successfully build
+// SystemServiceRegistry after registering for system service in SystemServiceRegistry both with
+// and without build flag RELEASE_RANGING_STACK enabled.
+ranging_stack_framework_mock_init {
+    name: "ranging_stack_mock_initializer",
+    soong_config_variables: {
+        release_ranging_stack: {
+            cmd: "touch $(out)",
+            // Adding an empty file as out is mandatory.
+            out: ["android/ranging/empty_ranging_fw.txt"],
+            conditions_default: {
+                srcs: ["android/ranging/mock/RangingFrameworkInitializer.java"],
+                cmd: "mkdir -p android/ranging/; cp $(in) $(out);",
+                out: ["android/ranging/RangingFrameworkInitializer.java"],
+            },
+        },
+    },
 }
 
 // Add selected MessageQueue.java implementation to srcs
@@ -78,6 +118,17 @@ filegroup {
 filegroup {
     name: "TraceReportParams.aidl",
     srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
+filegroup {
+    name: "dynamic_instrumentation_manager_aidl_sources",
+    srcs: ["android/os/instrumentation/*.aidl"],
+}
+
+aidl_interface {
+    name: "dynamic_instrumentation_manager_aidl",
+    srcs: [":dynamic_instrumentation_manager_aidl_sources"],
+    unstable: true,
 }
 
 filegroup {
@@ -167,6 +218,7 @@ filegroup {
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
         "android/os/IThermalEventListener.aidl",
+        "android/os/IThermalHeadroomListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
         "android/os/IPowerManager.aidl",
@@ -176,9 +228,15 @@ filegroup {
 
 aidl_interface {
     name: "android.os.hintmanager_aidl",
+    defaults: [
+        "android.hardware.power-aidl",
+    ],
     srcs: [
+        "android/os/CpuHeadroomParamsInternal.aidl",
+        "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
+        "android/os/SessionCreationConfig.aidl",
     ],
     unstable: true,
     backend: {
@@ -193,9 +251,6 @@ aidl_interface {
             enabled: true,
         },
     },
-    imports: [
-        "android.hardware.power-V5",
-    ],
 }
 
 aidl_library {
@@ -302,6 +357,13 @@ filegroup {
     srcs: [
         "android/util/IndentingPrintWriter.java",
         "com/android/internal/util/dump/DualDumpOutputStream.java",
+    ],
+}
+
+filegroup {
+    name: "service-crashrecovery-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
     ],
 }
 
@@ -609,7 +671,6 @@ filegroup {
 
 java_library {
     name: "protolog-lib",
-    platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
@@ -622,9 +683,15 @@ java_library {
 java_library {
     name: "protolog-groups",
     srcs: [
-        "com/android/internal/protolog/ProtoLogGroup.java",
+        "com/android/internal/protolog/WmProtoLogGroups.java",
         ":protolog-common-src",
     ],
 }
 
 // protolog end
+
+java_system_features_srcs {
+    name: "systemfeatures-gen-srcs",
+    full_class_name: "com.android.internal.pm.RoSystemFeatures",
+    visibility: ["//visibility:private"],
+}

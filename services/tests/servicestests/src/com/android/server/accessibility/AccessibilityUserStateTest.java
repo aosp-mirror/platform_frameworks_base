@@ -28,10 +28,15 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSI
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.ALL;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -67,6 +72,9 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
@@ -167,6 +175,7 @@ public class AccessibilityUserStateTest {
         mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), SOFTWARE);
         mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), GESTURE);
         mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), QUICK_SETTINGS);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), KEY_GESTURE);
         mUserState.updateA11yTilesInQsPanelLocked(
                 Set.of(AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME));
         mUserState.setTargetAssignedToAccessibilityButton(componentNameString);
@@ -194,6 +203,7 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.getShortcutTargetsLocked(SOFTWARE).isEmpty());
         assertTrue(mUserState.getShortcutTargetsLocked(GESTURE).isEmpty());
         assertTrue(mUserState.getShortcutTargetsLocked(QUICK_SETTINGS).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(KEY_GESTURE).isEmpty());
         assertTrue(mUserState.getA11yQsTilesInQsPanel().isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
@@ -449,17 +459,7 @@ public class AccessibilityUserStateTest {
 
         mUserState.updateShortcutTargetsLocked(newTargets, QUICK_SETTINGS);
 
-        assertThat(mUserState.getA11yQsTargets()).isEqualTo(newTargets);
-    }
-
-    @Test
-    public void getA11yQsTargets_returnsCopiedData() {
-        updateShortcutTargetsLocked_quickSettings_valueUpdated();
-
-        Set<String> targets = mUserState.getA11yQsTargets();
-        targets.clear();
-
-        assertThat(mUserState.getA11yQsTargets()).isNotEmpty();
+        assertThat(mUserState.getShortcutTargetsLocked(QUICK_SETTINGS)).isEqualTo(newTargets);
     }
 
     @Test
@@ -504,11 +504,78 @@ public class AccessibilityUserStateTest {
         assertThat(actual).containsExactly(tileComponent, mMockServiceInfo);
     }
 
+    @Test
+    public void isShortcutMagnificationEnabledLocked_anyShortcutType_returnsTrue() {
+        // Clear every shortcut
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+        // Check each shortcut individually
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            // Setup
+            setMagnificationForShortcutType(shortcutType, true);
+
+            // Checking
+            assertThat(mUserState.getShortcutTargetsLocked(shortcutType))
+                    .containsExactly(MAGNIFICATION_CONTROLLER_NAME);
+            assertThat(mUserState.isShortcutMagnificationEnabledLocked()).isTrue();
+
+            // Cleanup
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+    }
+
+    @Test
+    public void isShortcutMagnificationEnabledLocked_noShortcutTypes_returnsFalse() {
+        // Clear every shortcut
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+        assertThat(mUserState.isShortcutMagnificationEnabledLocked()).isFalse();
+    }
+
+    @Test
+    public void getShortcutTargetsLocked_returnsCorrectTargets() {
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            if (((TRIPLETAP | TWOFINGER_DOUBLETAP) & shortcutType) == shortcutType) {
+                continue;
+            }
+            Set<String> expectedSet = Set.of(ShortcutUtils.convertToKey(shortcutType));
+            mUserState.updateShortcutTargetsLocked(expectedSet, shortcutType);
+
+            assertThat(mUserState.getShortcutTargetsLocked(shortcutType))
+                    .containsExactlyElementsIn(expectedSet);
+        }
+    }
+
+    @Test
+    public void getShortcutTargetsLocked_returnsCopiedData() {
+        Set<String> set = Set.of("FOO", "BAR");
+        mUserState.updateShortcutTargetsLocked(set, SOFTWARE);
+
+        Set<String> targets = mUserState.getShortcutTargetsLocked(ALL);
+        targets.clear();
+
+        assertThat(mUserState.getShortcutTargetsLocked(ALL)).isNotEmpty();
+    }
+
     private int getSecureIntForUser(String key, int userId) {
         return Settings.Secure.getIntForUser(mMockResolver, key, -1, userId);
     }
 
     private void putSecureIntForUser(String key, int value, int userId) {
         Settings.Secure.putIntForUser(mMockResolver, key, value, userId);
+    }
+
+    private void setMagnificationForShortcutType(
+            @UserShortcutType int shortcutType, boolean enabled) {
+        if (shortcutType == TRIPLETAP) {
+            mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(enabled);
+        } else if (shortcutType == TWOFINGER_DOUBLETAP) {
+            mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(enabled);
+        } else {
+            mUserState.updateShortcutTargetsLocked(
+                    enabled ? Set.of(MAGNIFICATION_CONTROLLER_NAME) : Set.of(), shortcutType);
+        }
     }
 }

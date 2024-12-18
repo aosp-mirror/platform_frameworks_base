@@ -111,12 +111,6 @@ public class ActivityManagerTest extends AndroidTestCase {
         assertEquals(config.reqKeyboardType, vconfig.keyboard);
         assertEquals(config.reqTouchScreen, vconfig.touchscreen);
         assertEquals(config.reqNavigation, vconfig.navigation);
-        if (vconfig.navigation == Configuration.NAVIGATION_NONAV) {
-            assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV);
-        }
-        if (vconfig.keyboard != Configuration.KEYBOARD_UNDEFINED) {
-            assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD);
-        }    
     }
 
     @SmallTest

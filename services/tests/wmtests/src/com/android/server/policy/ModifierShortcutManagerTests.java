@@ -116,6 +116,7 @@ public class ModifierShortcutManagerTests {
 
         mModifierShortcutManager = new ModifierShortcutManager(
                 mContext, mHandler, UserHandle.SYSTEM);
+        mModifierShortcutManager.onSystemReady();
     }
 
     @Test

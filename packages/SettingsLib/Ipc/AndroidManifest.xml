@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.settingslib.ipc">
+
+    <uses-sdk android:minSdkVersion="21" />
+</manifest>

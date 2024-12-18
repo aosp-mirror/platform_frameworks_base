@@ -28,6 +28,8 @@ import android.location.LocationTime;
 import android.text.format.DateUtils;
 import android.util.Slog;
 
+import com.android.internal.os.ApplicationSharedMemory;
+
 import dalvik.annotation.optimization.CriticalNative;
 
 import java.time.Clock;
@@ -60,7 +62,7 @@ import java.time.ZoneOffset;
  *     sleep (CPU off, display dark, device waiting for external input),
  *     but is not affected by clock scaling, idle, or other power saving
  *     mechanisms.  This is the basis for most interval timing
- *     such as {@link Thread#sleep(long) Thread.sleep(millls)},
+ *     such as {@link Thread#sleep(long) Thread.sleep(millis)},
  *     {@link Object#wait(long) Object.wait(millis)}, and
  *     {@link System#nanoTime System.nanoTime()}.  This clock is guaranteed
  *     to be monotonic, and is suitable for interval timing when the
@@ -109,6 +111,7 @@ public final class SystemClock {
     private static final String TAG = "SystemClock";
 
     private static volatile IAlarmManager sIAlarmManager;
+    private static volatile ITimeDetectorService sITimeDetectorService;
 
     /**
      * Since {@code nanoTime()} is arbitrary, anchor our Ravenwood clocks against it.
@@ -186,6 +189,14 @@ public final class SystemClock {
                     .asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
         }
         return sIAlarmManager;
+    }
+
+    private static ITimeDetectorService getITimeDetectorService() {
+        if (sITimeDetectorService == null) {
+            sITimeDetectorService = ITimeDetectorService.Stub
+                    .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
+        }
+        return sITimeDetectorService;
     }
 
     /**
@@ -314,41 +325,38 @@ public final class SystemClock {
     }
 
     /**
-     * @see #currentNetworkTimeMillis(ITimeDetectorService)
-     * @hide
-     */
-    public static long currentNetworkTimeMillis() {
-        return currentNetworkTimeMillis(ITimeDetectorService.Stub
-                .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE)));
-    }
-
-    /**
-     * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized
-     * using a remote network source outside the device.
-     * <p>
-     * While the time returned by {@link System#currentTimeMillis()} can be
-     * adjusted by the user, the time returned by this method cannot be adjusted
-     * by the user.
-     * <p>
-     * This performs no blocking network operations and returns values based on
-     * a recent successful synchronization event; it will either return a valid
-     * time or throw.
-     * <p>
-     * Note that synchronization may occur using an insecure network protocol,
-     * so the returned time should not be used for security purposes.
-     * The device may resynchronize with the same or different network source
-     * at any time. Due to network delays, variations between servers, or local
-     * (client side) clock drift, the accuracy of the returned times cannot be
-     * guaranteed. In extreme cases, consecutive calls to {@link
-     * #currentNetworkTimeMillis(ITimeDetectorService)} could return times that
-     * are out of order.
+     * Returns milliseconds since January 1, 1970 00:00:00.0 UTC, synchronized using a remote
+     * network source outside the device.
+     *
+     * <p>While the time returned by {@link System#currentTimeMillis()} can be adjusted by the user,
+     * the time returned by this method cannot be adjusted by the user.
+     *
+     * <p>This performs no blocking network operations and returns values based on a recent
+     * successful synchronization event; it will either return a valid time or throw.
+     *
+     * <p>Note that synchronization may occur using an insecure network protocol, so the returned
+     * time should not be used for security purposes. The device may resynchronize with the same or
+     * different network source at any time. Due to network delays, variations between servers, or
+     * local (client side) clock drift, the accuracy of the returned times cannot be guaranteed. In
+     * extreme cases, consecutive calls to {@link #currentNetworkTimeMillis()} could return times
+     * that are out of order.
      *
      * @throws DateTimeException when no network time can be provided.
      * @hide
      */
-    public static long currentNetworkTimeMillis(
-            ITimeDetectorService timeDetectorService) {
-        if (timeDetectorService != null) {
+    public static long currentNetworkTimeMillis() {
+        if (com.android.internal.os.Flags.applicationSharedMemoryEnabled()
+                && Flags.networkTimeUsesSharedMemory()) {
+            final long latestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis =
+                    ApplicationSharedMemory.getInstance()
+                            .getLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis();
+            return latestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis + elapsedRealtime();
+        } else {
+            ITimeDetectorService timeDetectorService = getITimeDetectorService();
+            if (timeDetectorService == null) {
+                throw new RuntimeException(new DeadSystemException());
+            }
+
             UnixEpochTime time;
             try {
                 time = timeDetectorService.latestNetworkTime();
@@ -358,52 +366,41 @@ public final class SystemClock {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
-
             if (time == null) {
                 // This is not expected.
                 throw new DateTimeException("Network based time is not available.");
             }
+
             long currentMillis = elapsedRealtime();
             long deltaMs = currentMillis - time.getElapsedRealtimeMillis();
             return time.getUnixEpochTimeMillis() + deltaMs;
-        } else {
-            throw new RuntimeException(new DeadSystemException());
         }
     }
 
-   /**
-     * Returns a {@link Clock} that starts at January 1, 1970 00:00:00.0 UTC,
-     * synchronized using a remote network source outside the device.
-     * <p>
-     * While the time returned by {@link System#currentTimeMillis()} can be
-     * adjusted by the user, the time returned by this method cannot be adjusted
-     * by the user.
-     * <p>
-     * This performs no blocking network operations and returns values based on
-     * a recent successful synchronization event; it will either return a valid
-     * time or throw.
-     * <p>
-     * Note that synchronization may occur using an insecure network protocol,
-     * so the returned time should not be used for security purposes.
-     * The device may resynchronize with the same or different network source
-     * at any time. Due to network delays, variations between servers, or local
-     * (client side) clock drift, the accuracy of the returned times cannot be
-     * guaranteed. In extreme cases, consecutive calls to {@link
-     * Clock#millis()} on the returned {@link Clock} could return times that are
-     * out of order.
+    /**
+     * Returns a {@link Clock} that starts at January 1, 1970 00:00:00.0 UTC, synchronized using a
+     * remote network source outside the device.
+     *
+     * <p>While the time returned by {@link System#currentTimeMillis()} can be adjusted by the user,
+     * the time returned by this method cannot be adjusted by the user.
+     *
+     * <p>This performs no blocking network operations and returns values based on a recent
+     * successful synchronization event; it will either return a valid time or throw.
+     *
+     * <p>Note that synchronization may occur using an insecure network protocol, so the returned
+     * time should not be used for security purposes. The device may resynchronize with the same or
+     * different network source at any time. Due to network delays, variations between servers, or
+     * local (client side) clock drift, the accuracy of the returned times cannot be guaranteed. In
+     * extreme cases, consecutive calls to {@link Clock#millis()} on the returned {@link Clock}
+     * could return times that are out of order.
      *
      * @throws DateTimeException when no network time can be provided.
      */
     public static @NonNull Clock currentNetworkTimeClock() {
         return new SimpleClock(ZoneOffset.UTC) {
-            private ITimeDetectorService mSvc;
             @Override
             public long millis() {
-                if (mSvc == null) {
-                    mSvc = ITimeDetectorService.Stub
-                            .asInterface(ServiceManager.getService(Context.TIME_DETECTOR_SERVICE));
-                }
-                return SystemClock.currentNetworkTimeMillis(mSvc);
+                return SystemClock.currentNetworkTimeMillis();
             }
         };
     }

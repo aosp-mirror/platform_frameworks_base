@@ -17,8 +17,9 @@
 package com.android.systemui.keyguard.ui.composable.modifier
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -41,22 +42,20 @@ fun Modifier.burnInAware(
     params: BurnInParameters,
     isClock: Boolean = false,
 ): Modifier {
-    val translationYState = remember { mutableStateOf(0F) }
-    val copiedParams = params.copy(translationY = { translationYState.value })
-    val burnIn = viewModel.movement(copiedParams)
+    val cachedYTranslation = remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        viewModel.updateBurnInParams(params.copy(translationY = { cachedYTranslation.floatValue }))
+    }
+
+    val burnIn = viewModel.movement
     val translationX by
         burnIn.map { it.translationX.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
     val translationY by
         burnIn.map { it.translationY.toFloat() }.collectAsStateWithLifecycle(initialValue = 0f)
-    translationYState.value = translationY
+    cachedYTranslation.floatValue = translationY
     val scaleViewModel by
         burnIn
-            .map {
-                BurnInScaleViewModel(
-                    scale = it.scale,
-                    scaleClockOnly = it.scaleClockOnly,
-                )
-            }
+            .map { BurnInScaleViewModel(scale = it.scale, scaleClockOnly = it.scaleClockOnly) }
             .collectAsStateWithLifecycle(initialValue = BurnInScaleViewModel())
 
     return this.graphicsLayer {
@@ -72,8 +71,6 @@ fun Modifier.burnInAware(
 
 /** Reports the "top" coordinate of the modified composable to the given [consumer]. */
 @Composable
-fun Modifier.onTopPlacementChanged(
-    consumer: (Float) -> Unit,
-): Modifier {
+fun Modifier.onTopPlacementChanged(consumer: (Float) -> Unit): Modifier {
     return onPlaced { coordinates -> consumer(coordinates.boundsInWindow().top) }
 }

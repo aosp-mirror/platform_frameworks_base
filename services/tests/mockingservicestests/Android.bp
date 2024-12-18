@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 java_defaults {
-    name: "FrameworkMockingServicesTests-jni-defaults",
+    name: "FrameworksMockingServicesTests-jni-defaults",
     jni_libs: [
         "libmockingservicestestjni",
     ],
@@ -30,7 +30,7 @@ package {
 android_test {
     name: "FrameworksMockingServicesTests",
     defaults: [
-        "FrameworkMockingServicesTests-jni-defaults",
+        "FrameworksMockingServicesTests-jni-defaults",
         "modules-utils-testable-device-config-defaults",
     ],
 
@@ -77,12 +77,15 @@ android_test {
         "flag-junit",
         "am_flags_lib",
         "device_policy_aconfig_flags_lib",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery-pre-jarjar"],
+        default: [],
+    }),
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
         "servicestests-core-utils",
     ],
 
@@ -106,6 +109,10 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [
+        ":HelloWorldUsingSdk1And2",
+    ],
 }
 
 java_library {
@@ -118,27 +125,9 @@ java_library {
         "mockito-target-extended-minus-junit4",
     ],
     libs: [
-        "android.test.runner",
+        "android.test.runner.stubs.system",
     ],
 }
-
-android_ravenwood_test {
-    name: "FrameworksMockingServicesTestsRavenwood",
-    libs: [
-        "android.test.mock",
-    ],
-    static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.test.rules",
-        "services.core",
-    ],
-    srcs: [
-        "src/com/android/server/am/BroadcastRecordTest.java",
-    ],
-    auto_gen_config: true,
-}
-
-FLAKY = ["androidx.test.filters.FlakyTest"]
 
 test_module_config {
     name: "FrameworksMockingServicesTests_blob",
@@ -152,7 +141,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.DeviceIdleControllerTest"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -161,7 +149,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.AppStateTrackerTest"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -177,7 +164,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.alarm"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -185,7 +171,7 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.job"],
-    exclude_annotations: FLAKY + ["androidx.test.filters.LargeTest"],
+    exclude_annotations: ["androidx.test.filters.LargeTest"],
 }
 
 test_module_config {
@@ -200,7 +186,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.tare"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -215,7 +200,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["android.service.games"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -245,7 +229,6 @@ test_module_config {
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.am."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -265,7 +248,6 @@ test_module_config {
     test_suites: ["device-tests"],
     // Matches appop too
     include_filters: ["com.android.server.app"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -301,7 +283,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.pm"],
-    exclude_annotations: FLAKY + ["org.junit.Ignore"],
 }
 
 test_module_config {
@@ -309,7 +290,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.power"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -324,7 +304,6 @@ test_module_config {
     base: "FrameworksMockingServicesTests",
     test_suites: ["device-tests"],
     include_filters: ["com.android.server.trust"],
-    exclude_annotations: FLAKY,
 }
 
 test_module_config {
@@ -402,4 +381,21 @@ test_module_config {
         "device-tests",
     ],
     include_filters: ["com.android.server.trust"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_server_storagemanagerservicetest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.StorageManagerServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_service_batteryServiceTest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.BatteryServiceTest"],
 }

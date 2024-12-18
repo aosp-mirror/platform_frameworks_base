@@ -43,12 +43,15 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.recordissue.IssueRecordingService
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStartIntent
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopIntent
+import com.android.systemui.recordissue.IssueRecordingServiceConnection
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
-import com.android.systemui.recordissue.TraceurMessageSender
+import com.android.systemui.recordissue.TraceurConnection
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -56,12 +59,15 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
+const val DELAY_MS: Long = 0
+const val INTERVAL_MS: Long = 1000
+
 class RecordIssueTile
 @Inject
 constructor(
     host: QSHost,
     uiEventLogger: QsEventLogger,
-    @Background backgroundLooper: Looper,
+    @Background private val backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
     metricsLogger: MetricsLogger,
@@ -73,10 +79,12 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
-    private val traceurMessageSender: TraceurMessageSender,
+    irsConnProvider: IssueRecordingServiceConnection.Provider,
+    traceurConnProvider: TraceurConnection.Provider,
     @Background private val bgExecutor: Executor,
     private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
+    private val recordingController: RecordingController,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -87,23 +95,34 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
 
     private val onRecordingChangeListener = Runnable { refreshState() }
 
+    private val irsConnection: IssueRecordingServiceConnection = irsConnProvider.create()
+    private val traceurConnection =
+        traceurConnProvider.create().apply {
+            onBound.add {
+                getTags(issueRecordingState)
+                doUnBind()
+            }
+        }
+
     override fun handleSetListening(listening: Boolean) {
         super.handleSetListening(listening)
-        if (listening) {
-            issueRecordingState.addListener(onRecordingChangeListener)
-        } else {
-            issueRecordingState.removeListener(onRecordingChangeListener)
+        bgExecutor.execute {
+            if (listening) {
+                issueRecordingState.addListener(onRecordingChangeListener)
+            } else {
+                issueRecordingState.removeListener(onRecordingChangeListener)
+            }
         }
     }
 
     override fun handleDestroy() {
         super.handleDestroy()
-        bgExecutor.execute { traceurMessageSender.unbindFromTraceur(mContext) }
+        bgExecutor.execute { irsConnection.doUnBind() }
     }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
@@ -132,24 +151,42 @@ constructor(
     }
 
     private fun startIssueRecordingService() =
-        PendingIntent.getForegroundService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+        recordingController.startCountdown(
+            DELAY_MS,
+            INTERVAL_MS,
+            pendingServiceIntent(
+                getStartIntent(
+                    userContextProvider.userContext,
+                    issueRecordingState.traceConfig,
+                    issueRecordingState.recordScreen,
+                    issueRecordingState.takeBugreport,
+                )
+            ),
+            pendingServiceIntent(getStopIntent(userContextProvider.userContext)),
+        )
 
     private fun stopIssueRecordingService() =
-        PendingIntent.getService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStopIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        pendingServiceIntent(getStopIntent(userContextProvider.userContext))
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 
+    private fun pendingServiceIntent(action: Intent) =
+        PendingIntent.getService(
+            userContextProvider.userContext,
+            RecordingService.REQUEST_CODE,
+            action,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
     private fun showPrompt(expandable: Expandable?) {
+        bgExecutor.execute {
+            // We only want to get the tags once per session, as this is not likely to change, if at
+            // all on a month to month basis. Using onBound's size is a way to verify if the tag
+            // retrieval has already happened or not.
+            if (traceurConnection.onBound.isNotEmpty()) {
+                traceurConnection.doBind()
+            }
+            irsConnection.doBind()
+        }
         val dialog: AlertDialog =
             delegateFactory
                 .create {
@@ -184,13 +221,13 @@ constructor(
                 state = Tile.STATE_ACTIVE
                 forceExpandIcon = false
                 secondaryLabel = mContext.getString(R.string.qs_record_issue_stop)
-                icon = ResourceIcon.get(R.drawable.qs_record_issue_icon_on)
+                icon = maybeLoadResourceIcon(R.drawable.qs_record_issue_icon_on)
             } else {
                 value = false
                 state = Tile.STATE_INACTIVE
                 forceExpandIcon = true
                 secondaryLabel = mContext.getString(R.string.qs_record_issue_start)
-                icon = ResourceIcon.get(R.drawable.qs_record_issue_icon_off)
+                icon = maybeLoadResourceIcon(R.drawable.qs_record_issue_icon_off)
             }
             label = tileLabel
             contentDescription =

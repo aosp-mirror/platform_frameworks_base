@@ -217,8 +217,10 @@ class ExternalDisplayPolicy {
 
         mExternalDisplayStatsService.onDisplayConnected(logicalDisplay);
 
-        if ((Build.IS_ENG || Build.IS_USERDEBUG)
-                && SystemProperties.getBoolean(ENABLE_ON_CONNECT, false)) {
+        if (((Build.IS_ENG || Build.IS_USERDEBUG)
+                        && SystemProperties.getBoolean(ENABLE_ON_CONNECT, false))
+                || (mFlags.isDisplayContentModeManagementEnabled()
+                        && logicalDisplay.canHostTasksLocked())) {
             Slog.w(TAG, "External display is enabled by default, bypassing user consent.");
             mInjector.sendExternalDisplayEventLocked(logicalDisplay, EVENT_DISPLAY_CONNECTED);
             return;
@@ -373,6 +375,54 @@ class ExternalDisplayPolicy {
         synchronized (mSyncRoot) {
             mLogicalDisplayMapper.forEachLocked(this::disableExternalDisplayLocked);
         }
+    }
+
+    boolean isDisplayReadyForMirroring(int displayId) {
+        if (!mFlags.isWaitingConfirmationBeforeMirroringEnabled()) {
+            if (DEBUG) {
+                Slog.d(TAG, "isDisplayReadyForMirroring: mirroring CONFIRMED - "
+                        + " flag 'waiting for confirmation before mirroring' is disabled");
+            }
+            return true;
+        }
+
+        synchronized (mSyncRoot) {
+            if (!mIsBootCompleted) {
+                if (DEBUG) {
+                    Slog.d(TAG, "isDisplayReadyForMirroring: mirroring is not confirmed - "
+                            + "boot is in progress");
+                }
+                return false;
+            }
+
+            var logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayId);
+            if (logicalDisplay == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "isDisplayReadyForMirroring: mirroring is not confirmed - "
+                            + "logicalDisplay is null");
+                }
+                return false;
+            }
+
+            if (!isExternalDisplayLocked(logicalDisplay)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "isDisplayReadyForMirroring: mirroring is not confirmed - "
+                            + "logicalDisplay" + logicalDisplay.getDisplayIdLocked()
+                            + " type is " + logicalDisplay.getDisplayInfoLocked().type);
+                }
+                return false;
+            }
+
+            if (!logicalDisplay.isEnabledLocked()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "isDisplayReadyForMirroring: mirroring is not confirmed - "
+                            + "logicalDisplay is disabled");
+                }
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {

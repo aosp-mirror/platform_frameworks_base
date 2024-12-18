@@ -29,6 +29,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -207,8 +209,10 @@ public final class ZenPolicy implements Parcelable {
 
     /**
      * Total number of priority categories. Keep updated with any updates to PriorityCategory enum.
+     * If this changes, you must update {@link ZenModeDiff.PolicyDiff} to include new categories.
      * @hide
      */
+    @VisibleForTesting
     public static final int NUM_PRIORITY_CATEGORIES = 9;
 
     /** @hide */
@@ -241,8 +245,10 @@ public final class ZenPolicy implements Parcelable {
 
     /**
      * Total number of visual effects. Keep updated with any updates to VisualEffect enum.
+     * If this changes, you must update {@link ZenModeDiff.PolicyDiff} to include new categories.
      * @hide
      */
+    @VisibleForTesting
     public static final int NUM_VISUAL_EFFECTS = 7;
 
     /** @hide */

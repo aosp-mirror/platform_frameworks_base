@@ -21,13 +21,30 @@ import com.android.systemui.statusbar.LightRevealEffect
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Models UI state for the light reveal scrim, which is used during screen on and off animations to
  * draw a gradient that reveals/hides the contents of the screen.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class LightRevealScrimViewModel @Inject constructor(interactor: LightRevealScrimInteractor) {
+class LightRevealScrimViewModel
+@Inject
+constructor(private val interactor: LightRevealScrimInteractor) {
     val lightRevealEffect: Flow<LightRevealEffect> = interactor.lightRevealEffect
     val revealAmount: Flow<Float> = interactor.revealAmount
+
+    /** Max alpha for the scrim + whether to animate the change */
+    val maxAlpha: Flow<Pair<Float, Boolean>> =
+        interactor.maxAlpha.map { alpha ->
+            Pair(
+                alpha,
+                // Darken immediately if going to be fully opaque
+                if (alpha == 1f) false else true,
+            )
+        }
+
+    fun setWallpaperSupportsAmbientMode(supportsAmbientMode: Boolean) {
+        interactor.setWallpaperSupportsAmbientMode(supportsAmbientMode)
+    }
 }

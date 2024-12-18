@@ -15,12 +15,13 @@
  */
 package com.android.keyguard;
 
-import static com.android.systemui.Flags.msdlFeedback;
+import static com.android.systemui.Flags.gsfBouncer;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.PowerManager;
@@ -37,10 +38,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.res.R;
-
-import com.google.android.msdl.data.model.MSDLToken;
-import com.google.android.msdl.domain.MSDLPlayer;
 
 /**
  * Viewgroup for the bouncer numpad button, specifically for digits.
@@ -62,7 +61,7 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     private NumPadAnimator mAnimator;
     private int mOrientation;
     @Nullable
-    private MSDLPlayer mMSDLPlayer;
+    private BouncerHapticPlayer mBouncerHapticPlayer;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -156,11 +155,13 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
      * Reload colors from resources.
      **/
     public void reloadColors() {
-        int textColor = Utils.getColorAttr(getContext(), NUM_PAD_KEY)
-                .getDefaultColor();
+        int textColor = getContext().getColor(NUM_PAD_KEY);
         int klondikeColor = Utils.getColorAttr(getContext(), android.R.attr.textColorSecondary)
                 .getDefaultColor();
         mDigitText.setTextColor(textColor);
+        if (gsfBouncer()) {
+            mDigitText.setTypeface(Typeface.create("gsf-label-large-emphasized", Typeface.NORMAL));
+        }
         mKlondikeText.setTextColor(klondikeColor);
 
         if (mAnimator != null) mAnimator.reloadColors(getContext());
@@ -227,8 +228,8 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        if (msdlFeedback() && mMSDLPlayer != null) {
-            mMSDLPlayer.playToken(MSDLToken.KEYPRESS_STANDARD, null);
+        if (mBouncerHapticPlayer != null && mBouncerHapticPlayer.isEnabled()) {
+            mBouncerHapticPlayer.playNumpadKeyFeedback();
         } else {
             performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
@@ -255,7 +256,7 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         info.setTextEntryKey(true);
     }
 
-    public void setMSDLPlayer(@Nullable MSDLPlayer player) {
-        mMSDLPlayer = player;
+    public void setBouncerHapticHelper(@Nullable BouncerHapticPlayer bouncerHapticPlayer) {
+        mBouncerHapticPlayer = bouncerHapticPlayer;
     }
 }

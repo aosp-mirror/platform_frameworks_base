@@ -66,3 +66,59 @@ flag {
     # This flag is read at boot time.
     is_fixed_read_only: true
 }
+
+flag {
+    name: "dimension_frro"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for passing a dimension to create an frro"
+    bug: "369672322"
+}
+
+flag {
+    name: "rro_control_for_android_no_overlayable"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Allow enabling and disabling RROs targeting android package with no overlayable"
+    bug: "364035303"
+}
+
+flag {
+    name: "system_context_handle_app_info_changed"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing system context to handle application info changes"
+    bug: "362420029"
+    # This flag is read at boot time.
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "layout_readwrite_flags"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for allowing read/write flags in layout files"
+    bug: "377974898"
+    # This flag is used to control aapt2 behavior.
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "resources_minor_version_support"
+    is_exported: true
+    namespace: "resource_manager"
+    description: "Feature flag for supporting minor version in Resources"
+    bug: "373535266"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "self_targeting_android_resource_frro"
+    is_exported: true
+    namespace: "customization_picker"
+    description: "Fixes bug in Launcher preview by enabling overlays targeting 'android'"
+    bug: "377545987"
+}

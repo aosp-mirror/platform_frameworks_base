@@ -7,3 +7,10 @@ flag {
     description: "Feature flag for running content capture tasks on background thread"
     bug: "309411951"
 }
+
+flag {
+    name: "ccapi_baklava_enabled"
+    namespace: "machine_learning"
+    description: "Feature flag for baklava content capture API"
+    bug: "380381249"
+}

@@ -25,11 +25,13 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -169,6 +171,26 @@ public class JobSchedulerImpl extends JobScheduler {
             return mBinder.getPendingJobReason(mNamespace, jobId);
         } catch (RemoteException e) {
             return PENDING_JOB_REASON_UNDEFINED;
+        }
+    }
+
+    @Override
+    @NonNull
+    public int[] getPendingJobReasons(int jobId) {
+        try {
+            return mBinder.getPendingJobReasons(mNamespace, jobId);
+        } catch (RemoteException e) {
+            return new int[] { PENDING_JOB_REASON_UNDEFINED };
+        }
+    }
+
+    @Override
+    @NonNull
+    public List<PendingJobReasonsInfo> getPendingJobReasonsHistory(int jobId) {
+        try {
+            return mBinder.getPendingJobReasonsHistory(mNamespace, jobId);
+        } catch (RemoteException e) {
+            return Collections.EMPTY_LIST;
         }
     }
 

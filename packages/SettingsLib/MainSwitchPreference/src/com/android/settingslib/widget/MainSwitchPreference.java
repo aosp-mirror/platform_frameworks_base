@@ -18,6 +18,7 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -35,7 +36,8 @@ import java.util.List;
  * This component is used as the main switch of the page
  * to enable or disable the prefereces on the page.
  */
-public class MainSwitchPreference extends TwoStatePreference implements OnCheckedChangeListener {
+public class MainSwitchPreference extends TwoStatePreference
+        implements OnCheckedChangeListener, GroupSectionDividerMixin {
 
     private final List<OnCheckedChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
@@ -79,7 +81,11 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
     }
 
     private void init(Context context, AttributeSet attrs) {
-        setLayoutResource(R.layout.settingslib_main_switch_layout);
+        boolean isExpressive = SettingsThemeHelper.isExpressiveTheme(context);
+        int resId = isExpressive
+                ? R.layout.settingslib_expressive_main_switch_layout
+                : R.layout.settingslib_main_switch_layout;
+        setLayoutResource(resId);
         mSwitchChangeListeners.add(this);
         if (attrs != null) {
             final TypedArray a = context.obtainStyledAttributes(attrs,
@@ -88,6 +94,10 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
             final CharSequence title = a.getText(
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
+
+            CharSequence summary = a.getText(
+                    androidx.preference.R.styleable.Preference_android_summary);
+            setSummary(summary);
 
             final boolean bIconSpaceReserved = a.getBoolean(
                     androidx.preference.R.styleable.Preference_android_iconSpaceReserved, true);
@@ -109,6 +119,15 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
         super.setTitle(title);
         if (mMainSwitchBar != null) {
             mMainSwitchBar.setTitle(title);
+        }
+    }
+
+    @Override
+    public void setSummary(CharSequence summary) {
+        super.setSummary(summary);
+        if (mMainSwitchBar != null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            mMainSwitchBar.setSummary(summary);
         }
     }
 

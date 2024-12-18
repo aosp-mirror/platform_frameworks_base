@@ -85,6 +85,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.voice.VisualQueryDetectedResult;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -111,6 +112,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1216,6 +1218,69 @@ public final class Settings {
             "android.settings.REGIONAL_PREFERENCES_SETTINGS";
 
     /**
+     * Activity Action: Show screen for allowing the region configuration.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REGION_SETTINGS =
+            "android.settings.REGION_SETTINGS";
+
+    /**
+     * Activity Action: Show first day of week configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_FIRST_DAY_OF_WEEK_SETTINGS =
+            "android.settings.FIRST_DAY_OF_WEEK_SETTINGS";
+
+    /**
+     * Activity Action: Show temperature unit configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TEMPERATURE_UNIT_SETTINGS =
+            "android.settings.TEMPERATURE_UNIT_SETTINGS";
+
+    /**
+     * Activity Action: Show numbering system configuration settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NUMBERING_SYSTEM_SETTINGS =
+            "android.settings.NUMBERING_SYSTEM_SETTINGS";
+
+    /**
+     * Activity Action: Show measurement system configuration settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEASUREMENT_SYSTEM_SETTINGS =
+            "android.settings.MEASUREMENT_SYSTEM_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of lockscreen.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -1229,6 +1294,22 @@ public final class Settings {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_LOCKSCREEN_SETTINGS = "android.settings.LOCK_SCREEN_SETTINGS";
+
+    /**
+     * Activity Action: Show settings of notifications on lockscreen.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LOCKSCREEN_NOTIFICATIONS_SETTINGS =
+            "android.settings.LOCK_SCREEN_NOTIFICATIONS_SETTINGS";
 
     /**
      * Activity Action: Show settings to allow pairing bluetooth devices.
@@ -2091,23 +2172,6 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
-     * Activity Action: Show Zen Mode visual effects configuration settings.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ZEN_MODE_BLOCKED_EFFECTS_SETTINGS =
-            "android.settings.ZEN_MODE_BLOCKED_EFFECTS_SETTINGS";
-
-    /**
-     * Activity Action: Show Zen Mode onboarding activity.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ZEN_MODE_ONBOARDING = "android.settings.ZEN_MODE_ONBOARDING";
-
-    /**
      * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -2366,6 +2430,26 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
 
     /**
+     * Activity Action: Show the permission screen for allowing apps to post promoted notifications.
+     * Properly formatted priority notifications are elevated in appearance. For example they may be
+     * able to use colors, have richer progress bars, show as chips in the status bar, and/or
+     * permanently appear on always-on-displays. This functionality is intended to be reserved for
+     * user initiated ongoing activities like navigation, phone calls, and ride sharing.
+     *
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS
+            = "android.settings.APP_NOTIFICATION_PROMOTION_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -2399,6 +2483,25 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS
             = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
+
+    /**
+     * Activity Action: Show the settings for users to select their preferred SIM subscription
+     * when a new SIM subscription has become available.
+     * <p>
+     * This Activity will only launch successfully if the newly active subscription ID is set as the
+     * value of {@link #EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
+     * <p>
+     * Input: {@link #EXTRA_SUB_ID}: the subscription ID of the newly active SIM subscription.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_ACTION_SIM_PREFERENCE_SETTINGS)
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SIM_PREFERENCE_SETTINGS =
+            "android.settings.SIM_PREFERENCE_SETTINGS";
 
     /**
      * Intent Extra: The value of {@link android.app.settings.SettingsEnums#EntryPointType} for
@@ -3021,6 +3124,9 @@ public final class Settings {
 
     /** @hide - Private call() method to query the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
+
+    /** @hide - Private call() method to query the 'configuration' tables' namespaces */
+    public static final String CALL_METHOD_LIST_NAMESPACES_CONFIG = "LIST_namespaces_config";
 
     /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
     public static final String CALL_METHOD_SET_SYNC_DISABLED_MODE_CONFIG =
@@ -5150,13 +5256,19 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
-         * The screen backlight brightness between 0 and 255.
+         * The screen backlight brightness between 1 (minimum) and 255 (maximum).
+         *
+         * Use {@link android.view.WindowManager.LayoutParams#screenBrightness} to set the screen
+         * brightness instead.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
-         * Control whether to enable automatic brightness mode.
+         * Controls whether to enable automatic brightness mode. Value can be set to
+         * {@link #SCREEN_BRIGHTNESS_MODE_MANUAL} or {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC}.
+         * If {@link #SCREEN_BRIGHTNESS_MODE_AUTOMATIC} is set, the system may change
+         * {@link #SCREEN_BRIGHTNESS} automatically.
          */
         @Readable
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
@@ -5457,6 +5569,14 @@ public final class Settings {
          */
         @Readable
         public static final String VOLUME_MASTER = "volume_master";
+
+        /**
+         * The mapping of input device to its input gain index.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String INPUT_GAIN_INDEX_SETTINGS = "input_gain_index_settings";
 
         /**
          * Master mono (int 1 = mono, 0 = normal).
@@ -6187,6 +6307,14 @@ public final class Settings {
         public static final String TOUCHPAD_TAP_DRAGGING = "touchpad_tap_dragging";
 
         /**
+         * Whether to enable three finger tap customization on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION =
+                "touchpad_three_finger_tap_customization";
+
+        /**
          * Whether to enable a right-click zone on touchpads.
          *
          * When set to 1, pressing to click in a section on the right-hand side of the touchpad will
@@ -6195,6 +6323,32 @@ public final class Settings {
          * @hide
          */
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
+
+        /**
+         * Whether to enable system gestures (three- and four-finger swipes) on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_SYSTEM_GESTURES = "touchpad_system_gestures";
+
+        /**
+         * Whether to enable reversed vertical scrolling for connected mice.
+         *
+         * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
+         * @hide
+         */
+        public static final String MOUSE_REVERSE_VERTICAL_SCROLLING =
+                "mouse_reverse_vertical_scrolling";
+
+        /**
+         * Whether to enable swapping the primary button for connected mice.
+         *
+         * When enabled, right clicking will be the primary button and left clicking will be the
+         * secondary button (e.g. show menu).
+         * @hide
+         */
+        public static final String MOUSE_SWAP_PRIMARY_BUTTON =
+                "mouse_swap_primary_button";
 
         /**
          * Pointer fill style, specified by
@@ -6261,6 +6415,14 @@ public final class Settings {
          * @hide
          */
         public static final String LOCALE_PREFERENCES = "locale_preferences";
+
+        /**
+         * User can change the region from region settings. This records user's preferred region.
+         *
+         * E.g. : if user's locale is en-US, this will record US
+         * @hide
+         */
+        public static final String PREFERRED_REGION = "preferred_region";
 
         /**
          * Setting to enable camera flash notification feature.
@@ -6430,10 +6592,14 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
+            PRIVATE_SETTINGS.add(TOUCHPAD_SYSTEM_GESTURES);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
+            PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
+            PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
+            PRIVATE_SETTINGS.add(PREFERRED_REGION);
         }
 
         /**
@@ -8356,7 +8522,6 @@ public final class Settings {
         @Readable
         public static final String LOCK_SCREEN_LOCK_AFTER_TIMEOUT = "lock_screen_lock_after_timeout";
 
-
         /**
          * This preference contains the string that shows for owner info on LockScreen.
          * @hide
@@ -8624,6 +8789,19 @@ public final class Settings {
         public static final String ACCESSIBILITY_QS_TARGETS = "accessibility_qs_targets";
 
         /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via a keyboard shortcut gesture.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_KEY_GESTURE_TARGETS =
+                "accessibility_key_gesture_targets";
+
+        /**
          * The system class name of magnification controller which is a target to be toggled via
          * accessibility shortcut or accessibility button.
          *
@@ -8738,35 +8916,6 @@ public final class Settings {
         /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
 
         /**
-         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
-         * @hide
-         */
-        @Readable
-        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
-
-        /**
-         * If nonzero, will show the zen update settings suggestion.
-         * @hide
-         */
-        @Readable
-        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
-
-        /**
-         * If nonzero, zen has not been updated to reflect new changes.
-         * @hide
-         */
-        @Readable
-        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
-
-        /**
-         * If nonzero, zen setting suggestion has been viewed by user
-         * @hide
-         */
-        @Readable
-        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
-                "zen_settings_suggestion_viewed";
-
-        /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
          * boolean (1 or 0).
          * @hide
@@ -8815,6 +8964,18 @@ public final class Settings {
         @Readable
         public static final String ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED =
                 "high_text_contrast_enabled";
+
+        /**
+         * Setting that specifies the status of the High Contrast Text
+         * rectangle refresh's one-time prompt.
+         * 0 = UNKNOWN
+         * 1 = PROMPT_SHOWN
+         * 2 = PROMPT_UNNECESSARY
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_HCT_RECT_PROMPT_STATUS =
+                "accessibility_hct_rect_prompt_status";
 
         /**
          * The color contrast, float in [-1, 1], 1 being the highest contrast.
@@ -9148,15 +9309,27 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
+         * Whether to enable key repeats for Physical Keyboard.
+         *
+         * If set to false, continuous key presses on
+         * physical keyboard will not cause the pressed key to repeated.
+         * @hide
+         */
+        @Readable
+        public static final String KEY_REPEAT_ENABLED = "key_repeat_enabled";
+
+        /**
          * The duration before a key repeat begins in milliseconds.
          * @hide
          */
+        @Readable
         public static final String KEY_REPEAT_TIMEOUT_MS = "key_repeat_timeout";
 
         /**
          * The duration between successive key repeats in milliseconds.
          * @hide
          */
+        @Readable
         public static final String KEY_REPEAT_DELAY_MS = "key_repeat_delay";
 
         /**
@@ -9895,6 +10068,12 @@ public final class Settings {
         @Readable
         public static final String MINIMAL_POST_PROCESSING_ALLOWED =
                 "minimal_post_processing_allowed";
+
+        /**
+         * Whether to mirror the built-in display on all connected displays.
+         * @hide
+         */
+        public static final String MIRROR_BUILT_IN_DISPLAY = "mirror_built_in_display";
 
         /**
          * No mode switching will happen.
@@ -10728,6 +10907,16 @@ public final class Settings {
                 "lock_screen_show_only_unseen_notifications";
 
         /**
+         * Indicates whether to minimalize the number of notifications to show on the lockscreen.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_NOTIFICATION_MINIMALISM =
+                "lock_screen_notification_minimalism";
+
+        /**
          * Indicates whether snooze options should be shown on notifications
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -10879,6 +11068,25 @@ public final class Settings {
          */
         public static final String EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS =
                 "emergency_gesture_ui_last_started_millis";
+
+        /**
+         * Whether double tap the power button gesture is enabled.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED =
+                "double_tap_power_button_gesture_enabled";
+
+        /**
+         * Double tap power button gesture behavior.
+         * 0 = Camera launch
+         * 1 = Wallet launch
+         * @hide
+         */
+        @Readable
+        public static final String DOUBLE_TAP_POWER_BUTTON_GESTURE =
+                "double_tap_power_button_gesture";
 
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off
@@ -11049,6 +11257,12 @@ public final class Settings {
          * @hide
          */
         public static final String SFPS_PERFORMANT_AUTH_ENABLED = "sfps_performant_auth_enabled_v2";
+
+        /**
+         * Whether or not the UDFPS device is enabling the screen off unlock settings.
+         * @hide
+         */
+        public static final String SCREEN_OFF_UNLOCK_UDFPS_ENABLED = "screen_off_udfps_enabled";
 
         /**
          * Whether or not debugging is enabled.
@@ -11254,7 +11468,8 @@ public final class Settings {
                 "assist_long_press_home_enabled";
 
         /**
-         * Whether all entrypoints can trigger search. Replaces individual settings.
+         * Whether all entrypoints (e.g. long-press home, long-press nav handle)
+         * can trigger contextual search.
          *
          * @hide
          */
@@ -12818,6 +13033,12 @@ public final class Settings {
          */
         @Readable
         public static final String CONTEXTUAL_SEARCH_PACKAGE = "contextual_search_package";
+
+        /**
+         * Inetger property which determines whether advanced protection is on or not.
+         * @hide
+         */
+        public static final String ADVANCED_PROTECTION_MODE = "advanced_protection_mode";
     }
 
     /**
@@ -13515,6 +13736,14 @@ public final class Settings {
         @Readable
         public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
                 "render_shadows_in_compositor";
+
+        /**
+         * Policy to be used for the display shade when connected to an external display.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_SHADE_DISPLAY_AWARENESS =
+                "shade_display_awareness";
 
         /**
          * Path to the WindowManager display settings file. If unset, the default file path will
@@ -17993,6 +18222,44 @@ public final class Settings {
         public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
 
         /**
+         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * ambient              (int)
+         * group_ambient        (int)
+         * control_expanded     (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
+                "hearing_device_local_ambient_volume";
+
+        /**
+         * A semi-colon separated list of Bluetooth hearing devices' notification data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,input_changes=1"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * input_changes        (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_NOTIFICATION =
+                "hearing_device_local_notification";
+
+        /**
          * Global settings that shouldn't be persisted.
          *
          * @hide
@@ -18034,10 +18301,6 @@ public final class Settings {
             MOVED_TO_SECURE = new HashSet<>(8);
             MOVED_TO_SECURE.add(Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_SECURE.add(Global.ZEN_DURATION);
-            MOVED_TO_SECURE.add(Global.SHOW_ZEN_UPGRADE_NOTIFICATION);
-            MOVED_TO_SECURE.add(Global.SHOW_ZEN_SETTINGS_SUGGESTION);
-            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_UPDATED);
-            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_SUGGESTION_VIEWED);
             MOVED_TO_SECURE.add(Global.CHARGING_SOUNDS_ENABLED);
             MOVED_TO_SECURE.add(Global.CHARGING_VIBRATION_ENABLED);
             MOVED_TO_SECURE.add(Global.NOTIFICATION_BUBBLES);
@@ -18872,40 +19135,6 @@ public final class Settings {
         @Readable
         public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
 
-
-        /**
-         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_UPGRADE_NOTIFICATION}
-         */
-        @Deprecated
-        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
-
-        /**
-         * If nonzero, will show the zen update settings suggestion.
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_SETTINGS_SUGGESTION}
-         */
-        @Deprecated
-        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
-
-        /**
-         * If nonzero, zen has not been updated to reflect new changes.
-         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_UPDATED}
-         * @hide
-         */
-        @Deprecated
-        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
-
-        /**
-         * If nonzero, zen setting suggestion has been viewed by user
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_SUGGESTION_VIEWED}
-         */
-        @Deprecated
-        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
-                "zen_settings_suggestion_viewed";
-
         /**
          * Backup and restore agent timeout parameters.
          * These parameters are represented by a comma-delimited key-value list.
@@ -19310,14 +19539,14 @@ public final class Settings {
              * If hotword detection should be enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String HOTWORD_DETECTION_ENABLED = "hotword_detection_enabled";
 
             /**
              * Whether Smart Replies are enabled within Wear.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SMART_REPLIES_ENABLED = "smart_replies_enabled";
 
             /**
@@ -19331,7 +19560,7 @@ public final class Settings {
              * If FLP should obtain location data from the paired device.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String OBTAIN_PAIRED_DEVICE_LOCATION =
                     "obtain_paired_device_location";
 
@@ -19339,7 +19568,7 @@ public final class Settings {
              * The play store availability on companion phone.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String PHONE_PLAY_STORE_AVAILABILITY =
                     "phone_play_store_availability";
 
@@ -19355,7 +19584,7 @@ public final class Settings {
              * Whether the bug report is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String BUG_REPORT = "bug_report";
 
             // Possible bug report states
@@ -19368,14 +19597,14 @@ public final class Settings {
              * The enabled/disabled state of the SmartIlluminate.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SMART_ILLUMINATE_ENABLED = "smart_illuminate_enabled";
 
             /**
              * Whether automatic time is enabled on the watch.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CLOCKWORK_AUTO_TIME = "clockwork_auto_time";
 
             // Possible clockwork auto time states
@@ -19393,7 +19622,7 @@ public final class Settings {
              * Whether automatic time zone is enabled on the watch.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CLOCKWORK_AUTO_TIME_ZONE = "clockwork_auto_time_zone";
 
             // Possible clockwork auto time zone states
@@ -19410,14 +19639,14 @@ public final class Settings {
              * Whether 24 hour time format is enabled on the watch.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CLOCKWORK_24HR_TIME = "clockwork_24hr_time";
 
             /**
              * Whether the auto wifi toggle setting is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AUTO_WIFI = "auto_wifi";
 
             // Possible force wifi on states
@@ -19437,7 +19666,7 @@ public final class Settings {
              * wifi requirement until this time). The time is in millis since epoch.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS =
                     "alt_bypass_wifi_requirement_time_millis";
 
@@ -19445,7 +19674,7 @@ public final class Settings {
              * Whether the setup was skipped.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SETUP_SKIPPED = "setup_skipped";
 
             // Possible setup_skipped states
@@ -19460,7 +19689,7 @@ public final class Settings {
              * The last requested call forwarding action.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String LAST_CALL_FORWARD_ACTION = "last_call_forward_action";
 
             // Possible call forwarding actions
@@ -19473,31 +19702,31 @@ public final class Settings {
 
             // Stem button settings.
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_1_TYPE = "STEM_1_TYPE";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_1_DATA = "STEM_1_DATA";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_1_DEFAULT_DATA = "STEM_1_DEFAULT_DATA";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_2_TYPE = "STEM_2_TYPE";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_2_DATA = "STEM_2_DATA";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_2_DEFAULT_DATA = "STEM_2_DEFAULT_DATA";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_3_TYPE = "STEM_3_TYPE";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_3_DATA = "STEM_3_DATA";
             /** @hide */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String STEM_3_DEFAULT_DATA = "STEM_3_DEFAULT_DATA";
 
             // Stem types
@@ -19512,14 +19741,14 @@ public final class Settings {
              * If the device should be muted when off body.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String MUTE_WHEN_OFF_BODY_ENABLED = "obtain_mute_when_off_body";
 
             /**
              * Wear OS version string.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
@@ -19532,28 +19761,28 @@ public final class Settings {
              * The android wear system version.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String ANDROID_WEAR_VERSION = "android_wear_version";
 
             /**
              * The wear system capabiltiies.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SYSTEM_CAPABILITIES = "system_capabilities";
 
             /**
              * The android wear system edition.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SYSTEM_EDITION = "android_wear_system_edition";
 
             /**
              * The Wear platform MR number.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
@@ -19567,42 +19796,42 @@ public final class Settings {
              * Whether ambient is currently enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_ENABLED = "ambient_enabled";
 
             /**
              * Whether ambient tilt to wake is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_TILT_TO_WAKE = "ambient_tilt_to_wake";
 
             /**
              * Whether ambient low bit mode is enabled by developer options.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_LOW_BIT_ENABLED_DEV = "ambient_low_bit_enabled_dev";
 
             /**
              * Whether ambient touch to wake is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_TOUCH_TO_WAKE = "ambient_touch_to_wake";
 
             /**
              * Whether ambient tilt to bright is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
 
             /**
              * Whether touch and hold to edit WF is enabled
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED =
                     "gesture_touch_and_hold_watchface_enabled";
 
@@ -19616,7 +19845,7 @@ public final class Settings {
              * Whether bedtime mode is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String BEDTIME_MODE = "bedtime_mode";
 
             /**
@@ -19628,35 +19857,35 @@ public final class Settings {
              * Whether the current watchface is decomposable.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String DECOMPOSABLE_WATCHFACE = "current_watchface_decomposable";
 
             /**
              * Whether to force ambient when docked.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
 
             /**
              * Whether the ambient low bit mode is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_LOW_BIT_ENABLED = "ambient_low_bit_enabled";
 
             /**
              * The timeout duration in minutes of ambient mode when plugged in.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
 
             /**
              * What OS does paired device has.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
 
             // Possible values of PAIRED_DEVICE_OS_TYPE
@@ -19691,7 +19920,7 @@ public final class Settings {
              * The user's last setting for hfp client.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String USER_HFP_CLIENT_SETTING = "user_hfp_client_setting";
 
             // Possible hfp client user setting values
@@ -19716,7 +19945,7 @@ public final class Settings {
              * The companion App name.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String COMPANION_APP_NAME = "wear_companion_app_name";
 
             /**
@@ -19724,21 +19953,21 @@ public final class Settings {
              * wear. 1 for supporting, 0 for not supporting.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String ENABLE_ALL_LANGUAGES = "enable_all_languages";
 
             /**
              * The Locale (as language tag) the user chose at startup.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String SETUP_LOCALE = "setup_locale";
 
             /**
              * The version of oem setup present.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String OEM_SETUP_VERSION = "oem_setup_version";
 
             /**
@@ -19784,7 +20013,7 @@ public final class Settings {
              * -{@link BATTERY_SAVER_MODE_CUSTOM}
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String BATTERY_SAVER_MODE = "battery_saver_mode";
 
             /**
@@ -19841,7 +20070,7 @@ public final class Settings {
              * If burn in protection is enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
 
             /**
@@ -19860,7 +20089,7 @@ public final class Settings {
              *          RIGHT_WRIST_ROTATION_0 = "2", RIGHT_WRIST_ROTATION_180 = "3"
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String WRIST_ORIENTATION_MODE = "wear_wrist_orientation_mode";
 
             /**
@@ -19899,7 +20128,7 @@ public final class Settings {
              *
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CLOCKWORK_SYSUI_PACKAGE = "clockwork_sysui_package";
 
             /**
@@ -19929,7 +20158,7 @@ public final class Settings {
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String WET_MODE_ON = "wet_mode_on";
 
             /**
@@ -19948,7 +20177,7 @@ public final class Settings {
              * Whether charging sounds are enabled.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
 
             /**
@@ -19957,7 +20186,7 @@ public final class Settings {
              *
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String DYNAMIC_COLOR_THEME_ENABLED = "dynamic_color_theme_enabled";
 
             /**
@@ -20049,7 +20278,7 @@ public final class Settings {
              * The key to indicate the data migration status on device upgrade in Wear Services.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String UPGRADE_DATA_MIGRATION_STATUS =
                     "upgrade_data_migration_status";
 
@@ -20106,20 +20335,20 @@ public final class Settings {
              * The custom foreground color.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CUSTOM_COLOR_FOREGROUND = "custom_foreground_color";
 
             /**
              * The custom background color.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String CUSTOM_COLOR_BACKGROUND = "custom_background_color";
 
             /** The status of the phone switching process.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String PHONE_SWITCHING_STATUS = "phone_switching_status";
 
             /**
@@ -20193,6 +20422,12 @@ public final class Settings {
              * @hide
              */
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
+
+            /**
+             * Phone switching has finished account match step.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_ACCOUNTS_MATCHED = 12;
 
             /**
              * Phone switching request source
@@ -20290,7 +20525,7 @@ public final class Settings {
              * Controls the launcher ui mode on wearable devices.
              * @hide
              */
-            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            @Readable
             public static final String WEAR_LAUNCHER_UI_MODE = "wear_launcher_ui_mode";
 
             /** Whether Wear Power Anomaly Service is enabled.
@@ -20325,6 +20560,29 @@ public final class Settings {
              * @hide
              */
             public static final String AUTO_BEDTIME_MODE = "auto_bedtime_mode";
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be rendered
+             * by default wear system.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_DEFAULT = 0;
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be hidden.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_SYSTEM_HIDDEN = 1;
+
+            /**
+             * Configuration of system status tray in wear.
+             *
+             * @hide
+             */
+            public static final String WEAR_SYSTEM_STATUS_TRAY_CONFIGURATION =
+                    "wear_system_status_tray_configuration";
         }
     }
 
@@ -20446,6 +20704,10 @@ public final class Settings {
          *
          * The keys take the form {@code namespace/flag}, and the values are the flag values.
          *
+         * Note: this API is _not_ performant, and may make a large number of
+         * Binder calls. It is intended for use in testing and debugging, and
+         * should not be used in performance-sensitive code.
+         *
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
@@ -20457,13 +20719,33 @@ public final class Settings {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, resolver.getUserId());
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
-                Bundle b = cp.call(resolver.getAttributionSource(),
-                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_LIST_CONFIG, null, arg);
-                if (b != null) {
-                    Map<String, String> flagsToValues =
-                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
-                                            java.util.HashMap.class);
-                    allFlags.putAll(flagsToValues);
+
+                if (Flags.reduceBinderTransactionSizeForGetAllProperties()) {
+                    Bundle b = cp.call(resolver.getAttributionSource(),
+                            sProviderHolder.mUri.getAuthority(),
+                                CALL_METHOD_LIST_NAMESPACES_CONFIG, null, arg);
+                    if (b != null) {
+                        HashSet<String> namespaces =
+                                (HashSet) b.getSerializable(Settings.NameValueTable.VALUE,
+                                                java.util.HashSet.class);
+                        for (String namespace : namespaces) {
+                            Map<String, String> keyValues =
+                                    getStrings(namespace, new ArrayList());
+                            for (String key : keyValues.keySet()) {
+                                allFlags.put(namespace + "/" + key, keyValues.get(key));
+                            }
+                        }
+                    }
+                } else {
+                    Bundle b = cp.call(resolver.getAttributionSource(),
+                            sProviderHolder.mUri.getAuthority(),
+                            CALL_METHOD_LIST_CONFIG, null, arg);
+                    if (b != null) {
+                        Map<String, String> flagsToValues =
+                                (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
+                                                java.util.HashMap.class);
+                        allFlags.putAll(flagsToValues);
+                    }
                 }
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't query configuration table for " + CONTENT_URI, e);

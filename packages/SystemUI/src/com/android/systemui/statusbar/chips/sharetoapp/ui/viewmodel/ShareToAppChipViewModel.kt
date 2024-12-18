@@ -28,11 +28,13 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
-import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareToAppDialogDelegate
+import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndGenericShareToAppDialogDelegate
+import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareScreenToAppDialogDelegate
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
@@ -68,10 +70,17 @@ constructor(
                 when (projectionModel) {
                     is ProjectionChipModel.NotProjecting -> OngoingActivityChipModel.Hidden()
                     is ProjectionChipModel.Projecting -> {
-                        if (projectionModel.type != ProjectionChipModel.Type.SHARE_TO_APP) {
-                            OngoingActivityChipModel.Hidden()
-                        } else {
-                            createShareToAppChip(projectionModel)
+                        when (projectionModel.receiver) {
+                            ProjectionChipModel.Receiver.ShareToApp -> {
+                                when (projectionModel.contentType) {
+                                    ProjectionChipModel.ContentType.Screen ->
+                                        createShareScreenToAppChip(projectionModel)
+                                    ProjectionChipModel.ContentType.Audio ->
+                                        createIconOnlyShareToAppChip()
+                                }
+                            }
+                            ProjectionChipModel.Receiver.CastToOtherDevice ->
+                                OngoingActivityChipModel.Hidden()
                         }
                     }
                 }
@@ -105,8 +114,8 @@ constructor(
         mediaProjectionChipInteractor.stopProjecting()
     }
 
-    private fun createShareToAppChip(
-        state: ProjectionChipModel.Projecting,
+    private fun createShareScreenToAppChip(
+        state: ProjectionChipModel.Projecting
     ): OngoingActivityChipModel.Shown {
         return OngoingActivityChipModel.Shown.Timer(
             icon =
@@ -120,11 +129,33 @@ constructor(
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
             createDialogLaunchOnClickListener(
-                createShareToAppDialogDelegate(state),
+                createShareScreenToAppDialogDelegate(state),
+                dialogTransitionAnimator,
+                DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Share to app"),
+                logger,
+                TAG,
+            ),
+        )
+    }
+
+    private fun createIconOnlyShareToAppChip(): OngoingActivityChipModel.Shown {
+        return OngoingActivityChipModel.Shown.IconOnly(
+            icon =
+                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
+                    Icon.Resource(
+                        SHARE_TO_APP_ICON,
+                        ContentDescription.Resource(
+                            R.string.share_to_app_chip_accessibility_label_generic
+                        ),
+                    )
+                ),
+            colors = ColorsModel.Red,
+            createDialogLaunchOnClickListener(
+                createGenericShareToAppDialogDelegate(),
                 dialogTransitionAnimator,
                 DialogCuj(
                     Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
-                    tag = "Share to app",
+                    tag = "Share to app audio only",
                 ),
                 logger,
                 TAG,
@@ -132,16 +163,23 @@ constructor(
         )
     }
 
-    private fun createShareToAppDialogDelegate(state: ProjectionChipModel.Projecting) =
-        EndShareToAppDialogDelegate(
+    private fun createShareScreenToAppDialogDelegate(state: ProjectionChipModel.Projecting) =
+        EndShareScreenToAppDialogDelegate(
             endMediaProjectionDialogHelper,
             context,
             stopAction = this::stopProjectingFromDialog,
             state,
         )
 
+    private fun createGenericShareToAppDialogDelegate() =
+        EndGenericShareToAppDialogDelegate(
+            endMediaProjectionDialogHelper,
+            context,
+            stopAction = this::stopProjectingFromDialog,
+        )
+
     companion object {
         @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
-        private const val TAG = "ShareToAppVM"
+        private val TAG = "ShareToAppVM".pad()
     }
 }

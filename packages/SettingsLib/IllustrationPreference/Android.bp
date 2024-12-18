@@ -21,6 +21,7 @@ android_library {
         "SettingsLibColor",
         "androidx.preference_preference",
         "lottie",
+        "SettingsLibSettingsTheme",
         "settingslib_illustrationpreference_flags_lib",
     ],
 

@@ -56,6 +56,9 @@ constructor(
     private val mediaLogger: MediaLogger,
 ) {
 
+    val hasAnyMediaOrRecommendations: StateFlow<Boolean> = interactor.hasAnyMediaOrRecommendation
+    val hasActiveMediaOrRecommendations: StateFlow<Boolean> =
+        interactor.hasActiveMediaOrRecommendation
     val mediaItems: StateFlow<List<MediaCommonViewModel>> =
         interactor.currentMedia
             .map { sortedItems ->
@@ -114,7 +117,7 @@ constructor(
         qsExpanded: Boolean,
         visibleIndex: Int,
         location: Int,
-        isUpdate: Boolean = false
+        isUpdate: Boolean = false,
     ) {
         // Skip logging if on LS or QQS, and there is no active media card
         if (!qsExpanded && !interactor.hasActiveMediaOrRecommendation()) return
@@ -127,7 +130,7 @@ constructor(
         val instanceId = commonModel.mediaLoadedModel.instanceId
         return mediaControlByInstanceId[instanceId]?.copy(
             immediatelyUpdateUi = commonModel.mediaLoadedModel.immediatelyUpdateUi,
-            updateTime = commonModel.updateTime
+            updateTime = commonModel.updateTime,
         )
             ?: MediaCommonViewModel.MediaControl(
                     instanceId = instanceId,
@@ -144,7 +147,7 @@ constructor(
                     },
                     onUpdated = { onMediaControlAddedOrUpdated(it, commonModel) },
                     isMediaFromRec = commonModel.isMediaFromRec,
-                    updateTime = commonModel.updateTime
+                    updateTime = commonModel.updateTime,
                 )
                 .also { mediaControlByInstanceId[instanceId] = it }
     }
@@ -165,7 +168,7 @@ constructor(
         return mediaRecs?.copy(
             key = commonModel.recsLoadingModel.key,
             loadingEnabled =
-                interactor.isRecommendationActive() || mediaFlags.isPersistentSsCardEnabled()
+                interactor.isRecommendationActive() || mediaFlags.isPersistentSsCardEnabled(),
         )
             ?: MediaCommonViewModel.MediaRecommendations(
                     key = commonModel.recsLoadingModel.key,
@@ -195,7 +198,7 @@ constructor(
 
     private fun onMediaControlAddedOrUpdated(
         commonViewModel: MediaCommonViewModel,
-        commonModel: MediaCommonModel.MediaControl
+        commonModel: MediaCommonModel.MediaControl,
     ) {
         if (commonModel.canBeRemoved && !Utils.useMediaResumption(applicationContext)) {
             // This media control is due for removal as it is now paused + timed out, and resumption
@@ -222,7 +225,7 @@ constructor(
 
     private fun onMediaRecommendationRemoved(
         commonModel: MediaCommonModel.MediaRecommendations,
-        immediatelyRemove: Boolean
+        immediatelyRemove: Boolean,
     ) {
         mediaLogger.logMediaRecommendationCardRemoved(commonModel.recsLoadingModel.key)
         if (immediatelyRemove || isReorderingAllowed()) {

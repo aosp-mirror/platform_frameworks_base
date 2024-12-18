@@ -133,9 +133,9 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
         builder->axes.clear();
         return false;
     }
-    std::shared_ptr<minikin::MinikinFont> minikinFont =
-            std::make_shared<MinikinFontSkia>(std::move(face), fonts::getNewSourceId(), fontPtr,
-                                              fontSize, "", ttcIndex, builder->axes);
+    std::shared_ptr<minikin::MinikinFont> minikinFont = std::make_shared<MinikinFontSkia>(
+            std::move(face), fonts::getNewSourceId(), fontPtr, fontSize, "", ttcIndex,
+            minikin::VariationSettings(builder->axes, false));
     minikin::Font::Builder fontBuilder(minikinFont);
 
     if (weight != RESOLVE_BY_FONT_TABLE) {

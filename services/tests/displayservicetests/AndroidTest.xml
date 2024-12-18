@@ -23,6 +23,13 @@
         <option name="test-file-name" value="DisplayServiceTests.apk" />
     </target_preparer>
 
+    <!-- Load additional APKs onto device -->
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="install-arg" value="-t" />
+        <option name="test-file-name" value="DisplayManagerTestApp.apk" />
+    </target_preparer>
+
     <option name="test-tag" value="DisplayServiceTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="com.android.frameworks.displayservicetests" />

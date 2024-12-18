@@ -78,6 +78,8 @@ import android.view.SurfaceControl;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
@@ -133,6 +135,7 @@ public class SystemServicesTestRule implements TestRule {
     private final ArrayList<DeviceConfig.OnPropertiesChangedListener> mDeviceConfigListeners =
             new ArrayList<>();
 
+    private AppCompatConfiguration mAppCompat;
     private Description mDescription;
     private Context mContext;
     private StaticMockitoSession mMockitoSession;
@@ -182,6 +185,8 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void setUp() {
+        ProtoLog.init(WmProtoLogGroups.values());
+
         if (mOnBeforeServicesCreated != null) {
             mOnBeforeServicesCreated.run();
         }
@@ -379,6 +384,11 @@ public class SystemServicesTestRule implements TestRule {
                 mock(ActivityManagerService.class, withSettings().stubOnly());
         mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
+
+        // AppCompatConfiguration
+        mAppCompat = new AppCompatConfiguration(
+                ActivityThread.currentActivityThread().getSystemUiContext());
+
         // Create a fake WindowProcessController for the system process.
         final WindowProcessController wpc =
                 addProcess("android", "system", 1485 /* pid */, 1000 /* uid */);
@@ -394,7 +404,7 @@ public class SystemServicesTestRule implements TestRule {
         mWmService = WindowManagerService.main(
                 mContext, mImService, false, wmPolicy, mAtmService,
                 testDisplayWindowSettingsProvider, StubTransaction::new,
-                MockSurfaceControlBuilder::new);
+                MockSurfaceControlBuilder::new, mAppCompat);
         spyOn(mWmService);
         spyOn(mWmService.mRoot);
         // Invoked during {@link ActivityStack} creation.

@@ -484,14 +484,12 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
     private fun CoroutineScope.repeatWhenAttached(): DisposableHandle {
         return view.repeatWhenAttached(
             coroutineContext = coroutineContext,
-            block = block,
+            block = { block.invoke(this) },
         )
     }
 
-    private class Block : suspend LifecycleOwner.(View) -> Unit {
-        data class Invocation(
-            val lifecycleOwner: LifecycleOwner,
-        ) {
+    private class Block {
+        data class Invocation(val lifecycleOwner: LifecycleOwner) {
             val lifecycleState: Lifecycle.State
                 get() = lifecycleOwner.lifecycle.currentState
         }
@@ -504,7 +502,7 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         val latestLifecycleState: Lifecycle.State
             get() = _invocations.last().lifecycleState
 
-        override suspend fun invoke(lifecycleOwner: LifecycleOwner, view: View) {
+        fun invoke(lifecycleOwner: LifecycleOwner) {
             _invocations.add(Invocation(lifecycleOwner))
         }
     }

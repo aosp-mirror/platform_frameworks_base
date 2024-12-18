@@ -38,7 +38,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
-import com.android.settingslib.Utils;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -76,6 +75,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationCompactHeadsUpTemplateViewWrapper(ctx, v, row);
             } else if ("compactMessagingHUN".equals((v.getTag()))) {
                 return new NotificationCompactMessagingTemplateViewWrapper(ctx, v, row);
+            } else if ("progress".equals(v.getTag())) {
+                return new NotificationProgressTemplateViewWrapper(ctx, v, row);
             }
 
             if (row.getEntry().getSbn().getNotification().isStyle(
@@ -342,9 +343,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
         if (customBackgroundColor != 0) {
             return customBackgroundColor;
         }
-        return Utils.getColorAttr(mView.getContext(),
-                        com.android.internal.R.attr.materialColorSurfaceContainerHigh)
-                .getDefaultColor();
+        return mView.getContext().getColor(
+                com.android.internal.R.color.materialColorSurfaceContainerHigh);
     }
 
     public void setLegacy(boolean legacy) {

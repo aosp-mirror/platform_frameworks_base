@@ -1,0 +1,47 @@
+// Baseline format: 1.0
+InvalidNullabilityOverride: android.service.watchdog.ExplicitHealthCheckService#onBind(android.content.Intent):
+    Invalid nullability on type android.content.Intent in parameter `intent` in method `onBind`. Parameter in method override cannot use a non-null type when the corresponding type from the super method is platform-nullness.
+InvalidNullabilityOverride: android.service.watchdog.ExplicitHealthCheckService#onBind(android.content.Intent) parameter #0:
+    Invalid nullability on type android.content.Intent in parameter `intent` in method `onBind`. Parameter in method override cannot use a non-null type when the corresponding type from the super method is platform-nullness.
+
+
+MissingNullability: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#writeToParcel(android.os.Parcel,int):
+    Missing nullability on parameter `parcel` in method `writeToParcel`
+
+
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService:
+    New API must be flagged with @FlaggedApi: class android.service.watchdog.ExplicitHealthCheckService
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#BIND_PERMISSION:
+    New API must be flagged with @FlaggedApi: field android.service.watchdog.ExplicitHealthCheckService.BIND_PERMISSION
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#SERVICE_INTERFACE:
+    New API must be flagged with @FlaggedApi: field android.service.watchdog.ExplicitHealthCheckService.SERVICE_INTERFACE
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#notifyHealthCheckPassed(String):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.notifyHealthCheckPassed(String)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#onBind(android.content.Intent):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.onBind(android.content.Intent)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#onCancelHealthCheck(String):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.onCancelHealthCheck(String)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#onGetRequestedPackages():
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.onGetRequestedPackages()
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#onGetSupportedPackages():
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.onGetSupportedPackages()
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService#onRequestHealthCheck(String):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.onRequestHealthCheck(String)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig:
+    New API must be flagged with @FlaggedApi: class android.service.watchdog.ExplicitHealthCheckService.PackageConfig
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.service.watchdog.ExplicitHealthCheckService.PackageConfig.CREATOR
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#PackageConfig(String, long):
+    New API must be flagged with @FlaggedApi: constructor android.service.watchdog.ExplicitHealthCheckService.PackageConfig(String,long)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#PackageConfig(String,long):
+    New API must be flagged with @FlaggedApi: constructor android.service.watchdog.ExplicitHealthCheckService.PackageConfig(String,long)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#describeContents():
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.PackageConfig.describeContents()
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#getHealthCheckTimeoutMillis():
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.PackageConfig.getHealthCheckTimeoutMillis()
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#getPackageName():
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.PackageConfig.getPackageName()
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.PackageConfig.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.service.watchdog.ExplicitHealthCheckService.PackageConfig#writeToParcel(android.os.Parcel,int):
+    New API must be flagged with @FlaggedApi: method android.service.watchdog.ExplicitHealthCheckService.PackageConfig.writeToParcel(android.os.Parcel,int)

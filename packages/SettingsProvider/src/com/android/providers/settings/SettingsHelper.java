@@ -17,19 +17,25 @@
 package com.android.providers.settings;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.hardware.display.ColorDisplayManager;
 import android.icu.util.ULocale;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
+import android.media.Utils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -42,11 +48,13 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
+import com.android.server.backup.Flags;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -66,10 +74,18 @@ public class SettingsHelper {
     private static final int LONG_PRESS_POWER_FOR_ASSISTANT = 5;
     /** See frameworks/base/core/res/res/values/config.xml#config_keyChordPowerVolumeUp **/
     private static final int KEY_CHORD_POWER_VOLUME_UP_GLOBAL_ACTIONS = 2;
+    @VisibleForTesting
+    static final String HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION =
+            "com.android.settings.accessibility.ACTION_HIGH_CONTRAST_TEXT_RESTORED";
+
+    // Error messages for logging metrics.
+    private static final String ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA =
+        "remote_exception_setting_locale_data";
 
     private Context mContext;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager;
+    @Nullable private BackupRestoreEventLogger mBackupRestoreEventLogger;
 
     /**
      * A few settings elements are special in that a restore of those values needs to
@@ -87,21 +103,26 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     private static final ArraySet<String> sBroadcastOnRestoreSystemUI;
+    private static final ArraySet<String> sBroadcastOnRestoreAccessibility;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(12);
+        sBroadcastOnRestore = new ArraySet<>(7);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
-        sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
         sBroadcastOnRestore.add(Settings.Secure.UI_NIGHT_MODE);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_START_TIME);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
         sBroadcastOnRestore.add(Settings.Secure.SCREEN_RESOLUTION_MODE);
-        sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
+
+        sBroadcastOnRestoreAccessibility = new ArraySet<>(5);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        sBroadcastOnRestoreAccessibility.add(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+
+        sBroadcastOnRestoreSystemUI = new ArraySet<>(2);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);
     }
@@ -174,6 +195,7 @@ public class SettingsHelper {
         String oldValue = null;
         boolean sendBroadcast = false;
         boolean sendBroadcastSystemUI = false;
+        boolean sendBroadcastAccessibility = false;
         final SettingsLookup table;
 
         if (destination.equals(Settings.Secure.CONTENT_URI)) {
@@ -186,6 +208,7 @@ public class SettingsHelper {
 
         sendBroadcast = sBroadcastOnRestore.contains(name);
         sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
+        sendBroadcastAccessibility = sBroadcastOnRestoreAccessibility.contains(name);
 
         if (sendBroadcast) {
             // TODO: http://b/22388012
@@ -195,6 +218,10 @@ public class SettingsHelper {
             // It would probably be correct to do it for the ones sent to the system, but consumers
             // may be depending on the current behavior.
             oldValue = table.lookup(cr, name, context.getUserId());
+        } else if (sendBroadcastAccessibility) {
+            int userId = android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()
+                    ? context.getUserId() : UserHandle.USER_SYSTEM;
+            oldValue = table.lookup(cr, name, userId);
         }
 
         try {
@@ -237,15 +264,27 @@ public class SettingsHelper {
             } else if (Settings.System.ACCELEROMETER_ROTATION.equals(name)
                     && shouldSkipAutoRotateRestore()) {
                 return;
-            } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(name)) {
+            } else if (shouldSkipAndLetBroadcastHandlesRestoreLogic(name)) {
                 // Don't write it to setting. Let the broadcast receiver in
                 // AccessibilityManagerService handle restore/merging logic.
                 return;
-            } else if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()
-                    && Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(name)) {
-                // Don't write it to setting. Let the broadcast receiver in
-                // AccessibilityManagerService handle restore/merging logic.
-                return;
+            } else if (com.android.graphics.hwui.flags.Flags.highContrastTextSmallTextRect()
+                    && Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED.equals(name)) {
+                final boolean currentlyEnabled = Settings.Secure.getInt(
+                        context.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, 0) == 1;
+                final boolean enabledInRestore = value != null && Integer.parseInt(value) == 1;
+
+                // If restoring from Android 15 or earlier and the user didn't already enable HCT
+                // on this new device, then don't restore and trigger custom migration logic.
+                final boolean needsCustomMigration = !currentlyEnabled
+                        && restoredFromSdkInt < Build.VERSION_CODES.BAKLAVA
+                        && enabledInRestore;
+                if (needsCustomMigration) {
+                    migrateHighContrastText(context);
+                    return;
+                }
+                // fall through to the ordinary write to settings
             }
 
             // Default case: write the restored value to settings
@@ -257,12 +296,13 @@ public class SettingsHelper {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
             sendBroadcastSystemUI = false;
+            sendBroadcastAccessibility = false;
             Log.e(TAG, "Failed to restore setting name: " + name + " + value: " + value, e);
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has
             // been committed and observers kicked off.
-            if (sendBroadcast || sendBroadcastSystemUI) {
+            if (sendBroadcast || sendBroadcastSystemUI || sendBroadcastAccessibility) {
                 Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
                         .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
@@ -278,6 +318,13 @@ public class SettingsHelper {
                     intent.setPackage(
                             context.getString(com.android.internal.R.string.config_systemUi));
                     context.sendBroadcastAsUser(intent, context.getUser(), null);
+                }
+                if (sendBroadcastAccessibility) {
+                    UserHandle userHandle =
+                            android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()
+                                    ? context.getUser() : UserHandle.SYSTEM;
+                    intent.setPackage("android");
+                    context.sendBroadcastAsUser(intent, userHandle, null);
                 }
             }
         }
@@ -309,6 +356,13 @@ public class SettingsHelper {
                     return SILENT_RINGTONE;
                 }
             } else {
+                // If the ringtone/notification support the vibration, use the original value.
+                final int ringtoneType = getRingtoneType(name);
+                if ((ringtoneType == RingtoneManager.TYPE_RINGTONE
+                        || ringtoneType == RingtoneManager.TYPE_NOTIFICATION)
+                        && hasVibrationSettings(value, ringtoneType)) {
+                    return value;
+                }
                 return getCanonicalRingtoneValue(value);
             }
         }
@@ -359,6 +413,15 @@ public class SettingsHelper {
             // SILENT_RINGTONE is a special constant generated by onBackupValue in the source
             // device.
             RingtoneManager.setActualDefaultRingtoneUri(mContext, ringtoneType, null);
+            return;
+        }
+
+        // If the ringtone/notification has vibration, we backup original value in onBackupValue.
+        // So use the value directly for restoring.
+        if ((ringtoneType == RingtoneManager.TYPE_RINGTONE
+                || ringtoneType == RingtoneManager.TYPE_NOTIFICATION)
+                && hasVibrationSettings(value, ringtoneType)) {
+            RingtoneManager.setActualDefaultRingtoneUri(mContext, ringtoneType, Uri.parse(value));
             return;
         }
 
@@ -426,6 +489,19 @@ public class SettingsHelper {
             default:
                 return false;
         }
+    }
+
+    private boolean shouldSkipAndLetBroadcastHandlesRestoreLogic(String settingName) {
+        boolean restoreHandledByBroadcast = Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(
+                settingName)
+                || Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(settingName);
+        if (android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()) {
+            restoreHandledByBroadcast |=
+                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(settingName)
+                            || Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(settingName);
+        }
+
+        return restoreHandledByBroadcast;
     }
 
     private void setAutoRestore(boolean enabled) {
@@ -507,9 +583,38 @@ public class SettingsHelper {
         }
     }
 
+    private static void migrateHighContrastText(Context context) {
+        final Intent intent = new Intent(HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION)
+                .setPackage(getSettingsAppPackage(context));
+        context.sendBroadcastAsUser(intent, context.getUser(), null);
+    }
+
+    /**
+     * Returns the System Settings application's package name
+     */
+    private static String getSettingsAppPackage(Context context) {
+        String settingsAppPackage = null;
+        PackageManager packageManager = context.getPackageManager();
+        if (packageManager != null) {
+            List<ResolveInfo> results = packageManager.queryIntentActivities(
+                    new Intent(Settings.ACTION_SETTINGS),
+                    PackageManager.MATCH_SYSTEM_ONLY);
+            if (!results.isEmpty()) {
+                settingsAppPackage = results.getFirst().activityInfo.applicationInfo.packageName;
+            }
+        }
+
+        return !TextUtils.isEmpty(settingsAppPackage) ? settingsAppPackage : "com.android.settings";
+    }
+
     /* package */ byte[] getLocaleData() {
         Configuration conf = mContext.getResources().getConfiguration();
         return conf.getLocales().toLanguageTags().getBytes();
+    }
+
+    LocaleList getLocaleList() {
+        Configuration conf = mContext.getResources().getConfiguration();
+        return conf.getLocales();
     }
 
     private static Locale toFullLocale(@NonNull Locale locale) {
@@ -617,6 +722,19 @@ public class SettingsHelper {
         return allLocales.remove(toFullLocale(filteredLocale));
     }
 
+    private boolean hasVibrationSettings(String value, int type) {
+        if (Utils.hasVibration(Uri.parse(value)) && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_ringtoneVibrationSettingsSupported)) {
+            if (type == RingtoneManager.TYPE_RINGTONE) {
+                return android.media.audio.Flags.enableRingtoneHapticsCustomization();
+            }
+            if (type == RingtoneManager.TYPE_NOTIFICATION) {
+                return com.android.server.notification.Flags.notificationVibrationInSoundUri();
+            }
+        }
+        return false;
+    }
+
     /**
      * Sets the locale specified. Input data is the byte representation of comma separated
      * multiple BCP-47 language tags. For backwards compatibility, strings of the form
@@ -624,6 +742,7 @@ public class SettingsHelper {
      * code and {@code CC} is a two letter country code.
      *
      * @param data the comma separated BCP-47 language tags in bytes.
+     * @param size the size of the data in bytes.
      */
     /* package */ void setLocaleData(byte[] data, int size) {
         final Configuration conf = mContext.getResources().getConfiguration();
@@ -652,8 +771,18 @@ public class SettingsHelper {
 
             am.updatePersistentConfigurationWithAttribution(config, mContext.getOpPackageName(),
                     mContext.getAttributionTag());
+            if (Flags.enableMetricsSettingsBackupAgents() && mBackupRestoreEventLogger != null) {
+                mBackupRestoreEventLogger
+                    .logItemsRestored(SettingsBackupRestoreKeys.KEY_LOCALE, localeList.size());
+            }
         } catch (RemoteException e) {
-            // Intentionally left blank
+            if (Flags.enableMetricsSettingsBackupAgents() && mBackupRestoreEventLogger != null) {
+                mBackupRestoreEventLogger
+                    .logItemsRestoreFailed(
+                        SettingsBackupRestoreKeys.KEY_LOCALE,
+                        localeList.size(),
+                        ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA);
+            }
         }
     }
 
@@ -664,5 +793,14 @@ public class SettingsHelper {
     void applyAudioSettings() {
         AudioManager am = new AudioManager(mContext);
         am.reloadAudioSettings();
+    }
+
+    /**
+     * Sets the backup restore event logger.
+     *
+     * @param backupRestoreEventLogger the logger to log B&R metrics.
+     */
+    void setBackupRestoreEventLogger(BackupRestoreEventLogger backupRestoreEventLogger) {
+        mBackupRestoreEventLogger = backupRestoreEventLogger;
     }
 }

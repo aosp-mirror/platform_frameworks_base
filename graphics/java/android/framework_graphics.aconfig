@@ -33,3 +33,12 @@ flag {
   description: "Add OkLab ColorSpace support"
   bug: "344038816"
 }
+
+flag {
+  name: "display_bt2020_colorspace"
+  is_exported: true
+  is_fixed_read_only: true
+  namespace: "core_graphics"
+  description: "Add DISPLAY_BT2020 ColorSpace support"
+  bug: "344038816"
+}

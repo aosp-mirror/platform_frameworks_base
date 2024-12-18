@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsPdfTestCases",
-      "options": [
-        {
-          "include-filter": "android.graphics.pdf.cts.PdfDocumentTest"
-        }
-      ]
+      "name": "CtsPdfTestCases_cts_pdfdocumenttest"
     }
   ]
 }

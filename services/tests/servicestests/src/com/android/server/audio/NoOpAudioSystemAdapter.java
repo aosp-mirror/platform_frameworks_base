@@ -132,12 +132,13 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
-    public int setStreamVolumeIndexAS(int stream, int index, int device) {
+    public int setStreamVolumeIndexAS(int stream, int index, boolean muted, int device) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 
     @Override
-    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, int device) {
+    public int setVolumeIndexForAttributes(AudioAttributes attributes, int index, boolean muted,
+            int device) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 

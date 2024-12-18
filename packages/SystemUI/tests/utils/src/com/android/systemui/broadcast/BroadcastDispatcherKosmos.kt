@@ -16,19 +16,21 @@
 
 package com.android.systemui.broadcast
 
+import com.android.systemui.SysuiTestableContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
+var Kosmos.broadcastDispatcherContext: SysuiTestableContext by Kosmos.Fixture { mock() }
 val Kosmos.broadcastDispatcher by
     Kosmos.Fixture {
         FakeBroadcastDispatcher(
-            context = mock(),
+            context = broadcastDispatcherContext,
             mainExecutor = mock(),
             broadcastRunningLooper = mock(),
             broadcastRunningExecutor = mock(),
             dumpManager = mock(),
             logger = mock(),
             userTracker = mock(),
-            shouldFailOnLeakedReceiver = false
+            shouldFailOnLeakedReceiver = false,
         )
     }

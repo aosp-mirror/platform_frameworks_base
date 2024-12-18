@@ -17,6 +17,7 @@
 package android.telephony.satellite.stub;
 
 import android.annotation.NonNull;
+import android.hardware.radio.network.IRadioNetwork;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.IBooleanConsumer;
@@ -80,12 +81,12 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
+        public void enableTerrestrialNetworkScanWhileSatelliteModeIsOn(boolean enabled,
                 IIntegerConsumer resultCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .enableCellularModemWhileSatelliteModeIsOn(enabled, resultCallback),
-                    "enableCellularModemWhileSatelliteModeIsOn");
+                            .enableTerrestrialNetworkScanWhileSatelliteModeIsOn(
+                    enabled, resultCallback), "enableTerrestrialNetworkScanWhileSatelliteModeIsOn");
         }
 
         @Override
@@ -314,7 +315,7 @@ public class SatelliteImplBase extends SatelliteService {
      * and {@code false} to disable
      * @param resultCallback The callback to receive the error code result of the operation.
      */
-    public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
+    public void enableTerrestrialNetworkScanWhileSatelliteModeIsOn(boolean enabled,
             @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }
@@ -586,7 +587,11 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+     *
+     * @deprecated Use
+     * {@link IRadioNetwork#setSatellitePlmn(int, int, String[], String[])}.
      */
+    @Deprecated
     public void setSatellitePlmn(@NonNull int simLogicalSlotIndex,
             @NonNull List<String> carrierPlmnList, @NonNull List<String> allSatellitePlmnList,
             @NonNull IIntegerConsumer resultCallback) {
@@ -608,7 +613,11 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
      *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+     *
+     * @deprecated Use
+     * {@link IRadioNetwork#setSatelliteEnabledForCarrier(int, int, boolean)}.
      */
+    @Deprecated
     public void setSatelliteEnabledForCarrier(@NonNull int simLogicalSlotIndex,
             @NonNull boolean satelliteEnabled, @NonNull IIntegerConsumer callback) {
         // stub implementation
@@ -629,7 +638,11 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
      *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
+     *
+     * @deprecated Use
+     * {@link IRadioNetwork#isSatelliteEnabledForCarrier(int, int)}.
      */
+    @Deprecated
     public void requestIsSatelliteEnabledForCarrier(@NonNull int simLogicalSlotIndex,
             @NonNull IIntegerConsumer resultCallback, @NonNull IBooleanConsumer callback) {
         // stub implementation

@@ -12,7 +12,8 @@
       android:layout_height="@dimen/image_button_height"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
-      android:scaleType="fitCenter"/>
+      android:scaleType="fitCenter"
+      android:background="@drawable/menuitem_background_ripple" />
 
   <TextView
       android:id="@+id/shortcutLabel"

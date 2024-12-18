@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -78,6 +79,7 @@ public class DefaultDeviceEffectsApplierTest {
     private DefaultDeviceEffectsApplier mApplier;
     @Mock PowerManager mPowerManager;
     @Mock ColorDisplayManager mColorDisplayManager;
+    @Mock KeyguardManager mKeyguardManager;
     @Mock UiModeManager mUiModeManager;
     @Mock WallpaperManager mWallpaperManager;
 
@@ -87,6 +89,7 @@ public class DefaultDeviceEffectsApplierTest {
         mContext = spy(new TestableContext(InstrumentationRegistry.getContext(), null));
         mContext.addMockSystemService(PowerManager.class, mPowerManager);
         mContext.addMockSystemService(ColorDisplayManager.class, mColorDisplayManager);
+        mContext.addMockSystemService(KeyguardManager.class, mKeyguardManager);
         mContext.addMockSystemService(UiModeManager.class, mUiModeManager);
         mContext.addMockSystemService(WallpaperManager.class, mWallpaperManager);
         when(mWallpaperManager.isWallpaperSupported()).thenReturn(true);
@@ -301,6 +304,22 @@ public class DefaultDeviceEffectsApplierTest {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(false);
+
+        mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
+                origin.value());
+
+        // Effect was applied, and no broadcast receiver was registered.
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
+        verify(mContext, never()).registerReceiver(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    public void apply_nightModeWithScreenOnAndKeyguardShowing_appliedImmediately(
+            @TestParameter ZenChangeOrigin origin) {
+
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
                 origin.value());

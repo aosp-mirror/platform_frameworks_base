@@ -1,6 +1,23 @@
 // Signature format: 2.0
 package com.android.internal.vibrator.persistence {
 
+  public class BasicControlPoint {
+    ctor public BasicControlPoint();
+    method public long getDurationMs();
+    method public float getIntensity();
+    method public float getSharpness();
+    method public void setDurationMs(long);
+    method public void setIntensity(float);
+    method public void setSharpness(float);
+  }
+
+  public class BasicEnvelopeEffect {
+    ctor public BasicEnvelopeEffect();
+    method public java.util.List<com.android.internal.vibrator.persistence.BasicControlPoint> getControlPoint();
+    method public float getInitialSharpness();
+    method public void setInitialSharpness(float);
+  }
+
   public class PredefinedEffect {
     ctor public PredefinedEffect();
     method public com.android.internal.vibrator.persistence.PredefinedEffectName getName();
@@ -15,12 +32,20 @@ package com.android.internal.vibrator.persistence {
     enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName tick;
   }
 
+  public enum PrimitiveDelayType {
+    method public String getRawName();
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveDelayType pause;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveDelayType relative_start_offset;
+  }
+
   public class PrimitiveEffect {
     ctor public PrimitiveEffect();
     method public java.math.BigInteger getDelayMs();
+    method public com.android.internal.vibrator.persistence.PrimitiveDelayType getDelayType();
     method public com.android.internal.vibrator.persistence.PrimitiveEffectName getName();
     method public float getScale();
     method public void setDelayMs(java.math.BigInteger);
+    method public void setDelayType(com.android.internal.vibrator.persistence.PrimitiveDelayType);
     method public void setName(com.android.internal.vibrator.persistence.PrimitiveEffectName);
     method public void setScale(float);
   }
@@ -37,16 +62,44 @@ package com.android.internal.vibrator.persistence {
     enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName tick;
   }
 
-  public class VibrationEffect {
-    ctor public VibrationEffect();
+  public class RepeatingEffect {
+    ctor public RepeatingEffect();
+    method public com.android.internal.vibrator.persistence.RepeatingEffectEntry getPreamble();
+    method public com.android.internal.vibrator.persistence.RepeatingEffectEntry getRepeating();
+    method public void setPreamble(com.android.internal.vibrator.persistence.RepeatingEffectEntry);
+    method public void setRepeating(com.android.internal.vibrator.persistence.RepeatingEffectEntry);
+  }
+
+  public class RepeatingEffectEntry {
+    ctor public RepeatingEffectEntry();
+    method public com.android.internal.vibrator.persistence.BasicEnvelopeEffect getBasicEnvelopeEffect_optional();
     method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
     method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
-    method public byte[] getVendorEffect_optional();
-    method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEntry getWaveformEntry_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEnvelopeEffect getWaveformEnvelopeEffect_optional();
+    method public void setBasicEnvelopeEffect_optional(com.android.internal.vibrator.persistence.BasicEnvelopeEffect);
     method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
     method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setWaveformEntry_optional(com.android.internal.vibrator.persistence.WaveformEntry);
+    method public void setWaveformEnvelopeEffect_optional(com.android.internal.vibrator.persistence.WaveformEnvelopeEffect);
+  }
+
+  public class VibrationEffect {
+    ctor public VibrationEffect();
+    method public com.android.internal.vibrator.persistence.BasicEnvelopeEffect getBasicEnvelopeEffect_optional();
+    method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
+    method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
+    method public com.android.internal.vibrator.persistence.RepeatingEffect getRepeatingEffect_optional();
+    method public byte[] getVendorEffect_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEnvelopeEffect getWaveformEnvelopeEffect_optional();
+    method public void setBasicEnvelopeEffect_optional(com.android.internal.vibrator.persistence.BasicEnvelopeEffect);
+    method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
+    method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setRepeatingEffect_optional(com.android.internal.vibrator.persistence.RepeatingEffect);
     method public void setVendorEffect_optional(byte[]);
     method public void setWaveformEffect_optional(com.android.internal.vibrator.persistence.WaveformEffect);
+    method public void setWaveformEnvelopeEffect_optional(com.android.internal.vibrator.persistence.WaveformEnvelopeEffect);
   }
 
   public class VibrationSelect {
@@ -57,6 +110,16 @@ package com.android.internal.vibrator.persistence {
   public enum WaveformAmplitudeDefault {
     method public String getRawName();
     enum_constant public static final com.android.internal.vibrator.persistence.WaveformAmplitudeDefault _default;
+  }
+
+  public class WaveformControlPoint {
+    ctor public WaveformControlPoint();
+    method public float getAmplitude();
+    method public long getDurationMs();
+    method public float getFrequencyHz();
+    method public void setAmplitude(float);
+    method public void setDurationMs(long);
+    method public void setFrequencyHz(float);
   }
 
   public class WaveformEffect {
@@ -77,6 +140,13 @@ package com.android.internal.vibrator.persistence {
     method public java.math.BigInteger getDurationMs();
     method public void setAmplitude(String);
     method public void setDurationMs(java.math.BigInteger);
+  }
+
+  public class WaveformEnvelopeEffect {
+    ctor public WaveformEnvelopeEffect();
+    method public java.util.List<com.android.internal.vibrator.persistence.WaveformControlPoint> getControlPoint();
+    method public float getInitialFrequencyHz();
+    method public void setInitialFrequencyHz(float);
   }
 
   public class XmlParser {

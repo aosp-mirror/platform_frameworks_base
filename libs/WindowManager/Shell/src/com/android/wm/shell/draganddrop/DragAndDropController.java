@@ -26,13 +26,10 @@ import static android.view.DragEvent.ACTION_DROP;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -168,7 +165,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mMainExecutor.executeDelayed(() -> {
             mDisplayController.addDisplayWindowListener(this);
         }, 0);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_DRAG_AND_DROP,
+        mShellController.addExternalInterface(IDragAndDrop.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellTaskOrganizer.addTaskVanishedListener(this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
@@ -247,9 +244,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 R.layout.global_drop_target, null);
         rootView.setOnDragListener(this);
         rootView.setVisibility(View.INVISIBLE);
-        DragLayout dragLayout = new DragLayout(context, mSplitScreen, mIconProvider);
-        rootView.addView(dragLayout,
-                new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+        DragLayoutProvider dragLayout = new DragLayout(context, mSplitScreen, mIconProvider);
+        dragLayout.addDraggingView(rootView);
         try {
             wm.addView(rootView, layoutParams);
             addDisplayDropTarget(displayId, context, wm, rootView, dragLayout);
@@ -261,7 +257,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
 
     @VisibleForTesting
     void addDisplayDropTarget(int displayId, Context context, WindowManager wm,
-            FrameLayout rootView, DragLayout dragLayout) {
+            FrameLayout rootView, DragLayoutProvider dragLayout) {
         mDisplayDropTargets.put(displayId,
                 new PerDisplay(displayId, context, wm, rootView, dragLayout));
     }
@@ -564,7 +560,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         final Context context;
         final WindowManager wm;
         final FrameLayout rootView;
-        final DragLayout dragLayout;
+        final DragLayoutProvider dragLayout;
         // Tracks whether the window has fully drawn since it was last made visible
         boolean hasDrawn;
 
@@ -575,7 +571,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         // The active drag session
         DragSession dragSession;
 
-        PerDisplay(int dispId, Context c, WindowManager w, FrameLayout rv, DragLayout dl) {
+        PerDisplay(int dispId, Context c, WindowManager w, FrameLayout rv, DragLayoutProvider dl) {
             displayId = dispId;
             context = c;
             wm = w;

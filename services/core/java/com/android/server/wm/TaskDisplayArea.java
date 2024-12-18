@@ -28,8 +28,10 @@ import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_ROOT_TASK;
 import static com.android.server.wm.DisplayContent.alwaysCreateRootTask;
@@ -57,7 +59,9 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -916,6 +920,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 if (candidateTask.getParent() == null) {
                     addChild(candidateTask, position);
                 } else {
+                    if (candidateTask.getRootTask().mReparentLeafTaskIfRelaunch) {
+                        ProtoLog.d(WM_DEBUG_TASKS, "Reparenting to display area on relaunch: "
+                                + "rootTaskId=%d toTop=%b", candidateTask.mTaskId, onTop);
+                    }
                     candidateTask.reparent(this, onTop);
                 }
             }
@@ -1072,6 +1080,8 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             final Task launchRootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
             // We only allow this for created by organizer tasks.
             if (launchRootTask != null && launchRootTask.mCreatedByOrganizer) {
+                Slog.i(TAG_WM, "Using launch root task from activity options: taskId="
+                        + launchRootTask.mTaskId);
                 return launchRootTask;
             }
         }
@@ -1079,19 +1089,36 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
+            final Task launchAdjacentRootAdjacentTask;
+            if (Flags.allowMultipleAdjacentTaskFragments()) {
+                final Task[] tmpTask = new Task[1];
+                mLaunchAdjacentFlagRootTask.forOtherAdjacentTasks(task -> {
+                    // TODO(b/382208145): enable FLAG_ACTIVITY_LAUNCH_ADJACENT for 3+.
+                    // Find the first adjacent for now.
+                    tmpTask[0] = task;
+                    return true;
+                });
+                launchAdjacentRootAdjacentTask = tmpTask[0];
+            } else {
+                launchAdjacentRootAdjacentTask = mLaunchAdjacentFlagRootTask.getAdjacentTask();
+            }
             if (sourceTask != null && (sourceTask == candidateTask
                     || sourceTask.topRunningActivity() == null)) {
                 // Do nothing when task that is getting opened is same as the source or when
                 // the source is no-longer valid.
                 Slog.w(TAG_WM, "Ignoring LAUNCH_ADJACENT because adjacent source is gone.");
             } else if (sourceTask != null
-                    && mLaunchAdjacentFlagRootTask.getAdjacentTask() != null
+                    && launchAdjacentRootAdjacentTask != null
                     && (sourceTask == mLaunchAdjacentFlagRootTask
                     || sourceTask.isDescendantOf(mLaunchAdjacentFlagRootTask))) {
-                // If the adjacent launch is coming from the same root, launch to
-                // adjacent root instead.
-                return mLaunchAdjacentFlagRootTask.getAdjacentTask();
+                // If the adjacent launch is coming from the same root that was specified as the
+                // launch-adjacent task, so instead we launch to its adjacent root instead.
+                Slog.i(TAG_WM, "Using adjacent-to specified launch-adjacent task: taskId="
+                        + launchAdjacentRootAdjacentTask.mTaskId);
+                return launchAdjacentRootAdjacentTask;
             } else {
+                Slog.i(TAG_WM, "Using specified launch-adjacent task: taskId="
+                        + mLaunchAdjacentFlagRootTask.mTaskId);
                 return mLaunchAdjacentFlagRootTask;
             }
         }
@@ -1099,15 +1126,26 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
             if (mLaunchRootTasks.get(i).contains(windowingMode, activityType)) {
                 final Task launchRootTask = mLaunchRootTasks.get(i).task;
-                final Task adjacentRootTask = launchRootTask != null
-                        ? launchRootTask.getAdjacentTask() : null;
-                if (sourceTask != null && adjacentRootTask != null
-                        && (sourceTask == adjacentRootTask
-                        || sourceTask.isDescendantOf(adjacentRootTask))) {
-                    return adjacentRootTask;
-                } else {
+                if (launchRootTask == null || sourceTask == null) {
                     return launchRootTask;
                 }
+                if (!Flags.allowMultipleAdjacentTaskFragments()) {
+                    final Task adjacentRootTask = launchRootTask.getAdjacentTask();
+                    if (adjacentRootTask != null && (sourceTask == adjacentRootTask
+                            || sourceTask.isDescendantOf(adjacentRootTask))) {
+                        return adjacentRootTask;
+                    }
+                    return launchRootTask;
+                }
+                final Task[] adjacentRootTask = new Task[1];
+                launchRootTask.forOtherAdjacentTasks(task -> {
+                    if (sourceTask == task || sourceTask.isDescendantOf(task)) {
+                        adjacentRootTask[0] = task;
+                        return true;
+                    }
+                    return false;
+                });
+                return adjacentRootTask[0] != null ? adjacentRootTask[0] : launchRootTask;
             }
         }
 
@@ -1118,12 +1156,31 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 // A pinned task relaunching should be handled by its task organizer. Skip fallback
                 // launch target of a pinned task from source task.
                 || candidateTask.getWindowingMode() != WINDOWING_MODE_PINNED)) {
-            final Task adjacentTarget = sourceTask.getAdjacentTask();
-            if (adjacentTarget != null) {
-                if (candidateTask != null
-                        && (candidateTask == adjacentTarget
-                        || candidateTask.isDescendantOf(adjacentTarget))) {
-                    return adjacentTarget;
+            final Task taskWithAdjacent = sourceTask.getTaskWithAdjacent();
+            if (taskWithAdjacent != null) {
+                // Has adjacent.
+                if (candidateTask == null) {
+                    return sourceTask.getCreatedByOrganizerTask();
+                }
+                // Check if the candidate is already positioned in the adjacent Task.
+                if (Flags.allowMultipleAdjacentTaskFragments()) {
+                    final Task[] adjacentRootTask = new Task[1];
+                    sourceTask.forOtherAdjacentTasks(task -> {
+                        if (candidateTask == task || candidateTask.isDescendantOf(task)) {
+                            adjacentRootTask[0] = task;
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (adjacentRootTask[0] != null) {
+                        return adjacentRootTask[0];
+                    }
+                } else {
+                    final Task adjacentTarget = taskWithAdjacent.getAdjacentTask();
+                    if (candidateTask == adjacentTarget
+                            || candidateTask.isDescendantOf(adjacentTarget)) {
+                        return adjacentTarget;
+                    }
                 }
                 return sourceTask.getCreatedByOrganizerTask();
             }
@@ -1761,10 +1818,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * @return last reparented root task, or {@code null} if the root tasks had to be destroyed.
      */
     Task remove() {
+        final TaskDisplayArea toDisplayArea = getReparentToTaskDisplayArea(getFocusedRootTask());
         mPreferredTopFocusableRootTask = null;
         // TODO(b/153090332): Allow setting content removal mode per task display area
         final boolean destroyContentOnRemoval = mDisplayContent.shouldDestroyContentOnRemove();
-        final TaskDisplayArea toDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         Task lastReparentedRootTask = null;
 
         // Root tasks could be reparented from the removed display area to other display area. After
@@ -1828,6 +1885,41 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mRemoved = true;
 
         return lastReparentedRootTask;
+    }
+
+    /**
+     * Returns the {@link TaskDisplayArea} to which root tasks should be reparented.
+     *
+     * <p>In the automotive multi-user multi-display environment where background users have
+     * UI access on their assigned displays (a.k.a. visible background users), it's not allowed to
+     * launch an activity on an unassigned display. If an activity is attempted to launch on an
+     * unassigned display, it throws an exception.
+     * <p>This method determines the appropriate {@link TaskDisplayArea} for reparenting root tasks
+     * when a display is removed, in order to avoid the exception. If the root task is null,
+     * the visible background user is not supported or the user associated with the root task is
+     * not a visible background user, it returns the default {@link TaskDisplayArea} of the default
+     * display. Otherwise, it returns the default {@link TaskDisplayArea} of the main display
+     * assigned to the user.
+     *
+     * @param rootTask The root task whose {@link TaskDisplayArea} needs to be determined.
+     * @return The {@link TaskDisplayArea} where the root tasks should be reparented to.
+     */
+    private TaskDisplayArea getReparentToTaskDisplayArea(Task rootTask) {
+        final TaskDisplayArea defaultTaskDisplayArea =
+                mRootWindowContainer.getDefaultTaskDisplayArea();
+        if (rootTask == null) {
+            return defaultTaskDisplayArea;
+        }
+        UserManagerInternal userManagerInternal = mAtmService.mWindowManager.mUmInternal;
+        if (!userManagerInternal.isVisibleBackgroundFullUser(rootTask.mUserId)) {
+            return defaultTaskDisplayArea;
+        }
+        int toDisplayId = userManagerInternal.getMainDisplayAssignedToUser(rootTask.mUserId);
+        if (toDisplayId == INVALID_DISPLAY) {
+            return defaultTaskDisplayArea;
+        }
+        DisplayContent dc = mRootWindowContainer.getDisplayContent(toDisplayId);
+        return dc != null ? dc.getDefaultTaskDisplayArea() : defaultTaskDisplayArea;
     }
 
     /** Whether this task display area can request orientation. */

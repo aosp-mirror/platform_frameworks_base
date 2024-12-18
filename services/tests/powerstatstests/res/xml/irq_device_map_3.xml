@@ -32,4 +32,7 @@
     <device name="test.sensor.device">
         <subsystem>Sensor</subsystem>
     </device>
+    <device name="test.bluetooth.device">
+        <subsystem>Bluetooth</subsystem>
+    </device>
 </irq-device-map>

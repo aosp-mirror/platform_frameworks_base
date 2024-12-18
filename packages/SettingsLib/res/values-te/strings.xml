@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"మెరుగైన కనెక్టివిటీ ఫీచర్‌ను ఎనేబుల్ చేస్తుంది."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"స్థానిక షెల్ యాక్సెస్‌ను అందించే టెర్మినల్ యాప్‌ను ప్రారంభించండి"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux డెవలప్మెంట్ ఎన్విరాన్మెంట్"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ప్రయోగాత్మకం) Linux టెర్మినల్‌ను Androidలో రన్ చేయండి"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"మీరు డిజేబుల్ చేస్తే, Linux టెర్మినల్ డేటా క్లియర్ అవుతుంది"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP చెకింగ్‌"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP తనిఖీ ప్రవర్తనను సెట్ చేయండి"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"డీబగ్గింగ్"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"అలారాలు &amp; రిమైండర్‌లు"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"అలారాలను సెట్ చేయడానికి, టైమ్-సెన్సిటివ్ చర్యలను షెడ్యూల్ చేయడానికి ఈ యాప్‌ను అనుమతించండి. ఇది యాప్‌ను బ్యాక్‌గ్రౌండ్‌లో రన్ అవడానికి అనుమతిస్తుంది, ఇది ఎక్కువ బ్యాటరీని ఉపయోగించవచ్చు.\n\nఈ అనుమతిని ఆఫ్ చేస్తే, ఈ యాప్ ద్వారా షెడ్యూల్ చేసినటువంటి ఇప్పటికే ఉన్న అలారాలు, టైమ్-ఆధారిత ఈవెంట్‌లు పనిచేయవు."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"షెడ్యూల్, అలారం, రిమైండర్, గడియారం"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ఈ ఫోన్"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ఈ టాబ్లెట్"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ఈ కంప్యూటర్ (ఇంటర్నల్)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ఈ టీవీ"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"డాక్ స్పీకర్"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ఎక్స్‌టర్నల్ పరికరం"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"కనెక్ట్ చేసిన పరికరం"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ఈ ఫోన్"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"అనలాగ్"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ఈ పరికరంలో ప్లే చేయడం సాధ్యపడదు"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"మారడానికి ఖాతాను అప్‌గ్రేడ్ చేయండి"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ఇక్కడ డౌన్‌లోడ్‌లను ప్లే చేయడం సాధ్యపడదు"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ద్వారా కనెక్ట్ చేయబడింది"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"టీవీ ఆటోమేటిక్ సెట్టింగ్"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI అవుట్‌పుట్"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"అంతర్గత స్పీకర్‌లు"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"బిల్ట్-ఇన్ స్పీకర్"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"టీవీ ఆడియో"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
     <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; ఫీడ్‌బ్యాక్"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"డిజేబుల్ చేయబడింది"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ఎనేబుల్ చేయబడింది"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ఈ మార్పును వర్తింపజేయాలంటే మీరు మీ పరికరాన్ని తప్పనిసరిగా రీబూట్ చేయాలి. ఇప్పుడే రీబూట్ చేయండి లేదా రద్దు చేయండి."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"వైర్ ఉన్న హెడ్‌ఫోన్"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"వైర్ ఉన్న హెడ్‌ఫోన్"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"వైర్ ఉన్న ఆడియో"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ఆడియో"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"వైర్ ఉన్న మైక్రోఫోన్"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB మైక్రోఫోన్"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT మైక్రోఫోన్"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ఆన్‌లో ఉంది"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ఆఫ్‌లో ఉంది"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"క్యారియర్ నెట్‌వర్క్ మారుతోంది"</string>

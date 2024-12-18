@@ -26,7 +26,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
-import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowManager;
@@ -77,12 +76,11 @@ class WindowlessSnapshotWindowCreator {
         final SurfaceControlViewHost mViewHost = new SurfaceControlViewHost(
                 mContext, display, wlw, "WindowlessSnapshotWindowCreator");
         final Rect windowBounds = runningTaskInfo.configuration.windowConfiguration.getBounds();
-        final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
         final FrameLayout rootLayout = new FrameLayout(
                 mSplashscreenContentDrawer.createViewContextWrapper(mContext));
         mViewHost.setView(rootLayout, lp);
-        SnapshotDrawerUtils.drawSnapshotOnSurface(info, lp, wlw.mChildSurface, snapshot,
-                windowBounds, topWindowInsetsState, false /* releaseAfterDraw */);
+        SnapshotDrawerUtils.drawSnapshotOnSurface(lp, wlw.mChildSurface, snapshot,
+                windowBounds, false /* releaseAfterDraw */);
 
         final ActivityManager.TaskDescription taskDescription =
                 SnapshotDrawerUtils.getOrCreateTaskDescription(runningTaskInfo);

@@ -17,7 +17,6 @@
 package com.android.systemui.qs.user
 
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
@@ -25,7 +24,6 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -34,22 +32,25 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.user.ui.dialog.DialogShowerImpl
 import javax.inject.Inject
 import javax.inject.Provider
 
-/**
- * Controller for [UserDialog].
- */
+/** Controller for [UserDialog]. */
 @SysUISingleton
-class UserSwitchDialogController @Inject constructor(
+class UserSwitchDialogController
+@Inject
+constructor(
     private val userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
     private val activityStarter: ActivityStarter,
     private val falsingManager: FalsingManager,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val uiEventLogger: UiEventLogger,
-    private val dialogFactory: SystemUIDialog.Factory
+    private val dialogFactory: SystemUIDialog.Factory,
+    private val shadeDialogContextInteractor: ShadeDialogContextInteractor,
 ) {
 
     companion object {
@@ -63,8 +64,9 @@ class UserSwitchDialogController @Inject constructor(
      * Populate the dialog with information from and adapter obtained from
      * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
-    fun showDialog(context: Context, expandable: Expandable) {
-        with(dialogFactory.create()) {
+    fun showDialog(expandable: Expandable) {
+        val context = shadeDialogContextInteractor.context
+        with(dialogFactory.create(context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
 
@@ -72,24 +74,31 @@ class UserSwitchDialogController @Inject constructor(
             setPositiveButton(R.string.quick_settings_done) { _, _ ->
                 uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE)
             }
-            setNeutralButton(R.string.quick_settings_more_user_settings, { _, _ ->
-                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
-                    val controller = dialogTransitionAnimator.createActivityTransitionController(
-                        getButton(BUTTON_NEUTRAL)
-                    )
+            setNeutralButton(
+                R.string.quick_settings_more_user_settings,
+                { _, _ ->
+                    if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
+                        val controller =
+                            dialogTransitionAnimator.createActivityTransitionController(
+                                getButton(BUTTON_NEUTRAL)
+                            )
 
-                    if (controller == null) {
-                        dismiss()
+                        if (controller == null) {
+                            dismiss()
+                        }
+
+                        activityStarter.postStartActivityDismissingKeyguard(
+                            USER_SETTINGS_INTENT,
+                            0,
+                            controller,
+                        )
                     }
-
-                    activityStarter.postStartActivityDismissingKeyguard(
-                        USER_SETTINGS_INTENT, 0, controller
-                    )
-                }
-            }, false /* dismissOnClick */)
-            val gridFrame = LayoutInflater.from(this.context)
-                .inflate(R.layout.qs_user_dialog_content, null)
+                },
+                false, /* dismissOnClick */
+            )
+            val gridFrame =
+                LayoutInflater.from(this.context).inflate(R.layout.qs_user_dialog_content, null)
             setView(gridFrame)
 
             val adapter = userDetailViewAdapterProvider.get()
@@ -101,10 +110,7 @@ class UserSwitchDialogController @Inject constructor(
                     DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
                 )
             if (controller != null) {
-                dialogTransitionAnimator.show(
-                    this,
-                    controller,
-                )
+                dialogTransitionAnimator.show(this, controller)
             } else {
                 show()
             }

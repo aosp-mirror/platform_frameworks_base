@@ -86,6 +86,35 @@ class SplitContainer {
         }
     }
 
+    /** This is only used when restoring it from a {@link ParcelableSplitContainerData}. */
+    SplitContainer(@NonNull ParcelableSplitContainerData parcelableData,
+            @NonNull SplitController splitController, @NonNull SplitRule splitRule) {
+        mParcelableData = parcelableData;
+        mPrimaryContainer = splitController.getContainer(parcelableData.getPrimaryContainerToken());
+        mSecondaryContainer = splitController.getContainer(
+                parcelableData.getSecondaryContainerToken());
+        mSplitRule = splitRule;
+        mDefaultSplitAttributes = splitRule.getDefaultSplitAttributes();
+        mCurrentSplitAttributes = mDefaultSplitAttributes;
+
+        if (shouldFinishPrimaryWithSecondary(splitRule)) {
+            addContainerToFinishOnExitWhenRestore(mSecondaryContainer, mPrimaryContainer);
+        }
+        if (shouldFinishSecondaryWithPrimary(splitRule)) {
+            addContainerToFinishOnExitWhenRestore(mPrimaryContainer, mSecondaryContainer);
+        }
+    }
+
+    private void addContainerToFinishOnExitWhenRestore(
+            @NonNull TaskFragmentContainer containerToAdd,
+            @NonNull TaskFragmentContainer containerToFinish) {
+        // If an activity was already added to be finished after the restoration, then that's it.
+        // Otherwise, add the container to finish on exit.
+        if (!containerToAdd.hasActivityToFinishOnExit(containerToFinish)) {
+            containerToAdd.addContainerToFinishOnExit(containerToFinish);
+        }
+    }
+
     void setPrimaryContainer(@NonNull TaskFragmentContainer primaryContainer) {
         if (!mParcelableData.mIsPrimaryContainerMutable) {
             throw new IllegalStateException("Cannot update primary TaskFragmentContainer");

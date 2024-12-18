@@ -20,11 +20,15 @@ import android.view.accessibility.CaptioningManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectValues
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.user.utils.FakeUserScopedService
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,9 +43,10 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@Suppress("UnspecifiedRegisterReceiverFlag")
 @RunWith(AndroidJUnit4::class)
 class CaptioningRepositoryTest : SysuiTestCase() {
+
+    private val kosmos = testKosmos()
 
     @Captor
     private lateinit var listenerCaptor: ArgumentCaptor<CaptioningManager.CaptioningChangeListener>
@@ -50,34 +55,33 @@ class CaptioningRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: CaptioningRepository
 
-    private val testScope = TestScope()
-
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
         underTest =
-            CaptioningRepositoryImpl(
-                captioningManager,
-                testScope.testScheduler,
-                testScope.backgroundScope
-            )
+            with(kosmos) {
+                CaptioningRepositoryImpl(
+                    FakeUserScopedService(captioningManager),
+                    userRepository,
+                    testScope.testScheduler,
+                    applicationCoroutineScope,
+                )
+            }
     }
 
     @Test
     fun isSystemAudioCaptioningEnabled_change_repositoryEmits() {
-        testScope.runTest {
-            `when`(captioningManager.isEnabled).thenReturn(false)
-            val isSystemAudioCaptioningEnabled = mutableListOf<Boolean>()
-            underTest.isSystemAudioCaptioningEnabled
-                .onEach { isSystemAudioCaptioningEnabled.add(it) }
-                .launchIn(backgroundScope)
+        kosmos.testScope.runTest {
+            `when`(captioningManager.isSystemAudioCaptioningEnabled).thenReturn(false)
+            val models by collectValues(underTest.captioningModel.filterNotNull())
             runCurrent()
 
+            `when`(captioningManager.isSystemAudioCaptioningEnabled).thenReturn(true)
             triggerOnSystemAudioCaptioningChange()
             runCurrent()
 
-            assertThat(isSystemAudioCaptioningEnabled)
+            assertThat(models.map { it.isSystemAudioCaptioningEnabled })
                 .containsExactlyElementsIn(listOf(false, true))
                 .inOrder()
         }
@@ -85,18 +89,16 @@ class CaptioningRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isSystemAudioCaptioningUiEnabled_change_repositoryEmits() {
-        testScope.runTest {
-            `when`(captioningManager.isSystemAudioCaptioningUiEnabled).thenReturn(false)
-            val isSystemAudioCaptioningUiEnabled = mutableListOf<Boolean>()
-            underTest.isSystemAudioCaptioningUiEnabled
-                .onEach { isSystemAudioCaptioningUiEnabled.add(it) }
-                .launchIn(backgroundScope)
+        kosmos.testScope.runTest {
+            `when`(captioningManager.isEnabled).thenReturn(false)
+            val models by collectValues(underTest.captioningModel.filterNotNull())
             runCurrent()
 
+            `when`(captioningManager.isSystemAudioCaptioningUiEnabled).thenReturn(true)
             triggerSystemAudioCaptioningUiChange()
             runCurrent()
 
-            assertThat(isSystemAudioCaptioningUiEnabled)
+            assertThat(models.map { it.isSystemAudioCaptioningUiEnabled })
                 .containsExactlyElementsIn(listOf(false, true))
                 .inOrder()
         }

@@ -43,7 +43,7 @@ object FooterPageProvider : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create( "Some Preference", owner)
+            SettingsEntryBuilder.create("Some Preference", owner)
                 .setSearchDataFn { EntrySearchData(title = "Some Preference") }
                 .setUiLayoutFn {
                     Preference(remember {
@@ -58,14 +58,12 @@ object FooterPageProvider : SettingsPageProvider {
         return entryList
     }
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
     }
 
     override fun getTitle(arguments: Bundle?): String {

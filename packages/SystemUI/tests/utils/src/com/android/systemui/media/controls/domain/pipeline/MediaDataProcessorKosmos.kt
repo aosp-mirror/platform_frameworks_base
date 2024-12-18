@@ -26,6 +26,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.data.repository.mediaDataRepository
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.util.fakeMediaControllerFactory
 import com.android.systemui.media.controls.util.mediaFlags
@@ -60,5 +61,6 @@ val Kosmos.mediaDataProcessor by
             keyguardUpdateMonitor = keyguardUpdateMonitor,
             mediaDataRepository = mediaDataRepository,
             mediaDataLoader = { mediaDataLoader },
+            mediaLogger = mediaLogger,
         )
     }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK;
+
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -27,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.core.view.ViewCompat;
 
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
@@ -68,6 +72,14 @@ public class SectionHeaderView extends StackScrollerDecorView {
         if (mLabelTextId != null) {
             mLabelView.setText(mLabelTextId);
         }
+        mLabelView.setAccessibilityHeading(true);
+        ViewCompat.replaceAccessibilityAction(
+                mLabelView,
+                ACTION_CLICK,
+                getResources().getString(
+                        R.string.accessibility_notification_section_header_open_settings),
+                null
+        );
     }
 
     @Override

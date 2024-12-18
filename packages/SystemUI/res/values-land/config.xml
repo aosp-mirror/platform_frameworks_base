@@ -25,6 +25,15 @@
 
     <integer name="quick_settings_num_columns">4</integer>
 
+    <!-- The number of rows in the paginated grid QuickSettings -->
+    <integer name="quick_settings_paginated_grid_num_rows">2</integer>
+
+    <!-- The number of rows in the paginated grid QuickQuickSettings -->
+    <integer name="quick_qs_paginated_grid_num_rows">1</integer>
+
+    <!-- The number of columns in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_num_columns">8</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">2</integer>
 

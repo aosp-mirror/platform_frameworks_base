@@ -26,6 +26,7 @@ import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,6 +67,8 @@ import android.view.Window;
 import android.window.RemoteTransition;
 import android.window.SplashScreen;
 import android.window.WindowContainerToken;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,35 +111,63 @@ public class ActivityOptions extends ComponentOptions {
             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS,
             MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE})
     public @interface BackgroundActivityStartMode {}
+
     /**
-     * No explicit value chosen. The system will decide whether to grant privileges.
+     * The system determines whether to grant background activity start privileges. This is the
+     * default behavior if no explicit mode is specified.
      */
     public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
     /**
-     * Allow the {@link PendingIntent} to use the background activity start privileges.
+     * Grants the {@link PendingIntent} background activity start privileges.
+     *
+     * This behaves the same as {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS}, except it
+     * does not grant background activity launch permissions based on the privileged permission
+     * <code>START_ACTIVITIES_FROM_BACKGROUND</code>.
+     *
+     * @deprecated Use {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE} to allow starts
+     * only when the app is visible or {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS} to
+     * allow starts at any time (see <a
+     * href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from the background</a>).
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
     /**
-     * Deny the {@link PendingIntent} to use the background activity start privileges.
+     * Denies the {@link PendingIntent} any background activity start privileges.
      */
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
     /**
-     * Allow the {@link PendingIntent} to use ALL background activity start privileges, including
-     * special permissions that will allow starts at any time.
+     * Grants the {@link PendingIntent} all background activity start privileges, including
+     * those normally reserved for privileged contexts (e.g., companion apps or those with the
+     * {@code START_ACTIVITIES_FROM_BACKGROUND} permission).
      *
-     * @hide
+     * <p><b>Caution:</b> This mode should be used sparingly. Most apps should use
+     * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE} instead, relying on notifications
+     * or foreground services for background interactions to minimize user disruption. However,
+     * this mode is necessary for specific use cases, such as companion apps responding to
+     * prompts from a connected device.
+     *
+     * <p>For more information on background activity start restrictions, see:
+     * <a href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from the background</a>
      */
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS = 3;
     /**
-     * Allow the {@link PendingIntent} to use background activity start privileges based on
-     * visibility of the app.
+     * Grants the {@link PendingIntent} background activity start privileges only when the app
+     * has a visible window (i.e., is visible to the user). This is the recommended mode for most
+     * apps to minimize disruption to the user experience.
      *
-     * @hide
+     * <p>For more information on background activity start restrictions, see:
+     * <a href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from the background</a>
      */
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE = 4;
     /**
-     * Special behavior for compatibility.
-     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}
+     * Provides compatibility with previous Android versions regarding background activity starts.
+     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}.
      *
      * @hide
      */
@@ -453,6 +484,10 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
             "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
 
+    /** See {@link #setAllowPassThroughOnTouchOutside(boolean)}. */
+    private static final String KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE =
+            "android.activity.allowPassThroughOnTouchOutside";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -554,6 +589,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mPendingIntentCreatorBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
     private boolean mDisableStartingWindow;
+    private boolean mAllowPassThroughOnTouchOutside;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1416,6 +1452,7 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
                 MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
+        mAllowPassThroughOnTouchOutside = opts.getBoolean(KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE);
         mAnimationAbortListener = IRemoteCallback.Stub.asInterface(
                 opts.getBinder(KEY_ANIM_ABORT_LISTENER));
     }
@@ -1837,6 +1874,39 @@ public class ActivityOptions extends ComponentOptions {
     public boolean isLaunchIntoPip() {
         return mLaunchIntoPipParams != null
                 && mLaunchIntoPipParams.isLaunchIntoPip();
+    }
+
+    /**
+     * Returns whether the source activity allows the overlaying activities from the to-be-launched
+     * app to pass through touch events to it when touches fall outside the content window.
+     *
+     * @see #setAllowPassThroughOnTouchOutside(boolean)
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_TOUCH_PASS_THROUGH_OPT_IN)
+    public boolean isAllowPassThroughOnTouchOutside() {
+        return mAllowPassThroughOnTouchOutside;
+    }
+
+    /**
+     * Sets whether the source activity allows the overlaying activities from the to-be-launched
+     * app to pass through touch events to it when touches fall outside the content window.
+     *
+     * <p> By default, touches that fall on a translucent non-touchable area of an overlaying
+     * activity window are blocked from passing through to the activity below (source activity),
+     * unless the overlaying activity is from the same UID as the source activity. The source
+     * activity may use this method to opt in and allow the overlaying activities from the
+     * to-be-launched app to pass through touches to itself. The source activity needs to ensure
+     * that it trusts the overlaying activity and its content is not vulnerable to UI redressing
+     * attacks. The flag is ignored if the context calling
+     * {@link Context#startActivity(Intent, Bundle)} is not an activity.
+     *
+     * <p> For backward compatibility, apps with target SDK 35 and below may still receive
+     * pass-through touches without opt-in if the cross-uid activity is launched by the source
+     * activity.
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_TOUCH_PASS_THROUGH_OPT_IN)
+    public void setAllowPassThroughOnTouchOutside(boolean allowed) {
+        mAllowPassThroughOnTouchOutside = allowed;
     }
 
     /** @hide */
@@ -2519,6 +2589,10 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
+        }
+        if (mAllowPassThroughOnTouchOutside) {
+            b.putBoolean(KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE,
+                    mAllowPassThroughOnTouchOutside);
         }
         b.putBinder(KEY_ANIM_ABORT_LISTENER,
                 mAnimationAbortListener != null ? mAnimationAbortListener.asBinder() : null);

@@ -18,6 +18,7 @@ package com.android.server.power.stats;
 
 import android.os.BatteryUsageStats;
 import android.util.IndentingPrintWriter;
+import android.util.Slog;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -28,6 +29,7 @@ import java.io.IOException;
 
 class BatteryUsageStatsSection extends PowerStatsSpan.Section {
     public static final String TYPE = "battery-usage-stats";
+    private static final String TAG = "BatteryUsageStatsSection";
 
     private final BatteryUsageStats mBatteryUsageStats;
 
@@ -48,6 +50,15 @@ class BatteryUsageStatsSection extends PowerStatsSpan.Section {
     @Override
     public void dump(IndentingPrintWriter ipw) {
         mBatteryUsageStats.dump(ipw, "");
+    }
+
+    @Override
+    public void close() {
+        try {
+            mBatteryUsageStats.close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Closing BatteryUsageStats", e);
+        }
     }
 
     static class Reader implements PowerStatsSpan.SectionReader {
