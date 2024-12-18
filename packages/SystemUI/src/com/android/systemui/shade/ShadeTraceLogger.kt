@@ -17,45 +17,35 @@
 package com.android.systemui.shade
 
 import android.content.res.Configuration
-import android.os.Trace
-import com.android.app.tracing.TraceUtils.traceAsync
+import com.android.app.tracing.coroutines.TrackTracer
 
 /**
  * Centralized logging for shade-related events to a dedicated Perfetto track.
  *
- * Used by shade components to log events to a track named [TAG]. This consolidates shade-specific
- * events into a single track for easier analysis in Perfetto, rather than scattering them across
- * various threads' logs.
+ * Used by shade components to log events to a track named [TRACK_NAME]. This consolidates
+ * shade-specific events into a single track for easier analysis in Perfetto, rather than scattering
+ * them across various threads' logs.
  */
 object ShadeTraceLogger {
-    private const val TAG = "ShadeTraceLogger"
+    private val t = TrackTracer(trackName = "ShadeTraceLogger")
 
     @JvmStatic
     fun logOnMovedToDisplay(displayId: Int, config: Configuration) {
-        if (!Trace.isEnabled()) return
-        Trace.instantForTrack(
-            Trace.TRACE_TAG_APP,
-            TAG,
-            "onMovedToDisplay(displayId=$displayId, dpi=" + config.densityDpi + ")",
-        )
+        t.instant { "onMovedToDisplay(displayId=$displayId, dpi=${config.densityDpi})" }
     }
 
     @JvmStatic
     fun logOnConfigChanged(config: Configuration) {
-        if (!Trace.isEnabled()) return
-        Trace.instantForTrack(
-            Trace.TRACE_TAG_APP,
-            TAG,
-            "onConfigurationChanged(dpi=" + config.densityDpi + ")",
-        )
+        t.instant { "onConfigurationChanged(dpi=${config.densityDpi})" }
     }
 
+    @JvmStatic
     fun logMoveShadeWindowTo(displayId: Int) {
-        if (!Trace.isEnabled()) return
-        Trace.instantForTrack(Trace.TRACE_TAG_APP, TAG, "moveShadeWindowTo(displayId=$displayId)")
+        t.instant { "moveShadeWindowTo(displayId=$displayId)" }
     }
 
+    @JvmStatic
     fun traceReparenting(r: () -> Unit) {
-        traceAsync(TAG, { "reparenting" }) { r() }
+        t.traceAsync({ "reparenting" }) { r() }
     }
 }
