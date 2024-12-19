@@ -55,22 +55,21 @@ constructor(
             viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }
 
-        viewModel.state.onEach { it.bindToSlider(sliderView) }.launchIn(this)
+        viewModel.state.onEach { sliderView.setModel(it) }.launchIn(this)
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private suspend fun VolumeDialogSliderStateModel.bindToSlider(slider: Slider) {
-        with(slider) {
-            valueFrom = minValue
-            valueTo = maxValue
-            // coerce the current value to the new value range before animating it
-            value = value.coerceIn(valueFrom, valueTo)
-            setValueAnimated(
-                value,
-                jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
-            )
-            trackIconActiveEnd = context.getDrawable(iconRes)
-        }
+    private suspend fun Slider.setModel(model: VolumeDialogSliderStateModel) {
+        valueFrom = model.minValue
+        valueTo = model.maxValue
+        // coerce the current value to the new value range before animating it. This prevents
+        // animating from the value that is outside of current [valueFrom, valueTo].
+        value = value.coerceIn(valueFrom, valueTo)
+        setValueAnimated(
+            model.value,
+            jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
+        )
+        trackIconActiveEnd = context.getDrawable(model.iconRes)
     }
 }
 

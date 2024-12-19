@@ -2106,6 +2106,8 @@
 
     <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
 
+    <dimen name="volume_dialog_slider_max_deviation">56dp</dimen>
+
     <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
 
     <dimen name="volume_dialog_ringer_drawer_button_size">@dimen/volume_dialog_button_size</dimen>

@@ -40,9 +40,17 @@ constructor(private val viewModel: VolumeDialogSlidersViewModel) {
             view.requireViewById(R.id.volume_dialog_floating_sliders_container)
         val mainSliderContainer: View =
             view.requireViewById(R.id.volume_dialog_main_slider_container)
+        val background: View = view.requireViewById(R.id.volume_dialog_background)
+        val settingsButton: View = view.requireViewById(R.id.volume_dialog_settings)
+        val ringerDrawer: View = view.requireViewById(R.id.volume_ringer_drawer)
+
         viewModel.sliders
             .onEach { uiModel ->
-                bindSlider(uiModel.sliderComponent, mainSliderContainer)
+                bindSlider(
+                    uiModel.sliderComponent,
+                    mainSliderContainer,
+                    arrayOf(mainSliderContainer, background, settingsButton, ringerDrawer),
+                )
 
                 val floatingSliderViewBinders = uiModel.floatingSliderComponent
                 floatingSlidersContainer.ensureChildCount(
@@ -50,7 +58,8 @@ constructor(private val viewModel: VolumeDialogSlidersViewModel) {
                     count = floatingSliderViewBinders.size,
                 )
                 floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
-                    bindSlider(sliderComponent, floatingSlidersContainer.getChildAt(index))
+                    val sliderContainer = floatingSlidersContainer.getChildAt(index)
+                    bindSlider(sliderComponent, sliderContainer, arrayOf(sliderContainer))
                 }
             }
             .launchIn(this)
@@ -59,10 +68,12 @@ constructor(private val viewModel: VolumeDialogSlidersViewModel) {
     private fun CoroutineScope.bindSlider(
         component: VolumeDialogSliderComponent,
         sliderContainer: View,
+        viewsToAnimate: Array<View>,
     ) {
         with(component.sliderViewBinder()) { bind(sliderContainer) }
         with(component.sliderTouchesViewBinder()) { bind(sliderContainer) }
         with(component.sliderHapticsViewBinder()) { bind(sliderContainer) }
+        with(component.overscrollViewBinder()) { bind(sliderContainer, viewsToAnimate) }
     }
 }
 
