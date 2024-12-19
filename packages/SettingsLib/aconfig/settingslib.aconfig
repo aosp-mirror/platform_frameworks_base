@@ -199,3 +199,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "disable_audio_sharing_auto_pick_fallback_in_ui"
+    namespace: "cross_device_experiences"
+    description: "Do not auto pick audio sharing fallback device in UI"
+    bug: "383469911"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
