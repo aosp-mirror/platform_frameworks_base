@@ -21,6 +21,7 @@ android_library {
         "androidx.annotation_annotation",
         "androidx.fragment_fragment",
         "androidx.preference_preference",
+        "statslog-settingslib",
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
@@ -34,4 +35,19 @@ java_library {
     },
     sdk_version: "core_current",
     static_libs: ["libprotobuf-java-lite"],
+}
+
+genrule {
+    name: "statslog-settingslib-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module settings" +
+        " --javaPackage com.android.settingslib.graph.instrumentation --javaClass SettingslibStatsLog",
+    out: ["com/android/settingslib/graph/instrumentation/SettingslibStatsLog.java"],
+}
+
+java_library {
+    name: "statslog-settingslib",
+    srcs: [
+        ":statslog-settingslib-java-gen",
+    ],
 }
