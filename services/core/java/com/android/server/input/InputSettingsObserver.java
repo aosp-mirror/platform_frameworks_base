@@ -74,6 +74,8 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(
                                 Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED),
                         (reason) -> updateMouseAccelerationEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.MOUSE_SCROLLING_SPEED),
+                        (reason) -> updateMouseScrollingSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
                         (reason) -> updateTouchpadPointerSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
@@ -197,6 +199,11 @@ class InputSettingsObserver extends ContentObserver {
     private void updateMouseAccelerationEnabled() {
         mNative.setMouseAccelerationEnabled(
                 InputSettings.isMousePointerAccelerationEnabled(mContext));
+    }
+
+    private void updateMouseScrollingSpeed() {
+        mNative.setMouseScrollingSpeed(
+                constrainPointerSpeedValue(InputSettings.getMouseScrollingSpeed(mContext)));
     }
 
     private void updateTouchpadPointerSpeed() {

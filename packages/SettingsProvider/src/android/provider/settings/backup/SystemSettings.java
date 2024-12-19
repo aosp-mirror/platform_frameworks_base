@@ -109,6 +109,7 @@ public class SystemSettings {
                 Settings.System.LOCALE_PREFERENCES,
                 Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING,
                 Settings.System.MOUSE_SCROLLING_ACCELERATION,
+                Settings.System.MOUSE_SCROLLING_SPEED,
                 Settings.System.MOUSE_SWAP_PRIMARY_BUTTON,
                 Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED,
                 Settings.System.TOUCHPAD_POINTER_SPEED,
