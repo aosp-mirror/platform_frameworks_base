@@ -271,7 +271,7 @@ internal class SwipeAnimation<T : ContentKey>(
 
     /** The offset animation that animates the offset once the user lifts their finger. */
     private var offsetAnimation: Animatable<Float, AnimationVector1D>? by mutableStateOf(null)
-    private val offsetAnimationRunnable = CompletableDeferred<(suspend () -> Unit)?>()
+    private val offsetAnimationRunnable = CompletableDeferred<suspend () -> Unit>()
 
     val isUserInputOngoing: Boolean
         get() = offsetAnimation == null
@@ -333,6 +333,7 @@ internal class SwipeAnimation<T : ContentKey>(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
+        overscrollCompletable: CompletableDeferred<Unit>? = null,
     ): Float {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
@@ -391,7 +392,12 @@ internal class SwipeAnimation<T : ContentKey>(
         // detail).
         if (skipAnimation) {
             // Unblock the job.
-            offsetAnimationRunnable.complete(null)
+            offsetAnimationRunnable.complete {
+                // Wait for overscroll to finish so that the transition is removed from the STLState
+                // only after the overscroll is done, to avoid dropping frame right when the user
+                // lifts their finger and overscroll is animated to 0.
+                overscrollCompletable?.await()
+            }
             return 0f
         }
 
@@ -450,6 +456,11 @@ internal class SwipeAnimation<T : ContentKey>(
                     // The animation consumed the whole available velocity
                     velocityConsumed.complete(initialVelocity)
                 }
+
+                // Wait for overscroll to finish so that the transition is removed from the STLState
+                // only after the overscroll is done, to avoid dropping frame right when the user
+                // lifts their finger and overscroll is animated to 0.
+                overscrollCompletable?.await()
             }
         }
 
