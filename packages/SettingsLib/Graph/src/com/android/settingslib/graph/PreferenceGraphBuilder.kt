@@ -391,7 +391,13 @@ fun PreferenceMetadata.toProto(
     }
     persistent = metadata.isPersistent(context)
     if (persistent) {
-        if (metadata is PersistentPreference<*>) sensitivityLevel = metadata.sensitivityLevel
+        if (metadata is PersistentPreference<*>) {
+            sensitivityLevel = metadata.sensitivityLevel
+            val readPermissions = metadata.getReadPermissions(context)
+            readPermissions.forEach { addReadPermissions(it) }
+            val writePermissions = metadata.getWritePermissions(context)
+            writePermissions.forEach { addWritePermissions(it) }
+        }
         if (
             flags.includeValue() &&
                 enabled &&
