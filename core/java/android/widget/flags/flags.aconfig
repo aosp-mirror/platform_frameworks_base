@@ -17,3 +17,13 @@ flag {
   is_exported: true
   bug: "369480667"
 }
+
+flag {
+  name: "fix_unbolded_typeface_for_numberpicker"
+  namespace: "text"
+  description: "Use the correct bolded typeface when drawing the selector numbers"
+  bug: "318304896"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
