@@ -49,32 +49,20 @@ public final class HubMessage implements Parcelable {
      * HubEndpointSession#sendMessage} to specify the behavior of message delivery.
      */
     public static class DeliveryParams {
-        private boolean mResponseRequired;
+        private final boolean mResponseRequired;
 
-        private DeliveryParams(boolean responseRequired) {
+        /**
+         * @param responseRequired If true, message sent with this option will have a {@link
+         *     android.hardware.location.ContextHubTransaction.Response} when the peer received the
+         *     message.
+         */
+        public DeliveryParams(boolean responseRequired) {
             mResponseRequired = responseRequired;
         }
 
         /** Get the acknowledgement requirement. */
         public boolean isResponseRequired() {
             return mResponseRequired;
-        }
-
-        /**
-         * Set the response requirement for a message. Message sent with this option will have a
-         * {@link android.hardware.location.ContextHubTransaction.Response} when the peer received
-         * the message. Default is false.
-         */
-        @NonNull
-        public DeliveryParams setResponseRequired(boolean required) {
-            mResponseRequired = required;
-            return this;
-        }
-
-        /** Construct a default delivery option. */
-        @NonNull
-        public static DeliveryParams makeBasic() {
-            return new DeliveryParams(false);
         }
 
         @Override
@@ -105,37 +93,32 @@ public final class HubMessage implements Parcelable {
         }
     }
 
-    private HubMessage(int messageType, byte[] messageBody, DeliveryParams deliveryParams) {
-        mMessageType = messageType;
-        mMessageBody = messageBody;
-        mDeliveryParams = deliveryParams;
-    }
-
     /**
-     * Creates a HubMessage object to send to through an endpoint.
+     * Default constructor for HubMessage with no response required.
      *
      * @param messageType the endpoint & service dependent message type
      * @param messageBody the byte array message contents
-     * @return the HubMessage object
      */
-    @NonNull
-    public static HubMessage createMessage(int messageType, @NonNull byte[] messageBody) {
-        return new HubMessage(messageType, messageBody, DeliveryParams.makeBasic());
+    public HubMessage(int messageType, @NonNull byte[] messageBody) {
+        Objects.requireNonNull(messageBody, "messageBody cannot be null");
+        mMessageType = messageType;
+        mMessageBody = messageBody;
+        mDeliveryParams = new DeliveryParams(/* responseRequired= */ false);
     }
 
     /**
-     * Creates a HubMessage object to send to through an endpoint.
-     *
      * @param messageType the endpoint & service dependent message type
      * @param messageBody the byte array message contents
      * @param deliveryParams The message delivery parameters. See {@link HubMessage.DeliveryParams}
      *     for more details.
-     * @return the HubMessage object
      */
-    @NonNull
-    public static HubMessage createMessage(
+    public HubMessage(
             int messageType, @NonNull byte[] messageBody, @NonNull DeliveryParams deliveryParams) {
-        return new HubMessage(messageType, messageBody, deliveryParams);
+        Objects.requireNonNull(messageBody, "messageBody cannot be null");
+        Objects.requireNonNull(deliveryParams, "deliveryParams cannot be null");
+        mMessageType = messageType;
+        mMessageBody = messageBody;
+        mDeliveryParams = deliveryParams;
     }
 
     /**
@@ -192,8 +175,7 @@ public final class HubMessage implements Parcelable {
         mMessageBody = new byte[msgSize];
         in.readByteArray(mMessageBody);
 
-        mDeliveryParams = DeliveryParams.makeBasic();
-        mDeliveryParams.setResponseRequired(in.readInt() == 1);
+        mDeliveryParams = new DeliveryParams(in.readInt() == 1);
         mMessageSequenceNumber = in.readInt();
     }
 

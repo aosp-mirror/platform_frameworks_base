@@ -5157,8 +5157,8 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public final class HubMessage implements android.os.Parcelable {
-    method @NonNull public static android.hardware.contexthub.HubMessage createMessage(int, @NonNull byte[]);
-    method @NonNull public static android.hardware.contexthub.HubMessage createMessage(int, @NonNull byte[], @NonNull android.hardware.contexthub.HubMessage.DeliveryParams);
+    ctor public HubMessage(int, @NonNull byte[]);
+    ctor public HubMessage(int, @NonNull byte[], @NonNull android.hardware.contexthub.HubMessage.DeliveryParams);
     method public int describeContents();
     method @NonNull public byte[] getMessageBody();
     method public int getMessageType();
@@ -5167,9 +5167,8 @@ package android.hardware.contexthub {
   }
 
   public static class HubMessage.DeliveryParams {
+    ctor public HubMessage.DeliveryParams(boolean);
     method public boolean isResponseRequired();
-    method @NonNull public static android.hardware.contexthub.HubMessage.DeliveryParams makeBasic();
-    method @NonNull public android.hardware.contexthub.HubMessage.DeliveryParams setResponseRequired(boolean);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public final class HubServiceInfo implements android.os.Parcelable {
