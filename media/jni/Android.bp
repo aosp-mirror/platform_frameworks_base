@@ -25,7 +25,6 @@ cc_library_shared {
     min_sdk_version: "",
 
     srcs: [
-        "android_media_CodecCapabilities.cpp",
         "android_media_ImageWriter.cpp",
         "android_media_ImageReader.cpp",
         "android_media_JetPlayer.cpp",
@@ -65,7 +64,6 @@ cc_library_shared {
         "libbinder",
         "libmedia",
         "libmedia_codeclist",
-        "libmedia_codeclist_capabilities",
         "libmedia_jni_utils",
         "libmedia_omx",
         "libmediametrics",
