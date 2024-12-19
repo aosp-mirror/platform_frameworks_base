@@ -30,7 +30,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
 
 /** A view-model to trigger haptic feedback on Quick Settings tiles */
-@OptIn(ExperimentalCoroutinesApi::class)
 class TileHapticsViewModel
 @AssistedInject
 constructor(

@@ -86,14 +86,12 @@ import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
-@OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardRootViewBinder {
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic

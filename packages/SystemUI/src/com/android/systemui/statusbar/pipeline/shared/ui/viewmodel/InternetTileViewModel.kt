@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +51,6 @@ import kotlinx.coroutines.flow.stateIn
  * InternetTileModel objects, so that updating the tile is as simple as collecting on this state
  * flow and then calling [QSTileImpl.refreshState]
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class InternetTileViewModel
 @Inject

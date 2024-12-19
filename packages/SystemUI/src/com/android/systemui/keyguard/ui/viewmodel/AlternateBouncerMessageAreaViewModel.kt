@@ -26,7 +26,6 @@ import com.android.systemui.deviceentry.shared.model.FingerprintMessage
 import com.android.systemui.statusbar.KeyguardIndicationController.DEFAULT_MESSAGE_TIME
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /** View model for the alternate bouncer message area. */
-@ExperimentalCoroutinesApi
 class AlternateBouncerMessageAreaViewModel
 @Inject
 constructor(

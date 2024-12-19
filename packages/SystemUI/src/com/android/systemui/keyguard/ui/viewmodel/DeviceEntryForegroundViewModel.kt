@@ -30,7 +30,6 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.math.roundToInt
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -43,7 +42,6 @@ import kotlinx.coroutines.flow.onStart
 
 /** Models the UI state for the device entry icon foreground view (displayed icon). */
 @OptIn(FlowPreview::class)
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntryForegroundViewModel
 @Inject

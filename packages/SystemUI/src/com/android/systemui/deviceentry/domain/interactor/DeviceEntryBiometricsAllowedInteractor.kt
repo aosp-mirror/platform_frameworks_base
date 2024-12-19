@@ -20,7 +20,6 @@ import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,7 +34,6 @@ import kotlinx.coroutines.flow.map
  * This class coordinates the lockout states of each individual biometric based on the lockout
  * states of other biometrics.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceEntryBiometricsAllowedInteractor
 @Inject

@@ -27,12 +27,10 @@ import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityMod
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogPluginScope
 class VolumeDialogPluginViewModel
 @Inject

@@ -24,14 +24,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
  * Breaks down ALTERNATE_BOUNCER->OCCLUDED transition into discrete steps for corresponding views to
  * consume.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class AlternateBouncerToOccludedTransitionViewModel
 @Inject

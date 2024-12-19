@@ -45,7 +45,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -148,7 +147,6 @@ class FooterActionsViewModel(
             )
         }
 
-        @OptIn(ExperimentalCoroutinesApi::class)
         fun create(lifecycleCoroutineScope: LifecycleCoroutineScope): FooterActionsViewModel {
             val globalActionsDialogLite = globalActionsDialogLiteProvider.get()
             if (lifecycleCoroutineScope.isActive) {

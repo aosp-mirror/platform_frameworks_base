@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -190,7 +189,6 @@ constructor(
  * [defaultValue] allows for a default value to be used if there are no leaf nodes after applying
  * [selector]. E.g., if there are no mobile connections, assume that there is no service.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 private inline fun <R, reified S, T> Flow<List<R>>.aggregateOver(
     crossinline selector: (R) -> Flow<S>,
     defaultValue: T,

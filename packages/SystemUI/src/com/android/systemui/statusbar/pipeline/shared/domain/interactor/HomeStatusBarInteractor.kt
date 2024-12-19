@@ -22,7 +22,6 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.CarrierConfigInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.model.StatusBarDisableFlagsVisibilityModel
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.map
  * Interactor for the home screen status bar (aka
  * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment]).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class HomeStatusBarInteractor
 @Inject

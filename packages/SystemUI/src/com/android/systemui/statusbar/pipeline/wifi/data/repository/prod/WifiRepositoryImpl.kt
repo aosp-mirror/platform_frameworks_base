@@ -109,7 +109,6 @@ constructor(
             secondaryNetworks = emptyList(),
         )
 
-    @kotlinx.coroutines.ExperimentalCoroutinesApi
     private val wifiPickerTrackerInfo: StateFlow<WifiPickerTrackerInfo> =
         if (multiuserWifiPickerTrackerSupport()) {
             selectedUserContext

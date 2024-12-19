@@ -86,7 +86,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -95,7 +94,6 @@ import org.json.JSONObject
 
 /** Renders the preview of the lock screen. */
 class KeyguardPreviewRenderer
-@OptIn(ExperimentalCoroutinesApi::class)
 @AssistedInject
 constructor(
     @Application private val context: Context,
@@ -323,7 +321,6 @@ constructor(
         smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
         rootView.addView(

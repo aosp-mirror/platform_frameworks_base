@@ -50,7 +50,6 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,7 +121,6 @@ interface BiometricSettingsRepository {
 
 private const val TAG = "BiometricsRepositoryImpl"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BiometricSettingsRepositoryImpl
 @Inject
@@ -387,7 +385,6 @@ constructor(
             .and(isFaceAuthSupportedInCurrentPosture)
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 private class StrongAuthTracker(
     private val userRepository: UserRepository,
     @ShadeDisplayAware context: Context?

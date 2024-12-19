@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataS
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -47,7 +46,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Business logic about the visibility of various parts of the window root view. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WindowRootViewVisibilityInteractor
 @Inject

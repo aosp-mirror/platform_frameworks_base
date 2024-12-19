@@ -24,7 +24,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -36,7 +35,6 @@ import kotlinx.coroutines.flow.stateIn
 @SysUISingleton
 class ShadeAnimationInteractorSceneContainerImpl
 @Inject
-@OptIn(ExperimentalCoroutinesApi::class)
 constructor(
     @Background scope: CoroutineScope,
     shadeAnimationRepository: ShadeAnimationRepository,

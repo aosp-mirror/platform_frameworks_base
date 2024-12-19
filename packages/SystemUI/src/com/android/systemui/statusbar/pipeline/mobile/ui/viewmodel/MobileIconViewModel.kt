@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.model.MobileContentDesc
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -74,7 +73,6 @@ interface MobileIconViewModelCommon {
  * model gets the exact same information, as well as allows us to log that unified state only once
  * per icon.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class MobileIconViewModel(
     override val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,
@@ -164,7 +162,6 @@ private class CarrierBasedSatelliteViewModelImpl(
 
 /** Terrestrial (cellular) icon. */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 private class CellularIconViewModel(
     override val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,

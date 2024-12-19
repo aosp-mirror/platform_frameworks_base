@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 
@@ -41,7 +40,6 @@ import kotlinx.coroutines.flow.flatMapLatest
  * Breaks down PRIMARY_BOUNCER->GONE transition into discrete steps for corresponding views to
  * consume.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class PrimaryBouncerToGoneTransitionViewModel
 @Inject

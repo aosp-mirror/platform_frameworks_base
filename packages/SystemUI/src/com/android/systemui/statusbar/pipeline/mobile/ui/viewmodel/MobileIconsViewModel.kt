@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.stateIn
  * of [MobileIconViewModel]s which describe the individual icons and can be bound to
  * [ModernStatusBarMobileView].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class MobileIconsViewModel
 @Inject

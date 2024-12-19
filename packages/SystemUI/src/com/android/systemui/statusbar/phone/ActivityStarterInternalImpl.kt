@@ -66,14 +66,12 @@ import com.android.systemui.util.kotlin.getOrNull
 import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Encapsulates the activity logic for activity starter when the SceneContainerFlag is enabled.
  *
  * TODO: b/308819693
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class ActivityStarterInternalImpl
 @Inject

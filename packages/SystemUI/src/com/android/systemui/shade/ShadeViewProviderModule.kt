@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.shade
 
 import android.annotation.SuppressLint
@@ -62,7 +60,6 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Module for providing views related to the shade. */
 @Module

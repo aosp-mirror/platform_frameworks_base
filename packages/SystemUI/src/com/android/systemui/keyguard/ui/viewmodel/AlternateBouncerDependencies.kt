@@ -25,10 +25,8 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Provides dependencies for the AlternateBouncerViewBinder. */
-@ExperimentalCoroutinesApi
 class AlternateBouncerDependencies
 @Inject
 constructor(

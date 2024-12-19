@@ -64,14 +64,12 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 import javax.inject.Inject;
 
 /**
  * Implementation of DozeHost for SystemUI.
  */
-@ExperimentalCoroutinesApi @SysUISingleton
+@SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
     private final IListenerSet<Callback> mCallbacks = new CopyOnLoopListenerSet<>();

@@ -69,7 +69,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -83,7 +82,6 @@ private const val TAG = "UdfpsControllerOverlay"
  * Keeps track of the overlay state and UI resources associated with a single FingerprintService
  * request. This state can persist across configuration changes via the [show] and [hide] methods.
  */
-@ExperimentalCoroutinesApi
 @UiThread
 class UdfpsControllerOverlay
 @JvmOverloads

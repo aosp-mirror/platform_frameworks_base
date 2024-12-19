@@ -26,14 +26,12 @@ import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepos
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.TasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Interactor with logic related to task switching in the context of media projection. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TaskSwitchInteractor
 @Inject

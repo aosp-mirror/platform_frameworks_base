@@ -39,14 +39,12 @@ import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.jvm.optionals.getOrNull
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Positions elements of the lockscreen to the default position.
  *
  * This will be the most common use case for phones in portrait mode.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 @JvmSuppressWildcards
 class DefaultKeyguardBlueprint

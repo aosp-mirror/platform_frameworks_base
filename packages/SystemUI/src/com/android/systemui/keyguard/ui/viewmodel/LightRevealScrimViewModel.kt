@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.keyguard.domain.interactor.LightRevealScrimInteractor
 import com.android.systemui.statusbar.LightRevealEffect
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.map
  * Models UI state for the light reveal scrim, which is used during screen on and off animations to
  * draw a gradient that reveals/hides the contents of the screen.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class LightRevealScrimViewModel
 @Inject
 constructor(private val interactor: LightRevealScrimInteractor) {

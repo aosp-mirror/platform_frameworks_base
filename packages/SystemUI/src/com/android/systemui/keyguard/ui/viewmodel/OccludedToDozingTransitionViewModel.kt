@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -34,7 +33,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 /**
  * Breaks down OCCLUDED->DOZING transition into discrete steps for corresponding views to consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class OccludedToDozingTransitionViewModel
 @Inject

@@ -28,7 +28,6 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -36,7 +35,6 @@ import kotlinx.coroutines.flow.emptyFlow
  * Breaks down DOZING->PRIMARY BOUNCER transition into discrete steps for corresponding views to
  * consume.
  */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DozingToPrimaryBouncerTransitionViewModel
 @Inject

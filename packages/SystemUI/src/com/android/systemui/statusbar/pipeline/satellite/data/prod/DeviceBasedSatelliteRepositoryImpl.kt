@@ -54,7 +54,6 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -100,7 +99,6 @@ sealed interface SatelliteSupport {
      */
     data object NotSupported : SatelliteSupport
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     companion object {
         /**
          * Convenience function to switch to the supported flow. [retrySignal] is a flow that emits

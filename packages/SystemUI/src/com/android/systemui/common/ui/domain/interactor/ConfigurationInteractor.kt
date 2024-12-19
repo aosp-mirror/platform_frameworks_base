@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.common.ui.domain.interactor
 
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.Surface
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

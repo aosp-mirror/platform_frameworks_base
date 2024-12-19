@@ -24,9 +24,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.UdfpsAccessibilityOverlayViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 object UdfpsAccessibilityOverlayBinder {
 
     /** Forwards hover events to the view model to make guided announcements for accessibility. */

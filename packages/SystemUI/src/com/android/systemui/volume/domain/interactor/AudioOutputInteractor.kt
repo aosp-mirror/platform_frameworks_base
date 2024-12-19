@@ -35,7 +35,6 @@ import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.stateIn
 
 /** Provides a currently active audio device data. */
 @VolumePanelScope
-@OptIn(ExperimentalCoroutinesApi::class)
 class AudioOutputInteractor
 @Inject
 constructor(

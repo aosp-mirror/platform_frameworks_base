@@ -32,14 +32,12 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
 import javax.inject.Inject
 import kotlin.time.Duration
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /** ALTERNATE and PRIMARY bouncers common animations */
-@OptIn(ExperimentalCoroutinesApi::class)
 class BouncerToGoneFlows
 @Inject
 constructor(

@@ -50,7 +50,6 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -535,7 +534,6 @@ constructor(
         awaitClose { dozeTransitionListener.removeCallback(callback) }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val isEncryptedOrLockdown: Flow<Boolean> =
         conflatedCallbackFlow {
                 val callback =

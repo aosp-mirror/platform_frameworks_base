@@ -20,12 +20,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /** Encapsulates business logic for device entry biometric settings. */
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntryBiometricSettingsInteractor
 @Inject

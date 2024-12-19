@@ -113,7 +113,6 @@ constructor(
 
     private val datastore = MutableStateFlow<DataStore<Preferences>?>(null)
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private val prefData: Flow<Preferences> = datastore.filterNotNull().flatMapLatest { it.data }
 
     override val keyboardShortcutTriggered: Flow<GestureType> =

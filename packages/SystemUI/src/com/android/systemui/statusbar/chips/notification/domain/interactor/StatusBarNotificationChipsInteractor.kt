@@ -33,7 +33,6 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +45,6 @@ import kotlinx.coroutines.flow.map
 
 /** An interactor for the notification chips shown in the status bar. */
 @SysUISingleton
-@OptIn(ExperimentalCoroutinesApi::class)
 class StatusBarNotificationChipsInteractor
 @Inject
 constructor(

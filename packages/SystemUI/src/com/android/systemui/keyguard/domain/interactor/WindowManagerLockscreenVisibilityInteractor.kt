@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.compose.animation.scene.ObservableTransitionState.Idle
@@ -38,7 +36,6 @@ import com.android.systemui.util.kotlin.sample
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -46,7 +43,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WindowManagerLockscreenVisibilityInteractor
 @Inject
@@ -83,7 +79,6 @@ constructor(
      * only be visible after swiping 20% of the way up the screen, and should become invisible again
      * if the user swipes back down.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val transitionSpecificSurfaceBehindVisibility: Flow<Boolean?> =
         transitionInteractor.startedKeyguardTransitionStep
             .flatMapLatest { startedStep ->
@@ -121,7 +116,6 @@ constructor(
      * transitioning between [KeyguardState]s or [Scenes] or the transition-specific visibility used
      * during certain ongoing transitions.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     val surfaceBehindVisibility: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
                 sceneInteractor.get().transitionState.flatMapLatestConflated { state ->

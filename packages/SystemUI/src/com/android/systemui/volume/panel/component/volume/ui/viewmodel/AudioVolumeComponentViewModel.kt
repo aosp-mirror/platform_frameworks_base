@@ -32,7 +32,6 @@ import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.shared.model.filterData
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +51,6 @@ import kotlinx.coroutines.flow.transformLatest
  * Controls the behaviour of the whole audio
  * [com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @VolumePanelScope
 class AudioVolumeComponentViewModel
 @Inject

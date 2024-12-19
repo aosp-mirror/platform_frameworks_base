@@ -42,7 +42,6 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -56,7 +55,6 @@ private const val TAG = "VolumePanelViewModel"
 
 // Can't inject a constructor here because VolumePanelComponent provides this view model for its
 // components.
-@OptIn(ExperimentalCoroutinesApi::class)
 class VolumePanelViewModel(
     resources: Resources,
     coroutineScope: CoroutineScope,

@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCall
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,7 +55,6 @@ import kotlinx.coroutines.flow.stateIn
  *   visible
  * * - [OngoingCallModel.InCall] when there is a call notification and the call app is not visible
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class OngoingCallInteractor
 @Inject
