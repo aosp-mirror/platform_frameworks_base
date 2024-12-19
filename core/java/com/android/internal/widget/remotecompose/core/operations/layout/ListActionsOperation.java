@@ -88,6 +88,18 @@ public abstract class ListActionsOperation extends PaintOperation
         }
     }
 
+    /**
+     * Execute the list of actions
+     *
+     * @param context the RemoteContext
+     * @param document the current document
+     * @param component the component we belong to
+     * @param x the x touch down coordinate
+     * @param y the y touch down coordinate
+     * @param force if true, will apply the actions even if the component is not visible / not
+     *     containing the touch down coordinates
+     * @return true if we applied the actions, false otherwise
+     */
     public boolean applyActions(
             RemoteContext context,
             CoreDocument document,

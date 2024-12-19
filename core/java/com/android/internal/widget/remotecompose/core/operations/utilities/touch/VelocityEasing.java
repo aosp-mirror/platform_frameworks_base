@@ -108,14 +108,14 @@ public class VelocityEasing {
                 return mStage[i].getPos(t);
             }
         }
-        var ret = (float) getEasing((t - mStage[lastStages].mStartTime));
+        float ret = (float) getEasing((t - mStage[lastStages].mStartTime));
         ret += mStage[lastStages].mStartPos;
         return ret;
     }
 
     @Override
     public String toString() {
-        var s = " ";
+        String s = " ";
         for (int i = 0; i < mNumberOfStages; i++) {
             Stage stage = mStage[i];
             s += " $i $stage";

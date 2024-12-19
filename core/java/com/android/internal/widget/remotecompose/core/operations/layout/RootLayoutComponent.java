@@ -174,6 +174,11 @@ public class RootLayoutComponent extends Component {
         context.restore();
     }
 
+    /**
+     * Display the component hierarchy
+     *
+     * @return a formatted string containing the component hierarchy
+     */
     @NonNull
     public String displayHierarchy() {
         StringSerializer serializer = new StringSerializer();
@@ -181,6 +186,13 @@ public class RootLayoutComponent extends Component {
         return serializer.toString();
     }
 
+    /**
+     * Display the component hierarchy
+     *
+     * @param component the current component
+     * @param indent the current indentation level
+     * @param serializer the serializer we write to
+     */
     public void displayHierarchy(
             @NonNull Component component, int indent, @NonNull StringSerializer serializer) {
         component.serializeToString(indent, serializer);
@@ -214,6 +226,12 @@ public class RootLayoutComponent extends Component {
         return Operations.LAYOUT_ROOT;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param componentId
+     */
     public static void apply(@NonNull WireBuffer buffer, int componentId) {
         buffer.start(Operations.LAYOUT_ROOT);
         buffer.writeInt(componentId);
@@ -249,6 +267,11 @@ public class RootLayoutComponent extends Component {
         apply(buffer, mComponentId);
     }
 
+    /**
+     * Returns true if we have components with a touch listener
+     *
+     * @return true if listeners, false otherwise
+     */
     public boolean hasTouchListeners() {
         return mHasTouchListeners;
     }

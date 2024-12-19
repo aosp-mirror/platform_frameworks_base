@@ -22,6 +22,7 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.OperationInterface;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.TouchListener;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
@@ -176,8 +177,8 @@ public class LayoutComponent extends Component {
                     || (op instanceof PaintData)
                     || (op instanceof FloatExpression)) {
                 supportedOperations.add(op);
-                if (op instanceof TouchExpression) {
-                    ((TouchExpression) op).setComponent(this);
+                if (op instanceof TouchListener) {
+                    ((TouchListener) op).setComponent(this);
                 }
             } else {
                 // nothing

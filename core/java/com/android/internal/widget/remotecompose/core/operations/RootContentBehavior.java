@@ -219,6 +219,15 @@ public class RootContentBehavior extends Operation implements RemoteComposeOpera
         return OP_CODE;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param scroll
+     * @param alignment
+     * @param sizing
+     * @param mode
+     */
     public static void apply(
             @NonNull WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
         buffer.start(OP_CODE);

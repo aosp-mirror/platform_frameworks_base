@@ -17,7 +17,20 @@ package com.android.internal.widget.remotecompose.core.semantics;
 
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 
-/** A Modifier that provides semantic info. */
+/**
+ * A Modifier that provides semantic info.
+ *
+ * <p>This is needed since `AccessibilityModifier` is generally an open set and designed to be
+ * extended.
+ */
 public interface AccessibilityModifier extends ModifierOperation, AccessibleComponent {
+    /**
+     * This method retrieves the operation code.
+     *
+     * <p>This function is used to get the current operation code associated with the object or
+     * context this method belongs to.
+     *
+     * @return The operation code as an integer.
+     */
     int getOpCode();
 }

@@ -61,10 +61,21 @@ public class OperationField {
         return mPossibleValues;
     }
 
+    /**
+     * Add possible values for a field
+     *
+     * @param name
+     * @param value
+     */
     public void possibleValue(@NonNull String name, @NonNull String value) {
         mPossibleValues.add(new StringPair(name, value));
     }
 
+    /**
+     * Return true if the field has enumerated values
+     *
+     * @return true if enumerated values, false otherwise
+     */
     public boolean hasEnumeratedValues() {
         return !mPossibleValues.isEmpty();
     }
@@ -74,6 +85,11 @@ public class OperationField {
         return mVarSize;
     }
 
+    /**
+     * Returns the size in byte of the field depending on its type, or -1 if unknown
+     *
+     * @return the size in bytes
+     */
     public int getSize() {
         switch (mType) {
             case DocumentedOperation.BYTE:

@@ -368,6 +368,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
      *
      * @param component the component, or null if outside
      */
+    @Override
     public void setComponent(@Nullable Component component) {
         mComponent = component;
         if (mComponent != null) {

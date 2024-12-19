@@ -30,7 +30,7 @@ import com.android.internal.widget.ExploreByTouchHelper;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySemantics;
-import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics.Mode;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent.Mode;
 
 import java.util.HashSet;
 import java.util.List;

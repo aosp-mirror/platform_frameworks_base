@@ -123,6 +123,11 @@ public class CoreDocument {
         return mWidth;
     }
 
+    /**
+     * Set the viewport width of the document
+     *
+     * @param width document width
+     */
     public void setWidth(int width) {
         this.mWidth = width;
         mRemoteComposeState.setWindowWidth(width);
@@ -132,6 +137,11 @@ public class CoreDocument {
         return mHeight;
     }
 
+    /**
+     * Set the viewport height of the document
+     *
+     * @param height document height
+     */
     public void setHeight(int height) {
         this.mHeight = height;
         mRemoteComposeState.setWindowHeight(height);
@@ -395,6 +405,11 @@ public class CoreDocument {
 
     // ============== Haptic support ==================
     public interface HapticEngine {
+        /**
+         * Implements a haptic effect
+         *
+         * @param type the type of effect
+         */
         void haptic(int type);
     }
 
@@ -404,6 +419,11 @@ public class CoreDocument {
         mHapticEngine = engine;
     }
 
+    /**
+     * Execute an haptic command
+     *
+     * @param type the type of haptic pre-defined effect
+     */
     public void haptic(int type) {
         if (mHapticEngine != null) {
             mHapticEngine.haptic(type);
@@ -412,12 +432,23 @@ public class CoreDocument {
 
     // ============== Haptic support ==================
 
-    public void appliedTouchOperation(Component operation) {
-        mAppliedTouchOperations.add(operation);
+    /**
+     * To signal that the given component will apply the touch operation
+     *
+     * @param component the component applying the touch
+     */
+    public void appliedTouchOperation(Component component) {
+        mAppliedTouchOperations.add(component);
     }
 
     /** Callback interface for host actions */
     public interface ActionCallback {
+        /**
+         * Callback for actions
+         *
+         * @param name the action name
+         * @param value the payload of the action
+         */
         void onAction(@NonNull String name, Object value);
     }
 
@@ -450,7 +481,14 @@ public class CoreDocument {
         mActionListeners.clear();
     }
 
+    /** Id Actions */
     public interface IdActionCallback {
+        /**
+         * Callback on Id Actions
+         *
+         * @param id the actio id triggered
+         * @param metadata optional metadata
+         */
         void onAction(int id, @Nullable String metadata);
     }
 
@@ -530,10 +568,20 @@ public class CoreDocument {
             return mTop;
         }
 
+        /**
+         * Returns the width of the click area
+         *
+         * @return the width of the click area
+         */
         public float width() {
             return Math.max(0, mRight - mLeft);
         }
 
+        /**
+         * Returns the height of the click area
+         *
+         * @return the height of the click area
+         */
         public float height() {
             return Math.max(0, mBottom - mTop);
         }
@@ -816,6 +864,7 @@ public class CoreDocument {
         for (ClickAreaRepresentation clickArea : mClickAreas) {
             if (clickArea.mId == id) {
                 warnClickListeners(clickArea);
+                return;
             }
         }
         for (IdActionCallback listener : mIdActionListeners) {
@@ -1127,6 +1176,11 @@ public class CoreDocument {
         return count;
     }
 
+    /**
+     * Returns a list of useful statistics for the runtime document
+     *
+     * @return
+     */
     @NonNull
     public String[] getStats() {
         ArrayList<String> ret = new ArrayList<>();
@@ -1145,8 +1199,8 @@ public class CoreDocument {
 
             values[0] += 1;
             values[1] += sizeOfComponent(mOperation, buffer);
-            if (mOperation instanceof Component) {
-                Component com = (Component) mOperation;
+            if (mOperation instanceof Container) {
+                Container com = (Container) mOperation;
                 count += addChildren(com, map, buffer);
             } else if (mOperation instanceof LoopOperation) {
                 LoopOperation com = (LoopOperation) mOperation;
@@ -1172,9 +1226,9 @@ public class CoreDocument {
     }
 
     private int addChildren(
-            @NonNull Component base, @NonNull HashMap<String, int[]> map, @NonNull WireBuffer tmp) {
-        int count = base.mList.size();
-        for (Operation mOperation : base.mList) {
+            @NonNull Container base, @NonNull HashMap<String, int[]> map, @NonNull WireBuffer tmp) {
+        int count = base.getList().size();
+        for (Operation mOperation : base.getList()) {
             Class<? extends Operation> c = mOperation.getClass();
             int[] values;
             if (map.containsKey(c.getSimpleName())) {
@@ -1185,65 +1239,42 @@ public class CoreDocument {
             }
             values[0] += 1;
             values[1] += sizeOfComponent(mOperation, tmp);
-            if (mOperation instanceof Component) {
-                count += addChildren((Component) mOperation, map, tmp);
-            }
-            if (mOperation instanceof LoopOperation) {
-                count += addChildren((LoopOperation) mOperation, map, tmp);
+            if (mOperation instanceof Container) {
+                count += addChildren((Container) mOperation, map, tmp);
             }
         }
         return count;
     }
 
-    private int addChildren(
-            @NonNull LoopOperation base,
-            @NonNull HashMap<String, int[]> map,
-            @NonNull WireBuffer tmp) {
-        int count = base.mList.size();
-        for (Operation mOperation : base.mList) {
-            Class<? extends Operation> c = mOperation.getClass();
-            int[] values;
-            if (map.containsKey(c.getSimpleName())) {
-                values = map.get(c.getSimpleName());
-            } else {
-                values = new int[2];
-                map.put(c.getSimpleName(), values);
-            }
-            values[0] += 1;
-            values[1] += sizeOfComponent(mOperation, tmp);
-            if (mOperation instanceof Component) {
-                count += addChildren((Component) mOperation, map, tmp);
-            }
-            if (mOperation instanceof LoopOperation) {
-                count += addChildren((LoopOperation) mOperation, map, tmp);
-            }
-        }
-        return count;
-    }
-
+    /**
+     * Returns a string representation of the operations, traversing the list of operations &
+     * containers
+     *
+     * @return
+     */
     @NonNull
     public String toNestedString() {
         StringBuilder ret = new StringBuilder();
         for (Operation mOperation : mOperations) {
             ret.append(mOperation.toString());
             ret.append("\n");
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, "  ");
+            if (mOperation instanceof Container) {
+                toNestedString((Container) mOperation, ret, "  ");
             }
         }
         return ret.toString();
     }
 
     private void toNestedString(
-            @NonNull Component base, @NonNull StringBuilder ret, String indent) {
-        for (Operation mOperation : base.mList) {
+            @NonNull Container base, @NonNull StringBuilder ret, String indent) {
+        for (Operation mOperation : base.getList()) {
             for (String line : mOperation.toString().split("\n")) {
                 ret.append(indent);
                 ret.append(line);
                 ret.append("\n");
             }
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, indent + "  ");
+            if (mOperation instanceof Container) {
+                toNestedString((Container) mOperation, ret, indent + "  ");
             }
         }
     }
@@ -1255,6 +1286,12 @@ public class CoreDocument {
 
     /** defines if a shader can be run */
     public interface ShaderControl {
+        /**
+         * validate if a shader can run in the document
+         *
+         * @param shader the source of the shader
+         * @return true if the shader is allowed to run
+         */
         boolean isShaderValid(String shader);
     }
 

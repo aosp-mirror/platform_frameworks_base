@@ -135,6 +135,15 @@ public class Header extends Operation implements RemoteComposeOperation {
         return OP_CODE;
     }
 
+    /**
+     * Apply the header to the wire buffer
+     *
+     * @param buffer
+     * @param width
+     * @param height
+     * @param density
+     * @param capabilities
+     */
     public static void apply(
             @NonNull WireBuffer buffer, int width, int height, float density, long capabilities) {
         buffer.start(OP_CODE);
@@ -193,6 +202,11 @@ public class Header extends Operation implements RemoteComposeOperation {
                 .field(LONG, "CAPABILITIES", "Major version");
     }
 
+    /**
+     * Set the version on a document
+     *
+     * @param document
+     */
     public void setVersion(CoreDocument document) {
         document.setVersion(mMajorVersion, mMinorVersion, mPatchVersion);
     }

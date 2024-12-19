@@ -33,6 +33,7 @@ import java.util.List;
 
 /** Represents a loop of operations */
 public class LoopOperation extends PaintOperation implements Container, VariableSupport {
+
     private static final int OP_CODE = Operations.LOOP_START;
 
     @NonNull public ArrayList<Operation> mList = new ArrayList<>();
@@ -77,6 +78,7 @@ public class LoopOperation extends PaintOperation implements Container, Variable
         mIndexVariableId = indexId;
     }
 
+    @Override
     @NonNull
     public ArrayList<Operation> getList() {
         return mList;
@@ -139,6 +141,15 @@ public class LoopOperation extends PaintOperation implements Container, Variable
         return "Loop";
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param indexId
+     * @param from
+     * @param step
+     * @param until
+     */
     public static void apply(
             @NonNull WireBuffer buffer, int indexId, float from, float step, float until) {
         buffer.start(OP_CODE);
