@@ -148,7 +148,7 @@ class TileServiceRequestControllerTestComposeOn : SysuiTestCase() {
     @Test
     fun showAllUsers_set() =
         kosmos.runTest {
-            val dialog = runOnMainThreadAndWaitForIdleSync {
+            val dialog = createDialog {
                 underTest.requestTileAdd(
                     TEST_UID,
                     TEST_COMPONENT,
@@ -158,7 +158,6 @@ class TileServiceRequestControllerTestComposeOn : SysuiTestCase() {
                     Callback(),
                 )!!
             }
-            onTeardown { dialog.cancel() }
 
             assertThat(dialog.isShowForAllUsers).isTrue()
         }
@@ -166,7 +165,7 @@ class TileServiceRequestControllerTestComposeOn : SysuiTestCase() {
     @Test
     fun cancelOnTouchOutside_set() =
         kosmos.runTest {
-            val dialog = runOnMainThreadAndWaitForIdleSync {
+            val dialog = createDialog {
                 underTest.requestTileAdd(
                     TEST_UID,
                     TEST_COMPONENT,
@@ -176,10 +175,15 @@ class TileServiceRequestControllerTestComposeOn : SysuiTestCase() {
                     Callback(),
                 )!!
             }
-            onTeardown { dialog.cancel() }
 
             assertThat(dialog.isCancelOnTouchOutside).isTrue()
         }
+
+    fun <T : DialogInterface> createDialog(constructor: () -> T): T {
+        val dialog = runOnMainThreadAndWaitForIdleSync { constructor() }
+        onTeardown { runOnMainThreadAndWaitForIdleSync { dialog.cancel() } }
+        return dialog
+    }
 
     @Test
     fun positiveAction_tileAdded() =
