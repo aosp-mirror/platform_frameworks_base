@@ -26,6 +26,10 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A class contains the real time integrity status of a GNSS satellite based on notice advisory.
  *
@@ -35,8 +39,7 @@ import com.android.internal.util.Preconditions;
 @SystemApi
 public final class RealTimeIntegrityModel implements Parcelable {
     /**
-     * Pseudo-random or satellite ID number for the satellite,
-     * a.k.a. Space Vehicle (SV), or OSN number for Glonass.
+     * Bad satellite ID number or OSN number for Glonass.
      *
      * <p>The distinction is made by looking at the constellation field. Values
      * must be in the range of:
@@ -47,10 +50,14 @@ public final class RealTimeIntegrityModel implements Parcelable {
      * <p> - Galileo: 1-36
      * <p> - Beidou: 1-63
      */
-    private final int mSvid;
+    private final int mBadSvid;
 
-    /** Indicates whether the satellite is currently usable for navigation. */
-    private final boolean mUsable;
+    /**
+     * The type of the bad signal or signals.
+     *
+     * <p>An empty list means that all signals on the specific SV are not healthy.
+     */
+    @NonNull private final List<GnssSignalType> mBadSignalTypes;
 
     /** UTC timestamp (in seconds) when the advisory was published. */
     private final long mPublishDateSeconds;
@@ -81,14 +88,19 @@ public final class RealTimeIntegrityModel implements Parcelable {
 
     private RealTimeIntegrityModel(Builder builder) {
         // Allow SV ID beyond the range to support potential future extensibility.
-        Preconditions.checkArgument(builder.mSvid >= 1);
+        Preconditions.checkArgument(builder.mBadSvid >= 1);
         Preconditions.checkArgument(builder.mPublishDateSeconds > 0);
         Preconditions.checkArgument(builder.mStartDateSeconds > 0);
         Preconditions.checkArgument(builder.mEndDateSeconds > 0);
         Preconditions.checkNotNull(builder.mAdvisoryType, "AdvisoryType cannot be null");
         Preconditions.checkNotNull(builder.mAdvisoryNumber, "AdvisoryNumber cannot be null");
-        mSvid = builder.mSvid;
-        mUsable = builder.mUsable;
+        if (builder.mBadSignalTypes == null) {
+            mBadSignalTypes = new ArrayList<>();
+        } else {
+            mBadSignalTypes = Collections.unmodifiableList(
+                new ArrayList<>(builder.mBadSignalTypes));
+        }
+        mBadSvid = builder.mBadSvid;
         mPublishDateSeconds = builder.mPublishDateSeconds;
         mStartDateSeconds = builder.mStartDateSeconds;
         mEndDateSeconds = builder.mEndDateSeconds;
@@ -110,13 +122,18 @@ public final class RealTimeIntegrityModel implements Parcelable {
      * <p> - Beidou: 1-63
      */
     @IntRange(from = 1, to = 206)
-    public int getSvid() {
-        return mSvid;
+    public int getBadSvid() {
+        return mBadSvid;
     }
 
-    /** Returns whether the satellite is usable or not. */
-    public boolean isUsable() {
-        return mUsable;
+    /**
+     * Returns the type of the bad signal or signals.
+     *
+     * <p>An empty list means that all signals on the specific SV are not healthy.
+     */
+    @NonNull
+    public List<GnssSignalType> getBadSignalTypes() {
+        return mBadSignalTypes;
     }
 
     /** Returns the UTC timestamp (in seconds) when the advisory was published */
@@ -156,8 +173,9 @@ public final class RealTimeIntegrityModel implements Parcelable {
                 public RealTimeIntegrityModel createFromParcel(Parcel in) {
                     RealTimeIntegrityModel realTimeIntegrityModel =
                             new RealTimeIntegrityModel.Builder()
-                                    .setSvid(in.readInt())
-                                    .setUsable(in.readBoolean())
+                                    .setBadSvid(in.readInt())
+                                    .setBadSignalTypes(
+                                      in.createTypedArrayList(GnssSignalType.CREATOR))
                                     .setPublishDateSeconds(in.readLong())
                                     .setStartDateSeconds(in.readLong())
                                     .setEndDateSeconds(in.readLong())
@@ -180,8 +198,8 @@ public final class RealTimeIntegrityModel implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mSvid);
-        parcel.writeBoolean(mUsable);
+        parcel.writeInt(mBadSvid);
+        parcel.writeTypedList(mBadSignalTypes);
         parcel.writeLong(mPublishDateSeconds);
         parcel.writeLong(mStartDateSeconds);
         parcel.writeLong(mEndDateSeconds);
@@ -193,8 +211,8 @@ public final class RealTimeIntegrityModel implements Parcelable {
     @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("RealTimeIntegrityModel[");
-        builder.append("svid = ").append(mSvid);
-        builder.append(", usable = ").append(mUsable);
+        builder.append("badSvid = ").append(mBadSvid);
+        builder.append(", badSignalTypes = ").append(mBadSignalTypes);
         builder.append(", publishDateSeconds = ").append(mPublishDateSeconds);
         builder.append(", startDateSeconds = ").append(mStartDateSeconds);
         builder.append(", endDateSeconds = ").append(mEndDateSeconds);
@@ -206,8 +224,8 @@ public final class RealTimeIntegrityModel implements Parcelable {
 
     /** Builder for {@link RealTimeIntegrityModel} */
     public static final class Builder {
-        private int mSvid;
-        private boolean mUsable;
+        private int mBadSvid;
+        private List<GnssSignalType> mBadSignalTypes;
         private long mPublishDateSeconds;
         private long mStartDateSeconds;
         private long mEndDateSeconds;
@@ -215,8 +233,7 @@ public final class RealTimeIntegrityModel implements Parcelable {
         private String mAdvisoryNumber;
 
         /**
-         * Sets the Pseudo-random or satellite ID number for the satellite,
-         * a.k.a. Space Vehicle (SV), or OSN number for Glonass.
+         * Sets the bad satellite ID number or OSN number for Glonass.
          *
          * <p>The distinction is made by looking at the constellation field. Values
          * must be in the range of:
@@ -228,15 +245,19 @@ public final class RealTimeIntegrityModel implements Parcelable {
          * <p> - Beidou: 1-63
          */
         @NonNull
-        public Builder setSvid(@IntRange(from = 1, to = 206) int svid) {
-            mSvid = svid;
+        public Builder setBadSvid(@IntRange(from = 1, to = 206) int badSvid) {
+            mBadSvid = badSvid;
             return this;
         }
 
-        /** Sets whether the satellite is usable or not. */
+        /**
+         * Sets the type of the bad signal or signals.
+         *
+         * <p>An empty list means that all signals on the specific SV are not healthy.
+         */
         @NonNull
-        public Builder setUsable(boolean usable) {
-            mUsable = usable;
+        public Builder setBadSignalTypes(@NonNull List<GnssSignalType> badSignalTypes) {
+            mBadSignalTypes = badSignalTypes;
             return this;
         }
 
