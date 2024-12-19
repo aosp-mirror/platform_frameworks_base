@@ -78,12 +78,15 @@ import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.power.hint.HintManagerService.AppHintSession;
 import com.android.server.power.hint.HintManagerService.Injector;
 import com.android.server.power.hint.HintManagerService.NativeWrapper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -93,6 +96,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,6 +116,7 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class HintManagerServiceTest {
     private static final String TAG = "HintManagerServiceTest";
+    private List<File> mFilesCreated = new ArrayList<>();
 
     private static WorkDuration makeWorkDuration(
             long timestamp, long duration, long workPeriodStartTime,
@@ -192,9 +198,9 @@ public class HintManagerServiceTest {
         mSupportInfo.sessionTags = -1;
         mSupportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         mSupportInfo.headroom.isCpuSupported = true;
-        mSupportInfo.headroom.cpuMinIntervalMillis = 2000;
+        mSupportInfo.headroom.cpuMinIntervalMillis = 1000;
         mSupportInfo.headroom.isGpuSupported = true;
-        mSupportInfo.headroom.gpuMinIntervalMillis = 2000;
+        mSupportInfo.headroom.gpuMinIntervalMillis = 1000;
         mSupportInfo.compositionData = new SupportInfo.CompositionDataSupportInfo();
         return mSupportInfo;
     }
@@ -241,6 +247,13 @@ public class HintManagerServiceTest {
         when(mIPowerMock.getSupportInfo()).thenReturn(mSupportInfo);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
+    }
+
+    @After
+    public void tearDown() {
+        for (File file : mFilesCreated) {
+            file.delete();
+        }
     }
 
     /**
@@ -1327,6 +1340,58 @@ public class HintManagerServiceTest {
         });
     }
 
+    @Test
+    public void testCpuHeadroomCpuProcStatPath() throws Exception {
+        File dir = InstrumentationRegistry.getTargetContext().getFilesDir();
+        dir.mkdir();
+        String procStatFileStr = "mock_proc_stat";
+        File file = new File(dir, procStatFileStr);
+        mFilesCreated.add(file);
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            output.write("cpu  2000 3000 4000 0 0 0 0 0 0 0".getBytes());
+        }
+        HintManagerService service = createService();
+        service.setProcStatPathOverride(file.getPath());
+
+        CpuHeadroomParamsInternal params1 = new CpuHeadroomParamsInternal();
+        CpuHeadroomParams halParams1 = new CpuHeadroomParams();
+        halParams1.calculationType = CpuHeadroomParams.CalculationType.MIN;
+        halParams1.tids = new int[]{Process.myPid()};
+
+        float headroom1 = 0.1f;
+        CpuHeadroomResult halRet1 = CpuHeadroomResult.globalHeadroom(headroom1);
+        when(mIPowerMock.getCpuHeadroom(eq(halParams1))).thenReturn(halRet1);
+        clearInvocations(mIPowerMock);
+        assertEquals(halRet1, service.getBinderServiceInstance().getCpuHeadroom(params1));
+        verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams1));
+        // expire the cache but cpu proc hasn't changed so we expect no value return
+        Thread.sleep(1100);
+        clearInvocations(mIPowerMock);
+        assertEquals(null, service.getBinderServiceInstance().getCpuHeadroom(params1));
+        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams1));
+
+        // update user jiffies with 500 equivalent jiffies, which is not sufficient cpu time
+        Thread.sleep(1100);
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            output.write(("cpu  " + (2000 + (int) (500 / service.mJiffyMillis))
+                    + " 3000 4000 0 0 0 0 0 0 0").getBytes());
+        }
+        clearInvocations(mIPowerMock);
+        assertEquals(null, service.getBinderServiceInstance().getCpuHeadroom(params1));
+        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams1));
+
+        // update nice jiffies with 600 equivalent jiffies, now it exceeds 1000ms requirement
+        Thread.sleep(1100);
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            output.write(("cpu  " + (2000 + (int) (500 / service.mJiffyMillis))
+                    + " " + +(3000 + (int) (600 / service.mJiffyMillis))
+                    + " 4000 0 0 0 0 0 0 0").getBytes());
+        }
+        clearInvocations(mIPowerMock);
+        assertEquals(halRet1, service.getBinderServiceInstance().getCpuHeadroom(params1));
+        verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams1));
+    }
+
 
     @Test
     @EnableFlags({Flags.FLAG_CPU_HEADROOM_AFFINITY_CHECK})
@@ -1397,8 +1462,8 @@ public class HintManagerServiceTest {
         verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams3));
         verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams4));
 
-        // after 1 more second it should be served with cache still
-        Thread.sleep(1000);
+        // after 500ms more it should be served with cache
+        Thread.sleep(500);
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getCpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getCpuHeadroom(params2));
@@ -1410,8 +1475,8 @@ public class HintManagerServiceTest {
         verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams3));
         verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams4));
 
-        // after 2+ seconds it should be served from HAL as it exceeds 2000 millis interval
-        Thread.sleep(1100);
+        // after 1+ seconds it should be served from HAL as it exceeds 1000 millis interval
+        Thread.sleep(600);
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getCpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getCpuHeadroom(params2));
@@ -1519,8 +1584,8 @@ public class HintManagerServiceTest {
         verify(mIPowerMock, times(0)).getGpuHeadroom(eq(halParams1));
         verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams2));
 
-        // after 1 more second it should be served with cache still
-        Thread.sleep(1000);
+        // after 500ms it should be served with cache
+        Thread.sleep(500);
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getGpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getGpuHeadroom(params2));
@@ -1528,8 +1593,8 @@ public class HintManagerServiceTest {
         verify(mIPowerMock, times(0)).getGpuHeadroom(eq(halParams1));
         verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams2));
 
-        // after 2+ seconds it should be served from HAL as it exceeds 2000 millis interval
-        Thread.sleep(1100);
+        // after 1+ seconds it should be served from HAL as it exceeds 1000 millis interval
+        Thread.sleep(600);
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getGpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getGpuHeadroom(params2));
