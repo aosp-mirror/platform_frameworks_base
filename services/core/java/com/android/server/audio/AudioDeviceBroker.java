@@ -635,7 +635,8 @@ public class AudioDeviceBroker {
         client.setPlaybackActive(mAudioService.isPlaybackActiveForUid(client.getUid()));
         client.setRecordingActive(mAudioService.isRecordingActiveForUid(client.getUid()));
         if (wasActive != client.isActive()) {
-            postUpdateCommunicationRouteClient(bluetoothScoRequestOwnerAttributionSource(),
+            postUpdateCommunicationRouteClient(wasActive ?
+                    client.getAttributionSource() : null,
                     "updateCommunicationRouteClientState");
         }
     }
