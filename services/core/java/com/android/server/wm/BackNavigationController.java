@@ -997,11 +997,9 @@ class BackNavigationController {
     /**
      * Handle the pending animation when the running transition finished, all the visibility change
      * has applied so ready to start pending predictive back animation.
-     * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
-    void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
-            @NonNull Transition finishedTransition) {
+    void onTransitionFinish(@NonNull Transition finishedTransition) {
         if (isMonitoringPrepareTransition(finishedTransition)) {
             if (mAnimationHandler.mPrepareCloseTransition == null) {
                 clearBackAnimations(true /* cancel */);
@@ -1047,14 +1045,6 @@ class BackNavigationController {
             Slog.v(TAG, "Skip predictive back transition, another transition is collecting");
             cancelPendingAnimation();
             return;
-        }
-
-        // Ensure the final animation targets which hidden by transition could be visible.
-        for (int i = 0; i < targets.size(); i++) {
-            final WindowContainer wc = targets.get(i).mContainer;
-            if (wc.mSurfaceControl != null) {
-                wc.prepareSurfaces();
-            }
         }
 
         // The pending builder could be cleared due to prepareSurfaces
