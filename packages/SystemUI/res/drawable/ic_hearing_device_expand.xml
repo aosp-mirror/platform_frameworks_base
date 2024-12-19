@@ -14,20 +14,14 @@
     limitations under the License.
 -->
 
-<layer-list
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:paddingMode="stack">
-    <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/hearing_devices_preset_spinner_background_radius" />
-            <stroke
-                android:width="1dp"
-                android:color="?androidprv:attr/textColorTertiary" />
-            <solid android:color="@android:color/transparent"/>
-        </shape>
-    </item>
-    <item android:end="20dp"
-        android:gravity="end|center_vertical"
-        android:drawable="@drawable/ic_hearing_device_expand" />
-</layer-list>
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@androidprv:color/materialColorOnSurface">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z" />
+</vector>

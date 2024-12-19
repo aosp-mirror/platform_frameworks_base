@@ -1004,6 +1004,20 @@
     <string name="hearing_devices_preset_label">Preset</string>
     <!-- QuickSettings: Content description for the icon that indicates the item is selected [CHAR LIMIT=NONE]-->
     <string name="hearing_devices_spinner_item_selected">Selected</string>
+    <!-- QuickSettings: Title for ambient controls. [CHAR LIMIT=40]-->
+    <string name="hearing_devices_ambient_label">Surroundings</string>
+    <!-- QuickSettings: The text to show the control is for left side device. [CHAR LIMIT=30] -->
+    <string name="hearing_devices_ambient_control_left">Left</string>
+    <!-- QuickSettings: The text to show the control is for right side device. [CHAR LIMIT=30] -->
+    <string name="hearing_devices_ambient_control_right">Right</string>
+    <!-- QuickSettings: Content description for a button, that expands ambient volume sliders [CHAR_LIMIT=NONE] -->
+    <string name="hearing_devices_ambient_expand_controls">Expand to left and right separated controls</string>
+    <!-- QuickSettings: Content description for a button, that collapses ambient volume sliders [CHAR LIMIT=NONE] -->
+    <string name="hearing_devices_ambient_collapse_controls">Collapse to unified control</string>
+    <!-- QuickSettings: Content description for a button, that mute ambient volume [CHAR_LIMIT=NONE] -->
+    <string name="hearing_devices_ambient_mute">Mute surroundings</string>
+    <!-- QuickSettings: Content description for a button, that unmute ambient volume [CHAR LIMIT=NONE] -->
+    <string name="hearing_devices_ambient_unmute">Unmute surroundings</string>
     <!-- QuickSettings: Title for related tools of hearing. [CHAR LIMIT=40]-->
     <string name="hearing_devices_tools_label">Tools</string>
     <!-- QuickSettings: Tool name for hearing devices dialog related tools [CHAR LIMIT=40] [BACKUP_MESSAGE_ID=8916875614623730005]-->

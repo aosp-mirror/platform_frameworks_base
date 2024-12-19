@@ -1,0 +1,46 @@
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/bluetooth_dialog_layout_margin"
+    android:layout_marginEnd="@dimen/bluetooth_dialog_layout_margin"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/ambient_volume_slider_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingStart="@dimen/hearing_devices_small_title_padding_horizontal"
+        android:textAppearance="@style/TextAppearance.Dialog.Title"
+        android:textDirection="locale"
+        android:textSize="14sp"
+        android:labelFor="@+id/ambient_volume_slider"
+        android:gravity="center_vertical" />
+    <com.google.android.material.slider.Slider
+        style="@style/SystemUI.Material3.Slider"
+        android:id="@+id/ambient_volume_slider"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bluetooth_dialog_device_height"
+        android:layout_gravity="center_vertical"
+        android:theme="@style/Theme.Material3.DayNight"
+        app:labelBehavior="gone" />
+
+</LinearLayout>

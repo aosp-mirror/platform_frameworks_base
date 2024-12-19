@@ -85,13 +85,22 @@
             android:longClickable="false"/>
     </LinearLayout>
 
+    <com.android.systemui.accessibility.hearingaid.AmbientVolumeLayout
+        android:id="@+id/ambient_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/preset_layout"
+        android:layout_marginTop="@dimen/hearing_devices_layout_margin" />
+
     <LinearLayout
         android:id="@+id/tools_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/preset_layout"
+        app:layout_constraintTop_toBottomOf="@id/ambient_layout"
         android:layout_marginTop="@dimen/hearing_devices_layout_margin"
         android:orientation="vertical">
         <TextView

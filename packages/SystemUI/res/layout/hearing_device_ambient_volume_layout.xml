@@ -1,0 +1,67 @@
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ambient_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/bluetooth_dialog_layout_margin"
+        android:layout_marginEnd="@dimen/bluetooth_dialog_layout_margin"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/ambient_volume_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:contentDescription="@string/hearing_devices_ambient_unmute"
+            android:src="@drawable/ic_ambient_volume"
+            android:tint="@androidprv:color/materialColorOnSurface" />
+        <TextView
+            android:id="@+id/ambient_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="10dp"
+            android:text="@string/hearing_devices_ambient_label"
+            android:textAppearance="@style/TextAppearance.Dialog.Title"
+            android:textDirection="locale"
+            android:textSize="16sp"
+            android:gravity="center_vertical"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium" />
+        <ImageView
+            android:id="@+id/ambient_expand_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="10dp"
+            android:contentDescription="@string/hearing_devices_ambient_expand_controls"
+            android:src="@drawable/ic_hearing_device_expand"
+            android:tint="@androidprv:color/materialColorOnSurface" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ambient_control_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+</LinearLayout>
