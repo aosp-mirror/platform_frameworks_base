@@ -81,6 +81,10 @@ message PreferenceProto {
   optional PreferenceValueDescriptorProto value_descriptor = 15;
   // Indicate how sensitive of the preference.
   optional int32 sensitivity_level = 16;
+  // The required permissions to read preference value.
+  repeated string read_permissions = 17;
+  // The required permissions to write preference value.
+  repeated string write_permissions = 18;
 
   // Target of an Intent
   message ActionTarget {
