@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.airplane.domain.interactor
+package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.airplaneModeRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.shared.data.repository.connectivityRepository
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.carrierConfigRepository
 
-val Kosmos.airplaneModeInteractor: AirplaneModeInteractor by
+val Kosmos.carrierConfigInteractor by
     Kosmos.Fixture {
-        AirplaneModeInteractor(
-            airplaneModeRepository,
-            connectivityRepository,
-            mobileConnectionsRepository,
+        CarrierConfigInteractor(
+            carrierConfigRepository,
+            mobileIconsInteractor,
+            applicationCoroutineScope,
         )
     }

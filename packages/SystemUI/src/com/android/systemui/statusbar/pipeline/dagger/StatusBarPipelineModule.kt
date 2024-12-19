@@ -32,6 +32,8 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -48,6 +50,8 @@ import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSat
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModelImpl
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstantsImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
@@ -106,6 +110,9 @@ abstract class StatusBarPipelineModule {
         impl: DeviceBasedSatelliteViewModelImpl
     ): DeviceBasedSatelliteViewModel
 
+    @Binds
+    abstract fun connectivityConstants(impl: ConnectivityConstantsImpl): ConnectivityConstants
+
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 
     @Binds abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
@@ -118,6 +125,9 @@ abstract class StatusBarPipelineModule {
     @Binds abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
 
     @Binds abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun carrierConfigRepository(impl: CarrierConfigRepositoryImpl): CarrierConfigRepository
 
     @Binds
     abstract fun subscriptionManagerProxy(

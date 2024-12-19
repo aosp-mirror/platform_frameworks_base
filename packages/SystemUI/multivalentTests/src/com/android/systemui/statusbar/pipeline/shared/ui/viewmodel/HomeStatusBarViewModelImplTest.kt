@@ -22,6 +22,7 @@ import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
+import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
@@ -45,6 +46,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
@@ -73,6 +75,10 @@ import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
+import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarIconBlockList
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarInteractorShowOperatorName
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -493,6 +499,72 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
 
             assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_allowedByDisableFlags_visible() =
+        kosmos.runTest {
+            kosmos.setHomeStatusBarInteractorShowOperatorName(true)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_disAllowedByInteractor_allowedByDisableFlags_notVisible() =
+        kosmos.runTest {
+            kosmos.setHomeStatusBarInteractorShowOperatorName(false)
+
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_disallowedByDisableFlags_notVisible() =
+        kosmos.runTest {
+            kosmos.setHomeStatusBarInteractorShowOperatorName(true)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_SYSTEM_INFO, DISABLE2_NONE)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_hunPinned_false() =
+        kosmos.runTest {
+            kosmos.setHomeStatusBarInteractorShowOperatorName(false)
+
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
+                )
+            )
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+
+            assertThat(latest).isFalse()
         }
 
     @Test
@@ -928,6 +1000,66 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    fun areaTint_viewIsInDarkBounds_getsDarkTint() =
+        kosmos.runTest {
+            val displayId = 321
+            fakeDarkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
+
+            val areaTint by collectLastValue(underTest.areaTint(displayId))
+
+            val tint = areaTint?.tint(Rect(1, 1, 3, 3))
+
+            assertThat(tint).isEqualTo(0xAABBCC)
+        }
+
+    @Test
+    fun areaTint_viewIsNotInDarkBounds_getsDefaultTint() =
+        kosmos.runTest {
+            val displayId = 321
+            fakeDarkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
+
+            val areaTint by collectLastValue(underTest.areaTint(displayId))
+
+            val tint = areaTint?.tint(Rect(6, 6, 7, 7))
+
+            assertThat(tint).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
+        }
+
+    @Test
+    fun areaTint_viewIsInDarkBounds_darkBoundsChange_viewUpdates() =
+        kosmos.runTest {
+            val displayId = 321
+            fakeDarkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
+
+            val areaTint by collectLastValue(underTest.areaTint(displayId))
+
+            var tint = areaTint?.tint(Rect(1, 1, 3, 3))
+
+            assertThat(tint).isEqualTo(0xAABBCC)
+
+            // Dark region moves 5px to the right
+            fakeDarkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(5, 0, 10, 5)), 0f, 0xAABBCC)
+
+            tint = areaTint?.tint(Rect(1, 1, 3, 3))
+
+            assertThat(tint).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
+        }
+
+    @Test
+    fun iconBlockList_followsInteractor() =
+        kosmos.runTest {
+            setHomeStatusBarIconBlockList(listOf("icon1", "icon2"))
+
+            val latest by collectLastValue(underTest.iconBlockList)
+
+            assertThat(latest).containsExactly("icon1", "icon2")
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

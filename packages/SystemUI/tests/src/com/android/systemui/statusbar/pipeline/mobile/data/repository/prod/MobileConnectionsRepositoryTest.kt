@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.carrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManagerProxy
@@ -68,7 +69,6 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
-import com.android.systemui.user.data.repository.userRepository
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -209,14 +209,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 wifiTableLogBuffer,
             )
 
-        carrierConfigRepository =
-            CarrierConfigRepository(
-                fakeBroadcastDispatcher,
-                mock(),
-                mock(),
-                logger,
-                testScope.backgroundScope,
-            )
+        carrierConfigRepository = kosmos.carrierConfigRepository
 
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(

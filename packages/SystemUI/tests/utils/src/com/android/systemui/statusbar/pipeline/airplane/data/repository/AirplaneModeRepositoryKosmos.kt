@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.shared.domain.interactor
+package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
 
-val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
-    Kosmos.Fixture { CollapsedStatusBarInteractor(disableFlagsInteractor) }
+val Kosmos.airplaneModeRepository by Kosmos.Fixture { FakeAirplaneModeRepository() }
+
+val AirplaneModeRepository.fake
+    get() = this as FakeAirplaneModeRepository

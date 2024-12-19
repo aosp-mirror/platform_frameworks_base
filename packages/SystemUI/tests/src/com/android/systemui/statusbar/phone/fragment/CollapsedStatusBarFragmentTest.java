@@ -73,6 +73,7 @@ import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.StatusBarOperatorNameViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -1245,7 +1246,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mSecureSettings = mock(SecureSettings.class);
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();
-        mCollapsedStatusBarViewModel = new FakeHomeStatusBarViewModel();
+        mCollapsedStatusBarViewModel = new FakeHomeStatusBarViewModel(
+                mock(StatusBarOperatorNameViewModel.class));
         mCollapsedStatusBarViewBinder = new FakeHomeStatusBarViewBinder();
 
         return new CollapsedStatusBarFragment(

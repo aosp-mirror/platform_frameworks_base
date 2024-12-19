@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.graphics.Color
+import android.graphics.Rect
 import android.view.View
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
@@ -24,7 +27,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
+class FakeHomeStatusBarViewModel(
+    override val operatorNameViewModel: StatusBarOperatorNameViewModel
+) : HomeStatusBarViewModel {
     private val areNotificationLightsOut = MutableStateFlow(false)
 
     override val isTransitioningFromLockscreenToOccluded = MutableStateFlow(false)
@@ -37,6 +42,8 @@ class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
     override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
 
     override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
+
+    override val shouldShowOperatorNameView = MutableStateFlow(false)
 
     override val isClockVisible =
         MutableStateFlow(
@@ -65,5 +72,23 @@ class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
             )
         )
 
+    override val iconBlockList: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
+
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
+
+    val darkRegions = mutableListOf<Rect>()
+
+    var darkIconTint = Color.BLACK
+    var lightIconTint = Color.WHITE
+
+    override fun areaTint(displayId: Int): Flow<StatusBarTintColor> =
+        MutableStateFlow(
+            StatusBarTintColor { viewBounds ->
+                if (DarkIconDispatcher.isInAreas(darkRegions, viewBounds)) {
+                    lightIconTint
+                } else {
+                    darkIconTint
+                }
+            }
+        )
 }

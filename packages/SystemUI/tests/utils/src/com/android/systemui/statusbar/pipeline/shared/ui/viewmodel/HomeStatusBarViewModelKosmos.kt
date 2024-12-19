@@ -27,18 +27,23 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsVie
 import com.android.systemui.statusbar.events.domain.interactor.systemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
+import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
-import com.android.systemui.statusbar.pipeline.shared.domain.interactor.collapsedStatusBarInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.homeStatusBarIconBlockListInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.homeStatusBarInteractor
 
-val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
+var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
     Kosmos.Fixture {
         HomeStatusBarViewModelImpl(
-            collapsedStatusBarInteractor,
+            homeStatusBarInteractor,
+            homeStatusBarIconBlockListInteractor,
             lightsOutInteractor,
             activeNotificationsInteractor,
+            darkIconInteractor,
             headsUpNotificationInteractor,
             keyguardTransitionInteractor,
             keyguardInteractor,
+            statusBarOperatorNameViewModel,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,

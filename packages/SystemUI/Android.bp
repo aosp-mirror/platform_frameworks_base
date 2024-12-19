@@ -270,7 +270,7 @@ filegroup {
         "tests/src/**/systemui/stylus/StylusManagerTest.kt",
         "tests/src/**/systemui/recents/OverviewProxyServiceTest.kt",
         "tests/src/**/systemui/DisplayCutoutBaseViewTest.kt",
-        "tests/src/**/systemui/statusbar/pipeline/mobile/data/repository/CarrierConfigRepositoryTest.kt",
+        "tests/src/**/systemui/statusbar/pipeline/mobile/data/repository/CarrierConfigRepositoryImplTest.kt",
         "tests/src/**/systemui/statusbar/policy/BatteryControllerTest.java",
         "tests/src/**/systemui/statusbar/policy/SensitiveNotificationProtectionControllerTest.kt",
         "tests/src/**/systemui/statusbar/KeyboardShortcutsReceiverTest.java",

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.airplane.domain.interactor
+package com.android.systemui.statusbar.pipeline.shared
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.airplaneModeRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.shared.data.repository.connectivityRepository
 
-val Kosmos.airplaneModeInteractor: AirplaneModeInteractor by
-    Kosmos.Fixture {
-        AirplaneModeInteractor(
-            airplaneModeRepository,
-            connectivityRepository,
-            mobileConnectionsRepository,
-        )
-    }
+val Kosmos.connectivityConstants by Kosmos.Fixture { FakeConnectivityConstnants() }
+
+class FakeConnectivityConstnants : ConnectivityConstants {
+    override var hasDataCapabilities: Boolean = true
+
+    override var shouldShowActivityConfig: Boolean = false
+}
+
+val ConnectivityConstants.fake
+    get() = this as FakeConnectivityConstnants

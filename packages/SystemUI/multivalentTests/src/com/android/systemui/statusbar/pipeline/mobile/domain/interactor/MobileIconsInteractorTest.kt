@@ -885,6 +885,20 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             assertThat(latest).isFalse()
         }
 
+    @Test
+    fun defaultDataSubId_tracksRepo() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.defaultDataSubId)
+
+            connectionsRepository.defaultDataSubId.value = 1
+
+            assertThat(latest).isEqualTo(1)
+
+            connectionsRepository.defaultDataSubId.value = 2
+
+            assertThat(latest).isEqualTo(2)
+        }
+
     /**
      * Convenience method for creating a pair of subscriptions to test the filteredSubscriptions
      * flow.
