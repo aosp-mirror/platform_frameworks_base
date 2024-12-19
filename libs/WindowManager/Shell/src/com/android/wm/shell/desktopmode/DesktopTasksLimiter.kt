@@ -127,14 +127,20 @@ class DesktopTasksLimiter(
 
         override fun onTransitionStarting(transition: IBinder) {
             val mActiveTaskDetails = activeTransitionTokensAndTasks[transition]
-            if (mActiveTaskDetails != null && mActiveTaskDetails.transitionInfo != null) {
-                // Begin minimize window CUJ instrumentation.
-                interactionJankMonitor.begin(
-                    mActiveTaskDetails.transitionInfo?.rootLeash,
-                    context,
-                    handler,
-                    CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
-                )
+            val info = mActiveTaskDetails?.transitionInfo ?: return
+            val minimizeChange = getMinimizeChange(info, mActiveTaskDetails.taskId) ?: return
+            // Begin minimize window CUJ instrumentation.
+            interactionJankMonitor.begin(
+                minimizeChange.leash,
+                context,
+                handler,
+                CUJ_DESKTOP_MODE_MINIMIZE_WINDOW,
+            )
+        }
+
+        private fun getMinimizeChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? {
+            return info.changes.find { change ->
+                change.taskInfo?.taskId == taskId && change.mode == TRANSIT_TO_BACK
             }
         }
 

@@ -105,6 +105,13 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
+    name: "activity_embedding_support_for_connected_displays"
+    description: "Enables activity embedding support for connected displays, including enabling AE optimization for Settings."
+    bug: "369438353"
+}
+
+flag {
+    namespace: "windowing_sdk"
     name: "wlinfo_oncreate"
     description: "Makes WindowLayoutInfo accessible without racing in the Activity#onCreate()"
     bug: "337820752"
@@ -144,6 +151,16 @@ flag {
     name: "normalize_home_intent"
     description: "To ensure home is started in correct intent"
     bug: "378505461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "condense_configuration_change_for_simple_mode"
+    description: "Condense configuration change for simple mode"
+    bug: "356738240"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

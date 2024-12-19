@@ -82,7 +82,6 @@ class InternetTileMapperTest : SysuiTestCase() {
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(R.string.quick_settings_networks_available),
                 Icon.Loaded(signalDrawable, null),
-                null,
                 context.getString(R.string.quick_settings_internet_label),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
@@ -120,8 +119,11 @@ class InternetTileMapperTest : SysuiTestCase() {
             createInternetTileState(
                 QSTileState.ActivationState.ACTIVE,
                 inputModel.secondaryLabel.loadText(context).toString(),
-                Icon.Loaded(context.getDrawable(expectedSatIcon!!.res)!!, null),
-                expectedSatIcon.res,
+                Icon.Loaded(
+                    context.getDrawable(expectedSatIcon!!.res)!!,
+                    null,
+                    expectedSatIcon.res,
+                ),
                 expectedSatIcon.contentDescription.loadContentDescription(context).toString(),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
@@ -144,8 +146,7 @@ class InternetTileMapperTest : SysuiTestCase() {
             createInternetTileState(
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(R.string.quick_settings_networks_available),
-                Icon.Loaded(context.getDrawable(wifiRes)!!, contentDescription = null),
-                wifiRes,
+                Icon.Loaded(context.getDrawable(wifiRes)!!, null, wifiRes),
                 context.getString(R.string.quick_settings_internet_label),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
@@ -171,8 +172,8 @@ class InternetTileMapperTest : SysuiTestCase() {
                 Icon.Loaded(
                     context.getDrawable(R.drawable.ic_qs_no_internet_unavailable)!!,
                     contentDescription = null,
+                    R.drawable.ic_qs_no_internet_unavailable,
                 ),
-                R.drawable.ic_qs_no_internet_unavailable,
                 context.getString(R.string.quick_settings_networks_unavailable),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
@@ -182,13 +183,11 @@ class InternetTileMapperTest : SysuiTestCase() {
         activationState: QSTileState.ActivationState,
         secondaryLabel: String,
         icon: Icon,
-        iconRes: Int? = null,
         contentDescription: String,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_internet_label)
         return QSTileState(
             icon,
-            iconRes,
             label,
             activationState,
             secondaryLabel,

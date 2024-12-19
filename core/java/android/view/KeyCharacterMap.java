@@ -16,6 +16,9 @@
 
 package android.view;
 
+
+import static com.android.hardware.input.Flags.removeFallbackModifiers;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -458,7 +461,15 @@ public class KeyCharacterMap implements Parcelable {
         FallbackAction action = FallbackAction.obtain();
         metaState = KeyEvent.normalizeMetaState(metaState);
         if (nativeGetFallbackAction(mPtr, keyCode, metaState, action)) {
-            action.metaState = KeyEvent.normalizeMetaState(action.metaState);
+            if (removeFallbackModifiers()) {
+                // Strip all modifiers. This is safe to do since only exact keyCode + metaState
+                // modifiers will trigger a fallback.
+                // E.g. Ctrl + Space -> language_switch (fallback generated)
+                //      Ctrl + Alt + Space -> Ctrl + Alt + Space (no fallback generated)
+                action.metaState = 0;
+            } else {
+                action.metaState = KeyEvent.normalizeMetaState(action.metaState);
+            }
             return action;
         }
         action.recycle();

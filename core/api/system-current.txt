@@ -360,6 +360,7 @@ package android {
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
+    field @FlaggedApi("android.content.pm.uid_based_provider_lookup") public static final String RESOLVE_COMPONENT_FOR_UID = "android.permission.RESOLVE_COMPONENT_FOR_UID";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
     field @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled") public static final String RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS = "android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
@@ -4241,6 +4242,7 @@ package android.content.pm {
     method public abstract void registerDexModule(@NonNull String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
+    method @FlaggedApi("android.content.pm.uid_based_provider_lookup") @Nullable @RequiresPermission(android.Manifest.permission.RESOLVE_COMPONENT_FOR_UID) public android.content.pm.ProviderInfo resolveContentProviderForUid(@NonNull String, @NonNull android.content.pm.PackageManager.ComponentInfoFlags, int);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle, @NonNull String);
     method public void sendDeviceCustomizationReadyBroadcast();
@@ -5079,8 +5081,8 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpoint {
-    method @Nullable public android.hardware.contexthub.IHubEndpointLifecycleCallback getLifecycleCallback();
-    method @Nullable public android.hardware.contexthub.IHubEndpointMessageCallback getMessageCallback();
+    method @Nullable public android.hardware.contexthub.HubEndpointLifecycleCallback getLifecycleCallback();
+    method @Nullable public android.hardware.contexthub.HubEndpointMessageCallback getMessageCallback();
     method @NonNull public java.util.Collection<android.hardware.contexthub.HubServiceInfo> getServiceInfoCollection();
     method @Nullable public String getTag();
     method public int getVersion();
@@ -5095,12 +5097,17 @@ package android.hardware.contexthub {
   public static final class HubEndpoint.Builder {
     ctor public HubEndpoint.Builder(@NonNull android.content.Context);
     method @NonNull public android.hardware.contexthub.HubEndpoint build();
-    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
-    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.IHubEndpointLifecycleCallback);
-    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull android.hardware.contexthub.IHubEndpointMessageCallback);
-    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.IHubEndpointMessageCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull android.hardware.contexthub.HubEndpointLifecycleCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setLifecycleCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.HubEndpointLifecycleCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull android.hardware.contexthub.HubEndpointMessageCallback);
+    method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setMessageCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.HubEndpointMessageCallback);
     method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setServiceInfoCollection(@NonNull java.util.Collection<android.hardware.contexthub.HubServiceInfo>);
     method @NonNull public android.hardware.contexthub.HubEndpoint.Builder setTag(@NonNull String);
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public interface HubEndpointDiscoveryCallback {
+    method public void onEndpointsStarted(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>);
+    method public void onEndpointsStopped(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>, int);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public final class HubEndpointInfo implements android.os.Parcelable {
@@ -5124,6 +5131,16 @@ package android.hardware.contexthub {
   public static class HubEndpointInfo.HubEndpointIdentifier {
     method public long getEndpoint();
     method public long getHub();
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public interface HubEndpointLifecycleCallback {
+    method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
+    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo, @Nullable String);
+    method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
+  }
+
+  @FlaggedApi("android.chre.flags.offload_api") public interface HubEndpointMessageCallback {
+    method public void onMessageReceived(@NonNull android.hardware.contexthub.HubEndpointSession, @NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
@@ -5172,21 +5189,6 @@ package android.hardware.contexthub {
   public static final class HubServiceInfo.Builder {
     ctor public HubServiceInfo.Builder(@NonNull String, int, int, int);
     method @NonNull public android.hardware.contexthub.HubServiceInfo build();
-  }
-
-  @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointDiscoveryCallback {
-    method public void onEndpointsStarted(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>);
-    method public void onEndpointsStopped(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>, int);
-  }
-
-  @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
-    method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
-    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo, @Nullable String);
-    method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
-  }
-
-  @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointMessageCallback {
-    method public void onMessageReceived(@NonNull android.hardware.contexthub.HubEndpointSession, @NonNull android.hardware.contexthub.HubMessage);
   }
 
 }
@@ -6192,16 +6194,16 @@ package android.hardware.location {
     method @Deprecated public int registerCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     method @Deprecated public int registerCallback(android.hardware.location.ContextHubManager.Callback, android.os.Handler);
     method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpoint(@NonNull android.hardware.contexthub.HubEndpoint);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(long, @NonNull android.hardware.contexthub.IHubEndpointDiscoveryCallback);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(long, @NonNull android.hardware.contexthub.IHubEndpointDiscoveryCallback, @NonNull java.util.concurrent.Executor);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull String, @NonNull android.hardware.contexthub.IHubEndpointDiscoveryCallback);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull String, @NonNull android.hardware.contexthub.IHubEndpointDiscoveryCallback, @NonNull java.util.concurrent.Executor);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull android.hardware.contexthub.HubEndpointDiscoveryCallback, long);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.HubEndpointDiscoveryCallback, long);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull android.hardware.contexthub.HubEndpointDiscoveryCallback, @NonNull String);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void registerEndpointDiscoveryCallback(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.contexthub.HubEndpointDiscoveryCallback, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int sendMessage(int, int, @NonNull android.hardware.location.ContextHubMessage);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int unloadNanoApp(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @Deprecated public int unregisterCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void unregisterEndpoint(@NonNull android.hardware.contexthub.HubEndpoint);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void unregisterEndpointDiscoveryCallback(@NonNull android.hardware.contexthub.IHubEndpointDiscoveryCallback);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void unregisterEndpointDiscoveryCallback(@NonNull android.hardware.contexthub.HubEndpointDiscoveryCallback);
     field public static final int AUTHORIZATION_DENIED = 0; // 0x0
     field public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1; // 0x1
     field public static final int AUTHORIZATION_GRANTED = 2; // 0x2

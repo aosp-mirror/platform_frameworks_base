@@ -63,6 +63,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.scrimStartable
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.shared.model.sceneDataSource
+import com.android.systemui.scene.ui.view.mockWindowRootViewProvider
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -191,4 +192,5 @@ class KosmosJavaAdapter() {
     }
     val disableFlagsInteractor by lazy { kosmos.disableFlagsInteractor }
     val fakeDisableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
+    val mockWindowRootViewProvider by lazy { kosmos.mockWindowRootViewProvider }
 }

@@ -1706,6 +1706,10 @@ static jboolean android_os_BinderProxy_removeFrozenStateChangeCallback(JNIEnv* e
     return res;
 }
 
+static jboolean android_os_BinderProxy_frozenStateChangeCallbackSupported(JNIEnv*, jclass*) {
+    return ProcessState::isDriverFeatureEnabled(ProcessState::DriverFeature::FREEZE_NOTIFICATION);
+}
+
 static void BinderProxy_destroy(void* rawNativeData)
 {
     BinderProxyNativeData * nativeData = (BinderProxyNativeData *) rawNativeData;
@@ -1750,6 +1754,8 @@ static const JNINativeMethod gBinderProxyMethods[] = {
         "(Landroid/os/IBinder$FrozenStateChangeCallback;)V", (void*)android_os_BinderProxy_addFrozenStateChangeCallback},
     {"removeFrozenStateChangeCallbackNative",
         "(Landroid/os/IBinder$FrozenStateChangeCallback;)Z", (void*)android_os_BinderProxy_removeFrozenStateChangeCallback},
+    {"isFrozenStateChangeCallbackSupportedNative",
+        "()Z", (void*)android_os_BinderProxy_frozenStateChangeCallbackSupported},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},
     {"getExtension",        "()Landroid/os/IBinder;", (void*)android_os_BinderProxy_getExtension},
 };

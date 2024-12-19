@@ -1544,14 +1544,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(mStackScroller.mHeadsUpAnimatingAway);
     }
 
-    @Test
-    @EnableSceneContainer
-    public void finishExpanding_sceneContainerEnabled() {
-        mStackScroller.startOverscrollAfterExpanding();
-        verify(mStackScroller.getExpandHelper()).finishExpanding();
-        assertTrue(mStackScroller.getIsBeingDragged());
-    }
-
     private MotionEvent captureTouchSentToSceneFramework() {
         ArgumentCaptor<MotionEvent> captor = ArgumentCaptor.forClass(MotionEvent.class);
         verify(mStackScrollLayoutController).sendTouchToSceneFramework(captor.capture());

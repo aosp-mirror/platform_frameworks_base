@@ -994,6 +994,9 @@
     <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
         android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
+    <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
+    <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

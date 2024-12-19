@@ -781,6 +781,10 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0, controller);
     }
 
+    void startActivityForDialog(Intent intent) {
+        mActivityStarter.startActivity(intent, false /* dismissShade */);
+    }
+
     void launchNetworkSetting(View view) {
         startActivity(getSettingsIntent(), view);
     }

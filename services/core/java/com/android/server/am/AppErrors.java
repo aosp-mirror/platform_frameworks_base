@@ -373,6 +373,24 @@ class AppErrors {
         }
     }
 
+    void clearBadProcessForUser(final String processName, final int userId) {
+        synchronized (mBadProcessLock) {
+            final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();
+            badProcesses.putAll(mBadProcesses);
+            final SparseArray<BadProcessInfo> uids = badProcesses.get(processName);
+            if (uids == null) {
+                return;
+            }
+            for (int i = uids.size() - 1; i >= 0; --i) {
+                final int uid = uids.keyAt(i);
+                if (userId == UserHandle.USER_ALL || userId == UserHandle.getUserId(uid)) {
+                    badProcesses.remove(processName, uid);
+                }
+            }
+            mBadProcesses = badProcesses;
+        }
+    }
+
     void markBadProcess(final String processName, final int uid, BadProcessInfo info) {
         synchronized (mBadProcessLock) {
             final ProcessMap<BadProcessInfo> badProcesses = new ProcessMap<>();

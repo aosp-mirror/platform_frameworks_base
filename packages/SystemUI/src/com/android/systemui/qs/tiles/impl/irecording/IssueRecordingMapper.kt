@@ -39,6 +39,7 @@ constructor(@ShadeDisplayAware private val resources: Resources, private val the
                     Icon.Loaded(
                         resources.getDrawable(R.drawable.qs_record_issue_icon_on, theme),
                         null,
+                        R.drawable.qs_record_issue_icon_on,
                     )
                 } else {
                     activationState = QSTileState.ActivationState.INACTIVE
@@ -46,6 +47,7 @@ constructor(@ShadeDisplayAware private val resources: Resources, private val the
                     Icon.Loaded(
                         resources.getDrawable(R.drawable.qs_record_issue_icon_off, theme),
                         null,
+                        R.drawable.qs_record_issue_icon_off,
                     )
                 }
             supportedActions = setOf(QSTileState.UserAction.CLICK)

@@ -27,7 +27,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.accessibility.Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS;
@@ -34199,7 +34199,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && viewRootImpl.shouldCheckFrameRateCategory()
                 && parent instanceof View
                 && ((View) parent).getFrameContentVelocity() <= 0
-                && !isInputMethodWindowType) {
+                && !isInputMethodWindowType
+                && viewRootImpl.getFrameRateCompatibility() != FRAME_RATE_COMPATIBILITY_AT_LEAST) {
 
             return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
         }
@@ -34251,7 +34252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
                 frameRateToSet = frameRate;
             } else {
-                compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                compatibility = FRAME_RATE_COMPATIBILITY_AT_LEAST;
                 frameRateToSet = velocityFrameRate;
             }
             viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);

@@ -69,8 +69,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
         expandedAccessibilityClass: KClass<out View>? = Switch::class,
     ): QSTileState {
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

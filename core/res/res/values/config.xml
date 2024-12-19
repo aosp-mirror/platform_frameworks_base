@@ -2165,6 +2165,17 @@
          config_enableGeofenceOverlay is false. -->
     <string name="config_geofenceProviderPackageName" translatable="false">@null</string>
 
+    <!-- Whether to enable GNSS assistance overlay which allows GnssAssistanceProvider to be
+     replaced by an app at run-time. When disabled, only the
+     config_gnssAssistanceProviderPackageName package will be searched for
+     GnssAssistanceProvider, otherwise any system package is eligible. Anyone who wants to
+     disable the overlay mechanism can set it to false.
+     -->
+    <bool name="config_enableGnssAssistanceOverlay" translatable="false">true</bool>
+    <!-- Package name providing GNSS assistance API support. Used only when
+         config_enableGnssAssistanceOverlay is false. -->
+    <string name="config_gnssAssistanceProviderPackageName" translatable="false">@null</string>
+
     <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
          Activity-Recognition to be replaced by an app at run-time. When disabled, only the
          config_activityRecognitionHardwarePackageName package will be searched for

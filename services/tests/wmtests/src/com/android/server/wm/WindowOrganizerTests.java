@@ -909,8 +909,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setAdjacentRoots(info1.token, info2.token);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
-        assertEquals(task1.getAdjacentTaskFragment(), task2);
-        assertEquals(task2.getAdjacentTaskFragment(), task1);
+        assertTrue(task1.isAdjacentTo(task2));
+        assertTrue(task2.isAdjacentTo(task1));
 
         wct = new WindowContainerTransaction();
         wct.setLaunchAdjacentFlagRoot(info1.token);
@@ -921,8 +921,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         wct.clearAdjacentRoots(info1.token);
         wct.clearLaunchAdjacentFlagRoot(info1.token);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
-        assertEquals(task1.getAdjacentTaskFragment(), null);
-        assertEquals(task2.getAdjacentTaskFragment(), null);
+        assertFalse(task1.hasAdjacentTaskFragment());
+        assertFalse(task2.hasAdjacentTaskFragment());
         assertEquals(dc.getDefaultTaskDisplayArea().mLaunchAdjacentFlagRootTask, null);
     }
 

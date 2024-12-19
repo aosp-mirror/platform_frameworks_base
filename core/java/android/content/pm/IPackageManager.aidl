@@ -196,6 +196,21 @@ interface IPackageManager {
     ProviderInfo resolveContentProvider(String name, long flags, int userId);
 
     /**
+     * Resolve content providers with a given authority, for a specific
+     * callingUid.
+     *
+     * @param authority Authority of the content provider
+     * @param flags Additional option flags to modify the data returned.
+     * @param userId Current user ID
+     * @param callingUid UID of the caller who's access to the content provider
+              is to be checked
+     *
+     *  @return ProviderInfo of the resolved content provider. May return null
+    */
+    ProviderInfo resolveContentProviderForUid(String authority, long flags,
+      int userId, int callingUid);
+
+    /**
      * Retrieve sync information for all content providers.
      *
      * @param outNames Filled in with a list of the root names of the content

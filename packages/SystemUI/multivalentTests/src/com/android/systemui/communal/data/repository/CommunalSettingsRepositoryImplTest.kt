@@ -26,8 +26,8 @@ import android.content.res.mainResources
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
@@ -35,10 +35,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.DisabledReason
 import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_BACKGROUND_SETTING
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.nullable
@@ -51,14 +54,20 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply { mainResources = mContext.orCreateTestableResources.resources }
     private val testScope = kosmos.testScope
     private lateinit var underTest: CommunalSettingsRepository
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
@@ -164,17 +173,17 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             assertThat(enabledState).containsExactly(DisabledReason.DISABLED_REASON_INVALID_USER)
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @EnableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun classicFlagIsDisabled() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+        kosmos.runTest {
+            setCommunalV2Enabled(false)
             val enabledState by collectLastValue(underTest.getEnabledState(PRIMARY_USER))
             assertThat(enabledState?.enabled).isFalse()
             assertThat(enabledState).containsExactly(DisabledReason.DISABLED_REASON_FLAG)
         }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @DisableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun communalHubFlagIsDisabled() =
         testScope.runTest {
@@ -295,6 +304,34 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun screensaverDisabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                0,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isFalse()
+        }
+
+    @Test
+    fun screensaverEnabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                1,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isTrue()
+        }
+
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))
             .thenReturn(disabledFlags)
@@ -310,5 +347,11 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         val SECONDARY_USER = UserInfo(/* id= */ 1, /* name= */ "secondary user", /* flags= */ 0)
         val WORK_PROFILE =
             UserInfo(10, "work", /* iconPath= */ "", /* flags= */ 0, USER_TYPE_PROFILE_MANAGED)
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_GLANCEABLE_HUB_V2)
+        }
     }
 }

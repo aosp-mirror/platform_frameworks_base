@@ -86,12 +86,8 @@ suspend fun Kosmos.setCommunalEnabled(enabled: Boolean) {
 }
 
 suspend fun Kosmos.setCommunalV2Enabled(enabled: Boolean) {
-    setCommunalV2ConfigEnabled(true)
-    if (enabled) {
-        fakeUserRepository.asMainUser()
-    } else {
-        fakeUserRepository.asDefaultUser()
-    }
+    setCommunalV2ConfigEnabled(enabled)
+    setCommunalEnabled(enabled)
 }
 
 suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
@@ -103,10 +99,6 @@ suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
 }
 
 suspend fun Kosmos.setCommunalV2Available(available: Boolean) {
-    setCommunalV2ConfigEnabled(true)
-    setCommunalEnabled(available)
-    with(fakeKeyguardRepository) {
-        setIsEncryptedOrLockdown(!available)
-        setKeyguardShowing(available)
-    }
+    setCommunalV2ConfigEnabled(available)
+    setCommunalAvailable(available)
 }

@@ -38,10 +38,10 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.battery_detail_switch_title)
             contentDescription = label
-            iconRes =
+            val iconRes =
                 if (data.isPowerSaving) R.drawable.qs_battery_saver_icon_on
                 else R.drawable.qs_battery_saver_icon_off
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.None
 
             if (data.isPluggedIn) {

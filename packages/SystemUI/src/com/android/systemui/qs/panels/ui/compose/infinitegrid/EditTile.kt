@@ -395,7 +395,7 @@ private fun CurrentTilesGrid(
 
     val cells =
         remember(listState.tiles) {
-            listState.tiles.fastMap { Pair(it, BounceableTileViewModel()) }
+            listState.tiles.fastMap { tile -> Pair(tile, BounceableTileViewModel()) }
         }
 
     TileLazyGrid(

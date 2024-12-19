@@ -119,4 +119,15 @@ public class BackgroundStartPrivilegesTest {
                 Arrays.asList(BSP_ALLOW_A, BSP_ALLOW_A, BSP_ALLOW_A, BSP_ALLOW_A)))
                 .isEqualTo(BSP_ALLOW_A);
     }
+
+    @Test
+    public void backgroundStartPrivilege_equals_works() {
+        assertThat(NONE).isEqualTo(NONE);
+        assertThat(ALLOW_BAL).isEqualTo(ALLOW_BAL);
+        assertThat(ALLOW_FGS).isEqualTo(ALLOW_FGS);
+        assertThat(BSP_ALLOW_A).isEqualTo(BSP_ALLOW_A);
+        assertThat(NONE).isNotEqualTo(ALLOW_BAL);
+        assertThat(ALLOW_FGS).isNotEqualTo(ALLOW_BAL);
+        assertThat(BSP_ALLOW_A).isNotEqualTo(BSP_ALLOW_B);
+    }
 }

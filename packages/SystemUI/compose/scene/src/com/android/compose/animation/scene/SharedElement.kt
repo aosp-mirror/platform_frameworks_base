@@ -30,7 +30,8 @@ internal fun Element.shouldBeRenderedBy(content: ContentKey): Boolean {
     // the transition is running. If the [renderAuthority.size] is 1 it means that that this element
     // is currently composed only in one nesting level, which means that the render authority
     // is determined by "classic" shared element code.
-    return renderAuthority.size == 1 || renderAuthority.first() == content
+    return renderAuthority.size > 0 &&
+        (renderAuthority.size == 1 || renderAuthority.first() == content)
 }
 
 /**

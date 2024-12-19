@@ -27,6 +27,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Stores App Compat information about a particular Task.
@@ -58,16 +59,11 @@ public class AppCompatTaskInfo implements Parcelable {
     public int topActivityLetterboxHeight = PROPERTY_VALUE_UNSET;
 
     /**
-     * Contains the current app height of the letterboxed activity if available or
-     * {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
+     * Contains the app bounds of the top activity or size compat mode
+     * bounds when in size compat mode. If null, contains bounds.
      */
-    public int topActivityLetterboxAppHeight = PROPERTY_VALUE_UNSET;
-
-    /**
-     * Contains the current app  width of the letterboxed activity if available or
-     * {@link TaskInfo#PROPERTY_VALUE_UNSET} otherwise.
-     */
-    public int topActivityLetterboxAppWidth = PROPERTY_VALUE_UNSET;
+    @NonNull
+    public final Rect topActivityAppBounds = new Rect();
 
     /**
      * Contains the top activity bounds when the activity is letterboxed.
@@ -350,8 +346,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
-                && topActivityLetterboxAppWidth == that.topActivityLetterboxAppWidth
-                && topActivityLetterboxAppHeight == that.topActivityLetterboxAppHeight
+                && topActivityAppBounds.equals(that.topActivityAppBounds)
                 && topActivityLetterboxHorizontalPosition
                     == that.topActivityLetterboxHorizontalPosition
                 && cameraCompatTaskInfo.equalsForTaskOrganizer(that.cameraCompatTaskInfo);
@@ -371,8 +366,7 @@ public class AppCompatTaskInfo implements Parcelable {
                     == that.topActivityLetterboxHorizontalPosition
                 && topActivityLetterboxWidth == that.topActivityLetterboxWidth
                 && topActivityLetterboxHeight == that.topActivityLetterboxHeight
-                && topActivityLetterboxAppWidth == that.topActivityLetterboxAppWidth
-                && topActivityLetterboxAppHeight == that.topActivityLetterboxAppHeight
+                && topActivityAppBounds.equals(that.topActivityAppBounds)
                 && cameraCompatTaskInfo.equalsForCompatUi(that.cameraCompatTaskInfo);
     }
 
@@ -385,8 +379,7 @@ public class AppCompatTaskInfo implements Parcelable {
         topActivityLetterboxHorizontalPosition = source.readInt();
         topActivityLetterboxWidth = source.readInt();
         topActivityLetterboxHeight = source.readInt();
-        topActivityLetterboxAppWidth = source.readInt();
-        topActivityLetterboxAppHeight = source.readInt();
+        topActivityAppBounds.set(Objects.requireNonNull(source.readTypedObject(Rect.CREATOR)));
         topActivityLetterboxBounds = source.readTypedObject(Rect.CREATOR);
         cameraCompatTaskInfo = source.readTypedObject(CameraCompatTaskInfo.CREATOR);
     }
@@ -401,8 +394,7 @@ public class AppCompatTaskInfo implements Parcelable {
         dest.writeInt(topActivityLetterboxHorizontalPosition);
         dest.writeInt(topActivityLetterboxWidth);
         dest.writeInt(topActivityLetterboxHeight);
-        dest.writeInt(topActivityLetterboxAppWidth);
-        dest.writeInt(topActivityLetterboxAppHeight);
+        dest.writeTypedObject(topActivityAppBounds, flags);
         dest.writeTypedObject(topActivityLetterboxBounds, flags);
         dest.writeTypedObject(cameraCompatTaskInfo, flags);
     }
@@ -421,8 +413,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 + topActivityLetterboxHorizontalPosition
                 + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
-                + " topActivityLetterboxAppWidth=" + topActivityLetterboxAppWidth
-                + " topActivityLetterboxAppHeight=" + topActivityLetterboxAppHeight
+                + " topActivityAppBounds=" + topActivityAppBounds
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled()
                 + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled()
                 + " hasMinAspectRatioOverride=" + hasMinAspectRatioOverride()

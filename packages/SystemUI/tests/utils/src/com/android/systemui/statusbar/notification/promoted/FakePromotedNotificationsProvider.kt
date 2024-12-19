@@ -17,11 +17,20 @@
 package com.android.systemui.statusbar.notification.promoted
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import org.junit.Assert
 
 class FakePromotedNotificationsProvider : PromotedNotificationsProvider {
     val promotedEntries = mutableSetOf<NotificationEntry>()
+    val shouldPromoteForEntry = mutableMapOf<NotificationEntry, Boolean>()
 
     override fun shouldPromote(entry: NotificationEntry): Boolean {
-        return promotedEntries.contains(entry)
+        if (shouldPromoteForEntry.isEmpty()) {
+            // If *no* entries are set, just return false for everything.
+            return false
+        } else {
+            // If entries *are* set, fail on unexpected ones.
+            Assert.assertTrue(shouldPromoteForEntry.containsKey(entry))
+            return shouldPromoteForEntry[entry] ?: false
+        }
     }
 }

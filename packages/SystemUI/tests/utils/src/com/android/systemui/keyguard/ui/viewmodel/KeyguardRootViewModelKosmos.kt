@@ -87,7 +87,6 @@ val Kosmos.keyguardRootViewModel by Fixture {
             primaryBouncerToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
         aodBurnInViewModel = aodBurnInViewModel,
-        aodAlphaViewModel = aodAlphaViewModel,
         shadeInteractor = shadeInteractor,
     )
 }

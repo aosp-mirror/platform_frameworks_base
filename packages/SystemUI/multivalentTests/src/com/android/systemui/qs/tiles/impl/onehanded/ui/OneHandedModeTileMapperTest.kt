@@ -66,11 +66,7 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
         val outputState = mapper.map(config, inputModel)
 
         val expectedState =
-            createOneHandedModeTileState(
-                QSTileState.ActivationState.INACTIVE,
-                subtitleArray[1],
-                com.android.internal.R.drawable.ic_qs_one_handed_mode,
-            )
+            createOneHandedModeTileState(QSTileState.ActivationState.INACTIVE, subtitleArray[1])
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
@@ -81,23 +77,21 @@ class OneHandedModeTileMapperTest : SysuiTestCase() {
         val outputState = mapper.map(config, inputModel)
 
         val expectedState =
-            createOneHandedModeTileState(
-                QSTileState.ActivationState.ACTIVE,
-                subtitleArray[2],
-                com.android.internal.R.drawable.ic_qs_one_handed_mode,
-            )
+            createOneHandedModeTileState(QSTileState.ActivationState.ACTIVE, subtitleArray[2])
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
 
     private fun createOneHandedModeTileState(
         activationState: QSTileState.ActivationState,
         secondaryLabel: String,
-        iconRes: Int,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_onehanded_label)
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(
+                context.getDrawable(com.android.internal.R.drawable.ic_qs_one_handed_mode)!!,
+                null,
+                com.android.internal.R.drawable.ic_qs_one_handed_mode,
+            ),
             label,
             activationState,
             secondaryLabel,

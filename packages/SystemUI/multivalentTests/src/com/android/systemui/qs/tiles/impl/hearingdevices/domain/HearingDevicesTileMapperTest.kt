@@ -102,8 +102,7 @@ class HearingDevicesTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.quick_settings_hearing_devices_label)
         val iconRes = R.drawable.qs_hearing_devices_icon
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

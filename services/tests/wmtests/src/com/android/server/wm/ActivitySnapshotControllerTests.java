@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 
@@ -253,7 +254,11 @@ public class ActivitySnapshotControllerTests extends TaskSnapshotPersisterTestBa
      */
     @Test
     public void testSkipRecordActivity() {
-        doReturn(createSnapshot()).when(mActivitySnapshotController).recordSnapshotInner(any());
+        final AbsAppSnapshotController.SnapshotSupplier supplier =
+                new AbsAppSnapshotController.SnapshotSupplier();
+        supplier.setSupplier(this::createSnapshot);
+        doReturn(supplier).when(mActivitySnapshotController).recordSnapshotInner(
+                any(), anyBoolean(), any());
         final Task task = createTask(mDisplayContent);
 
         mSnapshotPersistQueue.setPaused(true);

@@ -38,9 +38,6 @@ interface ShadeLockscreenInteractor {
      */
     @Deprecated("Use ShadeInteractor instead") val isExpanded: Boolean
 
-    /** Called before animating Keyguard dismissal, i.e. the animation dismissing the bouncer. */
-    fun startBouncerPreHideAnimation()
-
     /** Called once every minute while dozing. */
     fun dozeTimeTick()
 

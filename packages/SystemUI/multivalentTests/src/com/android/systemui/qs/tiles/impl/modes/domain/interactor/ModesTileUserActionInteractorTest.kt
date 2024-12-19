@@ -156,6 +156,10 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     private fun modelOf(isActivated: Boolean, activeModeNames: List<String>): ModesTileModel {
-        return ModesTileModel(isActivated, activeModeNames, TestStubDrawable("icon").asIcon(), 123)
+        return ModesTileModel(
+            isActivated,
+            activeModeNames,
+            TestStubDrawable("icon").asIcon(res = 123),
+        )
     }
 }

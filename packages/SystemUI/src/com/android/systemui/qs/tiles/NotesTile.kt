@@ -22,6 +22,7 @@ import android.os.Looper
 import android.service.quicksettings.Tile
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -92,7 +93,8 @@ constructor(
 
         state?.apply {
             this.state = tileState.activationState.legacyState
-            icon = maybeLoadResourceIcon(tileState.iconRes ?: R.drawable.ic_qs_notes)
+            icon =
+                maybeLoadResourceIcon((tileState.icon as Icon.Loaded).res ?: R.drawable.ic_qs_notes)
             label = tileState.label
             contentDescription = tileState.contentDescription
             expandedAccessibilityClassName = tileState.expandedAccessibilityClassName

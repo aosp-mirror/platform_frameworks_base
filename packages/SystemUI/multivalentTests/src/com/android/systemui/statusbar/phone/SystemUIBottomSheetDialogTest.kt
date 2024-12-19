@@ -20,7 +20,9 @@ import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -31,7 +33,6 @@ import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -43,7 +44,7 @@ import org.mockito.Mockito.verify
 @RunWithLooper(setAsMainLooper = true)
 class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val configurationController = mock<ConfigurationController>()
     private val config = mock<Configuration>()
     private val delegate = mock<DialogDelegate<Dialog>>()
@@ -67,21 +68,17 @@ class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 
     @Test
     fun onStart_registersConfigCallback() {
-        kosmos.testScope.runTest {
+        kosmos.runTest {
             dialog.show()
-            runCurrent()
-
             verify(configurationController).addCallback(any())
         }
     }
 
     @Test
     fun onStop_unregisterConfigCallback() {
-        kosmos.testScope.runTest {
+        kosmos.runTest {
             dialog.show()
-            runCurrent()
             dialog.dismiss()
-            runCurrent()
 
             verify(configurationController).removeCallback(any())
         }
@@ -89,14 +86,12 @@ class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 
     @Test
     fun onConfigurationChanged_calledInDelegate() {
-        kosmos.testScope.runTest {
+        kosmos.runTest {
             dialog.show()
-            runCurrent()
             val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
             verify(configurationController).addCallback(capture(captor))
 
             captor.value.onConfigChanged(config)
-            runCurrent()
 
             verify(delegate).onConfigurationChanged(any(), any())
         }

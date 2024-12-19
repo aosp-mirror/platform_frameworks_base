@@ -131,6 +131,7 @@ public final class MetadataResult implements Parcelable {
     /**
      * Builder to construct {@link MetadataResult}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         @ResultCode
         private final int mResultCode;

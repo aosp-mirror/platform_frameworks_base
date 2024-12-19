@@ -20,13 +20,17 @@ package com.android.systemui.keyguard.data.quickaffordance
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.UserInfo
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.backup.BackupHelper
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -54,6 +58,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     @Mock private lateinit var userFileManager: UserFileManager
 
@@ -80,6 +85,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
                 context = context,
                 userFileManager = userFileManager,
                 userTracker = userTracker,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
     }
@@ -110,27 +116,13 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
         val affordanceId2 = "affordance2"
         val affordanceId3 = "affordance3"
 
-        underTest.setSelections(
-            slotId = slotId1,
-            affordanceIds = listOf(affordanceId1),
-        )
-        assertSelections(
-            affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId1),
-            ),
-        )
+        underTest.setSelections(slotId = slotId1, affordanceIds = listOf(affordanceId1))
+        assertSelections(affordanceIdsBySlotId.last(), mapOf(slotId1 to listOf(affordanceId1)))
 
-        underTest.setSelections(
-            slotId = slotId2,
-            affordanceIds = listOf(affordanceId2),
-        )
+        underTest.setSelections(slotId = slotId2, affordanceIds = listOf(affordanceId2))
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId1),
-                slotId2 to listOf(affordanceId2),
-            )
+            mapOf(slotId1 to listOf(affordanceId1), slotId2 to listOf(affordanceId2)),
         )
 
         underTest.setSelections(
@@ -139,34 +131,19 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
         )
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId1, affordanceId3),
-                slotId2 to listOf(affordanceId2),
-            )
+            mapOf(slotId1 to listOf(affordanceId1, affordanceId3), slotId2 to listOf(affordanceId2)),
         )
 
-        underTest.setSelections(
-            slotId = slotId1,
-            affordanceIds = listOf(affordanceId3),
-        )
+        underTest.setSelections(slotId = slotId1, affordanceIds = listOf(affordanceId3))
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId3),
-                slotId2 to listOf(affordanceId2),
-            )
+            mapOf(slotId1 to listOf(affordanceId3), slotId2 to listOf(affordanceId2)),
         )
 
-        underTest.setSelections(
-            slotId = slotId2,
-            affordanceIds = listOf(),
-        )
+        underTest.setSelections(slotId = slotId2, affordanceIds = listOf())
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId3),
-                slotId2 to listOf(),
-            )
+            mapOf(slotId1 to listOf(affordanceId3), slotId2 to listOf()),
         )
 
         job.cancel()
@@ -174,10 +151,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
     @Test
     fun remembersSelectionsByUser() = runTest {
-        overrideResource(
-            R.array.config_keyguardQuickAffordanceDefaults,
-            arrayOf<String>(),
-        )
+        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
         val slot1 = "slot_1"
         val slot2 = "slot_2"
         val affordance1 = "affordance_1"
@@ -195,60 +169,28 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
                 UserInfo(/* id= */ 0, "zero", /* flags= */ 0),
                 UserInfo(/* id= */ 1, "one", /* flags= */ 0),
             )
-        userTracker.set(
-            userInfos = userInfos,
-            selectedUserIndex = 0,
-        )
-        underTest.setSelections(
-            slotId = slot1,
-            affordanceIds = listOf(affordance1),
-        )
-        underTest.setSelections(
-            slotId = slot2,
-            affordanceIds = listOf(affordance2),
-        )
+        userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
+        underTest.setSelections(slotId = slot1, affordanceIds = listOf(affordance1))
+        underTest.setSelections(slotId = slot2, affordanceIds = listOf(affordance2))
 
         // Switch to user 1
-        userTracker.set(
-            userInfos = userInfos,
-            selectedUserIndex = 1,
-        )
+        userTracker.set(userInfos = userInfos, selectedUserIndex = 1)
         // We never set selections on user 1, so it should be empty.
-        assertSelections(
-            observed = affordanceIdsBySlotId.last(),
-            expected = emptyMap(),
-        )
+        assertSelections(observed = affordanceIdsBySlotId.last(), expected = emptyMap())
         // Now, let's set selections on user 1.
-        underTest.setSelections(
-            slotId = slot1,
-            affordanceIds = listOf(affordance2),
-        )
-        underTest.setSelections(
-            slotId = slot2,
-            affordanceIds = listOf(affordance3),
-        )
+        underTest.setSelections(slotId = slot1, affordanceIds = listOf(affordance2))
+        underTest.setSelections(slotId = slot2, affordanceIds = listOf(affordance3))
         assertSelections(
             observed = affordanceIdsBySlotId.last(),
-            expected =
-                mapOf(
-                    slot1 to listOf(affordance2),
-                    slot2 to listOf(affordance3),
-                ),
+            expected = mapOf(slot1 to listOf(affordance2), slot2 to listOf(affordance3)),
         )
 
         // Switch back to user 0.
-        userTracker.set(
-            userInfos = userInfos,
-            selectedUserIndex = 0,
-        )
+        userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
         // Assert that we still remember the old selections for user 0.
         assertSelections(
             observed = affordanceIdsBySlotId.last(),
-            expected =
-                mapOf(
-                    slot1 to listOf(affordance1),
-                    slot2 to listOf(affordance2),
-                ),
+            expected = mapOf(slot1 to listOf(affordance1), slot2 to listOf(affordance2)),
         )
 
         job.cancel()
@@ -276,10 +218,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
 
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId1, affordanceId3),
-                slotId2 to listOf(affordanceId2),
-            ),
+            mapOf(slotId1 to listOf(affordanceId1, affordanceId3), slotId2 to listOf(affordanceId2)),
         )
 
         job.cancel()
@@ -308,10 +247,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
         underTest.setSelections(slotId1, listOf(affordanceId2))
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(affordanceId2),
-                slotId2 to listOf(affordanceId2),
-            ),
+            mapOf(slotId1 to listOf(affordanceId2), slotId2 to listOf(affordanceId2)),
         )
 
         job.cancel()
@@ -340,10 +276,7 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
         underTest.setSelections(slotId1, listOf())
         assertSelections(
             affordanceIdsBySlotId.last(),
-            mapOf(
-                slotId1 to listOf(),
-                slotId2 to listOf(affordanceId2),
-            ),
+            mapOf(slotId1 to listOf(), slotId2 to listOf(affordanceId2)),
         )
 
         job.cancel()
@@ -373,16 +306,34 @@ class KeyguardQuickAffordanceLocalUserSelectionManagerTest : SysuiTestCase() {
         overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, false)
         overrideResource(
             R.array.config_keyguardQuickAffordanceDefaults,
-            arrayOf("leftTest:testShortcut1", "rightTest:testShortcut2")
+            arrayOf("leftTest:testShortcut1", "rightTest:testShortcut2"),
         )
 
         assertThat(underTest.getSelections())
             .isEqualTo(
-                mapOf(
-                    "leftTest" to listOf("testShortcut1"),
-                    "rightTest" to listOf("testShortcut2"),
-                )
+                mapOf("leftTest" to listOf("testShortcut1"), "rightTest" to listOf("testShortcut2"))
             )
+    }
+
+    @EnableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
+    @Test
+    fun getSelections_returnsSelectionsIfHubV2Enabled() = runTest {
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, false)
+        overrideResource(com.android.internal.R.bool.config_glanceableHubEnabled, true)
+
+        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
+        val affordanceIdsBySlotId = mutableListOf<Map<String, List<String>>>()
+        val job =
+            launch(UnconfinedTestDispatcher()) {
+                underTest.selections.toList(affordanceIdsBySlotId)
+            }
+        val slotId1 = "slot1"
+        val affordanceId1 = "affordance1"
+
+        underTest.setSelections(slotId = slotId1, affordanceIds = listOf(affordanceId1))
+        assertSelections(affordanceIdsBySlotId.last(), mapOf(slotId1 to listOf(affordanceId1)))
+
+        job.cancel()
     }
 
     private fun assertSelections(

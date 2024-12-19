@@ -451,6 +451,16 @@ public class CameraDeviceImpl extends CameraDevice
         }
     }
 
+    /**
+     * When camera device is opened in shared mode, call to check if this is a primary client.
+     *
+     */
+    public boolean isPrimaryClient() {
+        synchronized (mInterfaceLock) {
+            return mIsPrimaryClient;
+        }
+    }
+
     private Map<String, CameraCharacteristics> getPhysicalIdToChars() {
         if (mPhysicalIdsToChars == null) {
             try {
@@ -482,8 +492,19 @@ public class CameraDeviceImpl extends CameraDevice
 
             mRemoteDevice = new ICameraDeviceUserWrapper(remoteDevice);
             Parcel resultParcel = Parcel.obtain();
-            mRemoteDevice.getCaptureResultMetadataQueue().writeToParcel(resultParcel, 0);
+
+            // Passing in PARCELABLE_WRITE_RETURN_VALUE closes the ParcelFileDescriptors
+            // owned by MQDescriptor returned by getCaptureResultMetadataQueue()
+            // Though these will be closed when GC runs, that may not happen for a while.
+            // Also, apps running with StrictMode would get warnings / crash in the case they're not
+            // explicitly closed.
+            mRemoteDevice.getCaptureResultMetadataQueue().writeToParcel(resultParcel,
+                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             mFMQReader = nativeCreateFMQReader(resultParcel);
+            // Recycle since resultParcel would dup fds from MQDescriptor as well. We don't
+            // need them after the native FMQ reader has been created. That is since the native
+            // creates calls MQDescriptor.readFromParcel() which again dups the fds.
+            resultParcel.recycle();
 
             IBinder remoteDeviceBinder = remoteDevice.asBinder();
             // For legacy camera device, remoteDevice is in the same process, and
@@ -847,24 +868,19 @@ public class CameraDeviceImpl extends CameraDevice
         List<SharedOutputConfiguration> sharedConfigs =
                 sharedSessionConfiguration.getOutputStreamsInformation();
         for (SharedOutputConfiguration sharedConfig : sharedConfigs) {
-            if (outConfig.getConfiguredSize().equals(sharedConfig.getSize())
-                    && (outConfig.getConfiguredFormat() == sharedConfig.getFormat())
-                    && (outConfig.getSurfaceGroupId() == OutputConfiguration.SURFACE_GROUP_ID_NONE)
-                    && (outConfig.getSurfaceType() == sharedConfig.getSurfaceType())
+            if ((outConfig.getSurfaceGroupId() == OutputConfiguration.SURFACE_GROUP_ID_NONE)
                     && (outConfig.getMirrorMode() == sharedConfig.getMirrorMode())
-                    && (outConfig.getUsage() == sharedConfig.getUsage())
                     && (outConfig.isReadoutTimestampEnabled()
                     == sharedConfig.isReadoutTimestampEnabled())
                     && (outConfig.getTimestampBase() == sharedConfig.getTimestampBase())
                     && (outConfig.getStreamUseCase() == sharedConfig.getStreamUseCase())
-                    && (outConfig.getColorSpace().equals(
-                    sharedSessionConfiguration.getColorSpace()))
                     && (outConfig.getDynamicRangeProfile()
                     == DynamicRangeProfiles.STANDARD)
-                    && (outConfig.getConfiguredDataspace() == sharedConfig.getDataspace())
                     && (Objects.equals(outConfig.getPhysicalCameraId(),
                     sharedConfig.getPhysicalCameraId()))
                     && (outConfig.getSensorPixelModes().isEmpty())
+                    && (!outConfig.isMultiResolution())
+                    && (!outConfig.isDeferredConfiguration())
                     && (!outConfig.isShared())) {
                 //Found valid config, return true
                 return true;
@@ -896,14 +912,6 @@ public class CameraDeviceImpl extends CameraDevice
         if (config.getExecutor() == null) {
             throw new IllegalArgumentException("Invalid executor");
         }
-        if (mSharedMode) {
-            if (config.getSessionType() != SessionConfiguration.SESSION_SHARED) {
-                throw new IllegalArgumentException("Invalid session type");
-            }
-            if (!checkSharedSessionConfiguration(outputConfigs)) {
-                throw new IllegalArgumentException("Invalid output configurations");
-            }
-        }
         createCaptureSessionInternal(config.getInputConfiguration(), outputConfigs,
                 config.getStateCallback(), config.getExecutor(), config.getSessionType(),
                 config.getSessionParameters());
@@ -921,15 +929,24 @@ public class CameraDeviceImpl extends CameraDevice
 
             checkIfCameraClosedOrInError();
 
+            boolean isSharedSession = (operatingMode == ICameraDeviceUser.SHARED_MODE);
+            if (Flags.cameraMultiClient() && mSharedMode) {
+                if (!isSharedSession) {
+                    throw new IllegalArgumentException("Invalid session type");
+                }
+                if (!checkSharedSessionConfiguration(outputConfigurations)) {
+                    throw new IllegalArgumentException("Invalid output configurations");
+                }
+                if (inputConfig != null) {
+                    throw new IllegalArgumentException("Shared capture session doesn't support"
+                            + " input configuration yet.");
+                }
+            }
+
             boolean isConstrainedHighSpeed =
                     (operatingMode == ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE);
             if (isConstrainedHighSpeed && inputConfig != null) {
                 throw new IllegalArgumentException("Constrained high speed session doesn't support"
-                        + " input configuration yet.");
-            }
-            boolean isSharedSession = (operatingMode == ICameraDeviceUser.SHARED_MODE);
-            if (isSharedSession && inputConfig != null) {
-                throw new IllegalArgumentException("Shared capture session doesn't support"
                         + " input configuration yet.");
             }
 
@@ -993,8 +1010,7 @@ public class CameraDeviceImpl extends CameraDevice
                         mCharacteristics);
             } else if (isSharedSession) {
                 newSession = new CameraSharedCaptureSessionImpl(mNextSessionId++,
-                        callback, executor, this, mDeviceExecutor, configureSuccess,
-                        mIsPrimaryClient);
+                        callback, executor, this, mDeviceExecutor, configureSuccess);
             } else {
                 newSession = new CameraCaptureSessionImpl(mNextSessionId++, input,
                         callback, executor, this, mDeviceExecutor, configureSuccess);
@@ -1063,6 +1079,11 @@ public class CameraDeviceImpl extends CameraDevice
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
+            if (Flags.cameraMultiClient() && mSharedMode && !mIsPrimaryClient) {
+                throw new UnsupportedOperationException("In shared session mode,"
+                        + "only primary clients can create capture request.");
+            }
+
             for (String physicalId : physicalCameraIdSet) {
                 if (Objects.equals(physicalId, getId())) {
                     throw new IllegalStateException("Physical id matches the logical id!");
@@ -1089,6 +1110,11 @@ public class CameraDeviceImpl extends CameraDevice
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
 
+            if (Flags.cameraMultiClient() && mSharedMode && !mIsPrimaryClient) {
+                throw new UnsupportedOperationException("In shared session mode,"
+                        + "only primary clients can create capture request.");
+            }
+
             CameraMetadataNative templatedRequest = null;
 
             templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
@@ -1108,6 +1134,10 @@ public class CameraDeviceImpl extends CameraDevice
             throws CameraAccessException {
         synchronized(mInterfaceLock) {
             checkIfCameraClosedOrInError();
+            if (Flags.cameraMultiClient() && mSharedMode) {
+                throw new UnsupportedOperationException("In shared session mode,"
+                        + "reprocess capture requests are not supported.");
+            }
 
             CameraMetadataNative resultMetadata = new
                     CameraMetadataNative(inputResult.getNativeCopy());
@@ -1551,6 +1581,74 @@ public class CameraDeviceImpl extends CameraDevice
                 mRequestLastFrameNumbersList.add(
                     new RequestLastFrameNumbersHolder(requestList, requestInfo));
             }
+
+            if (mIdle) {
+                mDeviceExecutor.execute(mCallOnActive);
+            }
+            mIdle = false;
+
+            return requestInfo.getRequestId();
+        }
+    }
+
+    public int startStreaming(List<Surface> surfaces, CaptureCallback callback,
+            Executor executor) throws CameraAccessException {
+        // Need a valid executor, or current thread needs to have a looper, if
+        // callback is valid
+        executor = checkExecutor(executor, callback);
+        synchronized (mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+            for (Surface surface : surfaces) {
+                if (surface == null) {
+                    throw new IllegalArgumentException("Null Surface targets are not allowed");
+                }
+            }
+            // In shared session mode, if there are other active clients streaming then
+            // stoprepeating does not actually send request to HAL to cancel the request.
+            // Cameraservice will use this call to remove this client surfaces provided in its
+            // previous streaming request. If this is the only client for the shared camera device
+            // then camerservice will ask HAL to cancel the previous repeating request
+            stopRepeating();
+
+            // StartStreaming API does not allow capture parameters to be provided through a capture
+            // request. If the primary client has an existing repeating request, the camera service
+            // will either attach the provided surfaces to that request or create a default capture
+            // request if no repeating request is active. A default capture request is created here
+            // for initial use. The capture callback will provide capture results that include the
+            // actual capture parameters used for the streaming.
+            CaptureRequest.Builder builder = createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            for (Surface surface : surfaces) {
+                builder.addTarget(surface);
+            }
+            CaptureRequest request = builder.build();
+            request.convertSurfaceToStreamId(mConfiguredOutputs);
+
+            SubmitInfo requestInfo;
+            requestInfo = mRemoteDevice.startStreaming(request.getStreamIds(),
+                    request.getSurfaceIds());
+            request.recoverStreamIdToSurface();
+            List<CaptureRequest> requestList = new ArrayList<CaptureRequest>();
+            requestList.add(request);
+
+            if (callback != null) {
+                mCaptureCallbackMap.put(requestInfo.getRequestId(),
+                        new CaptureCallbackHolder(
+                            callback, requestList, executor, true, mNextSessionId - 1));
+            } else {
+                if (DEBUG) {
+                    Log.d(TAG, "Listen for request " + requestInfo.getRequestId() + " is null");
+                }
+            }
+
+            if (mRepeatingRequestId != REQUEST_ID_NONE) {
+                checkEarlyTriggerSequenceCompleteLocked(mRepeatingRequestId,
+                        requestInfo.getLastFrameNumber(), mRepeatingRequestTypes);
+            }
+
+            CaptureRequest[] requestArray = requestList.toArray(
+                    new CaptureRequest[requestList.size()]);
+            mRepeatingRequestId = requestInfo.getRequestId();
+            mRepeatingRequestTypes = getRequestTypes(requestArray);
 
             if (mIdle) {
                 mDeviceExecutor.execute(mCallOnActive);
@@ -2883,6 +2981,11 @@ public class CameraDeviceImpl extends CameraDevice
     @Override
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
+        if (Flags.cameraMultiClient() && mSharedMode) {
+            throw new UnsupportedOperationException("In shared session mode,"
+                    + "extension sessions are not supported.");
+        }
+
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
                 getPhysicalIdToChars());
         characteristicsMap.put(mCameraId, mCharacteristics);

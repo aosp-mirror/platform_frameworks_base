@@ -16,6 +16,19 @@
 
 package com.android.providers.settings;
 
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_DEVICE_SPECIFIC_CONFIG;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_GLOBAL;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_LOCALE;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_LOCK_SETTINGS;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_NETWORK_POLICIES;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SECURE;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SIM_SPECIFIC_SETTINGS;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SIM_SPECIFIC_SETTINGS_2;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SOFTAP_CONFIG;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SYSTEM;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_WIFI_NEW_CONFIG;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_WIFI_SETTINGS_BACKUP_DATA;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -98,22 +111,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final byte[] NULL_VALUE = new byte[0];
     private static final int NULL_SIZE = -1;
     private static final float FONT_SCALE_DEF_VALUE = 1.0f;
-
-    private static final String KEY_SYSTEM = "system";
-    private static final String KEY_SECURE = "secure";
-    private static final String KEY_GLOBAL = "global";
-    private static final String KEY_LOCALE = "locale";
-    private static final String KEY_LOCK_SETTINGS = "lock_settings";
-    private static final String KEY_SOFTAP_CONFIG = "softap_config";
-    private static final String KEY_NETWORK_POLICIES = "network_policies";
-    private static final String KEY_WIFI_NEW_CONFIG = "wifi_new_config";
-    private static final String KEY_DEVICE_SPECIFIC_CONFIG = "device_specific_config";
-    private static final String KEY_SIM_SPECIFIC_SETTINGS = "sim_specific_settings";
-    // Restoring sim-specific data backed up from newer Android version to Android 12 was causing a
-    // fatal crash. Creating a backup with a different key will prevent Android 12 versions from
-    // restoring this data.
-    private static final String KEY_SIM_SPECIFIC_SETTINGS_2 = "sim_specific_settings_2";
-    private static final String KEY_WIFI_SETTINGS_BACKUP_DATA = "wifi_settings_backup_data";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
@@ -257,6 +254,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (com.android.server.backup.Flags.enableMetricsSettingsBackupAgents()) {
             mBackupRestoreEventLogger = this.getBackupRestoreEventLogger();
+            mSettingsHelper.setBackupRestoreEventLogger(mBackupRestoreEventLogger);
             numberOfSettingsPerKey = new HashMap<>();
             areAgentMetricsEnabled = true;
         }
@@ -412,9 +410,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     mSettingsHelper
                         .setLocaleData(
                             localeData,
-                            size,
-                            mBackupRestoreEventLogger,
-                            KEY_LOCALE);
+                            size);
                     break;
 
                 case KEY_WIFI_CONFIG :
@@ -552,8 +548,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
             mSettingsHelper
-                .setLocaleData(
-                    buffer, nBytes, mBackupRestoreEventLogger, KEY_LOCALE);
+                .setLocaleData(buffer, nBytes);
 
             // Restore older backups performing the necessary migrations.
             if (version < FULL_BACKUP_ADDED_WIFI_NEW) {

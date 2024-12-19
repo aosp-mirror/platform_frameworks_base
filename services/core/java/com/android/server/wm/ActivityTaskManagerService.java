@@ -314,6 +314,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * System service for managing activities and their containers (task, displays,... ).
@@ -4038,6 +4039,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
+            final Supplier<TaskSnapshot> supplier;
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
@@ -4050,11 +4052,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // be retrieved by recents. While if updateCache is false, the real snapshot will
                 // always be taken and the snapshot won't be put into SnapshotPersister.
                 if (updateCache) {
-                    return mWindowManager.mTaskSnapshotController.recordSnapshot(task);
+                    supplier = mWindowManager.mTaskSnapshotController
+                            .getRecordSnapshotSupplier(task);
                 } else {
                     return mWindowManager.mTaskSnapshotController.snapshot(task);
                 }
             }
+            return supplier != null ? supplier.get() : null;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6403,6 +6407,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean shuttingDown(boolean booted, int timeout) {
             mShuttingDown = true;
+            mWindowManager.mSnapshotController.mTaskSnapshotController.prepareShutdown();
             synchronized (mGlobalLock) {
                 mRootWindowContainer.prepareForShutdown();
                 updateEventDispatchingLocked(booted);

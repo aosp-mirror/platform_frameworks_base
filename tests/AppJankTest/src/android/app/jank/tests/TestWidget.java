@@ -45,8 +45,8 @@ public class TestWidget extends View {
      */
     public void simulateAnimationStarting() {
         if (jankTrackerCreated()) {
-            mJankTracker.addUiState(AppJankStats.ANIMATION,
-                    Integer.toString(this.getId()), AppJankStats.ANIMATING);
+            mJankTracker.addUiState(AppJankStats.WIDGET_CATEGORY_ANIMATION,
+                    Integer.toString(this.getId()), AppJankStats.WIDGET_STATE_ANIMATING);
         }
     }
 
@@ -55,8 +55,8 @@ public class TestWidget extends View {
      */
     public void simulateAnimationEnding() {
         if (jankTrackerCreated()) {
-            mJankTracker.removeUiState(AppJankStats.ANIMATION,
-                    Integer.toString(this.getId()), AppJankStats.ANIMATING);
+            mJankTracker.removeUiState(AppJankStats.WIDGET_CATEGORY_ANIMATION,
+                    Integer.toString(this.getId()), AppJankStats.WIDGET_STATE_ANIMATING);
         }
     }
 

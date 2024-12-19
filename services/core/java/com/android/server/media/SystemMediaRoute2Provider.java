@@ -62,7 +62,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
 
     private final AudioManager mAudioManager;
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final Context mContext;
     private final UserHandle mUser;
 
@@ -116,7 +116,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                         () -> {
                             publishProviderState();
                             if (updateSessionInfosIfNeeded()) {
-                                notifySessionInfoUpdated();
+                                notifyGlobalSessionInfoUpdated();
                             }
                         });
 
@@ -129,7 +129,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                                         () -> {
                                             publishProviderState();
                                             if (updateSessionInfosIfNeeded()) {
-                                                notifySessionInfoUpdated();
+                                                notifyGlobalSessionInfoUpdated();
                                             }
                                         }));
     }
@@ -161,7 +161,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void setCallback(Callback callback) {
         super.setCallback(callback);
         notifyProviderState();
-        notifySessionInfoUpdated();
+        notifyGlobalSessionInfoUpdated();
     }
 
     @Override
@@ -296,7 +296,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()
                 && updateSessionInfosIfNeeded()) {
-            notifySessionInfoUpdated();
+            notifyGlobalSessionInfoUpdated();
         }
     }
 
@@ -643,7 +643,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         notifyProviderState();
     }
 
-    void notifySessionInfoUpdated() {
+    void notifyGlobalSessionInfoUpdated() {
         if (mCallback == null) {
             return;
         }
@@ -656,7 +656,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             sessionInfo = mSessionInfos.get(0);
         }
 
-        mCallback.onSessionUpdated(this, sessionInfo);
+        mCallback.onSessionUpdated(
+                this, sessionInfo, /* packageNamesWithRoutingSessionOverrides= */ Set.of());
     }
 
     @Override

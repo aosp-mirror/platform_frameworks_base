@@ -2040,6 +2040,7 @@
   <java-symbol type="bool" name="config_useGnssHardwareProvider" />
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
   <java-symbol type="bool" name="config_enableGeofenceOverlay" />
+  <java-symbol type="bool" name="config_enableGnssAssistanceOverlay" />
   <java-symbol type="bool" name="config_enableNetworkLocationOverlay" />
   <java-symbol type="bool" name="config_sf_limitedAlpha" />
   <java-symbol type="bool" name="config_unplugTurnsOnScreen" />
@@ -2223,6 +2224,7 @@
   <java-symbol type="string" name="config_gnssLocationProviderPackageName" />
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
   <java-symbol type="string" name="config_geofenceProviderPackageName" />
+  <java-symbol type="string" name="config_gnssAssistanceProviderPackageName" />
   <java-symbol type="string" name="config_networkLocationProviderPackageName" />
   <java-symbol type="string" name="config_wimaxManagerClassname" />
   <java-symbol type="string" name="config_wimaxNativeLibLocation" />

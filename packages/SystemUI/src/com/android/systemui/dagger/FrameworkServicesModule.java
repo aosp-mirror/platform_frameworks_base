@@ -267,6 +267,7 @@ public class FrameworkServicesModule {
     }
 
     @Provides
+    @Nullable
     @Singleton
     static VirtualDeviceManager provideVirtualDeviceManager(Context context) {
         return context.getSystemService(VirtualDeviceManager.class);

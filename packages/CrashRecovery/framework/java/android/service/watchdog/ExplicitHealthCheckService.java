@@ -180,7 +180,7 @@ public abstract class ExplicitHealthCheckService extends Service {
      *                 passed the health check.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_CRASHRECOVERY)
-    public final void setHealthCheckResultCallback(@CallbackExecutor @Nullable Executor executor,
+    public final void setHealthCheckPassedCallback(@CallbackExecutor @Nullable Executor executor,
             @Nullable Consumer<Bundle> callback) {
         mCallbackExecutor = executor;
         mHealthCheckResultCallback = callback;

@@ -212,7 +212,7 @@ public final class SharedSessionConfiguration {
         }
 
         public @Nullable String getPhysicalCameraId() {
-            return mPhysicalCameraId;
+            return mPhysicalCameraId.isEmpty() ? null : mPhysicalCameraId;
         }
     }
 

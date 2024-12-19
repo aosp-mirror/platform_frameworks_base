@@ -23,7 +23,6 @@
     android:clipToPadding="false"
     android:gravity="center"
     android:layoutDirection="ltr"
-    android:orientation="vertical"
     app:layoutDescription="@xml/volume_dialog_ringer_drawer_motion_scene">
 
     <!-- add ringer buttons here -->

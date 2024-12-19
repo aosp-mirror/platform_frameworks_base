@@ -76,6 +76,8 @@ class UserTrackerImplTest : SysuiTestCase() {
 
     @Mock private lateinit var iActivityManager: IActivityManager
 
+    @Mock private lateinit var beforeUserSwitchingReply: IRemoteCallback
+
     @Mock private lateinit var userSwitchingReply: IRemoteCallback
 
     @Mock(stubOnly = true) private lateinit var dumpManager: DumpManager
@@ -199,9 +201,10 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
 
             verify(userManager).getProfiles(newID)
@@ -341,10 +344,11 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
 
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
             assertThat(callback.calledOnUserChanging).isEqualTo(1)
             assertThat(callback.lastUser).isEqualTo(newID)
@@ -395,7 +399,7 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
-            captor.value.onBeforeUserSwitching(newID)
+            captor.value.onBeforeUserSwitching(newID, any())
             captor.value.onUserSwitchComplete(newID)
             runCurrent()
 
@@ -453,8 +457,10 @@ class UserTrackerImplTest : SysuiTestCase() {
 
             val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
             verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+            captor.value.onBeforeUserSwitching(newID, beforeUserSwitchingReply)
             captor.value.onUserSwitching(newID, userSwitchingReply)
             runCurrent()
+            verify(beforeUserSwitchingReply).sendResult(any())
             verify(userSwitchingReply).sendResult(any())
             captor.value.onUserSwitchComplete(newID)
 
@@ -488,12 +494,18 @@ class UserTrackerImplTest : SysuiTestCase() {
         }
 
     private class TestCallback : UserTracker.Callback {
+        var calledOnBeforeUserChanging = 0
         var calledOnUserChanging = 0
         var calledOnUserChanged = 0
         var calledOnProfilesChanged = 0
         var lastUser: Int? = null
         var lastUserContext: Context? = null
         var lastUserProfiles = emptyList<UserInfo>()
+
+        override fun onBeforeUserSwitching(newUser: Int) {
+            calledOnBeforeUserChanging++
+            lastUser = newUser
+        }
 
         override fun onUserChanging(newUser: Int, userContext: Context) {
             calledOnUserChanging++

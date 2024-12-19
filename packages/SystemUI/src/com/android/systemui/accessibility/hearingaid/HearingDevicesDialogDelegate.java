@@ -52,10 +52,12 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.settingslib.bluetooth.AmbientVolumeUiController;
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesListAdapter.HearingDeviceItemCallback;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bluetooth.qsdialog.ActiveHearingDeviceItemFactory;
@@ -108,7 +110,6 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
 
     private SystemUIDialog mDialog;
 
-    private RecyclerView mDeviceList;
     private List<DeviceItem> mHearingDeviceItemList;
     private HearingDevicesListAdapter mDeviceListAdapter;
 
@@ -133,6 +134,8 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                     });
                 }
             };
+
+    private AmbientVolumeUiController mAmbientController;
 
     private final List<DeviceItemFactory> mHearingDeviceItemFactoryList = List.of(
             new ActiveHearingDeviceItemFactory(),
@@ -225,13 +228,17 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     public void onActiveDeviceChanged(@Nullable CachedBluetoothDevice activeDevice,
             int bluetoothProfile) {
         refreshDeviceUi();
-        if (mPresetController != null) {
-            mPresetController.setDevice(getActiveHearingDevice());
-            mMainHandler.post(() -> {
+        mMainHandler.post(() -> {
+            CachedBluetoothDevice device = getActiveHearingDevice();
+            if (mPresetController != null) {
+                mPresetController.setDevice(device);
                 mPresetLayout.setVisibility(
                         mPresetController.isPresetControlAvailable() ? VISIBLE : GONE);
-            });
-        }
+            }
+            if (mAmbientController != null) {
+                mAmbientController.loadDevice(device);
+            }
+        });
     }
 
     @Override
@@ -272,13 +279,13 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
 
         mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DIALOG_SHOW, mLaunchSourceId);
-        mDeviceList = dialog.requireViewById(R.id.device_list);
-        mPresetLayout = dialog.requireViewById(R.id.preset_layout);
-        mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
 
         setupDeviceListView(dialog);
-        setupPresetSpinner(dialog);
         setupPairNewDeviceButton(dialog);
+        setupPresetSpinner(dialog);
+        if (com.android.settingslib.flags.Flags.hearingDevicesAmbientVolumeControl()) {
+            setupAmbientControls();
+        }
         if (com.android.systemui.Flags.hearingDevicesDialogRelatedTools()) {
             setupRelatedToolsView(dialog);
         }
@@ -286,41 +293,50 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
 
     @Override
     public void onStart(@NonNull SystemUIDialog dialog) {
-        if (mLocalBluetoothManager == null) {
-            return;
-        }
-        mLocalBluetoothManager.getEventManager().registerCallback(this);
-        if (mPresetController != null) {
-            mPresetController.registerHapCallback();
-        }
+        ThreadUtils.postOnBackgroundThread(() -> {
+            if (mLocalBluetoothManager != null) {
+                mLocalBluetoothManager.getEventManager().registerCallback(this);
+            }
+            if (mPresetController != null) {
+                mPresetController.registerHapCallback();
+            }
+            if (mAmbientController != null) {
+                mAmbientController.start();
+            }
+        });
     }
 
     @Override
     public void onStop(@NonNull SystemUIDialog dialog) {
-        if (mLocalBluetoothManager == null) {
-            return;
-        }
-
-        if (mPresetController != null) {
-            mPresetController.unregisterHapCallback();
-        }
-        mLocalBluetoothManager.getEventManager().unregisterCallback(this);
+        ThreadUtils.postOnBackgroundThread(() -> {
+            if (mLocalBluetoothManager != null) {
+                mLocalBluetoothManager.getEventManager().unregisterCallback(this);
+            }
+            if (mPresetController != null) {
+                mPresetController.unregisterHapCallback();
+            }
+            if (mAmbientController != null) {
+                mAmbientController.stop();
+            }
+        });
     }
 
     private void setupDeviceListView(SystemUIDialog dialog) {
-        mDeviceList.setLayoutManager(new LinearLayoutManager(dialog.getContext()));
+        final RecyclerView deviceList = dialog.requireViewById(R.id.device_list);
+        deviceList.setLayoutManager(new LinearLayoutManager(dialog.getContext()));
         mHearingDeviceItemList = getHearingDeviceItemList();
         mDeviceListAdapter = new HearingDevicesListAdapter(mHearingDeviceItemList, this);
-        mDeviceList.setAdapter(mDeviceListAdapter);
+        deviceList.setAdapter(mDeviceListAdapter);
     }
 
     private void setupPresetSpinner(SystemUIDialog dialog) {
         mPresetController = new HearingDevicesPresetsController(mProfileManager, mPresetCallback);
         mPresetController.setDevice(getActiveHearingDevice());
 
+        mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
         mPresetInfoAdapter = new HearingDevicesSpinnerAdapter(dialog.getContext());
         mPresetSpinner.setAdapter(mPresetInfoAdapter);
-        // disable redundant Touch & Hold accessibility action for Switch Access
+        // Disable redundant Touch & Hold accessibility action for Switch Access
         mPresetSpinner.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override
             public void onInitializeAccessibilityNodeInfo(@NonNull View host,
@@ -349,12 +365,20 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             }
         });
 
+        mPresetLayout = dialog.requireViewById(R.id.preset_layout);
         mPresetLayout.setVisibility(mPresetController.isPresetControlAvailable() ? VISIBLE : GONE);
+    }
+
+    private void setupAmbientControls() {
+        final AmbientVolumeLayout ambientLayout = mDialog.requireViewById(R.id.ambient_layout);
+        mAmbientController = new AmbientVolumeUiController(
+                mDialog.getContext(), mLocalBluetoothManager, ambientLayout);
+        mAmbientController.setShowUiWhenLocalDataExist(false);
+        mAmbientController.loadDevice(getActiveHearingDevice());
     }
 
     private void setupPairNewDeviceButton(SystemUIDialog dialog) {
         final Button pairButton = dialog.requireViewById(R.id.pair_new_device_button);
-
         pairButton.setVisibility(mShowPairNewDevice ? VISIBLE : GONE);
         if (mShowPairNewDevice) {
             pairButton.setOnClickListener(v -> {

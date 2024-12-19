@@ -52,7 +52,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class GuestUserInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: UserManager

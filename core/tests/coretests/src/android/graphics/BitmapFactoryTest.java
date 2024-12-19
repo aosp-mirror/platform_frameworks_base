@@ -16,19 +16,27 @@
 
 package android.graphics;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.ParcelFileDescriptor;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 
-public class BitmapFactoryTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class BitmapFactoryTest {
 
     // tests that we can decode bitmaps from MemoryFiles
     @SmallTest
+    @Test
     public void testBitmapParcelFileDescriptor() throws Exception {
         Bitmap bitmap1 = Bitmap.createBitmap(
                 new int[] { Color.BLUE }, 1, 1, Bitmap.Config.RGB_565);

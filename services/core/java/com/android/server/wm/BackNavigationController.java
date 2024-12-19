@@ -111,9 +111,7 @@ class BackNavigationController {
     }
 
     void onEmbeddedWindowGestureTransferred(@NonNull WindowState host) {
-        if (Flags.disallowAppProgressEmbeddedWindow()) {
-            mNavigationMonitor.onEmbeddedWindowGestureTransferred(host);
-        }
+        mNavigationMonitor.onEmbeddedWindowGestureTransferred(host);
     }
 
     /**
@@ -215,7 +213,7 @@ class BackNavigationController {
                 infoBuilder.setFocusedTaskId(currentTask.mTaskId);
             }
             boolean transferGestureToEmbedded = false;
-            if (Flags.disallowAppProgressEmbeddedWindow() && embeddedWindows != null) {
+            if (embeddedWindows != null) {
                 for (int i = embeddedWindows.size() - 1; i >= 0; --i) {
                     if (embeddedWindows.get(i).mGestureToEmbedded) {
                         transferGestureToEmbedded = true;
@@ -997,11 +995,9 @@ class BackNavigationController {
     /**
      * Handle the pending animation when the running transition finished, all the visibility change
      * has applied so ready to start pending predictive back animation.
-     * @param targets The final animation targets derived in transition.
      * @param finishedTransition The finished transition target.
     */
-    void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
-            @NonNull Transition finishedTransition) {
+    void onTransitionFinish(@NonNull Transition finishedTransition) {
         if (isMonitoringPrepareTransition(finishedTransition)) {
             if (mAnimationHandler.mPrepareCloseTransition == null) {
                 clearBackAnimations(true /* cancel */);
@@ -1047,14 +1043,6 @@ class BackNavigationController {
             Slog.v(TAG, "Skip predictive back transition, another transition is collecting");
             cancelPendingAnimation();
             return;
-        }
-
-        // Ensure the final animation targets which hidden by transition could be visible.
-        for (int i = 0; i < targets.size(); i++) {
-            final WindowContainer wc = targets.get(i).mContainer;
-            if (wc.mSurfaceControl != null) {
-                wc.prepareSurfaces();
-            }
         }
 
         // The pending builder could be cleared due to prepareSurfaces

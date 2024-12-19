@@ -940,10 +940,10 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from resetting network settings
-     * from Settings. This can only be set by device owners and profile owners on the primary user.
+     * from Settings. This can only be set by device owners and profile owners on the main user.
      * The default value is <code>false</code>.
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can reset the network settings of the device.
+     * <p>This restriction has no effect on non-Admin users since they cannot reset the network
+     * settings of the device.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1077,11 +1077,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring cell broadcasts.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * <p>This restriction can only be set by a device owner, a profile owner on the main
      * user or a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
-     * on the primary user or by a profile owner of an organization-owned managed profile on
-     * the parent profile, it disables the primary user from configuring cell broadcasts.
+     * on the main user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the user from configuring cell broadcasts.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1089,8 +1089,8 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can configure cell broadcasts.
+     * <p>This restriction has no effect on non-Admin users since they cannot configure cell
+     * broadcasts.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1103,11 +1103,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring mobile networks.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * <p>This restriction can only be set by a device owner, a profile owner on the main
      * user or a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
-     * on the primary user or by a profile owner of an organization-owned managed profile on
-     * the parent profile, it disables the primary user from configuring mobile networks.
+     * on the main user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the user from configuring mobile networks.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1115,8 +1115,8 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can configure mobile networks.
+     * <p>This restriction has no effect on non-Admin users since they cannot configure mobile
+     * networks.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

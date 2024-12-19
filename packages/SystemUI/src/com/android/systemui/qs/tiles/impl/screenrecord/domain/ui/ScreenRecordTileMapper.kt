@@ -38,7 +38,7 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_screen_record_label)
             supportedActions = setOf(QSTileState.UserAction.CLICK)
-
+            val iconRes: Int
             when (data) {
                 is ScreenRecordModel.Recording -> {
                     activationState = QSTileState.ActivationState.ACTIVE
@@ -61,7 +61,7 @@ constructor(
                         resources.getString(R.string.quick_settings_screen_record_start)
                 }
             }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             contentDescription =
                 if (TextUtils.isEmpty(secondaryLabel)) label

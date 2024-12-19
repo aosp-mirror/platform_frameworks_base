@@ -551,7 +551,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .getTransitionObserver()
             .onTransitionReady(
                 transition,
-                TransitionInfoBuilder(TRANSIT_OPEN).build(),
+                TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
                 StubTransaction() /* startTransaction */,
                 StubTransaction(), /* finishTransaction */
             )
@@ -583,7 +583,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .getTransitionObserver()
             .onTransitionReady(
                 transition,
-                TransitionInfoBuilder(TRANSIT_OPEN).build(),
+                TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
                 StubTransaction() /* startTransaction */,
                 StubTransaction(), /* finishTransaction */
             )
@@ -616,7 +616,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .getTransitionObserver()
             .onTransitionReady(
                 mergedTransition,
-                TransitionInfoBuilder(TRANSIT_OPEN).build(),
+                TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
                 StubTransaction() /* startTransaction */,
                 StubTransaction(), /* finishTransaction */
             )

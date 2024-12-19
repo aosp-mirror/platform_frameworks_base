@@ -11208,8 +11208,8 @@ public class Notification implements Parcelable
         private static final String KEY_SEGMENT_LENGTH = "length";
         private static final String KEY_POINT_POSITION = "position";
 
-        private static final int MAX_PROGRESS_SEGMENT_LIMIT = 15;
-        private static final int MAX_PROGRESS_STOP_LIMIT = 5;
+        private static final int MAX_PROGRESS_SEGMENT_LIMIT = 10;
+        private static final int MAX_PROGRESS_POINT_LIMIT = 4;
         private static final int DEFAULT_PROGRESS_MAX = 100;
 
         private List<Segment> mProgressSegments = new ArrayList<>();
@@ -11286,7 +11286,9 @@ public class Notification implements Parcelable
                 mProgressSegments = new ArrayList<>();
             }
             mProgressSegments.clear();
-            mProgressSegments.addAll(progressSegments);
+            for (Segment segment : progressSegments) {
+                addProgressSegment(segment);
+            }
             return this;
         }
 
@@ -11302,7 +11304,11 @@ public class Notification implements Parcelable
             if (mProgressSegments == null) {
                 mProgressSegments = new ArrayList<>();
             }
-            mProgressSegments.add(segment);
+            if (segment.getLength() > 0) {
+                mProgressSegments.add(segment);
+            } else {
+                Log.w(TAG, "Dropped the segment. The length is not a positive integer.");
+            }
 
             return this;
         }
@@ -11327,7 +11333,14 @@ public class Notification implements Parcelable
          * @see Point
          */
         public @NonNull ProgressStyle setProgressPoints(@NonNull List<Point> points) {
-            mProgressPoints = new ArrayList<>(points);
+            if (mProgressPoints == null) {
+                mProgressPoints = new ArrayList<>();
+            }
+            mProgressPoints.clear();
+
+            for (Point point: points) {
+                addProgressPoint(point);
+            }
             return this;
         }
 
@@ -11348,7 +11361,17 @@ public class Notification implements Parcelable
             if (mProgressPoints == null) {
                 mProgressPoints = new ArrayList<>();
             }
-            mProgressPoints.add(point);
+            if (point.getPosition() >= 0) {
+                mProgressPoints.add(point);
+
+                if (mProgressPoints.size() > MAX_PROGRESS_POINT_LIMIT) {
+                    Log.w(TAG, "Progress points limit is reached. First"
+                            + MAX_PROGRESS_POINT_LIMIT + " points will be rendered.");
+                }
+
+            } else {
+                Log.w(TAG, "Dropped the point. The position is a negative integer.");
+            }
 
             return this;
         }
@@ -11384,8 +11407,7 @@ public class Notification implements Parcelable
             } else {
                 int progressMax = 0;
                 int validSegmentCount = 0;
-                for (int i = 0; i < progressSegment.size()
-                        && validSegmentCount < MAX_PROGRESS_SEGMENT_LIMIT; i++) {
+                for (int i = 0; i < progressSegment.size(); i++) {
                     int segmentLength = progressSegment.get(i).getLength();
                     if (segmentLength > 0) {
                         try {
@@ -11832,6 +11854,30 @@ public class Notification implements Parcelable
                     totalLength = DEFAULT_PROGRESS_MAX;
                     segments.add(sanitizeSegment(new Segment(totalLength), backgroundColor,
                             defaultProgressColor));
+                } else if (segments.size() > MAX_PROGRESS_SEGMENT_LIMIT) {
+                    // If segment limit is exceeded. All segments will be replaced
+                    // with a single segment
+                    boolean allSameColor = true;
+                    int firstSegmentColor = segments.get(0).getColor();
+
+                    for (int i = 1; i < segments.size(); i++) {
+                        if (segments.get(i).getColor() != firstSegmentColor) {
+                            allSameColor = false;
+                            break;
+                        }
+                    }
+
+                    // This single segment length has same max as total.
+                    final Segment singleSegment = new Segment(totalLength);
+                    // Single segment color: if all segments have the same color,
+                    // use that color. Otherwise, use 0 / default.
+                    singleSegment.setColor(allSameColor ? firstSegmentColor
+                            : Notification.COLOR_DEFAULT);
+
+                    segments.clear();
+                    segments.add(sanitizeSegment(singleSegment,
+                            backgroundColor,
+                            defaultProgressColor));
                 }
 
                 // Ensure point color contrasts.
@@ -11840,6 +11886,9 @@ public class Notification implements Parcelable
                     final int position = point.getPosition();
                     if (position < 0 || position > totalLength) continue;
                     points.add(sanitizePoint(point, backgroundColor, defaultProgressColor));
+                    if (points.size() == MAX_PROGRESS_POINT_LIMIT) {
+                        break;
+                    }
                 }
 
                 model = new NotificationProgressModel(segments, points,
@@ -11868,8 +11917,10 @@ public class Notification implements Parcelable
          * has the same hue as the original color, but is lightened or darkened depending on
          * whether the background is dark or light.
          *
+         * @hide
          */
-        private int sanitizeProgressColor(@ColorInt int color,
+        @VisibleForTesting
+        public static int sanitizeProgressColor(@ColorInt int color,
                 @ColorInt int bg,
                 @ColorInt int defaultColor) {
             return Builder.ensureColorContrast(

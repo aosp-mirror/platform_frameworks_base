@@ -45,7 +45,6 @@ import android.annotation.IdRes;
 import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -57,7 +56,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityManager;
 
@@ -74,10 +72,8 @@ import com.android.keyguard.KeyguardSliceViewController;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
-import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -147,12 +143,13 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -172,17 +169,13 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
-import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository;
@@ -227,8 +220,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected HeadsUpManager mHeadsUpManager;
     @Mock protected NotificationGutsManager mGutsManager;
     @Mock protected KeyguardStatusBarView mKeyguardStatusBar;
-    @Mock protected KeyguardUserSwitcherView mUserSwitcherView;
-    @Mock protected ViewStub mUserSwitcherStubView;
     @Mock protected HeadsUpTouchHelper.Callback mHeadsUpCallback;
     @Mock protected KeyguardUpdateMonitor mUpdateMonitor;
     @Mock protected KeyguardBypassController mKeyguardBypassController;
@@ -254,12 +245,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ConversationNotificationManager mConversationNotificationManager;
     @Mock protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock protected KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
-    @Mock protected KeyguardQsUserSwitchComponent.Factory mKeyguardQsUserSwitchComponentFactory;
-    @Mock protected KeyguardQsUserSwitchComponent mKeyguardQsUserSwitchComponent;
-    @Mock protected KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
-    @Mock protected KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
-    @Mock protected KeyguardUserSwitcherComponent mKeyguardUserSwitcherComponent;
-    @Mock protected KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     @Mock protected KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock protected KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     @Mock protected KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
@@ -477,9 +462,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(SPLIT_SHADE_FULL_TRANSITION_DISTANCE);
         when(mView.getContext()).thenReturn(getContext());
         when(mView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
-        when(mView.findViewById(R.id.keyguard_user_switcher_view)).thenReturn(mUserSwitcherView);
-        when(mView.findViewById(R.id.keyguard_user_switcher_stub)).thenReturn(
-                mUserSwitcherStubView);
         when(mView.findViewById(R.id.keyguard_clock_container)).thenReturn(mKeyguardClockSwitch);
         when(mView.findViewById(R.id.notification_stack_scroller))
                 .thenReturn(mNotificationStackScrollLayout);
@@ -511,14 +493,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mFragmentService.getFragmentHostManager(mView)).thenReturn(mFragmentHostManager);
         FlingAnimationUtils.Builder flingAnimationUtilsBuilder = new FlingAnimationUtils.Builder(
                 mDisplayMetrics);
-        when(mKeyguardQsUserSwitchComponentFactory.build(any()))
-                .thenReturn(mKeyguardQsUserSwitchComponent);
-        when(mKeyguardQsUserSwitchComponent.getKeyguardQsUserSwitchController())
-                .thenReturn(mKeyguardQsUserSwitchController);
-        when(mKeyguardUserSwitcherComponentFactory.build(any()))
-                .thenReturn(mKeyguardUserSwitcherComponent);
-        when(mKeyguardUserSwitcherComponent.getKeyguardUserSwitcherController())
-                .thenReturn(mKeyguardUserSwitcherController);
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(true);
         when(mQs.getView()).thenReturn(mView);
         when(mQSFragment.getView()).thenReturn(mView);
@@ -627,8 +601,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mKeyguardStatusBarViewController);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
                 .thenReturn(keyguardStatusView);
-        when(mLayoutInflater.inflate(eq(R.layout.keyguard_user_switcher), any(), anyBoolean()))
-                .thenReturn(mUserSwitcherView);
         when(mNotificationRemoteInputManager.isRemoteInputActive())
                 .thenReturn(false);
         doAnswer(invocation -> {
@@ -690,8 +662,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationsQSContainerController,
                 mNotificationStackScrollLayoutController,
                 mKeyguardStatusViewComponentFactory,
-                mKeyguardQsUserSwitchComponentFactory,
-                mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mAuthController,
@@ -881,16 +851,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected void enableSplitShade(boolean enabled) {
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(enabled);
         mNotificationPanelViewController.updateResources();
-    }
-
-    protected void updateMultiUserSetting(boolean enabled) {
-        when(mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user)).thenReturn(false);
-        when(mUserManager.isUserSwitcherEnabled(false)).thenReturn(enabled);
-        final ArgumentCaptor<ContentObserver> observerCaptor =
-                ArgumentCaptor.forClass(ContentObserver.class);
-        verify(mContentResolver)
-                .registerContentObserver(any(), anyBoolean(), observerCaptor.capture());
-        observerCaptor.getValue().onChange(/* selfChange */ false);
     }
 
     protected void updateSmallestScreenWidth(int smallestScreenWidthDp) {

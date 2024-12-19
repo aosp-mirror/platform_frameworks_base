@@ -65,7 +65,7 @@ import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.icon.IconBuilder
 import com.android.systemui.statusbar.notification.icon.IconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractorImpl
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.CoordinateOnClickListener
@@ -222,16 +222,11 @@ class ExpandableNotificationRowBuilder(
                 Mockito.mock(LauncherApps::class.java, STUB_ONLY),
                 Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )
-
-        val promotedNotificationsProvider = PromotedNotificationsProviderImpl()
-        val promotedNotificationLog = logcatLogBuffer("PromotedNotifLog")
-        val promotedNotificationLogger = PromotedNotificationLogger(promotedNotificationLog)
-
         val promotedNotificationContentExtractor =
-            PromotedNotificationContentExtractor(
-                promotedNotificationsProvider,
+            PromotedNotificationContentExtractorImpl(
+                PromotedNotificationsProviderImpl(),
                 context,
-                promotedNotificationLogger,
+                PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")),
             )
 
         mContentBinder =

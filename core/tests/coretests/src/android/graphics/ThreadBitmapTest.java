@@ -16,17 +16,17 @@
 
 package android.graphics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class ThreadBitmapTest extends TestCase {
-
-    @Override
-    protected void setUp() throws Exception {
-    }
+@RunWith(AndroidJUnit4.class)
+public class ThreadBitmapTest {
 
     @LargeTest
+    @Test
     public void testCreation() {
         for (int i = 0; i < 200; i++) {
 
@@ -44,4 +44,3 @@ public class ThreadBitmapTest extends TestCase {
         public void run() {}
     }
 }
-

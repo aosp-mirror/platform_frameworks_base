@@ -35,8 +35,8 @@ constructor(
 ) : QSTileDataToStateMapper<NotesTileModel> {
     override fun map(config: QSTileConfig, data: NotesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes = R.drawable.ic_qs_notes
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
+            val iconRes = R.drawable.ic_qs_notes
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             contentDescription = label
             activationState = QSTileState.ActivationState.INACTIVE
             sideViewIcon = QSTileState.SideViewIcon.Chevron

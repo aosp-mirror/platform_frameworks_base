@@ -82,7 +82,7 @@ fun calculateInitialBounds(
                         // For portrait resizeable activities, respect apps fullscreen width but
                         // apply ideal size height.
                         Size(
-                            taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth,
+                            taskInfo.appCompatTaskInfo.topActivityAppBounds.width(),
                             idealSize.height,
                         )
                     } else {
@@ -104,7 +104,7 @@ fun calculateInitialBounds(
                         // apply custom app width.
                         Size(
                             customPortraitWidthForLandscapeApp,
-                            taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight,
+                            taskInfo.appCompatTaskInfo.topActivityAppBounds.height(),
                         )
                     } else {
                         // For portrait resizeable activities, simply apply ideal size.
@@ -196,13 +196,8 @@ fun maximizeSizeGivenAspectRatio(
 
 /** Calculates the aspect ratio of an activity from its fullscreen bounds. */
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
-    val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth
-    val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
-    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed || !taskInfo.canChangeAspectRatio) {
-        return maxOf(appLetterboxWidth, appLetterboxHeight) /
-            minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
-    }
-    val appBounds = taskInfo.configuration.windowConfiguration.appBounds ?: return 1f
+    if (taskInfo.appCompatTaskInfo.topActivityAppBounds.isEmpty) return 1f
+    val appBounds = taskInfo.appCompatTaskInfo.topActivityAppBounds
     return maxOf(appBounds.height(), appBounds.width()) /
         minOf(appBounds.height(), appBounds.width()).toFloat()
 }

@@ -21,12 +21,10 @@ import com.android.systemui.common.shared.model.Icon
 data class ModesTileModel(
     val isActivated: Boolean,
     val activeModes: List<String>,
-    val icon: Icon.Loaded,
-
     /**
-     * Resource id corresponding to [icon]. Will only be present if it's know to correspond to a
-     * resource with a known id in SystemUI (such as resources from `android.R`,
-     * `com.android.internal.R`, or `com.android.systemui.res` itself).
+     * icon.res will only be present if it is known to correspond to a resource with a known id in
+     * SystemUI (such as resources from `android.R`, `com.android.internal.R`, or
+     * `com.android.systemui.res` itself).
      */
-    val iconResId: Int? = null
+    val icon: Icon.Loaded,
 )

@@ -2945,7 +2945,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
                     if (callingPid != MY_PID) {
-                        throw new WindowManager.InvalidDisplayException(
+                        throw new IllegalArgumentException(
                                 "attachWindowContextToDisplayContent: trying to attach to a"
                                         + " non-existing display:" + displayId);
                     }
@@ -10084,14 +10084,16 @@ public class WindowManagerService extends IWindowManager.Stub
         TaskSnapshot taskSnapshot;
         final long token = Binder.clearCallingIdentity();
         try {
+            final Supplier<TaskSnapshot> supplier;
             synchronized (mGlobalLock) {
                 Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
                 if (task == null) {
                     throw new IllegalArgumentException(
                             "Failed to find matching task for taskId=" + taskId);
                 }
-                taskSnapshot = mTaskSnapshotController.captureSnapshot(task);
+                supplier = mTaskSnapshotController.captureSnapshot(task, true /* allowAppTheme */);
             }
+            taskSnapshot = supplier != null ? supplier.get() : null;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

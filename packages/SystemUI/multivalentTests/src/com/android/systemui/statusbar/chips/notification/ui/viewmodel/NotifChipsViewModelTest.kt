@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -71,6 +73,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_noNotifs_empty() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -81,6 +84,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_notifMissingStatusBarChipIconView_empty() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -99,6 +103,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_onePromotedNotif_statusBarIconViewMatches() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -122,6 +127,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_onePromotedNotif_connectedDisplaysFlagEnabled_statusBarIconMatches() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -145,6 +151,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_onePromotedNotif_colorMatches() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -175,6 +182,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_onlyForPromotedNotifs() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -208,6 +216,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_connectedDisplaysFlagEnabled_onlyForPromotedNotifs() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -242,6 +251,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_hasShortCriticalText_usesTextInsteadOfTime() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -272,6 +282,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_noTime_isIconOnly() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -294,6 +305,36 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
+    fun chips_basicTime_hiddenIfAutomaticallyPromoted() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 6543L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0])
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_basicTime_isShortTimeDelta() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -322,6 +363,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_countUpTime_isTimer() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -349,6 +391,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_countDownTime_isTimer() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -376,6 +419,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_noHeadsUp_showsTime() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -407,6 +451,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_hasHeadsUpByUser_onlyShowsIcon() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -442,6 +487,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
     fun chips_clickingChipNotifiesInteractor() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)

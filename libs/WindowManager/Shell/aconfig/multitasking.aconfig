@@ -171,3 +171,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "task_view_repository"
+    namespace: "multitasking"
+    description: "Factor task-view state tracking out of taskviewtransitions"
+    bug: "384976265"
+}

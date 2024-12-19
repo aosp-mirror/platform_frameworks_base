@@ -38,6 +38,7 @@ import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * When an app token becomes invisible, we take a snapshot (bitmap) and put it into our cache.
@@ -355,7 +356,9 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         final int[] mixedCode = new int[size];
         if (size == 1) {
             final ActivityRecord singleActivity = activity.get(0);
-            final TaskSnapshot snapshot = recordSnapshotInner(singleActivity);
+            final Supplier<TaskSnapshot> supplier = recordSnapshotInner(singleActivity,
+                    false /* allowAppTheme */, null /* inLockConsumer */);
+            final TaskSnapshot snapshot = supplier != null ? supplier.get() : null;
             if (snapshot != null) {
                 mixedCode[0] = getSystemHashCode(singleActivity);
                 addUserSavedFile(singleActivity.mUserId, snapshot, mixedCode);

@@ -25,7 +25,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -861,10 +861,10 @@ public class ViewRootImplTest {
             assertEquals(mViewRootImpl.getFrameRateCompatibility(),
                     FRAME_RATE_COMPATIBILITY_FIXED_SOURCE);
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(24, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             if (toolkitFrameRateVelocityMappingReadOnly()) {
                 assertEquals(24, mViewRootImpl.getPreferredFrameRate(), 0.1);
-                assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                assertEquals(FRAME_RATE_COMPATIBILITY_AT_LEAST,
                         mViewRootImpl.getFrameRateCompatibility());
                 assertFalse(mViewRootImpl.isFrameRateConflicted());
             } else {
@@ -888,10 +888,10 @@ public class ViewRootImplTest {
 
         sInstrumentation.runOnMainSync(() -> {
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             if (toolkitFrameRateVelocityMappingReadOnly()) {
                 assertEquals(60, mViewRootImpl.getPreferredFrameRate(), 0.1);
-                assertEquals(FRAME_RATE_COMPATIBILITY_GTE,
+                assertEquals(FRAME_RATE_COMPATIBILITY_AT_LEAST,
                         mViewRootImpl.getFrameRateCompatibility());
             } else {
                 assertEquals(FRAME_RATE_CATEGORY_HIGH,
@@ -904,7 +904,7 @@ public class ViewRootImplTest {
                     mViewRootImpl.getFrameRateCompatibility());
             // Should be false since 60 is a divisor of 120.
             assertFalse(mViewRootImpl.isFrameRateConflicted());
-            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_GTE);
+            mViewRootImpl.votePreferredFrameRate(60, FRAME_RATE_COMPATIBILITY_AT_LEAST);
             assertEquals(120, mViewRootImpl.getPreferredFrameRate(), 0.1);
             // compatibility should be remained the same (FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
             // since the frame rate 60 is smaller than 120.

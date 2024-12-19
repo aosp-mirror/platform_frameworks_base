@@ -164,15 +164,13 @@ final class AppCompatUtils {
 
         appCompatTaskInfo.setIsFromLetterboxDoubleTap(reachabilityOverrides.isFromDoubleTap());
 
+        appCompatTaskInfo.topActivityAppBounds.set(getAppBounds(top));
         final boolean isTopActivityLetterboxed = top.areBoundsLetterboxed();
         appCompatTaskInfo.setTopActivityLetterboxed(isTopActivityLetterboxed);
         if (isTopActivityLetterboxed) {
             final Rect bounds = top.getBounds();
-            final Rect appBounds = getAppBounds(top);
             appCompatTaskInfo.topActivityLetterboxWidth = bounds.width();
             appCompatTaskInfo.topActivityLetterboxHeight = bounds.height();
-            appCompatTaskInfo.topActivityLetterboxAppWidth = appBounds.width();
-            appCompatTaskInfo.topActivityLetterboxAppHeight = appBounds.height();
             // TODO(b/379824541) Remove duplicate information.
             appCompatTaskInfo.topActivityLetterboxBounds = bounds;
             // We need to consider if letterboxed or pillarboxed.
@@ -281,8 +279,7 @@ final class AppCompatUtils {
         info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.topActivityLetterboxAppHeight = TaskInfo.PROPERTY_VALUE_UNSET;
-        info.topActivityLetterboxAppWidth = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.topActivityAppBounds.setEmpty();
         info.topActivityLetterboxBounds = null;
         info.cameraCompatTaskInfo.freeformCameraCompatMode =
                 CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_UNSPECIFIED;

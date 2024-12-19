@@ -3227,7 +3227,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
-        return mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
+        return mAppCompatController.getAppCompatAspectRatioOverrides()
                 .userPreferenceCompatibleWithNonResizability();
     }
 
@@ -3898,11 +3898,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TaskFragment taskFragment = getTaskFragment();
         if (next != null && taskFragment != null && taskFragment.isEmbedded()) {
             final TaskFragment organized = taskFragment.getOrganizedTaskFragment();
-            final TaskFragment adjacent =
-                    organized != null ? organized.getAdjacentTaskFragment() : null;
-            if (adjacent != null && next.isDescendantOf(adjacent)
-                    && organized.topRunningActivity() == null) {
-                delayRemoval = organized.isDelayLastActivityRemoval();
+            if (Flags.allowMultipleAdjacentTaskFragments()) {
+                delayRemoval = organized != null
+                        && organized.topRunningActivity() == null
+                        && organized.isDelayLastActivityRemoval()
+                        && organized.forOtherAdjacentTaskFragments(next::isDescendantOf);
+            } else {
+                final TaskFragment adjacent =
+                        organized != null ? organized.getAdjacentTaskFragment() : null;
+                if (adjacent != null && next.isDescendantOf(adjacent)
+                        && organized.topRunningActivity() == null) {
+                    delayRemoval = organized.isDelayLastActivityRemoval();
+                }
             }
         }
 
@@ -4880,15 +4887,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *  @see #canShowWhenLocked(ActivityRecord)
      */
     boolean canShowWhenLocked() {
-        final TaskFragment taskFragment = getTaskFragment();
-        if (taskFragment != null && taskFragment.getAdjacentTaskFragment() != null
-                && taskFragment.isEmbedded()) {
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-            final ActivityRecord r = adjacentTaskFragment.getTopNonFinishingActivity();
-            return canShowWhenLocked(this) && canShowWhenLocked(r);
-        } else {
-            return canShowWhenLocked(this);
+        if (!canShowWhenLocked(this)) {
+            return false;
         }
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment == null || !taskFragment.hasAdjacentTaskFragment()
+                || !taskFragment.isEmbedded()) {
+            // No embedded adjacent that need to be checked.
+            return true;
+        }
+
+        // Make sure the embedded adjacent can also be shown.
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final ActivityRecord adjacentActivity = taskFragment.getAdjacentTaskFragment()
+                    .getTopNonFinishingActivity();
+            return canShowWhenLocked(adjacentActivity);
+        }
+        final boolean hasAdjacentNotAllowToShow = taskFragment.forOtherAdjacentTaskFragments(
+                adjacentTF -> !canShowWhenLocked(adjacentTF.getTopNonFinishingActivity()));
+        return !hasAdjacentNotAllowToShow;
     }
 
     /**
@@ -8528,8 +8545,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (Flags.immersiveAppRepositioning()
-                && !mAppCompatController.getAppCompatAspectRatioPolicy()
+        if (!mAppCompatController.getAppCompatAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio()
                 && !mAppCompatController.getAppCompatAspectRatioOverrides()
                     .hasFullscreenOverride()) {
@@ -8550,18 +8566,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!matchParentBounds()) {
                 computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
             }
-        }
-        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
-        // are already calculated in resolveFixedOrientationConfiguration, or if in size compat
-        // mode, it should already be calculated in resolveSizeCompatModeConfiguration.
-        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (!Flags.immersiveAppRepositioning()
-                && !mAppCompatController.getAppCompatAspectRatioPolicy()
-                    .isLetterboxedForFixedOrientationAndAspectRatio()
-                && !scmPolicy.isInSizeCompatModeForBounds()
-                && !mAppCompatController.getAppCompatAspectRatioOverrides()
-                    .hasFullscreenOverride()) {
-            resolveAspectRatioRestriction(newParentConfiguration);
         }
 
         if (isFixedOrientationLetterboxAllowed
@@ -8819,9 +8823,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isImmersiveMode(@NonNull Rect parentBounds) {
-        if (!Flags.immersiveAppRepositioning()) {
-            return false;
-        }
         if (!mResolveConfigHint.mUseOverrideInsetsForConfig
                 && mWmService.mFlags.mInsetsDecoupledConfiguration) {
             return false;
@@ -10355,7 +10356,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (!isVisibleRequested()) {
             // TODO(b/294925498): Remove this finishing check once we have accurate ready tracking.
-            if (task != null && task.getPausingActivity() == this) {
+            if (task != null && task.getPausingActivity() == this
+                    // Display is asleep, so nothing will be visible anyways.
+                    && !mDisplayContent.isSleeping()) {
                 // Visibility of starting activities isn't calculated until pause-complete, so if
                 // this is not paused yet, don't consider it ready.
                 return false;

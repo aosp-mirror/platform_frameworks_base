@@ -108,6 +108,7 @@ public final class GetValueRequest implements Parcelable {
     /**
      * Builder to construct {@link GetValueRequest}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         private final String mScreenKey;
         private final String mPreferenceKey;

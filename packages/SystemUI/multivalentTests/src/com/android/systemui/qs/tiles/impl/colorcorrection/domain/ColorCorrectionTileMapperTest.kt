@@ -77,8 +77,11 @@ class ColorCorrectionTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_color_correction_label)
         return QSTileState(
-            Icon.Loaded(context.getDrawable(R.drawable.ic_qs_color_correction)!!, null),
-            R.drawable.ic_qs_color_correction,
+            Icon.Loaded(
+                context.getDrawable(R.drawable.ic_qs_color_correction)!!,
+                null,
+                R.drawable.ic_qs_color_correction,
+            ),
             label,
             activationState,
             secondaryLabel,

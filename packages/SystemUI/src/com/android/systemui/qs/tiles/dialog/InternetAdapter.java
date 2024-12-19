@@ -193,7 +193,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                 if (mJob == null) {
                     mJob = WifiUtils.checkWepAllowed(mContext, mCoroutineScope, wifiEntry.getSsid(),
                             WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG, intent -> {
-                                mInternetDialogController.startActivity(intent, view);
+                                mInternetDialogController.startActivityForDialog(intent);
                                 return null;
                             }, () -> {
                                 wifiConnect(wifiEntry, view);
@@ -211,7 +211,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                         true /* connectForCaller */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                mContext.startActivity(intent);
+                mInternetDialogController.startActivityForDialog(intent);
                 return;
             }
 

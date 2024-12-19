@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import static android.media.MediaRoute2ProviderService.REASON_REJECTED;
 import static android.media.MediaRoute2ProviderService.REQUEST_ID_NONE;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -499,6 +500,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         synchronized (mLock) {
             var systemMediaSessionCallback = mRequestIdToSystemSessionRequest.get(requestId);
             if (systemMediaSessionCallback != null) {
+                mRequestIdToSystemSessionRequest.remove(requestId);
                 mSystemSessionCallbacks.put(newSession.getOriginalId(), systemMediaSessionCallback);
                 systemMediaSessionCallback.onSessionUpdate(newSession);
                 return;
@@ -674,7 +676,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
 
     private void dispatchSessionUpdated(RoutingSessionInfo session) {
         mHandler.sendMessage(
-                obtainMessage(mCallback::onSessionUpdated, this, session));
+                obtainMessage(
+                        mCallback::onSessionUpdated,
+                        this,
+                        session,
+                        /* packageNamesWithRoutingSessionOverrides= */ Set.of()));
     }
 
     private void dispatchSessionReleased(RoutingSessionInfo session) {
@@ -716,6 +722,19 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             synchronized (mLock) {
                 for (RoutingSessionInfo sessionInfo : mSessionInfos) {
                     mCallback.onSessionReleased(this, sessionInfo);
+                }
+                if (Flags.enableMirroringInMediaRouter2()) {
+                    for (var callback : mSystemSessionCallbacks.values()) {
+                        callback.onSessionReleased();
+                    }
+                    mSystemSessionCallbacks.clear();
+                    int requestsSize = mRequestIdToSystemSessionRequest.size();
+                    for (int i = 0; i < requestsSize; i++) {
+                        var callback = mRequestIdToSystemSessionRequest.valueAt(i);
+                        var requestId = mRequestIdToSystemSessionRequest.keyAt(i);
+                        callback.onRequestFailed(requestId, REASON_REJECTED);
+                    }
+                    mSystemSessionCallbacks.clear();
                 }
                 mSessionInfos.clear();
                 mReleasingSessions.clear();

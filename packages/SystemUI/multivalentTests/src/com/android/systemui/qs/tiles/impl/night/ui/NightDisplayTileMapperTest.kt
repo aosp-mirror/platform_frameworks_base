@@ -289,8 +289,7 @@ class NightDisplayTileMapperTest : SysuiTestCase() {
             if (TextUtils.isEmpty(secondaryLabel)) label
             else TextUtils.concat(label, ", ", secondaryLabel)
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

@@ -17,6 +17,9 @@
 package com.android.systemui.scene.ui.view
 
 import com.android.systemui.kosmos.Kosmos
+import javax.inject.Provider
 import org.mockito.kotlin.mock
 
 val Kosmos.mockShadeRootView by Kosmos.Fixture { mock<WindowRootView>() }
+val Kosmos.mockWindowRootViewProvider by
+    Kosmos.Fixture { Provider<WindowRootView> { mock<WindowRootView>() } }

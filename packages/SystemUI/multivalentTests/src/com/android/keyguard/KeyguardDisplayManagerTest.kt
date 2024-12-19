@@ -163,6 +163,16 @@ class KeyguardDisplayManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testShow_rearDisplayOuterDefaultActive_occluded() {
+        displayTracker.allDisplays = arrayOf(defaultDisplay, secondaryDisplay)
+
+        whenever(deviceStateHelper.isRearDisplayOuterDefaultActive(secondaryDisplay))
+            .thenReturn(true)
+        whenever(keyguardStateController.isOccluded).thenReturn(true)
+        verify(presentationFactory, never()).create(eq(secondaryDisplay))
+    }
+
+    @Test
     fun testShow_presentationCreated() {
         displayTracker.allDisplays = arrayOf(defaultDisplay, secondaryDisplay)
 

@@ -123,11 +123,6 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatOverrides getAppCompatOverrides() {
-        return mAppCompatOverrides;
-    }
-
-    @NonNull
     AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
         return mAppCompatOverrides.getAppCompatOrientationOverrides();
     }

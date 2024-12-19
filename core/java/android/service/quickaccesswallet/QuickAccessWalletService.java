@@ -93,6 +93,10 @@ import android.util.Log;
  * must do its own state management (keeping in mind that the service's process might be killed
  * by the Android System when unbound; for example, if the device is running low in memory).
  *
+ * <p> The service also provides pending intents to override the system's Quick Access activities
+ * via the {@link #getTargetActivityPendingIntent} and the
+ * {@link #getGestureTargetActivityPendingIntent} method.
+ *
  * <p>
  * <a name="ErrorHandling"></a>
  * <h3>Error handling</h3>
@@ -384,6 +388,10 @@ public abstract class QuickAccessWalletService extends Service {
      *
      * <p>The pending intent will be sent when the user performs a gesture to open Wallet.
      * The pending intent should launch an activity.
+     *
+     * <p> If the gesture is performed and this method returns null, the system will launch the
+     * activity specified by the {@link #getTargetActivityPendingIntent} method. If that method
+     * also returns null, the system will launch the system-provided card switcher activity.
      */
     @Nullable
     @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)

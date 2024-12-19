@@ -97,6 +97,7 @@ flag {
     name: "settings_catalyst"
     namespace: "android_settings"
     description: "Settings catalyst project migration"
+    is_exported: true
     bug: "323791114"
     is_exported: true
 }
@@ -106,6 +107,7 @@ flag {
     is_fixed_read_only: true
     namespace: "android_settings"
     description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
+    is_exported: true
     bug: "375193223"
     is_exported: true
 }
@@ -193,6 +195,16 @@ flag {
     namespace: "cross_device_experiences"
     description: "Do not show problem connecting message when Android Auto disconnect A2DP"
     bug: "381981752"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "disable_audio_sharing_auto_pick_fallback_in_ui"
+    namespace: "cross_device_experiences"
+    description: "Do not auto pick audio sharing fallback device in UI"
+    bug: "383469911"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

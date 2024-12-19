@@ -1171,6 +1171,88 @@ public class ViewFrameRateTest {
         waitForAfterDraw();
     }
 
+    @Test
+    public void ignoreHeuristicWhenFling() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        waitForFrameRateCategoryToSettle();
+        FrameLayout host = new FrameLayout(mActivity);
+        View childView = new View(mActivity);
+        float velocity = 1000;
+
+        TranslateAnimation translateAnimation = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, 0f, // fromXDelta
+                Animation.RELATIVE_TO_PARENT, 0f, // toXDelta
+                Animation.RELATIVE_TO_PARENT, 1f, // fromYDelta (100%p)
+                Animation.RELATIVE_TO_PARENT, 0f  // toYDelta
+        );
+        translateAnimation.setDuration(100);
+
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams fullSize = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            mActivity.setContentView(host, fullSize);
+            host.setFrameContentVelocity(velocity);
+            ViewGroupOverlay overlay = host.getOverlay();
+            overlay.add(childView);
+            assertEquals(velocity, host.getFrameContentVelocity());
+            assertEquals(host.getFrameContentVelocity(),
+                    ((View) childView.getParent()).getFrameContentVelocity());
+
+            mMovingView.startAnimation(translateAnimation);
+
+            // The frame rate should be "Normal" during fling gestures,
+            // even if there's a moving View.
+            assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRoot.getLastPreferredFrameRateCategory());
+        });
+        waitForAfterDraw();
+    }
+
+    @Test
+    public void ignoreHeuristicWhenFlingMovementFirst() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+
+        waitForFrameRateCategoryToSettle();
+        FrameLayout host = new FrameLayout(mActivity);
+        View childView = new View(mActivity);
+        float velocity = 1000;
+
+        TranslateAnimation translateAnimation = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, 0f, // fromXDelta
+                Animation.RELATIVE_TO_PARENT, 0f, // toXDelta
+                Animation.RELATIVE_TO_PARENT, 1f, // fromYDelta (100%p)
+                Animation.RELATIVE_TO_PARENT, 0f  // toYDelta
+        );
+        translateAnimation.setDuration(100);
+
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.startAnimation(translateAnimation);
+
+            ViewGroup.LayoutParams fullSize = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            mActivity.setContentView(host, fullSize);
+            host.setFrameContentVelocity(velocity);
+            ViewGroupOverlay overlay = host.getOverlay();
+            overlay.add(childView);
+            assertEquals(velocity, host.getFrameContentVelocity());
+            assertEquals(host.getFrameContentVelocity(),
+                    ((View) childView.getParent()).getFrameContentVelocity());
+
+            // The frame rate should be "Normal" during fling gestures,
+            // even if there's a moving View.
+            assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRoot.getLastPreferredFrameRateCategory());
+        });
+        waitForAfterDraw();
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);

@@ -656,7 +656,8 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean isAudioSharingHysteresisModeFixAvailable(@Nullable Context context) {
         return (audioSharingHysteresisModeFix() && Flags.enableLeAudioSharing())
-                || (context != null && isAudioSharingPreviewEnabled(context.getContentResolver()));
+                || (context != null && Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(context.getContentResolver()));
     }
 
     /** Returns if the le audio sharing is enabled. */

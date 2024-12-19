@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 
 /**
- * Return type of {@link IHubEndpointLifecycleCallback#onSessionOpenRequest}. The value determines
+ * Return type of {@link HubEndpointLifecycleCallback#onSessionOpenRequest}. The value determines
  * whether a open session request from the remote is accepted or not.
  *
  * @hide

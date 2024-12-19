@@ -29,17 +29,6 @@ interface ShadeBackActionInteractor {
     /** Returns whether the shade can be collapsed. */
     fun canBeCollapsed(): Boolean
 
-    /**
-     * Close the keyguard user switcher if it is open and capable of closing.
-     *
-     * Has no effect if user switcher isn't supported, if the user switcher is already closed, or if
-     * the user switcher uses "simple" mode. The simple user switcher cannot be closed.
-     *
-     * @return true if the keyguard user switcher was open, and is now closed
-     */
-    @Deprecated("Only supported by very old devices that will not adopt scenes.")
-    fun closeUserSwitcherIfOpen(): Boolean
-
     /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
     fun onBackPressed()
 

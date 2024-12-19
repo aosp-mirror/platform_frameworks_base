@@ -363,7 +363,7 @@ public class PackageWatchdog {
      * it will resume observing any packages requested from a previous boot.
      * @hide
      */
-    public void registerHealthObserver(PackageHealthObserver observer, Executor ignoredExecutor) {
+    public void registerHealthObserver(Executor ignoredExecutor, PackageHealthObserver observer) {
         synchronized (mLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -397,8 +397,8 @@ public class PackageWatchdog {
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      * @hide
      */
-    public void startExplicitHealthCheck(PackageHealthObserver observer, List<String> packageNames,
-            long durationMs) {
+    public void startExplicitHealthCheck(List<String> packageNames, long durationMs,
+            PackageHealthObserver observer) {
         if (packageNames.isEmpty()) {
             Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
             return;
@@ -446,7 +446,7 @@ public class PackageWatchdog {
             }
 
             // Register observer in case not already registered
-            registerHealthObserver(observer, null);
+            registerHealthObserver(null, observer);
 
             // Sync after we add the new packages to the observers. We may have received packges
             // requiring an earlier schedule than we are currently scheduled for.
@@ -2021,15 +2021,19 @@ public class PackageWatchdog {
             bootMitigationCounts.put(observer.name, observer.getBootMitigationCount());
         }
 
+        FileOutputStream fileStream = null;
+        ObjectOutputStream objectStream = null;
         try {
-            FileOutputStream fileStream = new FileOutputStream(new File(filePath));
-            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            fileStream = new FileOutputStream(new File(filePath));
+            objectStream = new ObjectOutputStream(fileStream);
             objectStream.writeObject(bootMitigationCounts);
             objectStream.flush();
-            objectStream.close();
-            fileStream.close();
         } catch (Exception e) {
             Slog.i(TAG, "Could not save observers metadata to file: " + e);
+            return;
+        } finally {
+            IoUtils.closeQuietly(objectStream);
+            IoUtils.closeQuietly(fileStream);
         }
     }
 
@@ -2180,23 +2184,32 @@ public class PackageWatchdog {
         void readAllObserversBootMitigationCountIfNecessary(String filePath) {
             File metadataFile = new File(filePath);
             if (metadataFile.exists()) {
+                FileInputStream fileStream = null;
+                ObjectInputStream objectStream = null;
+                HashMap<String, Integer> bootMitigationCounts = null;
                 try {
-                    FileInputStream fileStream = new FileInputStream(metadataFile);
-                    ObjectInputStream objectStream = new ObjectInputStream(fileStream);
-                    HashMap<String, Integer> bootMitigationCounts =
+                    fileStream = new FileInputStream(metadataFile);
+                    objectStream = new ObjectInputStream(fileStream);
+                    bootMitigationCounts =
                             (HashMap<String, Integer>) objectStream.readObject();
-                    objectStream.close();
-                    fileStream.close();
-
-                    for (int i = 0; i < mAllObservers.size(); i++) {
-                        final ObserverInternal observer = mAllObservers.valueAt(i);
-                        if (bootMitigationCounts.containsKey(observer.name)) {
-                            observer.setBootMitigationCount(
-                                    bootMitigationCounts.get(observer.name));
-                        }
-                    }
                 } catch (Exception e) {
                     Slog.i(TAG, "Could not read observer metadata file: " + e);
+                    return;
+                } finally {
+                    IoUtils.closeQuietly(objectStream);
+                    IoUtils.closeQuietly(fileStream);
+                }
+
+                if (bootMitigationCounts == null || bootMitigationCounts.isEmpty()) {
+                    Slog.i(TAG, "No observer in metadata file");
+                    return;
+                }
+                for (int i = 0; i < mAllObservers.size(); i++) {
+                    final ObserverInternal observer = mAllObservers.valueAt(i);
+                    if (bootMitigationCounts.containsKey(observer.name)) {
+                        observer.setBootMitigationCount(
+                                bootMitigationCounts.get(observer.name));
+                    }
                 }
             }
         }

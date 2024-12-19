@@ -85,6 +85,7 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-broken-robofiles-run",
     srcs: [
+        "tests/src/**/systemui/dreams/touch/CommunalTouchHandlerTest.java",
         "tests/src/**/systemui/shade/NotificationShadeWindowViewControllerTest.kt",
         "tests/src/**/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorSceneContainerTest.kt",
         "tests/src/**/systemui/statusbar/pipeline/mobile/ui/model/SignalIconModelParameterizedTest.kt",
@@ -418,6 +419,9 @@ android_library {
         "androidx.slice_slice-view",
     ],
     manifest: "AndroidManifest-res.xml",
+    flags_packages: [
+        "com_android_systemui_flags",
+    ],
 }
 
 android_library {

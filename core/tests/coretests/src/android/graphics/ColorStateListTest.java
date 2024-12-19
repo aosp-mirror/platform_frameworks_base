@@ -16,33 +16,41 @@
 
 package android.graphics;
 
+import static org.junit.Assert.assertEquals;
+
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.test.AndroidTestCase;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.frameworks.coretests.R;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
- * Tests of {@link android.graphics.ColorStateList}
+ * Tests of {@link ColorStateList}
  */
 
-public class ColorStateListTest extends AndroidTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class ColorStateListTest {
 
     private Resources mResources;
     private int mFailureColor;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mResources = mContext.getResources();
+    @Before
+    public void setUp() throws Exception {
+        mResources = InstrumentationRegistry.getInstrumentation().getContext().getResources();
         mFailureColor = mResources.getColor(R.color.failColor);
     }
 
-    @SmallTest
+    @Test
     public void testStateIsInList() throws Exception {
         ColorStateList colorStateList = mResources.getColorStateList(R.color.color1);
         int[] focusedState = {android.R.attr.state_focused};
@@ -50,7 +58,7 @@ public class ColorStateListTest extends AndroidTestCase {
         assertEquals(mResources.getColor(R.color.testcolor1), focusColor);
     }
 
-    @SmallTest
+    @Test
     public void testStateIsInList_proto() throws Exception {
         ColorStateList colorStateList = recreateFromProto(
                 mResources.getColorStateList(R.color.color1));
@@ -59,7 +67,7 @@ public class ColorStateListTest extends AndroidTestCase {
         assertEquals(mResources.getColor(R.color.testcolor1), focusColor);
     }
 
-    @SmallTest
+    @Test
     public void testEmptyState() throws Exception {
         ColorStateList colorStateList = mResources.getColorStateList(R.color.color1);
         int[] emptyState = {};
@@ -67,7 +75,7 @@ public class ColorStateListTest extends AndroidTestCase {
         assertEquals(mResources.getColor(R.color.testcolor2), defaultColor);
     }
 
-    @SmallTest
+    @Test
     public void testEmptyState_proto() throws Exception {
         ColorStateList colorStateList = recreateFromProto(
                 mResources.getColorStateList(R.color.color1));
@@ -76,22 +84,23 @@ public class ColorStateListTest extends AndroidTestCase {
         assertEquals(mResources.getColor(R.color.testcolor2), defaultColor);
     }
 
-    @SmallTest
+    @Test
     public void testGetColor() throws Exception {
         int defaultColor = mResources.getColor(R.color.color1);
         assertEquals(mResources.getColor(R.color.testcolor2), defaultColor);
     }
 
-    @SmallTest
+    @Test
     public void testGetColorWhenListHasNoDefault() throws Exception {
         int defaultColor = mResources.getColor(R.color.color_no_default);
         assertEquals(mResources.getColor(R.color.testcolor1), defaultColor);
     }
 
-    @SmallTest
+    @Test
     public void testLstar() throws Exception {
+        var cl = ColorStateList.valueOf(mResources.getColor(R.color.testcolor2)).withLStar(50.0f);
         int defaultColor = mResources.getColor(R.color.color_with_lstar);
-        assertEquals(mResources.getColor(R.color.testcolor3), defaultColor);
+        assertEquals(cl.getDefaultColor(), defaultColor);
     }
 
     private ColorStateList recreateFromProto(ColorStateList colorStateList) throws Exception {

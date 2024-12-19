@@ -30,9 +30,11 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +45,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class FontFileUtilTest {
     private static final String TAG = "FontFileUtilTest";
     private static final String CACHE_FILE_PREFIX = ".font";

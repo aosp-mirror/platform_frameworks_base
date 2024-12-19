@@ -54,6 +54,7 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryMod
 import com.android.systemui.common.usagestats.data.CommonUsageStatsDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
+import com.android.systemui.compose.ComposeModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -133,6 +134,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
@@ -141,7 +143,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerModule;
 import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PolicyModule;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
@@ -214,6 +215,7 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
+        ComposeModule.class,
         ConfigurationModule.class,
         ConfigurationRepositoryModule.class,
         CommonUsageStatsDataLayerModule.class,

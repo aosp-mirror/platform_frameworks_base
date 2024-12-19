@@ -34,7 +34,6 @@ constructor(@ShadeDisplayAware private val resources: Resources, val theme: Reso
     QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes = data.iconResId
             icon = data.icon
             activationState =
                 if (data.isActivated) {

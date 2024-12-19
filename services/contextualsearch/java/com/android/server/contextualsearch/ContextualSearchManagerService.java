@@ -55,6 +55,7 @@ import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -102,6 +103,7 @@ public class ContextualSearchManagerService extends SystemService {
     private final PackageManagerInternal mPackageManager;
     private final WindowManagerInternal mWmInternal;
     private final DevicePolicyManagerInternal mDpmInternal;
+    private final AudioManager mAudioManager;
     private final Object mLock = new Object();
     private final AssistDataRequester mAssistDataRequester;
 
@@ -163,6 +165,8 @@ public class ContextualSearchManagerService extends SystemService {
         mAtmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityTaskManagerInternal.class));
         mPackageManager = LocalServices.getService(PackageManagerInternal.class);
+        mAudioManager = context.getSystemService(AudioManager.class);
+
         mWmInternal = Objects.requireNonNull(LocalServices.getService(WindowManagerInternal.class));
         mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mAssistDataRequester = new AssistDataRequester(
@@ -306,6 +310,10 @@ public class ContextualSearchManagerService extends SystemService {
                 SystemClock.uptimeMillis());
         launchIntent.putExtra(ContextualSearchManager.EXTRA_ENTRYPOINT, entrypoint);
         launchIntent.putExtra(ContextualSearchManager.EXTRA_TOKEN, mToken);
+        if (Flags.includeAudioPlayingStatus()) {
+            launchIntent.putExtra(ContextualSearchManager.EXTRA_IS_AUDIO_PLAYING,
+                    mAudioManager.isMusicActive());
+        }
         boolean isAssistDataAllowed = mAtmInternal.isAssistDataAllowed();
         final List<ActivityAssistInfo> records = mAtmInternal.getTopVisibleActivities();
         final List<IBinder> activityTokens = new ArrayList<>(records.size());

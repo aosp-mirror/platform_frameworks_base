@@ -41,6 +41,7 @@ import com.android.internal.R as InternalR
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.time.SystemClock
 import dagger.assisted.Assisted
@@ -68,6 +69,7 @@ internal constructor(
     private val uiEventLogger: UiEventLogger,
     private val logger: BluetoothTileDialogLogger,
     private val systemuiDialogFactory: SystemUIDialog.Factory,
+    private val shadeDialogContextInteractor: ShadeDialogContextInteractor,
 ) : SystemUIDialog.Delegate {
 
     private val mutableBluetoothStateToggle: MutableStateFlow<Boolean?> = MutableStateFlow(null)
@@ -105,7 +107,7 @@ internal constructor(
     }
 
     override fun createDialog(): SystemUIDialog {
-        return systemuiDialogFactory.create(this)
+        return systemuiDialogFactory.create(this, shadeDialogContextInteractor.context)
     }
 
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
@@ -405,10 +407,11 @@ internal constructor(
                     }
 
                     // updating icon colors
-                    val tintColor = context.getColor(
-                        if (item.isActive) InternalR.color.materialColorOnPrimaryContainer
-                        else InternalR.color.materialColorOnSurface
-                    )
+                    val tintColor =
+                        context.getColor(
+                            if (item.isActive) InternalR.color.materialColorOnPrimaryContainer
+                            else InternalR.color.materialColorOnSurface
+                        )
 
                     // update icons
                     iconView.apply {

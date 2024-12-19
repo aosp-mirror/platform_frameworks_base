@@ -55,6 +55,8 @@ interface CommunalSettingsRepository {
     /** A [CommunalEnabledState] for the specified user. */
     fun getEnabledState(user: UserInfo): Flow<CommunalEnabledState>
 
+    fun getScreensaverEnabledState(user: UserInfo): Flow<Boolean>
+
     /**
      * Returns true if any glanceable hub functionality should be enabled via configs and flags.
      *
@@ -138,6 +140,20 @@ constructor(
             .flowOn(bgDispatcher)
     }
 
+    override fun getScreensaverEnabledState(user: UserInfo): Flow<Boolean> =
+        secureSettings
+            .observerFlow(userId = user.id, names = arrayOf(Settings.Secure.SCREENSAVER_ENABLED))
+            // Force an update
+            .onStart { emit(Unit) }
+            .map {
+                secureSettings.getIntForUser(
+                    Settings.Secure.SCREENSAVER_ENABLED,
+                    SCREENSAVER_ENABLED_SETTING_DEFAULT,
+                    user.id,
+                ) == 1
+            }
+            .flowOn(bgDispatcher)
+
     override fun getAllowedByDevicePolicy(user: UserInfo): Flow<Boolean> =
         broadcastDispatcher
             .broadcastFlow(
@@ -182,6 +198,7 @@ constructor(
     companion object {
         const val GLANCEABLE_HUB_BACKGROUND_SETTING = "glanceable_hub_background"
         private const val ENABLED_SETTING_DEFAULT = 1
+        private const val SCREENSAVER_ENABLED_SETTING_DEFAULT = 0
     }
 }
 
