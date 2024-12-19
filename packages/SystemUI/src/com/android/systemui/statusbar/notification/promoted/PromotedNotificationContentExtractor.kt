@@ -24,10 +24,12 @@ import android.app.Notification.EXTRA_CHRONOMETER_COUNT_DOWN
 import android.app.Notification.EXTRA_SUB_TEXT
 import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
+import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.app.Notification.ProgressStyle
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
@@ -45,7 +47,6 @@ interface PromotedNotificationContentExtractor {
 class PromotedNotificationContentExtractorImpl
 @Inject
 constructor(
-    private val promotedNotificationsProvider: PromotedNotificationsProvider,
     @ShadeDisplayAware private val context: Context,
     private val logger: PromotedNotificationLogger,
 ) : PromotedNotificationContentExtractor {
@@ -58,14 +59,19 @@ constructor(
             return null
         }
 
-        if (!promotedNotificationsProvider.shouldPromote(entry)) {
-            logger.logExtractionSkipped(entry, "shouldPromote returned false")
-            return null
-        }
-
         val notification = entry.sbn.notification
         if (notification == null) {
             logger.logExtractionFailed(entry, "entry.sbn.notification is null")
+            return null
+        }
+
+        // Notification.isPromotedOngoing checks the ui_rich_ongoing flag, but we want the status
+        // bar chip to be ready before all the features behind the ui_rich_ongoing flag are ready.
+        val isPromotedForStatusBarChip =
+            StatusBarNotifChips.isEnabled && (notification.flags and FLAG_PROMOTED_ONGOING) != 0
+        val isPromoted = notification.isPromotedOngoing() || isPromotedForStatusBarChip
+        if (!isPromoted) {
+            logger.logExtractionSkipped(entry, "isPromotedOngoing returned false")
             return null
         }
 
