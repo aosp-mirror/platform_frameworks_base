@@ -3898,11 +3898,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final TaskFragment taskFragment = getTaskFragment();
         if (next != null && taskFragment != null && taskFragment.isEmbedded()) {
             final TaskFragment organized = taskFragment.getOrganizedTaskFragment();
-            final TaskFragment adjacent =
-                    organized != null ? organized.getAdjacentTaskFragment() : null;
-            if (adjacent != null && next.isDescendantOf(adjacent)
-                    && organized.topRunningActivity() == null) {
-                delayRemoval = organized.isDelayLastActivityRemoval();
+            if (Flags.allowMultipleAdjacentTaskFragments()) {
+                delayRemoval = organized != null
+                        && organized.topRunningActivity() == null
+                        && organized.isDelayLastActivityRemoval()
+                        && organized.forOtherAdjacentTaskFragments(next::isDescendantOf);
+            } else {
+                final TaskFragment adjacent =
+                        organized != null ? organized.getAdjacentTaskFragment() : null;
+                if (adjacent != null && next.isDescendantOf(adjacent)
+                        && organized.topRunningActivity() == null) {
+                    delayRemoval = organized.isDelayLastActivityRemoval();
+                }
             }
         }
 
@@ -4880,15 +4887,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *  @see #canShowWhenLocked(ActivityRecord)
      */
     boolean canShowWhenLocked() {
-        final TaskFragment taskFragment = getTaskFragment();
-        if (taskFragment != null && taskFragment.getAdjacentTaskFragment() != null
-                && taskFragment.isEmbedded()) {
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-            final ActivityRecord r = adjacentTaskFragment.getTopNonFinishingActivity();
-            return canShowWhenLocked(this) && canShowWhenLocked(r);
-        } else {
-            return canShowWhenLocked(this);
+        if (!canShowWhenLocked(this)) {
+            return false;
         }
+        final TaskFragment taskFragment = getTaskFragment();
+        if (taskFragment == null || !taskFragment.hasAdjacentTaskFragment()
+                || !taskFragment.isEmbedded()) {
+            // No embedded adjacent that need to be checked.
+            return true;
+        }
+
+        // Make sure the embedded adjacent can also be shown.
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final ActivityRecord adjacentActivity = taskFragment.getAdjacentTaskFragment()
+                    .getTopNonFinishingActivity();
+            return canShowWhenLocked(adjacentActivity);
+        }
+        final boolean hasAdjacentNotAllowToShow = taskFragment.forOtherAdjacentTaskFragments(
+                adjacentTF -> !canShowWhenLocked(adjacentTF.getTopNonFinishingActivity()));
+        return !hasAdjacentNotAllowToShow;
     }
 
     /**

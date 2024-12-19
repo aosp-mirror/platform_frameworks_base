@@ -365,7 +365,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         assertEquals(taskFragmentBounds, activity.getBounds());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
-        assertEquals(taskFragment1, taskFragment0.getAdjacentTaskFragment());
+        assertTrue(taskFragment0.isAdjacentTo(taskFragment1));
         assertEquals(taskFragment1, taskFragment0.getCompanionTaskFragment());
         assertNotEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
 
@@ -381,7 +381,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(taskBounds, taskFragment0.getBounds());
         assertEquals(taskBounds, activity.getBounds());
         assertEquals(Configuration.EMPTY, taskFragment0.getRequestedOverrideConfiguration());
-        assertNull(taskFragment0.getAdjacentTaskFragment());
+        assertFalse(taskFragment0.hasAdjacentTaskFragment());
         assertNull(taskFragment0.getCompanionTaskFragment());
         assertEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
         // Because the whole Task is entering PiP, no need to record for future reparent.

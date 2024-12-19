@@ -3707,10 +3707,21 @@ class Task extends TaskFragment {
 
                 // Boost the adjacent TaskFragment for dimmer if needed.
                 final TaskFragment taskFragment = wc.asTaskFragment();
-                if (taskFragment != null && taskFragment.isEmbedded()) {
-                    final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
-                    if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
-                        adjacentTf.assignLayer(t, layer++);
+                if (taskFragment != null && taskFragment.isEmbedded()
+                        && taskFragment.hasAdjacentTaskFragment()) {
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        final int[] nextLayer = { layer };
+                        taskFragment.forOtherAdjacentTaskFragments(adjacentTf -> {
+                            if (adjacentTf.shouldBoostDimmer()) {
+                                adjacentTf.assignLayer(t, nextLayer[0]++);
+                            }
+                        });
+                        layer = nextLayer[0];
+                    } else {
+                        final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
+                        if (adjacentTf.shouldBoostDimmer()) {
+                            adjacentTf.assignLayer(t, layer++);
+                        }
                     }
                 }
 
