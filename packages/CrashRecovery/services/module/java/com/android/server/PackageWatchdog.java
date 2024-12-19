@@ -767,14 +767,6 @@ public class PackageWatchdog {
     }
 
     /**
-     * Indicates that the result of a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} is unknown.
-     */
-    public static final int MITIGATION_RESULT_UNKNOWN =
-            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN;
-
-    /**
      * Indicates that a mitigation was successfully triggered or executed during
      * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
      * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
@@ -790,23 +782,6 @@ public class PackageWatchdog {
     public static final int MITIGATION_RESULT_SKIPPED =
             ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
 
-    /**
-     * Indicates that a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
-     * but the failure is potentially retryable.
-     */
-    public static final int MITIGATION_RESULT_FAILURE_RETRYABLE =
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE;
-
-    /**
-     * Indicates that a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
-     * and the failure is not retryable.
-     */
-    public static final int MITIGATION_RESULT_FAILURE_NON_RETRYABLE =
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE;
 
     /**
      * Possible return values of the for mitigations executed during
@@ -816,18 +791,12 @@ public class PackageWatchdog {
      */
     @Retention(SOURCE)
     @IntDef(prefix = "MITIGATION_RESULT_", value = {
-            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN,
             ObserverMitigationResult.MITIGATION_RESULT_SUCCESS,
             ObserverMitigationResult.MITIGATION_RESULT_SKIPPED,
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE,
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE,
             })
     public @interface ObserverMitigationResult {
-        int MITIGATION_RESULT_UNKNOWN = 0;
         int MITIGATION_RESULT_SUCCESS = 1;
         int MITIGATION_RESULT_SKIPPED = 2;
-        int MITIGATION_RESULT_FAILURE_RETRYABLE = 3;
-        int MITIGATION_RESULT_FAILURE_NON_RETRYABLE = 4;
     }
 
     /**
@@ -921,11 +890,6 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been called for this package
          *                         (including this time).
          * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
-         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
-         *         retried,
-         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
-         *         cannot be retried,
-         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
          *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
         @ObserverMitigationResult int onExecuteHealthCheckMitigation(
@@ -957,11 +921,6 @@ public class PackageWatchdog {
          *                        boot loop (including this time).
          *
          * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
-         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
-         *         retried,
-         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
-         *         cannot be retried,
-         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
          *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
         default @ObserverMitigationResult int onExecuteBootLoopMitigation(int mitigationCount) {
