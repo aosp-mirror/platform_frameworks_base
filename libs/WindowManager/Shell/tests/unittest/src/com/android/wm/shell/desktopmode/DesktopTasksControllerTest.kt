@@ -110,6 +110,7 @@ import com.android.wm.shell.desktopmode.DesktopTestHelpers.createSplitScreenTask
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
@@ -235,6 +236,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock
     lateinit var desktopModeEnterExitTransitionListener: DesktopModeEntryExitTransitionListener
     @Mock private lateinit var userManager: UserManager
+    @Mock
+    private lateinit var desktopWallpaperActivityTokenProvider:
+        DesktopWallpaperActivityTokenProvider
+
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
     private lateinit var taskRepository: DesktopRepository
@@ -256,6 +261,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     private val RESIZABLE_PORTRAIT_BOUNDS = Rect(680, 75, 1880, 1275)
     private val UNRESIZABLE_LANDSCAPE_BOUNDS = Rect(25, 449, 1575, 1611)
     private val UNRESIZABLE_PORTRAIT_BOUNDS = Rect(830, 75, 1730, 1275)
+    private val wallpaperToken = MockToken().token()
 
     @Before
     fun setUp() {
@@ -323,6 +329,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 )
             )
             .thenReturn(ExitResult.NoExit)
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(wallpaperToken)
 
         controller = createController()
         controller.setSplitScreenController(splitScreenController)
@@ -374,6 +381,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopModeEventLogger,
             desktopModeUiEventLogger,
             desktopTilingDecorViewModel,
+            desktopWallpaperActivityTokenProvider,
         )
     }
 
@@ -1487,9 +1495,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun moveToFullscreen_tdaFullscreen_windowingModeUndefined_removesWallpaperActivity() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-
-        taskRepository.wallpaperActivityToken = wallpaperToken
         assertNotNull(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
             .configuration
             .windowConfiguration
@@ -1522,9 +1527,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun moveToFullscreen_tdaFreeform_windowingModeFullscreen_removesWallpaperActivity() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         assertNotNull(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
             .configuration
             .windowConfiguration
@@ -1546,9 +1549,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         // Setup task2
         setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         assertNotNull(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
             .configuration
             .windowConfiguration
@@ -1746,8 +1747,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .thenReturn(secondDisplayArea)
         // Add a task and a wallpaper
         val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         controller.moveToNextDisplay(task.taskId)
 
@@ -1932,7 +1931,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun onDesktopWindowClose_singleActiveTask_noWallpaperActivityToken() {
         val task = setUpFreeformTask()
         val wct = WindowContainerTransaction()
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
+
         controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
+
         // Doesn't modify transaction
         assertThat(wct.hierarchyOps).isEmpty()
     }
@@ -1940,8 +1942,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun onDesktopWindowClose_singleActiveTask_hasWallpaperActivityToken() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         val wct = WindowContainerTransaction()
         controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
@@ -1952,8 +1952,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun onDesktopWindowClose_singleActiveTask_isClosing() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
+
         taskRepository.addClosingTask(DEFAULT_DISPLAY, task.taskId)
 
         val wct = WindowContainerTransaction()
@@ -1965,8 +1964,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun onDesktopWindowClose_singleActiveTask_isMinimized() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
+
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
 
         val wct = WindowContainerTransaction()
@@ -1979,8 +1977,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun onDesktopWindowClose_multipleActiveTasks() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         val wct = WindowContainerTransaction()
         controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task1)
@@ -1992,8 +1988,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun onDesktopWindowClose_multipleActiveTasks_isOnlyNonClosingTask() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
+
         taskRepository.addClosingTask(DEFAULT_DISPLAY, task2.taskId)
 
         val wct = WindowContainerTransaction()
@@ -2006,8 +2001,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun onDesktopWindowClose_multipleActiveTasks_hasMinimized() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
+
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
 
         val wct = WindowContainerTransaction()
@@ -2022,8 +2016,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val transition = Binder()
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         controller.minimizeTask(task)
 
@@ -2080,8 +2072,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val transition = Binder()
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         // The only active task is being minimized.
         controller.minimizeTask(task)
@@ -2098,8 +2088,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val transition = Binder()
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
 
         // The only active task is already minimized.
@@ -2119,8 +2107,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val transition = Binder()
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         controller.minimizeTask(task1)
 
@@ -2138,8 +2124,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val transition = Binder()
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
-        val wallpaperToken = MockToken().token()
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
 
         // task1 is the only visible task as task2 is minimized.
@@ -2748,6 +2732,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_removesTask() {
         val task = setUpFreeformTask()
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -2771,6 +2756,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun handleRequest_backTransition_singleTaskNoToken_doesNotHandle() {
         val task = setUpFreeformTask()
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
@@ -2783,7 +2769,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_backTransition_singleTaskWithToken_noWallpaper_doesNotHandle() {
         val task = setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
@@ -2794,9 +2779,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun handleRequest_backTransition_singleTaskWithToken_removesWallpaper() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
@@ -2810,7 +2793,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
 
@@ -2823,7 +2805,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
 
@@ -2838,9 +2819,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_backTransition_multipleTasksSingleNonClosing_removesWallpaperAndTask() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
@@ -2854,9 +2833,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_backTransition_multipleTasksSingleNonMinimized_removesWallpaperAndTask() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
@@ -2870,9 +2847,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_backTransition_nonMinimizadTask_withWallpaper_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         // Task is being minimized so mark it as not visible.
         taskRepository.updateTask(displayId = DEFAULT_DISPLAY, task2.taskId, isVisible = false)
@@ -2897,6 +2872,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun handleRequest_closeTransition_singleTaskNoToken_doesNotHandle() {
         val task = setUpFreeformTask()
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
@@ -2909,7 +2885,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_closeTransition_singleTaskWithToken_noWallpaper_doesNotHandle() {
         val task = setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
 
@@ -2920,9 +2895,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun handleRequest_closeTransition_singleTaskWithToken_withWallpaper_removesWallpaper() {
         val task = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
 
@@ -2936,7 +2909,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
 
@@ -2949,7 +2921,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
 
-        taskRepository.wallpaperActivityToken = MockToken().token()
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
 
@@ -2961,9 +2932,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_closeTransition_multipleTasksSingleNonClosing_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.addClosingTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
@@ -2977,9 +2946,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_closeTransition_multipleTasksSingleNonMinimized_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         val result =
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_CLOSE))
@@ -2993,9 +2960,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun handleRequest_closeTransition_minimizadTask_withWallpaper_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
-        val wallpaperToken = MockToken().token()
 
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
         // Task is being minimized so mark it as not visible.
         taskRepository.updateTask(displayId = DEFAULT_DISPLAY, task2.taskId, isVisible = false)
@@ -3071,12 +3036,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         val task3 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
         task1.isFocused = false
         task2.isFocused = true
         task3.isFocused = false
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task1.taskId)
         taskRepository.updateTask(DEFAULT_DISPLAY, task3.taskId, isVisible = false)
 
@@ -3094,12 +3057,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         val task3 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
         task1.isFocused = false
         task2.isFocused = true
         task3.isFocused = false
-        taskRepository.wallpaperActivityToken = wallpaperToken
         controller.enterFullscreen(DEFAULT_DISPLAY, transitionSource = UNKNOWN)
 
         val wct = getLatestExitDesktopWct()
@@ -3586,12 +3547,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         val task3 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
         task1.isFocused = false
         task2.isFocused = true
         task3.isFocused = false
-        taskRepository.wallpaperActivityToken = wallpaperToken
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task1.taskId)
         taskRepository.updateTask(DEFAULT_DISPLAY, task3.taskId, isVisible = false)
 
@@ -3614,12 +3573,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
         val task3 = setUpFreeformTask()
-        val wallpaperToken = MockToken().token()
 
         task1.isFocused = false
         task2.isFocused = true
         task3.isFocused = false
-        taskRepository.wallpaperActivityToken = wallpaperToken
 
         controller.enterSplit(DEFAULT_DISPLAY, leftOrTop = false)
 

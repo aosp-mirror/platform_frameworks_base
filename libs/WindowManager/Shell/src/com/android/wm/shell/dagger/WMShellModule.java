@@ -100,6 +100,7 @@ import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.compatui.SystemModalsTransitionHandler;
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
@@ -733,7 +734,8 @@ public abstract class WMShellModule {
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
-            DesktopTilingDecorViewModel desktopTilingDecorViewModel) {
+            DesktopTilingDecorViewModel desktopTilingDecorViewModel,
+            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider) {
         return new DesktopTasksController(
                 context,
                 shellInit,
@@ -764,7 +766,8 @@ public abstract class WMShellModule {
                 mainHandler,
                 desktopModeEventLogger,
                 desktopModeUiEventLogger,
-                desktopTilingDecorViewModel);
+                desktopTilingDecorViewModel,
+                desktopWallpaperActivityTokenProvider);
     }
 
     @WMSingleton
@@ -1092,6 +1095,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler,
             Optional<BackAnimationController> backAnimationController,
+            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider,
             ShellInit shellInit) {
         return desktopUserRepositories.flatMap(
                 repository ->
@@ -1103,6 +1107,7 @@ public abstract class WMShellModule {
                                         shellTaskOrganizer,
                                         desktopMixedTransitionHandler.get(),
                                         backAnimationController.get(),
+                                        desktopWallpaperActivityTokenProvider,
                                         shellInit)));
     }
 
@@ -1304,6 +1309,12 @@ public abstract class WMShellModule {
             PackageManager packageManager
     ) {
         return new DesktopModeUiEventLogger(uiEventLogger, packageManager);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopWallpaperActivityTokenProvider provideDesktopWallpaperActivityTokenProvider() {
+        return new DesktopWallpaperActivityTokenProvider();
     }
 
     //
