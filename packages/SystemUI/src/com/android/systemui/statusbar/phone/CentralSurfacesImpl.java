@@ -53,7 +53,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.hardware.devicestate.DeviceStateManager;
-import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
@@ -66,7 +65,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -132,13 +130,11 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -251,7 +247,6 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 /**
  * A class handling initialization and coordination between some of the key central surfaces in
@@ -380,15 +375,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private PowerButtonReveal mPowerButtonReveal;
 
     /**
-     * Whether we should delay the wakeup animation (which shows the notifications and moves the
-     * clock view). This is typically done when waking up from a 'press to unlock' gesture on a
-     * device with a side fingerprint sensor, so that if the fingerprint scan is successful, we
-     * can play the unlock animation directly rather than interrupting the wakeup animation part
-     * way through.
-     */
-    private boolean mShouldDelayWakeUpAnimation = false;
-
-    /**
      * Whether we should delay the AOD->Lockscreen animation.
      * If false, the animation will start in onStartedWakingUp().
      * If true, the animation will start in onFinishedWakingUp().
@@ -450,7 +436,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
     private final UserTracker mUserTracker;
-    private final Provider<FingerprintManager> mFingerprintManager;
     private final ActivityStarter mActivityStarter;
 
     private final DisplayMetrics mDisplayMetrics;
@@ -702,7 +687,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             LightRevealScrim lightRevealScrim,
             AlternateBouncerInteractor alternateBouncerInteractor,
             UserTracker userTracker,
-            Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
             GlanceableHubContainerController glanceableHubContainerController,
@@ -798,7 +782,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCameraLauncherLazy = cameraLauncherLazy;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mUserTracker = userTracker;
-        mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
         if (!SceneContainerFlag.isEnabled()) {
@@ -1523,9 +1506,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return (v, event) -> {
             mAutoHideController.checkUserAutoHide(event);
             mRemoteInputManager.checkRemoteInputOutside(event);
-            if (!MigrateClocksToBlueprint.isEnabled() || mQsController.isCustomizing()) {
-                // For migrate clocks flag, when the user is editing QS tiles they need to be able
-                // to touch outside the customizer to close it, such as on the status or nav bar.
+            if (mQsController.isCustomizing()) {
+                // When the user is editing QS tiles they need to be able to touch outside the
+                // customizer to close it, such as on the status or nav bar.
                 mShadeController.onStatusBarTouch(event);
             }
             return getNotificationShadeWindowView().onTouchEvent(event);
@@ -2240,11 +2223,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
-            if (!mStatusBarStateController.isKeyguardRequested()) {
-                if (!MigrateClocksToBlueprint.isEnabled()) {
-                    mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
-                }
-            }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
             mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);
 
@@ -2351,10 +2329,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mContext.setTheme(themeResId);
             mConfigurationController.notifyThemeChanged();
         }
-    }
-
-    public boolean shouldDelayWakeUpAnimation() {
-        return mShouldDelayWakeUpAnimation;
     }
 
     private void updateDozingState() {
@@ -2594,55 +2568,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             DejankUtils.startDetectingBlockingIpcs(tag);
             mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
                 mDeviceInteractive = true;
-
-                boolean isFlaggedOff = MigrateClocksToBlueprint.isEnabled();
-                if (!isFlaggedOff && shouldAnimateDozeWakeup()) {
-                    // If this is false, the power button must be physically pressed in order to
-                    // trigger fingerprint authentication.
-                    final boolean touchToUnlockAnytime = Settings.Secure.getIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.SFPS_PERFORMANT_AUTH_ENABLED,
-                            -1,
-                            mUserTracker.getUserId()) > 0;
-
-                    // Delay if we're waking up, not mid-doze animation (which means we are
-                    // cancelling a sleep), from the power button, on a device with a power button
-                    // FPS, and 'press to unlock' is required.
-                    mShouldDelayWakeUpAnimation =
-                            !mDozeServiceHost.isPulsing()
-                                    && mStatusBarStateController.getDozeAmount() == 1f
-                                    && mWakefulnessLifecycle.getLastWakeReason()
-                                    == PowerManager.WAKE_REASON_POWER_BUTTON
-                                    && mFingerprintManager.get() != null
-                                    && mFingerprintManager.get().isPowerbuttonFps()
-                                    && mKeyguardUpdateMonitor
-                                    .isUnlockWithFingerprintPossible(
-                                            mUserTracker.getUserId())
-                                    && !touchToUnlockAnytime;
-                    if (DEBUG_WAKEUP_DELAY) {
-                        Log.d(TAG, "mShouldDelayWakeUpAnimation=" + mShouldDelayWakeUpAnimation);
-                    }
-                } else {
-                    // If we're not animating anyway, we do not need to delay it.
-                    mShouldDelayWakeUpAnimation = false;
-                    if (DEBUG_WAKEUP_DELAY) {
-                        Log.d(TAG, "mShouldDelayWakeUpAnimation CLEARED");
-                    }
-                }
-
-                mShadeSurface.setWillPlayDelayedDozeAmountAnimation(
-                        mShouldDelayWakeUpAnimation);
-                mWakeUpCoordinator.setWakingUp(
-                        /* wakingUp= */ true,
-                        mShouldDelayWakeUpAnimation);
-
+                mWakeUpCoordinator.setWakingUp(true);
                 updateIsKeyguard();
                 // TODO(b/301913237): can't delay transition if config_displayBlanksAfterDoze=true,
                 // otherwise, the clock will flicker during LOCKSCREEN_TRANSITION_FROM_AOD
                 mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
-                        && !mDozeParameters.getDisplayNeedsBlanking()
-                        && mFeatureFlags.isEnabled(
-                                Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD);
+                        && !mDozeParameters.getDisplayNeedsBlanking();
                 if (!mShouldDelayLockscreenTransitionFromAod) {
                     startLockscreenTransitionFromAod();
                 }
@@ -2678,7 +2609,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         this::startLockscreenTransitionFromAod);
             }
             mWakeUpCoordinator.setFullyAwake(true);
-            mWakeUpCoordinator.setWakingUp(false, false);
+            mWakeUpCoordinator.setWakingUp(false);
             if (mKeyguardStateController.isOccluded()
                     && !mDozeParameters.canControlUnlockedScreenOff()) {
                 // When the keyguard is occluded we don't use the KEYGUARD state which would

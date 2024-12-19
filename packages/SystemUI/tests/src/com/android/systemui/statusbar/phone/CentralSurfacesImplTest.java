@@ -69,7 +69,6 @@ import android.graphics.Rect;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Handler;
@@ -123,7 +122,6 @@ import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureInt
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -360,7 +358,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private UserTracker mUserTracker;
     @Mock private AvalancheProvider mAvalancheProvider;
-    @Mock private FingerprintManager mFingerprintManager;
     @Mock IPowerManager mPowerManagerService;
     @Mock ActivityStarter mActivityStarter;
     @Mock private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
@@ -399,8 +396,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // Set default value to avoid IllegalStateException.
         mFeatureFlags.set(SHORTCUT_LIST_SEARCH_LAYOUT, false);
-        // Turn AOD on and toggle feature flag for jank fixes
-        mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         IThermalService thermalService = mock(IThermalService.class);
@@ -443,7 +438,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
-        mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
 
         mMetricsLogger = new FakeMetricsLogger();
 
@@ -637,7 +631,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mLightRevealScrim,
                 mAlternateBouncerInteractor,
                 mUserTracker,
-                () -> mFingerprintManager,
                 mActivityStarter,
                 mBrightnessMirrorShowingInteractor,
                 mGlanceableHubContainerController,
@@ -1119,27 +1112,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mKeyguardViewMediator.isOccludeAnimationPlaying()).thenReturn(false);
         setKeyguardShowingAndOccluded(false /* showing */, true /* occluded */);
         verify(mStatusBarStateController).setState(SHADE);
-    }
-
-    /** Regression test for b/298355063 */
-    @Test
-    public void fingerprintManagerNull_noNPE() {
-        // GIVEN null fingerprint manager
-        mFingerprintManager = null;
-        createCentralSurfaces();
-
-        // GIVEN should animate doze wakeup
-        when(mDozeServiceHost.shouldAnimateWakeup()).thenReturn(true);
-        when(mBiometricUnlockController.getMode()).thenReturn(
-                BiometricUnlockController.MODE_ONLY_WAKE);
-        when(mDozeServiceHost.isPulsing()).thenReturn(false);
-        when(mStatusBarStateController.getDozeAmount()).thenReturn(1f);
-
-        // WHEN waking up from the power button
-        mWakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
-        mCentralSurfaces.mWakefulnessObserver.onStartedWakingUp();
-
-        // THEN no NPE when fingerprintManager is null
     }
 
     @Test

@@ -49,10 +49,6 @@ class ShadeSurfaceImpl @Inject constructor() : ShadeSurface, ShadeViewController
         // TODO(b/332732878): determine if still needed
     }
 
-    override fun setWillPlayDelayedDozeAmountAnimation(willPlay: Boolean) {
-        // TODO(b/322494538): determine if still needed
-    }
-
     override fun setDozing(dozing: Boolean, animate: Boolean) {
         // Do nothing
     }
