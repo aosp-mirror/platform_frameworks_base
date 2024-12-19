@@ -41,6 +41,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 
 @SysUISingleton
@@ -114,6 +115,7 @@ constructor(
         }
     }
 
+    @OptIn(FlowPreview::class)
     @SuppressLint("MissingPermission")
     private fun listenForDozingToAny() {
         if (KeyguardWmStateRefactor.isEnabled) {
