@@ -1751,6 +1751,19 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /** @hide **/
+    @Override
+    public ProviderInfo resolveContentProviderForUid(@NonNull String authority,
+            ComponentInfoFlags flags, int callingUid) {
+        try {
+            return mPM.resolveContentProviderForUid(authority,
+                updateFlagsForComponent(flags.getValue(), getUserId(), null), getUserId(),
+                callingUid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public List<ProviderInfo> queryContentProviders(String processName, int uid, int flags) {
         return queryContentProviders(processName, uid, ComponentInfoFlags.of(flags));

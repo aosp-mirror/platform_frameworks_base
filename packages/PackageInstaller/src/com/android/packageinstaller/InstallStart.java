@@ -26,6 +26,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -274,8 +275,20 @@ public class InstallStart extends Activity {
     }
 
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
-        ProviderInfo info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
-                PackageManager.ComponentInfoFlags.of(0));
+        ProviderInfo info;
+        try {
+            if (Flags.uidBasedProviderLookup()) {
+                info = mPackageManager.resolveContentProviderForUid(packageUri.getAuthority(),
+                    PackageManager.ComponentInfoFlags.of(0), callingUid);
+            } else {
+                info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
+                    PackageManager.ComponentInfoFlags.of(0));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Caller cannot access " + packageUri, e);
+            return false;
+        }
+
         if (info == null) {
             return false;
         }

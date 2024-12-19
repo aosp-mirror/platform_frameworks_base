@@ -360,6 +360,7 @@ package android {
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
+    field @FlaggedApi("android.content.pm.uid_based_provider_lookup") public static final String RESOLVE_COMPONENT_FOR_UID = "android.permission.RESOLVE_COMPONENT_FOR_UID";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
     field @FlaggedApi("android.permission.flags.health_connect_backup_restore_permission_enabled") public static final String RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS = "android.permission.RESTORE_HEALTH_CONNECT_DATA_AND_SETTINGS";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
@@ -4241,6 +4242,7 @@ package android.content.pm {
     method public abstract void registerDexModule(@NonNull String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
+    method @FlaggedApi("android.content.pm.uid_based_provider_lookup") @Nullable @RequiresPermission(android.Manifest.permission.RESOLVE_COMPONENT_FOR_UID) public android.content.pm.ProviderInfo resolveContentProviderForUid(@NonNull String, @NonNull android.content.pm.PackageManager.ComponentInfoFlags, int);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle, @NonNull String);
     method public void sendDeviceCustomizationReadyBroadcast();

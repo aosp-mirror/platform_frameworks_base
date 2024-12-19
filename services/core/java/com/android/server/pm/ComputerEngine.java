@@ -4749,6 +4749,38 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
+    public ProviderInfo resolveContentProviderForUid(@NonNull String name,
+            @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
+            int filterCallingUid) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.RESOLVE_COMPONENT_FOR_UID,
+                "resolveContentProviderForUid");
+
+        int callingUid = Binder.getCallingUid();
+        int filterUserId = UserHandle.getUserId(filterCallingUid);
+        enforceCrossUserPermission(callingUid, filterUserId, false, false,
+                "resolveContentProviderForUid");
+
+        // Real callingUid should be able to see filterCallingUid
+        if (filterAppAccess(filterCallingUid, callingUid)) {
+            return null;
+        }
+
+        ProviderInfo pInfo = resolveContentProvider(name, flags, userId, filterCallingUid);
+        if (pInfo == null) {
+            return null;
+        }
+        // Real callingUid should be able to see the ContentProvider accessible to filterCallingUid
+        ProviderInfo pInfo2 = resolveContentProvider(name, flags, userId, callingUid);
+        if (pInfo2 != null
+                && Objects.equals(pInfo.name, pInfo2.name)
+                && Objects.equals(pInfo.authority, pInfo2.authority)) {
+            return pInfo;
+        }
+        return null;
+    }
+
+    @Nullable
+    @Override
     public ProviderInfo resolveContentProvider(@NonNull String name,
             @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
             int callingUid) {

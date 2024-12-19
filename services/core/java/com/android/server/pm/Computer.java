@@ -487,6 +487,20 @@ public interface Computer extends PackageDataSnapshot {
     ProviderInfo resolveContentProvider(@NonNull String name,
             @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId, int callingUid);
 
+    /**
+     * Resolves a ContentProvider on behalf of a UID
+     * @param name Authority of the content provider
+     * @param flags option flags to modify the data returned.
+     * @param userId Current user ID
+     * @param filterCallingUid UID of the caller who's access to the content provider
+     *        is to be checked
+     * @return
+     */
+    @Nullable
+    ProviderInfo resolveContentProviderForUid(@NonNull String name,
+            @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
+            int filterCallingUid);
+
     @Nullable
     ProviderInfo getGrantImplicitAccessProviderInfo(int recipientUid,
             @NonNull String visibleAuthority);

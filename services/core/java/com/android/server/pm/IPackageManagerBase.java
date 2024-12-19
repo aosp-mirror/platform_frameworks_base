@@ -1129,6 +1129,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     }
 
     @Override
+    public final ProviderInfo resolveContentProviderForUid(String name,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId, int filterCallingUid) {
+        return snapshot().resolveContentProviderForUid(name, flags, userId, filterCallingUid);
+    }
+
+    @Override
     @Deprecated
     public final void resetApplicationPreferences(int userId) {
         mPreferredActivityHelper.resetApplicationPreferences(userId);

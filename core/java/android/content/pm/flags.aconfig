@@ -375,3 +375,11 @@ flag {
     description: "Feature flag to remove the consumption of the hidden module status (ModuleInfo#IsHidden) in the Android source tree."
     bug: "363952383"
 }
+
+flag {
+    name: "uid_based_provider_lookup"
+    is_exported: true
+    namespace: "package_manager_service"
+    bug: "334024639"
+    description: "Feature flag to check whether a given UID can access a content provider"
+}
