@@ -753,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Palydovas, pasiekiamas ryšys"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Prisijungimas prie palydovo kritiniu atveju"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Skambučiai pagalbos numeriu arba pagalbos iškvietimas kritiniu atveju"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"„<xliff:g id="CARRIER_NAME">%1$s</xliff:g>“, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"nėra signalo"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"viena juosta"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"dvi juostos"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"trys juostos"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"keturios juostos"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"stiprus signalas"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Darbo profilis"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Smagu, bet ne visada"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemos naudotojo sąsajos derinimo priemonė suteikia papildomų galimybių pagerinti ir tinkinti „Android“ naudotojo sąsają. Šios eksperimentinės funkcijos gali pasikeisti, nutrūkti ar išnykti iš būsimų laidų. Tęskite atsargiai."</string>
@@ -786,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Rodoma pokalbių pranešimų viršuje ir kaip profilio nuotrauka užrakinimo ekrane, burbule, pertraukia netrukdymo režimą"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetiniai"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaiko pokalbių funkcijų"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Pateikti atsiliepimą apie rinkinį"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šių pranešimų keisti negalima."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Skambučių pranešimų keisti negalima."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šios grupės pranešimai čia nekonfigūruojami"</string>
@@ -872,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Užrakinti ekraną"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Sukurti pastabą"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Kelių užduočių atlikimas"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Naudokite išskaidyto ekrano režimą su programa dešinėje"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Naudokite išskaidyto ekrano režimą su programa kairėje"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Perjunkite į viso ekrano režimą"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Perjunkite į programą dešinėje arba apačioje išskaidyto ekrano režimu"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Perjunkite į programą kairėje arba viršuje išskaidyto ekrano režimu"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Išskaidyto ekrano režimu: pakeisti iš vienos programos į kitą"</string>
@@ -979,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Įjungimo meniu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g> psl. iš <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Užrakinimo ekranas"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Šį telefoną galite rasti naudodami programą „Rasti įrenginį“, net jei jis išjungtas"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Išjungiama…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Žr. priežiūros veiksmus"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Žr. priežiūros veiksmus"</string>
@@ -1466,22 +1468,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Eikite į pagrindinį puslapį"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Peržiūrėti naujausias programas"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Atlikta"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"Bandykite dar kartą!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Grįžti"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Braukite kairėn arba dešinėn trimis pirštais bet kur jutiklinėje dalyje"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Šaunu!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Atlikote grįžimo atgal gestą."</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Jei norite grįžti naudodami jutiklinę dalį, perbraukite kairėn arba dešinėn trimis pirštais"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Eikite į pagrindinį ekraną"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Braukite viršun trimis pirštais bet kur jutiklinėje dalyje"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Puiku!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Atlikote perėjimo į pagrindinį ekraną gestą"</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Perbraukite viršun trimis pirštais jutiklinėje dalyje, kad pereitumėte į pagrindinį ekraną"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Peržiūrėti naujausias programas"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Braukite viršun trimis pirštais bet kur jutiklinėje dalyje ir palaikykite"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Puiku!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Atlikote naujausių programų peržiūros gestą."</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Peržiūrėkite naujausias programas, jutiklinėje dalyje perbraukę aukštyn trimis pirštais ir palaikę"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Žr. visas programas"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Paspauskite klaviatūros veiksmų klavišą"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Puikiai padirbėta!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Atlikote visų programų peržiūros gestą"</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Paspauskite klaviatūros veiksmų klavišą, kad peržiūrėtumėte visas programas"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Mokomoji animacija. Spustelėkite, kad pristabdytumėte ir tęstumėte atkūrimą."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatūros foninis apšvietimas"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d lygis iš %2$d"</string>

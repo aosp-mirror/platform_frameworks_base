@@ -704,7 +704,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Audio spaziale"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Off"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fisso"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Rilev. movim. testa"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Tracciamento testa"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tocca per cambiare la modalità della suoneria"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"modalità suoneria"</string>
     <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, tocca per cambiare la modalità della suoneria"</string>
@@ -753,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellitare, connessione disponibile"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS satellitare"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Chiamate di emergenza o SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"nessun segnale"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"una barra"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"due barre"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"tre barre"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"quattro barre"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"massimo segnale"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profilo di lavoro"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Il divertimento riservato a pochi eletti"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
@@ -786,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Appare in cima alle notifiche delle conversazioni, come immagine del profilo nella schermata di blocco e sotto forma di bolla, inoltre interrompe la modalità Non disturbare"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Fornisci feedback sul bundle"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossibile modificare queste notifiche."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Impossibile modificare gli avvisi di chiamata."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Qui non è possibile configurare questo gruppo di notifiche"</string>
@@ -976,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu del tasto di accensione"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> di <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Schermata di blocco"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Puoi trovare questo smartphone tramite Trova il mio dispositivo anche quando è spento"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Arresto in corso…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Leggi le misure da adottare"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
@@ -1463,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Vai alla schermata Home"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Visualizza app recenti"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fine"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Indietro"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Scorri verso sinistra o destra con tre dita sul touchpad"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Bene!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Hai completato il gesto Indietro."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Vai alla schermata Home"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Scorri in alto con tre dita sul touchpad"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Ottimo lavoro!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Hai completato il gesto Vai alla schermata Home"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Visualizza app recenti"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Scorri verso l\'alto e tieni premuto con tre dita sul touchpad"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ottimo lavoro!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Hai completato il gesto Visualizza app recenti."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Visualizza tutte le app"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Premi il tasto azione sulla tastiera"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Ben fatto!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Hai completato il gesto Visualizza tutte le app."</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animazione del tutorial: fai clic per mettere in pausa e riprendere la riproduzione."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroilluminazione della tastiera"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Livello %1$d di %2$d"</string>

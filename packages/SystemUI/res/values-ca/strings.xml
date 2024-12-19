@@ -753,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satèl·lit, connexió disponible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS per satèl·lit"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Trucades d\'emergència o SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"no hi ha senyal"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"una barra"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"dues barres"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"tres barres"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"quatre barres"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"senyal complet"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de treball"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversió per a uns quants, però no per a tothom"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El Personalitzador d\'interfície d\'usuari presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
@@ -786,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Es mostra a la part superior de les notificacions de les converses i com a foto de perfil a la pantalla de bloqueig, apareix com una bombolla, interromp el mode No molestis"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet les funcions de converses"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Proporciona suggeriments sobre el paquet"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Les notificacions de trucades no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Aquest grup de notificacions no es pot configurar aquí"</string>
@@ -872,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloqueja la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crea una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasca"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Utilitzar la pantalla dividida amb l\'aplicació a la dreta"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Utilitzar la pantalla dividida amb l\'aplicació a l\'esquerra"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Canviar a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Canvia a l\'aplicació de la dreta o de sota amb la pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Canvia a l\'aplicació de l\'esquerra o de dalt amb la pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durant el mode de pantalla dividida: substitueix una app per una altra"</string>
@@ -979,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú d\'engegada"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueig"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Pots localitzar aquest telèfon amb Troba el meu dispositiu fins i tot quan estigui apagat"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"S\'està apagant…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Mostra els passos de manteniment"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Mostra els passos de manteniment"</string>
@@ -1466,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ves a la pantalla d\'inici"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Mostra les aplicacions recents"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fet"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Torna"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Llisca cap a l\'esquerra o cap a la dreta amb tres dits al ratolí tàctil"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Molt bé!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Has completat el gest per tornar enrere."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ves a la pantalla d\'inici"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Llisca cap amunt amb tres dits al ratolí tàctil"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Ben fet!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Has completat el gest per anar a la pantalla d\'inici"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Mostra les aplicacions recents"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Llisca cap amunt amb tres dits i mantén-los premuts al ratolí tàctil"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ben fet!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completat el gest per veure les aplicacions recents."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Mostra totes les aplicacions"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Prem la tecla d\'acció al teclat"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Enhorabona!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Has completat el gest per veure totes les aplicacions"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animació del tutorial; fes clic per posar en pausa i reprendre la reproducció."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroil·luminació del teclat"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivell %1$d de %2$d"</string>

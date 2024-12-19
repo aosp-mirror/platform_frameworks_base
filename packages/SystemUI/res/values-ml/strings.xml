@@ -531,7 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"വിജറ്റുകൾ"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"വിജറ്റുകൾ\" കുറുക്കുവഴി ചേർക്കാൻ, ക്രമീകരണത്തിൽ \"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ കാണിക്കുക\" പ്രവർത്തനക്ഷമമാക്കിയെന്ന് ഉറപ്പാക്കുക."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ക്രമീകരണം"</string>
-    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"സ്‌ക്രീൻ സേവർ ബട്ടൺ കാണിക്കുക"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"സ്‌ക്രീൻ സേവർ കാണിക്കുക ബട്ടൺ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -753,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"സാറ്റലൈറ്റ്, കണക്ഷൻ ലഭ്യമാണ്"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"സാറ്റലൈറ്റ് SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"എമർജൻസി കോൾ അല്ലെങ്കിൽ SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"സിഗ്നൽ ഇല്ല"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"ഒരു ബാർ"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"രണ്ട് ബാറുകൾ"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"മൂന്ന് ബാറുകൾ"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"നാല് ബാറുകൾ"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"മികച്ച സിഗ്‌നൽ"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ചിലർക്ക് വിനോദം, എന്നാൽ എല്ലാവർക്കുമില്ല"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Android ഉപയോക്തൃ ഇന്റർഫേസ് ആവശ്യമുള്ള രീതിയിൽ മാറ്റുന്നതിനും ഇഷ്ടാനുസൃതമാക്കുന്നതിനും സിസ്റ്റം UI ട്യൂണർ നിങ്ങൾക്ക് അധിക വഴികൾ നൽകുന്നു. ഭാവി റിലീസുകളിൽ ഈ പരീക്ഷണാത്മക ഫീച്ചറുകൾ മാറ്റുകയോ നിർത്തുകയോ അപ്രത്യക്ഷമാവുകയോ ചെയ്തേക്കാം. ശ്രദ്ധയോടെ മുന്നോട്ടുപോകുക."</string>
@@ -786,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"സംഭാഷണ അറിയിപ്പുകളുടെ മുകളിലും സ്ക്രീൻ ലോക്കായിരിക്കുമ്പോൾ ഒരു പ്രൊഫൈൽ ചിത്രമായും ബബിൾ രൂപത്തിൽ ദൃശ്യമാകുന്നു, ശല്യപ്പെടുത്തരുത് മോഡ് തടസ്സപ്പെടുത്തുന്നു"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"സംഭാഷണ ഫീച്ചറുകളെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്‌ക്കുന്നില്ല"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"ബണ്ടിൽ ഫീഡ്ബാക്ക് നൽകുക"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"കോൾ അറിയിപ്പുകൾ പരിഷ്‌കരിക്കാനാകുന്നില്ല."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
@@ -872,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ഒരു കുറിപ്പെടുക്കുക"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"മൾട്ടിടാസ്‌കിംഗ്"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"വലതുവശത്തുള്ള ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ഇടതുവശത്തുള്ള ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"പൂർണ്ണ സ്‌ക്രീനിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ ഇടതുവശത്തെ/മുകളിലെ ആപ്പിലേക്ക് മാറൂ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"സ്‌ക്രീൻ വിഭജന മോഡിൽ: ഒരു ആപ്പിൽ നിന്ന് മറ്റൊന്നിലേക്ക് മാറുക"</string>
@@ -979,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"പവർ മെനു"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ലോക്ക് സ്‌ക്രീൻ"</string>
-    <string name="finder_active" msgid="7907846989716941952">"ഓഫായിരിക്കുമ്പോഴും Find My Device ഉപയോഗിച്ച് നിങ്ങൾക്ക് ഈ ഫോൺ കണ്ടെത്താനാകും"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"ഷട്ട്‌ഡൗൺ ചെയ്യുന്നു…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"പരിപാലന നിർദ്ദേശങ്ങൾ കാണുക"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"പരിപാലന നിർദ്ദേശങ്ങൾ കാണുക"</string>
@@ -1466,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ഹോമിലേക്ക് പോകുക"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"പൂർത്തിയായി"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"മടങ്ങുക"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"ടച്ച്‌പാഡിൽ മൂന്ന് വിരലുകൾ കൊണ്ട് ഇടത്തേക്കോ വലത്തേക്കോ സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"കൊള്ളാം!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"മടങ്ങുക ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ഹോമിലേക്ക് പോകൂ"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"ടച്ച്‌പാഡിൽ മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"കൊള്ളാം!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ഹോം ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"നിങ്ങളുടെ ടച്ച്പാഡിൽ മൂന്ന് വിരലുകൾ കൊണ്ട് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"കൊള്ളാം!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക എന്ന ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"എല്ലാ ആപ്പുകളും കാണുക"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"നിങ്ങളുടെ കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"അഭിനന്ദനങ്ങൾ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"\'എല്ലാ ആപ്പുകളും കാണുക\' ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ട്യൂട്ടോറിയൽ ആനിമേഷൻ, താൽക്കാലികമായി നിർത്താനും പ്ലേ പുനരാരംഭിക്കാനും ക്ലിക്ക് ചെയ്യുക."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"കീബോഡ് ബാക്ക്‌ലൈറ്റ്"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-ൽ %1$d-ാമത്തെ ലെവൽ"</string>

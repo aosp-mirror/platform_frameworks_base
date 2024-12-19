@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"විජට්"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"විජට්\" කෙටිමඟ එක් කිරීමට, සැකසීම් තුළ \"අගුළු තිරයෙහි විජට් පෙන්වන්න\" සබල කර ඇති බවට වග බලා ගන්න."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"සැකසීම්"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"තිර සුරැකුම් බොත්තම පෙන්වන්න"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"පරිශීලක මාරුව"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"නිපතන මෙනුව"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
@@ -754,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"චන්ද්‍රිකාව, සම්බන්ධතාවය තිබේ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"චන්ද්‍රිකා SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"හදිසි ඇමතුම් හෝ SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"සංඥාව නැත"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"තීරු එකක්"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"තීරු දෙකයි"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"තීරු තුනයි"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"තීරු හතරක්"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"සංඥාව පිරී ඇත"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"කාර්යාල පැතිකඩ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"සමහරක් දේවල් වලට විනෝදයි, නමුත් සියල්ලටම නොවේ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"පද්ධති UI සුසරකය ඔබට Android පරිශීලක අතුරු මුහුණත වෙනස් කිරීමට හෝ අභිරුචිකරණය කිරීමට අමතර ක්‍රම ලබා දේ. මෙම පර්යේෂණාත්මක අංග ඉදිරි නිකුත් වීම් වල වෙනස් වීමට, වැඩ නොකිරීමට, හෝ නැතිවීමට හැක. ප්‍රවේශමෙන් ඉදිරියට යන්න."</string>
@@ -787,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"සංවාද දැනුම්දීම්වල ඉහළින්ම සහ අගුලු තිරයේ ඇති පැතිකඩ පින්තූරයක් ලෙස පෙන්වයි, බුබුළක් ලෙස දිස් වේ, බාධා නොකරන්න සඳහා බාධා කරයි"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> සංවාද විශේෂාංගවලට සහාය නොදක්වයි"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"බණ්ඩල් ප්‍රතිපෝෂණ ලබා දෙන්න"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"ඇමතුම් දැනුම්දීම් වෙනස් කළ නොහැකිය."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"මෙම දැනුම්දීම් සමූහය මෙහි වින්‍යාස කළ නොහැක"</string>
@@ -873,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"තිරය අගුළු දමන්න"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"සටහනක් ගන්න"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"බහුකාර්ය"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"දකුණේ යෙදුම සමග බෙදීම් තිරය භාවිතා කරන්න"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"වම් පැත්තේ යෙදුම සමග බෙදීම් තිරය භාවිතා කරන්න"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"සම්පූර්ණ තිරයට මාරු වන්න"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"බෙදුම් තිරය භාවිත කරන අතරතුර දකුණේ හෝ පහළින් ඇති යෙදුමට මාරු වන්න"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"බෙදුම් තිරය භාවිත කරන අතරතුර වමේ හෝ ඉහළ ඇති යෙදුමට මාරු වන්න"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"බෙදුම් තිරය අතරතුර: යෙදුමක් එකකින් තවත් එකක් ප්‍රතිස්ථාපනය කරන්න"</string>
@@ -980,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"බල මෙනුව"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> න් <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"අගුලු තිරය"</string>
-    <string name="finder_active" msgid="7907846989716941952">"බලය ක්‍රියාවිරහිත වූ විට පවා ඔබට මගේ උපාංගය සෙවීම මගින් මෙම දුරකථනය සොයාගත හැක"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"වසා දමමින්…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"රැකවරණ පියවර බලන්න"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"රැකවරණ පියවර බලන්න"</string>
@@ -1467,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"මුල් පිටුවට යන්න"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"මෑත යෙදුම් බලන්න"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"නිමයි"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ආපස්සට යන්න"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"ඔබේ ස්පර්ශ පුවරුව මත ඇඟිලි තුනක් භාවිතයෙන් වමට හෝ දකුණට ස්වයිප් කරන්න"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"කදිමයි!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ඔබ ආපසු යාමේ ඉංගිතය සම්පූර්ණ කරන ලදි."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"මුල් පිටුවට යන්න"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"ඔබේ ස්පර්ශ පුවරුවේ ඇඟිලි තුනකින් ඉහළට ස්වයිප් කරන්න"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"අනර්ඝ වැඩක්!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ඔබ මුල් පිටුවට යාමේ ඉංගිතය සම්පූර්ණ කරන ලදි"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"මෑත යෙදුම් බලන්න"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"ඉහළට ස්වයිප් කර ඔබේ ස්පර්ශ පුවරුව මත ඇඟිලි තුනක් භාවිත කර රඳවාගෙන සිටින්න"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"අනර්ඝ වැඩක්!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ඔබ මෑත යෙදුම් ඉංගිත බැලීම සම්පූර්ණ කර ඇත."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"සියලු යෙදුම් බලන්න"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ඔබේ යතුරු පුවරුවේ ක්‍රියාකාරී යතුර ඔබන්න"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"හොඳින් කළා!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"ඔබ සියලු යෙදුම් ඉංගිත බැලීම සම්පූර්ණ කර ඇත"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"නිබන්ධන සජීවීකරණය, ක්‍රීඩාව විරාම කිරීමට සහ නැවත ආරම්භ කිරීමට ක්ලික් කරන්න."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"යතුරු පුවරු පසු ආලෝකය"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dන් %1$d වැනි මට්ටම"</string>

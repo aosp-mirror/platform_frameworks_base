@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widget\'lar"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"Widget\'lar\" kısayolunu eklemek için ayarlarda \"Widget\'ları kilit ekranında göster\" seçeneğinin etkinleştirildiğinden emin olun."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Ayarlar"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Ekran koruyucuyu göster düğmesi"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Kullanıcı değiştirme"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"açılır menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Bu oturumdaki tüm uygulamalar ve veriler silinecek."</string>
@@ -593,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirimler"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Görüşmeler"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Sessiz bildirimlerin tümünü temizle"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Bildirim ayarlarını aç"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bildirimler, Rahatsız Etmeyin özelliği tarafından duraklatıldı"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Bildirim yok}=1{Bildirimler {mode} tarafından duraklatıldı}=2{Bildirimler, {mode} ve bir diğer mod tarafından duraklatıldı}other{Bildirimler, {mode} ve # diğer mod tarafından duraklatıldı}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Şimdi başlat"</string>
@@ -755,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Uydu, bağlantı mevcut"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Acil Uydu Bağlantısı"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Acil durum aramaları veya acil yardım"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"sinyal yok"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"tek çubuk"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">",ki çubuk"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"üç çubuk"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"dört çubuk"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"tam sinyal"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"İş profili"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Bazıları için eğlenceliyken diğerleri için olmayabilir"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistem Kullanıcı Arayüzü Ayarlayıcı, Android kullanıcı arayüzünde değişiklikler yapmanız ve arayüzü özelleştirmeniz için ekstra yollar sağlar. Bu deneysel özellikler değişebilir, bozulabilir veya gelecekteki sürümlerde yer almayabilir. Dikkatli bir şekilde devam edin."</string>
@@ -788,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Görüşme bildirimlerinin üstünde ve kilit ekranında profil resmi olarak gösterilir, baloncuk olarak görünür, Rahatsız Etmeyin\'i kesintiye uğratır"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Öncelikli"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>, sohbet özelliklerini desteklemiyor"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Paketle İlgili Geri Bildirim Verin"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirimler değiştirilemez."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Arama bildirimleri değiştirilemez."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Bu bildirim grubu burada yapılandırılamaz"</string>
@@ -874,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilit ekranı"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Not al"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Çoklu görev"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Sağdaki uygulamayla birlikte bölünmüş ekranı kullan"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Soldaki uygulamayla birlikte bölünmüş ekranı kullan"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Tam ekran moduna geç"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Bölünmüş ekran kullanırken sağdaki veya alttaki uygulamaya geçiş yap"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Bölünmüş ekran kullanırken soldaki veya üstteki uygulamaya geçiş yapın"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Bölünmüş ekran etkinken: Bir uygulamayı başkasıyla değiştir"</string>
@@ -981,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Güç menüsü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kilit ekranı"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Bu telefonu kapalıyken bile Cihazımı Bul işleviyle bulabilirsiniz."</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Kapanıyor…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Bakımla ilgili adımlara bakın"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Bakımla ilgili adımlara bakın"</string>
@@ -1468,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ana sayfaya git"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Son uygulamaları görüntüle"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Bitti"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Geri dön"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Dokunmatik alanda üç parmağınızla sola veya sağa kaydırın"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Güzel!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Geri dön hareketini tamamladınız."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ana sayfaya gidin"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Dokunmatik alanda üç parmağınızla yukarı kaydırın"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Tebrikler!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Ana ekrana git hareketini tamamladınız"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Son uygulamaları görüntüle"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Dokunmatik alanda üç parmağınızla yukarı doğru kaydırıp basılı tutun"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Tebrikler!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Son uygulamaları görüntüleme hareketini tamamladınız."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Tüm uygulamaları göster"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Klavyenizde eylem tuşuna basın"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Tebrikler!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Tüm uygulamaları görüntüleme hareketini tamamladınız"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Eğitim animasyonu, oynatmayı duraklatmak ve sürdürmek için tıklayın."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klavye aydınlatması"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Seviye %1$d / %2$d"</string>

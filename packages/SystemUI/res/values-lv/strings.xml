@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Logrīki"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Lai pievienotu saīsni “Logrīki”, iestatījumos noteikti iespējojiet opciju “Rādīt logrīkus bloķēšanas ekrānā”."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Iestatījumi"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Poga “Rādīt ekrānsaudzētāju”"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mainīt lietotāju"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"novelkamā izvēlne"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tiks dzēstas visas šīs sesijas lietotnes un dati."</string>
@@ -754,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelīts, ir pieejams savienojums"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelīta SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Ārkārtas izsaukumi vai ārkārtas zvani"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"nav signāla"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"viena josla"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"divas joslas"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"trīs joslas"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"četras joslas"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"pilna piekļuve signālam"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Darba profils"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Jautri dažiem, bet ne visiem"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistēmas saskarnes regulators sniedz papildu veidus, kā mainīt un pielāgot Android lietotāja saskarni. Nākamajās versijās šīs eksperimentālās funkcijas var tikt mainītas, bojātas vai to darbība var tikt pārtraukta. Turpinot esiet uzmanīgs."</string>
@@ -787,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Parādās sarunu paziņojumu augšdaļā un kā profila attēls bloķēšanas ekrānā, arī kā burbulis, pārtrauc režīmu “Netraucēt”."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstītas sarunu funkcijas."</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Sniegt atsauksmes par paziņojumu grupu"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Paziņojumus par zvaniem nevar modificēt."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Šeit nevar konfigurēt šo paziņojumu grupu."</string>
@@ -873,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloķēt ekrānu"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Izveidot piezīmi"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Vairākuzdevumu režīms"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Izmantot ekrāna sadalīšanu ar lietotni labajā pusē"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Izmantot ekrāna sadalīšanu ar lietotni kreisajā pusē"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Pārslēgšana pilnekrāna režīmā"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Pāriet uz lietotni pa labi/lejā, kamēr izmantojat sadalīto ekrānu."</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Pāriet uz lietotni pa kreisi/augšā, kamēr izmantojat sadalīto ekrānu."</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ekrāna sadalīšanas režīmā: pārvietot lietotni no viena ekrāna uz otru"</string>
@@ -980,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Barošanas izvēlne"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Bloķēšanas ekrāns"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Lietotni “Atrast ierīci” var izmantot šī tālruņa atrašanās vietas noteikšanai arī tad, ja tālrunis ir izslēgts."</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Notiek izslēgšana…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Skatīt apkopes norādījumus"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Skatīt apkopes norādījumus"</string>
@@ -1467,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Pāriet uz sākuma ekrānu"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Skatīt nesen izmantotās lietotnes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Gatavs"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atpakaļ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Skārienpaliktnī ar trīs pirkstiem velciet pa kreisi vai pa labi."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Lieliski!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Jūs sekmīgi veicāt atgriešanās žestu."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Pāreja uz sākuma ekrānu"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Skārienpaliktnī ar trīs pirkstiem velciet augšup."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Lieliski!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Jūs sekmīgi veicāt sākuma ekrāna atvēršanas žestu."</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Nesen izmantoto lietotņu skatīšana"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Skārienpaliktnī ar trīs pirkstiem velciet augšup un turiet."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Lieliski!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Jūs sekmīgi veicāt nesen izmantoto lietotņu skatīšanas žestu."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Skatīt visas lietotnes"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tastatūrā nospiediet darbību taustiņu."</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Lieliski!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Jūs sekmīgi veicāt visu lietotņu skatīšanas žestu."</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Mācību animācija. Noklikšķiniet, lai pārtrauktu un atsāktu atskaņošanu."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastatūras fona apgaismojums"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Līmenis numur %1$d, kopā ir %2$d"</string>
