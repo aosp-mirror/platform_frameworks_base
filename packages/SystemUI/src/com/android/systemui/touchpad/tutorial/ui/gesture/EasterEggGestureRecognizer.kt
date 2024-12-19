@@ -17,7 +17,7 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor.Companion.CIRCLES_COUNT_THRESHOLD
+import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureRecognizer.Companion.CIRCLES_COUNT_THRESHOLD
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
@@ -28,7 +28,7 @@ import kotlin.math.sqrt
  * clockwise within one two-fingers gesture. It tries to be on the safer side of not triggering
  * gesture if we're not sure if full circle was done.
  */
-class EasterEggGestureMonitor : GestureRecognizer {
+class EasterEggGestureRecognizer : GestureRecognizer {
 
     private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 

@@ -29,10 +29,10 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class EasterEggGestureTest : SysuiTestCase() {
+class EasterEggGestureRecognizerTest : SysuiTestCase() {
 
     private var triggered = false
-    private val gestureRecognizer = EasterEggGestureMonitor()
+    private val gestureRecognizer = EasterEggGestureRecognizer()
     private val handler = TouchpadGestureHandler(gestureRecognizer)
 
     @Before
