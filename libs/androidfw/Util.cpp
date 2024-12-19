@@ -32,13 +32,18 @@ namespace android {
 namespace util {
 
 void ReadUtf16StringFromDevice(const uint16_t* src, size_t len, std::string* out) {
-  char buf[5];
-  while (*src && len != 0) {
-    char16_t c = static_cast<char16_t>(dtohs(*src));
-    utf16_to_utf8(&c, 1, buf, sizeof(buf));
-    out->append(buf, strlen(buf));
-    ++src;
-    --len;
+  static constexpr bool kDeviceEndiannessSame = dtohs(0x1001) == 0x1001;
+  if constexpr (kDeviceEndiannessSame) {
+    *out = Utf16ToUtf8({(const char16_t*)src, strnlen16((const char16_t*)src, len)});
+  } else {
+    char buf[5];
+    while (*src && len != 0) {
+      char16_t c = static_cast<char16_t>(dtohs(*src));
+      utf16_to_utf8(&c, 1, buf, sizeof(buf));
+      out->append(buf, strlen(buf));
+      ++src;
+      --len;
+    }
   }
 }
 
@@ -63,8 +68,10 @@ std::string Utf16ToUtf8(StringPiece16 utf16) {
   }
 
   std::string utf8;
-  utf8.resize(utf8_length);
-  utf16_to_utf8(utf16.data(), utf16.length(), &*utf8.begin(), utf8_length + 1);
+  utf8.resize_and_overwrite(utf8_length, [&utf16](char* data, size_t size) {
+    utf16_to_utf8(utf16.data(), utf16.length(), data, size + 1);
+    return size;
+  });
   return utf8;
 }
 
