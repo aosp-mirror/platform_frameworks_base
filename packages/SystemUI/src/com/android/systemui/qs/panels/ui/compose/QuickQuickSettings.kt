@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
-import com.android.systemui.grid.ui.compose.rememberSpannedGridState
 import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.Tile
 import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
@@ -48,8 +47,6 @@ fun SceneScope.QuickQuickSettings(
     val bounceables = remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
     val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val gridState = rememberSpannedGridState()
-    val positions = gridState.positions
 
     DisposableEffect(tiles) {
         val token = Any()
@@ -57,34 +54,30 @@ fun SceneScope.QuickQuickSettings(
         onDispose { tiles.forEach { it.stopListening(token) } }
     }
     val columns = viewModel.columns
+    var cellIndex = 0
     Box(modifier = modifier) {
         GridAnchor()
         VerticalSpannedGrid(
             columns = columns,
             columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
             rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
-            state = gridState,
+            spans = sizedTiles.fastMap { it.width },
             modifier = Modifier.sysuiResTag("qqs_tile_layout"),
-        ) {
-            sizedTiles.forEachWithBounceables(positions, bounceables, columns) {
-                index,
-                sizedTile,
-                bounceableInfo ->
-                Tile(
-                    tile = sizedTile.tile,
-                    iconOnly = sizedTile.isIcon,
-                    modifier =
-                        Modifier.element(sizedTile.tile.spec.toElementKey(index))
-                            .span(sizedTile.width),
-                    squishiness = { squishiness },
-                    coroutineScope = scope,
-                    bounceableInfo = bounceableInfo,
-                    tileHapticsViewModelFactoryProvider =
-                        viewModel.tileHapticsViewModelFactoryProvider,
-                    // There should be no QuickQuickSettings when the details view is enabled.
-                    detailsViewModel = null,
-                )
-            }
+        ) { spanIndex ->
+            val it = sizedTiles[spanIndex]
+            val column = cellIndex % columns
+            cellIndex += it.width
+            Tile(
+                tile = it.tile,
+                iconOnly = it.isIcon,
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
+                coroutineScope = scope,
+                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
+                // There should be no QuickQuickSettings when the details view is enabled.
+                detailsViewModel = null,
+            )
         }
     }
 }

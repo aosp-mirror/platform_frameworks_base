@@ -23,18 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
-import com.android.systemui.grid.ui.compose.rememberSpannedGridState
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.bounceableInfo
-import com.android.systemui.qs.panels.ui.compose.forEachWithBounceables
 import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
@@ -84,32 +83,27 @@ constructor(
             remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
         val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
         val scope = rememberCoroutineScope()
-        val gridState = rememberSpannedGridState()
-        val positions = gridState.positions
+        var cellIndex = 0
 
         VerticalSpannedGrid(
             columns = columns,
-            state = gridState,
             columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
             rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
-        ) {
-            sizedTiles.forEachWithBounceables(positions, bounceables, columns) {
-                index,
-                sizedTile,
-                bounceableInfo ->
-                Tile(
-                    tile = sizedTile.tile,
-                    iconOnly = iconTilesViewModel.isIconTile(sizedTile.tile.spec),
-                    modifier =
-                        Modifier.element(sizedTile.tile.spec.toElementKey(index))
-                            .span(sizedTile.width),
-                    squishiness = { squishiness },
-                    tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
-                    coroutineScope = scope,
-                    bounceableInfo = bounceableInfo,
-                    detailsViewModel = detailsViewModel,
-                )
-            }
+            spans = sizedTiles.fastMap { it.width },
+        ) { spanIndex ->
+            val it = sizedTiles[spanIndex]
+            val column = cellIndex % columns
+            cellIndex += it.width
+            Tile(
+                tile = it.tile,
+                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
+                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
+                coroutineScope = scope,
+                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                detailsViewModel = detailsViewModel,
+            )
         }
     }
 

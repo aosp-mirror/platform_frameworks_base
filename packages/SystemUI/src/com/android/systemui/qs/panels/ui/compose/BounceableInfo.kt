@@ -17,7 +17,6 @@
 package com.android.systemui.qs.panels.ui.compose
 
 import com.android.compose.animation.Bounceable
-import com.android.systemui.grid.ui.compose.SpannedGridState
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.model.GridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
@@ -38,37 +37,22 @@ fun List<Pair<GridCell, BounceableTileViewModel>>.bounceableInfo(
     val cell = this[index].first as TileGridCell
     // Only look for neighbor bounceables if they are on the same row
     val onLastColumn = cell.onLastColumn(cell.column, columns)
-    val previousTile = getOrNull(index - 1)?.takeIf { it.first.row == cell.row }
-    val nextTile = getOrNull(index + 1)?.takeIf { it.first.row == cell.row }
+    val previousTile = getOrNull(index - 1)?.takeIf { cell.column != 0 }
+    val nextTile = getOrNull(index + 1)?.takeIf { !onLastColumn }
     return BounceableInfo(this[index].second, previousTile?.second, nextTile?.second, !onLastColumn)
 }
 
-inline fun List<SizedTile<TileViewModel>>.forEachWithBounceables(
-    positions: List<SpannedGridState.Position>,
-    bounceables: List<BounceableTileViewModel>,
+fun List<BounceableTileViewModel>.bounceableInfo(
+    sizedTile: SizedTile<TileViewModel>,
+    index: Int,
+    column: Int,
     columns: Int,
-    action: (index: Int, tile: SizedTile<TileViewModel>, bounceableInfo: BounceableInfo) -> Unit,
-) {
-    this.forEachIndexed { index, tile ->
-        val position = positions.getOrNull(index)
-        val onLastColumn = position?.column == columns - tile.width
-        val previousBounceable =
-            bounceables.getOrNull(index - 1)?.takeIf {
-                position != null && positions.getOrNull(index - 1)?.row == position.row
-            }
-        val nextBounceable =
-            bounceables.getOrNull(index + 1)?.takeIf {
-                position != null && positions.getOrNull(index + 1)?.row == position.row
-            }
-        val bounceableInfo =
-            BounceableInfo(
-                bounceable = bounceables[index],
-                previousTile = previousBounceable,
-                nextTile = nextBounceable,
-                bounceEnd = !onLastColumn,
-            )
-        action(index, tile, bounceableInfo)
-    }
+): BounceableInfo {
+    // Only look for neighbor bounceables if they are on the same row
+    val onLastColumn = sizedTile.onLastColumn(column, columns)
+    val previousTile = getOrNull(index - 1)?.takeIf { column != 0 }
+    val nextTile = getOrNull(index + 1)?.takeIf { !onLastColumn }
+    return BounceableInfo(this[index], previousTile, nextTile, !onLastColumn)
 }
 
 private fun <T> SizedTile<T>.onLastColumn(column: Int, columns: Int): Boolean {
