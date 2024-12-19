@@ -159,6 +159,12 @@ class PreferenceSetterApiHandler(
                 }
                 storage.setInt(key, intValue)
                 return PreferenceSetterResult.OK
+            } else if (value.hasFloatValue()) {
+                val floatValue = value.floatValue
+                val resultCode = metadata.checkWritePermit(floatValue)
+                if (resultCode != PreferenceSetterResult.OK) return resultCode
+                storage.setFloat(key, floatValue)
+                return PreferenceSetterResult.OK
             }
         } catch (e: Exception) {
             return PreferenceSetterResult.INTERNAL_ERROR
