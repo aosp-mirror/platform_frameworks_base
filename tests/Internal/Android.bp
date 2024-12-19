@@ -65,6 +65,7 @@ android_ravenwood_test {
         "src/com/android/internal/util/ParcellingTests.java",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
 
 java_test_helper_library {

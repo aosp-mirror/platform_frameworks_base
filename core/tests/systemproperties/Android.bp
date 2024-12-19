@@ -44,4 +44,5 @@ android_ravenwood_test {
         "src/**/*.java",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
