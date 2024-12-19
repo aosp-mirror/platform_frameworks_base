@@ -616,7 +616,6 @@ public class BackgroundActivityStartController {
     }
 
     static class BalVerdict {
-
         static final BalVerdict BLOCK = new BalVerdict(BAL_BLOCK, false, "Blocked");
         static final BalVerdict ALLOW_BY_DEFAULT =
                 new BalVerdict(BAL_ALLOW_DEFAULT, false, "Default");
@@ -640,6 +639,9 @@ public class BackgroundActivityStartController {
         }
 
         public BalVerdict withProcessInfo(String msg, WindowProcessController process) {
+            if (this == BLOCK || this == ALLOW_BY_DEFAULT || this == ALLOW_PRIVILEGED) {
+                return this;
+            }
             mProcessInfo = msg + " (uid=" + process.mUid + ",pid=" + process.getPid() + ")";
             return this;
         }
@@ -653,6 +655,10 @@ public class BackgroundActivityStartController {
         }
 
         void setOnlyCreatorAllows(boolean onlyCreatorAllows) {
+            if (this == BLOCK) {
+                // do not modify BLOCK constant
+                return;
+            }
             mOnlyCreatorAllows = onlyCreatorAllows;
         }
 
@@ -662,6 +668,10 @@ public class BackgroundActivityStartController {
 
         @VisibleForTesting
         BalVerdict setBasedOnRealCaller() {
+            if (this == BLOCK) {
+                // do not modify BLOCK constant
+                return this;
+            }
             mBasedOnRealCaller = true;
             return this;
         }
@@ -669,22 +679,29 @@ public class BackgroundActivityStartController {
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(balCodeToString(mCode));
-            if (DEBUG_ACTIVITY_STARTS) {
-                builder.append(" (");
-                if (mBackground) {
-                    builder.append("Background ");
+            if (this != BLOCK) {
+                if (mOnlyCreatorAllows) {
+                    builder.append(" [onlyCaller]");
+                } else if (mBasedOnRealCaller) {
+                    builder.append(" [realCaller]");
                 }
-                builder.append("Activity start ");
-                if (mCode == BAL_BLOCK) {
-                    builder.append("denied");
-                } else {
-                    builder.append("allowed: ").append(mMessage);
+                if (DEBUG_ACTIVITY_STARTS) {
+                    builder.append(" (");
+                    if (mBackground) {
+                        builder.append("Background ");
+                    }
+                    builder.append("Activity start ");
+                    if (mCode == BAL_BLOCK) {
+                        builder.append("denied");
+                    } else {
+                        builder.append("allowed: ").append(mMessage);
+                    }
+                    if (mProcessInfo != null) {
+                        builder.append(" ");
+                        builder.append(mProcessInfo);
+                    }
+                    builder.append(")");
                 }
-                if (mProcessInfo != null) {
-                    builder.append(" ");
-                    builder.append(mProcessInfo);
-                }
-                builder.append(")");
             }
             return builder.toString();
         }
@@ -785,9 +802,8 @@ public class BackgroundActivityStartController {
                         .setBasedOnRealCaller();
         state.setResultForRealCaller(resultForRealCaller);
 
-        if (state.isPendingIntent()) {
-            resultForCaller.setOnlyCreatorAllows(
-                    resultForCaller.allows() && resultForRealCaller.blocks());
+        if (state.isPendingIntent() && resultForCaller.allows() && resultForRealCaller.blocks()) {
+            resultForCaller.setOnlyCreatorAllows(true);
         }
 
         // Handle cases with explicit opt-in
