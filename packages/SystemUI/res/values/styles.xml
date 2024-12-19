@@ -91,7 +91,6 @@
         <item name="android:ellipsize">none</item>
         <item name="android:requiresFadingEdge">horizontal</item>
         <item name="android:fadingEdgeLength">@dimen/ongoing_activity_chip_text_fading_edge_length</item>
-        <item name="android:maxWidth">@dimen/ongoing_activity_chip_max_text_width</item>
     </style>
 
     <style name="Chipbar" />
