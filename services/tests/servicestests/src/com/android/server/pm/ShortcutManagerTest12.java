@@ -50,21 +50,21 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
     @Override
     protected void tearDown() throws Exception {
         if (mService.isAppSearchEnabled()) {
-            setCaller(CALLING_PACKAGE_1, USER_0);
-            mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_0)
+            setCaller(CALLING_PACKAGE_1, USER_10);
+            mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_10)
                     .removeAllShortcutsAsync();
         }
         super.tearDown();
     }
 
     public void testGetShortcutIntents_ReturnsMutablePendingIntents() throws RemoteException {
-        setDefaultLauncher(USER_0, LAUNCHER_1);
+        setDefaultLauncher(USER_10, LAUNCHER_1);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () ->
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () ->
                 assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"))))
         );
 
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
             final PendingIntent intent = mLauncherApps.getShortcutIntent(
                     CALLING_PACKAGE_1, "s1", null, UserHandle.SYSTEM);
             assertNotNull(intent);
@@ -75,7 +75,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         // Verifies setDynamicShortcuts persists shortcuts into AppSearch
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
@@ -102,7 +102,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -126,7 +126,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -168,7 +168,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -194,7 +194,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -218,7 +218,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -243,7 +243,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcut("s1"),
                 makeShortcut("s2"),
@@ -266,7 +266,7 @@ public class ShortcutManagerTest12 extends BaseShortcutManagerTest {
         if (!mService.isAppSearchEnabled()) {
             return;
         }
-        setCaller(CALLING_PACKAGE_1, USER_0);
+        setCaller(CALLING_PACKAGE_1, USER_10);
         mManager.setDynamicShortcuts(list(
                 makeShortcutExcludedFromLauncher("s1"),
                 makeShortcutExcludedFromLauncher("s2"),
