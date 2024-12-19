@@ -1638,7 +1638,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // brightness sources (such as an app override) are not saved to the setting, but should be
         // reflected in HBM calculations.
         mBrightnessRangeController.onBrightnessChanged(brightnessState, unthrottledBrightnessState,
-                clampedState.getBrightnessMaxReason());
+                clampedState);
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
