@@ -168,17 +168,6 @@ class BackActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnBackRequested_closeUserSwitcherIfOpen() {
-        whenever(shadeBackActionInteractor.closeUserSwitcherIfOpen()).thenReturn(true)
-
-        val result = backActionInteractor.onBackRequested()
-
-        assertTrue(result)
-        verify(statusBarKeyguardViewManager, never()).onBackPressed()
-        verify(shadeBackActionInteractor, never()).animateCollapseQs(anyBoolean())
-    }
-
-    @Test
     fun testOnBackRequested_returnsFalse() {
         // make shouldBackBeHandled return false
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)

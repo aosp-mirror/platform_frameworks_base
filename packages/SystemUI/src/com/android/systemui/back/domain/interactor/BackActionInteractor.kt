@@ -114,9 +114,6 @@ constructor(
             shadeBackActionInteractor.animateCollapseQs(false)
             return true
         }
-        if (shadeBackActionInteractor.closeUserSwitcherIfOpen()) {
-            return true
-        }
         if (glanceableHubBackAction()) {
             if (communalBackActionInteractor.canBeDismissed()) {
                 communalBackActionInteractor.onBackPressed()

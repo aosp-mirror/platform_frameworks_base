@@ -33,7 +33,6 @@ import com.android.keyguard.dagger.KeyguardDisplayModule;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
-import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -108,8 +107,7 @@ import java.util.concurrent.Executor;
 @Module(subcomponents = {
         KeyguardQsUserSwitchComponent.class,
         KeyguardStatusBarViewComponent.class,
-        KeyguardStatusViewComponent.class,
-        KeyguardUserSwitcherComponent.class},
+        KeyguardStatusViewComponent.class},
         includes = {
             DeviceEntryIconTransitionModule.class,
             FalsingModule.class,

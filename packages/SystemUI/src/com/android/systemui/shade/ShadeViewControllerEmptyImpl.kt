@@ -55,18 +55,11 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
 
     override fun startExpandLatencyTracking() {}
 
-    override fun startBouncerPreHideAnimation() {}
-
     override fun dozeTimeTick() {}
 
     override fun resetViews(animate: Boolean) {}
 
     override val barState: Int = 0
-
-    @Deprecated("Only supported by very old devices that will not adopt scenes.")
-    override fun closeUserSwitcherIfOpen(): Boolean {
-        return false
-    }
 
     override fun onBackPressed() {}
 
