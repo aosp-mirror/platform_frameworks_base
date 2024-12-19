@@ -286,14 +286,21 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 return@forEach
             }
             var newFlags = oldFlags
+            val isSystemOrInstalled =
+                packageState.isSystem || packageState.getUserStateOrDefault(userId).isInstalled
             newFlags =
                 if (
-                    newFlags.hasBits(PermissionFlags.ROLE) ||
-                        newFlags.hasBits(PermissionFlags.PREGRANT)
+                    isSystemOrInstalled && (
+                        newFlags.hasBits(PermissionFlags.ROLE) ||
+                            newFlags.hasBits(PermissionFlags.PREGRANT)
+                    )
                 ) {
                     newFlags or PermissionFlags.RUNTIME_GRANTED
                 } else {
-                    newFlags andInv PermissionFlags.RUNTIME_GRANTED
+                    newFlags andInv (
+                        PermissionFlags.RUNTIME_GRANTED or PermissionFlags.ROLE or
+                            PermissionFlags.PREGRANT
+                    )
                 }
             newFlags = newFlags andInv USER_SETTABLE_MASK
             if (newFlags.hasBits(PermissionFlags.LEGACY_GRANTED)) {
