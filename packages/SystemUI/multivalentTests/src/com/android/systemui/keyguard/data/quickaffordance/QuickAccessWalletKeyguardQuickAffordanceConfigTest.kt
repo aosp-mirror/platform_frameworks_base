@@ -88,9 +88,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                     Icon.Loaded(
                         drawable = ICON,
                         contentDescription =
-                            ContentDescription.Resource(
-                                res = R.string.accessibility_wallet_button,
-                            ),
+                            ContentDescription.Resource(res = R.string.accessibility_wallet_button),
                     )
                 )
         }
@@ -118,9 +116,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                     Icon.Loaded(
                         drawable = ICON,
                         contentDescription =
-                            ContentDescription.Resource(
-                                res = R.string.accessibility_wallet_button,
-                            ),
+                            ContentDescription.Resource(res = R.string.accessibility_wallet_button),
                     )
                 )
         }
@@ -163,13 +159,9 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
         assertThat(underTest.onTriggered(expandable))
-            .isEqualTo(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled)
+            .isEqualTo(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(true))
         verify(walletController)
-            .startQuickAccessUiIntent(
-                activityStarter,
-                animationController,
-                /* hasCard= */ true,
-            )
+            .startQuickAccessUiIntent(activityStarter, animationController, /* hasCard= */ true)
     }
 
     @Test
@@ -184,9 +176,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun getPickerScreenState_unavailable() =
         testScope.runTest {
-            setUpState(
-                isWalletServiceAvailable = false,
-            )
+            setUpState(isWalletServiceAvailable = false)
 
             assertThat(underTest.getPickerScreenState())
                 .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
@@ -195,9 +185,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() =
         testScope.runTest {
-            setUpState(
-                isWalletFeatureAvailable = false,
-            )
+            setUpState(isWalletFeatureAvailable = false)
 
             assertThat(underTest.getPickerScreenState())
                 .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
@@ -206,9 +194,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Test
     fun getPickerScreenState_disabledWhenThereIsNoCard() =
         testScope.runTest {
-            setUpState(
-                hasSelectedCard = false,
-            )
+            setUpState(hasSelectedCard = false)
 
             assertThat(underTest.getPickerScreenState())
                 .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
@@ -219,7 +205,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         isWalletServiceAvailable: Boolean = true,
         isWalletQuerySuccessful: Boolean = true,
         hasSelectedCard: Boolean = true,
-        cardType: Int = WalletCard.CARD_TYPE_UNKNOWN
+        cardType: Int = WalletCard.CARD_TYPE_UNKNOWN,
     ) {
         val walletClient: QuickAccessWalletClient = mock()
         whenever(walletClient.tileIcon).thenReturn(ICON)
@@ -242,11 +228,11 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                                             /*cardType= */ cardType,
                                             /*cardImage= */ mock(),
                                             /*contentDescription=  */ CARD_DESCRIPTION,
-                                            /*pendingIntent= */ mock()
+                                            /*pendingIntent= */ mock(),
                                         )
                                         .build()
                                 ),
-                                0
+                                0,
                             )
                         } else {
                             GetWalletCardsResponse(emptyList(), 0)

@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.row
 
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.app.Notification.MessagingStyle
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ApplicationInfo
@@ -42,6 +43,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.NotifInflation
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.InflationTask
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_SENSITIVE_CONTENT
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.InflationException
@@ -142,9 +144,7 @@ constructor(
                 entry,
                 conversationProcessor,
                 row,
-                bindParams.isMinimized,
-                bindParams.usesIncreasedHeight,
-                bindParams.usesIncreasedHeadsUpHeight,
+                bindParams,
                 callback,
                 remoteInputManager.remoteViewsOnClickHandler,
                 /* isMediaFlagEnabled = */ smartReplyStateInflater,
@@ -178,10 +178,8 @@ constructor(
                 reInflateFlags = reInflateFlags,
                 entry = entry,
                 builder = builder,
-                isMinimized = bindParams.isMinimized,
-                usesIncreasedHeight = bindParams.usesIncreasedHeight,
-                usesIncreasedHeadsUpHeight = bindParams.usesIncreasedHeadsUpHeight,
-                systemUIContext = systemUIContext,
+                bindParams,
+                systemUiContext = systemUIContext,
                 packageContext = packageContext,
                 row = row,
                 notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
@@ -370,9 +368,7 @@ constructor(
         private val entry: NotificationEntry,
         private val conversationProcessor: ConversationNotificationProcessor,
         private val row: ExpandableNotificationRow,
-        private val isMinimized: Boolean,
-        private val usesIncreasedHeight: Boolean,
-        private val usesIncreasedHeadsUpHeight: Boolean,
+        private val bindParams: BindParams,
         private val callback: InflationCallback?,
         private val remoteViewClickHandler: InteractionHandler?,
         private val smartRepliesInflater: SmartReplyStateInflater,
@@ -440,10 +436,8 @@ constructor(
                     reInflateFlags = reInflateFlags,
                     entry = entry,
                     builder = recoveredBuilder,
-                    isMinimized = isMinimized,
-                    usesIncreasedHeight = usesIncreasedHeight,
-                    usesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight,
-                    systemUIContext = context,
+                    bindParams = bindParams,
+                    systemUiContext = context,
                     packageContext = packageContext,
                     row = row,
                     notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
@@ -513,7 +507,7 @@ constructor(
                         apply(
                             inflationExecutor,
                             inflateSynchronously,
-                            isMinimized,
+                            bindParams.isMinimized,
                             progress,
                             reInflateFlags,
                             remoteViewCache,
@@ -670,10 +664,8 @@ constructor(
             @InflationFlag reInflateFlags: Int,
             entry: NotificationEntry,
             builder: Notification.Builder,
-            isMinimized: Boolean,
-            usesIncreasedHeight: Boolean,
-            usesIncreasedHeadsUpHeight: Boolean,
-            systemUIContext: Context,
+            bindParams: BindParams,
+            systemUiContext: Context,
             packageContext: Context,
             row: ExpandableNotificationRow,
             notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
@@ -705,9 +697,10 @@ constructor(
                 createRemoteViews(
                     reInflateFlags = reInflateFlags,
                     builder = builder,
-                    isMinimized = isMinimized,
-                    usesIncreasedHeight = usesIncreasedHeight,
-                    usesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight,
+                    bindParams = bindParams,
+                    entry = entry,
+                    systemUiContext = systemUiContext,
+                    packageContext = packageContext,
                     row = row,
                     notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
                     headsUpStyleProvider = headsUpStyleProvider,
@@ -724,7 +717,8 @@ constructor(
                         notification = entry.sbn.notification,
                         messagingStyle = messagingStyle,
                         builder = builder,
-                        systemUiContext = systemUIContext,
+                        systemUiContext = systemUiContext,
+                        redactText = false,
                     )
                 } else null
 
@@ -734,10 +728,20 @@ constructor(
                         reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE != 0
                 ) {
                     logger.logAsyncTaskProgress(entry, "inflating public single line view model")
-                    SingleLineViewInflater.inflateRedactedSingleLineViewModel(
-                        systemUIContext,
-                        entry.ranking.isConversation,
-                    )
+                    if (bindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
+                        SingleLineViewInflater.inflateSingleLineViewModel(
+                            notification = entry.sbn.notification,
+                            messagingStyle = messagingStyle,
+                            builder = builder,
+                            systemUiContext = systemUiContext,
+                            redactText = true,
+                        )
+                    } else {
+                        SingleLineViewInflater.inflateRedactedSingleLineViewModel(
+                            systemUiContext,
+                            entry.ranking.isConversation,
+                        )
+                    }
                 } else null
 
             val headsUpStatusBarModel =
@@ -761,12 +765,50 @@ constructor(
             )
         }
 
+        private fun createSensitiveContentMessageNotification(
+            original: Notification,
+            originalStyle: Notification.Style?,
+            sysUiContext: Context,
+            packageContext: Context,
+        ): Notification.Builder {
+            val redacted = Notification.Builder(packageContext, original.channelId)
+            redacted.setContentTitle(original.extras.getCharSequence(Notification.EXTRA_TITLE))
+            val redactedMessage =
+                sysUiContext.getString(R.string.redacted_notification_single_line_text)
+
+            if (originalStyle is MessagingStyle) {
+                val newStyle = MessagingStyle(originalStyle.user)
+                newStyle.conversationTitle = originalStyle.conversationTitle
+                newStyle.isGroupConversation = false
+                newStyle.conversationType = originalStyle.conversationType
+                newStyle.shortcutIcon = originalStyle.shortcutIcon
+                newStyle.setBuilder(redacted)
+                val latestMessage = MessagingStyle.findLatestIncomingMessage(originalStyle.messages)
+                if (latestMessage != null) {
+                    val newMessage =
+                        MessagingStyle.Message(
+                            redactedMessage,
+                            latestMessage.timestamp,
+                            latestMessage.senderPerson,
+                        )
+                    newStyle.addMessage(newMessage)
+                }
+                redacted.style = newStyle
+            } else {
+                redacted.setContentText(redactedMessage)
+            }
+            redacted.setLargeIcon(original.getLargeIcon())
+            redacted.setSmallIcon(original.smallIcon)
+            return redacted
+        }
+
         private fun createRemoteViews(
             @InflationFlag reInflateFlags: Int,
             builder: Notification.Builder,
-            isMinimized: Boolean,
-            usesIncreasedHeight: Boolean,
-            usesIncreasedHeadsUpHeight: Boolean,
+            bindParams: BindParams,
+            entry: NotificationEntry,
+            systemUiContext: Context,
+            packageContext: Context,
             row: ExpandableNotificationRow,
             notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
             headsUpStyleProvider: HeadsUpStyleProvider,
@@ -780,7 +822,11 @@ constructor(
                             entryForLogging,
                             "creating contracted remote view",
                         )
-                        createContentView(builder, isMinimized, usesIncreasedHeight)
+                        createContentView(
+                            builder,
+                            bindParams.isMinimized,
+                            bindParams.usesIncreasedHeight,
+                        )
                     } else null
                 val expanded =
                     if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
@@ -788,7 +834,7 @@ constructor(
                             entryForLogging,
                             "creating expanded remote view",
                         )
-                        createExpandedView(builder, isMinimized)
+                        createExpandedView(builder, bindParams.isMinimized)
                     } else null
                 val headsUp =
                     if (reInflateFlags and FLAG_CONTENT_VIEW_HEADS_UP != 0) {
@@ -800,13 +846,26 @@ constructor(
                         if (isHeadsUpCompact) {
                             builder.createCompactHeadsUpContentView()
                         } else {
-                            builder.createHeadsUpContentView(usesIncreasedHeadsUpHeight)
+                            builder.createHeadsUpContentView(bindParams.usesIncreasedHeadsUpHeight)
                         }
                     } else null
                 val public =
                     if (reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC != 0) {
                         logger.logAsyncTaskProgress(entryForLogging, "creating public remote view")
-                        builder.makePublicContentView(isMinimized)
+                        if (
+                            LockscreenOtpRedaction.isEnabled &&
+                                bindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT
+                        ) {
+                            createSensitiveContentMessageNotification(
+                                    entry.sbn.notification,
+                                    builder.style,
+                                    systemUiContext,
+                                    packageContext,
+                                )
+                                .createContentView(bindParams.usesIncreasedHeight)
+                        } else {
+                            builder.makePublicContentView(bindParams.isMinimized)
+                        }
                     } else null
                 val normalGroupHeader =
                     if (

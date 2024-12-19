@@ -152,7 +152,7 @@ flag {
     name: "cache_sdk_system_features"
     namespace: "system_performance"
     description: "Feature flag to enable optimized cache for SDK-defined system feature lookups."
-    bug: "375000483"
+    bug: "326623529"
 }
 
 flag {
@@ -374,4 +374,12 @@ flag {
     namespace: "modularization"
     description: "Feature flag to remove the consumption of the hidden module status (ModuleInfo#IsHidden) in the Android source tree."
     bug: "363952383"
+}
+
+flag {
+    name: "uid_based_provider_lookup"
+    is_exported: true
+    namespace: "package_manager_service"
+    bug: "334024639"
+    description: "Feature flag to check whether a given UID can access a content provider"
 }

@@ -463,6 +463,7 @@ public class BubbleBarAnimationHelper {
                 super.onAnimationEnd(animation);
                 bbev.resetPivot();
                 bbev.setDragging(false);
+                updateExpandedView(bbev);
             }
         });
         startNewAnimator(animatorSet);

@@ -19,6 +19,7 @@ package com.android.systemui.haptics.msdl.qs
 import android.service.quicksettings.Tile
 import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.util.kotlin.pairwise
@@ -173,6 +174,7 @@ constructor(
     }
 }
 
+@SysUISingleton
 class TileHapticsViewModelFactoryProvider
 @Inject
 constructor(private val tileHapticsViewModelFactory: TileHapticsViewModel.Factory) {

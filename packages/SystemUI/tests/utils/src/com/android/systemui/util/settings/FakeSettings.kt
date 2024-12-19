@@ -70,6 +70,14 @@ class FakeSettings : SecureSettings, SystemSettings, UserSettingsProxy {
         }
     }
 
+    fun getContentObservers(uri: Uri, userHandle: Int): List<ContentObserver> {
+        if (userHandle == UserHandle.USER_ALL) {
+            return contentObserversAllUsers[uri.toString()] ?: listOf()
+        } else {
+            return contentObservers[SettingsKey(userHandle, uri.toString())] ?: listOf()
+        }
+    }
+
     override fun getContentResolver(): ContentResolver {
         throw UnsupportedOperationException("FakeSettings.getContentResolver is not implemented")
     }

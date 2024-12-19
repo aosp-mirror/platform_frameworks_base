@@ -496,6 +496,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_popup_chips"
+    namespace: "systemui"
+    description: "Show rich ongoing processes as chips in the status bar"
+    bug: "372964148"
+}
+
+flag {
     name: "promote_notifications_automatically"
     namespace: "systemui"
     description: "Flag to automatically turn certain notifications into promoted notifications so "
@@ -1234,6 +1241,13 @@ flag {
   description: "Read only flag for rolling out glanceable hub v2 resource values"
   bug: "375689917"
   is_fixed_read_only: true
+}
+
+flag {
+    name: "glanceable_hub_back_action"
+    namespace: "systemui"
+    description: "Support back action from glanceable hub"
+    bug: "382771533"
 }
 
 flag {

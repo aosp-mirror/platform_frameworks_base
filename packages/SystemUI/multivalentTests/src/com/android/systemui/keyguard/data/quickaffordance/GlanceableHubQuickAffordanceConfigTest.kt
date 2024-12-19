@@ -24,21 +24,19 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalSceneRepository
-import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalV2Available
 import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.andSceneContainer
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.flags.parameterizeSceneContainerFlag
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.scene.data.repository.sceneContainerRepository
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,14 +45,11 @@ import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
-@EnableFlags(Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON, Flags.FLAG_GLANCEABLE_HUB_V2)
+@EnableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
 @RunWith(ParameterizedAndroidJunit4::class)
 class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
-
-    private lateinit var underTest: GlanceableHubQuickAffordanceConfig
+    private val Kosmos.underTest by Kosmos.Fixture { glanceableHubQuickAffordanceConfig }
 
     init {
         mSetFlagsRule.setFlagsParameterization(flags!!)
@@ -64,20 +59,16 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        underTest =
-            GlanceableHubQuickAffordanceConfig(
-                context = context,
-                communalInteractor = kosmos.communalInteractor,
-                communalSceneRepository = kosmos.communalSceneRepository,
-                communalSettingsInteractor = kosmos.communalSettingsInteractor,
-                sceneInteractor = kosmos.sceneInteractor,
-            )
+        // Access the class immediately so that flows are instantiated.
+        // GlanceableHubQuickAffordanceConfig accesses StateFlow.value directly so we need the flows
+        // to start flowing before runCurrent is called in the tests.
+        kosmos.underTest
     }
 
     @Test
     fun lockscreenState_whenGlanceableHubEnabled_returnsVisible() =
-        testScope.runTest {
-            kosmos.setCommunalV2Enabled(true)
+        kosmos.runTest {
+            kosmos.setCommunalV2Available(true)
             runCurrent()
 
             val lockScreenState by collectLastValue(underTest.lockScreenState)
@@ -88,8 +79,21 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
 
     @Test
     fun lockscreenState_whenGlanceableHubDisabled_returnsHidden() =
-        testScope.runTest {
-            kosmos.setCommunalV2Enabled(false)
+        kosmos.runTest {
+            setCommunalV2Enabled(false)
+            val lockScreenState by collectLastValue(underTest.lockScreenState)
+            runCurrent()
+
+            assertThat(lockScreenState)
+                .isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
+
+    @Test
+    fun lockscreenState_whenGlanceableHubNotAvailable_returnsHidden() =
+        kosmos.runTest {
+            // Hub is enabled, but not available.
+            setCommunalV2Enabled(true)
+            fakeKeyguardRepository.setKeyguardShowing(false)
             val lockScreenState by collectLastValue(underTest.lockScreenState)
             runCurrent()
 
@@ -99,8 +103,8 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
 
     @Test
     fun pickerScreenState_whenGlanceableHubEnabled_returnsDefault() =
-        testScope.runTest {
-            kosmos.setCommunalV2Enabled(true)
+        kosmos.runTest {
+            setCommunalV2Enabled(true)
             runCurrent()
 
             assertThat(underTest.getPickerScreenState())
@@ -109,8 +113,8 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
 
     @Test
     fun pickerScreenState_whenGlanceableHubDisabled_returnsDisabled() =
-        testScope.runTest {
-            kosmos.setCommunalV2Enabled(false)
+        kosmos.runTest {
+            setCommunalV2Enabled(false)
             runCurrent()
 
             assertThat(
@@ -122,7 +126,7 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
     @Test
     @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun onTriggered_changesSceneToCommunal() =
-        testScope.runTest {
+        kosmos.runTest {
             underTest.onTriggered(expandable = null)
             runCurrent()
 
@@ -133,7 +137,7 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
     @Test
     @EnableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testTransitionToGlanceableHub_sceneContainer() =
-        testScope.runTest {
+        kosmos.runTest {
             underTest.onTriggered(expandable = null)
             runCurrent()
 
@@ -145,11 +149,7 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf(
-                    Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON,
-                    Flags.FLAG_GLANCEABLE_HUB_V2,
-                )
-                .andSceneContainer()
+            return parameterizeSceneContainerFlag()
         }
     }
 }

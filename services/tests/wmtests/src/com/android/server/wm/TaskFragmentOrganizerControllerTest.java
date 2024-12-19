@@ -741,16 +741,16 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Not allowed because TaskFragments are not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
-        assertNull(mTaskFragment.getAdjacentTaskFragment());
-        assertNull(taskFragment2.getAdjacentTaskFragment());
+        assertFalse(mTaskFragment.hasAdjacentTaskFragment());
+        assertFalse(taskFragment2.hasAdjacentTaskFragment());
 
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
 
         // Not allowed because TaskFragment2 is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
-        assertNull(mTaskFragment.getAdjacentTaskFragment());
-        assertNull(taskFragment2.getAdjacentTaskFragment());
+        assertFalse(mTaskFragment.hasAdjacentTaskFragment());
+        assertFalse(taskFragment2.hasAdjacentTaskFragment());
 
         mTaskFragment.onTaskFragmentOrganizerRemoved();
         taskFragment2.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
@@ -758,14 +758,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Not allowed because mTaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
-        assertNull(mTaskFragment.getAdjacentTaskFragment());
-        assertNull(taskFragment2.getAdjacentTaskFragment());
+        assertFalse(mTaskFragment.hasAdjacentTaskFragment());
+        assertFalse(taskFragment2.hasAdjacentTaskFragment());
 
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
 
         assertApplyTransactionAllowed(mTransaction);
-        assertEquals(taskFragment2, mTaskFragment.getAdjacentTaskFragment());
+        assertTrue(mTaskFragment.isAdjacentTo(taskFragment2));
     }
 
     @Test
@@ -790,14 +790,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Not allowed because TaskFragment is not organized by the caller organizer.
         assertApplyTransactionDisallowed(mTransaction);
-        assertEquals(taskFragment2, mTaskFragment.getAdjacentTaskFragment());
+        assertTrue(mTaskFragment.isAdjacentTo(taskFragment2));
 
         mTaskFragment.setTaskFragmentOrganizer(mOrganizerToken, 10 /* uid */,
                 "Test:TaskFragmentOrganizer" /* processName */);
 
         assertApplyTransactionAllowed(mTransaction);
-        assertNull(mTaskFragment.getAdjacentTaskFragment());
-        assertNull(taskFragment2.getAdjacentTaskFragment());
+        assertFalse(mTaskFragment.hasAdjacentTaskFragment());
+        assertFalse(taskFragment2.hasAdjacentTaskFragment());
     }
 
     @Test

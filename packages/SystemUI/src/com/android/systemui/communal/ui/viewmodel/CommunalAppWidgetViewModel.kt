@@ -83,7 +83,7 @@ constructor(
     }
 
     private suspend fun handleSetListener(appWidgetId: Int, listener: AppWidgetHostListener) =
-        withContextTraced("$TAG#setListenerInner", backgroundContext) {
+        withContextTraced("${TAG}_$appWidgetId#setListenerInner", backgroundContext) {
             if (
                 multiUserHelper.glanceableHubHsumFlagEnabled &&
                     multiUserHelper.isInHeadlessSystemUser()
@@ -92,13 +92,19 @@ constructor(
                 // remotely in the foreground user, and therefore the host listener needs to be
                 // registered through the widget manager.
                 with(glanceableHubWidgetManagerLazy.get()) {
-                    setAppWidgetHostListener(appWidgetId, listenerDelegateFactory.create(listener))
+                    setAppWidgetHostListener(
+                        appWidgetId,
+                        listenerDelegateFactory.create("${TAG}_$appWidgetId", listener),
+                    )
                 }
             } else {
                 // Instead of setting the view as the listener directly, we wrap the view in a
                 // delegate which ensures the callbacks always get called on the main thread.
                 with(appWidgetHostLazy.get()) {
-                    setListener(appWidgetId, listenerDelegateFactory.create(listener))
+                    setListener(
+                        appWidgetId,
+                        listenerDelegateFactory.create("${TAG}_$appWidgetId", listener),
+                    )
                 }
             }
         }

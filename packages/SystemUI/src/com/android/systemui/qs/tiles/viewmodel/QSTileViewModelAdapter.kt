@@ -260,8 +260,8 @@ constructor(
                 icon =
                     when (val stateIcon = viewModelState.icon) {
                         is Icon.Loaded ->
-                            if (viewModelState.iconRes == null) DrawableIcon(stateIcon.drawable)
-                            else DrawableIconWithRes(stateIcon.drawable, viewModelState.iconRes)
+                            if (stateIcon.res == null) DrawableIcon(stateIcon.drawable)
+                            else DrawableIconWithRes(stateIcon.drawable, stateIcon.res)
                         is Icon.Resource -> ResourceIcon.get(stateIcon.res)
                         null -> null
                     }

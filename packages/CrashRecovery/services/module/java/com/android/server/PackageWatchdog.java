@@ -347,8 +347,8 @@ public class PackageWatchdog {
      *                 and boot loops.
      * @param executor Executor for the thread on which observers would receive callbacks
      */
-    public void registerHealthObserver(@NonNull PackageHealthObserver observer,
-            @NonNull @CallbackExecutor Executor executor) {
+    public void registerHealthObserver(@NonNull @CallbackExecutor Executor executor,
+            @NonNull PackageHealthObserver observer) {
         synchronized (sLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -390,8 +390,8 @@ public class PackageWatchdog {
      *
      * @throws IllegalStateException if the observer was not previously registered
      */
-    public void startExplicitHealthCheck(@NonNull PackageHealthObserver observer,
-            @NonNull List<String> packageNames, long timeoutMs) {
+    public void startExplicitHealthCheck(@NonNull List<String> packageNames, long timeoutMs,
+            @NonNull PackageHealthObserver observer) {
         synchronized (sLock) {
             if (!mAllObservers.containsKey(observer.getUniqueIdentifier())) {
                 Slog.wtf(TAG, "No observer found, need to register the observer: "
@@ -767,14 +767,6 @@ public class PackageWatchdog {
     }
 
     /**
-     * Indicates that the result of a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} is unknown.
-     */
-    public static final int MITIGATION_RESULT_UNKNOWN =
-            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN;
-
-    /**
      * Indicates that a mitigation was successfully triggered or executed during
      * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
      * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
@@ -790,23 +782,6 @@ public class PackageWatchdog {
     public static final int MITIGATION_RESULT_SKIPPED =
             ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
 
-    /**
-     * Indicates that a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
-     * but the failure is potentially retryable.
-     */
-    public static final int MITIGATION_RESULT_FAILURE_RETRYABLE =
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE;
-
-    /**
-     * Indicates that a mitigation executed during
-     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
-     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
-     * and the failure is not retryable.
-     */
-    public static final int MITIGATION_RESULT_FAILURE_NON_RETRYABLE =
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE;
 
     /**
      * Possible return values of the for mitigations executed during
@@ -816,18 +791,12 @@ public class PackageWatchdog {
      */
     @Retention(SOURCE)
     @IntDef(prefix = "MITIGATION_RESULT_", value = {
-            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN,
             ObserverMitigationResult.MITIGATION_RESULT_SUCCESS,
             ObserverMitigationResult.MITIGATION_RESULT_SKIPPED,
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE,
-            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE,
             })
     public @interface ObserverMitigationResult {
-        int MITIGATION_RESULT_UNKNOWN = 0;
         int MITIGATION_RESULT_SUCCESS = 1;
         int MITIGATION_RESULT_SKIPPED = 2;
-        int MITIGATION_RESULT_FAILURE_RETRYABLE = 3;
-        int MITIGATION_RESULT_FAILURE_NON_RETRYABLE = 4;
     }
 
     /**
@@ -921,11 +890,6 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been called for this package
          *                         (including this time).
          * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
-         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
-         *         retried,
-         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
-         *         cannot be retried,
-         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
          *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
         @ObserverMitigationResult int onExecuteHealthCheckMitigation(
@@ -957,11 +921,6 @@ public class PackageWatchdog {
          *                        boot loop (including this time).
          *
          * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
-         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
-         *         retried,
-         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
-         *         cannot be retried,
-         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
          *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
         default @ObserverMitigationResult int onExecuteBootLoopMitigation(int mitigationCount) {
@@ -2074,15 +2033,19 @@ public class PackageWatchdog {
             bootMitigationCounts.put(observer.name, observer.getBootMitigationCount());
         }
 
+        FileOutputStream fileStream = null;
+        ObjectOutputStream objectStream = null;
         try {
-            FileOutputStream fileStream = new FileOutputStream(new File(filePath));
-            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            fileStream = new FileOutputStream(new File(filePath));
+            objectStream = new ObjectOutputStream(fileStream);
             objectStream.writeObject(bootMitigationCounts);
             objectStream.flush();
-            objectStream.close();
-            fileStream.close();
         } catch (Exception e) {
             Slog.i(TAG, "Could not save observers metadata to file: " + e);
+            return;
+        } finally {
+            IoUtils.closeQuietly(objectStream);
+            IoUtils.closeQuietly(fileStream);
         }
     }
 
@@ -2233,23 +2196,32 @@ public class PackageWatchdog {
         void readAllObserversBootMitigationCountIfNecessary(String filePath) {
             File metadataFile = new File(filePath);
             if (metadataFile.exists()) {
+                FileInputStream fileStream = null;
+                ObjectInputStream objectStream = null;
+                HashMap<String, Integer> bootMitigationCounts = null;
                 try {
-                    FileInputStream fileStream = new FileInputStream(metadataFile);
-                    ObjectInputStream objectStream = new ObjectInputStream(fileStream);
-                    HashMap<String, Integer> bootMitigationCounts =
+                    fileStream = new FileInputStream(metadataFile);
+                    objectStream = new ObjectInputStream(fileStream);
+                    bootMitigationCounts =
                             (HashMap<String, Integer>) objectStream.readObject();
-                    objectStream.close();
-                    fileStream.close();
-
-                    for (int i = 0; i < mAllObservers.size(); i++) {
-                        final ObserverInternal observer = mAllObservers.valueAt(i);
-                        if (bootMitigationCounts.containsKey(observer.name)) {
-                            observer.setBootMitigationCount(
-                                    bootMitigationCounts.get(observer.name));
-                        }
-                    }
                 } catch (Exception e) {
                     Slog.i(TAG, "Could not read observer metadata file: " + e);
+                   return;
+                } finally {
+                    IoUtils.closeQuietly(objectStream);
+                    IoUtils.closeQuietly(fileStream);
+                }
+
+                if (bootMitigationCounts == null || bootMitigationCounts.isEmpty()) {
+                    Slog.i(TAG, "No observer in metadata file");
+                    return;
+                }
+                for (int i = 0; i < mAllObservers.size(); i++) {
+                    final ObserverInternal observer = mAllObservers.valueAt(i);
+                    if (bootMitigationCounts.containsKey(observer.name)) {
+                        observer.setBootMitigationCount(
+                                bootMitigationCounts.get(observer.name));
+                    }
                 }
             }
         }

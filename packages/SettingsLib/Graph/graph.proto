@@ -81,6 +81,10 @@ message PreferenceProto {
   optional PreferenceValueDescriptorProto value_descriptor = 15;
   // Indicate how sensitive of the preference.
   optional int32 sensitivity_level = 16;
+  // The required permissions to read preference value.
+  repeated string read_permissions = 17;
+  // The required permissions to write preference value.
+  repeated string write_permissions = 18;
 
   // Target of an Intent
   message ActionTarget {
@@ -108,6 +112,7 @@ message PreferenceValueProto {
   oneof value {
     bool boolean_value = 1;
     int32 int_value = 2;
+    float float_value = 3;
   }
 }
 
@@ -116,6 +121,7 @@ message PreferenceValueDescriptorProto {
   oneof type {
     bool boolean_type = 1;
     RangeValueProto range_value = 2;
+    bool float_type = 3;
   }
 }
 

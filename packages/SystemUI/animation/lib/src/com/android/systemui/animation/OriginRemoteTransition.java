@@ -195,7 +195,10 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         // Create the origin leash and add to the transition root leash.
         mOriginLeash =
                 new SurfaceControl.Builder().setName("OriginTransition-origin-leash").build();
-        mStartTransaction
+
+        // Create temporary transaction to build
+        final SurfaceControl.Transaction tmpTransaction = new SurfaceControl.Transaction();
+        tmpTransaction
                 .reparent(mOriginLeash, rootLeash)
                 .show(mOriginLeash)
                 .setCornerRadius(mOriginLeash, windowRadius)
@@ -208,14 +211,14 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
             int mode = change.getMode();
             SurfaceControl leash = change.getLeash();
             // Reparent leash to the transition root.
-            mStartTransaction.reparent(leash, rootLeash);
+            tmpTransaction.reparent(leash, rootLeash);
             if (TransitionUtil.isOpeningMode(mode)) {
                 openingSurfaces.add(change.getLeash());
                 // For opening surfaces, ending bounds are base bound. Apply corner radius if
                 // it's full screen.
                 Rect bounds = change.getEndAbsBounds();
                 if (displayBounds.equals(bounds)) {
-                    mStartTransaction
+                    tmpTransaction
                             .setCornerRadius(leash, windowRadius)
                             .setWindowCrop(leash, bounds.width(), bounds.height());
                 }
@@ -226,28 +229,53 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                 // it's full screen.
                 Rect bounds = change.getStartAbsBounds();
                 if (displayBounds.equals(bounds)) {
-                    mStartTransaction
+                    tmpTransaction
                             .setCornerRadius(leash, windowRadius)
                             .setWindowCrop(leash, bounds.width(), bounds.height());
                 }
             }
         }
 
+        if (openingSurfaces.isEmpty() && closingSurfaces.isEmpty()) {
+            logD("prepareUIs: no opening/closing surfaces available, nothing to prepare.");
+            return false;
+        }
+
         // Set relative order:
         // ----  App1  ----
         // ---- origin ----
         // ----  App2  ----
+
         if (mIsEntry) {
-            mStartTransaction
-                    .setRelativeLayer(mOriginLeash, closingSurfaces.get(0), 1)
-                    .setRelativeLayer(
-                            openingSurfaces.get(openingSurfaces.size() - 1), mOriginLeash, 1);
+            if (!closingSurfaces.isEmpty()) {
+                tmpTransaction
+                        .setRelativeLayer(mOriginLeash, closingSurfaces.get(0), 1);
+            } else {
+                logW("Missing closing surface is entry transition");
+            }
+            if (!openingSurfaces.isEmpty()) {
+                tmpTransaction
+                        .setRelativeLayer(
+                                openingSurfaces.get(openingSurfaces.size() - 1), mOriginLeash, 1);
+            } else {
+                logW("Missing opening surface is entry transition");
+            }
+
         } else {
-            mStartTransaction
-                    .setRelativeLayer(mOriginLeash, openingSurfaces.get(0), 1)
-                    .setRelativeLayer(
-                            closingSurfaces.get(closingSurfaces.size() - 1), mOriginLeash, 1);
+            if (!openingSurfaces.isEmpty()) {
+                tmpTransaction
+                        .setRelativeLayer(mOriginLeash, openingSurfaces.get(0), 1);
+            } else {
+                logW("Missing opening surface is exit transition");
+            }
+            if (!closingSurfaces.isEmpty()) {
+                tmpTransaction.setRelativeLayer(
+                        closingSurfaces.get(closingSurfaces.size() - 1), mOriginLeash, 1);
+            } else {
+                logW("Missing closing surface is exit transition");
+            }
         }
+        mStartTransaction.merge(tmpTransaction);
 
         // Attach origin UIComponent to origin leash.
         mOriginTransaction = mOrigin.newTransaction();
@@ -300,6 +328,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
     }
 
     private void cancel() {
+        logD("cancel()");
         if (mAnimator != null) {
             mAnimator.cancel();
         }
@@ -309,6 +338,10 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         if (OriginTransitionSession.DEBUG) {
             Log.d(TAG, msg);
         }
+    }
+
+    private static void logW(String msg) {
+        Log.w(TAG, msg);
     }
 
     private static void logE(String msg) {

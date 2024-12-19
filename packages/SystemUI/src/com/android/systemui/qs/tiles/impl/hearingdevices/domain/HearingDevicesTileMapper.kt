@@ -37,8 +37,8 @@ constructor(
     override fun map(config: QSTileConfig, data: HearingDevicesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_hearing_devices_label)
-            iconRes = R.drawable.qs_hearing_devices_icon
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.qs_hearing_devices_icon
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             if (data.isAnyActiveHearingDevice) {

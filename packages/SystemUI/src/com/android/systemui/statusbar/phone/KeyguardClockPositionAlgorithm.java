@@ -33,7 +33,6 @@ import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.LargeScreenHeaderHelper;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 import javax.inject.Inject;
 
@@ -53,19 +52,6 @@ public class KeyguardClockPositionAlgorithm {
      * Height of {@link KeyguardStatusView}.
      */
     private int mKeyguardStatusHeight;
-
-    /**
-     * Height of user avatar used by the multi-user switcher. This could either be the
-     * {@link KeyguardUserSwitcherListView} when it is closed and only the current user's icon is
-     * visible, or it could be height of the avatar used by the
-     * {@link com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController}.
-     */
-    private int mUserSwitchHeight;
-
-    /**
-     * Preferred Y position of user avatar used by the multi-user switcher.
-     */
-    private int mUserSwitchPreferredY;
 
     /**
      * Minimum top margin to avoid overlap with status bar or multi-user switcher avatar.
@@ -184,17 +170,13 @@ public class KeyguardClockPositionAlgorithm {
      * Sets up algorithm values.
      */
     public void setup(int keyguardStatusBarHeaderHeight, float panelExpansion,
-            int keyguardStatusHeight, int userSwitchHeight, int userSwitchPreferredY,
-            float dark, float overStretchAmount, boolean bypassEnabled,
+            int keyguardStatusHeight, float dark, float overStretchAmount, boolean bypassEnabled,
             int unlockedStackScrollerPadding, float qsExpansion, int cutoutTopInset,
             boolean isSplitShade, float udfpsTop, float clockBottom, boolean isClockTopAligned) {
-        mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
-                userSwitchHeight);
+        mMinTopMargin = keyguardStatusBarHeaderHeight + mContainerTopPadding;
         mPanelExpansion = BouncerPanelExpansionCalculator
                 .getKeyguardClockScaledExpansion(panelExpansion);
         mKeyguardStatusHeight = keyguardStatusHeight + mStatusViewBottomMargin;
-        mUserSwitchHeight = userSwitchHeight;
-        mUserSwitchPreferredY = userSwitchPreferredY;
         mDarkAmount = dark;
         mOverStretchAmount = overStretchAmount;
         mBypassEnabled = bypassEnabled;
@@ -210,7 +192,6 @@ public class KeyguardClockPositionAlgorithm {
     public void run(Result result) {
         final int y = getClockY(mPanelExpansion, mDarkAmount);
         result.clockY = y;
-        result.userSwitchY = getUserSwitcherY(mPanelExpansion);
         result.clockYFullyDozing = getClockY(
                 1.0f /* panelExpansion */, 1.0f /* darkAmount */);
         result.clockAlpha = getClockAlpha(y);
@@ -224,7 +205,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {
-            return getClockY(1.0f, mDarkAmount) + mUserSwitchHeight;
+            return getClockY(1.0f, mDarkAmount);
         } else {
             return getClockY(1.0f, mDarkAmount) + mKeyguardStatusHeight;
         }
@@ -236,7 +217,7 @@ public class KeyguardClockPositionAlgorithm {
         } else if (mIsSplitShade) {
             // mCurrentBurnInOffsetY is subtracted to make notifications not follow clock adjustment
             // for burn-in. It can make pulsing notification go too high and it will get clipped
-            return clockYPosition - mSplitShadeTopNotificationsMargin + mUserSwitchHeight
+            return clockYPosition - mSplitShadeTopNotificationsMargin
                     - (int) mCurrentBurnInOffsetY;
         } else {
             return clockYPosition + mKeyguardStatusHeight;
@@ -251,7 +232,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding - nsslTop;
         } else if (mIsSplitShade) {
-            return mSplitShadeTargetTopMargin + mUserSwitchHeight - nsslTop;
+            return mSplitShadeTargetTopMargin - nsslTop;
         } else {
             // Non-bypass portrait shade already uses values from nsslTop
             // so we don't need to subtract it here.
@@ -339,17 +320,6 @@ public class KeyguardClockPositionAlgorithm {
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mOverStretchAmount);
     }
 
-    private int getUserSwitcherY(float panelExpansion) {
-        float userSwitchYRegular = mUserSwitchPreferredY;
-        float userSwitchYBouncer = -mKeyguardStatusHeight - mUserSwitchHeight;
-
-        // Move user-switch up while collapsing the shade
-        float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(panelExpansion);
-        float userSwitchY = MathUtils.lerp(userSwitchYBouncer, userSwitchYRegular, shadeExpansion);
-
-        return (int) (userSwitchY + mOverStretchAmount);
-    }
-
     /**
      * We might want to fade out the clock when the user is swiping up.
      * One exception is when the bouncer will become visible, in this cause the clock
@@ -389,11 +359,6 @@ public class KeyguardClockPositionAlgorithm {
          * The y translation of the clock.
          */
         public int clockY;
-
-        /**
-         * The y translation of the multi-user switch.
-         */
-        public int userSwitchY;
 
         /**
          * The y translation of the clock when we're fully dozing.

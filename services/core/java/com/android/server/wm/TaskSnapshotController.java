@@ -36,7 +36,9 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.wm.BaseAppSnapshotPersister.PersistInfoProvider;
+import com.android.window.flags.Flags;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -154,6 +156,8 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
      * The attributes of task snapshot are based on task configuration. But sometimes the
      * configuration may have been changed during a transition, so supply the ChangeInfo that
      * stored the previous appearance of the closing task.
+     *
+     * The snapshot won't be created immediately if it should be captured as fake snapshot.
      */
     void recordSnapshot(Task task, Transition.ChangeInfo changeInfo) {
         mCurrentChangeInfo = changeInfo;
@@ -164,13 +168,35 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
     }
 
-    TaskSnapshot recordSnapshot(Task task) {
-        final TaskSnapshot snapshot = recordSnapshotInner(task);
-        if (snapshot != null && !task.isActivityTypeHome()) {
-            mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-            task.onSnapshotChanged(snapshot);
+    void recordSnapshot(Task task) {
+        if (shouldDisableSnapshots()) {
+            return;
         }
-        return snapshot;
+        final SnapshotSupplier supplier = getRecordSnapshotSupplier(task);
+        if (supplier == null) {
+            return;
+        }
+        final int mode = getSnapshotMode(task);
+        if (Flags.excludeDrawingAppThemeSnapshotFromLock() && mode == SNAPSHOT_MODE_APP_THEME) {
+            mService.mH.post(supplier::handleSnapshot);
+        } else {
+            supplier.handleSnapshot();
+        }
+    }
+
+    /**
+     * Note that the snapshot is not created immediately, if the returned supplier is non-null, the
+     * caller must call {@link AbsAppSnapshotController.SnapshotSupplier#get} or
+     * {@link AbsAppSnapshotController.SnapshotSupplier#handleSnapshot} to complete the entire
+     * record request.
+     */
+    SnapshotSupplier getRecordSnapshotSupplier(Task task) {
+        return recordSnapshotInner(task, true /* allowAppTheme */, snapshot -> {
+            if (!task.isActivityTypeHome()) {
+                mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                task.onSnapshotChanged(snapshot);
+            }
+        });
     }
 
     /**
@@ -328,27 +354,38 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
      * Record task snapshots before shutdown.
      */
     void prepareShutdown() {
-        if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
+        if (!Flags.recordTaskSnapshotsBeforeShutdown()) {
             return;
         }
-        // Make write items run in a batch.
-        mPersister.mSnapshotPersistQueue.setPaused(true);
-        mPersister.mSnapshotPersistQueue.prepareShutdown();
-        for (int i = 0; i < mService.mRoot.getChildCount(); i++) {
-            mService.mRoot.getChildAt(i).forAllLeafTasks(task -> {
-                if (task.isVisible() && !task.isActivityTypeHome()) {
-                    final TaskSnapshot snapshot = captureSnapshot(task);
-                    if (snapshot != null) {
-                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+        final ArrayList<SnapshotSupplier> supplierArrayList = new ArrayList<>();
+        synchronized (mService.mGlobalLock) {
+            // Make write items run in a batch.
+            mPersister.mSnapshotPersistQueue.setPaused(true);
+            mPersister.mSnapshotPersistQueue.prepareShutdown();
+            for (int i = 0; i < mService.mRoot.getChildCount(); i++) {
+                mService.mRoot.getChildAt(i).forAllLeafTasks(task -> {
+                    if (task.isVisible() && !task.isActivityTypeHome()) {
+                        final SnapshotSupplier supplier = captureSnapshot(task,
+                                true /* allowAppTheme */);
+                        if (supplier != null) {
+                            supplier.setConsumer(t ->
+                                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, t));
+                            supplierArrayList.add(supplier);
+                        }
                     }
-                }
-            }, true /* traverseTopToBottom */);
+                }, true /* traverseTopToBottom */);
+            }
         }
-        mPersister.mSnapshotPersistQueue.setPaused(false);
+        for (int i = supplierArrayList.size() - 1; i >= 0; --i) {
+            supplierArrayList.get(i).handleSnapshot();
+        }
+        synchronized (mService.mGlobalLock) {
+            mPersister.mSnapshotPersistQueue.setPaused(false);
+        }
     }
 
     void waitFlush(long timeout) {
-        if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
+        if (!Flags.recordTaskSnapshotsBeforeShutdown()) {
             return;
         }
         mPersister.mSnapshotPersistQueue.waitFlush(timeout);

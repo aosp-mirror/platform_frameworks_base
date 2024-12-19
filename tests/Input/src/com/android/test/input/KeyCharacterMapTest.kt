@@ -16,10 +16,17 @@
 
 package com.android.test.input
 
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
+
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 
+import com.android.hardware.input.Flags
+
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -30,26 +37,38 @@ import org.junit.Test
  *
  */
 class KeyCharacterMapTest {
+    @get:Rule
+    val setFlagsRule = SetFlagsRule()
+
     @Test
+    @EnableFlags(Flags.FLAG_REMOVE_FALLBACK_MODIFIERS)
     fun testGetFallback() {
         // Based off of VIRTUAL kcm fallbacks.
         val keyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
 
         // One modifier fallback.
-        assertEquals(
-            keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_SPACE,
-                KeyEvent.META_CTRL_ON).keyCode,
-            KeyEvent.KEYCODE_LANGUAGE_SWITCH)
+        val oneModifierFallback = keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_SPACE,
+            KeyEvent.META_CTRL_ON)
+        assertEquals(KeyEvent.KEYCODE_LANGUAGE_SWITCH, oneModifierFallback.keyCode)
+        assertEquals(0, oneModifierFallback.metaState)
 
         // Multiple modifier fallback.
-        assertEquals(
-            keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_DEL,
-                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON).keyCode,
-            KeyEvent.KEYCODE_BACK)
+        val twoModifierFallback = keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_DEL,
+            KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON)
+        assertEquals(KeyEvent.KEYCODE_BACK, twoModifierFallback.keyCode)
+        assertEquals(0, twoModifierFallback.metaState)
 
         // No default button, fallback only.
-        assertEquals(
-            keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_BUTTON_A, 0).keyCode,
-            KeyEvent.KEYCODE_DPAD_CENTER)
+        val keyOnlyFallback =
+            keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_BUTTON_A, 0)
+        assertEquals(KeyEvent.KEYCODE_DPAD_CENTER, keyOnlyFallback.keyCode)
+        assertEquals(0, keyOnlyFallback.metaState)
+
+        // A key event that is not an exact match for a fallback. Expect a null return.
+        // E.g. Ctrl + Space -> LanguageSwitch
+        //      Ctrl + Alt + Space -> Ctrl + Alt + Space (No fallback).
+        val noMatchFallback = keyCharacterMap.getFallbackAction(KeyEvent.KEYCODE_SPACE,
+            KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON)
+        assertNull(noMatchFallback)
     }
 }

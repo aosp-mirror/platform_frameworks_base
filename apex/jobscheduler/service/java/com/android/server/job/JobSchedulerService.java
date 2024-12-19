@@ -5766,6 +5766,41 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure
+    int getJobWakelockTag(PrintWriter pw, String pkgName, int userId, @Nullable String namespace,
+            int jobId) {
+        try {
+            final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
+                    userId != UserHandle.USER_ALL ? userId : UserHandle.USER_SYSTEM);
+            if (uid < 0) {
+                pw.print("unknown(");
+                pw.print(pkgName);
+                pw.println(")");
+                return JobSchedulerShellCommand.CMD_ERR_NO_PACKAGE;
+            }
+
+            synchronized (mLock) {
+                final JobStatus js = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+                if (DEBUG) {
+                    Slog.d(TAG, "get-job-wakelock-tag " + namespace
+                            + "/" + uid + "/" + jobId + ": " + js);
+                }
+                if (js == null) {
+                    pw.print("unknown(");
+                    UserHandle.formatUid(pw, uid);
+                    pw.print("/jid");
+                    pw.print(jobId);
+                    pw.println(")");
+                    return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
+                }
+
+                pw.println(js.getWakelockTag());
+            }
+        } catch (RemoteException e) {
+            // can't happen
+        }
+        return 0;
+    }
+
     int getJobState(PrintWriter pw, String pkgName, int userId, @Nullable String namespace,
             int jobId) {
         try {
@@ -5944,6 +5979,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_HISTORY_API,
                     android.app.job.Flags.getPendingJobReasonsHistoryApi());
+            pw.println();
+            pw.print(android.app.job.Flags.FLAG_ADD_TYPE_INFO_TO_WAKELOCK_TAG,
+                    android.app.job.Flags.addTypeInfoToWakelockTag());
             pw.println();
             pw.decreaseIndent();
             pw.println();

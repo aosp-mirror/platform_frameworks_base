@@ -204,3 +204,10 @@ flag {
     description: "Allows the user to disable input scrolling acceleration for mouse."
     bug: "383555305"
 }
+
+flag {
+  name: "remove_fallback_modifiers"
+  namespace: "input"
+  description: "Removes modifiers from the original key event that activated the fallback, ensuring that only the intended fallback event is sent."
+  bug: "382545048"
+}

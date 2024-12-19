@@ -35,8 +35,6 @@ import android.annotation.NonNull;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.window.flags.Flags;
-
 /**
  * Encapsulate overrides and configurations about app compat reachability.
  */
@@ -157,33 +155,27 @@ class AppCompatReachabilityOverrides {
     }
 
     /**
-     * @return {@value true} if the vertical reachability should be allowed in case of
+     * @return {@code true} if the vertical reachability should be allowed in case of
      * thin letterboxing.
      */
     boolean allowVerticalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingPolicy()) {
-            return true;
-        }
         // When the flag is enabled we allow vertical reachability only if the
         // app is not thin letterboxed vertically.
         return !isVerticalThinLetterboxed();
     }
 
     /**
-     * @return {@value true} if the horizontal reachability should be enabled in case of
+     * @return {@code true} if the horizontal reachability should be enabled in case of
      * thin letterboxing.
      */
     boolean allowHorizontalReachabilityForThinLetterbox() {
-        if (!Flags.disableThinLetterboxingPolicy()) {
-            return true;
-        }
         // When the flag is enabled we allow horizontal reachability only if the
         // app is not thin pillarboxed.
         return !isHorizontalThinLetterboxed();
     }
 
     /**
-     * @return {@value true} if the resulting app is letterboxed in a way defined as thin.
+     * @return {@code true} if the resulting app is letterboxed in a way defined as thin.
      */
     boolean isVerticalThinLetterboxed() {
         final int thinHeight = mAppCompatConfiguration.getThinLetterboxHeightPx();
@@ -200,7 +192,7 @@ class AppCompatReachabilityOverrides {
     }
 
     /**
-     * @return {@value true} if the resulting app is pillarboxed in a way defined as thin.
+     * @return {@code true} if the resulting app is pillarboxed in a way defined as thin.
      */
     boolean isHorizontalThinLetterboxed() {
         final int thinWidth = mAppCompatConfiguration.getThinLetterboxWidthPx();

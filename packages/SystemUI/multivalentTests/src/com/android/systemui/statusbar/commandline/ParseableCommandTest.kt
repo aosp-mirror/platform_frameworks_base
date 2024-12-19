@@ -48,12 +48,14 @@ class ParseableCommandTest : SysuiTestCase() {
         val mySubCommand =
             object : ParseableCommand("subCommand") {
                 val flag by flag("flag")
+
                 override fun execute(pw: PrintWriter) {}
             }
 
         val mySubCommand2 =
             object : ParseableCommand("subCommand2") {
                 val flag by flag("flag")
+
                 override fun execute(pw: PrintWriter) {}
             }
 
@@ -141,6 +143,7 @@ class ParseableCommandTest : SysuiTestCase() {
         val cmd =
             object : ParseableCommand("test-command") {
                 val flag by flag("flag")
+
                 override fun execute(pw: PrintWriter) {}
             }
 
@@ -162,6 +165,7 @@ class ParseableCommandTest : SysuiTestCase() {
                 var onParseFailedCalled = false
 
                 override fun execute(pw: PrintWriter) {}
+
                 override fun onParseFailed(error: ArgParseError) {
                     onParseFailedCalled = true
                 }
@@ -204,11 +208,7 @@ class ParseableCommandTest : SysuiTestCase() {
         val cmd =
             object : ParseableCommand(name) {
                 val singleRequiredParam: String by
-                    param(
-                            longName = "param1",
-                            shortName = "p",
-                            valueParser = Type.String,
-                        )
+                    param(longName = "param1", shortName = "p", valueParser = Type.String)
                         .required()
 
                 override fun execute(pw: PrintWriter) {}
@@ -253,6 +253,7 @@ class ParseableCommandTest : SysuiTestCase() {
         val cmd =
             object : ParseableCommand(name) {
                 val subCmd by subCommand(subCmd)
+
                 override fun execute(pw: PrintWriter) {}
             }
 
@@ -293,18 +294,72 @@ class ParseableCommandTest : SysuiTestCase() {
         assertThat(myCommand.subCommand?.param1).isEqualTo("arg2")
     }
 
-    class MyCommand(
-        private val onExecute: ((MyCommand) -> Unit)? = null,
-    ) : ParseableCommand(name) {
+    @Test
+    fun commandWithSubCommand_allOptional_nothingPassed_execCalled() {
+        // GIVEN single sub command
+        val subName = "sub-command"
+        val subCmd =
+            object : ParseableCommand(subName) {
+                var execd = false
+
+                override fun execute(pw: PrintWriter) {
+                    execd = true
+                }
+            }
+
+        // GIVEN command wrapping the optional subcommand
+        val cmd =
+            object : ParseableCommand(name) {
+                val sub: ParseableCommand? by subCommand(subCmd)
+                var execCalled = false
+
+                override fun execute(pw: PrintWriter) {
+                    execCalled = true
+                }
+            }
+
+        // WHEN the base command is sent (i.e., sub-command is missing
+        cmd.execute(pw, listOf())
+        // THEN exec is still called, since this is a valid command
+        assertThat(cmd.execCalled).isTrue()
+    }
+
+    @Test
+    fun commandWithSubCommand_required_nothingPassed_execNotCalled() {
+        // GIVEN single sub command
+        val subName = "sub-command"
+        val subCmd =
+            object : ParseableCommand(subName) {
+                var execd = false
+
+                override fun execute(pw: PrintWriter) {
+                    execd = true
+                }
+            }
+
+        // GIVEN command wrapping the required subcommand
+        val cmd =
+            object : ParseableCommand(name) {
+                val sub: ParseableCommand? by subCommand(subCmd).required()
+                var execCalled = false
+
+                override fun execute(pw: PrintWriter) {
+                    execCalled = true
+                }
+            }
+
+        // WHEN the base command is sent (i.e., sub-command is missing
+        cmd.execute(pw, listOf())
+        // THEN exec is not called, since the subcommand is required
+        assertThat(cmd.execCalled).isFalse()
+    }
+
+    class MyCommand(private val onExecute: ((MyCommand) -> Unit)? = null) : ParseableCommand(name) {
 
         val flag1 by flag(shortName = "f", longName = "flag1", description = "flag 1 for test")
         val flag2 by flag(shortName = "g", longName = "flag2", description = "flag 2 for test")
         val singleParam: String? by
-            param(
-                shortName = "a",
-                longName = "arg1",
-                valueParser = Type.String,
-            )
+            param(shortName = "a", longName = "arg1", valueParser = Type.String)
 
         override fun execute(pw: PrintWriter) {
             onExecute?.invoke(this)

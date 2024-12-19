@@ -539,7 +539,10 @@ public class HubEndpoint {
             return this;
         }
 
-        /** Attach a callback interface for lifecycle events for this Endpoint */
+        /**
+         * Attach a callback interface for lifecycle events for this Endpoint. Callback will be
+         * posted to the main thread.
+         */
         @NonNull
         public Builder setLifecycleCallback(
                 @NonNull HubEndpointLifecycleCallback lifecycleCallback) {
@@ -560,7 +563,10 @@ public class HubEndpoint {
             return this;
         }
 
-        /** Attach a callback interface for message events for this Endpoint */
+        /**
+         * Attach a callback interface for message events for this Endpoint. Callback will be posted
+         * to the main thread.
+         */
         @NonNull
         public Builder setMessageCallback(@NonNull HubEndpointMessageCallback messageCallback) {
             mMessageCallback = messageCallback;

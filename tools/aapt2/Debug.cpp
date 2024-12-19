@@ -683,8 +683,6 @@ class ChunkPrinter {
       item->PrettyPrint(printer_);
       printer_->Print(")");
     }
-
-    printer_->Print("\n");
   }
 
   void PrintQualifiers(uint32_t qualifiers) const {
@@ -763,11 +761,13 @@ class ChunkPrinter {
 
   bool PrintTableType(const ResTable_type* chunk) {
     printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
-    printer_->Print(StringPrintf(
-        " name: %s",
-        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1)
-            .c_str()));
+    const auto name =
+        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1);
+    printer_->Print(StringPrintf(" name: %s", name.c_str()));
     printer_->Print(StringPrintf(" flags: 0x%02x", android::util::DeviceToHost32(chunk->flags)));
+    printer_->Print(android::util::DeviceToHost32(chunk->flags) & ResTable_type::FLAG_SPARSE
+                        ? " (SPARSE)"
+                        : " (DENSE)");
     printer_->Print(
         StringPrintf(" entryCount: %u", android::util::DeviceToHost32(chunk->entryCount)));
     printer_->Print(
@@ -777,8 +777,7 @@ class ChunkPrinter {
     config.copyFromDtoH(chunk->config);
     printer_->Print(StringPrintf(" config: %s\n", config.to_string().c_str()));
 
-    const ResourceType* type = ParseResourceType(
-        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1));
+    const ResourceType* type = ParseResourceType(name);
 
     printer_->Indent();
 
@@ -817,11 +816,8 @@ class ChunkPrinter {
         for (size_t i = 0; i < map_entry_count; i++) {
           PrintResValue(&(maps[i].value), config, type);
 
-          printer_->Print(StringPrintf(
-              " name: %s name-id:%d\n",
-              android::util::GetString(key_pool_, android::util::DeviceToHost32(maps[i].name.ident))
-                  .c_str(),
-              android::util::DeviceToHost32(maps[i].name.ident)));
+          printer_->Print(StringPrintf(" name-id: 0x%08x\n",
+                                       android::util::DeviceToHost32(maps[i].name.ident)));
         }
       } else {
         printer_->Print("\n");
@@ -829,6 +825,8 @@ class ChunkPrinter {
         // Print the value of the entry
         Res_value value = entry->value();
         PrintResValue(&value, config, type);
+
+        printer_->Print("\n");
       }
 
       printer_->Undent();

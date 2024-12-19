@@ -37,6 +37,7 @@ constructor(
 
     override fun map(config: QSTileConfig, data: ReduceBrightColorsTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
+            val iconRes: Int
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 iconRes = R.drawable.qs_extra_dim_icon_on
@@ -50,7 +51,7 @@ constructor(
                     resources
                         .getStringArray(R.array.tile_states_reduce_brightness)[Tile.STATE_INACTIVE]
             }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             label =
                 resources.getString(com.android.internal.R.string.reduce_bright_colors_feature_name)
             contentDescription = label

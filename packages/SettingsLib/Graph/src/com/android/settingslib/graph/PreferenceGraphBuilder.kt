@@ -42,6 +42,7 @@ import com.android.settingslib.graph.proto.PreferenceProto.ActionTarget
 import com.android.settingslib.graph.proto.PreferenceScreenProto
 import com.android.settingslib.graph.proto.TextProto
 import com.android.settingslib.metadata.BooleanValue
+import com.android.settingslib.metadata.FloatPersistentPreference
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
 import com.android.settingslib.metadata.PreferenceHierarchy
@@ -390,7 +391,13 @@ fun PreferenceMetadata.toProto(
     }
     persistent = metadata.isPersistent(context)
     if (persistent) {
-        if (metadata is PersistentPreference<*>) sensitivityLevel = metadata.sensitivityLevel
+        if (metadata is PersistentPreference<*>) {
+            sensitivityLevel = metadata.sensitivityLevel
+            val readPermissions = metadata.getReadPermissions(context)
+            readPermissions.forEach { addReadPermissions(it) }
+            val writePermissions = metadata.getWritePermissions(context)
+            writePermissions.forEach { addWritePermissions(it) }
+        }
         if (
             flags.includeValue() &&
                 enabled &&
@@ -399,15 +406,13 @@ fun PreferenceMetadata.toProto(
                 metadata is PersistentPreference<*> &&
                 metadata.evalReadPermit(context, callingPid, callingUid) == ReadWritePermit.ALLOW
         ) {
+            val storage = metadata.storage(context)
             value = preferenceValueProto {
                 when (metadata) {
-                    is BooleanValue ->
-                        metadata.storage(context).getBoolean(metadata.key)?.let {
-                            booleanValue = it
-                        }
-                    is RangeValue -> {
-                        metadata.storage(context).getInt(metadata.key)?.let { intValue = it }
-                    }
+                    is BooleanValue -> storage.getBoolean(metadata.key)?.let { booleanValue = it }
+                    is RangeValue -> storage.getInt(metadata.key)?.let { intValue = it }
+                    is FloatPersistentPreference ->
+                        storage.getFloat(metadata.key)?.let { floatValue = it }
                     else -> {}
                 }
             }
@@ -421,6 +426,7 @@ fun PreferenceMetadata.toProto(
                             max = metadata.getMaxValue(context)
                             step = metadata.getIncrementStep(context)
                         }
+                    is FloatPersistentPreference -> floatType = true
                     else -> {}
                 }
             }

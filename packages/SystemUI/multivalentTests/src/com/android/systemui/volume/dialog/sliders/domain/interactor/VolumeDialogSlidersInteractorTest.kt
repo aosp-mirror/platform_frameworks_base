@@ -172,9 +172,9 @@ class VolumeDialogSlidersInteractorTest : SysuiTestCase() {
                 runCurrent()
 
                 assertThat(slidersModel!!.slider)
-                    .isEqualTo(VolumeDialogSliderType.Stream(AudioManager.STREAM_MUSIC))
+                    .isEqualTo(VolumeDialogSliderType.Stream(AudioManager.STREAM_SYSTEM))
                 assertThat(slidersModel!!.floatingSliders)
-                    .containsExactly(VolumeDialogSliderType.Stream(AudioManager.STREAM_SYSTEM))
+                    .containsExactly(VolumeDialogSliderType.Stream(AudioManager.STREAM_MUSIC))
             }
         }
     }

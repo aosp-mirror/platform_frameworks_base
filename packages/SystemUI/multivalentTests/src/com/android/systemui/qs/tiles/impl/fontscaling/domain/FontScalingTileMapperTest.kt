@@ -58,8 +58,11 @@ class FontScalingTileMapperTest : SysuiTestCase() {
 
     private fun createFontScalingTileState(): QSTileState =
         QSTileState(
-            Icon.Loaded(context.getDrawable(R.drawable.ic_qs_font_scaling)!!, null),
-            R.drawable.ic_qs_font_scaling,
+            Icon.Loaded(
+                context.getDrawable(R.drawable.ic_qs_font_scaling)!!,
+                null,
+                R.drawable.ic_qs_font_scaling,
+            ),
             context.getString(R.string.quick_settings_font_scaling_label),
             QSTileState.ActivationState.ACTIVE,
             null,

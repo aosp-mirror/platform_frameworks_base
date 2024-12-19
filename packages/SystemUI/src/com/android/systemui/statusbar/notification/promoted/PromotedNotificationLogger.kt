@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.promoted
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.ERROR
 import com.android.systemui.log.core.LogLevel.INFO
-import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
@@ -27,7 +26,7 @@ import javax.inject.Inject
 
 class PromotedNotificationLogger
 @Inject
-constructor(@NotificationLog private val buffer: LogBuffer) {
+constructor(@PromotedNotificationLog private val buffer: LogBuffer) {
     fun logExtractionSkipped(entry: NotificationEntry, reason: String) {
         buffer.log(
             EXTRACTION_TAG,

@@ -62,6 +62,8 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     private Letterbox mLetterbox;
     private LetterboxTest.SurfaceControlMocker mSurfaces;
 
+    private WindowState mWindowState;
+
     @Before
     public void setUp() throws Exception {
         mSurfaces = new LetterboxTest.SurfaceControlMocker();
@@ -72,6 +74,7 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
         doReturn(false).when(letterboxOverrides).hasWallpaperBackgroundForLetterbox();
         doReturn(0).when(letterboxOverrides).getLetterboxWallpaperBlurRadiusPx();
         doReturn(0.5f).when(letterboxOverrides).getLetterboxWallpaperDarkScrimAlpha();
+        mWindowState = createWindowState();
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 mock(AppCompatReachabilityPolicy.class), letterboxOverrides,
                 () -> mock(SurfaceControl.class));
@@ -83,7 +86,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testSurface_createdHasSlipperyInput_scrollingFromLetterboxDisabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
 
         assertNotNull(mSurfaces.top);
@@ -100,7 +102,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testInputSurface_notCreated_scrollingFromLetterboxDisabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
 
         assertNull(mSurfaces.topInput);
@@ -111,7 +112,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testSurface_createdHasNoInput_scrollingFromLetterboxEnabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
 
         assertNotNull(mSurfaces.top);
@@ -124,7 +124,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testInputSurface_createdHasSpyInput_scrollingFromLetterboxEnabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
 
         assertNotNull(mSurfaces.topInput);
@@ -141,7 +140,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testInputSurfaceOrigin_applied_scrollingFromLetterboxEnabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
 
         verify(mTransaction).setPosition(mSurfaces.topInput, -1000, -2000);
@@ -152,7 +150,6 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
     public void testInputSurfaceOrigin_changeCausesReapply_scrollingFromLetterboxEnabled() {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
 
-        attachInput();
         applySurfaceChanges();
         clearInvocations(mTransaction);
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(0, 0));
@@ -166,13 +163,12 @@ public class LetterboxAttachInputTest extends WindowTestsBase {
 
     private void applySurfaceChanges() {
         mLetterbox.applySurfaceChanges(/* syncTransaction */ mTransaction,
-                /* pendingTransaction */ mTransaction);
+                /* pendingTransaction */ mTransaction, mWindowState);
     }
 
-    private void attachInput() {
+    private WindowState createWindowState() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
         final WindowToken windowToken = createTestWindowToken(0, mDisplayContent);
-        WindowState windowState = createWindowState(attrs, windowToken);
-        mLetterbox.attachInput(windowState);
+        return createWindowState(attrs, windowToken);
     }
 }

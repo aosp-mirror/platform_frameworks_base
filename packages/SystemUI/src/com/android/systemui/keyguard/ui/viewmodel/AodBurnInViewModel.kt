@@ -24,7 +24,6 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -194,12 +193,7 @@ constructor(
                 (!useAltAod) && keyguardClockViewModel.clockSize.value == ClockSize.LARGE
 
             val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolated).toInt()
-            val translationY =
-                if (MigrateClocksToBlueprint.isEnabled) {
-                    max(params.topInset - params.minViewY, burnInY)
-                } else {
-                    max(params.topInset, params.minViewY + burnInY) - params.minViewY
-                }
+            val translationY = max(params.topInset - params.minViewY, burnInY)
             BurnInModel(
                 translationX = MathUtils.lerp(0, burnIn.translationX, interpolated).toInt(),
                 translationY = translationY,

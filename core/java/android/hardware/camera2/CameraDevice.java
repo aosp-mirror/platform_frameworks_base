@@ -417,6 +417,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *                                  or if any of the output configurations sets a stream use
      *                                  case different from {@link
      *                                  android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT}.
+     * @throws UnsupportedOperationException if the camera has been opened in shared mode
      * @see CameraExtensionCharacteristics#getSupportedExtensions
      * @see CameraExtensionCharacteristics#getExtensionSupportedSizes
      */
@@ -1258,7 +1259,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *                                  configurations are empty; or the session configuration
      *                                  executor is invalid;
      *                                  or the output dynamic range combination is
-     *                                  invalid/unsupported.
+     *                                  invalid/unsupported; or the session type is not shared when
+     *                                  camera has been opened in shared mode.
      * @throws CameraAccessException In case the camera device is no longer connected or has
      *                               encountered a fatal error.
      * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
@@ -1292,6 +1294,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if this is not a primary client of a camera opened in
+     *                                       shared mode
      */
     @NonNull
     public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
@@ -1328,6 +1332,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if this is not a primary client of a camera opened in
+     *                                       shared mode
      *
      * @see #TEMPLATE_PREVIEW
      * @see #TEMPLATE_RECORD
@@ -1369,6 +1375,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if the camera has been opened in shared mode
      *
      * @see CaptureRequest.Builder
      * @see TotalCaptureResult

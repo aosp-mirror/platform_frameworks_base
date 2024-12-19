@@ -17,26 +17,40 @@
 package com.android.systemui.grid.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ParentDataModifierNode
 import androidx.compose.ui.semantics.CollectionInfo
-import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.collectionInfo
-import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.util.fastMapIndexed
 import kotlin.math.max
 
+/** Creates a [SpannedGridState] that is remembered across recompositions. */
+@Composable
+fun rememberSpannedGridState(): SpannedGridState {
+    return remember { SpannedGridStateImpl() }
+}
+
 /**
- * Horizontal (non lazy) grid that supports [spans] for its elements.
+ * Horizontal (non lazy) grid that supports spans for its elements.
  *
  * The elements will be laid down vertically first, and then by columns. So assuming LTR layout, it
  * will be (for a span list `[2, 1, 2, 1, 1, 1, 1, 1]` and 4 rows):
@@ -50,8 +64,11 @@ import kotlin.math.max
  * where repeated numbers show larger span. If an element doesn't fit in a column due to its span,
  * it will start a new column.
  *
- * Elements in [spans] must be in the interval `[1, rows]` ([rows] > 0), and the composables are
- * associated with the corresponding span based on their index.
+ * Elements in [composables] can provide their span using [SpannedGridScope.span] and have a default
+ * span of 1. Spans must be in the interval `[1, columns]` ([columns] > 0).
+ *
+ * Passing a [SpannedGridState] can be useful to get access to the [SpannedGridState.positions],
+ * representing the row and column of each item.
  *
  * Due to the fact that elements are seen as a linear list that's laid out in a grid, the semantics
  * represent the collection as a list of elements.
@@ -61,23 +78,23 @@ fun HorizontalSpannedGrid(
     rows: Int,
     columnSpacing: Dp,
     rowSpacing: Dp,
-    spans: List<Int>,
     modifier: Modifier = Modifier,
-    composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
+    state: SpannedGridState = rememberSpannedGridState(),
+    composables: @Composable SpannedGridScope.() -> Unit,
 ) {
     SpannedGrid(
         primarySpaces = rows,
         crossAxisSpacing = rowSpacing,
         mainAxisSpacing = columnSpacing,
-        spans = spans,
         isVertical = false,
+        state = state,
         modifier = modifier,
         composables = composables,
     )
 }
 
 /**
- * Horizontal (non lazy) grid that supports [spans] for its elements.
+ * Horizontal (non lazy) grid that supports spans for its elements.
  *
  * The elements will be laid down horizontally first, and then by rows. So assuming LTR layout, it
  * will be (for a span list `[2, 1, 2, 1, 1, 1, 1, 1]` and 4 columns):
@@ -90,8 +107,11 @@ fun HorizontalSpannedGrid(
  * where repeated numbers show larger span. If an element doesn't fit in a row due to its span, it
  * will start a new row.
  *
- * Elements in [spans] must be in the interval `[1, columns]` ([columns] > 0), and the composables
- * are associated with the corresponding span based on their index.
+ * Elements in [composables] can provide their span using [SpannedGridScope.span] and have a default
+ * span of 1. Spans must be in the interval `[1, columns]` ([columns] > 0).
+ *
+ * Passing a [SpannedGridState] can be useful to get access to the [SpannedGridState.positions],
+ * representing the row and column of each item.
  *
  * Due to the fact that elements are seen as a linear list that's laid out in a grid, the semantics
  * represent the collection as a list of elements.
@@ -101,16 +121,16 @@ fun VerticalSpannedGrid(
     columns: Int,
     columnSpacing: Dp,
     rowSpacing: Dp,
-    spans: List<Int>,
     modifier: Modifier = Modifier,
-    composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
+    state: SpannedGridState = rememberSpannedGridState(),
+    composables: @Composable SpannedGridScope.() -> Unit,
 ) {
     SpannedGrid(
         primarySpaces = columns,
         crossAxisSpacing = columnSpacing,
         mainAxisSpacing = rowSpacing,
-        spans = spans,
         isVertical = true,
+        state = state,
         modifier = modifier,
         composables = composables,
     )
@@ -121,18 +141,15 @@ private fun SpannedGrid(
     primarySpaces: Int,
     crossAxisSpacing: Dp,
     mainAxisSpacing: Dp,
-    spans: List<Int>,
     isVertical: Boolean,
+    state: SpannedGridState,
     modifier: Modifier = Modifier,
-    composables: @Composable BoxScope.(spanIndex: Int) -> Unit,
+    composables: @Composable SpannedGridScope.() -> Unit,
 ) {
+    state as SpannedGridStateImpl
+    SideEffect { state.setOrientation(isVertical) }
+
     val crossAxisArrangement = Arrangement.spacedBy(crossAxisSpacing)
-    spans.forEachIndexed { index, span ->
-        check(span in 1..primarySpaces) {
-            "Span out of bounds. Span at index $index has value of $span which is outside of the " +
-                "expected rance of [1, $primarySpaces]"
-        }
-    }
 
     if (isVertical) {
         check(crossAxisSpacing >= 0.dp) { "Negative columnSpacing $crossAxisSpacing" }
@@ -142,21 +159,6 @@ private fun SpannedGrid(
         check(crossAxisSpacing >= 0.dp) { "Negative rowSpacing $crossAxisSpacing" }
     }
 
-    val totalMainAxisGroups: Int =
-        remember(primarySpaces, spans) {
-            var currentAccumulated = 0
-            var groups = 1
-            spans.forEach { span ->
-                if (currentAccumulated + span <= primarySpaces) {
-                    currentAccumulated += span
-                } else {
-                    groups += 1
-                    currentAccumulated = span
-                }
-            }
-            groups
-        }
-
     val slotPositionsAndSizesCache = remember {
         object {
             var sizes = IntArray(0)
@@ -165,25 +167,28 @@ private fun SpannedGrid(
     }
 
     Layout(
-        {
-            (0 until spans.size).map { spanIndex ->
-                Box(
-                    Modifier.semantics {
-                        collectionItemInfo =
-                            if (isVertical) {
-                                CollectionItemInfo(spanIndex, 1, 0, 1)
-                            } else {
-                                CollectionItemInfo(0, 1, spanIndex, 1)
-                            }
+        { SpannedGridScope.composables() },
+        modifier.semantics { collectionInfo = CollectionInfo(state.positions.size, 1) },
+    ) { measurables, constraints ->
+        val spans =
+            measurables.fastMapIndexed { index, measurable ->
+                measurable.spannedGridParentData.span.also { span ->
+                    check(span in 1..primarySpaces) {
+                        "Span out of bounds. Span at index $index has value of $span which is " +
+                            "outside of the expected rance of [1, $primarySpaces]"
                     }
-                ) {
-                    composables(spanIndex)
                 }
             }
-        },
-        modifier.semantics { collectionInfo = CollectionInfo(spans.size, 1) },
-    ) { measurables, constraints ->
-        check(measurables.size == spans.size)
+        var totalMainAxisGroups = 1
+        var currentAccumulated = 0
+        spans.forEach { span ->
+            if (currentAccumulated + span <= primarySpaces) {
+                currentAccumulated += span
+            } else {
+                totalMainAxisGroups += 1
+                currentAccumulated = span
+            }
+        }
         val crossAxisSize = if (isVertical) constraints.maxWidth else constraints.maxHeight
         check(crossAxisSize != Constraints.Infinity) { "Width must be constrained" }
         if (slotPositionsAndSizesCache.sizes.size != primarySpaces) {
@@ -275,11 +280,54 @@ private fun SpannedGrid(
                     }
                 placeable.placeRelative(x, y)
             }
+            state.onPlaceResults(placeables)
         }
     }
 }
 
-fun makeConstraint(isVertical: Boolean, mainAxisSize: Int, crossAxisSize: Int): Constraints {
+/** Receiver scope which is used by [VerticalSpannedGrid] and [HorizontalSpannedGrid] */
+@Stable
+object SpannedGridScope {
+    fun Modifier.span(span: Int) = this then SpanElement(span)
+}
+
+/** A state object that can be hoisted to observe items positioning */
+@Stable
+sealed interface SpannedGridState {
+    data class Position(val row: Int, val column: Int)
+
+    val positions: List<Position>
+}
+
+private class SpannedGridStateImpl : SpannedGridState {
+    private val _positions = mutableStateListOf<SpannedGridState.Position>()
+    override val positions
+        get() = _positions
+
+    private var isVertical by mutableStateOf(false)
+
+    fun onPlaceResults(placeResults: List<PlaceResult>) {
+        _positions.clear()
+        _positions.addAll(
+            placeResults.fastMap { placeResult ->
+                SpannedGridState.Position(
+                    row = if (isVertical) placeResult.mainAxisGroup else placeResult.slotIndex,
+                    column = if (isVertical) placeResult.slotIndex else placeResult.mainAxisGroup,
+                )
+            }
+        )
+    }
+
+    fun setOrientation(isVertical: Boolean) {
+        this.isVertical = isVertical
+    }
+}
+
+private fun makeConstraint(
+    isVertical: Boolean,
+    mainAxisSize: Int,
+    crossAxisSize: Int,
+): Constraints {
     return if (isVertical) {
         Constraints(maxHeight = mainAxisSize, minWidth = crossAxisSize, maxWidth = crossAxisSize)
     } else {
@@ -319,3 +367,27 @@ private data class PlaceResult(
     val slotIndex: Int,
     val mainAxisGroup: Int,
 )
+
+private val IntrinsicMeasurable.spannedGridParentData: SpannedGridParentData?
+    get() = parentData as? SpannedGridParentData
+
+private val SpannedGridParentData?.span: Int
+    get() = this?.span ?: 1
+
+private data class SpannedGridParentData(val span: Int = 1)
+
+private data class SpanElement(val span: Int) : ModifierNodeElement<SpanNode>() {
+    override fun create(): SpanNode {
+        return SpanNode(span)
+    }
+
+    override fun update(node: SpanNode) {
+        node.span = span
+    }
+}
+
+private class SpanNode(var span: Int) : ParentDataModifierNode, Modifier.Node() {
+    override fun Density.modifyParentData(parentData: Any?): Any? {
+        return ((parentData as? SpannedGridParentData) ?: SpannedGridParentData()).copy(span = span)
+    }
+}

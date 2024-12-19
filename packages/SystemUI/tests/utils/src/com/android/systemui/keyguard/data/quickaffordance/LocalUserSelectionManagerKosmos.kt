@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.applicationContext
 import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.settings.userTracker
@@ -28,6 +29,7 @@ val Kosmos.localUserSelectionManager by
             context = applicationContext,
             userFileManager = userFileManager,
             userTracker = userTracker,
+            communalSettingsInteractor = communalSettingsInteractor,
             broadcastDispatcher = broadcastDispatcher,
         )
     }

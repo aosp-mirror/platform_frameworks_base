@@ -29,6 +29,7 @@ import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -359,13 +360,24 @@ private class DragControllerImpl(
             return swipeAnimation.animateOffset(velocity, targetContent)
         }
 
-        overscrollEffect.applyToFling(
-            velocity = velocity.toVelocity(),
-            performFling = {
-                val velocityLeft = it.toFloat()
-                swipeAnimation.animateOffset(velocityLeft, targetContent).toVelocity()
-            },
-        )
+        val overscrollCompletable = CompletableDeferred<Unit>()
+        try {
+            overscrollEffect.applyToFling(
+                velocity = velocity.toVelocity(),
+                performFling = {
+                    val velocityLeft = it.toFloat()
+                    swipeAnimation
+                        .animateOffset(
+                            velocityLeft,
+                            targetContent,
+                            overscrollCompletable = overscrollCompletable,
+                        )
+                        .toVelocity()
+                },
+            )
+        } finally {
+            overscrollCompletable.complete(Unit)
+        }
 
         return velocity
     }

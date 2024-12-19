@@ -36,8 +36,8 @@ constructor(
 
     override fun map(config: QSTileConfig, data: FontScalingTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes = R.drawable.ic_qs_font_scaling
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.ic_qs_font_scaling
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             contentDescription = label
             activationState = QSTileState.ActivationState.ACTIVE
             sideViewIcon = QSTileState.SideViewIcon.Chevron

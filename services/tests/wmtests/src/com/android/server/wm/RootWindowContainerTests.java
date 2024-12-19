@@ -1348,13 +1348,19 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         doReturn(rootTask3).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
 
-        // Set up user ids and visibility
+        // Set up child tasks inside root tasks and set some of them visible
+        final Task task1 = new TaskBuilder(mSupervisor).setOnTop(true).setParentTask(
+                rootTask1).build();
+        final Task task2 = new TaskBuilder(mSupervisor).setOnTop(true).setParentTask(
+                rootTask2).build();
+        final Task task3 = new TaskBuilder(mSupervisor).setOnTop(true).setParentTask(
+                rootTask3).build();
         rootTask1.mUserId = mRootWindowContainer.mCurrentUser;
         rootTask2.mUserId = mRootWindowContainer.mCurrentUser;
         rootTask3.mUserId = mRootWindowContainer.mCurrentUser;
-        rootTask1.mVisibleRequested = false;
-        rootTask2.mVisibleRequested = true;
-        rootTask3.mVisibleRequested = true;
+        doReturn(false).when(task1).isVisible();
+        doReturn(true).when(task2).isVisible();
+        doReturn(true).when(task3).isVisible();
 
         // Switch to a different user
         int currentUser = mRootWindowContainer.mCurrentUser;

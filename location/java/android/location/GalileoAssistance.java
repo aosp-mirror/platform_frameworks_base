@@ -19,7 +19,6 @@ package android.location;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.location.GnssAssistance.GnssSatelliteCorrections;
 import android.location.flags.Flags;
@@ -51,6 +50,9 @@ public final class GalileoAssistance implements Parcelable {
     /** The leap seconds model. */
     @Nullable private final LeapSecondsModel mLeapSecondsModel;
 
+    /** The auxiliary information. */
+    @Nullable private final AuxiliaryInformation mAuxiliaryInformation;
+
     /** The list of time models. */
     @NonNull private final List<TimeModel> mTimeModels;
 
@@ -68,6 +70,7 @@ public final class GalileoAssistance implements Parcelable {
         mIonosphericModel = builder.mIonosphericModel;
         mUtcModel = builder.mUtcModel;
         mLeapSecondsModel = builder.mLeapSecondsModel;
+        mAuxiliaryInformation = builder.mAuxiliaryInformation;
         if (builder.mTimeModels != null) {
             mTimeModels = Collections.unmodifiableList(new ArrayList<>(builder.mTimeModels));
         } else {
@@ -117,6 +120,12 @@ public final class GalileoAssistance implements Parcelable {
         return mLeapSecondsModel;
     }
 
+    /** Returns the auxiliary information. */
+    @Nullable
+    public AuxiliaryInformation getAuxiliaryInformation() {
+        return mAuxiliaryInformation;
+    }
+
     /** Returns the list of time models. */
     @NonNull
     public List<TimeModel> getTimeModels() {
@@ -152,6 +161,7 @@ public final class GalileoAssistance implements Parcelable {
         dest.writeTypedObject(mIonosphericModel, flags);
         dest.writeTypedObject(mUtcModel, flags);
         dest.writeTypedObject(mLeapSecondsModel, flags);
+        dest.writeTypedObject(mAuxiliaryInformation, flags);
         dest.writeTypedList(mTimeModels);
         dest.writeTypedList(mSatelliteEphemeris);
         dest.writeTypedList(mRealTimeIntegrityModels);
@@ -166,6 +176,7 @@ public final class GalileoAssistance implements Parcelable {
         builder.append(", ionosphericModel = ").append(mIonosphericModel);
         builder.append(", utcModel = ").append(mUtcModel);
         builder.append(", leapSecondsModel = ").append(mLeapSecondsModel);
+        builder.append(", auxiliaryInformation = ").append(mAuxiliaryInformation);
         builder.append(", timeModels = ").append(mTimeModels);
         builder.append(", satelliteEphemeris = ").append(mSatelliteEphemeris);
         builder.append(", realTimeIntegrityModels = ").append(mRealTimeIntegrityModels);
@@ -184,6 +195,8 @@ public final class GalileoAssistance implements Parcelable {
                                     in.readTypedObject(KlobucharIonosphericModel.CREATOR))
                             .setUtcModel(in.readTypedObject(UtcModel.CREATOR))
                             .setLeapSecondsModel(in.readTypedObject(LeapSecondsModel.CREATOR))
+                            .setAuxiliaryInformation(
+                                    in.readTypedObject(AuxiliaryInformation.CREATOR))
                             .setTimeModels(in.createTypedArrayList(TimeModel.CREATOR))
                             .setSatelliteEphemeris(
                                     in.createTypedArrayList(GalileoSatelliteEphemeris.CREATOR))
@@ -206,6 +219,7 @@ public final class GalileoAssistance implements Parcelable {
         private KlobucharIonosphericModel mIonosphericModel;
         private UtcModel mUtcModel;
         private LeapSecondsModel mLeapSecondsModel;
+        private AuxiliaryInformation mAuxiliaryInformation;
         private List<TimeModel> mTimeModels;
         private List<GalileoSatelliteEphemeris> mSatelliteEphemeris;
         private List<RealTimeIntegrityModel> mRealTimeIntegrityModels;
@@ -239,10 +253,17 @@ public final class GalileoAssistance implements Parcelable {
             return this;
         }
 
+        /** Sets the auxiliary information. */
+        @NonNull
+        public Builder setAuxiliaryInformation(
+                @Nullable AuxiliaryInformation auxiliaryInformation) {
+            mAuxiliaryInformation = auxiliaryInformation;
+            return this;
+        }
+
         /** Sets the list of time models. */
         @NonNull
-        public Builder setTimeModels(
-                @Nullable @SuppressLint("NullableCollection") List<TimeModel> timeModels) {
+        public Builder setTimeModels(@NonNull List<TimeModel> timeModels) {
             mTimeModels = timeModels;
             return this;
         }
@@ -250,8 +271,7 @@ public final class GalileoAssistance implements Parcelable {
         /** Sets the list of Galileo ephemeris. */
         @NonNull
         public Builder setSatelliteEphemeris(
-                @Nullable @SuppressLint("NullableCollection")
-                        List<GalileoSatelliteEphemeris> satelliteEphemeris) {
+                @NonNull List<GalileoSatelliteEphemeris> satelliteEphemeris) {
             mSatelliteEphemeris = satelliteEphemeris;
             return this;
         }
@@ -259,8 +279,7 @@ public final class GalileoAssistance implements Parcelable {
         /** Sets the list of real time integrity models. */
         @NonNull
         public Builder setRealTimeIntegrityModels(
-                @Nullable @SuppressLint("NullableCollection")
-                        List<RealTimeIntegrityModel> realTimeIntegrityModels) {
+                @NonNull List<RealTimeIntegrityModel> realTimeIntegrityModels) {
             mRealTimeIntegrityModels = realTimeIntegrityModels;
             return this;
         }
@@ -268,8 +287,7 @@ public final class GalileoAssistance implements Parcelable {
         /** Sets the list of Galileo satellite corrections. */
         @NonNull
         public Builder setSatelliteCorrections(
-                @Nullable @SuppressLint("NullableCollection")
-                        List<GnssSatelliteCorrections> satelliteCorrections) {
+                @NonNull List<GnssSatelliteCorrections> satelliteCorrections) {
             mSatelliteCorrections = satelliteCorrections;
             return this;
         }

@@ -110,8 +110,7 @@ class ScreenRecordTileMapperTest : SysuiTestCase() {
         val label = context.getString(R.string.quick_settings_screen_record_label)
 
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

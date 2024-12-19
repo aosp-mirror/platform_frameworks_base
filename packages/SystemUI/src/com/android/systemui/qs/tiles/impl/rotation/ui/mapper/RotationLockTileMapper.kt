@@ -42,7 +42,7 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_rotation_unlocked_label)
             contentDescription = resources.getString(R.string.accessibility_quick_settings_rotation)
-
+            val iconRes: Int
             if (data.isRotationLocked) {
                 activationState = QSTileState.ActivationState.INACTIVE
                 secondaryLabel = EMPTY_SECONDARY_STRING
@@ -57,7 +57,7 @@ constructor(
                     }
                 iconRes = R.drawable.qs_auto_rotate_icon_on
             }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             if (isDeviceFoldable(resources, deviceStateManager)) {
                 secondaryLabel = getSecondaryLabelWithPosture(activationState)
             }

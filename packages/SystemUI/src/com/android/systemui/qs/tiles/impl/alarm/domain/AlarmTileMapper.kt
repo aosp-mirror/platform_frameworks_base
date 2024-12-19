@@ -84,8 +84,8 @@ constructor(
                     secondaryLabel = resources.getString(R.string.qs_alarm_tile_no_alarm)
                 }
             }
-            iconRes = R.drawable.ic_alarm
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.ic_alarm
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             supportedActions = setOf(QSTileState.UserAction.CLICK)

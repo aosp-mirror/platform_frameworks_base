@@ -22,13 +22,13 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.MotionEvent.BUTTON_STYLUS_PRIMARY;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.os.Looper;
 import android.util.Slog;
 import android.view.InputChannel;
-import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
@@ -63,6 +63,7 @@ class DragInputEventReceiver extends InputEventReceiver {
                 return;
             }
             final MotionEvent motionEvent = (MotionEvent) event;
+            final int displayId = motionEvent.getDisplayId();
             final float newX = motionEvent.getRawX();
             final float newY = motionEvent.getRawY();
             final boolean isStylusButtonDown =
@@ -102,7 +103,8 @@ class DragInputEventReceiver extends InputEventReceiver {
                     return;
             }
 
-            mDragDropController.handleMotionEvent(!mMuteInput /* keepHandling */, newX, newY);
+            mDragDropController.handleMotionEvent(!mMuteInput /* keepHandling */, displayId, newX,
+                    newY);
             handled = true;
         } catch (Exception e) {
             Slog.e(TAG_WM, "Exception caught by drag handleMotion", e);

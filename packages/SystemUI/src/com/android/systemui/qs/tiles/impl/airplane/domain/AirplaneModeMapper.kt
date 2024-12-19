@@ -35,13 +35,13 @@ constructor(@ShadeDisplayAware private val resources: Resources, val theme: Them
 
     override fun map(config: QSTileConfig, data: AirplaneModeTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
+            val iconRes =
                 if (data.isEnabled) {
                     R.drawable.qs_airplane_icon_on
                 } else {
                     R.drawable.qs_airplane_icon_off
                 }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = resources.getStringArray(R.array.tile_states_airplane)[2]

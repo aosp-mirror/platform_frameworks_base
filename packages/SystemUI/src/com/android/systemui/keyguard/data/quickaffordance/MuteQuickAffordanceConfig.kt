@@ -21,6 +21,7 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription
@@ -45,7 +46,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -118,7 +118,7 @@ constructor(
                 audioManager.ringerModeInternal = newRingerMode
             }
         }
-        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
     }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState =
@@ -140,11 +140,11 @@ constructor(
                 .getSharedPreferences(
                     MUTE_QUICK_AFFORDANCE_PREFS_FILE_NAME,
                     Context.MODE_PRIVATE,
-                    userTracker.userId
+                    userTracker.userId,
                 )
                 .getInt(
                     LAST_NON_SILENT_RINGER_MODE_KEY,
-                    ringerModeTracker.ringerModeInternal.value ?: DEFAULT_LAST_NON_SILENT_VALUE
+                    ringerModeTracker.ringerModeInternal.value ?: DEFAULT_LAST_NON_SILENT_VALUE,
                 )
         }
 

@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.os.BinderProxy;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -290,11 +291,15 @@ public class DisplayEventDeliveryTest {
     }
 
     /**
-     * Return true if the freezer is enabled on this platform.
+     * Return true if the freezer is enabled on this platform and if freezer notifications are
+     * supported.  It is not enough to test that the freezer notification feature is enabled
+     * because some devices do not have the necessary kernel support.
      */
     private boolean isAppFreezerEnabled() {
         try {
-            return mActivityManager.getService().isAppFreezerEnabled();
+            return mActivityManager.getService().isAppFreezerEnabled()
+                    && android.os.Flags.binderFrozenStateChangeCallback()
+                    && BinderProxy.isFrozenStateChangeCallbackSupported();
         } catch (Exception e) {
             Log.e(TAG, "isAppFreezerEnabled() failed: " + e);
             return false;

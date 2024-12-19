@@ -56,15 +56,18 @@ interface IDisplayManager {
     void stopWifiDisplayScan();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void connectWifiDisplay(String address);
 
     // No permissions required.
     void disconnectWifiDisplay();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void renameWifiDisplay(String address, String alias);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void forgetWifiDisplay(String address);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
@@ -169,6 +172,7 @@ interface IDisplayManager {
     void setBrightness(int displayId, float brightness);
 
     // Retrieves the display brightness.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float getBrightness(int displayId);
 
     // Temporarily sets the auto brightness adjustment factor.
@@ -196,8 +200,7 @@ interface IDisplayManager {
 
     // Sets the HDR conversion mode for a device.
     // Requires MODIFY_HDR_CONVERSION_MODE permission.
-    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
-                + ".permission.MODIFY_HDR_CONVERSION_MODE)")
+    @EnforcePermission("MODIFY_HDR_CONVERSION_MODE")
     void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
     HdrConversionMode getHdrConversionModeSetting();
     HdrConversionMode getHdrConversionMode();

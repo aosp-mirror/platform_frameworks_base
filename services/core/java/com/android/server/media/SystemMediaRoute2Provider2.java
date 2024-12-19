@@ -44,6 +44,7 @@ import com.android.server.media.MediaRoute2ProviderServiceProxy.SystemMediaSessi
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -82,7 +83,7 @@ import java.util.stream.Stream;
 
     /** Maps request ids to pending session creation callbacks. */
     @GuardedBy("mLock")
-    private final LongSparseArray<PendingSessionCreationCallbackImpl> mPendingSessionCreations =
+    private final LongSparseArray<SystemMediaSessionCallbackImpl> mPendingSessionCreations =
             new LongSparseArray<>();
 
     private static final ComponentName COMPONENT_NAME =
@@ -157,7 +158,7 @@ import java.util.stream.Stream;
                     }
                 }
                 var pendingCreationCallback =
-                        new PendingSessionCreationCallbackImpl(
+                        new SystemMediaSessionCallbackImpl(
                                 targetProviderProxyId, requestId, clientPackageName);
                 mPendingSessionCreations.put(requestId, pendingCreationCallback);
                 targetProviderProxyRecord.requestCreateSystemMediaSession(
@@ -242,7 +243,7 @@ import java.util.stream.Stream;
         }
         updateSessionInfo();
         notifyProviderState();
-        notifySessionInfoUpdated();
+        notifyGlobalSessionInfoUpdated();
     }
 
     @Override
@@ -252,7 +253,7 @@ import java.util.stream.Stream;
             updateProviderInfo();
         }
         updateSessionInfo();
-        notifySessionInfoUpdated();
+        notifyGlobalSessionInfoUpdated();
     }
 
     /**
@@ -300,6 +301,43 @@ import java.util.stream.Stream;
                             });
         }
         setProviderState(builder.build());
+    }
+
+    @Override
+    /* package */ void notifyGlobalSessionInfoUpdated() {
+        if (mCallback == null) {
+            return;
+        }
+
+        RoutingSessionInfo sessionInfo;
+        Set<String> packageNamesWithRoutingSessionOverrides;
+        synchronized (mLock) {
+            if (mSessionInfos.isEmpty()) {
+                return;
+            }
+            packageNamesWithRoutingSessionOverrides = mPackageNameToSessionRecord.keySet();
+            sessionInfo = mSessionInfos.getFirst();
+        }
+
+        mCallback.onSessionUpdated(this, sessionInfo, packageNamesWithRoutingSessionOverrides);
+    }
+
+    private void onSessionOverrideUpdated(RoutingSessionInfo sessionInfo) {
+        // TODO: b/362507305 - Consider adding routes from other provider services. This is not a
+        // trivial change because a provider1-route to provider2-route transfer has seemingly two
+        // possible approachies. Either we first release the current session and then create the new
+        // one, in which case the audio is briefly going to leak through the system route. On the
+        // other hand, if we first create the provider2 session, then there will be a period during
+        // which there will be two overlapping routing policies asking for the exact same media
+        // stream.
+        var builder = new RoutingSessionInfo.Builder(sessionInfo);
+        mLastSystemProviderInfo.getRoutes().stream()
+                .map(MediaRoute2Info::getOriginalId)
+                .forEach(builder::addTransferableRoute);
+        mCallback.onSessionUpdated(
+                /* provider= */ this,
+                builder.build(),
+                /* packageNamesWithRoutingSessionOverrides= */ Set.of());
     }
 
     /**
@@ -432,13 +470,15 @@ import java.util.stream.Stream;
         }
     }
 
-    private class PendingSessionCreationCallbackImpl implements SystemMediaSessionCallback {
+    private class SystemMediaSessionCallbackImpl implements SystemMediaSessionCallback {
 
         private final String mProviderId;
         private final long mRequestId;
         private final String mClientPackageName;
+        // Accessed only on mHandler.
+        @Nullable private SystemMediaSessionRecord mSessionRecord;
 
-        private PendingSessionCreationCallbackImpl(
+        private SystemMediaSessionCallbackImpl(
                 String providerId, long requestId, String clientPackageName) {
             mProviderId = providerId;
             mRequestId = requestId;
@@ -446,27 +486,51 @@ import java.util.stream.Stream;
         }
 
         @Override
-        public void onSessionUpdate(RoutingSessionInfo sessionInfo) {
-            SystemMediaSessionRecord systemMediaSessionRecord =
-                    new SystemMediaSessionRecord(mProviderId, sessionInfo);
-            synchronized (mLock) {
-                mPackageNameToSessionRecord.put(mClientPackageName, systemMediaSessionRecord);
-                mPendingSessionCreations.remove(mRequestId);
-            }
+        public void onSessionUpdate(@NonNull RoutingSessionInfo sessionInfo) {
+            mHandler.post(
+                    () -> {
+                        if (mSessionRecord != null) {
+                            mSessionRecord.onSessionUpdate(sessionInfo);
+                        }
+                        SystemMediaSessionRecord systemMediaSessionRecord =
+                                new SystemMediaSessionRecord(mProviderId, sessionInfo);
+                        RoutingSessionInfo translatedSession;
+                        synchronized (mLock) {
+                            mSessionRecord = systemMediaSessionRecord;
+                            mPackageNameToSessionRecord.put(
+                                    mClientPackageName, systemMediaSessionRecord);
+                            mPendingSessionCreations.remove(mRequestId);
+                            translatedSession = systemMediaSessionRecord.mTranslatedSessionInfo;
+                        }
+                        onSessionOverrideUpdated(translatedSession);
+                    });
         }
 
         @Override
         public void onRequestFailed(long requestId, @Reason int reason) {
-            synchronized (mLock) {
-                mPendingSessionCreations.remove(mRequestId);
-            }
-            notifyRequestFailed(requestId, reason);
+            mHandler.post(
+                    () -> {
+                        if (mSessionRecord != null) {
+                            mSessionRecord.onRequestFailed(requestId, reason);
+                        }
+                        synchronized (mLock) {
+                            mPendingSessionCreations.remove(mRequestId);
+                        }
+                        notifyRequestFailed(requestId, reason);
+                    });
         }
 
         @Override
         public void onSessionReleased() {
-            // Unexpected. The session hasn't yet been created.
-            throw new IllegalStateException();
+            mHandler.post(
+                    () -> {
+                        if (mSessionRecord != null) {
+                            mSessionRecord.onSessionReleased();
+                        } else {
+                            // Should never happen. The session hasn't yet been created.
+                            throw new IllegalStateException();
+                        }
+                    });
         }
     }
 
@@ -494,12 +558,13 @@ import java.util.stream.Stream;
         }
 
         @Override
-        public void onSessionUpdate(RoutingSessionInfo sessionInfo) {
+        public void onSessionUpdate(@NonNull RoutingSessionInfo sessionInfo) {
+            RoutingSessionInfo translatedSessionInfo = mTranslatedSessionInfo;
             synchronized (mLock) {
                 mSourceSessionInfo = sessionInfo;
                 mTranslatedSessionInfo = asSystemProviderSession(sessionInfo);
             }
-            notifySessionInfoUpdated();
+            onSessionOverrideUpdated(translatedSessionInfo);
         }
 
         @Override
@@ -512,7 +577,7 @@ import java.util.stream.Stream;
             synchronized (mLock) {
                 removeSelfFromSessionMap();
             }
-            notifySessionInfoUpdated();
+            notifyGlobalSessionInfoUpdated();
         }
 
         @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
@@ -536,6 +601,7 @@ import java.util.stream.Stream;
             var builder =
                     new RoutingSessionInfo.Builder(session)
                             .setProviderId(mUniqueId)
+                            .setSystemSession(true)
                             .clearSelectedRoutes()
                             .clearSelectableRoutes()
                             .clearDeselectableRoutes()

@@ -21,6 +21,7 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -887,6 +888,32 @@ public class NotifierTest {
                 BatteryStats.WAKE_TYPE_FULL, false);
         verify(mAppOpsManager).startOpNoThrow(AppOpsManager.OP_WAKE_LOCK, uid,
                 "my.package.name", false, null, null);
+    }
+
+    @Test
+    public void getWakelockMonitorTypeForLogging_evaluatesWakelockLevel() {
+        createNotifier();
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(PowerManager.SCREEN_DIM_WAKE_LOCK),
+                PowerManager.FULL_WAKE_LOCK);
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK), PowerManager.FULL_WAKE_LOCK);
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(PowerManager.DRAW_WAKE_LOCK),
+                PowerManager.DRAW_WAKE_LOCK);
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(PowerManager.PARTIAL_WAKE_LOCK),
+                PowerManager.PARTIAL_WAKE_LOCK);
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(
+                        PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK),
+                PowerManager.PARTIAL_WAKE_LOCK);
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(
+                        PowerManager.DOZE_WAKE_LOCK), -1);
+
+        when(mResourcesSpy.getBoolean(
+                com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity))
+                .thenReturn(true);
+
+        createNotifier();
+        assertEquals(mNotifier.getWakelockMonitorTypeForLogging(
+                        PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK), -1);
     }
 
     private final PowerManagerService.Injector mInjector = new PowerManagerService.Injector() {

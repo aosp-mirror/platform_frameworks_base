@@ -368,17 +368,6 @@ flag {
 }
 
 flag {
-  name: "disallow_app_progress_embedded_window"
-  namespace: "windowing_frontend"
-  description: "Pilfer pointers when app transfer input gesture to embedded window."
-  bug: "365504126"
-  is_fixed_read_only: true
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "predictive_back_system_override_callback"
     namespace: "windowing_frontend"
     description: "Provide pre-make predictive back API extension"
@@ -430,4 +419,15 @@ flag {
   description: "Support insets definition and calculation relative to task bounds."
   bug: "277292497"
   is_fixed_read_only: true
+}
+
+flag {
+    name: "exclude_drawing_app_theme_snapshot_from_lock"
+    namespace: "windowing_frontend"
+    description: "Do not hold wm lock when drawing app theme snapshot."
+    is_fixed_read_only: true
+    bug: "373502791"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -27,18 +27,7 @@
             <solid android:color="@android:color/transparent"/>
         </shape>
     </item>
-    <item
-        android:end="20dp"
-        android:gravity="end|center_vertical">
-        <vector
-            android:width="@dimen/hearing_devices_preset_spinner_icon_size"
-            android:height="@dimen/hearing_devices_preset_spinner_icon_size"
-            android:viewportWidth="24"
-            android:viewportHeight="24"
-            android:tint="?androidprv:attr/colorControlNormal">
-            <path
-                android:fillColor="#FF000000"
-                android:pathData="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z" />
-        </vector>
-    </item>
+    <item android:end="20dp"
+        android:gravity="end|center_vertical"
+        android:drawable="@drawable/ic_hearing_device_expand" />
 </layer-list>

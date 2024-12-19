@@ -241,7 +241,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             shadeTestUtil.setSplitShade(true)
 
             val horizontalPosition = checkNotNull(dimens).horizontalPosition
-            assertIs<HorizontalPosition.FloatAtEnd>(horizontalPosition)
+            assertIs<HorizontalPosition.FloatAtStart>(horizontalPosition)
             assertThat(horizontalPosition.width).isEqualTo(200)
         }
 

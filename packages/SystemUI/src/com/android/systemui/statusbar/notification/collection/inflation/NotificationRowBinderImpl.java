@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.inflation;
 
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_SENSITIVE_CONTENT;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -186,6 +187,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
         if (AsyncHybridViewInflation.isEnabled()) {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_SINGLE_LINE);
+            if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
+                params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
+            }
         }
         mRowContentBindStage.requestRebind(entry, null);
     }
@@ -256,10 +260,10 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseMinimized(isMinimized);
-        // TODO b/358403414: use the different types of redaction
-        boolean needsRedaction = inflaterParams.getRedactionType() != REDACTION_TYPE_NONE;
+        int redactionType = inflaterParams.getRedactionType();
 
-        if (needsRedaction) {
+        params.setRedactionType(redactionType);
+        if (redactionType != REDACTION_TYPE_NONE) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
@@ -276,8 +280,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         }
 
         if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
-
-            if (inflaterParams.isChildInGroup() && needsRedaction) {
+            if (inflaterParams.isChildInGroup()
+                    && redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
                 params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);
             } else {
                 params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE);

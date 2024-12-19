@@ -1589,7 +1589,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         cleanUpInternal();
 
         // Handle back animation if it's already started.
-        mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
+        mController.mAtm.mBackNavigationController.onTransitionFinish(this);
         mController.mFinishingTransition = null;
         mController.mSnapshotController.onTransitionFinish(mType, mTargets);
         // Resume snapshot persist thread after snapshot controller analysis this transition.
@@ -2542,15 +2542,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // TaskFragment doesn't contain occluded ActivityRecord.
             return true;
         }
-        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-        if (adjacentTaskFragment != null) {
-            // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
-            // hidden unless any of them are translucent.
-            return adjacentTaskFragment.isTranslucentForTransition();
-        } else {
+        if (!taskFragment.hasAdjacentTaskFragment()) {
             // Non-filling without adjacent is considered as translucent.
             return !wc.fillsParent();
         }
+        // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
+        // hidden unless any of them are translucent.
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            return taskFragment.getAdjacentTaskFragment().isTranslucentForTransition();
+        }
+        return taskFragment.forOtherAdjacentTaskFragments(TaskFragment::isTranslucentForTransition);
     }
 
     private void updatePriorVisibility() {

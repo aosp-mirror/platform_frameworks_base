@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -27,7 +28,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
@@ -53,10 +53,6 @@ constructor(
     @Deprecated("Use ShadeInteractor instead")
     override val isExpanded
         get() = shadeInteractor.isAnyExpanded.value
-
-    override fun startBouncerPreHideAnimation() {
-        // TODO("b/324280998") Implement replacement or delete
-    }
 
     override fun dozeTimeTick() {
         // TODO("b/383591086") Implement replacement or delete

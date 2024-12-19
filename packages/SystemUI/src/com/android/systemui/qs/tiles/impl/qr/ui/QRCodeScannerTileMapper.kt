@@ -38,8 +38,8 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.qr_code_scanner_title)
             contentDescription = label
-            iconRes = R.drawable.ic_qr_code_scanner
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.ic_qr_code_scanner
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             supportedActions = setOf(QSTileState.UserAction.CLICK)
 

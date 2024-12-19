@@ -28,8 +28,8 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.dock.DockManager
@@ -62,6 +62,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -90,6 +91,7 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @ShadeDisplayAware private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
@@ -99,6 +101,14 @@ constructor(
      * elements that allow the user to perform quick actions without unlocking their device.
      */
     val launchingAffordance: StateFlow<Boolean> = repository.get().launchingAffordance.asStateFlow()
+
+    /**
+     * Whether a [KeyguardQuickAffordanceConfig.OnTriggeredResult] indicated that the system
+     * launched an activity or showed a dialog.
+     */
+    private val _launchingFromTriggeredResult =
+        MutableStateFlow<KeyguardQuickAffordanceConfig.LaunchingFromTriggeredResult?>(null)
+    val launchingFromTriggeredResult = _launchingFromTriggeredResult.asStateFlow()
 
     /**
      * Whether the UI should use the long press gesture to activate quick affordances.
@@ -187,16 +197,43 @@ constructor(
         metricsLogger.logOnShortcutTriggered(slotId, configKey)
 
         when (val result = config.onTriggered(expandable)) {
-            is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity ->
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity -> {
+                setLaunchingFromTriggeredResult(
+                    KeyguardQuickAffordanceConfig.LaunchingFromTriggeredResult(
+                        launched = true,
+                        configKey,
+                    )
+                )
                 launchQuickAffordance(
                     intent = result.intent,
                     canShowWhileLocked = result.canShowWhileLocked,
                     expandable = expandable,
                 )
-            is KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled -> Unit
-            is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog ->
+            }
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled -> {
+                setLaunchingFromTriggeredResult(
+                    KeyguardQuickAffordanceConfig.LaunchingFromTriggeredResult(
+                        result.actionLaunched,
+                        configKey,
+                    )
+                )
+            }
+            is KeyguardQuickAffordanceConfig.OnTriggeredResult.ShowDialog -> {
+                setLaunchingFromTriggeredResult(
+                    KeyguardQuickAffordanceConfig.LaunchingFromTriggeredResult(
+                        launched = true,
+                        configKey,
+                    )
+                )
                 showDialog(result.dialog, result.expandable)
+            }
         }
+    }
+
+    fun setLaunchingFromTriggeredResult(
+        launchingResult: KeyguardQuickAffordanceConfig.LaunchingFromTriggeredResult?
+    ) {
+        _launchingFromTriggeredResult.value = launchingResult
     }
 
     /**
@@ -427,7 +464,10 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
                     !isFeatureDisabledByDevicePolicy() &&
-                        appContext.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled),
+                        // TODO(b/383391342): remove isV2FlagEnabled check once trunkfood is reached
+                        (appContext.resources.getBoolean(
+                            R.bool.custom_lockscreen_shortcuts_enabled
+                        ) || communalSettingsInteractor.isV2FlagEnabled()),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,

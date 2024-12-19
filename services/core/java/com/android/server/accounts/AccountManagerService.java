@@ -5266,6 +5266,22 @@ public class AccountManagerService
             }
         }
 
+        @Override
+        public void onNullBinding(ComponentName name) {
+            IAccountManagerResponse response = getResponseAndClose();
+            if (response != null) {
+                try {
+                    response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                            "disconnected");
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Session.onNullBinding: "
+                                + "caught RemoteException while responding", e);
+                    }
+                }
+            }
+        }
+
         public abstract void run() throws RemoteException;
 
         public void onTimedOut() {

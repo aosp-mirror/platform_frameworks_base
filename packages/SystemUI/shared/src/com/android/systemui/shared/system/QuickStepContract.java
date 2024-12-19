@@ -20,6 +20,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.systemui.Flags.glanceableHubBackAction;
 import static com.android.systemui.shared.Flags.shadeAllowBackGesture;
 
 import android.annotation.LongDef;
@@ -352,6 +353,10 @@ public class QuickStepContract {
         }
         // Disable back gesture on the hub, but not when the shade is showing.
         if ((sysuiStateFlags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
+            // Allow back gesture on Glanceable Hub with back action support.
+            if (glanceableHubBackAction()) {
+                return false;
+            }
             // Use QS expanded signal as the notification panel is always considered visible
             // expanded when on the lock screen and when opening hub over lock screen. This does
             // mean that back gesture is disabled when opening shade over hub while in portrait

@@ -23,12 +23,14 @@ import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE;
+import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Secure.MIRROR_BUILT_IN_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
@@ -123,6 +125,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.test.FakePermissionEnforcer;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -444,8 +447,6 @@ public class DisplayManagerServiceTest {
         when(mContext.getResources()).thenReturn(mResources);
         mUserManager = Mockito.spy(mContext.getSystemService(UserManager.class));
 
-        mPermissionEnforcer.grant(CONTROL_DISPLAY_BRIGHTNESS);
-        mPermissionEnforcer.grant(MODIFY_USER_PREFERRED_DISPLAY_MODE);
         doReturn(Context.PERMISSION_ENFORCER_SERVICE).when(mContext).getSystemServiceName(
                 eq(PermissionEnforcer.class));
         doReturn(mPermissionEnforcer).when(mContext).getSystemService(
@@ -2576,11 +2577,11 @@ public class DisplayManagerServiceTest {
                 new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
                 new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 3));
         assertEquals(
-                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM),
-                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+                new HdrConversionMode(HDR_CONVERSION_SYSTEM),
+                new HdrConversionMode(HDR_CONVERSION_SYSTEM));
         assertNotEquals(
                 new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
-                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+                new HdrConversionMode(HDR_CONVERSION_SYSTEM));
     }
 
     @Test
@@ -2601,7 +2602,7 @@ public class DisplayManagerServiceTest {
                         + "HDR_CONVERSION_SYSTEM",
                 IllegalArgumentException.class,
                 () -> displayManager.setHdrConversionModeInternal(new HdrConversionMode(
-                        HdrConversionMode.HDR_CONVERSION_SYSTEM,
+                        HDR_CONVERSION_SYSTEM,
                         Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)));
     }
 
@@ -2678,7 +2679,7 @@ public class DisplayManagerServiceTest {
         displayManager.setUserDisabledHdrTypesInternal(new int [0]);
         displayManager.setAreUserDisabledHdrTypesAllowedInternal(true);
         displayManager.setHdrConversionModeInternal(
-                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+                new HdrConversionMode(HDR_CONVERSION_SYSTEM));
 
         assertEquals(1, mAllowedHdrOutputTypes.length);
         assertTrue(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION == mAllowedHdrOutputTypes[0]);
@@ -2732,7 +2733,7 @@ public class DisplayManagerServiceTest {
         assertTrue(logicalDisplay.getDisplayInfoLocked().isForceSdr);
 
         displayManager.setHdrConversionModeInternal(
-                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+                new HdrConversionMode(HDR_CONVERSION_SYSTEM));
         assertFalse(logicalDisplay.getDisplayInfoLocked().isForceSdr);
     }
 
@@ -3360,6 +3361,7 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testOnUserSwitching_UpdatesBrightness() {
+        mPermissionEnforcer.grant(CONTROL_DISPLAY_BRIGHTNESS);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -3411,6 +3413,7 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testOnUserSwitching_brightnessForNewUserIsDefault() {
+        mPermissionEnforcer.grant(CONTROL_DISPLAY_BRIGHTNESS);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -3439,7 +3442,8 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testResolutionChangeGetsBackedUp_FeatureFlagFalse() throws Exception {
+    public void testResolutionChangeGetsBackedUp_FeatureFlagFalse() {
+        mPermissionEnforcer.grant(MODIFY_USER_PREFERRED_DISPLAY_MODE);
         when(mMockFlags.isResolutionBackupRestoreEnabled()).thenReturn(false);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
@@ -3465,6 +3469,7 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testBrightnessUpdates() {
+        mPermissionEnforcer.grant(CONTROL_DISPLAY_BRIGHTNESS);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -3533,6 +3538,7 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testResolutionChangeGetsBackedUp() throws Exception {
+        mPermissionEnforcer.grant(MODIFY_USER_PREFERRED_DISPLAY_MODE);
         when(mMockFlags.isResolutionBackupRestoreEnabled()).thenReturn(true);
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
@@ -3911,9 +3917,9 @@ public class DisplayManagerServiceTest {
         waitForIdleHandler(handler);
 
         // Create a default display device
-        createFakeDisplayDevice(displayManager, new float[] {60f}, Display.TYPE_INTERNAL);
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         // Create a non-default display device
-        createFakeDisplayDevice(displayManager, new float[] {60f}, Display.TYPE_EXTERNAL);
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
 
         Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 1);
         final ContentObserver observer = displayManager.getSettingsObserver();
@@ -3921,6 +3927,300 @@ public class DisplayManagerServiceTest {
         waitForIdleHandler(handler);
 
         assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_BASIC_CHANGED);
+    }
+
+    @Test
+    public void startWifiDisplayScan_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, displayManagerBinderService::startWifiDisplayScan);
+    }
+
+    @Test
+    public void stopWifiDisplayScan_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, displayManagerBinderService::stopWifiDisplayScan);
+    }
+
+    @Test
+    public void connectWifiDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                () -> displayManagerBinderService.connectWifiDisplay("someAddress"));
+    }
+
+    @Test
+    public void renameWifiDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                () -> displayManagerBinderService.renameWifiDisplay("someAddress", "someAlias"));
+    }
+
+    @Test
+    public void forgetWifiDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                () -> displayManagerBinderService.forgetWifiDisplay("someAddress"));
+    }
+
+    @Test
+    public void pauseWifiDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, displayManagerBinderService::pauseWifiDisplay);
+    }
+
+    @Test
+    public void resumeWifiDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, displayManagerBinderService::resumeWifiDisplay);
+    }
+
+    @Test
+    public void setUserDisabledHdrTypes_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setUserDisabledHdrTypes(new int[0]));
+    }
+
+    @Test
+    public void setAreUserDisabledHdrTypesAllowed_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setAreUserDisabledHdrTypesAllowed(true));
+    }
+
+    @Test
+    public void requestColorMode_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService.requestColorMode(
+                Display.DEFAULT_DISPLAY, Display.COLOR_MODE_DEFAULT));
+    }
+
+    @Test
+    public void getBrightnessEvents_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.getBrightnessEvents("somePackage"));
+    }
+
+    @Test
+    public void getAmbientBrightnessStats_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                displayManagerBinderService::getAmbientBrightnessStats);
+    }
+
+    @Test
+    public void setBrightnessConfigurationForUser_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setBrightnessConfigurationForUser(
+                        new BrightnessConfiguration.Builder(/* lux= */ new float[]{0, 100},
+                                /* nits= */ new float[]{100, 200}).build(), UserHandle.USER_SYSTEM,
+                        "somePackage"));
+    }
+
+    @Test
+    public void setBrightnessConfigurationForDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setBrightnessConfigurationForDisplay(
+                        new BrightnessConfiguration.Builder(/* lux= */ new float[]{0, 100},
+                                /* nits= */ new float[]{100, 200}).build(), "uniqueId",
+                        UserHandle.USER_SYSTEM, "somePackage"));
+    }
+
+    @Test
+    public void getBrightnessConfigurationForDisplay_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.getBrightnessConfigurationForDisplay("uniqueId",
+                        UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void getDefaultBrightnessConfiguration_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                displayManagerBinderService::getDefaultBrightnessConfiguration);
+    }
+
+    @Test
+    public void getBrightnessInfo_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.getBrightnessInfo(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void setTemporaryBrightness_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setTemporaryBrightness(Display.DEFAULT_DISPLAY, 0.3f));
+    }
+
+    @Test
+    public void setBrightness_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, 0.3f));
+    }
+
+    @Test
+    public void getBrightness_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void setTemporaryAutoBrightnessAdjustment_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () ->
+                displayManagerBinderService.setTemporaryAutoBrightnessAdjustment(0.1f));
+    }
+
+    @Test
+    public void setUserPreferredDisplayMode_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .setUserPreferredDisplayMode(Display.DEFAULT_DISPLAY, new Display.Mode(
+                        /* width= */ 800, /* height= */ 600, /* refreshRate= */ 60)));
+    }
+
+    @Test
+    public void setHdrConversionMode_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .setHdrConversionMode(new HdrConversionMode(HDR_CONVERSION_SYSTEM)));
+    }
+
+    @Test
+    public void setShouldAlwaysRespectAppRequestedMode_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .setShouldAlwaysRespectAppRequestedMode(true));
+    }
+
+    @Test
+    public void shouldAlwaysRespectAppRequestedMode_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class,
+                displayManagerBinderService::shouldAlwaysRespectAppRequestedMode);
+    }
+
+    @Test
+    public void setRefreshRateSwitchingType_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .setRefreshRateSwitchingType(SWITCHING_TYPE_NONE));
+    }
+
+    @Test
+    public void requestDisplayModes_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .requestDisplayModes(new Binder(), Display.DEFAULT_DISPLAY, new int[0]));
+    }
+
+    @Test
+    public void getDozeBrightnessSensorValueToBrightness_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .getDozeBrightnessSensorValueToBrightness(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void getDefaultDozeBrightness_withoutPermission_shouldThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        assertThrows(SecurityException.class, () -> displayManagerBinderService
+                .getDefaultDozeBrightness(Display.DEFAULT_DISPLAY));
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {

@@ -30,7 +30,7 @@ class FakeKeyguardQuickAffordanceConfig(
     override val pickerIconResourceId: Int = 0,
 ) : KeyguardQuickAffordanceConfig {
 
-    var onTriggeredResult: OnTriggeredResult = OnTriggeredResult.Handled
+    var onTriggeredResult: OnTriggeredResult = OnTriggeredResult.Handled(false)
 
     private val _lockScreenState =
         MutableStateFlow<KeyguardQuickAffordanceConfig.LockScreenState>(
@@ -41,9 +41,7 @@ class FakeKeyguardQuickAffordanceConfig(
 
     override fun pickerName(): String = pickerName
 
-    override fun onTriggered(
-        expandable: Expandable?,
-    ): OnTriggeredResult {
+    override fun onTriggered(expandable: Expandable?): OnTriggeredResult {
         return onTriggeredResult
     }
 

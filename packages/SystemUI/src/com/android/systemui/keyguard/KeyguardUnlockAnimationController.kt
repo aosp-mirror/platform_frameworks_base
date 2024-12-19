@@ -39,7 +39,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.math.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.internal.R
-import com.android.keyguard.KeyguardClockSwitchController
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.Flags.fasterUnlockTransition
 import com.android.systemui.dagger.SysUISingleton
@@ -206,7 +205,7 @@ constructor(
         fun onUnlockAnimationFinished() {}
     }
 
-    /** The SmartSpace view on the lockscreen, provided by [KeyguardClockSwitchController]. */
+    /** The SmartSpace view on the lockscreen. */
     var lockscreenSmartspace: View? = null
 
     /**

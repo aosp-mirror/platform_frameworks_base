@@ -23,7 +23,6 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.shade.ShadeDisplayAware
@@ -50,16 +49,13 @@ constructor(
         sharedNotificationContainerBinder,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         constraintSet.apply {
             connect(
                 R.id.nssl_placeholder,
                 TOP,
                 PARENT_ID,
                 TOP,
-                context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
+                context.resources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin),
             )
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)

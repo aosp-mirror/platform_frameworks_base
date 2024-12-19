@@ -125,6 +125,7 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
+        <permission name="android.permission.RESOLVE_COMPONENT_FOR_UID"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -609,6 +610,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
         <!-- Permission required for CTS test - KeyguardLockedStateApiTest -->
         <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
+        <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
+        <permission name="android.permission.RESOLVE_COMPONENT_FOR_UID"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

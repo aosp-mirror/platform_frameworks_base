@@ -35,9 +35,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
-import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
@@ -61,7 +60,7 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
 ) {
     @Composable
-    fun SceneScope.DefaultClockLayout(
+    fun ContentScope.DefaultClockLayout(
         smartSpacePaddingTop: (Resources) -> Int,
         isShadeLayoutWide: Boolean,
         modifier: Modifier = Modifier,
@@ -95,7 +94,7 @@ constructor(
         }
 
         Column(modifier) {
-            SceneTransitionLayout(state) {
+            NestedSceneTransitionLayout(state, Modifier) {
                 scene(splitShadeLargeClockScene) {
                     LargeClockWithSmartSpace(
                         smartSpacePaddingTop = smartSpacePaddingTop,
@@ -134,7 +133,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.SmallClockWithSmartSpace(
+    private fun ContentScope.SmallClockWithSmartSpace(
         smartSpacePaddingTop: (Resources) -> Int,
         modifier: Modifier = Modifier,
     ) {
@@ -159,7 +158,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.LargeClockWithSmartSpace(
+    private fun ContentScope.LargeClockWithSmartSpace(
         smartSpacePaddingTop: (Resources) -> Int,
         shouldOffSetClockToOneHalf: Boolean = false,
     ) {
@@ -200,7 +199,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.WeatherLargeClockWithSmartSpace(
+    private fun ContentScope.WeatherLargeClockWithSmartSpace(
         smartSpacePaddingTop: (Resources) -> Int,
         modifier: Modifier = Modifier,
     ) {

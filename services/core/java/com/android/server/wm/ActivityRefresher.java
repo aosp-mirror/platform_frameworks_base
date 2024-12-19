@@ -115,8 +115,8 @@ class ActivityRefresher {
     private boolean shouldRefreshActivity(@NonNull ActivityRecord activity,
             @NonNull Configuration newConfig, @NonNull Configuration lastReportedConfig) {
         return mWmService.mAppCompatConfiguration.isCameraCompatRefreshEnabled()
-                && activity.mAppCompatController.getAppCompatOverrides()
-                    .getAppCompatCameraOverrides().shouldRefreshActivityForCameraCompat()
+                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                    .shouldRefreshActivityForCameraCompat()
                 && ArrayUtils.find(mEvaluators.toArray(), evaluator ->
                 ((Evaluator) evaluator)
                         .shouldRefreshActivity(activity, newConfig, lastReportedConfig)) != null;
