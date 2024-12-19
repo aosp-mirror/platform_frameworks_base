@@ -28,13 +28,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.InitController
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.shade.domain.interactor.panelExpansionInteractor
 import com.android.systemui.shade.notificationShadeWindowView
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.lockscreenShadeTransitionController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -47,6 +53,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionFilter
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.visualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notificationLockscreenUserManager
@@ -61,7 +68,9 @@ import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -282,6 +291,52 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
         assertThat(types).contains(VisualInterruptionType.BUBBLE)
     }
 
+    @Test
+    @EnableSceneContainer
+    fun testExpandSensitiveNotification_onLockScreen_opensShade() =
+        kosmos.runTest {
+            // Given we are on the keyguard
+            kosmos.sysuiStatusBarStateController.state = StatusBarState.KEYGUARD
+            // And the device is locked
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+
+            // When the user expands a sensitive Notification
+            val row = createRow()
+            val entry =
+                row.entry.apply { setSensitive(/* sensitive= */ true, /* deviceSensitive= */ true) }
+
+            underTest.onExpandClicked(entry, mock(), /* nowExpanded= */ true)
+
+            // Then we open the locked shade
+            verify(kosmos.lockscreenShadeTransitionController)
+                // Explicit parameters to avoid issues with Kotlin default arguments in Mockito
+                .goToLockedShade(row, true)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun testExpandSensitiveNotification_onLockedShade_showsBouncer() =
+        kosmos.runTest {
+            // Given we are on the locked shade
+            kosmos.sysuiStatusBarStateController.state = StatusBarState.SHADE_LOCKED
+            // And the device is locked
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pin
+            )
+
+            // When the user expands a sensitive Notification
+            val entry =
+                createRow().entry.apply {
+                    setSensitive(/* sensitive= */ true, /* deviceSensitive= */ true)
+                }
+            underTest.onExpandClicked(entry, mock(), /* nowExpanded= */ true)
+
+            // Then we show the bouncer
+            verify(kosmos.activityStarter).dismissKeyguardThenExecute(any(), eq(null), eq(false))
+        }
+
     private fun createPresenter(): StatusBarNotificationPresenter {
         val initController: InitController = InitController()
         return StatusBarNotificationPresenter(
@@ -311,6 +366,7 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
                 kosmos.notificationRemoteInputManager,
                 /* remoteInputManagerCallback = */ mock(),
                 /* notificationListContainer = */ mock(),
+                kosmos.deviceUnlockedInteractor,
             )
             .also { initController.executePostInitTasks() }
     }
@@ -342,14 +398,21 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
         interruptSuppressor = suppressorCaptor.lastValue
     }
 
-    private fun createNotificationEntry(): NotificationEntry {
-        return NotificationEntryBuilder()
+    private fun createRow(): ExpandableNotificationRow {
+        val row: ExpandableNotificationRow = mock()
+        val entry: NotificationEntry = createNotificationEntry()
+        whenever(row.entry).thenReturn(entry)
+        entry.row = row
+        return row
+    }
+
+    private fun createNotificationEntry(): NotificationEntry =
+        NotificationEntryBuilder()
             .setPkg("a")
             .setOpPkg("a")
             .setTag("a")
             .setNotification(Builder(mContext, "a").build())
             .build()
-    }
 
     private fun createFsiNotificationEntry(): NotificationEntry {
         val notification: Notification =
