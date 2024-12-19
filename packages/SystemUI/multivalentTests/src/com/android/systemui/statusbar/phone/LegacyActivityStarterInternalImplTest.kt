@@ -48,6 +48,7 @@ import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
+import com.android.systemui.shared.Flags as SharedFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -63,6 +64,7 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -149,6 +151,63 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         `when`(communalSceneInteractor.isLaunchingWidget).thenReturn(MutableStateFlow(false))
     }
 
+    @EnableFlags(
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun registerTransition_registers() {
+        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+        `when`(controllerFactory.cookie).thenReturn(cookie)
+
+        underTest.registerTransition(cookie, controllerFactory)
+
+        verify(activityTransitionAnimator).register(eq(cookie), any())
+    }
+
+    @DisableFlags(
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun registerTransition_throws_whenFlagsAreDisabled() {
+        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+        val controllerFactory = mock(ActivityTransitionAnimator.ControllerFactory::class.java)
+
+        assertThrows(IllegalStateException::class.java) {
+            underTest.registerTransition(cookie, controllerFactory)
+        }
+
+        verify(activityTransitionAnimator, never()).register(any(), any())
+    }
+
+    @EnableFlags(
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun unregisterTransition_unregisters() {
+        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+
+        underTest.unregisterTransition(cookie)
+
+        verify(activityTransitionAnimator).unregister(eq(cookie))
+    }
+
+    @DisableFlags(
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        SharedFlags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun unregisterTransition_throws_whenFlagsAreDisabled() {
+        val cookie = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+
+        assertThrows(IllegalStateException::class.java) { underTest.unregisterTransition(cookie) }
+
+        verify(activityTransitionAnimator, never()).unregister(eq(cookie))
+    }
+
     @Test
     fun startActivityDismissingKeyguard_dismissShadeWhenOccluded_runAfterKeyguardGone() {
         val intent = mock(Intent::class.java)
@@ -216,7 +275,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         underTest.startPendingIntentDismissingKeyguard(
             intent = pendingIntent,
             dismissShade = true,
-            customMessage = customMessage
+            customMessage = customMessage,
         )
         mainExecutor.runAllReady()
 
@@ -296,7 +355,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
                 nullable(PendingIntent.OnFinished::class.java),
                 nullable(Handler::class.java),
                 nullable(String::class.java),
-                bundleCaptor.capture()
+                bundleCaptor.capture(),
             )
         val options = ActivityOptions.fromBundle(bundleCaptor.firstValue)
         assertThat(options.getPendingIntentBackgroundActivityStartMode())
@@ -339,7 +398,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             dismissShade = true,
             animationController = controller,
             showOverLockscreen = true,
-            skipLockscreenChecks = true
+            skipLockscreenChecks = true,
         )
         mainExecutor.runAllReady()
 
@@ -373,7 +432,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             dismissShade = true,
             animationController = controller,
             showOverLockscreen = true,
-            skipLockscreenChecks = true
+            skipLockscreenChecks = true,
         )
         mainExecutor.runAllReady()
 
@@ -413,7 +472,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             dismissShade = false,
             animationController = controller,
             showOverLockscreen = true,
-            skipLockscreenChecks = false
+            skipLockscreenChecks = false,
         )
         mainExecutor.runAllReady()
 
@@ -458,7 +517,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             dismissShade = false,
             animationController = controller,
             showOverLockscreen = true,
-            skipLockscreenChecks = false
+            skipLockscreenChecks = false,
         )
         mainExecutor.runAllReady()
 
@@ -583,7 +642,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             },
             {},
             false,
-            customMessage
+            customMessage,
         )
 
         verify(centralSurfaces).awakenDreams()
@@ -602,7 +661,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             cancelAction = null,
             dismissShade = false,
             afterKeyguardGone = false,
-            deferred = false
+            deferred = false,
         )
 
         verify(centralSurfaces, times(1)).awakenDreams()
@@ -620,7 +679,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
             cancelAction = null,
             dismissShade = false,
             afterKeyguardGone = false,
-            deferred = false
+            deferred = false,
         )
 
         verify(centralSurfaces, never()).awakenDreams()
