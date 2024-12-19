@@ -1904,3 +1904,10 @@ flag {
    description: "Invokes edit mode directly from long press in glanceable hub"
    bug: "382531177"
 }
+
+flag {
+   name: "notification_magic_actions_treatment"
+   namespace: "systemui"
+   description: "Special UI treatment for magic actions"
+   bug: "383567383"
+}
