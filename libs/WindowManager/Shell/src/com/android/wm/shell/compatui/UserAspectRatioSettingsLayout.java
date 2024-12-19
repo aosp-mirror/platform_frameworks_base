@@ -32,6 +32,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 
 /**
@@ -172,6 +173,9 @@ public class UserAspectRatioSettingsLayout extends LinearLayout {
             @Override
             public void onAnimationEnd(Animator animation) {
                 view.setVisibility(View.GONE);
+                if (Flags.releaseUserAspectRatioWm()) {
+                    mWindowManager.release();
+                }
             }
         });
         fadeOut.start();

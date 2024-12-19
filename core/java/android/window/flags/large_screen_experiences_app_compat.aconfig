@@ -146,3 +146,13 @@ flag {
   bug: "372848702"
   is_exported: true
 }
+
+flag {
+  name: "release_user_aspect_ratio_wm"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether to release UserAspectRatioSettingsWindowManager when button is hidden"
+  bug: "385049711"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
