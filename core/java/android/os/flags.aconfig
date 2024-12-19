@@ -340,6 +340,13 @@ flag {
 
 flag {
      namespace: "system_performance"
+     name: "perfetto_sdk_tracing_v2"
+     description: "Tracing using Perfetto SDK API."
+     bug: "303199244"
+}
+
+flag {
+     namespace: "system_performance"
      name: "telemetry_apis_framework_initialization"
      is_exported: true
      description: "Control framework initialization APIs of telemetry APIs feature."

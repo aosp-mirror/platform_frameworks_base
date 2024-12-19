@@ -119,6 +119,7 @@ android_test {
         "android.view.flags-aconfig-java",
     ],
     jni_libs: [
+        "libperfetto_trace_test_jni",
         "libpowermanagertest_jni",
         "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
@@ -260,6 +261,7 @@ android_ravenwood_test {
         "compatibility-device-util-axt-ravenwood",
         "flag-junit",
         "platform-test-annotations",
+        "perfetto_trace_java_protos",
         "flag-junit",
         "testng",
     ],
