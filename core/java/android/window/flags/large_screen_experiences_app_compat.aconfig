@@ -2,6 +2,16 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
+  name: "ignore_aspect_ratio_restrictions_for_resizeable_freeform_activities"
+  namespace: "large_screen_experiences_app_compat"
+  description: "If a resizeable activity enters freeform mode, ignore all aspect ratio constraints."
+  bug: "381866902"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "allows_screen_size_decoupled_from_status_bar_and_cutout"
   namespace: "large_screen_experiences_app_compat"
   description: "When necessary, configuration decoupled from status bar and display cutout"
