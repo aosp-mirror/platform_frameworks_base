@@ -54,10 +54,6 @@ constructor(
     override val isExpanded
         get() = shadeInteractor.isAnyExpanded.value
 
-    override fun dozeTimeTick() {
-        // TODO("b/383591086") Implement replacement or delete
-    }
-
     @Deprecated("Not supported by scenes")
     override fun blockExpansionForCurrentTouch() {
         // TODO("b/324280998") Implement replacement or delete
@@ -89,11 +85,6 @@ constructor(
 
     @Deprecated("Not supported by scenes")
     override fun resetViewGroupFade() {
-        // Now handled elsewhere. Do nothing.
-    }
-
-    @Deprecated("Not supported by scenes")
-    override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {
         // Now handled elsewhere. Do nothing.
     }
 

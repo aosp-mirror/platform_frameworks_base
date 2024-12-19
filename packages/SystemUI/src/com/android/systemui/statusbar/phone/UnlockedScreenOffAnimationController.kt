@@ -21,7 +21,6 @@ import com.android.systemui.DejankUtils
 import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
@@ -87,7 +86,6 @@ constructor(
     private var animatorDurationScale = 1f
     private var shouldAnimateInKeyguard = false
     private var lightRevealAnimationPlaying = false
-    private var aodUiAnimationPlaying = false
 
     /**
      * The result of our decision whether to play the screen off animation in
@@ -131,7 +129,7 @@ constructor(
                     override fun onAnimationStart(animation: Animator) {
                         interactionJankMonitor.begin(
                             notifShadeWindowControllerLazy.get().windowRootView,
-                            CUJ_SCREEN_OFF
+                            CUJ_SCREEN_OFF,
                         )
                     }
                 }
@@ -155,7 +153,7 @@ constructor(
     override fun initialize(
         centralSurfaces: CentralSurfaces,
         shadeViewController: ShadeViewController,
-        lightRevealScrim: LightRevealScrim
+        lightRevealScrim: LightRevealScrim,
     ) {
         this.initialized = true
         this.lightRevealScrim = lightRevealScrim
@@ -165,7 +163,7 @@ constructor(
         globalSettings.registerContentObserverSync(
             Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
             /* notify for descendants */ false,
-            animatorDurationScaleObserver
+            animatorDurationScaleObserver,
         )
         wakefulnessLifecycle.addObserver(this)
     }
@@ -203,7 +201,7 @@ constructor(
             AnimatableProperty.Y,
             currentY,
             AnimationProperties().setDuration(duration.toLong()),
-            true /* animate */
+            true, /* animate */
         )
 
         // Cancel any existing CUJs before starting the animation
@@ -217,8 +215,6 @@ constructor(
                 .setDelay(0)
                 .setDuration(duration.toLong())
                 .setAnimationEndAction {
-                    aodUiAnimationPlaying = false
-
                     // Lock the keyguard if it was waiting for the screen off animation to end.
                     keyguardViewMediatorLazy.get().maybeHandlePendingLock()
 
@@ -239,17 +235,16 @@ constructor(
                     // will not be called, which is what we want since that will finish the
                     // screen off animation and show the lockscreen, which we don't want if we
                     // were cancelled.
-                    aodUiAnimationPlaying = false
                     decidedToAnimateGoingToSleep = null
                     interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
                 }
                 .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
-            true /* animate */
+            true, /* animate */
         )
         val builder =
             InteractionJankMonitor.Configuration.Builder.withView(
                     InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD,
-                    checkNotNull(notifShadeWindowControllerLazy.get().windowRootView)
+                    checkNotNull(notifShadeWindowControllerLazy.get().windowRootView),
                 )
                 .setTag(statusBarStateControllerImpl.getClockId())
 
@@ -267,11 +262,6 @@ constructor(
     }
 
     override fun onFinishedWakingUp() {
-        // Set this to false in onFinishedWakingUp rather than onStartedWakingUp so that other
-        // observers (such as CentralSurfaces) can ask us whether we were playing the screen off
-        // animation and reset accordingly.
-        aodUiAnimationPlaying = false
-
         // If we can't control the screen off animation, we shouldn't mess with the
         // CentralSurfaces's keyguard state unnecessarily.
         if (dozeParameters.get().canControlUnlockedScreenOff()) {
@@ -313,19 +303,12 @@ constructor(
                         !powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                             shouldAnimateInKeyguard
                     ) {
-                        if (!MigrateClocksToBlueprint.isEnabled) {
-                            // Tracking this state should no longer be relevant, as the
-                            // isInteractive
-                            // check covers it
-                            aodUiAnimationPlaying = true
-                        }
-
                         // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                         // #animateInKeyguard.
                         shadeLockscreenInteractorLazy.get().showAodUi()
                     }
                 },
-                (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong()
+                (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong(),
             )
 
             return true
@@ -362,7 +345,7 @@ constructor(
         if (
             Settings.Global.getString(
                 context.contentResolver,
-                Settings.Global.ANIMATOR_DURATION_SCALE
+                Settings.Global.ANIMATOR_DURATION_SCALE,
             ) == "0"
         ) {
             return false
@@ -408,7 +391,7 @@ constructor(
      * AOD UI.
      */
     override fun isAnimationPlaying(): Boolean {
-        return isScreenOffLightRevealAnimationPlaying() || aodUiAnimationPlaying
+        return isScreenOffLightRevealAnimationPlaying()
     }
 
     override fun shouldAnimateInKeyguard(): Boolean = shouldAnimateInKeyguard

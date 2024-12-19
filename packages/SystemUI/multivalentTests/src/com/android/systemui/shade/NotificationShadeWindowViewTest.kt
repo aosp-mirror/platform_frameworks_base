@@ -16,11 +16,9 @@
 package com.android.systemui.shade
 
 import android.content.res.Configuration
-import android.os.SystemClock
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
-import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest

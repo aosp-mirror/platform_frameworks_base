@@ -2662,7 +2662,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         @Override
         public void onScreenTurningOn() {
             mFalsingCollector.onScreenTurningOn();
-            mShadeSurface.onScreenTurningOn();
         }
 
         @Override

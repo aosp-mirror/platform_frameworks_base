@@ -16,7 +16,6 @@
 
 package com.android.keyguard.dagger;
 
-import com.android.keyguard.KeyguardStatusViewController;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
@@ -25,9 +24,7 @@ import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
- * Subcomponent for helping work with KeyguardStatusView and its children.
- *
- * TODO: unify this with {@link KeyguardStatusViewComponent}
+ * Subcomponent for helping work with KeyguardStatusBarView and its children.
  */
 @Subcomponent(modules = {KeyguardStatusBarViewModule.class})
 @KeyguardStatusBarViewScope
@@ -41,6 +38,5 @@ public interface KeyguardStatusBarViewComponent {
                         shadeViewStateProvider);
     }
 
-    /** Builds a {@link KeyguardStatusViewController}. */
     KeyguardStatusBarViewController getKeyguardStatusBarViewController();
 }

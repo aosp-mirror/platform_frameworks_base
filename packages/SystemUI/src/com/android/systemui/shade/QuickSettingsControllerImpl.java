@@ -1199,7 +1199,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 !mSplitShadeEnabled && qsExpansionFraction == 0 && qsPanelBottomY > 0;
         final boolean qsVisible = qsExpansionFraction > 0;
         final boolean qsOrQqsVisible = qqsVisible || qsVisible;
-        checkCorrectScrimVisibility(qsExpansionFraction);
 
         int top = calculateTopClippingBound(qsPanelBottomY);
         int bottom = calculateBottomClippingBound(top);
@@ -1400,21 +1399,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             return -mAmbientState.getStackTopMargin();
         } else {
             return qsTop - mNotificationStackScrollLayoutController.getTop();
-        }
-    }
-
-    private void checkCorrectScrimVisibility(float expansionFraction) {
-        // issues with scrims visible on keyguard occur only in split shade
-        if (mSplitShadeEnabled) {
-            // TODO (b/265193930): remove dependency on NPVC
-            boolean keyguardViewsVisible = mBarState == KEYGUARD
-                            && mPanelViewControllerLazy.get().getKeyguardOnlyContentAlpha() == 1;
-            // expansionFraction == 1 means scrims are fully visible as their size/visibility depend
-            // on QS expansion
-            if (expansionFraction == 1 && keyguardViewsVisible) {
-                Log.wtf(TAG,
-                        "Incorrect state, scrim is visible at the same time when clock is visible");
-            }
         }
     }
 

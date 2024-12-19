@@ -18,37 +18,19 @@
 package com.android.systemui.keyguard.shared.model
 
 import android.util.Log
-import com.android.keyguard.KeyguardClockSwitch
 
-enum class ClockSize(
-    @KeyguardClockSwitch.ClockSize val legacyValue: Int,
-) {
-    SMALL(KeyguardClockSwitch.SMALL),
-    LARGE(KeyguardClockSwitch.LARGE);
-
-    companion object {
-        private val TAG = ClockSize::class.simpleName!!
-        fun fromLegacy(@KeyguardClockSwitch.ClockSize value: Int): ClockSize {
-            for (enumVal in enumValues<ClockSize>()) {
-                if (enumVal.legacyValue == value) {
-                    return enumVal
-                }
-            }
-
-            Log.e(TAG, "Unrecognized legacy clock size value: $value")
-            return LARGE
-        }
-    }
+enum class ClockSize {
+    SMALL,
+    LARGE,
 }
 
-enum class ClockSizeSetting(
-    val settingValue: Int,
-) {
+enum class ClockSizeSetting(val settingValue: Int) {
     DYNAMIC(1),
     SMALL(0);
 
     companion object {
         private val TAG = ClockSizeSetting::class.simpleName!!
+
         fun fromSettingValue(value: Int): ClockSizeSetting {
             for (enumVal in enumValues<ClockSizeSetting>()) {
                 if (enumVal.settingValue == value) {

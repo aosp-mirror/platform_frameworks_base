@@ -37,7 +37,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotification
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSliceViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
@@ -67,7 +66,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultShortcutsSection: DefaultShortcutsSection
     @Mock private lateinit var defaultAmbientIndicationAreaSection: Optional<KeyguardSection>
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
-    @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
     @Mock private lateinit var defaultStatusBarViewSection: DefaultStatusBarSection
     @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
@@ -79,6 +77,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var keyguardSliceViewSection: KeyguardSliceViewSection
     @Mock
     private lateinit var udfpsAccessibilityOverlaySection: DefaultUdfpsAccessibilityOverlaySection
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -91,7 +90,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultShortcutsSection,
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
-                defaultStatusViewSection,
                 defaultStatusBarViewSection,
                 defaultNSSLSection,
                 aodNotificationIconsSection,

@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import android.view.ViewGroup
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
@@ -55,8 +54,6 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
 
     override fun startExpandLatencyTracking() {}
 
-    override fun dozeTimeTick() {}
-
     override fun resetViews(animate: Boolean) {}
 
     override val barState: Int = 0
@@ -74,8 +71,6 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
 
     override fun setQsScrimEnabled(qsScrimEnabled: Boolean) {}
 
-    override fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean) {}
-
     override fun updateSystemUiStateFlags() {}
 
     override fun updateTouchableRegion() {}
@@ -83,9 +78,6 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun transitionToExpandedShade(delay: Long) {}
 
     @Deprecated("Not supported by scenes") override fun resetViewGroupFade() {}
-
-    @Deprecated("Not supported by scenes")
-    override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}
 
     @Deprecated("Not supported by scenes") override fun setOverStretchAmount(amount: Float) {}
 
@@ -146,6 +138,4 @@ class ShadeFoldAnimatorEmptyImpl : ShadeFoldAnimator {
     ) {}
 
     override fun cancelFoldToAodAnimation() {}
-
-    override val view: ViewGroup? = null
 }

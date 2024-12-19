@@ -27,7 +27,6 @@ import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -122,13 +121,11 @@ constructor(
                 // We offset the placeholder bounds by the configured top margin to account for
                 // legacy placement behavior within notifications for splitshade.
                 emit(
-                    if (MigrateClocksToBlueprint.isEnabled) {
-                        if (useSplitShade) {
-                            bounds.copy(bottom = bounds.bottom - keyguardSplitShadeTopMargin)
-                        } else {
-                            bounds
-                        }
-                    } else bounds
+                    if (useSplitShade) {
+                        bounds.copy(bottom = bounds.bottom - keyguardSplitShadeTopMargin)
+                    } else {
+                        bounds
+                    }
                 )
             }
             .stateIn(
@@ -340,9 +337,6 @@ constructor(
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
 
-    @Deprecated("Use the relevant TransitionViewModel")
-    val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
-
     /** Temporary shim for fading out content when the brightness slider is used */
     @Deprecated("SceneContainer uses NotificationStackAppearanceInteractor")
     val panelAlpha: StateFlow<Float> = repository.panelAlpha.asStateFlow()
@@ -481,10 +475,6 @@ constructor(
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
-    }
-
-    fun setAlpha(alpha: Float) {
-        repository.setKeyguardAlpha(alpha)
     }
 
     fun setPanelAlpha(alpha: Float) {

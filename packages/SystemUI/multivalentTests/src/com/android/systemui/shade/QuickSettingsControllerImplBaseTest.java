@@ -32,7 +32,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
@@ -200,9 +199,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 ),
                 mKosmos.getShadeModeInteractor());
 
-        KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
-        keyguardStatusView.setId(R.id.keyguard_status_view);
-
         when(mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance)).thenReturn(DEFAULT_HEIGHT);
         when(mPanelView.getResources()).thenReturn(mResources);
@@ -218,8 +214,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         when(mQs.getHeaderBottom()).thenReturn(QS_FRAME_BOTTOM);
         when(mPanelView.getY()).thenReturn((float) QS_FRAME_TOP);
         when(mPanelView.getHeight()).thenReturn(QS_FRAME_BOTTOM);
-        when(mPanelView.findViewById(R.id.keyguard_status_view))
-                .thenReturn(mock(KeyguardStatusView.class));
         when(mQs.getView()).thenReturn(mPanelView);
         when(mQSFragment.getView()).thenReturn(mPanelView);
 

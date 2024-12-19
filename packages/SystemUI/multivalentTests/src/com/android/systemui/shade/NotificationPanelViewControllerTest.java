@@ -57,42 +57,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    @Ignore("b/261472011 - Test appears inconsistent across environments")
-    public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
-                /* lockIconPadding= */ 20,
-                /* indicationPadding= */ 0,
-                /* ambientPadding= */ 0);
-
-        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
-                .isEqualTo(80);
-    }
-
-    @Test
-    @Ignore("b/261472011 - Test appears inconsistent across environments")
-    public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
-                /* lockIconPadding= */ 0,
-                /* indicationPadding= */ 30,
-                /* ambientPadding= */ 0);
-
-        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
-                .isEqualTo(70);
-    }
-
-    @Test
-    @Ignore("b/261472011 - Test appears inconsistent across environments")
-    public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
-        setBottomPadding(/* stackScrollLayoutBottom= */ 180,
-                /* lockIconPadding= */ 0,
-                /* indicationPadding= */ 0,
-                /* ambientPadding= */ 40);
-
-        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
-                .isEqualTo(60);
-    }
-
-    @Test
     @EnableFlags(com.android.systemui.Flags.FLAG_SHADE_EXPANDS_ON_STATUS_BAR_LONG_PRESS)
     public void onStatusBarLongPress_shadeExpands() {
         long downTime = 42L;

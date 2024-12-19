@@ -85,22 +85,6 @@ public class DebugDrawable extends Drawable {
                             mNotificationPanelViewController.getExpandedFraction()),
                     Color.MAGENTA, "calculateNotificationsTopPadding()");
         }
-        drawDebugInfo(canvas, mNotificationPanelViewController.getClockPositionResult().clockY,
-                Color.GRAY, "mClockPositionResult.clockY");
-
-        if (mNotificationPanelViewController.isKeyguardShowing()) {
-            // Notifications have the space between those two lines.
-            drawDebugInfo(canvas,
-                    mNotificationStackScrollLayoutController.getTop()
-                            + (int) mNotificationPanelViewController
-                            .getKeyguardNotificationTopPadding(),
-                    Color.RED, "NSSL.getTop() + mKeyguardNotificationTopPadding");
-
-            drawDebugInfo(canvas, mNotificationStackScrollLayoutController.getBottom()
-                            - (int) mNotificationPanelViewController
-                            .getKeyguardNotificationBottomPadding(),
-                    Color.RED, "NSSL.getBottom() - mKeyguardNotificationBottomPadding");
-        }
 
         mDebugPaint.setColor(Color.CYAN);
         canvas.drawLine(0,

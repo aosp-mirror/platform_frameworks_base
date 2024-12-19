@@ -340,7 +340,6 @@ public final class DozeServiceHost implements DozeHost {
     public void dozeTimeTick() {
         TraceUtils.trace("DozeServiceHost#dozeTimeTick", () -> {
             mDozeInteractor.dozeTimeTick();
-            mShadeLockscreenInteractor.dozeTimeTick();
             mAuthController.dozeTimeTick();
             if (mAmbientIndicationContainer instanceof DozeReceiver) {
                 ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();

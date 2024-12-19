@@ -17,37 +17,64 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
-import android.view.View
-import android.view.ViewGroup
+import android.os.Handler
+import android.view.LayoutInflater
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.android.keyguard.KeyguardSliceView
+import com.android.keyguard.KeyguardSliceViewController
 import com.android.systemui.customization.R as customR
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 
 class KeyguardSliceViewSection
 @Inject
 constructor(
     val smartspaceController: LockscreenSmartspaceController,
+    val layoutInflater: LayoutInflater,
+    @Main val handler: Handler,
+    @Background val bgHandler: Handler,
+    val activityStarter: ActivityStarter,
+    val configurationController: ConfigurationController,
+    val dumpManager: DumpManager,
+    val displayTracker: DisplayTracker,
 ) : KeyguardSection() {
+    private lateinit var sliceView: KeyguardSliceView
+
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled) return
 
-        constraintLayout.findViewById<View?>(R.id.keyguard_slice_view)?.let {
-            (it.parent as ViewGroup).removeView(it)
-            constraintLayout.addView(it)
-        }
+        sliceView =
+            layoutInflater.inflate(R.layout.keyguard_slice_view, null, false) as KeyguardSliceView
+        constraintLayout.addView(sliceView)
     }
 
-    override fun bindData(constraintLayout: ConstraintLayout) {}
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (smartspaceController.isEnabled) return
+
+        val controller =
+            KeyguardSliceViewController(
+                handler,
+                bgHandler,
+                sliceView,
+                activityStarter,
+                configurationController,
+                dumpManager,
+                displayTracker,
+            )
+        controller.init()
+    }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled) return
 
         constraintSet.apply {
@@ -55,13 +82,13 @@ constructor(
                 R.id.keyguard_slice_view,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
-                ConstraintSet.START
+                ConstraintSet.START,
             )
             connect(
                 R.id.keyguard_slice_view,
                 ConstraintSet.END,
                 ConstraintSet.PARENT_ID,
-                ConstraintSet.END
+                ConstraintSet.END,
             )
             constrainHeight(R.id.keyguard_slice_view, ConstraintSet.WRAP_CONTENT)
 
@@ -69,20 +96,19 @@ constructor(
                 R.id.keyguard_slice_view,
                 ConstraintSet.TOP,
                 customR.id.lockscreen_clock_view,
-                ConstraintSet.BOTTOM
+                ConstraintSet.BOTTOM,
             )
 
             createBarrier(
                 R.id.smart_space_barrier_bottom,
                 Barrier.BOTTOM,
                 0,
-                *intArrayOf(R.id.keyguard_slice_view)
+                *intArrayOf(R.id.keyguard_slice_view),
             )
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (smartspaceController.isEnabled) return
 
         constraintLayout.removeView(R.id.keyguard_slice_view)

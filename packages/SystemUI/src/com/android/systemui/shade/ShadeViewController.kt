@@ -16,7 +16,6 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import android.view.ViewGroup
 import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
@@ -52,10 +51,6 @@ interface ShadeViewController {
     /** Sets Qs ScrimEnabled and updates QS state. */
     @Deprecated("Does nothing when scene container is enabled.")
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
-
-    /** Sets the top spacing for the ambient indicator. */
-    @Deprecated("Does nothing when scene container is enabled.")
-    fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
     @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
@@ -169,9 +164,6 @@ interface ShadeFoldAnimator {
     /** Cancels fold to AOD transition and resets view state. */
     @Deprecated("Used by the Keyguard Fold Transition. Needs flexiglass equivalent.")
     fun cancelFoldToAodAnimation()
-
-    /** Returns the main view of the shade. */
-    @Deprecated("Not used when migrateClocksToBlueprint enabled.") val view: ViewGroup?
 }
 
 /**

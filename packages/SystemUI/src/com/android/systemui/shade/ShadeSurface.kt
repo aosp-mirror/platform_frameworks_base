@@ -75,9 +75,6 @@ interface ShadeSurface :
     /** Sets the view's alpha to max. */
     fun resetAlpha()
 
-    /** @see com.android.systemui.keyguard.ScreenLifecycle.Observer.onScreenTurningOn */
-    fun onScreenTurningOn()
-
     /**
      * Called when the device's theme changes.
      *

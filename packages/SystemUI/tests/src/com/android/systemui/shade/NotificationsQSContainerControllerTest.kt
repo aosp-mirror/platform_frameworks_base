@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -27,7 +26,6 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -68,7 +66,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
     private val view = mock<NotificationsQuickSettingsContainer>()
@@ -120,7 +117,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
                 delayableExecutor,
                 notificationStackScrollLayoutController,
                 ResourcesSplitShadeStateController(),
-                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper },
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -205,23 +202,23 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = true,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = 0, // taskbar should disappear when shade is expanded
             expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
 
         given(
             taskbarVisible = true,
             navigationMode = BUTTONS_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = STABLE_INSET_BOTTOM,
             expectedNotificationsMargin = NOTIFICATIONS_MARGIN,
-            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
     }
 
@@ -233,22 +230,22 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = 0,
-            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
 
         given(
             taskbarVisible = false,
             navigationMode = BUTTONS_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = 0, // qs goes full height as it's not obscuring nav buttons
             expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-            expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
     }
 
@@ -259,22 +256,22 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withCutout()
+            insets = windowInsets().withCutout(),
         )
         then(
             expectedContainerPadding = CUTOUT_HEIGHT,
-            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
 
         given(
             taskbarVisible = false,
             navigationMode = BUTTONS_NAVIGATION,
-            insets = windowInsets().withCutout().withStableBottom()
+            insets = windowInsets().withCutout().withStableBottom(),
         )
         then(
             expectedContainerPadding = 0,
             expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-            expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET
+            expectedQsPadding = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN - QS_PADDING_OFFSET,
         )
     }
 
@@ -285,18 +282,18 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = true,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(expectedContainerPadding = 0, expectedQsPadding = STABLE_INSET_BOTTOM)
 
         given(
             taskbarVisible = true,
             navigationMode = BUTTONS_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = STABLE_INSET_BOTTOM,
-            expectedQsPadding = STABLE_INSET_BOTTOM
+            expectedQsPadding = STABLE_INSET_BOTTOM,
         )
     }
 
@@ -310,19 +307,19 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withCutout().withStableBottom()
+            insets = windowInsets().withCutout().withStableBottom(),
         )
         then(expectedContainerPadding = CUTOUT_HEIGHT, expectedQsPadding = STABLE_INSET_BOTTOM)
 
         given(
             taskbarVisible = false,
             navigationMode = BUTTONS_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(
             expectedContainerPadding = 0,
             expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN,
-            expectedQsPadding = STABLE_INSET_BOTTOM
+            expectedQsPadding = STABLE_INSET_BOTTOM,
         )
     }
 
@@ -335,7 +332,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(expectedContainerPadding = 0, expectedNotificationsMargin = 0)
 
@@ -351,7 +348,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         given(
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
-            insets = windowInsets().withStableBottom()
+            insets = windowInsets().withStableBottom(),
         )
         then(expectedContainerPadding = 0)
 
@@ -467,7 +464,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
                 delayableExecutor,
                 notificationStackScrollLayoutController,
                 ResourcesSplitShadeStateController(),
-                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper }
+                largeScreenHeaderHelperLazy = { largeScreenHeaderHelper },
             )
         controller.updateConstraints()
 
@@ -483,7 +480,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
             taskbarVisible = false,
             navigationMode = GESTURES_NAVIGATION,
             insets = emptyInsets(),
-            applyImmediately = false
+            applyImmediately = false,
         )
         fakeSystemClock.advanceTime(INSET_DEBOUNCE_MILLIS / 2)
         windowInsetsCallback.accept(windowInsets().withStableBottom())
@@ -550,7 +547,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         taskbarVisible: Boolean,
         navigationMode: Int,
         insets: WindowInsets,
-        applyImmediately: Boolean = true
+        applyImmediately: Boolean = true,
     ) {
         Mockito.clearInvocations(view)
         taskbarVisibilityCallback.onTaskbarStatusUpdated(taskbarVisible, false)
@@ -565,7 +562,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     fun then(
         expectedContainerPadding: Int,
         expectedNotificationsMargin: Int = NOTIFICATIONS_MARGIN,
-        expectedQsPadding: Int = 0
+        expectedQsPadding: Int = 0,
     ) {
         verify(view).setPadding(anyInt(), anyInt(), anyInt(), eq(expectedContainerPadding))
         verify(view).setNotificationsMarginBottom(expectedNotificationsMargin)
@@ -597,7 +594,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         val layoutParams =
             ConstraintLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT,
             )
         // required as cloning ConstraintSet fails if view doesn't have layout params
         view.layoutParams = layoutParams
