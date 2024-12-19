@@ -34,7 +34,6 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.fakeUserFileManager
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,7 +43,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.spy
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CommunalPrefsRepositoryImplTest : SysuiTestCase() {

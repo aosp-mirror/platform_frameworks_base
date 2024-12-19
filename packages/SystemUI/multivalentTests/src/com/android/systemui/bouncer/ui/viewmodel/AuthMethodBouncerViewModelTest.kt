@@ -33,7 +33,6 @@ import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.testKosmos
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -90,7 +89,6 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             assertThat(animateFailure).isFalse()
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun onAuthenticationResult_playUnlockTokenIfSuccessful() =
@@ -109,7 +107,6 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(authInteractionProperties)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun onAuthenticationResult_playFailureTokenIfFailure() =

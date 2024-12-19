@@ -77,7 +77,6 @@ import com.android.systemui.res.R
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -107,7 +106,6 @@ private const val OP_PACKAGE_NAME_WITH_APP_LOGO = "biometric.testapp"
 private const val OP_PACKAGE_NAME_NO_LOGO_INFO = "biometric.testapp.nologoinfo"
 private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCase() {

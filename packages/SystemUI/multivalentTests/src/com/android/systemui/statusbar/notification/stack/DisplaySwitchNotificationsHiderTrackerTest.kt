@@ -24,7 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -38,7 +37,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class DisplaySwitchNotificationsHiderTrackerTest : SysuiTestCase() {
 

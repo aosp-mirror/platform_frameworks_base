@@ -22,7 +22,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -39,7 +38,6 @@ import org.mockito.MockitoAnnotations
 /**
  * Be careful with the {FeatureFlagsReleaseRestarter} in this test. It has a call to System.exit()!
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class NotOccludedConditionTest : SysuiTestCase() {

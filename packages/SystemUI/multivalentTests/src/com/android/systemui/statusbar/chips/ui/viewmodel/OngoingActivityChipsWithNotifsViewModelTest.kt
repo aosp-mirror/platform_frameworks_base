@@ -68,7 +68,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
@@ -84,7 +83,6 @@ import org.mockito.kotlin.whenever
 /** Tests for [OngoingActivityChipsViewModel] when the [StatusBarNotifChips] flag is enabled. */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(StatusBarNotifChips.FLAG_NAME)
 class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()

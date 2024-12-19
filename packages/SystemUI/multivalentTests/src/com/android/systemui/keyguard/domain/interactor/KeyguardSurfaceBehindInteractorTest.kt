@@ -50,7 +50,6 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardSurfaceBehindInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private lateinit var testScope: TestScope

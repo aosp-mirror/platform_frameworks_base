@@ -32,7 +32,6 @@ import com.android.systemui.volume.dialog.sliders.shared.model.SliderInputEvent
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -41,7 +40,6 @@ import org.junit.runner.RunWith
 
 private val volumeDialogTimeout = 3.seconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper

@@ -17,7 +17,6 @@ import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -26,7 +25,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 class ActivityTaskManagerThumbnailLoaderTest : SysuiTestCase() {
 
     private val dispatcher = UnconfinedTestDispatcher()

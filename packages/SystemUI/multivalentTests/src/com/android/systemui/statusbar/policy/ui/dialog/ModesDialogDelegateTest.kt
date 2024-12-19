@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.policy.ui.dialog
 
 import android.app.Dialog
@@ -37,7 +35,6 @@ import com.android.systemui.statusbar.phone.systemUIDialogFactory
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.modesDialogViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest

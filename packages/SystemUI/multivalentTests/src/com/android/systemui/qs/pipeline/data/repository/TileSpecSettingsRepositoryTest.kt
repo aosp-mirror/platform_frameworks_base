@@ -28,7 +28,6 @@ import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.FakeRetailModeRepository
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -42,7 +41,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class TileSpecSettingsRepositoryTest : SysuiTestCase() {
 
     private lateinit var secureSettings: FakeSettings

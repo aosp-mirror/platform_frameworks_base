@@ -36,7 +36,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -47,7 +46,6 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()

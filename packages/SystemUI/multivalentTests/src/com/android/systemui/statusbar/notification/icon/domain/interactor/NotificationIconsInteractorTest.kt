@@ -44,7 +44,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.bubbles.bubbles
 import com.android.wm.shell.bubbles.bubblesOptional
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -142,7 +141,6 @@ class NotificationIconsInteractorTest : SysuiTestCase() {
         }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AlwaysOnDisplayNotificationIconsInteractorTest : SysuiTestCase() {

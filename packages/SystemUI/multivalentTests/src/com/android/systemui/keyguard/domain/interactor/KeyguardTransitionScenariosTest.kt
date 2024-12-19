@@ -65,7 +65,6 @@ import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -88,7 +87,6 @@ import platform.test.runner.parameterized.Parameters
  * Class for testing user journeys through the interactors. They will all be activated during setup,
  * to ensure the expected transitions are still triggered.
  */
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTestCase() {

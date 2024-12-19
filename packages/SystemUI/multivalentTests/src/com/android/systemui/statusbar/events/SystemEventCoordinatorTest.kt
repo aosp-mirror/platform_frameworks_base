@@ -25,7 +25,6 @@ import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
@@ -43,7 +42,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 class SystemEventCoordinatorTest : SysuiTestCase() {
 
     private val fakeSystemClock = FakeSystemClock()

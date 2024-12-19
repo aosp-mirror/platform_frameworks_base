@@ -26,7 +26,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +36,6 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class ShortcutHelperCoreStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val repo = kosmos.shortcutHelperStateRepository

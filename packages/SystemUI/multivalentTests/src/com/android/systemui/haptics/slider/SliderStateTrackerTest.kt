@@ -21,7 +21,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -35,7 +34,6 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class SliderStateTrackerTest : SysuiTestCase() {
 
@@ -102,7 +100,6 @@ class SliderStateTrackerTest : SysuiTestCase() {
 
     // Tests on the WAIT state
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun waitCompletes_onWait_movesToHandleAcquired() = runTest {
         val config = SeekableSliderTrackerConfig()
@@ -716,7 +713,6 @@ class SliderStateTrackerTest : SysuiTestCase() {
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun initTracker(
         scope: CoroutineScope,
         config: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),

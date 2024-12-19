@@ -30,7 +30,6 @@ import com.android.systemui.res.R
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -47,7 +46,6 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 private const val FREE_IMAGE_DELAY_MS = 4000L
 private const val MAX_IMAGE_SIZE = 512 // size of the test drawables in pixels
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper
 @RunWith(AndroidJUnit4::class)

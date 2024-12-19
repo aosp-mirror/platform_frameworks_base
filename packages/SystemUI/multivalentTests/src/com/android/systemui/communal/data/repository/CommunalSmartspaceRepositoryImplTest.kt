@@ -33,7 +33,6 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListe
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -47,7 +46,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
 @SmallTest
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalSmartspaceRepositoryImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()

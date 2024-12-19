@@ -46,14 +46,12 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.CarrierConfigTracker
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MobileIconsInteractorTest : SysuiTestCase() {

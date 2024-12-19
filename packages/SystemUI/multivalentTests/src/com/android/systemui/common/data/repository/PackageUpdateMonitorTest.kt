@@ -34,7 +34,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -47,7 +46,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PackageUpdateMonitorTest : SysuiTestCase() {

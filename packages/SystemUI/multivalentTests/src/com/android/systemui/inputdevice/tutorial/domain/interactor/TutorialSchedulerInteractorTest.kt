@@ -30,7 +30,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
@@ -39,7 +38,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class TutorialSchedulerInteractorTest : SysuiTestCase() {

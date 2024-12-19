@@ -28,7 +28,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -44,7 +43,6 @@ import org.mockito.junit.MockitoRule
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class HapticSliderPluginTest : SysuiTestCase() {
 
     private val kosmos = Kosmos()

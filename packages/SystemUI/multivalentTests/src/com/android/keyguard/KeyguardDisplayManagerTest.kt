@@ -31,7 +31,6 @@ import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.shade.data.repository.FakeShadeDisplayRepository
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -52,7 +51,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardDisplayManagerTest : SysuiTestCase() {
     @Mock private val navigationBarController = mock(NavigationBarController::class.java)
     @Mock

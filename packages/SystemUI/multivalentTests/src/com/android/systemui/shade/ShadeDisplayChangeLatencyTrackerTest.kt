@@ -27,7 +27,6 @@ import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.testKosmos
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -61,7 +60,6 @@ class ShadeDisplayChangeLatencyTrackerTest : SysuiTestCase() {
             verify(latencyTracker).onActionEnd(any())
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun onChange_doFrameTimesOut_previousCancelled() =
         testScope.runTest {
@@ -77,7 +75,6 @@ class ShadeDisplayChangeLatencyTrackerTest : SysuiTestCase() {
             verify(latencyTracker).onActionCancel(any())
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun onChange_onMovedToDisplayTimesOut_cancelled() =
         testScope.runTest {

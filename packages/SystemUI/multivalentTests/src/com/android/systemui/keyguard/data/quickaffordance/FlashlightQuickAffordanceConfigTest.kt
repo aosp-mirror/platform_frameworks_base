@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.android.systemui.utils.leaks.FakeFlashlightController
 import com.android.systemui.utils.leaks.LeakCheckedTest
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -39,7 +38,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood

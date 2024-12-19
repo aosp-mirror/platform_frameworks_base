@@ -25,7 +25,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -34,7 +33,6 @@ import org.junit.runner.RunWith
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class WorkTileRestoreProcessorTest : SysuiTestCase() {
 
     private val underTest = WorkTileRestoreProcessor()

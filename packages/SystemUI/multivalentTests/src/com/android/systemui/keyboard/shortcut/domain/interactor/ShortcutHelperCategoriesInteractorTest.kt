@@ -51,7 +51,6 @@ import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -69,7 +68,6 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
     private val systemShortcutsSource = FakeKeyboardShortcutGroupsSource()
     private val multitaskingShortcutsSource = FakeKeyboardShortcutGroupsSource()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val kosmos =
         testKosmos().also {
             it.testDispatcher = UnconfinedTestDispatcher()

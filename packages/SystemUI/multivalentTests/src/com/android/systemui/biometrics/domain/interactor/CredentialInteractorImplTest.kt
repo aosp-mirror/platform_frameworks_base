@@ -21,7 +21,6 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,7 +39,6 @@ private const val PASSWORD_ID = 30
 private const val OPERATION_ID = 100L
 private const val MAX_ATTEMPTS = 5
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class CredentialInteractorImplTest : SysuiTestCase() {

@@ -29,7 +29,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -45,7 +44,6 @@ import org.mockito.kotlin.any
 
 private const val USER_ID = 8
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FaceSettingsRepositoryImplTest : SysuiTestCase() {

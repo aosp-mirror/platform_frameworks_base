@@ -28,7 +28,6 @@ import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -53,7 +52,6 @@ class IconTilesInteractorTest : SysuiTestCase() {
         assertThat(underTest.isIconTile(smallTile)).isTrue()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun isIconTile_updatesFromSharedPreferences() =
         with(kosmos) {
@@ -76,7 +74,6 @@ class IconTilesInteractorTest : SysuiTestCase() {
             }
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun resize_updatesSharedPreferences() =
         with(kosmos) {
@@ -96,7 +93,6 @@ class IconTilesInteractorTest : SysuiTestCase() {
             }
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun resizingNonCurrentTile_doesNothing() =
         with(kosmos) {

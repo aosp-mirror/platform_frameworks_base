@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsMode
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.util.animation.DisappearParameters
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Test
@@ -56,7 +55,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() {
 
     @Test

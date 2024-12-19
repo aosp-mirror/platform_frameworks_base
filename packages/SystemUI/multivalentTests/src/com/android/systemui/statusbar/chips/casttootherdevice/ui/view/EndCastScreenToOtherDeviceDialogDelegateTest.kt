@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProj
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -57,7 +56,6 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class EndCastScreenToOtherDeviceDialogDelegateTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val sysuiDialog = mock<SystemUIDialog>()

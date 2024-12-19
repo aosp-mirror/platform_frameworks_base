@@ -16,7 +16,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -37,7 +36,6 @@ private const val REQUEST_ID = 22L
 private const val OPERATION_ID = 100L
 private const val OP_PACKAGE_NAME = "biometric.testapp"
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PromptCredentialInteractorTest : SysuiTestCase() {

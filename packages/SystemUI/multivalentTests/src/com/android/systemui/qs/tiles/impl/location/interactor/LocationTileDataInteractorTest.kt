@@ -29,7 +29,6 @@ import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTil
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
 import com.android.systemui.utils.leaks.FakeLocationController
 import com.google.common.truth.Truth
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -37,7 +36,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)

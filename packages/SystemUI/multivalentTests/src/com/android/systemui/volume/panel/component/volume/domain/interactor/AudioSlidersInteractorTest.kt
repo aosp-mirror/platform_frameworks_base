@@ -32,14 +32,12 @@ import com.android.systemui.volume.data.repository.audioRepository
 import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.android.systemui.volume.panel.component.volume.domain.model.SliderType
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

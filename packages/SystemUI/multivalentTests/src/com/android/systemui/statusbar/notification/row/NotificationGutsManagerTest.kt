@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.row
 
 import android.R
@@ -81,7 +79,6 @@ import com.android.systemui.wmshell.BubblesManager
 import java.util.Optional
 import kotlin.test.assertNotNull
 import kotlin.test.fail
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

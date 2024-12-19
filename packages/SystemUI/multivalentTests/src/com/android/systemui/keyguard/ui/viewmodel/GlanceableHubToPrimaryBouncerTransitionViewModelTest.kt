@@ -29,11 +29,9 @@ import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.collectValues
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class GlanceableHubToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {

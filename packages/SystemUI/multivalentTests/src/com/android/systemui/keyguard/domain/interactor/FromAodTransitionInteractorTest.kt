@@ -63,7 +63,6 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -73,7 +72,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FromAodTransitionInteractorTest : SysuiTestCase() {

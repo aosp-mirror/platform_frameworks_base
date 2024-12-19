@@ -30,7 +30,6 @@ import com.android.systemui.volume.domain.model.VolumePanelRoute
 import com.android.systemui.volume.panel.domain.interactor.volumePanelGlobalStateInteractor
 import com.android.systemui.volume.panel.ui.viewmodel.volumePanelViewModelFactory
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -41,7 +40,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class VolumeNavigatorTest : SysuiTestCase() {

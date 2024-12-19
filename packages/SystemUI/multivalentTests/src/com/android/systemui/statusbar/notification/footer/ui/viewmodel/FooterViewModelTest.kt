@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.platform.test.annotations.DisableFlags
@@ -45,7 +43,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

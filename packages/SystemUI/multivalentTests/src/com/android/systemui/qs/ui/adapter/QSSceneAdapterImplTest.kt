@@ -50,7 +50,6 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -64,7 +63,6 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class QSSceneAdapterImplTest : SysuiTestCase() {
 
     private val kosmos = Kosmos().apply { testCase = this@QSSceneAdapterImplTest }

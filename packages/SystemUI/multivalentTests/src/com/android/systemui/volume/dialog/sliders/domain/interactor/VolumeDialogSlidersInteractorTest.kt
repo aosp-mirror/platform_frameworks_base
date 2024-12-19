@@ -30,7 +30,6 @@ import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -40,7 +39,6 @@ import org.mockito.kotlin.whenever
 
 private const val AUDIO_SHARING_STREAM = 99
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
