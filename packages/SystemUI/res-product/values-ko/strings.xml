@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"더 많은 옵션을 확인하려면 기기를 잠금 해제하세요."</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"이 휴대전화에서 재생 중"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"이 태블릿에서 재생 중"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"전원이 꺼져 있을 때도 내 기기 찾기로 이 휴대전화를 찾을 수 있습니다."</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"전원이 꺼져 있을 때도 내 기기 찾기로 이 태블릿을 찾을 수 있습니다."</string>
 </resources>

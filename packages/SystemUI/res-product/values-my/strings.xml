@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်စက်ကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"ဤဖုန်းတွင် ဖွင့်နေသည်"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"ဤတက်ဘလက်တွင် ဖွင့်နေသည်"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤဖုန်းကို ရှာနိုင်သည်"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤတက်ဘလက်ကို ရှာနိုင်သည်"</string>
 </resources>

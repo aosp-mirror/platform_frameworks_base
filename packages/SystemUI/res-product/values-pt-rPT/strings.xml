@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloqueie o dispositivo para obter mais opções."</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"A reproduzir neste telemóvel"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"A reproduzir neste tablet"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Pode localizar este telemóvel com o serviço Localizar o meu dispositivo mesmo quando está desligado"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Pode localizar este tablet com o serviço Localizar o meu dispositivo mesmo quando está desligado"</string>
 </resources>

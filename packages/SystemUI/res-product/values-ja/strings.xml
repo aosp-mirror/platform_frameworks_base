@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"デバイスのロックを解除してその他のオプションを表示する"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"このスマートフォンで再生しています"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"このタブレットで再生しています"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"「デバイスを探す」を使うと、電源が OFF の状態でもこのスマートフォンの現在地を確認できます"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"「デバイスを探す」を使うと、電源が OFF の状態でもこのタブレットの現在地を確認できます"</string>
 </resources>
