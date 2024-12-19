@@ -22,6 +22,7 @@ import android.hardware.display.DisplayTopology.TreeNode.POSITION_BOTTOM
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_LEFT
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_RIGHT
+import android.util.SparseArray
 import android.view.Display
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -685,6 +686,34 @@ class DisplayTopologyTest {
         val actualDisplay4 = actualDisplay2.children[0]
         verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_RIGHT,
             offset = 0f, noOfChildren = 0)
+    }
+
+    @Test
+    fun coordinates() {
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
+            /* height= */ 600f, /* position= */ 0, /* offset= */ 0f)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 0f)
+        display1.addChild(display2)
+
+        val display3 = DisplayTopology.TreeNode(/* displayId= */ 3, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 400f)
+        display1.addChild(display3)
+
+        val display4 = DisplayTopology.TreeNode(/* displayId= */ 4, /* width= */ 200f,
+            /* height= */ 600f, POSITION_RIGHT, /* offset= */ 0f)
+        display2.addChild(display4)
+
+        topology = DisplayTopology(display1, /* primaryDisplayId= */ 1)
+        val coords = topology.absoluteBounds
+
+        val expectedCoords = SparseArray<RectF>()
+        expectedCoords.append(1, RectF(0f, 0f, 200f, 600f))
+        expectedCoords.append(2, RectF(200f, 0f, 800f, 200f))
+        expectedCoords.append(3, RectF(200f, 400f, 800f, 600f))
+        expectedCoords.append(4, RectF(800f, 0f, 1000f, 600f))
+        assertThat(coords.contentEquals(expectedCoords)).isTrue()
     }
 
     /**
