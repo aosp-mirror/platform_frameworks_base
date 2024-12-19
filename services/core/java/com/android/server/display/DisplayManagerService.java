@@ -119,6 +119,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.IBinder.FrozenStateChangeCallback;
 import android.os.IThermalService;
 import android.os.Looper;
 import android.os.Message;
@@ -272,6 +273,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE = 7;
     private static final int MSG_DELIVER_DISPLAY_GROUP_EVENT = 8;
     private static final int MSG_RECEIVED_DEVICE_STATE = 9;
+    private static final int MSG_DISPATCH_PENDING_PROCESS_EVENTS = 10;
     private static final int[] EMPTY_ARRAY = new int[0];
     private static final HdrConversionMode HDR_CONVERSION_MODE_UNSUPPORTED = new HdrConversionMode(
             HDR_CONVERSION_UNSUPPORTED);
@@ -286,7 +288,6 @@ public final class DisplayManagerService extends SystemService {
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private final UidImportanceListener mUidImportanceListener = new UidImportanceListener();
-    private final DisplayFrozenProcessListener mDisplayFrozenProcessListener;
 
     @Nullable
     private IMediaProjectionManager mProjectionService;
@@ -630,7 +631,6 @@ public final class DisplayManagerService extends SystemService {
         mFlags = injector.getFlags();
         mHandler = new DisplayManagerHandler(displayThreadLooper);
         mHandlerExecutor = new HandlerExecutor(mHandler);
-        mDisplayFrozenProcessListener = new DisplayFrozenProcessListener();
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
@@ -1165,31 +1165,11 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private class DisplayFrozenProcessListener
-            implements ActivityManagerInternal.FrozenProcessListener {
-        public void onProcessFrozen(int pid) {
-            synchronized (mSyncRoot) {
-                CallbackRecord callback = mCallbacks.get(pid);
-                if (callback == null) {
-                    return;
-                }
-                callback.setFrozen(true);
-            }
-        }
-
-        public void onProcessUnfrozen(int pid) {
-            // First, see if there is a callback associated with this pid.  If there's no
-            // callback, then there is nothing to do.
-            CallbackRecord callback;
-            synchronized (mSyncRoot) {
-                callback = mCallbacks.get(pid);
-                if (callback == null) {
-                    return;
-                }
-                callback.setFrozen(false);
-            }
-            // Attempt to dispatch pending events if the process is coming out of frozen.
+    private void dispatchPendingProcessEvents(@NonNull Object cb) {
+        if (cb instanceof CallbackRecord callback) {
             callback.dispatchPending();
+        } else {
+            Slog.wtf(TAG, "not a callback: " + cb);
         }
     }
 
@@ -4052,6 +4032,9 @@ public final class DisplayManagerService extends SystemService {
                     deliverDisplayGroupEvent(msg.arg1, msg.arg2);
                     break;
 
+                case MSG_DISPATCH_PENDING_PROCESS_EVENTS:
+                    dispatchPendingProcessEvents(msg.obj);
+                    break;
             }
         }
     }
@@ -4119,7 +4102,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private final class CallbackRecord implements DeathRecipient {
+    private final class CallbackRecord implements DeathRecipient, FrozenStateChangeCallback {
         public final int mPid;
         public final int mUid;
         private final IDisplayManagerCallback mCallback;
@@ -4142,6 +4125,8 @@ public final class DisplayManagerService extends SystemService {
         private boolean mCached;
         @GuardedBy("mCallback")
         private boolean mFrozen;
+        @GuardedBy("mCallback")
+        private boolean mAlive;
 
         CallbackRecord(int pid, int uid, @NonNull IDisplayManagerCallback callback,
                 @InternalEventFlag long internalEventFlagsMask) {
@@ -4151,18 +4136,20 @@ public final class DisplayManagerService extends SystemService {
             mInternalEventFlagsMask = new AtomicLong(internalEventFlagsMask);
             mCached = false;
             mFrozen = false;
+            mAlive = true;
 
             if (deferDisplayEventsWhenFrozen()) {
-                // Some CallbackRecords are registered very early in system boot, before
-                // mActivityManagerInternal is initialized. If mActivityManagerInternal is null,
-                // do not register the frozen process listener.  However, do verify that all such
-                // registrations are for the self pid (which can never be frozen, so the frozen
-                // process listener does not matter).
-                if (mActivityManagerInternal != null) {
-                    mActivityManagerInternal.addFrozenProcessListener(pid, mHandlerExecutor,
-                            mDisplayFrozenProcessListener);
-                } else if (Process.myPid() != pid) {
-                    Slog.e(TAG, "DisplayListener registered too early");
+                try {
+                    callback.asBinder().addFrozenStateChangeCallback(this);
+                } catch (UnsupportedOperationException e) {
+                    // Ignore the exception.  The callback is not supported on this platform or on
+                    // this binder.  The callback is never supported for local binders.  There is
+                    // no error: the UID importance listener will still operate.  A log message is
+                    // provided for debug.
+                    Slog.v(TAG, "FrozenStateChangeCallback not supported for pid " + mPid);
+                } catch (RemoteException e) {
+                    // This is unexpected.  Just give up.
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -4187,7 +4174,7 @@ public final class DisplayManagerService extends SystemService {
          */
         @GuardedBy("mCallback")
         private boolean hasPendingAndIsReadyLocked() {
-            return isReadyLocked() && mPendingEvents != null && !mPendingEvents.isEmpty();
+            return isReadyLocked() && mPendingEvents != null && !mPendingEvents.isEmpty() && mAlive;
         }
 
         /**
@@ -4195,7 +4182,7 @@ public final class DisplayManagerService extends SystemService {
          * receive events and there are pending events to be delivered.
          * This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
          */
-        public boolean setFrozen(boolean frozen) {
+        private boolean setFrozen(boolean frozen) {
             synchronized (mCallback) {
                 mFrozen = frozen;
                 return hasPendingAndIsReadyLocked();
@@ -4216,6 +4203,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void binderDied() {
+            synchronized (mCallback) {
+                mAlive = false;
+            }
             if (DEBUG || extraLogging(mPackageName)) {
                 Slog.d(TAG, "Display listener for pid " + mPid + " died.");
             }
@@ -4224,6 +4214,14 @@ public final class DisplayManagerService extends SystemService {
                         "displayManagerBinderDied#mPid=" + mPid);
             }
             onCallbackDied(this);
+        }
+
+        @Override
+        public void onFrozenStateChanged(@NonNull IBinder who, int state) {
+            if (setFrozen(state == FrozenStateChangeCallback.STATE_FROZEN)) {
+                Message msg = mHandler.obtainMessage(MSG_DISPATCH_PENDING_PROCESS_EVENTS, this);
+                mHandler.sendMessage(msg);
+            }
         }
 
         /**
@@ -4392,7 +4390,7 @@ public final class DisplayManagerService extends SystemService {
         // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
         public boolean dispatchPending() {
             synchronized (mCallback) {
-                if (mPendingEvents == null || mPendingEvents.isEmpty()) {
+                if (mPendingEvents == null || mPendingEvents.isEmpty() || !mAlive) {
                     return true;
                 }
                 if (!isReadyLocked()) {
@@ -6064,6 +6062,7 @@ public final class DisplayManagerService extends SystemService {
      * Return the value of the pause
      */
     private static boolean deferDisplayEventsWhenFrozen() {
-        return com.android.server.am.Flags.deferDisplayEventsWhenFrozen();
+        return android.os.Flags.binderFrozenStateChangeCallback()
+                && com.android.server.am.Flags.deferDisplayEventsWhenFrozen();
     }
 }

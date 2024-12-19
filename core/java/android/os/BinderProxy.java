@@ -687,11 +687,17 @@ public final class BinderProxy implements IBinder {
         return removeFrozenStateChangeCallbackNative(wrappedCallback);
     }
 
+    public static boolean isFrozenStateChangeCallbackSupported() {
+        return isFrozenStateChangeCallbackSupportedNative();
+    }
+
     private native void addFrozenStateChangeCallbackNative(FrozenStateChangeCallback callback)
             throws RemoteException;
 
     private native boolean removeFrozenStateChangeCallbackNative(
             FrozenStateChangeCallback callback);
+
+    private static native boolean isFrozenStateChangeCallbackSupportedNative();
 
     /**
      * Perform a dump on the remote object
