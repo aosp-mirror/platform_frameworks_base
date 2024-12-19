@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.applicationContext
@@ -24,7 +22,6 @@ import com.android.systemui.doze.util.burnInHelperWrapper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 var Kosmos.burnInInteractor by Fixture {
     BurnInInteractor(

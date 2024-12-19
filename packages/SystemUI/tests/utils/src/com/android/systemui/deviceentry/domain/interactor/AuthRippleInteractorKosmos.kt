@@ -17,9 +17,7 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.authRippleInteractor by
     Kosmos.Fixture {
         AuthRippleInteractor(

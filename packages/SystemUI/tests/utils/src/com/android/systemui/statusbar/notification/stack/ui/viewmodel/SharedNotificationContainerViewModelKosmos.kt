@@ -60,9 +60,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.notif
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 import com.android.systemui.window.ui.viewmodel.fakeBouncerTransitions
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.sharedNotificationContainerViewModel by Fixture {
     SharedNotificationContainerViewModel(
         interactor = sharedNotificationContainerInteractor,

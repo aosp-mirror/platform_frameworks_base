@@ -19,9 +19,7 @@ import android.app.WallpaperManager
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.wallpaperManager: WallpaperManager by Fixture {
     WallpaperManager.getInstance(applicationContext)
 }

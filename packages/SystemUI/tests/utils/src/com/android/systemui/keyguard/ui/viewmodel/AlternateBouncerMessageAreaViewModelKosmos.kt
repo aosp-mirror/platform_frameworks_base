@@ -20,9 +20,7 @@ import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.deviceentry.domain.interactor.biometricMessageInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.time.systemClock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 val Kosmos.alternateBouncerMessageAreaViewModel by
     Kosmos.Fixture {
         AlternateBouncerMessageAreaViewModel(

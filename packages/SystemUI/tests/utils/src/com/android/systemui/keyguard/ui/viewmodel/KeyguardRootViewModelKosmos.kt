@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.communalInteractor
@@ -31,7 +29,6 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.notificatio
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
