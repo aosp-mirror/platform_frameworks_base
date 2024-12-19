@@ -108,7 +108,8 @@ public class PluginInstance<T extends Plugin>
     }
 
     @Override
-    public synchronized boolean onFail(String className, String methodName, LinkageError failure) {
+    public synchronized boolean onFail(String className, String methodName, Throwable failure) {
+        Log.e(TAG, "Failure from " + mPlugin + ". Disabling Plugin.");
         mHasError = true;
         unloadPlugin();
         mListener.onPluginDetached(this);
@@ -118,7 +119,7 @@ public class PluginInstance<T extends Plugin>
     /** Alerts listener and plugin that the plugin has been created. */
     public synchronized void onCreate() {
         if (mHasError) {
-            log("Previous LinkageError detected for plugin class");
+            log("Previous Fatal Exception detected for plugin class");
             return;
         }
 
@@ -175,7 +176,7 @@ public class PluginInstance<T extends Plugin>
      */
     public synchronized void loadPlugin() {
         if (mHasError) {
-            log("Previous LinkageError detected for plugin class");
+            log("Previous Fatal Exception detected for plugin class");
             return;
         }
 
