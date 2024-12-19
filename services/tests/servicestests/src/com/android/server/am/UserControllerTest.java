@@ -33,7 +33,6 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.server.am.UserController.CLEAR_USER_JOURNEY_SESSION_MSG;
 import static com.android.server.am.UserController.COMPLETE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
-import static com.android.server.am.UserController.DEFAULT_BEFORE_USER_SWITCH_TIMEOUT_MS;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_MSG;
@@ -95,7 +94,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -183,12 +181,14 @@ public class UserControllerTest {
             Intent.ACTION_USER_STARTING);
 
     private static final Set<Integer> START_FOREGROUND_USER_MESSAGE_CODES = newHashSet(
+            0, // for startUserInternalOnHandler
             REPORT_USER_SWITCH_MSG,
             USER_SWITCH_TIMEOUT_MSG,
             USER_START_MSG,
             USER_CURRENT_MSG);
 
     private static final Set<Integer> START_BACKGROUND_USER_MESSAGE_CODES = newHashSet(
+            0, // for startUserInternalOnHandler
             USER_START_MSG,
             REPORT_LOCKED_BOOT_COMPLETE_MSG);
 
@@ -376,7 +376,7 @@ public class UserControllerTest {
         // and the cascade effect goes on...). In fact, a better approach would to not assert the
         // binder calls, but their side effects (in this case, that the user is stopped right away)
         assertWithMessage("wrong binder message calls").that(mInjector.mHandler.getMessageCodes())
-                .containsExactly(USER_START_MSG);
+                .containsExactly(/* for startUserInternalOnHandler */ 0, USER_START_MSG);
     }
 
     private void startUserAssertions(
@@ -419,12 +419,17 @@ public class UserControllerTest {
     @Test
     public void testDispatchUserSwitch() throws RemoteException {
         // Prepare mock observer and register it
-        IUserSwitchObserver observer = registerUserSwitchObserver(
-                /* replyToOnBeforeUserSwitchingCallback= */ true,
-                /* replyToOnUserSwitchingCallback= */ true);
+        IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
+        when(observer.asBinder()).thenReturn(new Binder());
+        doAnswer(invocation -> {
+            IRemoteCallback callback = (IRemoteCallback) invocation.getArguments()[1];
+            callback.sendResult(null);
+            return null;
+        }).when(observer).onUserSwitching(anyInt(), any());
+        mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID), any());
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -448,26 +453,14 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testShouldCrashWhenOnBeforeUserSwitchingTimeouts() throws RemoteException {
-        IUserSwitchObserver observer = registerUserSwitchObserver(
-                /* replyToOnBeforeUserSwitchingCallback= */ false,
-                /* replyToOnUserSwitchingCallback= */ true);
-        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID), any());
-        assertThrows("Should have crashed when observers don't reply to onBeforeUserSwitching in "
-                        + DEFAULT_BEFORE_USER_SWITCH_TIMEOUT_MS + " ms", RuntimeException.class,
-                mInjector.mHandler::runPendingCallbacks);
-    }
-
-    @Test
     public void testDispatchUserSwitchBadReceiver() throws RemoteException {
-        // Prepare mock observer which doesn't notify the onUserSwitching callback and register it
-        IUserSwitchObserver observer = registerUserSwitchObserver(
-                /* replyToOnBeforeUserSwitchingCallback= */ true,
-                /* replyToOnUserSwitchingCallback= */ false);
+        // Prepare mock observer which doesn't notify the callback and register it
+        IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
+        when(observer.asBinder()).thenReturn(new Binder());
+        mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID), any());
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -558,6 +551,7 @@ public class UserControllerTest {
         expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
         if (backgroundUserStopping) {
             expectedCodes.add(CLEAR_USER_JOURNEY_SESSION_MSG);
+            expectedCodes.add(0); // this is for directly posting in stopping.
         }
         if (expectScheduleBackgroundUserStopping) {
             expectedCodes.add(SCHEDULED_STOP_BACKGROUND_USER_MSG);
@@ -573,9 +567,9 @@ public class UserControllerTest {
     @Test
     public void testDispatchUserSwitchComplete() throws RemoteException {
         // Prepare mock observer and register it
-        IUserSwitchObserver observer = registerUserSwitchObserver(
-                /* replyToOnBeforeUserSwitchingCallback= */ true,
-                /* replyToOnUserSwitchingCallback= */ true);
+        IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
+        when(observer.asBinder()).thenReturn(new Binder());
+        mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -1758,29 +1752,6 @@ public class UserControllerTest {
         verify(mInjector, never()).onSystemUserVisibilityChanged(anyBoolean());
     }
 
-    private IUserSwitchObserver registerUserSwitchObserver(
-            boolean replyToOnBeforeUserSwitchingCallback, boolean replyToOnUserSwitchingCallback)
-            throws RemoteException {
-        IUserSwitchObserver observer = mock(IUserSwitchObserver.class);
-        when(observer.asBinder()).thenReturn(new Binder());
-        if (replyToOnBeforeUserSwitchingCallback) {
-            doAnswer(invocation -> {
-                IRemoteCallback callback = (IRemoteCallback) invocation.getArguments()[1];
-                callback.sendResult(null);
-                return null;
-            }).when(observer).onBeforeUserSwitching(anyInt(), any());
-        }
-        if (replyToOnUserSwitchingCallback) {
-            doAnswer(invocation -> {
-                IRemoteCallback callback = (IRemoteCallback) invocation.getArguments()[1];
-                callback.sendResult(null);
-                return null;
-            }).when(observer).onUserSwitching(anyInt(), any());
-        }
-        mUserController.registerUserSwitchObserver(observer, "mock");
-        return observer;
-    }
-
     // Should be public to allow mocking
     private static class TestInjector extends UserController.Injector {
         public final TestHandler mHandler;
@@ -1986,7 +1957,6 @@ public class UserControllerTest {
          * fix this, but in the meantime, this is your warning.
          */
         private final List<Message> mMessages = new ArrayList<>();
-        private final List<Runnable> mPendingCallbacks = new ArrayList<>();
 
         TestHandler(Looper looper) {
             super(looper);
@@ -2019,24 +1989,14 @@ public class UserControllerTest {
 
         @Override
         public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
-            if (msg.getCallback() == null) {
-                Message copy = new Message();
-                copy.copyFrom(msg);
-                mMessages.add(copy);
-            } else {
-                if (SystemClock.uptimeMillis() >= uptimeMillis) {
-                    msg.getCallback().run();
-                } else {
-                    mPendingCallbacks.add(msg.getCallback());
-                }
+            Message copy = new Message();
+            copy.copyFrom(msg);
+            mMessages.add(copy);
+            if (msg.getCallback() != null) {
+                msg.getCallback().run();
                 msg.setCallback(null);
             }
             return super.sendMessageAtTime(msg, uptimeMillis);
-        }
-
-        private void runPendingCallbacks() {
-            mPendingCallbacks.forEach(Runnable::run);
-            mPendingCallbacks.clear();
         }
     }
 }
