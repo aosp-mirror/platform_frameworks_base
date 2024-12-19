@@ -37,7 +37,6 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR
 import android.telephony.satellite.SatelliteManager.SatelliteException
 import android.telephony.satellite.SatelliteModemStateCallback
 import android.telephony.satellite.SatelliteProvisionStateCallback
-import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -52,6 +51,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import java.util.function.Consumer
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -535,7 +535,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteSupportedStateCallback> {
+                withArgCaptor<Consumer<Boolean>> {
                     verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
                 }
 
@@ -548,7 +548,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             verify(satelliteManager, times(1)).registerForNtnSignalStrengthChanged(any(), any())
 
             // WHEN satellite support turns off
-            callback.onSatelliteSupportedStateChanged(false)
+            callback.accept(false)
             runCurrent()
 
             // THEN listeners are unregistered
@@ -564,7 +564,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteSupportedStateCallback> {
+                withArgCaptor<Consumer<Boolean>> {
                     verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
                 }
 
@@ -577,7 +577,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             verify(satelliteManager, times(0)).registerForNtnSignalStrengthChanged(any(), any())
 
             // WHEN satellite support turns on
-            callback.onSatelliteSupportedStateChanged(true)
+            callback.accept(true)
             runCurrent()
 
             // THEN listeners are registered

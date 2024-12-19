@@ -30,8 +30,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * SatelliteSubscriberInfo
- *
  * Satellite Gateway client will use these subscriber ids to register with satellite gateway service
  * which identify user subscription with unique subscriber ids. These subscriber ids can be any
  * unique value like iccid, imsi or msisdn which is decided based upon carrier requirements.
@@ -52,16 +50,16 @@ public final class SatelliteSubscriberInfo implements Parcelable {
     private int mSubId;
 
     /** SubscriberId format is the ICCID. */
-    public static final int ICCID = 0;
+    public static final int SUBSCRIBER_ID_TYPE_ICCID = 0;
     /** SubscriberId format is the 6 digit of IMSI + MSISDN. */
-    public static final int IMSI_MSISDN = 1;
+    public static final int SUBSCRIBER_ID_TYPE_IMSI_MSISDN = 1;
 
     /** Type of subscriber id */
     @SubscriberIdType private int mSubscriberIdType;
     /** @hide */
-    @IntDef(prefix = "SubscriberId_Type_", value = {
-            ICCID,
-            IMSI_MSISDN
+    @IntDef(prefix = "SUBSCRIBER_ID_TYPE_", value = {
+            SUBSCRIBER_ID_TYPE_ICCID,
+            SUBSCRIBER_ID_TYPE_IMSI_MSISDN
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubscriberIdType {}

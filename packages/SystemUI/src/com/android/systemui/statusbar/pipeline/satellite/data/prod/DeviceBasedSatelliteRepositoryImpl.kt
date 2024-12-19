@@ -26,7 +26,6 @@ import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
 import android.telephony.satellite.SatelliteProvisionStateCallback
-import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -51,6 +50,7 @@ import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import java.util.Optional
+import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
@@ -322,10 +322,10 @@ constructor(
             flowOf(false)
         } else {
             conflatedCallbackFlow {
-                val callback = SatelliteSupportedStateCallback { supported ->
+                val callback = Consumer<Boolean> { supported ->
                     logBuffer.i {
                         "onSatelliteSupportedStateChanged: " +
-                            "${if (supported) "supported" else "not supported"}"
+                                "${if (supported) "supported" else "not supported"}"
                     }
                     trySend(supported)
                 }
