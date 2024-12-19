@@ -29,6 +29,8 @@ import android.os.IBinder;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.google.common.testing.EqualsTester;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -122,12 +124,16 @@ public class BackgroundStartPrivilegesTest {
 
     @Test
     public void backgroundStartPrivilege_equals_works() {
-        assertThat(NONE).isEqualTo(NONE);
-        assertThat(ALLOW_BAL).isEqualTo(ALLOW_BAL);
-        assertThat(ALLOW_FGS).isEqualTo(ALLOW_FGS);
-        assertThat(BSP_ALLOW_A).isEqualTo(BSP_ALLOW_A);
-        assertThat(NONE).isNotEqualTo(ALLOW_BAL);
-        assertThat(ALLOW_FGS).isNotEqualTo(ALLOW_BAL);
-        assertThat(BSP_ALLOW_A).isNotEqualTo(BSP_ALLOW_B);
+        Binder token = new Binder();
+        Binder anotherToken = new Binder();
+        new EqualsTester()
+                .addEqualityGroup(NONE)
+                .addEqualityGroup(ALLOW_BAL)
+                .addEqualityGroup(ALLOW_FGS)
+                .addEqualityGroup(BackgroundStartPrivileges.allowBackgroundActivityStarts(token),
+                        BackgroundStartPrivileges.allowBackgroundActivityStarts(token))
+                .addEqualityGroup(
+                        BackgroundStartPrivileges.allowBackgroundActivityStarts(anotherToken))
+                .testEquals();
     }
 }

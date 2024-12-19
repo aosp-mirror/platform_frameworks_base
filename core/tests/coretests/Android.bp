@@ -73,6 +73,7 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "guava-android-testlib",
         "android.app.usage.flags-aconfig-java",
         "android.view.accessibility.flags-aconfig-java",
         "androidx.core_core",
