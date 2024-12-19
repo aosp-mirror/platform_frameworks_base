@@ -38,6 +38,9 @@ import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialS
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
@@ -51,16 +54,28 @@ constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
     private val logger: InputDeviceTutorialLogger,
     private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
+    private val backGestureViewModel: BackGestureScreenViewModel,
+    private val homeGestureViewModel: HomeGestureScreenViewModel,
+    private val recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
 ) : ComponentActivity() {
 
-    private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
+    private val tutorialViewModel by
+        viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setTitle(getString(R.string.launch_touchpad_tutorial_notification_content))
         setContent {
-            PlatformTheme { TouchpadTutorialScreen(vm, closeTutorial = ::finishTutorial) }
+            PlatformTheme {
+                TouchpadTutorialScreen(
+                    tutorialViewModel,
+                    backGestureViewModel,
+                    homeGestureViewModel,
+                    recentAppsGestureViewModel,
+                    closeTutorial = ::finishTutorial,
+                )
+            }
         }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
@@ -75,17 +90,23 @@ constructor(
 
     override fun onResume() {
         super.onResume()
-        vm.onOpened()
+        tutorialViewModel.onOpened()
     }
 
     override fun onPause() {
         super.onPause()
-        vm.onClosed()
+        tutorialViewModel.onClosed()
     }
 }
 
 @Composable
-fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> Unit) {
+fun TouchpadTutorialScreen(
+    vm: TouchpadTutorialViewModel,
+    backGestureViewModel: BackGestureScreenViewModel,
+    homeGestureViewModel: HomeGestureScreenViewModel,
+    recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
+    closeTutorial: () -> Unit,
+) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
     var lastSelectedScreen by remember { mutableStateOf(TUTORIAL_SELECTION) }
     when (activeScreen) {
@@ -108,16 +129,19 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             )
         BACK_GESTURE ->
             BackGestureTutorialScreen(
+                backGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
         HOME_GESTURE ->
             HomeGestureTutorialScreen(
+                homeGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
         RECENT_APPS_GESTURE ->
             RecentAppsGestureTutorialScreen(
+                recentAppsGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

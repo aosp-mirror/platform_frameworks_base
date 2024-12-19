@@ -27,7 +27,11 @@ import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
+import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -45,8 +49,11 @@ interface TouchpadTutorialModule {
 
     companion object {
         @Provides
-        fun touchpadScreensProvider(): TouchpadTutorialScreensProvider {
-            return ScreensProvider
+        fun touchpadScreensProvider(
+            backGestureScreenViewModel: BackGestureScreenViewModel,
+            homeGestureScreenViewModel: HomeGestureScreenViewModel,
+        ): TouchpadTutorialScreensProvider {
+            return ScreensProvider(backGestureScreenViewModel, homeGestureScreenViewModel)
         }
 
         @SysUISingleton
@@ -59,17 +66,22 @@ interface TouchpadTutorialModule {
         ): TouchpadGesturesInteractor {
             return TouchpadGesturesInteractor(sysUiState, displayTracker, backgroundScope, logger)
         }
+
+        @Provides fun velocityTracker(): VelocityTracker = VerticalVelocityTracker()
     }
 }
 
-private object ScreensProvider : TouchpadTutorialScreensProvider {
+private class ScreensProvider(
+    val backGestureScreenViewModel: BackGestureScreenViewModel,
+    val homeGestureScreenViewModel: HomeGestureScreenViewModel,
+) : TouchpadTutorialScreensProvider {
     @Composable
     override fun BackGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        BackGestureTutorialScreen(onDoneButtonClicked, onBack)
+        BackGestureTutorialScreen(backGestureScreenViewModel, onDoneButtonClicked, onBack)
     }
 
     @Composable
     override fun HomeGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        HomeGestureTutorialScreen(onDoneButtonClicked, onBack)
+        HomeGestureTutorialScreen(homeGestureScreenViewModel, onDoneButtonClicked, onBack)
     }
 }

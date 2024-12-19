@@ -16,26 +16,22 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
-import android.content.res.Resources
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.util.kotlin.pairwiseBy
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
 
 @Composable
-fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
+fun BackGestureTutorialScreen(
+    viewModel: BackGestureScreenViewModel,
+    onDoneButtonClicked: () -> Unit,
+    onBack: () -> Unit,
+) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -50,40 +46,15 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                 ),
             animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
         )
-    val recognizer = rememberBackGestureRecognizer(LocalContext.current.resources)
-    val gestureUiState: Flow<GestureUiState> =
-        remember(recognizer) {
-            GestureFlowAdapter(recognizer).gestureStateAsFlow.pairwiseBy(GestureState.NotStarted) {
-                previous,
-                current ->
-                val (startMarker, endMarker) = getMarkers(current)
-                current.toGestureUiState(
-                    progressStartMarker = startMarker,
-                    progressEndMarker = endMarker,
-                    successAnimation = successAnimation(previous),
-                )
-            }
-        }
-    GestureTutorialScreen(screenConfig, recognizer, gestureUiState, onDoneButtonClicked, onBack)
-}
-
-@Composable
-private fun rememberBackGestureRecognizer(resources: Resources): GestureRecognizer {
-    val distance =
-        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
-    return remember(distance) { BackGestureRecognizer(distance) }
-}
-
-private fun getMarkers(it: GestureState): Pair<String, String> {
-    return if (it is GestureState.InProgress && it.direction == GestureDirection.LEFT) {
-        "gesture to L" to "end progress L"
-    } else "gesture to R" to "end progress R"
-}
-
-private fun successAnimation(previous: GestureState): Int {
-    return if (previous is GestureState.InProgress && previous.direction == GestureDirection.LEFT) {
-        R.raw.trackpad_back_success_left
-    } else R.raw.trackpad_back_success_right
+    GestureTutorialScreen(
+        screenConfig = screenConfig,
+        gestureUiStateFlow = viewModel.gestureUiState,
+        motionEventConsumer = viewModel::handleEvent,
+        easterEggTriggeredFlow = viewModel.easterEggTriggered,
+        onEasterEggFinished = viewModel::onEasterEggFinished,
+        onDoneButtonClicked = onDoneButtonClicked,
+        onBack = onBack,
+    )
 }
 
 @Composable
