@@ -1087,16 +1087,10 @@ public class LauncherAppsService extends SystemService {
                 return null;
             }
 
-            final AndroidFuture<Intent[]> ret = new AndroidFuture<>();
-            Intent[] intents;
-            mShortcutServiceInternal.createShortcutIntentsAsync(getCallingUserId(),
-                    callingPackage, packageName, shortcutId, user.getIdentifier(),
-                    injectBinderCallingPid(), injectBinderCallingUid(), ret);
-            try {
-                intents = ret.get();
-            } catch (InterruptedException | ExecutionException e) {
-                return null;
-            }
+            Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
+                    getCallingUserId(), callingPackage, packageName, shortcutId,
+                    user.getIdentifier(), injectBinderCallingPid(),
+                    injectBinderCallingUid());
             if (intents == null || intents.length == 0) {
                 return null;
             }
@@ -1275,40 +1269,6 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public void getShortcutsAsync(@NonNull final String callingPackage,
-                @NonNull final ShortcutQueryWrapper query, @NonNull final UserHandle targetUser,
-                @NonNull final AndroidFuture<List<ShortcutInfo>> cb) {
-            ensureShortcutPermission(callingPackage);
-            if (!canAccessProfile(targetUser.getIdentifier(), "Cannot get shortcuts")) {
-                cb.complete(Collections.EMPTY_LIST);
-                return;
-            }
-
-            final long changedSince = query.getChangedSince();
-            final String packageName = query.getPackage();
-            final List<String> shortcutIds = query.getShortcutIds();
-            final List<LocusId> locusIds = query.getLocusIds();
-            final ComponentName componentName = query.getActivity();
-            final int flags = query.getQueryFlags();
-            if (shortcutIds != null && packageName == null) {
-                throw new IllegalArgumentException(
-                        "To query by shortcut ID, package name must also be set");
-            }
-            if (locusIds != null && packageName == null) {
-                throw new IllegalArgumentException(
-                        "To query by locus ID, package name must also be set");
-            }
-            if ((query.getQueryFlags() & ShortcutQuery.FLAG_GET_PERSONS_DATA) != 0) {
-                ensureStrictAccessShortcutsPermission(callingPackage);
-            }
-
-            mShortcutServiceInternal.getShortcutsAsync(getCallingUserId(),
-                    callingPackage, changedSince, packageName, shortcutIds, locusIds,
-                    componentName, flags, targetUser.getIdentifier(),
-                    injectBinderCallingPid(), injectBinderCallingUid(), cb);
-        }
-
-        @Override
         public void registerShortcutChangeCallback(@NonNull final String callingPackage,
                 @NonNull final ShortcutQueryWrapper query,
                 @NonNull final IShortcutChangeCallback callback) {
@@ -1406,15 +1366,8 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(targetUserId, "Cannot access shortcuts")) {
                 return null;
             }
-
-            final AndroidFuture<ParcelFileDescriptor> ret = new AndroidFuture<>();
-            mShortcutServiceInternal.getShortcutIconFdAsync(getCallingUserId(),
-                    callingPackage, packageName, id, targetUserId, ret);
-            try {
-                return ret.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+            return mShortcutServiceInternal.getShortcutIconFd(getCallingUserId(),
+                    callingPackage, packageName, id, targetUserId);
         }
 
         @Override
@@ -1424,15 +1377,9 @@ public class LauncherAppsService extends SystemService {
             if (!canAccessProfile(userId, "Cannot access shortcuts")) {
                 return null;
             }
-
-            final AndroidFuture<String> ret = new AndroidFuture<>();
-            mShortcutServiceInternal.getShortcutIconUriAsync(getCallingUserId(), callingPackage,
-                    packageName, shortcutId, userId, ret);
-            try {
-                return ret.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+            return mShortcutServiceInternal.getShortcutIconUri(
+                    getCallingUserId(), callingPackage,
+                    packageName, shortcutId, userId);
         }
 
         @Override
@@ -1515,16 +1462,9 @@ public class LauncherAppsService extends SystemService {
                 ensureShortcutPermission(callerUid, callerPid, callingPackage);
             }
 
-            final AndroidFuture<Intent[]> ret = new AndroidFuture<>();
-            Intent[] intents;
-            mShortcutServiceInternal.createShortcutIntentsAsync(getCallingUserId(), callingPackage,
-                    packageName, shortcutId, targetUserId,
-                    injectBinderCallingPid(), injectBinderCallingUid(), ret);
-            try {
-                intents = ret.get();
-            } catch (InterruptedException | ExecutionException e) {
-                return false;
-            }
+            Intent[] intents = mShortcutServiceInternal.createShortcutIntents(
+                    getCallingUserId(), callingPackage, packageName, shortcutId,
+                    targetUserId, injectBinderCallingPid(), injectBinderCallingUid());
             if (intents == null || intents.length == 0) {
                 return false;
             }

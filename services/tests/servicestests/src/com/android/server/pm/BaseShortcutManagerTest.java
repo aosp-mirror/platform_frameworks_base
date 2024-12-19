@@ -2045,18 +2045,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return p == null ? null : p.getAllShareTargetsForTest();
     }
 
-    protected void resetPersistedShortcuts() {
-        final ShortcutPackage p = mService.getPackageShortcutForTest(
-                getCallingPackage(), getCallingUserId());
-        p.removeAllShortcutsAsync();
-    }
-
-    protected void getPersistedShortcut(AndroidFuture<List<ShortcutInfo>> cb) {
-        final ShortcutPackage p = mService.getPackageShortcutForTest(
-                getCallingPackage(), getCallingUserId());
-        p.getTopShortcutsFromPersistence(cb);
-    }
-
     /**
      * @return the number of shortcuts stored internally for the caller that can be used as a share
      * target in the ShareSheet. Such shortcuts have a matching category with at least one of the

@@ -464,17 +464,6 @@ public class LauncherApps {
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /**
-         * Includes shortcuts from persistence layer in the search result.
-         *
-         * <p>The caller should make the query on a worker thread since accessing persistence layer
-         * is considered asynchronous.
-         *
-         * @hide
-         */
-        @SystemApi
-        public static final int FLAG_GET_PERSISTED_DATA = 1 << 12;
-
-        /**
          * Populate the persons field in the result. See {@link ShortcutInfo#getPersons()}.
          *
          * <p>The caller must have the system {@code ACCESS_SHORTCUTS} permission.
@@ -484,6 +473,17 @@ public class LauncherApps {
         @SystemApi
         @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS)
         public static final int FLAG_GET_PERSONS_DATA = 1 << 11;
+
+        /**
+         * Includes shortcuts from persistence layer in the search result.
+         *
+         * <p>The caller should make the query on a worker thread since accessing persistence layer
+         * is considered asynchronous.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final int FLAG_GET_PERSISTED_DATA = 1 << 12;
 
         /** @hide */
         @IntDef(flag = true, prefix = { "FLAG_" }, value = {
@@ -1500,9 +1500,6 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            if ((query.mQueryFlags & ShortcutQuery.FLAG_GET_PERSISTED_DATA) != 0) {
-                return getShortcutsBlocked(query, user);
-            }
             // Note this is the only case we need to update the disabled message for shortcuts
             // that weren't restored.
             // The restore problem messages are only shown by the user, and publishers will never
@@ -1514,22 +1511,6 @@ public class LauncherApps {
                         .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private List<ShortcutInfo> getShortcutsBlocked(@NonNull ShortcutQuery query,
-            @NonNull UserHandle user) {
-        logErrorForInvalidProfileAccess(user);
-        final AndroidFuture<List<ShortcutInfo>> future = new AndroidFuture<>();
-        future.thenApply(this::maybeUpdateDisabledMessage);
-        try {
-            mService.getShortcutsAsync(mContext.getPackageName(),
-                            new ShortcutQueryWrapper(query), user, future);
-            return future.get();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
         }
     }
 
