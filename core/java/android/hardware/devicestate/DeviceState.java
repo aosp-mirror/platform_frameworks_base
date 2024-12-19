@@ -25,6 +25,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -49,7 +50,7 @@ import java.util.Set;
  * @see DeviceStateManager
  */
 @SystemApi
-@FlaggedApi(android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_API)
+@FlaggedApi(Flags.FLAG_DEVICE_STATE_PROPERTY_API)
 public final class DeviceState {
     /**
      * Property that indicates that a fold-in style foldable device is currently in a fully closed
@@ -178,15 +179,12 @@ public final class DeviceState {
      * is the default display where the app is shown, and the inner display is used by the system to
      * show a UI affordance for exiting the mode.
      *
-     * Note that this value should generally not be used, and may be removed in the future (e.g.
-     * if or when it becomes the only type of rear display mode when
-     * {@link android.hardware.devicestate.feature.flags.Flags#deviceStateRdmV2} is removed).
-     *
-     * As such, clients should strongly consider relying on {@link #PROPERTY_FEATURE_REAR_DISPLAY}
-     * instead.
+     * Clients should strongly consider relying on {@link #PROPERTY_FEATURE_REAR_DISPLAY} instead.
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_DEVICE_STATE_RDM_V2)
     public static final int PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT = 1001;
 
     /** @hide */
