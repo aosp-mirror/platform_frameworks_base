@@ -63,7 +63,7 @@ constructor(
                 LinkedHashSet(sliderTypes)
             }
             .runningReduce { sliderTypes, newSliderTypes ->
-                newSliderTypes.apply { addAll(sliderTypes) }
+                sliderTypes.apply { addAll(newSliderTypes) }
             }
             .map { sliderTypes ->
                 VolumeDialogSlidersModel(
