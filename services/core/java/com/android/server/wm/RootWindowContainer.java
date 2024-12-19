@@ -1941,7 +1941,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
             final IntArray visibleRootTasks = new IntArray();
             forAllRootTasks(rootTask -> {
-                if (mCurrentUser == rootTask.mUserId && rootTask.isVisibleRequested()) {
+                if ((mCurrentUser == rootTask.mUserId || rootTask.showForAllUsers())
+                        && rootTask.isVisible()) {
                     visibleRootTasks.add(rootTask.getRootTaskId());
                 }
             }, /* traverseTopToBottom */ false);
@@ -2045,6 +2046,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
             if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
                 final IntArray rootTasks = mUserVisibleRootTasks.get(userId, new IntArray());
+                // If root task already exists in the list, move it to the top instead.
+                final int rootTaskIndex = rootTasks.indexOf(rootTask.getRootTaskId());
+                if (rootTaskIndex != -1) {
+                    rootTasks.remove(rootTaskIndex);
+                }
                 rootTasks.add(rootTask.getRootTaskId());
                 mUserVisibleRootTasks.put(userId, rootTasks);
             } else {
