@@ -67,7 +67,7 @@ object FlagsFactory {
         namespace: String = "systemui",
         default: Boolean = false
     ): SysPropBooleanFlag {
-        val flag = SysPropBooleanFlag(name = name, namespace = "systemui", default = default)
+        val flag = SysPropBooleanFlag(name = name, namespace, default = default)
         checkForDupesAndAdd(flag)
         return flag
     }
