@@ -499,11 +499,12 @@ public class HubEndpoint {
         private final String mPackageName;
 
         @Nullable private HubEndpointLifecycleCallback mLifecycleCallback;
-
-        @NonNull private Executor mLifecycleCallbackExecutor;
+        @Nullable private Executor mLifecycleCallbackExecutor;
 
         @Nullable private HubEndpointMessageCallback mMessageCallback;
-        @NonNull private Executor mMessageCallbackExecutor;
+        @Nullable private Executor mMessageCallbackExecutor;
+
+        @NonNull private final Executor mMainExecutor;
 
         private int mVersion;
         @Nullable private String mTag;
@@ -514,8 +515,7 @@ public class HubEndpoint {
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
             mVersion = (int) context.getApplicationInfo().longVersionCode;
-            mLifecycleCallbackExecutor = context.getMainExecutor();
-            mMessageCallbackExecutor = context.getMainExecutor();
+            mMainExecutor = context.getMainExecutor();
         }
 
         /**
@@ -546,6 +546,7 @@ public class HubEndpoint {
         @NonNull
         public Builder setLifecycleCallback(
                 @NonNull HubEndpointLifecycleCallback lifecycleCallback) {
+            mLifecycleCallbackExecutor = null;
             mLifecycleCallback = lifecycleCallback;
             return this;
         }
@@ -569,6 +570,7 @@ public class HubEndpoint {
          */
         @NonNull
         public Builder setMessageCallback(@NonNull HubEndpointMessageCallback messageCallback) {
+            mMessageCallbackExecutor = null;
             mMessageCallback = messageCallback;
             return this;
         }
@@ -604,9 +606,9 @@ public class HubEndpoint {
             return new HubEndpoint(
                     new HubEndpointInfo(mPackageName, mVersion, mTag, mServiceInfos),
                     mLifecycleCallback,
-                    mLifecycleCallbackExecutor,
+                    mLifecycleCallbackExecutor != null ? mLifecycleCallbackExecutor : mMainExecutor,
                     mMessageCallback,
-                    mMessageCallbackExecutor);
+                    mMessageCallbackExecutor != null ? mMessageCallbackExecutor : mMainExecutor);
         }
     }
 }
