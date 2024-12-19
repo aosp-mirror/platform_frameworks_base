@@ -1902,6 +1902,17 @@ public class DisplayPolicy {
         });
     }
 
+    void notifyDisplayRemoveSystemDecorations() {
+        mHandler.post(
+                () -> {
+                    final int displayId = getDisplayId();
+                    StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+                    if (statusBar != null) {
+                        statusBar.onDisplayRemoveSystemDecorations(displayId);
+                    }
+                });
+    }
+
     /**
      * Return corner radius in pixels that should be used on windows in order to cover the display.
      *

@@ -274,6 +274,11 @@ public class NavigationBarControllerImpl implements
     private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
         @Override
         public void onDisplayRemoved(int displayId) {
+            onDisplayRemoveSystemDecorations(displayId);
+        }
+
+        @Override
+        public void onDisplayRemoveSystemDecorations(int displayId) {
             removeNavigationBar(displayId);
             mHasNavBar.delete(displayId);
         }

@@ -177,6 +177,13 @@ public interface StatusBarManagerInternal {
      */
     void onDisplayReady(int displayId);
 
+    /**
+     * Notifies System UI that the system decorations should be removed from the display.
+     *
+     * @param displayId display ID
+     */
+    void onDisplayRemoveSystemDecorations(int displayId);
+
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,

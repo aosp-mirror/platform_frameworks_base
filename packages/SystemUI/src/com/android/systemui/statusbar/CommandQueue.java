@@ -185,6 +185,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TOGGLE_QUICK_SETTINGS_PANEL = 82 << MSG_SHIFT;
     private static final int MSG_WALLET_ACTION_LAUNCH_GESTURE = 83 << MSG_SHIFT;
     private static final int MSG_SET_HAS_NAVIGATION_BAR = 84 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS = 85 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -417,6 +418,12 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#onDisplayReady(int)
          */
         default void onDisplayReady(int displayId) {
+        }
+
+        /**
+         * @see IStatusBar#onDisplayRemoveSystemDecorations(int)
+         */
+        default void onDisplayRemoveSystemDecorations(int displayId) {
         }
 
         /**
@@ -1204,6 +1211,14 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
     }
 
+    @Override
+    public void onDisplayRemoveSystemDecorations(int displayId) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS, displayId, 0)
+                    .sendToTarget();
+        }
+    }
+
     // This was previously called from WM, but is now called from WMShell
     public void onRecentsAnimationStateChanged(boolean running) {
         synchronized (mLock) {
@@ -1839,6 +1854,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_DISPLAY_READY:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onDisplayReady(msg.arg1);
+                    }
+                    break;
+                case MSG_DISPLAY_REMOVE_SYSTEM_DECORATIONS:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onDisplayRemoveSystemDecorations(msg.arg1);
                     }
                     break;
                 case MSG_RECENTS_ANIMATION_STATE_CHANGED:
