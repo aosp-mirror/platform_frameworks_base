@@ -82,5 +82,11 @@ class SettingsGlobalStore private constructor(contentResolver: ContentResolver) 
                             instance = it
                         }
                 }
+
+        /** Returns the required permissions to read [Global] settings. */
+        fun getReadPermissions() = arrayOf<String>()
+
+        /** Returns the required permissions to write [Global] settings. */
+        fun getWritePermissions() = arrayOf<String>()
     }
 }
