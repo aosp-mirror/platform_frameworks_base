@@ -111,9 +111,7 @@ class BackNavigationController {
     }
 
     void onEmbeddedWindowGestureTransferred(@NonNull WindowState host) {
-        if (Flags.disallowAppProgressEmbeddedWindow()) {
-            mNavigationMonitor.onEmbeddedWindowGestureTransferred(host);
-        }
+        mNavigationMonitor.onEmbeddedWindowGestureTransferred(host);
     }
 
     /**
@@ -215,7 +213,7 @@ class BackNavigationController {
                 infoBuilder.setFocusedTaskId(currentTask.mTaskId);
             }
             boolean transferGestureToEmbedded = false;
-            if (Flags.disallowAppProgressEmbeddedWindow() && embeddedWindows != null) {
+            if (embeddedWindows != null) {
                 for (int i = embeddedWindows.size() - 1; i >= 0; --i) {
                     if (embeddedWindows.get(i).mGestureToEmbedded) {
                         transferGestureToEmbedded = true;
