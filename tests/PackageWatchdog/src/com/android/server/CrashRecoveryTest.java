@@ -765,14 +765,14 @@ public class CrashRecoveryTest {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
-        watchdog.registerHealthObserver(rollbackObserver, mTestExecutor);
+        watchdog.registerHealthObserver(mTestExecutor, rollbackObserver);
         return rollbackObserver;
     }
     RescuePartyObserver setUpRescuePartyObserver(PackageWatchdog watchdog) {
         setCrashRecoveryPropRescueBootCount(0);
         RescuePartyObserver rescuePartyObserver = spy(RescuePartyObserver.getInstance(mSpyContext));
         assertFalse(RescueParty.isRebootPropertySet());
-        watchdog.registerHealthObserver(rescuePartyObserver, mTestExecutor);
+        watchdog.registerHealthObserver(mTestExecutor, rescuePartyObserver);
         return rescuePartyObserver;
     }
 

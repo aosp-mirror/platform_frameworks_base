@@ -1251,12 +1251,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
                 // should document in PackageInstaller.SessionParams#setEnableRollback
                 // After enabling and committing any rollback, observe packages and
                 // prepare to rollback if packages crashes too frequently.
-                mPackageWatchdog.startExplicitHealthCheck(mPackageHealthObserver,
-                        rollback.getPackageNames(), mRollbackLifetimeDurationInMillis);
+                mPackageWatchdog.startExplicitHealthCheck(rollback.getPackageNames(),
+                        mRollbackLifetimeDurationInMillis, mPackageHealthObserver);
             }
         } else {
-            mPackageWatchdog.startExplicitHealthCheck(mPackageHealthObserver,
-                    rollback.getPackageNames(), mRollbackLifetimeDurationInMillis);
+            mPackageWatchdog.startExplicitHealthCheck(rollback.getPackageNames(),
+                    mRollbackLifetimeDurationInMillis, mPackageHealthObserver);
         }
         runExpiration();
     }

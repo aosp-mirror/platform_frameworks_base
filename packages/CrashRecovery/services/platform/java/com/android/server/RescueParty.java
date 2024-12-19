@@ -168,7 +168,7 @@ public class RescueParty {
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
         PackageWatchdog.getInstance(context).registerHealthObserver(
-                RescuePartyObserver.getInstance(context), null);
+                null, RescuePartyObserver.getInstance(context));
     }
 
     private static boolean isDisabled() {
@@ -390,9 +390,9 @@ public class RescueParty {
             Slog.i(TAG, "Starting to observe: " + callingPackageList + ", updated namespace: "
                     + updatedNamespace);
             PackageWatchdog.getInstance(context).startExplicitHealthCheck(
-                    rescuePartyObserver,
                     callingPackageList,
-                    DEFAULT_OBSERVING_DURATION_MS);
+                    DEFAULT_OBSERVING_DURATION_MS,
+                    rescuePartyObserver);
         }
     }
 

@@ -113,8 +113,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
-        PackageWatchdog.getInstance(mContext).registerHealthObserver(this,
-                context.getMainExecutor());
+        PackageWatchdog.getInstance(mContext).registerHealthObserver(context.getMainExecutor(),
+                this);
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             // Load the value from the file if system server has crashed and restarted
