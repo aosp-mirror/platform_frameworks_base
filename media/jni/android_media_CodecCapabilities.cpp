@@ -29,7 +29,6 @@ namespace android {
 
 struct fields_t {
     jfieldID audioCapsContext;
-    jfieldID videoCapsContext;
 };
 static fields_t fields;
 
@@ -39,33 +38,6 @@ static AudioCapabilities* getAudioCapabilities(JNIEnv *env, jobject thiz) {
     AudioCapabilities* const p = (AudioCapabilities*)env->GetLongField(
             thiz, fields.audioCapsContext);
     return p;
-}
-
-static VideoCapabilities* getVideoCapabilities(JNIEnv *env, jobject thiz) {
-    VideoCapabilities* const p = (VideoCapabilities*)env->GetLongField(
-            thiz, fields.videoCapsContext);
-    return p;
-}
-
-// Utils
-
-static jobject convertToJavaIntRange(JNIEnv *env, const Range<int32_t>& range) {
-    jclass helperClazz = env->FindClass("android/media/MediaCodecInfo$GenericHelper");
-    jmethodID constructIntegerRangeID = env->GetStaticMethodID(helperClazz, "constructIntegerRange",
-            "(II)Landroid/util/Range;");
-    jobject jRange = env->CallStaticObjectMethod(helperClazz, constructIntegerRangeID,
-            range.lower(), range.upper());
-
-    return jRange;
-}
-
-static jobject convertToJavaDoubleRange(JNIEnv *env, const Range<double>& range) {
-    jclass helperClazz = env->FindClass("android/media/MediaCodecInfo$GenericHelper");
-    jmethodID constructDoubleRangeID = env->GetStaticMethodID(helperClazz, "constructDoubleRange",
-            "(DD)Landroid/util/Range;");
-    jobject jRange = env->CallStaticObjectMethod(helperClazz, constructDoubleRangeID,
-            range.lower(), range.upper());
-    return jRange;
 }
 
 // Converters between Java objects and native instances
@@ -186,125 +158,6 @@ static jboolean android_media_VideoCapabilities_PerformancePoint_equals(JNIEnv *
     return res;
 }
 
-// VideoCapabilities
-
-static void android_media_VideoCapabilities_native_init(JNIEnv *env, jobject /* thiz */) {
-    jclass clazz
-            = env->FindClass("android/media/MediaCodecInfo$VideoCapabilities$VideoCapsNativeImpl");
-    if (clazz == NULL) {
-        return;
-    }
-
-    fields.videoCapsContext = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (fields.videoCapsContext == NULL) {
-        return;
-    }
-
-    env->DeleteLocalRef(clazz);
-}
-
-static jboolean android_media_VideoCapabilities_areSizeAndRateSupported(JNIEnv *env, jobject thiz,
-        int32_t width, int32_t height, double frameRate) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-
-    bool res = videoCaps->areSizeAndRateSupported(width, height, frameRate);
-    return res;
-}
-
-static jboolean android_media_VideoCapabilities_isSizeSupported(JNIEnv *env, jobject thiz,
-        int32_t width, int32_t height) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-
-    bool res = videoCaps->isSizeSupported(width, height);
-    return res;
-}
-
-static jobject android_media_VideoCapabilities_getAchievableFrameRatesFor(JNIEnv *env, jobject thiz,
-        int32_t width, int32_t height) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    std::optional<Range<double>> frameRates = videoCaps->getAchievableFrameRatesFor(width, height);
-    if (!frameRates) {
-        return NULL;
-    }
-    jobject jFrameRates = convertToJavaDoubleRange(env, frameRates.value());
-    return jFrameRates;
-}
-
-static jobject android_media_VideoCapabilities_getSupportedFrameRatesFor(JNIEnv *env, jobject thiz,
-        int32_t width, int32_t height) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    std::optional<Range<double>> frameRates = videoCaps->getSupportedFrameRatesFor(width, height);
-    if (!frameRates) {
-        return NULL;
-    }
-    jobject jFrameRates = convertToJavaDoubleRange(env, frameRates.value());
-    return jFrameRates;
-}
-
-static jobject android_media_VideoCapabilities_getSupportedWidthsFor(JNIEnv *env, jobject thiz,
-        int32_t height) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    std::optional<Range<int32_t>> supportedWidths = videoCaps->getSupportedWidthsFor(height);
-    if (!supportedWidths) {
-        return NULL;
-    }
-    jobject jSupportedWidths = convertToJavaIntRange(env, supportedWidths.value());
-
-    return jSupportedWidths;
-}
-
-static jobject android_media_VideoCapabilities_getSupportedHeightsFor(JNIEnv *env, jobject thiz,
-        int32_t width) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return NULL;
-    }
-
-    std::optional<Range<int32_t>> supportedHeights = videoCaps->getSupportedHeightsFor(width);
-    if (!supportedHeights) {
-        return NULL;
-    }
-    jobject jSupportedHeights = convertToJavaIntRange(env, supportedHeights.value());
-
-    return jSupportedHeights;
-}
-
-static jint android_media_VideoCapabilities_getSmallerDimensionUpperLimit(JNIEnv *env,
-        jobject thiz) {
-    VideoCapabilities* const videoCaps = getVideoCapabilities(env, thiz);
-    if (videoCaps == nullptr) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-
-    int smallerDimensionUpperLimit = videoCaps->getSmallerDimensionUpperLimit();
-    return smallerDimensionUpperLimit;
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gAudioCapsMethods[] = {
@@ -319,17 +172,6 @@ static const JNINativeMethod gPerformancePointMethods[] = {
     {"native_equals", "(Landroid/media/MediaCodecInfo$VideoCapabilities$PerformancePoint;)Z", (void *)android_media_VideoCapabilities_PerformancePoint_equals},
 };
 
-static const JNINativeMethod gVideoCapsMethods[] = {
-    {"native_init", "()V", (void *)android_media_VideoCapabilities_native_init},
-    {"native_areSizeAndRateSupported", "(IID)Z", (void *)android_media_VideoCapabilities_areSizeAndRateSupported},
-    {"native_isSizeSupported", "(II)Z", (void *)android_media_VideoCapabilities_isSizeSupported},
-    {"native_getAchievableFrameRatesFor", "(II)Landroid/util/Range;", (void *)android_media_VideoCapabilities_getAchievableFrameRatesFor},
-    {"native_getSupportedFrameRatesFor", "(II)Landroid/util/Range;", (void *)android_media_VideoCapabilities_getSupportedFrameRatesFor},
-    {"native_getSupportedWidthsFor", "(I)Landroid/util/Range;", (void *)android_media_VideoCapabilities_getSupportedWidthsFor},
-    {"native_getSupportedHeightsFor", "(I)Landroid/util/Range;", (void *)android_media_VideoCapabilities_getSupportedHeightsFor},
-    {"native_getSmallerDimensionUpperLimit", "()I", (void *)android_media_VideoCapabilities_getSmallerDimensionUpperLimit}
-};
-
 int register_android_media_CodecCapabilities(JNIEnv *env) {
     int result = AndroidRuntime::registerNativeMethods(env,
             "android/media/MediaCodecInfo$AudioCapabilities$AudioCapsNativeImpl",
@@ -341,13 +183,6 @@ int register_android_media_CodecCapabilities(JNIEnv *env) {
     result = AndroidRuntime::registerNativeMethods(env,
             "android/media/MediaCodecInfo$VideoCapabilities$PerformancePoint",
             gPerformancePointMethods, NELEM(gPerformancePointMethods));
-    if (result != JNI_OK) {
-        return result;
-    }
-
-    result = AndroidRuntime::registerNativeMethods(env,
-            "android/media/MediaCodecInfo$VideoCapabilities$VideoCapsNativeImpl",
-            gVideoCapsMethods, NELEM(gVideoCapsMethods));
     if (result != JNI_OK) {
         return result;
     }
