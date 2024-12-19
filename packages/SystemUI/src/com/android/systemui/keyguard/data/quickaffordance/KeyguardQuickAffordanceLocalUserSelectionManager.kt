@@ -24,8 +24,8 @@ import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -51,6 +51,7 @@ constructor(
     @ShadeDisplayAware private val context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     broadcastDispatcher: BroadcastDispatcher,
 ) : KeyguardQuickAffordanceSelectionManager {
 
@@ -102,7 +103,7 @@ constructor(
                     // common case anyway as restoration really only happens on initial device
                     // setup).
                     emit(Unit)
-                }
+                },
             ) { _, _ ->
             }
             .flatMapLatest {
@@ -128,7 +129,11 @@ constructor(
 
     override fun getSelections(): Map<String, List<String>> {
         // If the custom shortcuts feature is not enabled, ignore prior selections and use defaults
-        if (!context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled)) {
+        // TODO(b/383391342): remove isV2FlagEnabled check and just depend on the resource
+        if (
+            !(context.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled) ||
+                communalSettingsInteractor.isV2FlagEnabled())
+        ) {
             return defaults
         }
 
@@ -164,10 +169,7 @@ constructor(
         return result
     }
 
-    override fun setSelections(
-        slotId: String,
-        affordanceIds: List<String>,
-    ) {
+    override fun setSelections(slotId: String, affordanceIds: List<String>) {
         val key = "$KEY_PREFIX_SLOT$slotId"
         val value = affordanceIds.joinToString(AFFORDANCE_DELIMITER)
         sharedPrefs.edit().putString(key, value).apply()

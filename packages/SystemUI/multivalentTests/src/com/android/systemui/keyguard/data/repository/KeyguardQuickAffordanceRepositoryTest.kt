@@ -22,6 +22,7 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -84,16 +85,11 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
-                        whenever(
-                                getSharedPreferences(
-                                    anyString(),
-                                    anyInt(),
-                                    anyInt(),
-                                )
-                            )
+                        whenever(getSharedPreferences(anyString(), anyInt(), anyInt()))
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         client1 = FakeCustomizationProviderClient()
@@ -103,9 +99,8 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 scope = testScope.backgroundScope,
                 userTracker = userTracker,
                 clientFactory =
-                    FakeKeyguardQuickAffordanceProviderClientFactory(
-                        userTracker,
-                    ) { selectedUserId ->
+                    FakeKeyguardQuickAffordanceProviderClientFactory(userTracker) { selectedUserId
+                        ->
                         when (selectedUserId) {
                             SECONDARY_USER_1 -> client1
                             SECONDARY_USER_2 -> client2
@@ -115,10 +110,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 userHandle = UserHandle.SYSTEM,
             )
 
-        overrideResource(
-            R.array.config_keyguardQuickAffordanceDefaults,
-            arrayOf<String>(),
-        )
+        overrideResource(R.array.config_keyguardQuickAffordanceDefaults, arrayOf<String>())
 
         underTest =
             KeyguardQuickAffordanceRepository(
@@ -155,30 +147,19 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             val slotId2 = "slot2"
 
             underTest.setSelections(slotId1, listOf(config1.key))
-            assertSelections(
-                configsBySlotId(),
-                mapOf(
-                    slotId1 to listOf(config1),
-                ),
-            )
+            assertSelections(configsBySlotId(), mapOf(slotId1 to listOf(config1)))
 
             underTest.setSelections(slotId2, listOf(config2.key))
             assertSelections(
                 configsBySlotId(),
-                mapOf(
-                    slotId1 to listOf(config1),
-                    slotId2 to listOf(config2),
-                ),
+                mapOf(slotId1 to listOf(config1), slotId2 to listOf(config2)),
             )
 
             underTest.setSelections(slotId1, emptyList())
             underTest.setSelections(slotId2, listOf(config1.key))
             assertSelections(
                 configsBySlotId(),
-                mapOf(
-                    slotId1 to emptyList(),
-                    slotId2 to listOf(config1),
-                ),
+                mapOf(slotId1 to emptyList(), slotId2 to listOf(config1)),
             )
         }
 
@@ -209,28 +190,15 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         val slot3 = "slot3"
         context.orCreateTestableResources.addOverride(
             R.array.config_keyguardQuickAffordanceSlots,
-            arrayOf(
-                "$slot1:2",
-                "$slot2:4",
-                "$slot3:5",
-            ),
+            arrayOf("$slot1:2", "$slot2:4", "$slot3:5"),
         )
 
         assertThat(underTest.getSlotPickerRepresentations())
             .isEqualTo(
                 listOf(
-                    KeyguardSlotPickerRepresentation(
-                        id = slot1,
-                        maxSelectedAffordances = 2,
-                    ),
-                    KeyguardSlotPickerRepresentation(
-                        id = slot2,
-                        maxSelectedAffordances = 4,
-                    ),
-                    KeyguardSlotPickerRepresentation(
-                        id = slot3,
-                        maxSelectedAffordances = 5,
-                    ),
+                    KeyguardSlotPickerRepresentation(id = slot1, maxSelectedAffordances = 2),
+                    KeyguardSlotPickerRepresentation(id = slot2, maxSelectedAffordances = 4),
+                    KeyguardSlotPickerRepresentation(id = slot3, maxSelectedAffordances = 5),
                 )
             )
     }
@@ -243,28 +211,15 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         val slot3 = "slot3"
         context.orCreateTestableResources.addOverride(
             R.array.config_keyguardQuickAffordanceSlots,
-            arrayOf(
-                "$slot1:2",
-                "$slot2:4",
-                "$slot3:5",
-            ),
+            arrayOf("$slot1:2", "$slot2:4", "$slot3:5"),
         )
 
         assertThat(underTest.getSlotPickerRepresentations())
             .isEqualTo(
                 listOf(
-                    KeyguardSlotPickerRepresentation(
-                        id = slot3,
-                        maxSelectedAffordances = 5,
-                    ),
-                    KeyguardSlotPickerRepresentation(
-                        id = slot2,
-                        maxSelectedAffordances = 4,
-                    ),
-                    KeyguardSlotPickerRepresentation(
-                        id = slot1,
-                        maxSelectedAffordances = 2,
-                    ),
+                    KeyguardSlotPickerRepresentation(id = slot3, maxSelectedAffordances = 5),
+                    KeyguardSlotPickerRepresentation(id = slot2, maxSelectedAffordances = 4),
+                    KeyguardSlotPickerRepresentation(id = slot1, maxSelectedAffordances = 2),
                 )
             )
     }
@@ -275,21 +230,9 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             userTracker.set(
                 userInfos =
                     listOf(
-                        UserInfo(
-                            UserHandle.USER_SYSTEM,
-                            "Primary",
-                            /* flags= */ 0,
-                        ),
-                        UserInfo(
-                            SECONDARY_USER_1,
-                            "Secondary 1",
-                            /* flags= */ 0,
-                        ),
-                        UserInfo(
-                            SECONDARY_USER_2,
-                            "Secondary 2",
-                            /* flags= */ 0,
-                        ),
+                        UserInfo(UserHandle.USER_SYSTEM, "Primary", /* flags= */ 0),
+                        UserInfo(SECONDARY_USER_1, "Secondary 1", /* flags= */ 0),
+                        UserInfo(SECONDARY_USER_2, "Secondary 2", /* flags= */ 0),
                     ),
                 selectedUserIndex = 2,
             )
@@ -302,12 +245,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             assertSelections(
                 observed = observed(),
                 expected =
-                    mapOf(
-                        KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
-                            listOf(
-                                config2,
-                            ),
-                    )
+                    mapOf(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to listOf(config2)),
             )
         }
 

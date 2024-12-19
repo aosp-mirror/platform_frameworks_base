@@ -17,19 +17,19 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.applicationContext
-import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.communal.data.repository.communalSceneRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.settings.userFileManager
-import com.android.systemui.settings.userTracker
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 
-val Kosmos.localUserSelectionManager by
+val Kosmos.glanceableHubQuickAffordanceConfig by
     Kosmos.Fixture {
-        KeyguardQuickAffordanceLocalUserSelectionManager(
+        GlanceableHubQuickAffordanceConfig(
             context = applicationContext,
-            userFileManager = userFileManager,
-            userTracker = userTracker,
+            communalInteractor = communalInteractor,
+            communalSceneRepository = communalSceneRepository,
             communalSettingsInteractor = communalSettingsInteractor,
-            broadcastDispatcher = broadcastDispatcher,
+            sceneInteractor = sceneInteractor,
         )
     }

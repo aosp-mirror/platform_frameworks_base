@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
@@ -216,6 +217,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -295,6 +297,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         biometricSettingsRepository = biometricSettingsRepository,
                         backgroundDispatcher = kosmos.testDispatcher,
                         appContext = mContext,
+                        communalSettingsInteractor = kosmos.communalSettingsInteractor,
                         sceneInteractor = { kosmos.sceneInteractor },
                     ),
                 keyguardInteractor = keyguardInteractor,
