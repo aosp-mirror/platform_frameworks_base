@@ -181,11 +181,14 @@ public class UserBackupManagerService {
     public static class BackupWakeLock {
         private final PowerManager.WakeLock mPowerManagerWakeLock;
         private boolean mHasQuit = false;
-        private int mUserId;
+        private final int mUserId;
+        private final BackupManagerConstants mBackupManagerConstants;
 
-        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock, int userId) {
+        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock, int userId,
+                BackupManagerConstants backupManagerConstants) {
             mPowerManagerWakeLock = powerManagerWakeLock;
             mUserId = userId;
+            mBackupManagerConstants = backupManagerConstants;
         }
 
         /** Acquires the {@link PowerManager.WakeLock} if hasn't been quit. */
@@ -199,7 +202,9 @@ public class UserBackupManagerService {
                                         + mPowerManagerWakeLock.getTag()));
                 return;
             }
-            mPowerManagerWakeLock.acquire();
+            // Set a timeout for the wakelock. Otherwise if we fail internally and never call
+            // release(), the device might stay awake and drain battery indefinitely.
+            mPowerManagerWakeLock.acquire(mBackupManagerConstants.getWakelockTimeoutMillis());
             Slog.v(
                     TAG,
                     addUserIdToLogMessage(
@@ -674,10 +679,8 @@ public class UserBackupManagerService {
         mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
         // Power management
-        mWakelock = new BackupWakeLock(
-                mPowerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK,
-                        "*backup*-" + userId + "-" + userBackupThread.getThreadId()), userId);
+        mWakelock = new BackupWakeLock(mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "*backup*-" + userId + "-" + userBackupThread.getThreadId()), userId, mConstants);
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
