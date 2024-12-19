@@ -534,7 +534,10 @@ android_library {
         "-Adagger.useBindingGraphFix=ENABLED",
         "-Aroom.schemaLocation=frameworks/base/packages/SystemUI/schemas",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
+    kotlincflags: [
+        "-Xjvm-default=all",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+    ],
 
     plugins: [
         "androidx.room_room-compiler-plugin",
@@ -757,6 +760,7 @@ android_library {
         "-Xjvm-default=all",
         // TODO(b/352363800): Why do we need this?
         "-J-Xmx8192M",
+        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
     ],
     javacflags: [
         "-Adagger.useBindingGraphFix=ENABLED",
