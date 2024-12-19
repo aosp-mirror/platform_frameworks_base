@@ -34199,7 +34199,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && viewRootImpl.shouldCheckFrameRateCategory()
                 && parent instanceof View
                 && ((View) parent).getFrameContentVelocity() <= 0
-                && !isInputMethodWindowType) {
+                && !isInputMethodWindowType
+                && viewRootImpl.getFrameRateCompatibility() != FRAME_RATE_COMPATIBILITY_AT_LEAST) {
 
             return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
         }
