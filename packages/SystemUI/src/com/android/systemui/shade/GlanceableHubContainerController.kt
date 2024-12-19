@@ -67,6 +67,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
+import com.android.systemui.util.kotlin.Quad
 import com.android.systemui.util.kotlin.collectFlow
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -409,11 +410,12 @@ constructor(
                 shadeInteractor.isAnyFullyExpanded,
                 shadeInteractor.isUserInteracting,
                 shadeInteractor.isShadeFullyCollapsed,
-                ::Triple,
+                shadeInteractor.isQsExpanded,
+                ::Quad,
             ),
-            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
+            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed, isQsExpanded) ->
                 shadeConsumingTouches = isUserInteracting
-                shadeShowing = !isShadeFullyCollapsed
+                shadeShowing = isQsExpanded || !isShadeFullyCollapsed
                 val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
 
                 // If we ever are fully expanded and not interacting, capture this state as we

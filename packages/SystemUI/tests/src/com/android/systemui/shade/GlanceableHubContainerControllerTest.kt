@@ -699,6 +699,30 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun onTouchEvent_qsExpanding_touchesNotDispatched() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+                whenever(
+                        notificationStackScrollLayoutController.isBelowLastNotification(
+                            any(),
+                            any(),
+                        )
+                    )
+                    .thenReturn(true)
+
+                // Shade is open slightly.
+                shadeTestUtil.setQsExpansion(0.01f)
+                testableLooper.processAllMessages()
+
+                // Touches are not consumed.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(DOWN_EVENT)
+            }
+        }
+
     @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun onTouchEvent_bouncerInteracting_movesNotDispatched() =
