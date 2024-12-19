@@ -30,11 +30,7 @@ public class UserSwitchObserver extends IUserSwitchObserver.Stub {
     }
 
     @Override
-    public void onBeforeUserSwitching(int newUserId, IRemoteCallback reply) throws RemoteException {
-        if (reply != null) {
-            reply.sendResult(null);
-        }
-    }
+    public void onBeforeUserSwitching(int newUserId) throws RemoteException {}
 
     @Override
     public void onUserSwitching(int newUserId, IRemoteCallback reply) throws RemoteException {
