@@ -16,6 +16,7 @@
 
 package com.android.settingslib.datastore
 
+import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
@@ -87,6 +88,6 @@ class SettingsGlobalStore private constructor(contentResolver: ContentResolver) 
         fun getReadPermissions() = arrayOf<String>()
 
         /** Returns the required permissions to write [Global] settings. */
-        fun getWritePermissions() = arrayOf<String>()
+        fun getWritePermissions() = arrayOf(Manifest.permission.WRITE_SECURE_SETTINGS)
     }
 }
