@@ -273,11 +273,7 @@ public final class Slice implements Parcelable {
 
     protected Slice(Parcel in) {
         mHints = in.readStringArray();
-        int n = in.readInt();
-        mItems = new SliceItem[n];
-        for (int i = 0; i < n; i++) {
-            mItems[i] = SliceItem.CREATOR.createFromParcel(in);
-        }
+        mItems = in.createTypedArray(SliceItem.CREATOR);
         mUri = Uri.CREATOR.createFromParcel(in);
         mSpec = in.readTypedObject(SliceSpec.CREATOR);
     }
@@ -313,10 +309,7 @@ public final class Slice implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(mHints);
-        dest.writeInt(mItems.length);
-        for (int i = 0; i < mItems.length; i++) {
-            mItems[i].writeToParcel(dest, flags);
-        }
+        dest.writeTypedArray(mItems, flags);
         mUri.writeToParcel(dest, 0);
         dest.writeTypedObject(mSpec, flags);
     }
