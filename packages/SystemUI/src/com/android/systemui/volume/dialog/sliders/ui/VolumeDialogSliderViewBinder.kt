@@ -16,18 +16,15 @@
 
 package com.android.systemui.volume.dialog.sliders.ui
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.view.View
-import android.view.animation.DecelerateInterpolator
+import androidx.dynamicanimation.animation.FloatPropertyCompat
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderStateModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
-import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
-import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
-import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -35,53 +32,61 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-private const val PROGRESS_CHANGE_ANIMATION_DURATION_MS = 80L
-
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
 @Inject
-constructor(
-    private val viewModel: VolumeDialogSliderViewModel,
-    private val jankListenerFactory: JankListenerFactory,
-) {
+constructor(private val viewModel: VolumeDialogSliderViewModel) {
+
+    private val sliderValueProperty =
+        object : FloatPropertyCompat<Slider>("value") {
+            override fun getValue(slider: Slider): Float = slider.value
+
+            override fun setValue(slider: Slider, value: Float) {
+                slider.value = value
+            }
+        }
+    private val springForce =
+        SpringForce().apply {
+            stiffness = SpringForce.STIFFNESS_MEDIUM
+            dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+        }
 
     fun CoroutineScope.bind(view: View) {
-        val sliderView: Slider =
-            view.requireViewById<Slider>(R.id.volume_dialog_slider).apply {
-                labelBehavior = LabelFormatter.LABEL_GONE
-                trackIconActiveColor = trackInactiveTintList
-            }
+        var isInitialUpdate = true
+        val sliderView: Slider = view.requireViewById(R.id.volume_dialog_slider)
+        val animation = SpringAnimation(sliderView, sliderValueProperty)
+        animation.spring = springForce
+
         sliderView.addOnChangeListener { _, value, fromUser ->
             viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }
 
-        viewModel.state.onEach { sliderView.setModel(it) }.launchIn(this)
+        viewModel.state
+            .onEach {
+                sliderView.setModel(it, animation, isInitialUpdate)
+                isInitialUpdate = false
+            }
+            .launchIn(this)
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private suspend fun Slider.setModel(model: VolumeDialogSliderStateModel) {
+    private fun Slider.setModel(
+        model: VolumeDialogSliderStateModel,
+        animation: SpringAnimation,
+        isInitialUpdate: Boolean,
+    ) {
         valueFrom = model.minValue
+        animation.setMinValue(model.minValue)
         valueTo = model.maxValue
+        animation.setMaxValue(model.maxValue)
         // coerce the current value to the new value range before animating it. This prevents
         // animating from the value that is outside of current [valueFrom, valueTo].
         value = value.coerceIn(valueFrom, valueTo)
-        setValueAnimated(
-            model.value,
-            jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
-        )
-        trackIconActiveEnd = context.getDrawable(model.iconRes)
-    }
-}
-
-private suspend fun Slider.setValueAnimated(
-    newValue: Float,
-    jankListener: Animator.AnimatorListener,
-) {
-    ObjectAnimator.ofFloat(value, newValue)
-        .apply {
-            duration = PROGRESS_CHANGE_ANIMATION_DURATION_MS
-            interpolator = DecelerateInterpolator()
-            addListener(jankListener)
+        setTrackIconActiveStart(model.iconRes)
+        if (isInitialUpdate) {
+            value = model.value
+        } else {
+            animation.animateToFinalPosition(model.value)
         }
-        .suspendAnimate<Float> { value = it }
+    }
 }

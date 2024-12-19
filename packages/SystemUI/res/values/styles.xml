@@ -561,6 +561,8 @@
         <item name="trackCornerSize">12dp</item>
         <item name="trackInsideCornerSize">2dp</item>
         <item name="trackStopIndicatorSize">6dp</item>
+        <item name="trackIconSize">20dp</item>
+        <item name="labelBehavior">gone</item>
     </style>
 
     <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
@@ -570,6 +572,7 @@
         <item name="tickColorInactive">@androidprv:color/materialColorPrimary</item>
         <item name="trackColorActive">@androidprv:color/materialColorPrimary</item>
         <item name="trackColorInactive">@androidprv:color/materialColorSurfaceContainerHighest</item>
+        <item name="trackIconActiveColor">@androidprv:color/materialColorSurfaceContainerHighest</item>
     </style>
 
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
