@@ -970,8 +970,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
@@ -991,8 +993,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
@@ -1012,8 +1016,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device2));
@@ -1035,10 +1041,13 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice3.getGroupId()).thenReturn(3);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
         BluetoothDevice device3 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice3.getDevice()).thenReturn(device3);
         when(mDeviceManager.findDevice(device3)).thenReturn(cachedBluetoothDevice3);
 
         when(mAssistant.getAllConnectedDevices())
@@ -1280,6 +1289,8 @@ public class BluetoothUtilsTest {
         mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
         mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_HYSTERESIS_MODE_FIX);
         mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 1);
 
         assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isTrue();
     }
