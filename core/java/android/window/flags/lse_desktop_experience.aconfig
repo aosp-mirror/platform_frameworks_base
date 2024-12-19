@@ -485,6 +485,13 @@ flag {
 }
 
 flag {
+    name: "enable_multiple_desktops_backend"
+    namespace: "lse_desktop_experience"
+    description: "Enable multiple desktop sessions for desktop windowing (backend)."
+    bug: "362720497"
+}
+
+flag {
     name: "enable_connected_displays_dnd"
     namespace: "lse_desktop_experience"
     description: "Enable drag-and-drop between connected displays."
