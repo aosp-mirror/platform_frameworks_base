@@ -28,8 +28,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.window.flags.Flags;
-
 import java.io.PrintWriter;
 import java.util.function.DoubleSupplier;
 
@@ -202,9 +200,7 @@ class AppCompatSizeCompatModePolicy {
         // saved here before resolved bounds are overridden below.
         final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivityRecord.mAppCompatController
                 .getAppCompatAspectRatioPolicy();
-        final boolean useResolvedBounds = Flags.immersiveAppRepositioning()
-                ? aspectRatioPolicy.isAspectRatioApplied()
-                : aspectRatioPolicy.isLetterboxedForFixedOrientationAndAspectRatio();
+        final boolean useResolvedBounds = aspectRatioPolicy.isAspectRatioApplied();
         final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
                 : newParentConfiguration.windowConfiguration.getBounds();

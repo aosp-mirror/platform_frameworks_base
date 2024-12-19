@@ -8528,8 +8528,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (Flags.immersiveAppRepositioning()
-                && !mAppCompatController.getAppCompatAspectRatioPolicy()
+        if (!mAppCompatController.getAppCompatAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio()
                 && !mAppCompatController.getAppCompatAspectRatioOverrides()
                     .hasFullscreenOverride()) {
@@ -8550,18 +8549,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!matchParentBounds()) {
                 computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
             }
-        }
-        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
-        // are already calculated in resolveFixedOrientationConfiguration, or if in size compat
-        // mode, it should already be calculated in resolveSizeCompatModeConfiguration.
-        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (!Flags.immersiveAppRepositioning()
-                && !mAppCompatController.getAppCompatAspectRatioPolicy()
-                    .isLetterboxedForFixedOrientationAndAspectRatio()
-                && !scmPolicy.isInSizeCompatModeForBounds()
-                && !mAppCompatController.getAppCompatAspectRatioOverrides()
-                    .hasFullscreenOverride()) {
-            resolveAspectRatioRestriction(newParentConfiguration);
         }
 
         if (isFixedOrientationLetterboxAllowed
@@ -8819,9 +8806,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isImmersiveMode(@NonNull Rect parentBounds) {
-        if (!Flags.immersiveAppRepositioning()) {
-            return false;
-        }
         if (!mResolveConfigHint.mUseOverrideInsetsForConfig
                 && mWmService.mFlags.mInsetsDecoupledConfiguration) {
             return false;

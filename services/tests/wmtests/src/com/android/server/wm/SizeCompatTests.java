@@ -391,7 +391,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_IMMERSIVE_APP_REPOSITIONING)
     @DisableCompatChanges({ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED})
     public void testRepositionLandscapeImmersiveAppWithDisplayCutout() {
         final int dw = 2100;
@@ -3783,7 +3782,6 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_IMMERSIVE_APP_REPOSITIONING)
     public void testImmersiveLetterboxAlignedToBottom_OverlappingNavbar() {
         assertLandscapeActivityAlignedToBottomWithNavbar(true /* immersive */);
     }
