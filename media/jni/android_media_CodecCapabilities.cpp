@@ -21,7 +21,6 @@
 #include "jni.h"
 
 #include <media/AudioCapabilities.h>
-#include <media/VideoCapabilities.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/JNIHelp.h>
 
@@ -38,47 +37,6 @@ static AudioCapabilities* getAudioCapabilities(JNIEnv *env, jobject thiz) {
     AudioCapabilities* const p = (AudioCapabilities*)env->GetLongField(
             thiz, fields.audioCapsContext);
     return p;
-}
-
-// Converters between Java objects and native instances
-
-static VideoCapabilities::PerformancePoint convertToNativePerformancePoint(
-        JNIEnv *env, jobject pp) {
-    if (pp == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-    }
-
-    jclass clazz = env->FindClass(
-            "android/media/MediaCodecInfo$VideoCapabilities$PerformancePoint");
-    CHECK(clazz != NULL);
-    CHECK(env->IsInstanceOf(pp, clazz));
-
-    jmethodID getWidthID = env->GetMethodID(clazz, "getWidth", "()I");
-    CHECK(getWidthID != NULL);
-    jint width = env->CallIntMethod(pp, getWidthID);
-
-    jmethodID getHeightID = env->GetMethodID(clazz, "getHeight", "()I");
-    CHECK(getHeightID != NULL);
-    jint height = env->CallIntMethod(pp, getHeightID);
-
-    jmethodID getMaxFrameRateID = env->GetMethodID(clazz, "getMaxFrameRate", "()I");
-    CHECK(getMaxFrameRateID != NULL);
-    jint maxFrameRate = env->CallIntMethod(pp, getMaxFrameRateID);
-
-    jmethodID getMaxMacroBlockRateID = env->GetMethodID(clazz, "getMaxMacroBlockRate", "()J");
-    CHECK(getMaxMacroBlockRateID != NULL);
-    jlong maxMacroBlockRate = env->CallLongMethod(pp, getMaxMacroBlockRateID);
-
-    jmethodID getBlockWidthID = env->GetMethodID(clazz, "getBlockWidth", "()I");
-    CHECK(getBlockWidthID != NULL);
-    jint blockWidth = env->CallIntMethod(pp, getBlockWidthID);
-
-    jmethodID getBlockHeightID = env->GetMethodID(clazz, "getBlockHeight", "()I");
-    CHECK(getBlockHeightID != NULL);
-    jint blockHeight = env->CallIntMethod(pp, getBlockHeightID);
-
-    return VideoCapabilities::PerformancePoint(VideoSize(blockWidth, blockHeight),
-            width, height, maxFrameRate, maxMacroBlockRate);
 }
 
 }  // namespace android
@@ -138,26 +96,6 @@ static jboolean android_media_AudioCapabilities_isSampleRateSupported(JNIEnv *en
     return res;
 }
 
-// PerformancePoint
-
-static jboolean android_media_VideoCapabilities_PerformancePoint_covers(JNIEnv *env, jobject thiz,
-        jobject other) {
-    VideoCapabilities::PerformancePoint pp0 = convertToNativePerformancePoint(env, thiz);
-    VideoCapabilities::PerformancePoint pp1 = convertToNativePerformancePoint(env, other);
-
-    bool res = pp0.covers(pp1);
-    return res;
-}
-
-static jboolean android_media_VideoCapabilities_PerformancePoint_equals(JNIEnv *env, jobject thiz,
-        jobject other) {
-    VideoCapabilities::PerformancePoint pp0 = convertToNativePerformancePoint(env, thiz);
-    VideoCapabilities::PerformancePoint pp1 = convertToNativePerformancePoint(env, other);
-
-    bool res = pp0.equals(pp1);
-    return res;
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gAudioCapsMethods[] = {
@@ -167,22 +105,10 @@ static const JNINativeMethod gAudioCapsMethods[] = {
     {"native_isSampleRateSupported", "(I)Z", (void *)android_media_AudioCapabilities_isSampleRateSupported}
 };
 
-static const JNINativeMethod gPerformancePointMethods[] = {
-    {"native_covers", "(Landroid/media/MediaCodecInfo$VideoCapabilities$PerformancePoint;)Z", (void *)android_media_VideoCapabilities_PerformancePoint_covers},
-    {"native_equals", "(Landroid/media/MediaCodecInfo$VideoCapabilities$PerformancePoint;)Z", (void *)android_media_VideoCapabilities_PerformancePoint_equals},
-};
-
 int register_android_media_CodecCapabilities(JNIEnv *env) {
     int result = AndroidRuntime::registerNativeMethods(env,
             "android/media/MediaCodecInfo$AudioCapabilities$AudioCapsNativeImpl",
             gAudioCapsMethods, NELEM(gAudioCapsMethods));
-    if (result != JNI_OK) {
-        return result;
-    }
-
-    result = AndroidRuntime::registerNativeMethods(env,
-            "android/media/MediaCodecInfo$VideoCapabilities$PerformancePoint",
-            gPerformancePointMethods, NELEM(gPerformancePointMethods));
     if (result != JNI_OK) {
         return result;
     }
