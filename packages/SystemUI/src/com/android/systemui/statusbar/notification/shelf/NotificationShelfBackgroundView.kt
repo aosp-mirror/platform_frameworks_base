@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.shelf
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.notification.row.NotificationBackgroundView
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 
@@ -31,7 +32,8 @@ constructor(context: Context, attrs: AttributeSet? = null) :
     var alignToEnd = false
 
     /** @return whether the alignment of the notification shelf is right. */
-    override fun isAlignedToRight(): Boolean {
+    @VisibleForTesting
+    public override fun isAlignedToRight(): Boolean {
         if (!NotificationMinimalism.isEnabled) {
             return super.isAlignedToRight()
         }

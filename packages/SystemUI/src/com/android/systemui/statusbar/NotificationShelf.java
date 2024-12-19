@@ -79,9 +79,11 @@ public class NotificationShelf extends ActivatableNotificationView {
     private static final SourceType BASE_VALUE = SourceType.from("BaseValue");
     private static final SourceType SHELF_SCROLL = SourceType.from("ShelfScroll");
 
-    private NotificationShelfIconContainer mShelfIcons;
+    @VisibleForTesting
+    public NotificationShelfIconContainer mShelfIcons;
     // This field hides mBackgroundNormal from super class for short-shelf alignment
-    private NotificationShelfBackgroundView mBackgroundNormal;
+    @VisibleForTesting
+    public NotificationShelfBackgroundView mBackgroundNormal;
     private boolean mHideBackground;
     private int mStatusBarHeight;
     private boolean mEnableNotificationClipping;
@@ -275,7 +277,11 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private void setActualWidth(float actualWidth) {
+    /**
+     * Set the actual width of the shelf, this will only differ from width for short shelves.
+     */
+    @VisibleForTesting
+    public void setActualWidth(float actualWidth) {
         setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
             mShelfIcons.setAlignToEnd(isAlignedToEnd());
@@ -369,7 +375,8 @@ public class NotificationShelf extends ActivatableNotificationView {
     /**
      * @return The left boundary of the shelf.
      */
-    private float getShelfLeftBound() {
+    @VisibleForTesting
+    public float getShelfLeftBound() {
         if (isAlignedToRight()) {
             return getWidth() - getActualWidth();
         } else {
@@ -380,7 +387,8 @@ public class NotificationShelf extends ActivatableNotificationView {
     /**
      * @return The right boundary of the shelf.
      */
-    private float getShelfRightBound() {
+    @VisibleForTesting
+    public float getShelfRightBound() {
         if (isAlignedToRight()) {
             return getWidth();
         } else {
@@ -388,7 +396,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private boolean isAlignedToRight() {
+    @VisibleForTesting
+    public boolean isAlignedToRight() {
         return isAlignedToEnd() ^ isLayoutRtl();
     }
 
@@ -397,7 +406,8 @@ public class NotificationShelf extends ActivatableNotificationView {
      * to the layout end (right for LTR; left for RTL).
      * @return whether to align with the minimalism split shade style
      */
-    private boolean isAlignedToEnd() {
+    @VisibleForTesting
+    public boolean isAlignedToEnd() {
         if (!NotificationMinimalism.isEnabled()) {
             return false;
         }
