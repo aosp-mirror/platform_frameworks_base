@@ -16,8 +16,10 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import androidx.compose.runtime.getValue
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -28,6 +30,8 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /**
  * Models UI state used to render the content of the quick settings shade overlay.
@@ -44,10 +48,21 @@ constructor(
     quickSettingsContainerViewModelFactory: QuickSettingsContainerViewModel.Factory,
 ) : ExclusiveActivatable() {
 
+    private val hydrator = Hydrator("QuickSettingsContainerViewModel.hydrator")
+
+    val showHeader: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "showHeader",
+            initialValue = !shadeInteractor.isShadeLayoutWide.value,
+            source = shadeInteractor.isShadeLayoutWide.map { !it },
+        )
+
     val quickSettingsContainerViewModel = quickSettingsContainerViewModelFactory.create(false)
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
+            launch { hydrator.activate() }
+
             launch {
                 sceneInteractor.currentScene.collect { currentScene ->
                     when (currentScene) {

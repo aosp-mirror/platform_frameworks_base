@@ -103,12 +103,15 @@ constructor(
             onScrimClicked = viewModel::onScrimClicked,
         ) {
             Column {
-                CollapsedShadeHeader(
-                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                    createTintedIconManager = tintedIconManagerFactory::create,
-                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
-                    statusBarIconController = statusBarIconController,
-                )
+                if (viewModel.showHeader) {
+                    CollapsedShadeHeader(
+                        viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                        createTintedIconManager = tintedIconManagerFactory::create,
+                        createBatteryMeterViewController =
+                            batteryMeterViewControllerFactory::create,
+                        statusBarIconController = statusBarIconController,
+                    )
+                }
 
                 ShadeBody(viewModel = viewModel.quickSettingsContainerViewModel)
             }
@@ -178,8 +181,8 @@ fun ContentScope.QuickSettingsLayout(
     Column(
         verticalArrangement = Arrangement.spacedBy(QuickSettingsShade.Dimensions.Padding),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(
+        modifier =
+            modifier.padding(
                 start = QuickSettingsShade.Dimensions.Padding,
                 end = QuickSettingsShade.Dimensions.Padding,
                 bottom = QuickSettingsShade.Dimensions.Padding,

@@ -36,6 +36,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
@@ -122,6 +123,24 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
             lockDevice()
             assertThat(isShadeTouchable).isFalse()
             assertThat(currentOverlays).doesNotContain(Overlays.QuickSettingsShade)
+        }
+
+    @Test
+    fun showHeader_showsOnNarrowScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+            runCurrent()
+
+            assertThat(underTest.showHeader).isTrue()
+        }
+
+    @Test
+    fun showHeader_hidesOnWideScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            runCurrent()
+
+            assertThat(underTest.showHeader).isFalse()
         }
 
     private fun TestScope.lockDevice() {
