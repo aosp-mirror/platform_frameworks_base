@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalTypeInference::class)
+@file:OptIn(ExperimentalTypeInference::class)
 
 package com.android.systemui.utils.coroutines.flow
 
 import kotlin.experimental.ExperimentalTypeInference
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.conflate
