@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDoz
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
@@ -93,6 +94,8 @@ constructor(
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
     private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
     private val fromOccludedTransitionInteractor: Provider<FromOccludedTransitionInteractor>,
+    private val fromAlternateBouncerTransitionInteractor:
+        Provider<FromAlternateBouncerTransitionInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
     // TODO(b/296118689): move to a repository
@@ -526,6 +529,8 @@ constructor(
         when (keyguardTransitionInteractor.transitionState.value.to) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
             OCCLUDED -> fromOccludedTransitionInteractor.get().dismissFromOccluded()
+            ALTERNATE_BOUNCER ->
+                fromAlternateBouncerTransitionInteractor.get().dismissAlternateBouncer()
             else -> Log.v(TAG, "Keyguard was dismissed, no direct transition call needed")
         }
     }
