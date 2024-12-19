@@ -36,6 +36,9 @@
     <string name="title_nearby_device_streaming" msgid="2727103756701741359">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;將<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>的應用程式串流傳輸到 &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; 嗎？"</string>
     <string name="summary_nearby_device_streaming" msgid="70434958004946884">"「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」將可存取 <xliff:g id="DEVICE_NAME_1">%3$s</xliff:g> 顯示或播放的所有內容，包括音訊、相片、付款資訊、密碼和訊息。&lt;br/&gt;&lt;br/&gt;「<xliff:g id="APP_NAME_2">%1$s</xliff:g>」可將應用程式串流傳輸到 <xliff:g id="DEVICE_NAME_3">%3$s</xliff:g>，直到你移除這個權限為止。"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="4712712177819370967">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表 <xliff:g id="DEVICE_NAME">%2$s</xliff:g> 要求必要權限，以便從<xliff:g id="DEVICE_TYPE">%3$s</xliff:g>串流傳輸應用程式"</string>
+    <string name="title_sensor_device_streaming" msgid="2395553261097861497">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;在<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>和「<xliff:g id="DEVICE_NAME">%3$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;間串流傳輸音訊和系統功能嗎？"</string>
+    <string name="summary_sensor_device_streaming" msgid="3413105061195145547">"「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」將可存取「<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>」播放的所有內容。&lt;br/&gt;&lt;br/&gt;「<xliff:g id="APP_NAME_2">%1$s</xliff:g>」可將音訊串流傳輸到「<xliff:g id="DEVICE_NAME_3">%3$s</xliff:g>」，直到你移除這個權限為止。"</string>
+    <string name="helper_summary_sensor_device_streaming" msgid="8860174545653786353">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在代表「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」要求必要權限，以便在裝置間串流傳輸音訊和系統功能。"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
     <string name="summary_generic" msgid="1761976003668044801">"這個應用程式將可在手機和指定裝置間同步資訊，例如來電者名稱"</string>
     <string name="consent_yes" msgid="8344487259618762872">"允許"</string>

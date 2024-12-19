@@ -36,6 +36,9 @@
     <string name="title_nearby_device_streaming" msgid="2727103756701741359">"允许&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;将您的<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>上的应用流式传输到&lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;吗？"</string>
     <string name="summary_nearby_device_streaming" msgid="70434958004946884">"“<xliff:g id="APP_NAME_0">%1$s</xliff:g>”将能够访问“<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>”上显示或播放的任何内容，包括音频、照片、付款信息、密码和消息。&lt;br/&gt;&lt;br/&gt;“<xliff:g id="APP_NAME_2">%1$s</xliff:g>”可将应用流式传输到“<xliff:g id="DEVICE_NAME_3">%3$s</xliff:g>”，除非您撤消此访问权限。"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="4712712177819370967">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正代表“<xliff:g id="DEVICE_NAME">%2$s</xliff:g>”请求获得从您的<xliff:g id="DEVICE_TYPE">%3$s</xliff:g>流式传输应用的权限"</string>
+    <string name="title_sensor_device_streaming" msgid="2395553261097861497">"要允许&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;在<xliff:g id="DEVICE_TYPE">%2$s</xliff:g>和&lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;之间流式传输音频和系统功能吗？"</string>
+    <string name="summary_sensor_device_streaming" msgid="3413105061195145547">"“<xliff:g id="APP_NAME_0">%1$s</xliff:g>”将能够访问“<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>”上播放的任何内容。&lt;br/&gt;&lt;br/&gt;“<xliff:g id="APP_NAME_2">%1$s</xliff:g>”能够将音频流式传输到“<xliff:g id="DEVICE_NAME_3">%3$s</xliff:g>”，除非您撤消此访问权限。"</string>
+    <string name="helper_summary_sensor_device_streaming" msgid="8860174545653786353">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正代表“<xliff:g id="DEVICE_NAME">%2$s</xliff:g>”请求在设备之间流式传输音频和系统功能。"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"设备"</string>
     <string name="summary_generic" msgid="1761976003668044801">"此应用将能在您的手机和所选设备之间同步信息，例如来电者的姓名"</string>
     <string name="consent_yes" msgid="8344487259618762872">"允许"</string>
