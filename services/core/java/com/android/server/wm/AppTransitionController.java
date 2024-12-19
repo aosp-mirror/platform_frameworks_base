@@ -218,11 +218,6 @@ public class AppTransitionController {
         if (mDisplayContent.mAtmService.mBackNavigationController.isMonitoringFinishTransition()) {
             tmpOpenApps = new ArraySet<>(mDisplayContent.mOpeningApps);
             tmpCloseApps = new ArraySet<>(mDisplayContent.mClosingApps);
-            if (mDisplayContent.mAtmService.mBackNavigationController
-                    .removeIfContainsBackAnimationTargets(tmpOpenApps, tmpCloseApps)) {
-                mDisplayContent.mAtmService.mBackNavigationController
-                        .clearBackAnimations(false /* cancel */);
-            }
         }
 
         @TransitionOldType final int transit = getTransitCompatType(
