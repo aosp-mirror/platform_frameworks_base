@@ -18,17 +18,25 @@ package android.nfc.cardemulation;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.role.RoleManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.nfc.Constants;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -61,6 +69,7 @@ public class CardemulationTest {
     public void setUp() {
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .mockStatic(NfcAdapter.class)
+                .mockStatic(Settings.Secure.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
         MockitoAnnotations.initMocks(this);
@@ -109,5 +118,69 @@ public class CardemulationTest {
         assertThat(result).isTrue();
         verify(mINfcCardEmulation).isDefaultServiceForAid(1, componentName,
                 "payment");
+    }
+
+    @Test
+    public void testCategoryAllowsForegroundPreference() throws Settings.SettingNotFoundException {
+        when(mContext.createContextAsUser(any(), anyInt())).thenReturn(mContext);
+        RoleManager roleManager = mock(RoleManager.class);
+        when(roleManager.isRoleAvailable(RoleManager.ROLE_WALLET)).thenReturn(false);
+        when(mContext.getSystemService(RoleManager.class)).thenReturn(roleManager);
+        ContentResolver contentResolver = mock(ContentResolver.class);
+        when(mContext.getContentResolver()).thenReturn(contentResolver);
+        when(Settings.Secure.getInt(contentResolver, Constants
+                .SETTINGS_SECURE_NFC_PAYMENT_FOREGROUND)).thenReturn(1);
+        boolean result = mCardEmulation.categoryAllowsForegroundPreference("payment");
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testGetSelectionModeForCategory() throws RemoteException {
+        when(mINfcCardEmulation.isDefaultPaymentRegistered()).thenReturn(true);
+        int result = mCardEmulation.getSelectionModeForCategory("payment");
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    public void testSetShouldDefaultToObserveModeForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.setShouldDefaultToObserveModeForService(1, componentName, true))
+                .thenReturn(true);
+        boolean result = mCardEmulation
+                .setShouldDefaultToObserveModeForService(componentName, true);
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).setShouldDefaultToObserveModeForService(1, componentName, true);
+    }
+
+    @Test
+    public void testRegisterPollingLoopFilterForService()throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.registerPollingLoopFilterForService(anyInt(),
+                any(), anyString(), anyBoolean())).thenReturn(true);
+        boolean result = mCardEmulation.registerPollingLoopFilterForService(componentName,
+                "A0000000041010", true);
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation)
+                .registerPollingLoopFilterForService(anyInt(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testRemovePollingLoopFilterForService()throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.removePollingLoopFilterForService(anyInt(), any(), anyString()))
+                .thenReturn(true);
+        boolean result = mCardEmulation
+                .removePollingLoopFilterForService(componentName, "A0000000041010");
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).removePollingLoopFilterForService(anyInt(), any(), anyString());
     }
 }
