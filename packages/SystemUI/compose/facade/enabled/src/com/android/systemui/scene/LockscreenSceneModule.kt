@@ -34,7 +34,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 import javax.inject.Provider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Module(includes = [LockscreenSceneBlueprintModule::class])
 interface LockscreenSceneModule {
@@ -43,7 +42,6 @@ interface LockscreenSceneModule {
 
     companion object {
 
-        @OptIn(ExperimentalCoroutinesApi::class)
         @Provides
         @SysUISingleton
         @KeyguardRootView
