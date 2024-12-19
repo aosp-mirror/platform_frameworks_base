@@ -19,7 +19,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.Choreographer;
 import android.view.MotionEvent;
@@ -104,6 +106,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     public void setDocument(RemoteComposeDocument value) {
         mDocument = value;
         mDocument.initializeContext(mARContext);
+        mDisable = false;
         mARContext.setAnimationEnabled(true);
         mARContext.setDensity(mDensity);
         mARContext.setUseChoreographer(true);
@@ -463,6 +466,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     private long mDuration;
     private boolean mEvalTime = false; // turn on to measure eval time
     private float mLastAnimationTime = 0.1f; // set to random non 0 number
+    private boolean mDisable = false;
 
     /**
      * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
@@ -489,47 +493,76 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
-        long start = mEvalTime ? System.nanoTime() : 0; // measure execut of commands
+        if (mDisable) {
+            drawDisable(canvas);
+            return;
+        }
+        try {
 
-        float animationTime = (System.nanoTime() - mStart) * 1E-9f;
-        mARContext.setAnimationTime(animationTime);
-        mARContext.loadFloat(RemoteContext.ID_ANIMATION_TIME, animationTime);
-        mARContext.loadFloat(
-                RemoteContext.ID_ANIMATION_DELTA_TIME, animationTime - mLastAnimationTime);
-        mLastAnimationTime = animationTime;
-        mARContext.setAnimationEnabled(true);
-        mARContext.currentTime = System.currentTimeMillis();
-        mARContext.setDebug(mDebug);
-        float density = getContext().getResources().getDisplayMetrics().density;
-        mARContext.useCanvas(canvas);
-        mARContext.mWidth = getWidth();
-        mARContext.mHeight = getHeight();
-        mDocument.paint(mARContext, mTheme);
-        if (mDebug == 1) {
-            mCount++;
-            if (System.nanoTime() - mTime > 1000000000L) {
-                System.out.println(" count " + mCount + " fps");
-                mCount = 0;
-                mTime = System.nanoTime();
+            long start = mEvalTime ? System.nanoTime() : 0; // measure execut of commands
+
+            float animationTime = (System.nanoTime() - mStart) * 1E-9f;
+            mARContext.setAnimationTime(animationTime);
+            mARContext.loadFloat(RemoteContext.ID_ANIMATION_TIME, animationTime);
+            float loopTime = animationTime - mLastAnimationTime;
+            mARContext.loadFloat(RemoteContext.ID_ANIMATION_DELTA_TIME, loopTime);
+            mLastAnimationTime = animationTime;
+            mARContext.setAnimationEnabled(true);
+            mARContext.currentTime = System.currentTimeMillis();
+            mARContext.setDebug(mDebug);
+            float density = getContext().getResources().getDisplayMetrics().density;
+            mARContext.useCanvas(canvas);
+            mARContext.mWidth = getWidth();
+            mARContext.mHeight = getHeight();
+            mDocument.paint(mARContext, mTheme);
+            if (mDebug == 1) {
+                mCount++;
+                if (System.nanoTime() - mTime > 1000000000L) {
+                    System.out.println(" count " + mCount + " fps");
+                    mCount = 0;
+                    mTime = System.nanoTime();
+                }
             }
+            int nextFrame = mDocument.needsRepaint();
+            if (nextFrame > 0) {
+                mLastFrameDelay = Math.max(mMaxFrameDelay, nextFrame);
+                if (mChoreographer != null) {
+                    mChoreographer.postFrameCallbackDelayed(mFrameCallback, mLastFrameDelay);
+                }
+                if (!mARContext.useChoreographer()) {
+                    invalidate();
+                }
+            } else {
+                if (mChoreographer != null) {
+                    mChoreographer.removeFrameCallback(mFrameCallback);
+                }
+            }
+            if (mEvalTime) {
+                mDuration += System.nanoTime() - start;
+                mCount++;
+            }
+        } catch (Exception ex) {
+            mARContext.getLastOpCount();
+            mDisable = true;
+            invalidate();
         }
-        int nextFrame = mDocument.needsRepaint();
-        if (nextFrame > 0) {
-            mLastFrameDelay = Math.max(mMaxFrameDelay, nextFrame);
-            if (mChoreographer != null) {
-                mChoreographer.postFrameCallbackDelayed(mFrameCallback, mLastFrameDelay);
-            }
-            if (!mARContext.useChoreographer()) {
-                invalidate();
-            }
-        } else {
-            if (mChoreographer != null) {
-                mChoreographer.removeFrameCallback(mFrameCallback);
-            }
-        }
-        if (mEvalTime) {
-            mDuration += System.nanoTime() - start;
-            mCount++;
-        }
+    }
+
+    private void drawDisable(Canvas canvas) {
+        Rect rect = new Rect();
+        canvas.drawColor(Color.BLACK);
+        Paint paint = new Paint();
+        paint.setTextSize(128f);
+        paint.setColor(Color.RED);
+        int w = getWidth();
+        int h = getHeight();
+
+        String str = "⚠";
+        paint.getTextBounds(str, 0, 1, rect);
+
+        float x = w / 2f - rect.width() / 2f - rect.left;
+        float y = h / 2f + rect.height() / 2f - rect.bottom;
+
+        canvas.drawText(str, x, y, paint);
     }
 }

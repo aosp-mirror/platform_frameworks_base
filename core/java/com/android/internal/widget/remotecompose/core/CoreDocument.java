@@ -62,7 +62,7 @@ public class CoreDocument {
 
     // We also keep a more fine-grained BUILD number, exposed as
     // ID_API_LEVEL = DOCUMENT_API_LEVEL + BUILD
-    static final float BUILD = 0.0f;
+    static final float BUILD = 0.1f;
 
     @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
 

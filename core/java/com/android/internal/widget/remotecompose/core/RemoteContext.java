@@ -40,7 +40,7 @@ import java.time.ZoneOffset;
  * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
-    private static final int MAX_OP_COUNT = 100_000; // Maximum cmds per frame
+    private static final int MAX_OP_COUNT = 20_000; // Maximum cmds per frame
     protected @NonNull CoreDocument mDocument =
             new CoreDocument(); // todo: is this a valid way to initialize? bbade@
     public @NonNull RemoteComposeState mRemoteComposeState =
