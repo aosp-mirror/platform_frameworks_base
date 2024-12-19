@@ -344,13 +344,22 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     @Override
     public void dismissPip() {
+        dismissPip(true /* withFadeout */);
+    }
+
+    /**
+     * Dismisses the pinned stack.
+     *
+     * @param withFadeout should animate with fadeout for the removal
+     */
+    public void dismissPip(boolean withFadeout) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: removePip: callers=\n%s", TAG, Debug.getCallers(5, "    "));
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
-        mPipScheduler.scheduleRemovePip();
+        mPipScheduler.scheduleRemovePip(withFadeout);
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */
@@ -473,7 +482,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         mPipBoundsState.getMovementBounds().bottom + getBounds().height() * 2,
                         0,
                         mSpringConfig)
-                .withEndActions(this::dismissPip);
+                .withEndActions(() -> dismissPip(false /* withFadeout */));
 
         startBoundsAnimator(
                 getBounds().left /* toX */, getBounds().bottom + getBounds().height() /* toY */);
@@ -772,7 +781,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             case PipTransitionState.EXITING_PIP:
                 // We need to force finish any local animators if about to leave PiP, to avoid
                 // breaking the state (e.g. leashes are cleaned up upon exit).
-                if (!mPipBoundsState.getMotionBoundsState().isInMotion()) break;
                 cancelPhysicsAnimation();
                 settlePipBoundsAfterPhysicsAnimation(false /* animatingAfter */);
                 break;

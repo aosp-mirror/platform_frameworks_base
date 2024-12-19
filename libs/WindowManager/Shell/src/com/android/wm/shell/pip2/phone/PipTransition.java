@@ -18,6 +18,7 @@ package com.android.wm.shell.pip2.phone;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -118,6 +119,7 @@ public class PipTransition extends PipTransitionController implements
     @Nullable
     private IBinder mResizeTransition;
     private int mBoundsChangeDuration = BOUNDS_CHANGE_JUMPCUT_DURATION;
+    private boolean mPendingRemoveWithFadeout;
 
 
     //
@@ -170,15 +172,19 @@ public class PipTransition extends PipTransitionController implements
     //
 
     @Override
-    public void startExitTransition(int type, WindowContainerTransaction out,
-            @Nullable Rect destinationBounds) {
-        if (out == null) {
-            return;
-        }
-        IBinder transition = mTransitions.startTransition(type, out, this);
-        if (type == TRANSIT_EXIT_PIP) {
-            mExitViaExpandTransition = transition;
-        }
+    public void startExpandTransition(WindowContainerTransaction out) {
+        if (out == null) return;
+        mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
+        mExitViaExpandTransition = mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
+    }
+
+    @Override
+    public void startRemoveTransition(boolean withFadeout) {
+        final WindowContainerTransaction wct = getRemovePipTransaction();
+        if (wct == null) return;
+        mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
+        mPendingRemoveWithFadeout = withFadeout;
+        mTransitions.startTransition(TRANSIT_REMOVE_PIP, wct, this);
     }
 
     @Override
@@ -270,7 +276,6 @@ public class PipTransition extends PipTransitionController implements
                     finishCallback);
         } else if (transition == mExitViaExpandTransition) {
             mExitViaExpandTransition = null;
-            mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
             return startExpandAnimation(info, startTransaction, finishTransaction, finishCallback);
         } else if (transition == mResizeTransition) {
             mResizeTransition = null;
@@ -676,11 +681,19 @@ public class PipTransition extends PipTransitionController implements
         TransitionInfo.Change pipChange = getChangeByToken(info,
                 mPipTransitionState.getPipTaskToken());
         mFinishCallback = finishCallback;
-        PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipChange.getLeash(),
-                startTransaction, PipAlphaAnimator.FADE_OUT);
+
         finishTransaction.setAlpha(pipChange.getLeash(), 0f);
-        animator.setAnimationEndCallback(this::finishTransition);
-        animator.start();
+        if (mPendingRemoveWithFadeout) {
+            PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipChange.getLeash(),
+                    startTransaction, PipAlphaAnimator.FADE_OUT);
+            animator.setAnimationEndCallback(this::finishTransition);
+            animator.start();
+        } else {
+            // Jumpcut to a faded-out PiP if no fadeout animation was requested.
+            startTransaction.setAlpha(pipChange.getLeash(), 0f);
+            startTransaction.apply();
+            finishTransition();
+        }
         return true;
     }
 
@@ -807,6 +820,19 @@ public class PipTransition extends PipTransitionController implements
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.movePipActivityToPinnedRootTask(token, entryBounds);
         wct.deferConfigToTransitionEnd(token);
+        return wct;
+    }
+
+    @Nullable
+    private WindowContainerTransaction getRemovePipTransaction() {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null) {
+            return null;
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(pipTaskToken, null);
+        wct.setWindowingMode(pipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.reorder(pipTaskToken, false);
         return wct;
     }
 
@@ -953,6 +979,7 @@ public class PipTransition extends PipTransitionController implements
             case PipTransitionState.EXITED_PIP:
                 mPipTransitionState.setPinnedTaskLeash(null);
                 mPipTransitionState.setPipTaskInfo(null);
+                mPendingRemoveWithFadeout = false;
                 break;
         }
     }
