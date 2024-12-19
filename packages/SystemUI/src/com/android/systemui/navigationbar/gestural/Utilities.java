@@ -18,15 +18,10 @@ package com.android.systemui.navigationbar.gestural;
 
 import static android.view.MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT;
 import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
-import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
 
 import android.view.MotionEvent;
 
 public final class Utilities {
-
-    public static boolean isTrackpadScroll(MotionEvent event) {
-        return event.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE;
-    }
 
     public static boolean isTrackpadThreeFingerSwipe(MotionEvent event) {
         return event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE

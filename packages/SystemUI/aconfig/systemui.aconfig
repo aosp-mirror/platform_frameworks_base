@@ -1804,6 +1804,12 @@ flag {
   bug: "371224114"
 }
 
+flag {
+  name: "disable_shade_expands_on_trackpad_two_finger_swipe"
+  namespace: "systemui"
+  description: "Disables expansion of the shade via two finger swipe on a trackpad"
+  bug: "356804470"
+}
 
 flag {
     name: "keyboard_shortcut_helper_shortcut_customizer"
