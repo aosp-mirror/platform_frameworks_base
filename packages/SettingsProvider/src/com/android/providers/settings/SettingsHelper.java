@@ -81,6 +81,7 @@ public class SettingsHelper {
     // Error messages for logging metrics.
     private static final String ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA =
         "remote_exception_setting_locale_data";
+    private static final String ERROR_FAILED_TO_RESTORE_SETTING = "failed_to_restore_setting";
 
     private Context mContext;
     private AudioManager mAudioManager;
@@ -206,6 +207,12 @@ public class SettingsHelper {
             table = sGlobalLookup;
         }
 
+        // Get datatype for B&R metrics logging.
+        String datatype = "";
+        if (Flags.enableMetricsSettingsBackupAgents()) {
+            datatype = SettingsBackupRestoreKeys.getKeyFromUri(destination);
+        }
+
         sendBroadcast = sBroadcastOnRestore.contains(name);
         sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
         sendBroadcastAccessibility = sBroadcastOnRestoreAccessibility.contains(name);
@@ -292,12 +299,19 @@ public class SettingsHelper {
             contentValues.put(Settings.NameValueTable.NAME, name);
             contentValues.put(Settings.NameValueTable.VALUE, value);
             cr.insert(destination, contentValues);
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                mBackupRestoreEventLogger.logItemsRestored(datatype, /* count= */ 1);
+            }
         } catch (Exception e) {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
             sendBroadcastSystemUI = false;
             sendBroadcastAccessibility = false;
             Log.e(TAG, "Failed to restore setting name: " + name + " + value: " + value, e);
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                    datatype, /* count= */ 1, ERROR_FAILED_TO_RESTORE_SETTING);
+            }
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has
