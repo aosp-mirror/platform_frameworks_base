@@ -268,7 +268,9 @@ public class SliderPreference extends Preference {
         mSlider.setValueFrom(mMin);
         mSlider.setValueTo(mMax);
         mSlider.setValue(mSliderValue);
+        mSlider.clearOnSliderTouchListeners();
         mSlider.addOnSliderTouchListener(mTouchListener);
+        mSlider.clearOnChangeListeners();
         mSlider.addOnChangeListener(mChangeListener);
         mSlider.setEnabled(isEnabled());
 
