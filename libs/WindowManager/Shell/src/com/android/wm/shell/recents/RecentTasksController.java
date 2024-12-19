@@ -43,7 +43,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.window.DesktopModeFlags;
 import android.window.WindowContainerToken;
@@ -83,6 +82,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Manages the recent task list from the system, caching it as necessary.
@@ -124,6 +124,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
      * Cached list of the visible tasks, sorted from top most to bottom most.
      */
     private final List<RunningTaskInfo> mVisibleTasks = new ArrayList<>();
+    private final Map<Integer, TaskInfo> mVisibleTasksMap = new HashMap<>();
+
+    // Temporary vars used in `generateList()`
+    private final Map<Integer, TaskInfo> mTmpRemaining = new HashMap<>();
 
     /**
      * Creates {@link RecentTasksController}, returns {@code null} if the feature is not
@@ -348,8 +352,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
     public void onVisibleTasksChanged(@NonNull List<? extends RunningTaskInfo> visibleTasks) {
         mVisibleTasks.clear();
         mVisibleTasks.addAll(visibleTasks);
+        mVisibleTasksMap.clear();
+        mVisibleTasksMap.putAll(mVisibleTasks.stream().collect(
+                Collectors.toMap(TaskInfo::getTaskId, task -> task)));
         // Notify with all the info and not just the running task info
-        notifyVisibleTasksChanged(visibleTasks);
+        notifyVisibleTasksChanged(mVisibleTasks);
     }
 
     @VisibleForTesting
@@ -458,7 +465,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
         try {
             // Compute the visible recent tasks in order, and move the task to the top
-            mListener.onVisibleTasksChanged(generateList(visibleTasks)
+            mListener.onVisibleTasksChanged(generateList(visibleTasks, "visibleTasksChanged")
                     .toArray(new GroupedTaskInfo[0]));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed call onVisibleTasksChanged", e);
@@ -494,40 +501,87 @@ public class RecentTasksController implements TaskStackListenerCallback,
     @VisibleForTesting
     ArrayList<GroupedTaskInfo> getRecentTasks(int maxNum, int flags, int userId) {
         // Note: the returned task list is ordered from the most-recent to least-recent order
-        return generateList(mActivityTaskManager.getRecentTasks(maxNum, flags, userId));
+        return generateList(mActivityTaskManager.getRecentTasks(maxNum, flags, userId),
+                "getRecentTasks");
     }
 
     /**
-     * Generates a list of GroupedTaskInfos for the given list of tasks.
+     * Returns whether the given task should be excluded from the generated list.
      */
-    private <T extends TaskInfo> ArrayList<GroupedTaskInfo> generateList(@NonNull List<T> tasks) {
-        // Make a mapping of task id -> task info
-        final SparseArray<TaskInfo> rawMapping = new SparseArray<>();
-        for (int i = 0; i < tasks.size(); i++) {
-            final TaskInfo taskInfo = tasks.get(i);
-            rawMapping.put(taskInfo.taskId, taskInfo);
+    private boolean excludeTaskFromGeneratedList(TaskInfo taskInfo) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // We don't current send pinned tasks as a part of recent or running tasks
+            return true;
+        }
+        if (isWallpaperTask(taskInfo)) {
+            // Don't add the fullscreen wallpaper task as an entry in grouped tasks
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Generates a list of GroupedTaskInfos for the given raw list of tasks (either recents or
+     * running tasks).
+     *
+     * The general flow is:
+     *  - Collect the desktop tasks
+     *  - Collect the visible tasks (in order), including the desktop tasks if visible
+     *  - Construct the final list with the visible tasks, followed by the subsequent tasks
+     *      - if enableShellTopTaskTracking() is enabled, the visible tasks will be grouped into
+     *        a single mixed task
+     *      - if the desktop tasks are not visible, they will be appended to the end of the list
+     *
+     * TODO(346588978): Generate list in per-display order
+     *
+     * @param tasks The list of tasks ordered from most recent to least recent
+     */
+    @VisibleForTesting
+    <T extends TaskInfo> ArrayList<GroupedTaskInfo> generateList(@NonNull List<T> tasks,
+            String reason) {
+        if (tasks.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        ArrayList<TaskInfo> freeformTasks = new ArrayList<>();
-        Set<Integer> minimizedFreeformTasks = new HashSet<>();
+        if (enableShellTopTaskTracking()) {
+            ProtoLog.v(WM_SHELL_TASK_OBSERVER, "RecentTasksController.generateList(%s)", reason);
+        }
 
-        int mostRecentFreeformTaskIndex = Integer.MAX_VALUE;
+        // Make a mapping of task id -> task info for the remaining tasks to be processed, this
+        // mapping is used to keep track of split tasks that may exist later in the task list that
+        // should be ignored because they've already been grouped
+        mTmpRemaining.clear();
+        mTmpRemaining.putAll(tasks.stream().collect(
+                Collectors.toMap(TaskInfo::getTaskId, task -> task)));
 
-        ArrayList<GroupedTaskInfo> groupedTasks = new ArrayList<>();
-        // Pull out the pairs as we iterate back in the list
+        // The final grouped tasks
+        ArrayList<GroupedTaskInfo> groupedTasks = new ArrayList<>(tasks.size());
+        ArrayList<GroupedTaskInfo> visibleGroupedTasks = new ArrayList<>();
+
+        // Phase 1: Extract the desktop and visible fullscreen/split tasks. We make new collections
+        // here as the GroupedTaskInfo can store them without copying
+        ArrayList<TaskInfo> desktopTasks = new ArrayList<>();
+        Set<Integer> minimizedDesktopTasks = new HashSet<>();
+        boolean desktopTasksVisible = false;
         for (int i = 0; i < tasks.size(); i++) {
             final TaskInfo taskInfo = tasks.get(i);
-            if (!rawMapping.contains(taskInfo.taskId)) {
-                // If it's not in the mapping, then it was already paired with another task
+            final int taskId = taskInfo.taskId;
+
+            if (!mTmpRemaining.containsKey(taskInfo.taskId)) {
+                // Skip if we've already processed it
                 continue;
             }
+
+            if (excludeTaskFromGeneratedList(taskInfo)) {
+                // Skip and update the list if we are excluding this task
+                mTmpRemaining.remove(taskId);
+                continue;
+            }
+
+            // Desktop tasks
             if (DesktopModeStatus.canEnterDesktopMode(mContext) &&
-                mDesktopUserRepositories.isPresent()
-                    && mDesktopUserRepositories.get().getCurrent().isActiveTask(taskInfo.taskId)) {
-                // Freeform tasks will be added as a separate entry
-                if (mostRecentFreeformTaskIndex == Integer.MAX_VALUE) {
-                    mostRecentFreeformTaskIndex = groupedTasks.size();
-                }
+                    mDesktopUserRepositories.isPresent()
+                    && mDesktopUserRepositories.get().getCurrent().isActiveTask(taskId)) {
                 // If task has their app bounds set to null which happens after reboot, set the
                 // app bounds to persisted lastFullscreenBounds. Also set the position in parent
                 // to the top left of the bounds.
@@ -538,46 +592,129 @@ public class RecentTasksController implements TaskStackListenerCallback,
                     taskInfo.positionInParent = new Point(taskInfo.lastNonFullscreenBounds.left,
                             taskInfo.lastNonFullscreenBounds.top);
                 }
-                freeformTasks.add(taskInfo);
-                if (mDesktopUserRepositories.get().getCurrent().isMinimizedTask(taskInfo.taskId)) {
-                    minimizedFreeformTasks.add(taskInfo.taskId);
+                desktopTasks.add(taskInfo);
+                if (mDesktopUserRepositories.get().getCurrent().isMinimizedTask(taskId)) {
+                    minimizedDesktopTasks.add(taskId);
                 }
+                desktopTasksVisible |= mVisibleTasksMap.containsKey(taskId);
+                mTmpRemaining.remove(taskId);
                 continue;
             }
 
-            final int pairedTaskId = mSplitTasks.get(taskInfo.taskId, INVALID_TASK_ID);
-            if (pairedTaskId != INVALID_TASK_ID && rawMapping.contains(pairedTaskId)) {
-                final TaskInfo pairedTaskInfo = rawMapping.get(pairedTaskId);
-                rawMapping.remove(pairedTaskId);
-                groupedTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
-                        mTaskSplitBoundsMap.get(pairedTaskId)));
+            if (enableShellTopTaskTracking()) {
+                // Visible tasks
+                if (mVisibleTasksMap.containsKey(taskId)) {
+                    // Split tasks
+                    if (extractAndAddSplitGroupedTask(taskInfo, mTmpRemaining,
+                            visibleGroupedTasks)) {
+                        continue;
+                    }
+
+                    // Fullscreen tasks
+                    visibleGroupedTasks.add(GroupedTaskInfo.forFullscreenTasks(taskInfo));
+                    mTmpRemaining.remove(taskId);
+                }
             } else {
-                if (isWallpaperTask(taskInfo)) {
-                    // Don't add the wallpaper task as an entry in grouped tasks
+                // Split tasks
+                if (extractAndAddSplitGroupedTask(taskInfo, mTmpRemaining, groupedTasks)) {
                     continue;
                 }
-                // TODO(346588978): Consolidate multiple visible fullscreen tasks into the same
-                //  grouped task
+
+                // Fullscreen tasks
                 groupedTasks.add(GroupedTaskInfo.forFullscreenTasks(taskInfo));
             }
         }
 
-        // Add a special entry for freeform tasks
-        if (!freeformTasks.isEmpty()) {
-            groupedTasks.add(mostRecentFreeformTaskIndex,
-                    GroupedTaskInfo.forFreeformTasks(
-                            freeformTasks,
-                            minimizedFreeformTasks));
-        }
-
         if (enableShellTopTaskTracking()) {
-            // We don't current send pinned tasks as a part of recent or running tasks, so remove
-            // them from the list here
-            groupedTasks.removeIf(
-                    gti -> gti.getTaskInfo1().getWindowingMode() == WINDOWING_MODE_PINNED);
+            // Phase 2: If there were desktop tasks and they are visible, add them to the visible
+            //          list as well (the actual order doesn't matter for Overview)
+            if (!desktopTasks.isEmpty() && desktopTasksVisible) {
+                visibleGroupedTasks.add(
+                        GroupedTaskInfo.forFreeformTasks(desktopTasks, minimizedDesktopTasks));
+            }
+
+            if (!visibleGroupedTasks.isEmpty()) {
+                // Phase 3: Combine the visible tasks into a single mixed grouped task, only if
+                //          there are > 1 tasks to group, and add them to the final list
+                if (visibleGroupedTasks.size() > 1) {
+                    groupedTasks.add(GroupedTaskInfo.forMixed(visibleGroupedTasks));
+                } else {
+                    groupedTasks.addAll(visibleGroupedTasks);
+                }
+            }
+            dumpGroupedTasks(groupedTasks, "Phase 3");
+
+            // Phase 4: For the remaining non-visible split and fullscreen tasks, add grouped tasks
+            //          in order to the final list
+            for (int i = 0; i < tasks.size(); i++) {
+                final TaskInfo taskInfo = tasks.get(i);
+                if (!mTmpRemaining.containsKey(taskInfo.taskId)) {
+                    // Skip if we've already processed it
+                    continue;
+                }
+
+                // Split tasks
+                if (extractAndAddSplitGroupedTask(taskInfo, mTmpRemaining, groupedTasks)) {
+                    continue;
+                }
+
+                // Fullscreen tasks
+                groupedTasks.add(GroupedTaskInfo.forFullscreenTasks(taskInfo));
+            }
+            dumpGroupedTasks(groupedTasks, "Phase 4");
+
+            // Phase 5: If there were desktop tasks and they are not visible (ie. weren't added
+            //          above), add them to the end of the final list (the actual order doesn't
+            //          matter for Overview)
+            if (!desktopTasks.isEmpty() && !desktopTasksVisible) {
+                groupedTasks.add(
+                        GroupedTaskInfo.forFreeformTasks(desktopTasks, minimizedDesktopTasks));
+            }
+            dumpGroupedTasks(groupedTasks, "Phase 5");
+        } else {
+            // Add the desktop tasks at the end of the list
+            if (!desktopTasks.isEmpty()) {
+                groupedTasks.add(
+                        GroupedTaskInfo.forFreeformTasks(desktopTasks, minimizedDesktopTasks));
+            }
         }
 
         return groupedTasks;
+    }
+
+    /**
+     * Only to be called from `generateList()`. If the given {@param taskInfo} has a paired task,
+     * then a split grouped task with the pair is added to {@param tasksOut}.
+     *
+     * @return whether a split task was extracted and added to the given list
+     */
+    private boolean extractAndAddSplitGroupedTask(@NonNull TaskInfo taskInfo,
+            @NonNull Map<Integer, TaskInfo> remainingTasks,
+            @NonNull ArrayList<GroupedTaskInfo> tasksOut) {
+        final int pairedTaskId = mSplitTasks.get(taskInfo.taskId, INVALID_TASK_ID);
+        if (pairedTaskId == INVALID_TASK_ID || !remainingTasks.containsKey(pairedTaskId)) {
+            return false;
+        }
+
+        // Add both this task and its pair to the list, and mark the paired task to be
+        // skipped when it is encountered in the list
+        final TaskInfo pairedTaskInfo = remainingTasks.get(pairedTaskId);
+        remainingTasks.remove(taskInfo.taskId);
+        remainingTasks.remove(pairedTaskId);
+        tasksOut.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
+                mTaskSplitBoundsMap.get(pairedTaskId)));
+        return true;
+    }
+
+    /** Dumps the set of tasks to protolog */
+    private void dumpGroupedTasks(List<GroupedTaskInfo> groupedTasks, String reason) {
+        if (!WM_SHELL_TASK_OBSERVER.isEnabled()) {
+            return;
+        }
+        ProtoLog.v(WM_SHELL_TASK_OBSERVER, "    Tasks (%s):", reason);
+        for (GroupedTaskInfo task : groupedTasks) {
+            ProtoLog.v(WM_SHELL_TASK_OBSERVER, "        %s", task);
+        }
     }
 
     /**

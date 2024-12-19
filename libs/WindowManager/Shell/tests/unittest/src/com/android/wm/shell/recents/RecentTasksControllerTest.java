@@ -20,6 +20,7 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
@@ -28,7 +29,6 @@ import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -48,9 +48,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static java.lang.Integer.MAX_VALUE;
+import static java.util.stream.Collectors.joining;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
@@ -247,10 +248,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         ArrayList<GroupedTaskInfo> recentTasks =
                 mRecentTasksController.getRecentTasks(MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
-        assertGroupedTasksListEquals(recentTasks,
-                t1.taskId, -1,
-                t2.taskId, -1,
-                t3.taskId, -1);
+        assertGroupedTasksListEquals(recentTasks, List.of(
+                List.of(t1.taskId),
+                List.of(t2.taskId),
+                List.of(t3.taskId)));
     }
 
     @Test
@@ -262,7 +263,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         ArrayList<GroupedTaskInfo> recentTasks =
                 mRecentTasksController.getRecentTasks(MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
-        assertGroupedTasksListEquals(recentTasks, t1.taskId, -1, t3.taskId, -1);
+        assertGroupedTasksListEquals(recentTasks, List.of(
+                List.of(t1.taskId),
+                List.of(t3.taskId)));
     }
 
     @Test
@@ -286,11 +289,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         ArrayList<GroupedTaskInfo> recentTasks =
                 mRecentTasksController.getRecentTasks(MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
-        assertGroupedTasksListEquals(recentTasks,
-                t1.taskId, -1,
-                t2.taskId, t4.taskId,
-                t3.taskId, t5.taskId,
-                t6.taskId, -1);
+        assertGroupedTasksListEquals(recentTasks, List.of(
+                List.of(t1.taskId),
+                List.of(t2.taskId, t4.taskId),
+                List.of(t3.taskId, t5.taskId),
+                List.of(t6.taskId)));
     }
 
     @Test
@@ -320,11 +323,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
                         consumer);
         mMainExecutor.flushAll();
 
-        assertGroupedTasksListEquals(recentTasks[0],
-                t1.taskId, -1,
-                t2.taskId, t4.taskId,
-                t3.taskId, t5.taskId,
-                t6.taskId, -1);
+        assertGroupedTasksListEquals(recentTasks[0], List.of(
+                List.of(t1.taskId),
+                List.of(t2.taskId, t4.taskId),
+                List.of(t3.taskId, t5.taskId),
+                List.of(t6.taskId)));
     }
 
     @Test
@@ -343,9 +346,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // 2 freeform tasks should be grouped into one, 3 total recents entries
         assertEquals(3, recentTasks.size());
-        GroupedTaskInfo freeformGroup = recentTasks.get(0);
-        GroupedTaskInfo singleGroup1 = recentTasks.get(1);
-        GroupedTaskInfo singleGroup2 = recentTasks.get(2);
+        GroupedTaskInfo singleGroup1 = recentTasks.get(0);
+        GroupedTaskInfo singleGroup2 = recentTasks.get(1);
+        GroupedTaskInfo freeformGroup = recentTasks.get(2);
 
         // Check that groups have expected types
         assertTrue(freeformGroup.isBaseType(TYPE_FREEFORM));
@@ -383,8 +386,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         // 2 split screen tasks grouped, 2 freeform tasks grouped, 3 total recents entries
         assertEquals(3, recentTasks.size());
         GroupedTaskInfo splitGroup = recentTasks.get(0);
-        GroupedTaskInfo freeformGroup = recentTasks.get(1);
-        GroupedTaskInfo singleGroup = recentTasks.get(2);
+        GroupedTaskInfo singleGroup = recentTasks.get(1);
+        GroupedTaskInfo freeformGroup = recentTasks.get(2);
 
         // Check that groups have expected types
         assertTrue(splitGroup.isBaseType(TYPE_SPLIT));
@@ -454,9 +457,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // 3 freeform tasks should be grouped into one, 2 single tasks, 3 total recents entries
         assertEquals(3, recentTasks.size());
-        GroupedTaskInfo freeformGroup = recentTasks.get(0);
-        GroupedTaskInfo singleGroup1 = recentTasks.get(1);
-        GroupedTaskInfo singleGroup2 = recentTasks.get(2);
+        GroupedTaskInfo singleGroup1 = recentTasks.get(0);
+        GroupedTaskInfo singleGroup2 = recentTasks.get(1);
+        GroupedTaskInfo freeformGroup = recentTasks.get(2);
 
         // Check that groups have expected types
         assertTrue(freeformGroup.isBaseType(TYPE_FREEFORM));
@@ -523,7 +526,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Remove one of the tasks and ensure the pair is removed
         SurfaceControl mockLeash = mock(SurfaceControl.class);
-        ActivityManager.RunningTaskInfo rt2 = makeRunningTaskInfo(2);
+        RunningTaskInfo rt2 = makeRunningTaskInfo(2);
         mShellTaskOrganizer.onTaskAppeared(rt2, mockLeash);
         mShellTaskOrganizer.onTaskVanished(rt2);
 
@@ -537,13 +540,13 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Remove one of the tasks and ensure the pair is removed
         SurfaceControl mockLeash = mock(SurfaceControl.class);
-        ActivityManager.RunningTaskInfo rt2Fullscreen = makeRunningTaskInfo(2);
+        RunningTaskInfo rt2Fullscreen = makeRunningTaskInfo(2);
         rt2Fullscreen.configuration.windowConfiguration.setWindowingMode(
                 WINDOWING_MODE_FULLSCREEN);
         mShellTaskOrganizer.onTaskAppeared(rt2Fullscreen, mockLeash);
 
         // Change the windowing mode and ensure the recent tasks change is notified
-        ActivityManager.RunningTaskInfo rt2MultiWIndow = makeRunningTaskInfo(2);
+        RunningTaskInfo rt2MultiWIndow = makeRunningTaskInfo(2);
         rt2MultiWIndow.configuration.windowConfiguration.setWindowingMode(
                 WINDOWING_MODE_MULTI_WINDOW);
         mShellTaskOrganizer.onTaskInfoChanged(rt2MultiWIndow);
@@ -557,7 +560,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void onTaskAdded_desktopModeRunningAppsEnabled_triggersOnRunningTaskAppeared()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskAdded(taskInfo);
 
@@ -570,7 +573,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void onTaskAdded_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskAppeared()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskAdded(taskInfo);
 
@@ -583,7 +586,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void taskWindowingModeChanged_desktopRunningAppsEnabled_triggersOnRunningTaskChanged()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
 
@@ -597,7 +600,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
             taskWindowingModeChanged_desktopRunningAppsDisabled_doesNotTriggerOnRunningTaskChanged()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskRunningInfoChanged(taskInfo);
 
@@ -610,7 +613,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void onTaskRemoved_desktopModeRunningAppsEnabled_triggersOnRunningTaskVanished()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskRemoved(taskInfo);
 
@@ -623,7 +626,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void onTaskRemoved_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskVanished()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskRemoved(taskInfo);
 
@@ -632,10 +635,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @DisableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     public void onTaskMovedToFront_TaskStackObserverEnabled_triggersOnTaskMovedToFront()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskMovedToFrontThroughTransition(taskInfo);
 
@@ -648,7 +652,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void onTaskMovedToFront_TaskStackObserverEnabled_doesNotTriggersOnTaskMovedToFront()
             throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
 
         mRecentTasksControllerReal.onTaskMovedToFront(taskInfo);
 
@@ -700,7 +704,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     public void shellTopTaskTracker_onTaskRemoved_expectNoRecentsChanged() throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
         mRecentTasksControllerReal.onTaskRemoved(taskInfo);
         verify(mRecentTasksListener, never()).onRecentTasksChanged();
     }
@@ -710,9 +714,93 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
     public void shellTopTaskTracker_onVisibleTasksChanged() throws Exception {
         mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
-        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+        RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
         mRecentTasksControllerReal.onVisibleTasksChanged(List.of(taskInfo));
         verify(mRecentTasksListener, never()).onVisibleTasksChanged(any());
+    }
+
+    @Test
+    public void generateList_emptyTaskList_expectNoGroupedTasks() throws Exception {
+        assertTrue(mRecentTasksControllerReal.generateList(List.of(), "test").isEmpty());
+    }
+
+    @Test
+    public void generateList_excludePipTask() throws Exception {
+        RunningTaskInfo task1 = makeRunningTaskInfo(1);
+        RunningTaskInfo pipTask = makeRunningTaskInfo(2);
+        pipTask.configuration.windowConfiguration.setWindowingMode(
+                WINDOWING_MODE_PINNED);
+
+        ArrayList<GroupedTaskInfo> groupedTasks = mRecentTasksControllerReal.generateList(
+                List.of(task1, pipTask),
+                "test");
+
+        assertGroupedTasksListEquals(groupedTasks, List.of(List.of(task1.taskId)));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void generateList_fullscreen_noVisibleTasks_expectNoGrouping() throws Exception {
+        RunningTaskInfo task1 = makeRunningTaskInfo(1);
+        RunningTaskInfo task2 = makeRunningTaskInfo(2);
+        RunningTaskInfo task3 = makeRunningTaskInfo(3);
+        // Reset visible tasks list
+        mRecentTasksControllerReal.onVisibleTasksChanged(List.of());
+
+        // Generate a list with a number of fullscreen tasks
+        ArrayList<GroupedTaskInfo> groupedTasks = mRecentTasksControllerReal.generateList(
+                List.of(task1, task2, task3),
+                "test");
+
+        assertGroupedTasksListEquals(groupedTasks, List.of(
+                List.of(task1.taskId),
+                List.of(task2.taskId),
+                List.of(task3.taskId)));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void generateList_fullscreen_singleVisibleTask_expectNoGrouping() throws Exception {
+        RunningTaskInfo task1 = makeRunningTaskInfo(1);
+        RunningTaskInfo task2 = makeRunningTaskInfo(2);
+        RunningTaskInfo task3 = makeRunningTaskInfo(3);
+
+        // Reset visible tasks list
+        mRecentTasksControllerReal.onVisibleTasksChanged(List.of(task1));
+
+        // Generate a list with a number of fullscreen tasks
+        ArrayList<GroupedTaskInfo> groupedTasks = mRecentTasksControllerReal.generateList(
+                List.of(task1, task2, task3),
+                "test");
+
+        assertGroupedTasksListEquals(groupedTasks, List.of(
+                List.of(task1.taskId),
+                List.of(task2.taskId),
+                List.of(task3.taskId)));
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
+    @EnableFlags(com.android.wm.shell.Flags.FLAG_ENABLE_SHELL_TOP_TASK_TRACKING)
+    public void generateList_fullscreen_multipleVisibleTasks_expectGrouping() throws Exception {
+        RunningTaskInfo task1 = makeRunningTaskInfo(1);
+        RunningTaskInfo task2 = makeRunningTaskInfo(2);
+        RunningTaskInfo task3 = makeRunningTaskInfo(3);
+
+        // Reset visible tasks list
+        mRecentTasksControllerReal.onVisibleTasksChanged(List.of(task1, task2));
+
+        // Generate a list with a number of fullscreen tasks
+        ArrayList<GroupedTaskInfo> groupedTasks = mRecentTasksControllerReal.generateList(
+                List.of(task1, task2, task3),
+                "test");
+
+        assertGroupedTasksListEquals(groupedTasks, List.of(
+                List.of(task1.taskId),
+                List.of(task2.taskId),
+                List.of(task3.taskId)));
     }
 
     /**
@@ -721,11 +809,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private RecentTaskInfo makeTaskInfo(int taskId) {
         RecentTaskInfo info = new RecentTaskInfo();
         info.taskId = taskId;
-
+        info.realActivity = new ComponentName("testPackage", "testClass");
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com." + taskId, "Activity" + taskId));
         info.baseIntent = intent;
-
         info.lastNonFullscreenBounds = new Rect();
         return info;
     }
@@ -742,10 +829,14 @@ public class RecentTasksControllerTest extends ShellTestCase {
     /**
      * Helper to create a running task with a given task id.
      */
-    private ActivityManager.RunningTaskInfo makeRunningTaskInfo(int taskId) {
-        ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
+    private RunningTaskInfo makeRunningTaskInfo(int taskId) {
+        RunningTaskInfo info = new RunningTaskInfo();
         info.taskId = taskId;
         info.realActivity = new ComponentName("testPackage", "testClass");
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com." + taskId, "Activity" + taskId));
+        info.baseIntent = intent;
+        info.lastNonFullscreenBounds = new Rect();
         return info;
     }
 
@@ -759,37 +850,42 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     /**
      * Asserts that the recent tasks matches the given task ids.
+     * TODO(346588978): Separate out specific split verification during the iteration below
      *
-     * @param expectedTaskIds list of task ids that map to the flattened task ids of the tasks in
-     *                        the grouped task list
+     * @param expectedTaskIds a list of expected grouped task ids (itself a list of ints)
      */
-    private void assertGroupedTasksListEquals(List<GroupedTaskInfo> recentTasks,
-            int... expectedTaskIds) {
-        int[] flattenedTaskIds = new int[recentTasks.size() * 2];
-        for (int i = 0; i < recentTasks.size(); i++) {
-            GroupedTaskInfo pair = recentTasks.get(i);
-            int taskId1 = pair.getTaskInfo1().taskId;
-            flattenedTaskIds[2 * i] = taskId1;
-            flattenedTaskIds[2 * i + 1] = pair.getTaskInfo2() != null
-                    ? pair.getTaskInfo2().taskId
-                    : -1;
+    private void assertGroupedTasksListEquals(List<GroupedTaskInfo> groupedTasks,
+            List<List<Integer>> expectedTaskIds) {
+        List<List<Integer>> foundTaskIds = new ArrayList<>();
+        for (int i = 0; i < groupedTasks.size(); i++) {
+            GroupedTaskInfo groupedTask = groupedTasks.get(i);
+            List<Integer> groupedTaskIds = groupedTask.getTaskInfoList().stream()
+                    .map(taskInfo -> taskInfo.taskId)
+                    .toList();
+            foundTaskIds.add(groupedTaskIds);
 
-            if (pair.getTaskInfo2() != null) {
-                assertNotNull(pair.getSplitBounds());
-                int leftTopTaskId = pair.getSplitBounds().leftTopTaskId;
-                int bottomRightTaskId = pair.getSplitBounds().rightBottomTaskId;
+            if (groupedTask.isBaseType(TYPE_SPLIT)) {
+                assertNotNull(groupedTask.getSplitBounds());
+                int leftTopTaskId = groupedTask.getSplitBounds().leftTopTaskId;
+                int bottomRightTaskId = groupedTask.getSplitBounds().rightBottomTaskId;
                 // Unclear if pairs are ordered by split position, most likely not.
-                assertTrue(leftTopTaskId == taskId1
-                        || leftTopTaskId == pair.getTaskInfo2().taskId);
-                assertTrue(bottomRightTaskId == taskId1
-                        || bottomRightTaskId == pair.getTaskInfo2().taskId);
-            } else {
-                assertNull(pair.getSplitBounds());
+                assertTrue(leftTopTaskId == groupedTaskIds.getFirst()
+                        || leftTopTaskId == groupedTaskIds.getLast());
+                assertTrue(bottomRightTaskId == groupedTaskIds.getFirst()
+                        || bottomRightTaskId == groupedTaskIds.getLast());
             }
         }
-        assertArrayEquals("Expected: " + Arrays.toString(expectedTaskIds)
-                        + " Received: " + Arrays.toString(flattenedTaskIds),
-                flattenedTaskIds,
-                expectedTaskIds);
+        List<Integer> flattenedExpectedTaskIds = expectedTaskIds.stream()
+                .flatMap(List::stream)
+                .toList();
+        List<Integer> flattenedFoundTaskIds = foundTaskIds.stream()
+                .flatMap(List::stream)
+                .toList();
+        assertEquals("Expected: "
+                        + flattenedExpectedTaskIds.stream().map(String::valueOf).collect(joining())
+                        + " Received: "
+                        + flattenedFoundTaskIds.stream().map(String::valueOf).collect(joining()),
+                flattenedExpectedTaskIds,
+                flattenedFoundTaskIds);
     }
 }
