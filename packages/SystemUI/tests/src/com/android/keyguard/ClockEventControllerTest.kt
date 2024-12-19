@@ -95,7 +95,6 @@ import org.mockito.kotlin.clearInvocations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ClockEventControllerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()

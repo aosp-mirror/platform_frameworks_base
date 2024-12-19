@@ -49,7 +49,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -92,7 +91,6 @@ import org.mockito.MockitoAnnotations
  * 5. Assert that B has the state sent in step #2
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl

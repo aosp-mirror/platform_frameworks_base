@@ -35,7 +35,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -69,7 +68,6 @@ private fun <T> anyObject(): T {
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {

@@ -41,7 +41,6 @@ const val AUTHORITY = "exception.provider.authority"
 val TEST_URI = Uri.Builder().scheme("content").authority(AUTHORITY).path("path").build()
 
 @SmallTest
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class ImageLoaderContentProviderTest : SysuiTestCase() {
 

@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.testKosmos
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -60,7 +59,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ConnectivityRepositoryImplTest : SysuiTestCase() {
