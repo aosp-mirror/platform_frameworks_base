@@ -13,15 +13,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- Have the wrapper frame layout match the parent height so that we get a larger touch area for
-     the chip. -->
-<FrameLayout
+
+<merge
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_gravity="center_vertical|start"
-    android:layout_marginStart="5dp"
->
+    >
     <!-- TODO(b/332662551): Update this content description when this supports more than just
          phone calls. -->
     <com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -72,4 +67,4 @@
             />
 
     </com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer>
-</FrameLayout>
+</merge>

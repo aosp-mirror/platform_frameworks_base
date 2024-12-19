@@ -73,6 +73,15 @@
     <style name="StatusBar" />
     <style name="StatusBar.Chip" />
 
+    <style name="StatusBar.Chip.RootView">
+        <item name="android:layout_width">wrap_content</item>
+        <!-- Have the root chip view match the parent height so that we get a larger touch area for
+             the chip. -->
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
+        <item name="android:layout_marginStart">5dp</item>
+    </style>
+
     <style name="StatusBar.Chip.Text">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
