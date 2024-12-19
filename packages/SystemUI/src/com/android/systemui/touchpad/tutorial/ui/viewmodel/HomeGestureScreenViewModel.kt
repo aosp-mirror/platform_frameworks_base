@@ -23,7 +23,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
 import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureRecognizer
@@ -33,7 +32,6 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -46,9 +44,6 @@ constructor(
     @Main val resources: Resources,
     val velocityTracker: VelocityTracker = VerticalVelocityTracker(),
 ) : TouchpadTutorialScreenViewModel {
-
-    private val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered.value = true }
-    override val easterEggTriggered = MutableStateFlow(false)
 
     private var handler: TouchpadGestureHandler? = null
 
@@ -73,7 +68,7 @@ constructor(
                         velocityThresholdPxPerMs = velocity,
                         velocityTracker = velocityTracker,
                     )
-                handler = TouchpadGestureHandler(recognizer, easterEggMonitor)
+                handler = TouchpadGestureHandler(recognizer)
                 GestureFlowAdapter(recognizer).gestureStateAsFlow
             }
             .map { toGestureUiState(it) }

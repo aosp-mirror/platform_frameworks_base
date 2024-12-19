@@ -22,7 +22,6 @@ import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
 import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
 import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
@@ -32,16 +31,12 @@ import com.android.systemui.util.kotlin.pairwiseBy
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 
 class BackGestureScreenViewModel
 @Inject
 constructor(configurationInteractor: ConfigurationInteractor) : TouchpadTutorialScreenViewModel {
-
-    private val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered.value = true }
-    override val easterEggTriggered = MutableStateFlow(false)
 
     private var handler: TouchpadGestureHandler? = null
 
@@ -55,7 +50,7 @@ constructor(configurationInteractor: ConfigurationInteractor) : TouchpadTutorial
         distanceThreshold
             .flatMapLatest {
                 val recognizer = BackGestureRecognizer(gestureDistanceThresholdPx = it)
-                handler = TouchpadGestureHandler(recognizer, easterEggMonitor)
+                handler = TouchpadGestureHandler(recognizer)
                 GestureFlowAdapter(recognizer).gestureStateAsFlow
             }
             .pairwiseBy(GestureState.NotStarted) { previous, current ->

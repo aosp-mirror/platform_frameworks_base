@@ -24,10 +24,7 @@ import java.util.function.Consumer
  * Allows listening to touchpadGesture and calling onDone when gesture was triggered. Can have all
  * motion events passed to [onMotionEvent] and will filter touchpad events accordingly
  */
-class TouchpadGestureHandler(
-    private val gestureRecognizer: Consumer<MotionEvent>,
-    private val easterEggGestureMonitor: EasterEggGestureMonitor,
-) {
+class TouchpadGestureHandler(private vararg val eventConsumers: Consumer<MotionEvent>) {
 
     fun onMotionEvent(event: MotionEvent): Boolean {
         // events from touchpad have SOURCE_MOUSE and not SOURCE_TOUCHPAD because of legacy reasons
@@ -38,10 +35,7 @@ class TouchpadGestureHandler(
             event.actionMasked == MotionEvent.ACTION_DOWN &&
                 event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
         return if (isFromTouchpad && !buttonClick) {
-            if (isTwoFingerSwipe(event)) {
-                easterEggGestureMonitor.processTouchpadEvent(event)
-            }
-            gestureRecognizer.accept(event)
+            eventConsumers.forEach { it.accept(event) }
             true
         } else {
             false

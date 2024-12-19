@@ -31,6 +31,7 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
@@ -53,7 +54,11 @@ interface TouchpadTutorialModule {
             backGestureScreenViewModel: BackGestureScreenViewModel,
             homeGestureScreenViewModel: HomeGestureScreenViewModel,
         ): TouchpadTutorialScreensProvider {
-            return ScreensProvider(backGestureScreenViewModel, homeGestureScreenViewModel)
+            return ScreensProvider(
+                backGestureScreenViewModel,
+                homeGestureScreenViewModel,
+                EasterEggGestureViewModel(),
+            )
         }
 
         @SysUISingleton
@@ -74,14 +79,25 @@ interface TouchpadTutorialModule {
 private class ScreensProvider(
     val backGestureScreenViewModel: BackGestureScreenViewModel,
     val homeGestureScreenViewModel: HomeGestureScreenViewModel,
+    val easterEggGestureViewModel: EasterEggGestureViewModel,
 ) : TouchpadTutorialScreensProvider {
     @Composable
     override fun BackGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        BackGestureTutorialScreen(backGestureScreenViewModel, onDoneButtonClicked, onBack)
+        BackGestureTutorialScreen(
+            backGestureScreenViewModel,
+            easterEggGestureViewModel,
+            onDoneButtonClicked,
+            onBack,
+        )
     }
 
     @Composable
     override fun HomeGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        HomeGestureTutorialScreen(homeGestureScreenViewModel, onDoneButtonClicked, onBack)
+        HomeGestureTutorialScreen(
+            homeGestureScreenViewModel,
+            easterEggGestureViewModel,
+            onDoneButtonClicked,
+            onBack,
+        )
     }
 }

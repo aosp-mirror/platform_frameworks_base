@@ -38,7 +38,7 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     private var gestureState: GestureState = GestureState.NotStarted
     private val gestureRecognizer =
         BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
-    private val handler = TouchpadGestureHandler(gestureRecognizer, EasterEggGestureMonitor {})
+    private val handler = TouchpadGestureHandler(gestureRecognizer)
 
     @Before
     fun before() {
