@@ -30,6 +30,8 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
+import com.android.systemui.common.ui.view.ChoreographerUtils
+import com.android.systemui.common.ui.view.ChoreographerUtilsImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
@@ -259,6 +261,12 @@ object ShadeDisplayAwareModule {
             CoreStartable.NOP
         }
     }
+
+    /**
+     * Provided for making classes easier to test. In tests, a custom method to wait for the next
+     * frame can be easily provided.
+     */
+    @Provides fun provideChoreographerUtils(): ChoreographerUtils = ChoreographerUtilsImpl
 
     @Provides
     @ShadeOnDefaultDisplayWhenLocked

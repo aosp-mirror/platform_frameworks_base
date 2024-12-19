@@ -20,22 +20,23 @@ import android.content.mockedContext
 import android.window.WindowContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.ui.view.mockShadeRootView
+import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker
 import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
-import java.util.Optional
 import org.mockito.kotlin.mock
 
 val Kosmos.shadeLayoutParams by Kosmos.Fixture { ShadeWindowLayoutParams.create(mockedContext) }
 
 val Kosmos.mockedWindowContext by Kosmos.Fixture { mock<WindowContext>() }
+val Kosmos.mockedShadeDisplayChangeLatencyTracker by
+    Kosmos.Fixture { mock<ShadeDisplayChangeLatencyTracker>() }
 val Kosmos.shadeDisplaysInteractor by
     Kosmos.Fixture {
         ShadeDisplaysInteractor(
-            Optional.of(mockShadeRootView),
             fakeShadeDisplaysRepository,
             mockedWindowContext,
             testScope.backgroundScope,
             testScope.backgroundScope.coroutineContext,
+            mockedShadeDisplayChangeLatencyTracker,
         )
     }
