@@ -32,7 +32,7 @@ flag {
      name: "pic_isolated_cache_statistics"
      is_fixed_read_only: true
      description: "Collects statistics for cache UID isolation strategies"
-     bug: "373752556"
+     bug: "379098894"
 }
 
 flag {
