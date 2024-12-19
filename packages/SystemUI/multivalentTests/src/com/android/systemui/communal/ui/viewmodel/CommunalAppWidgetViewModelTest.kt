@@ -30,6 +30,7 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.GlanceableHubWidgetManager
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.backgroundCoroutineContext
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
@@ -57,8 +58,8 @@ class CommunalAppWidgetViewModelTest(flags: FlagsParameterization) : SysuiTestCa
 
     private val Kosmos.listenerDelegateFactory by
         Kosmos.Fixture {
-            AppWidgetHostListenerDelegate.Factory { listener ->
-                AppWidgetHostListenerDelegate(fakeExecutor, listener)
+            AppWidgetHostListenerDelegate.Factory { tag, listener ->
+                AppWidgetHostListenerDelegate(applicationCoroutineScope, tag, listener)
             }
         }
 
