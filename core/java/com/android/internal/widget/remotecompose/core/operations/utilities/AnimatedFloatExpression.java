@@ -162,7 +162,7 @@ public class AnimatedFloatExpression {
     /** VAR2 operator */
     public static final float VAR3 = asNan(OFFSET + 43);
 
-    // TODO CLAMP, CBRT, DEG, RAD, EXPM1, CEIL, FLOOR
+    // TODO SQUARE, DUP, HYPOT, SWAP
     //    private static final float FP_PI = (float) Math.PI;
     private static final float FP_TO_RAD = 57.29578f; // 180/PI
     private static final float FP_TO_DEG = 0.017453292f; // 180/PI
@@ -172,7 +172,7 @@ public class AnimatedFloatExpression {
     @NonNull float[] mVar = new float[0];
     @Nullable CollectionsAccess mCollectionsAccess;
     IntMap<MonotonicSpline> mSplineMap = new IntMap<>();
-    private Random mRandom;
+    private static Random sRandom;
 
     private float getSplineValue(int arrayId, float pos) {
         MonotonicSpline fit = mSplineMap.get(arrayId);
@@ -806,21 +806,21 @@ public class AnimatedFloatExpression {
                 return sp - 1;
 
             case OP_RAND:
-                if (mRandom == null) {
-                    mRandom = new Random();
+                if (sRandom == null) {
+                    sRandom = new Random();
                 }
-                mStack[sp + 1] = mRandom.nextFloat();
+                mStack[sp + 1] = sRandom.nextFloat();
                 return sp + 1;
 
             case OP_RAND_SEED:
                 float seed = mStack[sp];
                 if (seed == 0) {
-                    mRandom = new Random();
+                    sRandom = new Random();
                 } else {
-                    if (mRandom == null) {
-                        mRandom = new Random(Float.floatToRawIntBits(seed));
+                    if (sRandom == null) {
+                        sRandom = new Random(Float.floatToRawIntBits(seed));
                     } else {
-                        mRandom.setSeed(Float.floatToRawIntBits(seed));
+                        sRandom.setSeed(Float.floatToRawIntBits(seed));
                     }
                 }
                 return sp - 1;
