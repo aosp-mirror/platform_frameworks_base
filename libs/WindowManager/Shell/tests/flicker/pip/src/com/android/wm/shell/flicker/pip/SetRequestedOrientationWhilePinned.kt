@@ -43,8 +43,26 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test exiting Pip with orientation changes. To run this test:
- * `atest WMShellFlickerTestsPip1:SetRequestedOrientationWhilePinned`
+ * Test leaving pip while changing orientation (from pip window in portrait to app in landscape)
+ *
+ * To run this test: `atest WMShellFlickerTestsPip:SetRequestedOrientationWhilePinned`
+ *
+ * Actions:
+ * ```
+ *     Launch [pipApp] on a fixed landscape orientation
+ *     Broadcast action [ACTION_ENTER_PIP] to enter pip mode in portrait
+ *     Restore PIP from the original task to landscape
+ * ```
+ *
+ * Notes:
+ * ```
+ *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
+ *        are inherited [PipTransition]
+ *     2. Part of the test setup occurs automatically via
+ *        [android.tools.flicker.legacy.runner.TransitionRunner],
+ *        including configuring navigation mode, initial orientation and ensuring no
+ *        apps are running before setup
+ * ```
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -53,7 +71,7 @@ import org.junit.runners.Parameterized
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 open class SetRequestedOrientationWhilePinned(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
-    private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
+    internal open val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
 
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions {
@@ -131,7 +149,7 @@ open class SetRequestedOrientationWhilePinned(flicker: LegacyFlickerTest) : PipT
 
     @Presubmit
     @Test
-    fun pipAppLayerCoversFullScreen() {
+    open fun pipAppLayerCoversDisplayBoundsOnEnd() {
         flicker.assertLayersEnd { visibleRegion(pipApp).coversExactly(endingBounds) }
     }
 

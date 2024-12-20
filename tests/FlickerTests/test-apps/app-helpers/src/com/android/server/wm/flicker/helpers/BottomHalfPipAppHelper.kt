@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.content.Intent
 import android.tools.traces.parsers.toFlickerComponent
+import android.tools.traces.parsers.WindowManagerStateHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 
 class BottomHalfPipAppHelper(
@@ -38,4 +39,14 @@ class BottomHalfPipAppHelper(
                 ActivityOptions.BottomHalfPip.COMPONENT
             }
         }
+
+    override fun exitPipToOriginalTaskViaIntent(wmHelper: WindowManagerStateHelper) {
+        launchViaIntent(
+            wmHelper,
+            Intent().apply {
+                component = ActivityOptions.BottomHalfPip.COMPONENT
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+    }
 }
