@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"활성(왼쪽만)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"활성(오른쪽만)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"활성(왼쪽 및 오른쪽)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"사용 중입니다(미디어 전용). 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"사용 중입니다(미디어 전용). 배터리는 왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>입니다."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"연결되었습니다(오디오 공유 지원). 배터리는 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>입니다."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"전환 애니메이션 배율"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 길이 배율"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"보조 디스플레이 시뮬레이션"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"음영 표시 위치"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"앱"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"활동 유지 안함"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"사용자가 종료하는 즉시 바로 제거"</string>

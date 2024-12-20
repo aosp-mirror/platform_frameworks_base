@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ativo (apenas esquerdo)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Ativo (apenas direito)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Ativo (esquerdo e direito)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Não foi possível atualizar o ambiente"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Ativo (apenas para multimédia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Ativo (apenas para multimédia). E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria. D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Ligado (suporta partilha de áudio). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
@@ -423,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração de animação"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular apresentações secundárias"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Posição da sombra no ecrã"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Não manter atividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destruir atividades assim que o utilizador sair"</string>

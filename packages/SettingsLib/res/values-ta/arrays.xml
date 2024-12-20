@@ -288,4 +288,19 @@
     <item msgid="3753634915787796632">"2"</item>
     <item msgid="4779928470672877922">"3"</item>
   </string-array>
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"சாதனக் காட்சி மட்டும் (இயல்பு)"</item>
+    <item msgid="9161645858025071955">"வெளிப்புறக் காட்சி"</item>
+    <item msgid="114384731934682483">"ஃபோகஸ் அடிப்படையிலானது"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"சாதனக் காட்சியில் மட்டும் ஷேடைக் காட்டும்"</item>
+    <item msgid="7795034287069726554">"ஒற்றை வெளிப்புறக் காட்சியில் சாதனத்தைக் காட்டும்"</item>
+    <item msgid="5280431949814340475">"கடைசியாக ஃபோகஸ் செய்யப்பட்ட காட்சியில் சாதனத்தைக் காட்டும்"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_values">
+    <item msgid="3055776101992426514">"default_display"</item>
+    <item msgid="774789415968826925">"any_external_display"</item>
+    <item msgid="7880769915418638436">"status_bar_latest_touch"</item>
+  </string-array>
 </resources>

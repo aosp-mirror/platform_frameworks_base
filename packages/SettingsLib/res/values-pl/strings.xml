@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktywne (tylko lewa strona)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktywne (tylko prawa strona)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktywne (lewa i prawa strona)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktywne (tylko multimedia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktywne (tylko multimedia), lewa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, prawa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> naładowania baterii."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Połączone (obsługa udostępniania dźwięku), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacji przejścia"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala długości animacji"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Symuluj ekrany dodatkowe"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Pozycja wyświetlania cienia"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacje"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Nie zachowuj działań"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Przerwij każde działanie, gdy użytkownik je porzuci"</string>

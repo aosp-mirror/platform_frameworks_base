@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"চালু আছে (শুধু বাঁদিক)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"চালু আছে (শুধু ডানদিক)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"চালু আছে (বাঁদিক ও ডানদিক)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"চালু আছে (শুধুমাত্র মিডিয়া)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"চালু আছে (শুধুমাত্র মিডিয়া), বাঁদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ডানদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি।"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"অ্যানিমেটর সময়কাল স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্রদর্শনগুলি নকল করুন"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"শেড ডিসপ্লে করার পজিশন"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"অ্যাপ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"অ্যাক্টিভিটি রাখবেন না"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি অ্যাক্টিভিটি ধ্বংস করুন"</string>

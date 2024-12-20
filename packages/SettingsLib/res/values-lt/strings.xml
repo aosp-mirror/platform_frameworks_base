@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktyvus (tik kairiojoje pusėje)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktyvus (tik dešiniojoje pusėje)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktyvus (kairiojoje ir dešiniojoje pusėse)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktyvus (tik medija). Akumuliatorius lygis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktyvus (tik medija), akumuliatoriaus lygis kairėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, dešinėje: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Prijungta (palaikomas garso įrašų bendrinimas). Akumuliatoriaus lygis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animuoto perėjimo mast."</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator. trukmės skalė"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Imituoti antrin. ekranus"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Šešėlio rodymo padėtis"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Programos"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Nesaugoti veiklos"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Sunaikinti visą veiklą, kai naud. iš jos išeina"</string>

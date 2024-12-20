@@ -288,4 +288,19 @@
     <item msgid="3753634915787796632">"2"</item>
     <item msgid="4779928470672877922">"3"</item>
   </string-array>
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"ഉപകരണ ഡിസ്പ്ലേ മാത്രം (ഡിഫോൾട്ട്)"</item>
+    <item msgid="9161645858025071955">"ബാഹ്യ ഡിസ്പ്ലേ"</item>
+    <item msgid="114384731934682483">"ഫോക്കസ്-അടിസ്ഥാനമാക്കിയുള്ളത്"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"ഉപകരണ ഡിസ്പ്ലേയിൽ മാത്രം ഷെയ്‌ഡ് കാണിക്കുക"</item>
+    <item msgid="7795034287069726554">"ഒരൊറ്റ ബാഹ്യ ഡിസ്പ്ലേയിൽ ഉപകരണം കാണിക്കുക"</item>
+    <item msgid="5280431949814340475">"അവസാനം ഫോക്കസ് ചെയ്ത ഡിസ്പ്ലേയിൽ ഉപകരണം കാണിക്കുക"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_values">
+    <item msgid="3055776101992426514">"default_display"</item>
+    <item msgid="774789415968826925">"any_external_display"</item>
+    <item msgid="7880769915418638436">"status_bar_latest_touch"</item>
+  </string-array>
 </resources>

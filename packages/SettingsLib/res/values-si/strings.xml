@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"සක්‍රිය (වම පමණි)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"සක්‍රිය (දකුණ පමණි)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"සක්‍රිය (වම සහ දකුණ)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ක්‍රියාත්මකයි (මාධ්‍ය පමණයි). බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ක්‍රියාත්මකයි (මාධ්‍ය පමණයි), බැටරිය ව: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"සම්බන්‍ධයි (ශ්‍රව්‍ය බෙදා ගැනීමට සහය දක්වයි). බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"සංක්‍රමණ සජීවන පරිමාණය"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"සජීවක කාල පරාස පරිමාණය"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ද්විතියික දර්ශනය අඟවන්න"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"සෙවන සංදර්ශක ස්ථානය"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"යෙදුම්"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ක්‍රියාකාරකම් තබාගන්න එපා"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"පරිශීලකයා ඉවත් වුන විගසම සෑම ක්‍රියාකාරකමක්ම විනාශ කරන්න"</string>

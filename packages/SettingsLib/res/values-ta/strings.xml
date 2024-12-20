@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"செயலில் உள்ளது (இடதுபுறம் மட்டும்)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"செயலில் உள்ளது (வலதுபுறம் மட்டும்)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"செயலில் உள்ளது (இடது மற்றும் வலதுபுறம்)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"செயலிலுள்ளது (மீடியா மட்டும்). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"செயலிலுள்ளது (மீடியா மட்டும்). இடது பேட்டரி: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, வலது பேட்டரி: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"அனிமேஷன் மாற்றத்தின் வேகம்"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"அனிமேட்டர் கால அளவு"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"இரண்டாம்நிலைக் காட்சிகளை உருவகப்படுத்து"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ஷேட் காட்சியின் நிலை"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ஆப்ஸ்"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"செயல்பாடுகளை வைத்திருக்காதே"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"பயனர் வெளியேறியதும் செயல்பாடுகளை நீக்கும்"</string>
