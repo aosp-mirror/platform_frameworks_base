@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -128,9 +127,6 @@ val sceneTransitions = transitions {
             fade(Communal.Elements.Grid)
         }
     }
-    // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
-    // can lead to inconsistent KeyguardState changes.
-    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**

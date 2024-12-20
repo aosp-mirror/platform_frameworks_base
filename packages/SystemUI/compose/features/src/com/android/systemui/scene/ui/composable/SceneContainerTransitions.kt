@@ -1,7 +1,6 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
@@ -126,13 +125,4 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Lockscreen, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
         toQuickSettingsShadeTransition(durationScale = 0.9)
     }
-
-    // Scene overscroll
-    // TODO(b/382477212) Remove STL Overscroll DSL
-    overscrollDisabled(Scenes.Gone, Orientation.Vertical)
-    overscrollDisabled(Scenes.Lockscreen, Orientation.Vertical)
-    overscrollDisabled(Scenes.Bouncer, Orientation.Vertical)
-    overscrollDisabled(Scenes.Shade, Orientation.Vertical)
-    overscrollDisabled(Overlays.NotificationsShade, Orientation.Vertical)
-    overscrollDisabled(Overlays.QuickSettingsShade, Orientation.Vertical)
 }
