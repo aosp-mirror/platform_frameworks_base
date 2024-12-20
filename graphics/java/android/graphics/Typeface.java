@@ -237,6 +237,8 @@ public class Typeface {
 
     private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) final int mWeight;
 
+    private boolean mIsVariationInstance;
+
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
     /** @hide */
@@ -277,6 +279,11 @@ public class Typeface {
     /** Returns the typeface's weight value */
     public @IntRange(from = 0, to = 1000) int getWeight() {
         return mWeight;
+    }
+
+    /** @hide */
+    public boolean isVariationInstance() {
+        return mIsVariationInstance;
     }
 
     /** Returns the typeface's intrinsic style attributes */
@@ -1280,6 +1287,7 @@ public class Typeface {
         mCleaner = sRegistry.registerNativeAllocation(this, native_instance);
         mStyle = nativeGetStyle(ni);
         mWeight = nativeGetWeight(ni);
+        mIsVariationInstance = nativeIsVariationInstance(ni);
         mSystemFontFamilyName = systemFontFamilyName;
         mDerivedFrom = derivedFrom;
     }
@@ -1696,6 +1704,9 @@ public class Typeface {
 
     @CriticalNative
     private static native int  nativeGetWeight(long nativePtr);
+
+    @CriticalNative
+    private static native boolean nativeIsVariationInstance(long nativePtr);
 
     @CriticalNative
     private static native long nativeGetReleaseFunc();
