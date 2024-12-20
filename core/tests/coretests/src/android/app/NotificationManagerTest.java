@@ -18,6 +18,7 @@ package android.app;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -67,6 +68,8 @@ public class NotificationManagerTest {
             mClock.advanceByMillis(5);
         }
 
+        verify(mNotificationManager.mBackendService, atLeast(20)).enqueueNotificationWithTag(any(),
+                any(), any(), anyInt(), any(), anyInt());
         verify(mNotificationManager.mBackendService, atMost(30)).enqueueNotificationWithTag(any(),
                 any(), any(), anyInt(), any(), anyInt());
     }
@@ -101,7 +104,38 @@ public class NotificationManagerTest {
 
     @Test
     @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
-    public void notify_rapidAddAndCancel_isNotThrottled() throws Exception {
+    public void cancel_unnecessaryAndRapid_isThrottled() throws Exception {
+
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.cancel(1);
+            mClock.advanceByMillis(5);
+        }
+
+        verify(mNotificationManager.mBackendService, atLeast(20)).cancelNotificationWithTag(any(),
+                any(), any(), anyInt(), anyInt());
+        verify(mNotificationManager.mBackendService, atMost(30)).cancelNotificationWithTag(any(),
+                any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void cancel_unnecessaryButReasonable_isNotThrottled() throws Exception {
+        // Scenario: the app tries to repeatedly cancel a single notification, but at a reasonable
+        // rate. Strange, but not what we're trying to block with NM_BINDER_PERF_THROTTLE_NOTIFY.
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.cancel(1);
+            mClock.advanceByMillis(500);
+        }
+
+        verify(mNotificationManager.mBackendService, times(100)).cancelNotificationWithTag(any(),
+                any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void cancel_necessaryAndRapid_isNotThrottled() throws Exception {
+        // Scenario: the app posts and immediately cancels a bunch of notifications. Strange,
+        // but not what we're trying to block with NM_BINDER_PERF_THROTTLE_NOTIFY.
         Notification n = exampleNotification();
 
         for (int i = 0; i < 100; i++) {
@@ -112,6 +146,23 @@ public class NotificationManagerTest {
 
         verify(mNotificationManager.mBackendService, times(100)).enqueueNotificationWithTag(any(),
                 any(), any(), anyInt(), any(), anyInt());
+        verify(mNotificationManager.mBackendService, times(100)).cancelNotificationWithTag(any(),
+                any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void cancel_maybeNecessaryAndRapid_isNotThrottled() throws Exception {
+        // Scenario: the app posted a lot of notifications, is killed, then restarts (so NM client
+        // doesn't know about them), then cancels them one by one. We don't want to throttle this
+        // case.
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.cancel(i);
+            mClock.advanceByMillis(1);
+        }
+
+        verify(mNotificationManager.mBackendService, times(100)).cancelNotificationWithTag(any(),
+                any(), any(), anyInt(), anyInt());
     }
 
     private Notification exampleNotification() {
