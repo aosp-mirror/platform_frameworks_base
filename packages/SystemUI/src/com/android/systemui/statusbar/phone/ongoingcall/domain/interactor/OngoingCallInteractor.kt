@@ -49,15 +49,18 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * Interactor for determining whether to show a chip in the status bar for ongoing phone calls.
  *
- * This class monitors call notifications and the visibility of call apps to determine the appropriate
- * chip state. It emits:
- *  * - [OngoingCallModel.NoCall] when there is no call notification
- *  * - [OngoingCallModel.InCallWithVisibleApp] when there is a call notification but the call app is visible
- *  * - [OngoingCallModel.InCall] when there is a call notification and the call app is not visible
- *  */
+ * This class monitors call notifications and the visibility of call apps to determine the
+ * appropriate chip state. It emits:
+ * * - [OngoingCallModel.NoCall] when there is no call notification
+ * * - [OngoingCallModel.InCallWithVisibleApp] when there is a call notification but the call app is
+ *   visible
+ * * - [OngoingCallModel.InCall] when there is a call notification and the call app is not visible
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class OngoingCallInteractor @Inject constructor(
+class OngoingCallInteractor
+@Inject
+constructor(
     @Application private val scope: CoroutineScope,
     private val activityManagerRepository: ActivityManagerRepository,
     private val statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
@@ -68,44 +71,37 @@ class OngoingCallInteractor @Inject constructor(
 ) : CoreStartable {
     private val logger = Logger(logBuffer, TAG)
 
-    /**
-     * Tracks whether the call chip has been swiped away.
-     */
+    /** Tracks whether the call chip has been swiped away. */
     private val _isChipSwipedAway = MutableStateFlow(false)
     val isChipSwipedAway: StateFlow<Boolean> = _isChipSwipedAway.asStateFlow()
 
-    /**
-     * The current state of ongoing calls.
-     */
+    /** The current state of ongoing calls. */
     val ongoingCallState: StateFlow<OngoingCallModel> =
         activeNotificationsInteractor.ongoingCallNotification
             .flatMapLatest { notification ->
-                createOngoingCallStateFlow(
-                    notification = notification
-                )
+                createOngoingCallStateFlow(notification = notification)
             }
             .stateIn(
                 scope = scope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = OngoingCallModel.NoCall
+                initialValue = OngoingCallModel.NoCall,
             )
 
     @VisibleForTesting
-    val isStatusBarRequiredForOngoingCall = combine(
-        ongoingCallState,
-        isChipSwipedAway
-    ) { callState, chipSwipedAway ->
-        callState is OngoingCallModel.InCall && !chipSwipedAway
-    }
+    val isStatusBarRequiredForOngoingCall =
+        combine(ongoingCallState, isChipSwipedAway) { callState, chipSwipedAway ->
+            callState is OngoingCallModel.InCall && !chipSwipedAway
+        }
 
     @VisibleForTesting
-    val isGestureListeningEnabled = combine(
-        ongoingCallState,
-        statusBarModeRepositoryStore.defaultDisplay.isInFullscreenMode,
-        isChipSwipedAway
-    ) { callState, isFullscreen, chipSwipedAway ->
-        callState is OngoingCallModel.InCall && !chipSwipedAway && isFullscreen
-    }
+    val isGestureListeningEnabled =
+        combine(
+            ongoingCallState,
+            statusBarModeRepositoryStore.defaultDisplay.isInFullscreenMode,
+            isChipSwipedAway,
+        ) { callState, isFullscreen, chipSwipedAway ->
+            callState is OngoingCallModel.InCall && !chipSwipedAway && isFullscreen
+        }
 
     private fun createOngoingCallStateFlow(
         notification: ActiveNotificationModel?
@@ -121,7 +117,7 @@ class OngoingCallInteractor @Inject constructor(
                 creationUid = notification.uid,
                 logger = logger,
                 identifyingLogTag = TAG,
-            )
+            ),
         ) { model, isVisible ->
             deriveOngoingCallState(model, isVisible)
         }
@@ -130,22 +126,19 @@ class OngoingCallInteractor @Inject constructor(
     override fun start() {
         ongoingCallState
             .filterIsInstance<OngoingCallModel.NoCall>()
-            .onEach {
-                _isChipSwipedAway.value = false
-            }.launchIn(scope)
+            .onEach { _isChipSwipedAway.value = false }
+            .launchIn(scope)
 
-        isStatusBarRequiredForOngoingCall.onEach { statusBarRequired ->
-            setStatusBarRequiredForOngoingCall(statusBarRequired)
-        }.launchIn(scope)
+        isStatusBarRequiredForOngoingCall
+            .onEach { statusBarRequired -> setStatusBarRequiredForOngoingCall(statusBarRequired) }
+            .launchIn(scope)
 
-        isGestureListeningEnabled.onEach { isEnabled ->
-            updateGestureListening(isEnabled)
-        }.launchIn(scope)
+        isGestureListeningEnabled
+            .onEach { isEnabled -> updateGestureListening(isEnabled) }
+            .launchIn(scope)
     }
 
-    /**
-     * Callback that must run when the status bar is swiped while gesture listening is active.
-     */
+    /** Callback that must run when the status bar is swiped while gesture listening is active. */
     @VisibleForTesting
     fun onStatusBarSwiped() {
         logger.d("Status bar chip swiped away")
@@ -154,13 +147,11 @@ class OngoingCallInteractor @Inject constructor(
 
     private fun deriveOngoingCallState(
         model: ActiveNotificationModel,
-        isVisible: Boolean
+        isVisible: Boolean,
     ): OngoingCallModel {
         return when {
             isVisible -> {
-                logger.d({ "Call app is visible: uid=$int1" }) {
-                    int1 = model.uid
-                }
+                logger.d({ "Call app is visible: uid=$int1" }) { int1 = model.uid }
                 OngoingCallModel.InCallWithVisibleApp
             }
 
@@ -173,7 +164,7 @@ class OngoingCallInteractor @Inject constructor(
                     startTimeMs = model.whenTime,
                     notificationIconView = model.statusBarChipIconView,
                     intent = model.contentIntent,
-                    notificationKey = model.key
+                    notificationKey = model.key,
                 )
             }
         }
@@ -186,8 +177,9 @@ class OngoingCallInteractor @Inject constructor(
         statusBarModeRepositoryStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
             statusBarRequired
         )
-        statusBarWindowControllerStore.defaultDisplay
-            .setOngoingProcessRequiresStatusBarVisible(statusBarRequired)
+        statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
+            statusBarRequired
+        )
     }
 
     private fun updateGestureListening(isEnabled: Boolean) {
