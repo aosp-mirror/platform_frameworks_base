@@ -340,11 +340,12 @@ fun ContentScope.NotificationScrollingStack(
     // set the bounds to null when the scrim disappears
     DisposableEffect(Unit) { onDispose { viewModel.onScrimBoundsChanged(null) } }
 
-    val minScrimTop = with(density) { ShadeHeader.Dimensions.CollapsedHeight.toPx() }
+    // Top position if the scrim, when it is fully expanded.
+    val minScrimTop = ShadeHeader.Dimensions.CollapsedHeight
 
     // The minimum offset for the scrim. The scrim is considered fully expanded when it
     // is at this offset.
-    val minScrimOffset: () -> Float = { minScrimTop - maxScrimTop() }
+    val minScrimOffset: () -> Float = { with(density) { minScrimTop.toPx() } - maxScrimTop() }
 
     // The height of the scrim visible on screen when it is in its resting (collapsed) state.
     val minVisibleScrimHeight: () -> Float = {
@@ -563,6 +564,7 @@ fun ContentScope.NotificationScrollingStack(
                     }
                     .thenIf(shouldShowScrim) { Modifier.background(scrimBackgroundColor) }
                     .thenIf(shouldFillMaxSize) { Modifier.fillMaxSize() }
+                    .thenIf(supportNestedScrolling) { Modifier.padding(bottom = minScrimTop) }
                     .debugBackground(viewModel, DEBUG_BOX_COLOR)
         ) {
             Column(

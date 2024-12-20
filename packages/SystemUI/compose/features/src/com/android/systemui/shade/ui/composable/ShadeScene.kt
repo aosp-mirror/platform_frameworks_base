@@ -239,7 +239,7 @@ private fun SceneScope.ShadeScene(
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
-        is ShadeMode.Dual -> error("Dual shade is not yet implemented!")
+        is ShadeMode.Dual -> error("Dual shade is implemented separately as an overlay.")
     }
 }
 
