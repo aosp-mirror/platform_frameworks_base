@@ -99,6 +99,20 @@ message PreferenceProto {
   }
 }
 
+// Proto of permissions
+message PermissionsProto {
+  repeated PermissionProto all_of = 1;
+  repeated PermissionProto any_of = 2;
+}
+
+// Proto of permission
+message PermissionProto {
+  oneof kind {
+    string permission = 1;
+    PermissionsProto permissions = 2;
+  }
+}
+
 // Proto of string or string resource id.
 message TextProto {
   oneof text {
