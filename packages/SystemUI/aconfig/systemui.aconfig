@@ -1808,6 +1808,9 @@ flag {
   namespace: "systemui"
   description: "Disables expansion of the shade via two finger swipe on a trackpad"
   bug: "356804470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
