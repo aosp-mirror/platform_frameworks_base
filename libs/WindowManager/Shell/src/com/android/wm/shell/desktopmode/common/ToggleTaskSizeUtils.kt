@@ -90,10 +90,10 @@ constructor(
             Source.HEADER_BUTTON_TO_RESTORE -> Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW
             Source.KEYBOARD_SHORTCUT -> null
             Source.HEADER_DRAG_TO_TOP -> null
-            Source.MAXIMIZE_MENU_TO_MAXIMIZE -> null
-            Source.MAXIMIZE_MENU_TO_RESTORE -> null
-            Source.DOUBLE_TAP_TO_MAXIMIZE -> null
-            Source.DOUBLE_TAP_TO_RESTORE -> null
+            Source.MAXIMIZE_MENU_TO_MAXIMIZE -> Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW
+            Source.MAXIMIZE_MENU_TO_RESTORE -> Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW
+            Source.DOUBLE_TAP_TO_MAXIMIZE -> Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW
+            Source.DOUBLE_TAP_TO_RESTORE -> Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW
         }
 
     /** The direction to which the task is being resized. */
