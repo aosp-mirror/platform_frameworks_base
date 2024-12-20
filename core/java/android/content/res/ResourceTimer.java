@@ -17,13 +17,10 @@
 package android.content.res;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-
 import android.app.AppProtoEnums;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -33,6 +30,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -277,38 +275,40 @@ public final class ResourceTimer {
      * Update the metrics information and dump it.
      * @hide
      */
-    public static void dumpTimers(@NonNull ParcelFileDescriptor pfd, @Nullable String[] args) {
-        FileOutputStream fout = new FileOutputStream(pfd.getFileDescriptor());
-        PrintWriter pw = new FastPrintWriter(fout);
-        synchronized (sLock) {
-            if (!sEnabled || (sConfig == null)) {
+    public static void dumpTimers(@NonNull FileDescriptor fd, String... args) {
+        try (PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd))) {
+            pw.println("\nDumping ResourceTimers");
+
+            final boolean enabled;
+            synchronized (sLock) {
+                enabled = sEnabled && sConfig != null;
+            }
+            if (!enabled) {
                 pw.println("  Timers are not enabled in this process");
-                pw.flush();
                 return;
             }
-        }
 
-        // Look for the --refresh switch.  If the switch is present, then sTimers is updated.
-        // Otherwise, the current value of sTimers is displayed.
-        boolean refresh = Arrays.asList(args).contains("-refresh");
+            // Look for the --refresh switch.  If the switch is present, then sTimers is updated.
+            // Otherwise, the current value of sTimers is displayed.
+            boolean refresh = Arrays.asList(args).contains("-refresh");
 
-        synchronized (sLock) {
-            update(refresh);
-            long runtime = sLastUpdated - sProcessStart;
-            pw.format("  config runtime=%d proc=%s\n", runtime, Process.myProcessName());
-            for (int i = 0; i < sTimers.length; i++) {
-                Timer t = sTimers[i];
-                if (t.count != 0) {
-                    String name = sConfig.timers[i];
-                    pw.format("  stats timer=%s cnt=%d avg=%d min=%d max=%d pval=%s "
-                        + "largest=%s\n",
-                        name, t.count, t.total / t.count, t.mintime, t.maxtime,
-                        packedString(t.percentile),
-                        packedString(t.largest));
+            synchronized (sLock) {
+                update(refresh);
+                long runtime = sLastUpdated - sProcessStart;
+                pw.format("  config runtime=%d proc=%s\n", runtime, Process.myProcessName());
+                for (int i = 0; i < sTimers.length; i++) {
+                    Timer t = sTimers[i];
+                    if (t.count != 0) {
+                        String name = sConfig.timers[i];
+                        pw.format("  stats timer=%s cnt=%d avg=%d min=%d max=%d pval=%s "
+                                        + "largest=%s\n",
+                                name, t.count, t.total / t.count, t.mintime, t.maxtime,
+                                packedString(t.percentile),
+                                packedString(t.largest));
+                    }
                 }
             }
         }
-        pw.flush();
     }
 
     // Enable (or disabled) the runtime timers.  Note that timers are disabled by default.  This
