@@ -992,15 +992,24 @@ public class ResourcesImpl {
                     } else {
                         dr = loadXmlDrawable(wrapper, value, id, density, file);
                     }
-                } else if (file.startsWith("frro://")) {
+                } else if (file.startsWith("frro:/")) {
                     Uri uri = Uri.parse(file);
+                    long offset = Long.parseLong(uri.getQueryParameter("offset"));
+                    long size = Long.parseLong(uri.getQueryParameter("size"));
+                    if (offset < 0 || size <= 0) {
+                        throw new NotFoundException("invalid frro parameters");
+                    }
                     File f = new File('/' + uri.getHost() + uri.getPath());
+                    if (!f.getCanonicalPath().startsWith(ResourcesManager.RESOURCE_CACHE_DIR)
+                            || !f.getCanonicalPath().endsWith(".frro") || !f.canRead()) {
+                        throw new NotFoundException("invalid frro path");
+                    }
                     ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f,
                             ParcelFileDescriptor.MODE_READ_ONLY);
                     AssetFileDescriptor afd = new AssetFileDescriptor(
                             pfd,
-                            Long.parseLong(uri.getQueryParameter("offset")),
-                            Long.parseLong(uri.getQueryParameter("size")));
+                            offset,
+                            size);
                     FileInputStream is = afd.createInputStream();
                     dr = decodeImageDrawable(is, wrapper);
                 } else {
