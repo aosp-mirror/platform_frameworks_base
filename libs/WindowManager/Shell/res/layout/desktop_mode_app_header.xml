@@ -56,9 +56,7 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:singleLine="true"
-            android:ellipsize="none"
-            android:requiresFadingEdge="horizontal"
-            android:fadingEdgeLength="28dp"
+            android:ellipsize="end"
             android:clickable="false"
             android:focusable="false"
             tools:text="Gmail"/>
