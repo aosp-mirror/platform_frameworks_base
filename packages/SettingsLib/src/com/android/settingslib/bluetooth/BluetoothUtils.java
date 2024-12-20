@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.sysprop.BluetoothProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -648,8 +649,10 @@ public class BluetoothUtils {
 
     /** Returns if the le audio sharing UI is available. */
     public static boolean isAudioSharingUIAvailable(@Nullable Context context) {
-        return isAudioSharingEnabled() || (context != null && isAudioSharingPreviewEnabled(
-                context.getContentResolver()));
+        return (Flags.enableLeAudioSharing()
+                || (context != null && Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(context.getContentResolver())))
+                && isAudioSharingSupported();
     }
 
     /** Returns if the le audio sharing hysteresis mode fix is available. */
@@ -662,31 +665,39 @@ public class BluetoothUtils {
 
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        try {
-            return Flags.enableLeAudioSharing()
-                    && adapter.isLeAudioBroadcastSourceSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED
-                    && adapter.isLeAudioBroadcastAssistantSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
-        } catch (IllegalStateException e) {
-            Log.d(TAG, "Fail to check isAudioSharingEnabled, e = ", e);
-            return false;
-        }
+        return Flags.enableLeAudioSharing() && isAudioSharingSupported();
     }
 
     /** Returns if the le audio sharing preview is enabled in developer option. */
     public static boolean isAudioSharingPreviewEnabled(@Nullable ContentResolver contentResolver) {
+        return Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(contentResolver)
+                && isAudioSharingSupported();
+    }
+
+    /** Returns if the device has le audio sharing capability */
+    private static boolean isAudioSharingSupported() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         try {
-            return Flags.audioSharingDeveloperOption()
-                    && getAudioSharingPreviewValue(contentResolver)
-                    && adapter.isLeAudioBroadcastSourceSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED
-                    && adapter.isLeAudioBroadcastAssistantSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+            // b/381777424 The APIs have to return ERROR_BLUETOOTH_NOT_ENABLED when BT off based on
+            // CDD definition.
+            // However, app layer need to gate the feature based on whether the device has audio
+            // sharing capability regardless of the BT state.
+            // So here we check the BluetoothProperties when BT off.
+            //
+            // TODO: Also check SystemProperties "persist.bluetooth.leaudio_dynamic_switcher.mode"
+            // and return true if it is in broadcast mode.
+            // Now SystemUI don't have access to read the value.
+            int sourceSupportedCode = adapter.isLeAudioBroadcastSourceSupported();
+            int assistantSupportedCode = adapter.isLeAudioBroadcastAssistantSupported();
+            return (sourceSupportedCode == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    || (sourceSupportedCode == BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED
+                    && BluetoothProperties.isProfileBapBroadcastSourceEnabled().orElse(false)))
+                    && (assistantSupportedCode == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    || (assistantSupportedCode == BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED
+                    && BluetoothProperties.isProfileBapBroadcastAssistEnabled().orElse(false)));
         } catch (IllegalStateException e) {
-            Log.d(TAG, "Fail to check isAudioSharingPreviewEnabled, e = ", e);
+            Log.d(TAG, "Fail to check isAudioSharingSupported, e = ", e);
             return false;
         }
     }
