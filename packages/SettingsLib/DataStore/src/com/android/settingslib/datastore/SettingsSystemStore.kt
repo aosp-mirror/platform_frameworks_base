@@ -85,9 +85,9 @@ class SettingsSystemStore private constructor(contentResolver: ContentResolver) 
                 }
 
         /** Returns the required permissions to read [System] settings. */
-        fun getReadPermissions() = arrayOf<String>()
+        fun getReadPermissions() = Permissions.EMPTY
 
         /** Returns the required permissions to write [System] settings. */
-        fun getWritePermissions() = arrayOf(Manifest.permission.WRITE_SETTINGS)
+        fun getWritePermissions() = Permissions.allOf(Manifest.permission.WRITE_SETTINGS)
     }
 }

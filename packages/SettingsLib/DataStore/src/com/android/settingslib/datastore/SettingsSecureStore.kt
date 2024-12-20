@@ -85,9 +85,9 @@ class SettingsSecureStore private constructor(contentResolver: ContentResolver) 
                 }
 
         /** Returns the required permissions to read [Secure] settings. */
-        fun getReadPermissions() = arrayOf<String>()
+        fun getReadPermissions() = Permissions.EMPTY
 
         /** Returns the required permissions to write [Secure] settings. */
-        fun getWritePermissions() = arrayOf(Manifest.permission.WRITE_SECURE_SETTINGS)
+        fun getWritePermissions() = Permissions.allOf(Manifest.permission.WRITE_SECURE_SETTINGS)
     }
 }
