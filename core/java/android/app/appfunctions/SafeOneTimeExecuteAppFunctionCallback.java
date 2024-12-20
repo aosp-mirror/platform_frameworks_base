@@ -19,7 +19,6 @@ package android.app.appfunctions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.Objects;
@@ -40,8 +39,7 @@ public class SafeOneTimeExecuteAppFunctionCallback {
 
     @NonNull private final IExecuteAppFunctionCallback mCallback;
 
-    @Nullable
-    private final CompletionCallback mCompletionCallback;
+    @Nullable private final CompletionCallback mCompletionCallback;
 
     private final AtomicLong mExecutionStartTimeAfterBindMillis = new AtomicLong();
 
@@ -49,7 +47,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         this(callback, /* completionCallback= */ null);
     }
 
-    public SafeOneTimeExecuteAppFunctionCallback(@NonNull IExecuteAppFunctionCallback callback,
+    public SafeOneTimeExecuteAppFunctionCallback(
+            @NonNull IExecuteAppFunctionCallback callback,
             @Nullable CompletionCallback completionCallback) {
         mCallback = Objects.requireNonNull(callback);
         mCompletionCallback = completionCallback;
@@ -64,8 +63,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         try {
             mCallback.onSuccess(result);
             if (mCompletionCallback != null) {
-                mCompletionCallback.finalizeOnSuccess(result,
-                        mExecutionStartTimeAfterBindMillis.get());
+                mCompletionCallback.finalizeOnSuccess(
+                        result, mExecutionStartTimeAfterBindMillis.get());
             }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
@@ -82,8 +81,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         try {
             mCallback.onError(error);
             if (mCompletionCallback != null) {
-                mCompletionCallback.finalizeOnError(error,
-                        mExecutionStartTimeAfterBindMillis.get());
+                mCompletionCallback.finalizeOnError(
+                        error, mExecutionStartTimeAfterBindMillis.get());
             }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
@@ -103,9 +102,10 @@ public class SafeOneTimeExecuteAppFunctionCallback {
      * Sets the execution start time of the request. Used to calculate the overhead latency of
      * requests.
      */
-    public void setExecutionStartTimeMillis() {
-        if (!mExecutionStartTimeAfterBindMillis.compareAndSet(0, SystemClock.elapsedRealtime())) {
-            Log.w(TAG, "Ignore subsequent calls to setExecutionStartTimeMillis()");
+    public void setExecutionStartTimeAfterBindMillis(long executionStartTimeAfterBindMillis) {
+        if (!mExecutionStartTimeAfterBindMillis.compareAndSet(
+                0, executionStartTimeAfterBindMillis)) {
+            Log.w(TAG, "Ignore subsequent calls to setExecutionStartTimeAfterBindMillis()");
         }
     }
 
@@ -115,8 +115,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
      */
     public interface CompletionCallback {
         /** Called after {@link IExecuteAppFunctionCallback#onSuccess}. */
-        void finalizeOnSuccess(@NonNull ExecuteAppFunctionResponse result,
-                long executionStartTimeMillis);
+        void finalizeOnSuccess(
+                @NonNull ExecuteAppFunctionResponse result, long executionStartTimeMillis);
 
         /** Called after {@link IExecuteAppFunctionCallback#onError}. */
         void finalizeOnError(@NonNull AppFunctionException error, long executionStartTimeMillis);

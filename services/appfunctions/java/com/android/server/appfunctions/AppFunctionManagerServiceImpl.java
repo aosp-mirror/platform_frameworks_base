@@ -155,23 +155,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         int callingPid = Binder.getCallingPid();
 
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
-                new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback,
-                        new SafeOneTimeExecuteAppFunctionCallback.CompletionCallback() {
-                            @Override
-                            public void finalizeOnSuccess(
-                                    @NonNull ExecuteAppFunctionResponse result,
-                                    long executionStartTimeMillis) {
-                                mLoggerWrapper.logAppFunctionSuccess(requestInternal, result,
-                                        callingUid, executionStartTimeMillis);
-                            }
-
-                            @Override
-                            public void finalizeOnError(@NonNull AppFunctionException error,
-                                    long executionStartTimeMillis) {
-                                mLoggerWrapper.logAppFunctionError(requestInternal,
-                                        error.getErrorCode(), callingUid, executionStartTimeMillis);
-                            }
-                        });
+                initializeSafeExecuteAppFunctionCallback(
+                        requestInternal, executeAppFunctionCallback, callingUid);
 
         String validatedCallingPackage;
         try {
@@ -574,6 +559,38 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             mLocks.values().removeAll(Collections.singleton(null)); // Remove null values
             return mLocks.computeIfAbsent(callingPackage, k -> new Object());
         }
+    }
+
+    /**
+     * Returns a new {@link SafeOneTimeExecuteAppFunctionCallback} initialized with a {@link
+     * SafeOneTimeExecuteAppFunctionCallback.CompletionCallback} that logs the results.
+     */
+    @VisibleForTesting
+    SafeOneTimeExecuteAppFunctionCallback initializeSafeExecuteAppFunctionCallback(
+            @NonNull ExecuteAppFunctionAidlRequest requestInternal,
+            @NonNull IExecuteAppFunctionCallback executeAppFunctionCallback,
+            int callingUid) {
+        return new SafeOneTimeExecuteAppFunctionCallback(
+                executeAppFunctionCallback,
+                new SafeOneTimeExecuteAppFunctionCallback.CompletionCallback() {
+                    @Override
+                    public void finalizeOnSuccess(
+                            @NonNull ExecuteAppFunctionResponse result,
+                            long executionStartTimeMillis) {
+                        mLoggerWrapper.logAppFunctionSuccess(
+                                requestInternal, result, callingUid, executionStartTimeMillis);
+                    }
+
+                    @Override
+                    public void finalizeOnError(
+                            @NonNull AppFunctionException error, long executionStartTimeMillis) {
+                        mLoggerWrapper.logAppFunctionError(
+                                requestInternal,
+                                error.getErrorCode(),
+                                callingUid,
+                                executionStartTimeMillis);
+                    }
+                });
     }
 
     private static class AppFunctionMetadataObserver implements ObserverCallback {
