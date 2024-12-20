@@ -547,14 +547,6 @@ flag {
 }
 
 flag {
-   name: "migrate_clocks_to_blueprint"
-   namespace: "systemui"
-   description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
-        "and use modern architecture for lockscreen clocks"
-   bug: "301502635"
-}
-
-flag {
    name: "clock_reactive_variants"
    namespace: "systemui"
    description: "Add reactive variant fonts to some clocks"

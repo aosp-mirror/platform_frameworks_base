@@ -81,7 +81,6 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.haptics.msdl.FakeMSDLPlayer;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
@@ -89,7 +88,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
-import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -240,9 +238,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected AmbientState mAmbientState;
     @Mock protected UserManager mUserManager;
     @Mock protected UiEventLogger mUiEventLogger;
-    @Mock protected KeyguardViewConfigurator mKeyguardViewConfigurator;
-    @Mock protected KeyguardRootView mKeyguardRootView;
-    @Mock protected View mKeyguardRootViewChild;
     @Mock protected KeyguardMediaController mKeyguardMediaController;
     @Mock protected NavigationModeController mNavigationModeController;
     @Mock protected NavigationBarController mNavigationBarController;
@@ -534,9 +529,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(longPressHandlingView.getResources()).thenReturn(longPressHandlingViewRes);
         when(longPressHandlingViewRes.getString(anyInt())).thenReturn("");
 
-        when(mKeyguardRootView.findViewById(anyInt())).thenReturn(mKeyguardRootViewChild);
-        when(mKeyguardViewConfigurator.getKeyguardRootView()).thenReturn(mKeyguardRootView);
-
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,
                 mMainHandler,
@@ -598,7 +590,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mSharedNotificationContainerInteractor,
                 mActiveNotificationsInteractor,
                 mShadeAnimationInteractor,
-                mKeyguardViewConfigurator,
                 mDeviceEntryFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),
                 mPowerInteractor,
@@ -697,19 +688,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         if (leakedAnimators != null) {
             assertThat(leakedAnimators).isEmpty();
         }
-    }
-
-    protected void setBottomPadding(int stackBottom, int lockIconPadding, int indicationPadding,
-            int ambientPadding) {
-
-        when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
-        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(stackBottom);
-        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(stackBottom);
-        when(mKeyguardRootViewChild.getTop()).thenReturn((int) (stackBottom - lockIconPadding));
-
-        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
-                .thenReturn(indicationPadding);
-        mNotificationPanelViewController.loadDimens();
     }
 
     protected void triggerPositionClockAndNotifications() {

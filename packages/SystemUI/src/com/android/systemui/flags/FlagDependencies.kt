@@ -31,7 +31,6 @@ import com.android.systemui.Flags.statusBarCallChipNotificationIcon
 import com.android.systemui.Flags.statusBarScreenSharingChips
 import com.android.systemui.Flags.statusBarUseReposForCallChip
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -63,9 +62,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-
-        // CommunalHub dependencies
-        communalHub dependsOn MigrateClocksToBlueprint.token
 
         // DualShade dependencies
         DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()

@@ -23,7 +23,6 @@ import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
@@ -37,7 +36,6 @@ object SceneContainerFlag {
         get() =
             sceneContainer() && // mainAconfigFlag
                 KeyguardWmStateRefactor.isEnabled &&
-                MigrateClocksToBlueprint.isEnabled &&
                 NotificationThrottleHun.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled
 
@@ -50,7 +48,6 @@ object SceneContainerFlag {
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
         sequenceOf(
             KeyguardWmStateRefactor.token,
-            MigrateClocksToBlueprint.token,
             NotificationThrottleHun.token,
             PredictiveBackSysUiFlag.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer

@@ -109,7 +109,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -531,7 +530,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
     private final PowerInteractor mPowerInteractor;
-    private final KeyguardViewConfigurator mKeyguardViewConfigurator;
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
     private boolean mForceFlingAnimationForTest = false;
@@ -624,7 +622,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
             ActiveNotificationsInteractor activeNotificationsInteractor,
             ShadeAnimationInteractor shadeAnimationInteractor,
-            KeyguardViewConfigurator keyguardViewConfigurator,
             DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
             SplitShadeStateController splitShadeStateController,
             PowerInteractor powerInteractor,
@@ -654,7 +651,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mActiveNotificationsInteractor = activeNotificationsInteractor;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
-        mKeyguardViewConfigurator = keyguardViewConfigurator;
         mClockPositionAlgorithm = keyguardClockPositionAlgorithm;
         mNaturalScrollingSettingObserver = naturalScrollingSettingObserver;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {

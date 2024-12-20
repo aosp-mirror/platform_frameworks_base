@@ -21,7 +21,6 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -72,8 +71,8 @@ constructor(
         combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
                 startButtonModel,
                 endButtonModel ->
-            startButtonModel.isVisible || endButtonModel.isVisible
-        }
+                startButtonModel.isVisible || endButtonModel.isVisible
+            }
             .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,18 +100,6 @@ constructor(
 
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {
-        return if (MigrateClocksToBlueprint.isEnabled) {
-            burnIn.map { it.translationY.toFloat() }.flowOn(mainDispatcher)
-        } else {
-            keyguardInteractor.dozeAmount
-                .map { dozeAmount ->
-                    dozeAmount *
-                        (burnInHelperWrapper.burnInOffset(
-                            /* amplitude = */ defaultBurnInOffset * 2,
-                            /* xAxis= */ false,
-                        ) - defaultBurnInOffset)
-                }
-                .distinctUntilChanged()
-        }
+        return burnIn.map { it.translationY.toFloat() }.flowOn(mainDispatcher)
     }
 }
