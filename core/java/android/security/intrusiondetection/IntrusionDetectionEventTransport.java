@@ -44,7 +44,8 @@ import java.util.List;
  * which will then be delivered to the specified location.
  *
  * Usage:
- * 1. Obtain an instance of {@link IntrusionDetectionEventTransport} using the constructor.
+ * 1. Obtain an instance of {@link IntrusionDetectionEventTransport} using the appropriate
+ *    creation method.
  * 2. Initialize the transport by calling {@link #initialize()}.
  * 3. Add events to the transport queue using {@link #addData(List)}.
  * 4. Release the transport when finished by calling {@link #release()}.

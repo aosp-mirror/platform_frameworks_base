@@ -230,7 +230,7 @@ public class IntrusionDetectionManager {
     /**
      * Disable intrusion detection.
      * If successful, IntrusionDetectionService will transition to {@link #STATE_DISABLED}.
-     * <p>
+     *
      * When intrusion detection is disabled, device events will no longer be collected.
      * Any events that have been collected but not yet sent to IntrusionDetectionEventTransport
      * will be transferred as a final batch.

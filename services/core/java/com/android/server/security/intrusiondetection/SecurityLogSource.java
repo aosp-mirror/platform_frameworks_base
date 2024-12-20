@@ -89,7 +89,7 @@ public class SecurityLogSource implements DataSource {
             List<IntrusionDetectionEvent> intrusionDetectionEvents =
                     events.stream()
                             .filter(event -> event != null)
-                            .map(event -> new IntrusionDetectionEvent(event))
+                            .map(event -> IntrusionDetectionEvent.createForSecurityEvent(event))
                             .collect(Collectors.toList());
             mDataAggregator.addBatchData(intrusionDetectionEvents);
         }
