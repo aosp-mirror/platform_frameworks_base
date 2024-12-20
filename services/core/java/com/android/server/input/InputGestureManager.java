@@ -173,7 +173,7 @@ final class InputGestureManager {
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_DPAD_LEFT,
-                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
                 ),
                 createKeyGesture(
@@ -183,7 +183,7 @@ final class InputGestureManager {
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_DPAD_RIGHT,
-                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
                 ),
                 createKeyGesture(
@@ -217,22 +217,22 @@ final class InputGestureManager {
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_MINUS,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT));
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_EQUALS,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN));
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_LEFT,
-                    KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT));
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_RIGHT,
-                    KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT));
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_UP,
-                    KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP));
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_DOWN,
-                    KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN));
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_M,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION));

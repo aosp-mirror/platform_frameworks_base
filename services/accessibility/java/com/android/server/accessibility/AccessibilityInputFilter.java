@@ -261,27 +261,27 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                             ? event.getDisplayId() : Display.DEFAULT_DISPLAY;
 
                     switch (gestureType) {
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN:
                                 mAms.getMagnificationController().scaleMagnificationByStep(
                                         displayId, MagnificationController.ZOOM_DIRECTION_IN);
                             return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT:
                                 mAms.getMagnificationController().scaleMagnificationByStep(
                                         displayId, MagnificationController.ZOOM_DIRECTION_OUT);
                             return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT:
                             mAms.getMagnificationController().panMagnificationByStep(
                                     displayId, MagnificationController.PAN_DIRECTION_LEFT);
                             return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT:
                             mAms.getMagnificationController().panMagnificationByStep(
                                     displayId, MagnificationController.PAN_DIRECTION_RIGHT);
                             return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP:
                             mAms.getMagnificationController().panMagnificationByStep(
                                     displayId, MagnificationController.PAN_DIRECTION_UP);
                             return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN:
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN:
                             mAms.getMagnificationController().panMagnificationByStep(
                                     displayId, MagnificationController.PAN_DIRECTION_DOWN);
                             return true;
@@ -292,12 +292,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 @Override
                 public boolean isKeyGestureSupported(int gestureType) {
                     return switch (gestureType) {
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN -> true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN -> true;
                         default -> false;
                     };
                 }
