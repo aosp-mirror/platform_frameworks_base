@@ -1395,7 +1395,9 @@ public final class PowerManagerService extends SystemService
             DisplayGroupPowerChangeListener displayGroupPowerChangeListener =
                     new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
-            mDisplayManager.registerDisplayListener(new DisplayListener(), mHandler);
+            if (mFeatureFlags.isScreenTimeoutPolicyListenerApiEnabled()) {
+                mDisplayManager.registerDisplayListener(new DisplayListener(), mHandler);
+            }
 
             if(mDreamManager != null){
                 // This DreamManager method does not acquire a lock, so it should be safe to call.
@@ -3852,6 +3854,10 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void notifyScreenTimeoutPolicyChangesLocked() {
+        if (!mFeatureFlags.isScreenTimeoutPolicyListenerApiEnabled()) {
+            return;
+        }
+
         for (int idx = 0; idx < mPowerGroups.size(); idx++) {
             final int powerGroupId = mPowerGroups.keyAt(idx);
             final PowerGroup powerGroup = mPowerGroups.valueAt(idx);
@@ -6011,6 +6017,11 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void addScreenTimeoutPolicyListener(int displayId,
                 IScreenTimeoutPolicyListener listener) {
+            if (!mFeatureFlags.isScreenTimeoutPolicyListenerApiEnabled()) {
+                throw new IllegalStateException("Screen timeout policy listener API flag "
+                        + "is not enabled");
+            }
+
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
 
@@ -6042,6 +6053,11 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void removeScreenTimeoutPolicyListener(int displayId,
                 IScreenTimeoutPolicyListener listener) {
+            if (!mFeatureFlags.isScreenTimeoutPolicyListenerApiEnabled()) {
+                throw new IllegalStateException("Screen timeout policy listener API flag "
+                        + "is not enabled");
+            }
+
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
 
