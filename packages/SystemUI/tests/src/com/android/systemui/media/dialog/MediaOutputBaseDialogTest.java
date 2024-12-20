@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.session.MediaController;
@@ -38,6 +41,7 @@ import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.graphics.drawable.IconCompat;
@@ -128,6 +132,21 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         when(mMediaController.getPackageName()).thenReturn(TEST_PACKAGE);
         mMediaControllers.add(mMediaController);
         when(mMediaSessionManager.getActiveSessions(any())).thenReturn(mMediaControllers);
+        createMediaSwitchingController(TEST_PACKAGE);
+
+        // Using a fake package will cause routing operations to fail, so we intercept
+        // scanning-related operations.
+        mMediaSwitchingController.mLocalMediaManager = mock(LocalMediaManager.class);
+        doNothing().when(mMediaSwitchingController.mLocalMediaManager).startScan();
+        doNothing().when(mMediaSwitchingController.mLocalMediaManager).stopScan();
+
+        mMediaOutputBaseDialogImpl =
+                new MediaOutputBaseDialogImpl(
+                        mContext, mBroadcastSender, mMediaSwitchingController);
+        mMediaOutputBaseDialogImpl.onCreate(new Bundle());
+    }
+
+    private void createMediaSwitchingController(String testPackage) {
         VolumePanelGlobalStateInteractor volumePanelGlobalStateInteractor =
                 VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
                         mKosmos);
@@ -135,7 +154,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaSwitchingController =
                 new MediaSwitchingController(
                         mContext,
-                        TEST_PACKAGE,
+                        testPackage,
                         mContext.getUser(),
                         /* token */ null,
                         mMediaSessionManager,
@@ -150,17 +169,40 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                         mFlags,
                         volumePanelGlobalStateInteractor,
                         mUserTracker);
+    }
 
-        // Using a fake package will cause routing operations to fail, so we intercept
-        // scanning-related operations.
-        mMediaSwitchingController.mLocalMediaManager = mock(LocalMediaManager.class);
-        doNothing().when(mMediaSwitchingController.mLocalMediaManager).startScan();
-        doNothing().when(mMediaSwitchingController.mLocalMediaManager).stopScan();
+    @Test
+    public void onCreate_noAppOpenIntent_metadataSectionNonClickable() {
+        createMediaSwitchingController(null);
 
         mMediaOutputBaseDialogImpl =
                 new MediaOutputBaseDialogImpl(
                         mContext, mBroadcastSender, mMediaSwitchingController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
+        final LinearLayout mediaMetadataSectionLayout =
+                mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                        R.id.media_metadata_section);
+
+        assertThat(mediaMetadataSectionLayout.isClickable()).isFalse();
+    }
+
+    @Test
+    public void onCreate_appOpenIntentAvailable_metadataSectionClickable() {
+        final PackageManager packageManager = mock(PackageManager.class);
+        mContext.setMockPackageManager(packageManager);
+        Intent intent = new Intent(TEST_PACKAGE);
+        doReturn(intent).when(packageManager).getLaunchIntentForPackage(TEST_PACKAGE);
+        createMediaSwitchingController(TEST_PACKAGE);
+
+        mMediaOutputBaseDialogImpl =
+                new MediaOutputBaseDialogImpl(
+                        mContext, mBroadcastSender, mMediaSwitchingController);
+        mMediaOutputBaseDialogImpl.onCreate(new Bundle());
+        final LinearLayout mediaMetadataSectionLayout =
+                mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                        R.id.media_metadata_section);
+
+        assertThat(mediaMetadataSectionLayout.isClickable()).isTrue();
     }
 
     @Test

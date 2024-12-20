@@ -268,8 +268,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> onStopButtonClick());
-        mMediaMetadataSectionLayout.setOnClickListener(
-                mMediaSwitchingController::tryToLaunchMediaApplication);
+        if (mMediaSwitchingController.getAppLaunchIntent() != null) {
+            // For a11y purposes only add listener if a section is clickable.
+            mMediaMetadataSectionLayout.setOnClickListener(
+                    mMediaSwitchingController::tryToLaunchMediaApplication);
+        }
 
         mDismissing = false;
     }
