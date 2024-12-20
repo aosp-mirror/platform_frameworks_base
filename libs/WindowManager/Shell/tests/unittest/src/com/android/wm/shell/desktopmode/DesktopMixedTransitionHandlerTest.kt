@@ -777,7 +777,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         task: RunningTaskInfo,
         withWallpaper: Boolean = false,
     ): TransitionInfo =
-        TransitionInfo(WindowManager.TRANSIT_CLOSE, 0 /* flags */).apply {
+        TransitionInfo(WindowManager.TRANSIT_CLOSE, /* flags= */ 0).apply {
             addChange(
                 TransitionInfo.Change(mock(), closingTaskLeash).apply {
                     mode = changeMode

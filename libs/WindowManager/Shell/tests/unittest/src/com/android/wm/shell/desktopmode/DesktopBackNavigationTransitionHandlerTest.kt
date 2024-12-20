@@ -153,7 +153,7 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
         changeMode: Int = WindowManager.TRANSIT_TO_BACK,
         task: RunningTaskInfo,
     ): TransitionInfo =
-        TransitionInfo(type, 0 /* flags */).apply {
+        TransitionInfo(type, /* flags= */ 0).apply {
             addChange(
                 TransitionInfo.Change(mock(), closingTaskLeash).apply {
                     mode = changeMode

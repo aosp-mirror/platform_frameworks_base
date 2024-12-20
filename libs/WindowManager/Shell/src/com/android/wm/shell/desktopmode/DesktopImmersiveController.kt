@@ -339,7 +339,7 @@ class DesktopImmersiveController(
                         .setWindowCrop(leash, endBounds.width(), endBounds.height())
                         .apply()
                     onTaskResizeAnimationListener?.onAnimationEnd(taskId)
-                    finishCallback.onTransitionFinished(null /* wct */)
+                    finishCallback.onTransitionFinished(/* wct= */ null)
                 }
             )
             addUpdateListener { animation ->

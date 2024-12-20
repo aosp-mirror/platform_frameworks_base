@@ -1256,7 +1256,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         // Set task as systemUI package
         val systemUIPackageName =
             context.resources.getString(com.android.internal.R.string.config_systemUi)
-        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        val baseComponent = ComponentName(systemUIPackageName, /* cls= */ "")
         val task =
             setUpFullscreenTask().apply {
                 baseActivity = baseComponent
@@ -1273,7 +1273,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         // Set task as systemUI package
         val systemUIPackageName =
             context.resources.getString(com.android.internal.R.string.config_systemUi)
-        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        val baseComponent = ComponentName(systemUIPackageName, /* cls= */ "")
         val task =
             setUpFullscreenTask().apply {
                 baseActivity = baseComponent
@@ -2728,7 +2728,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         // Set task as systemUI package
         val systemUIPackageName =
             context.resources.getString(com.android.internal.R.string.config_systemUi)
-        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        val baseComponent = ComponentName(systemUIPackageName, /* cls= */ "")
         val task =
             setUpFreeformTask().apply {
                 baseActivity = baseComponent
@@ -2749,7 +2749,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         // Set task as systemUI package
         val systemUIPackageName =
             context.resources.getString(com.android.internal.R.string.config_systemUi)
-        val baseComponent = ComponentName(systemUIPackageName, /* class */ "")
+        val baseComponent = ComponentName(systemUIPackageName, /* cls= */ "")
         val task =
             setUpFullscreenTask().apply {
                 baseActivity = baseComponent
@@ -3382,11 +3382,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            Point(100, -100), /* position */
-            PointF(200f, -200f), /* inputCoordinate */
-            Rect(100, -100, 500, 1000), /* currentDragBounds */
-            Rect(0, 50, 2000, 2000), /* validDragArea */
-            Rect() /* dragStartBounds */,
+            position = Point(100, -100),
+            inputCoordinate = PointF(200f, -200f),
+            currentDragBounds = Rect(100, -100, 500, 1000),
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
             motionEvent,
             desktopWindowDecoration,
         )
@@ -3421,11 +3421,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            Point(100, 200), /* position */
-            PointF(200f, 300f), /* inputCoordinate */
-            currentDragBounds, /* currentDragBounds */
-            Rect(0, 50, 2000, 2000) /* validDragArea */,
-            Rect() /* dragStartBounds */,
+            position = Point(100, 200),
+            inputCoordinate = PointF(200f, 300f),
+            currentDragBounds = currentDragBounds,
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
             motionEvent,
             desktopWindowDecoration,
         )
@@ -3465,11 +3465,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            Point(100, 50), /* position */
-            PointF(200f, 300f), /* inputCoordinate */
-            Rect(100, 50, 500, 1000), /* currentDragBounds */
-            Rect(0, 50, 2000, 2000) /* validDragArea */,
-            Rect() /* dragStartBounds */,
+            position = Point(100, 50),
+            inputCoordinate = PointF(200f, 300f),
+            currentDragBounds = Rect(100, 50, 500, 1000),
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
             motionEvent,
             desktopWindowDecoration,
         )
@@ -3504,11 +3504,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            Point(100, 50), /* position */
-            PointF(200f, 300f), /* inputCoordinate */
+            position = Point(100, 50),
+            inputCoordinate = PointF(200f, 300f),
             currentDragBounds,
-            Rect(0, 50, 2000, 2000) /* validDragArea */,
-            Rect() /* dragStartBounds */,
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
             motionEvent,
             desktopWindowDecoration,
         )
@@ -3561,11 +3561,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
         spyController.onDragPositioningEnd(
             task,
             mockSurface,
-            Point(100, 50), /* position */
-            PointF(200f, 300f), /* inputCoordinate */
-            currentDragBounds, /* currentDragBounds */
-            Rect(0, 50, 2000, 2000) /* validDragArea */,
-            Rect() /* dragStartBounds */,
+            position = Point(100, 50),
+            inputCoordinate = PointF(200f, 300f),
+            currentDragBounds = currentDragBounds,
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
             motionEvent,
             desktopWindowDecoration,
         )
@@ -5062,7 +5062,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         task: RunningTaskInfo?,
         @WindowManager.TransitionType type: Int = TRANSIT_OPEN,
     ): TransitionRequestInfo {
-        return TransitionRequestInfo(type, task, null /* remoteTransition */)
+        return TransitionRequestInfo(type, task, /* remoteTransition= */ null)
     }
 
     private companion object {
