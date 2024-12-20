@@ -24,7 +24,6 @@ import android.widget.ImageButton
 import androidx.annotation.LayoutRes
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
@@ -44,13 +43,16 @@ import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import javax.inject.Inject
 import kotlin.properties.Delegates
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 private const val CLOSE_DRAWER_DELAY = 300L
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogScope
 class VolumeDialogRingerViewBinder
 @Inject
@@ -95,7 +97,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         volumeDialogBackgroundView.background = volumeDialogBackgroundView.background.mutate()
 
         viewModel.ringerViewModel
-            .onEach { ringerState ->
+            .mapLatest { ringerState ->
                 when (ringerState) {
                     is RingerViewModelState.Available -> {
                         val uiModel = ringerState.uiModel
@@ -221,15 +223,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
             val unselectedButton =
                 getChildAt(count - previousIndex - 1)
                     .requireViewById<ImageButton>(R.id.volume_drawer_button)
-
-            // On roundness animation end.
-            val roundnessAnimationEndListener =
-                DynamicAnimation.OnAnimationEndListener { _, _, _, _ ->
-                    postDelayed(
-                        { bindButtons(viewModel, uiModel, onAnimationEnd, isAnimated = true) },
-                        CLOSE_DRAWER_DELAY,
-                    )
-                }
             // We only need to execute on roundness animation end and volume dialog background
             // progress update once because these changes should be applied once on volume dialog
             // background and ringer drawer views.
@@ -242,7 +235,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                     } else {
                         { _, _ -> }
                     },
-                    roundnessAnimationEndListener,
                 )
             }
             val unselectedCornerRadius =
@@ -256,6 +248,12 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                         { _, _ -> }
                     },
                 )
+            }
+            coroutineScope {
+                launch {
+                    delay(CLOSE_DRAWER_DELAY)
+                    bindButtons(viewModel, uiModel, onAnimationEnd, isAnimated = true)
+                }
             }
         } else {
             bindButtons(viewModel, uiModel, onAnimationEnd)
@@ -348,7 +346,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     private suspend fun ImageButton.animateTo(
         ringerButtonUiModel: RingerButtonUiModel,
         onProgressChanged: (Float, Boolean) -> Unit = { _, _ -> },
-        roundnessAnimationEndListener: DynamicAnimation.OnAnimationEndListener? = null,
     ) {
         val roundnessAnimation =
             SpringAnimation(FloatValueHolder(0F)).setSpring(roundnessSpringForce)
@@ -356,37 +353,32 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         val radius = (background as GradientDrawable).cornerRadius
         val cornerRadiusDiff =
             ringerButtonUiModel.cornerRadius - (background as GradientDrawable).cornerRadius
-        val roundnessAnimationUpdateListener =
-            DynamicAnimation.OnAnimationUpdateListener { _, value, _ ->
+        coroutineScope {
+            launch {
+                colorAnimation.suspendAnimate { value ->
+                    val currentIconColor =
+                        rgbEvaluator.evaluate(
+                            value.coerceIn(0F, 1F),
+                            imageTintList?.colors?.first(),
+                            ringerButtonUiModel.tintColor,
+                        ) as Int
+                    val currentBgColor =
+                        rgbEvaluator.evaluate(
+                            value.coerceIn(0F, 1F),
+                            (background as GradientDrawable).color?.colors?.get(0),
+                            ringerButtonUiModel.backgroundColor,
+                        ) as Int
+
+                    (background as GradientDrawable).setColor(currentBgColor)
+                    background.invalidateSelf()
+                    setColorFilter(currentIconColor)
+                }
+            }
+            roundnessAnimation.suspendAnimate { value ->
                 onProgressChanged(value, cornerRadiusDiff > 0F)
                 (background as GradientDrawable).cornerRadius = radius + value * cornerRadiusDiff
                 background.invalidateSelf()
             }
-        val colorAnimationUpdateListener =
-            DynamicAnimation.OnAnimationUpdateListener { _, value, _ ->
-                val currentIconColor =
-                    rgbEvaluator.evaluate(
-                        value.coerceIn(0F, 1F),
-                        imageTintList?.colors?.first(),
-                        ringerButtonUiModel.tintColor,
-                    ) as Int
-                val currentBgColor =
-                    rgbEvaluator.evaluate(
-                        value.coerceIn(0F, 1F),
-                        (background as GradientDrawable).color?.colors?.get(0),
-                        ringerButtonUiModel.backgroundColor,
-                    ) as Int
-
-                (background as GradientDrawable).setColor(currentBgColor)
-                background.invalidateSelf()
-                setColorFilter(currentIconColor)
-            }
-        coroutineScope {
-            launch { colorAnimation.suspendAnimate(colorAnimationUpdateListener) }
-            roundnessAnimation.suspendAnimate(
-                roundnessAnimationUpdateListener,
-                roundnessAnimationEndListener,
-            )
         }
     }
 
