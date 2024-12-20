@@ -95,6 +95,7 @@ import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDes
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
@@ -170,6 +171,7 @@ class DesktopTasksController(
     private val desktopModeEventLogger: DesktopModeEventLogger,
     private val desktopModeUiEventLogger: DesktopModeUiEventLogger,
     private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
+    private val desktopWallpaperActivityTokenProvider: DesktopWallpaperActivityTokenProvider,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -1366,7 +1368,7 @@ class DesktopTasksController(
     }
 
     private fun removeWallpaperActivity(wct: WindowContainerTransaction) {
-        taskRepository.wallpaperActivityToken?.let { token ->
+        desktopWallpaperActivityTokenProvider.getToken()?.let { token ->
             logV("removeWallpaperActivity")
             wct.removeTask(token)
         }
@@ -1396,9 +1398,7 @@ class DesktopTasksController(
         desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(
             FULLSCREEN_ANIMATION_DURATION
         )
-        if (taskRepository.wallpaperActivityToken != null) {
-            removeWallpaperActivity(wct)
-        }
+        removeWallpaperActivity(wct)
     }
 
     fun releaseVisualIndicator() {

@@ -43,6 +43,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.back.BackAnimationController
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -87,6 +88,9 @@ class DesktopTasksTransitionObserverTest {
     private val taskRepository = mock<DesktopRepository>()
     private val mixedHandler = mock<DesktopMixedTransitionHandler>()
     private val backAnimationController = mock<BackAnimationController>()
+    private val desktopWallpaperActivityTokenProvider =
+        mock<DesktopWallpaperActivityTokenProvider>()
+    private val wallpaperToken = MockToken().token()
 
     private lateinit var transitionObserver: DesktopTasksTransitionObserver
     private lateinit var shellInit: ShellInit
@@ -98,6 +102,7 @@ class DesktopTasksTransitionObserverTest {
 
         whenever(userRepositories.current).thenReturn(taskRepository)
         whenever(userRepositories.getProfile(anyInt())).thenReturn(taskRepository)
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(wallpaperToken)
 
         transitionObserver =
             DesktopTasksTransitionObserver(
@@ -107,6 +112,7 @@ class DesktopTasksTransitionObserverTest {
                 shellTaskOrganizer,
                 mixedHandler,
                 backAnimationController,
+                desktopWallpaperActivityTokenProvider,
                 shellInit,
             )
     }
@@ -236,9 +242,7 @@ class DesktopTasksTransitionObserverTest {
     fun closeLastTask_wallpaperTokenExists_wallpaperIsRemoved() {
         val mockTransition = Mockito.mock(IBinder::class.java)
         val task = createTaskInfo(1, WINDOWING_MODE_FREEFORM)
-        val wallpaperToken = MockToken().token()
         whenever(taskRepository.getVisibleTaskCount(task.displayId)).thenReturn(0)
-        whenever(taskRepository.wallpaperActivityToken).thenReturn(wallpaperToken)
 
         transitionObserver.onTransitionReady(
             transition = mockTransition,

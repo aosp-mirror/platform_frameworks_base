@@ -23,7 +23,6 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.view.Display.INVALID_DISPLAY
 import android.window.DesktopModeFlags
-import android.window.WindowContainerToken
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
@@ -89,9 +88,6 @@ class DesktopRepository(
             topTransparentFullscreenTaskId = null
         }
     }
-
-    /* Current wallpaper activity token to remove wallpaper activity when last task is removed. */
-    var wallpaperActivityToken: WindowContainerToken? = null
 
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
@@ -549,7 +545,6 @@ class DesktopRepository(
                 "${innerPrefix}topTransparentFullscreenTaskId=" +
                     "${data.topTransparentFullscreenTaskId}"
             )
-            pw.println("${innerPrefix}wallpaperActivityToken=$wallpaperActivityToken")
         }
     }
 
