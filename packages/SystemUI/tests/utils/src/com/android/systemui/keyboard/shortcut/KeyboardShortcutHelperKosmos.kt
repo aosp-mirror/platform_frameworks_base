@@ -69,10 +69,7 @@ var Kosmos.shortcutHelperMultiTaskingShortcutsSource: KeyboardShortcutGroupsSour
 val Kosmos.shortcutHelperStateRepository by
     Kosmos.Fixture {
         ShortcutHelperStateRepository(
-            fakeCommandQueue,
-            broadcastDispatcher,
             fakeInputManager.inputManager,
-            testScope,
             testDispatcher,
         )
     }
@@ -153,10 +150,20 @@ val Kosmos.customShortcutCategoriesRepository by
         )
     }
 
+val Kosmos.shortcutHelperCoreStartable by
+        Kosmos.Fixture {
+            ShortcutHelperCoreStartable(
+                fakeCommandQueue,
+                broadcastDispatcher,
+                shortcutHelperStateRepository,
+                testScope,
+            )
+        }
+
 val Kosmos.shortcutHelperTestHelper by
     Kosmos.Fixture {
         ShortcutHelperTestHelper(
-            shortcutHelperStateRepository,
+            shortcutHelperCoreStartable,
             applicationContext,
             broadcastDispatcher,
             fakeCommandQueue,

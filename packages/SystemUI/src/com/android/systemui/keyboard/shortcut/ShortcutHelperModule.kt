@@ -21,7 +21,6 @@ import com.android.systemui.Flags.keyboardShortcutHelperRewrite
 import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesRepository
-import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.CurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
@@ -95,8 +94,8 @@ interface ShortcutHelperModule {
 
         @Provides
         @IntoMap
-        @ClassKey(ShortcutHelperStateRepository::class)
-        fun repo(implLazy: Lazy<ShortcutHelperStateRepository>): CoreStartable {
+        @ClassKey(ShortcutHelperCoreStartable::class)
+        fun repo(implLazy: Lazy<ShortcutHelperCoreStartable>): CoreStartable {
             return if (keyboardShortcutHelperRewrite()) {
                 implLazy.get()
             } else {

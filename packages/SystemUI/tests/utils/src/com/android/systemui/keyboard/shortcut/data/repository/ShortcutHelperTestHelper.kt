@@ -23,12 +23,13 @@ import android.view.KeyboardShortcutGroup
 import android.view.WindowManager
 import android.view.WindowManager.KeyboardShortcutsReceiver
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
+import com.android.systemui.keyboard.shortcut.ShortcutHelperCoreStartable
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 
 class ShortcutHelperTestHelper(
-    repo: ShortcutHelperStateRepository,
+    coreStartable: ShortcutHelperCoreStartable,
     private val context: Context,
     private val fakeBroadcastDispatcher: FakeBroadcastDispatcher,
     private val fakeCommandQueue: FakeCommandQueue,
@@ -54,7 +55,7 @@ class ShortcutHelperTestHelper(
             keyboardShortcutReceiver.onKeyboardShortcutsReceived(currentAppsShortcuts)
             return@thenAnswer Unit
         }
-        repo.start()
+        coreStartable.start()
     }
 
     /**

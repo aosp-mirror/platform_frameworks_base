@@ -23,10 +23,9 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
@@ -39,7 +38,7 @@ constructor(
     private val repository: ShortcutHelperStateRepository
 ) {
 
-    val state: Flow<ShortcutHelperState> = repository.state.asStateFlow()
+    val state: Flow<ShortcutHelperState> = repository.state
 
     fun onViewClosed() {
         repository.hide()
