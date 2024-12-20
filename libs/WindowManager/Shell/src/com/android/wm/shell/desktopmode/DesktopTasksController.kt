@@ -1336,35 +1336,60 @@ class DesktopTasksController(
 
     private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
-        val userHandle = UserHandle.of(userId)
-        val userContext = context.createContextAsUser(userHandle, /* flags= */ 0)
-        val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
-        val options =
-            ActivityOptions.makeBasic().apply {
-                launchWindowingMode = WINDOWING_MODE_FULLSCREEN
-                pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-                if (Flags.enableBugFixesForSecondaryDisplay()) {
-                    launchDisplayId = displayId
+        if (Flags.enableDesktopWallpaperActivityOnSystemUser()) {
+            val intent = Intent(context, DesktopWallpaperActivity::class.java)
+            val options =
+                ActivityOptions.makeBasic().apply {
+                    launchWindowingMode = WINDOWING_MODE_FULLSCREEN
+                    pendingIntentBackgroundActivityStartMode =
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                        launchDisplayId = displayId
+                    }
                 }
-            }
-        val pendingIntent =
-            PendingIntent.getActivityAsUser(
-                userContext,
-                /* requestCode= */ 0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE,
-                /* options= */ null,
-                userHandle,
-            )
-        wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
+            val pendingIntent =
+                PendingIntent.getActivity(
+                    context,
+                    /* requestCode = */ 0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+            wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
+        } else {
+            val userHandle = UserHandle.of(userId)
+            val userContext = context.createContextAsUser(userHandle, /* flags= */ 0)
+            val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
+            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
+            val options =
+                ActivityOptions.makeBasic().apply {
+                    launchWindowingMode = WINDOWING_MODE_FULLSCREEN
+                    pendingIntentBackgroundActivityStartMode =
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                        launchDisplayId = displayId
+                    }
+                }
+            val pendingIntent =
+                PendingIntent.getActivityAsUser(
+                    userContext,
+                    /* requestCode= */ 0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE,
+                    /* options= */ null,
+                    userHandle,
+                )
+            wct.sendPendingIntent(pendingIntent, intent, options.toBundle())
+        }
     }
 
     private fun removeWallpaperActivity(wct: WindowContainerTransaction) {
         desktopWallpaperActivityTokenProvider.getToken()?.let { token ->
             logV("removeWallpaperActivity")
-            wct.removeTask(token)
+            if (Flags.enableDesktopWallpaperActivityOnSystemUser()) {
+                wct.reorder(token, /* onTop= */ false)
+            } else {
+                wct.removeTask(token)
+            }
         }
     }
 

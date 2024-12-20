@@ -29,6 +29,7 @@ import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVI
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.back.BackAnimationController
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition
@@ -235,11 +236,20 @@ class DesktopTasksTransitionObserver(
         if (transitionToCloseWallpaper == transition) {
             // TODO: b/362469671 - Handle merging the animation when desktop is also closing.
             desktopWallpaperActivityTokenProvider.getToken()?.let { wallpaperActivityToken ->
-                transitions.startTransition(
-                    TRANSIT_CLOSE,
-                    WindowContainerTransaction().removeTask(wallpaperActivityToken),
-                    null,
-                )
+                if (Flags.enableDesktopWallpaperActivityOnSystemUser()) {
+                    transitions.startTransition(
+                        TRANSIT_TO_BACK,
+                        WindowContainerTransaction()
+                            .reorder(wallpaperActivityToken, /* onTop= */ false),
+                        null,
+                    )
+                } else {
+                    transitions.startTransition(
+                        TRANSIT_CLOSE,
+                        WindowContainerTransaction().removeTask(wallpaperActivityToken),
+                        null,
+                    )
+                }
             }
             transitionToCloseWallpaper = null
         }
