@@ -17,8 +17,7 @@
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
-    <!-- TODO(b/332662551): Update this content description when this supports more than just
-         phone calls. -->
+
     <com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
         android:id="@+id/ongoing_activity_chip_background"
         android:layout_width="wrap_content"
@@ -34,7 +33,7 @@
         <ImageView
             android:src="@*android:drawable/ic_phone"
             android:id="@+id/ongoing_activity_chip_icon"
-            android:contentDescription="@string/ongoing_phone_call_content_description"
+            android:contentDescription="@string/ongoing_call_content_description"
             android:layout_width="@dimen/ongoing_activity_chip_icon_size"
             android:layout_height="@dimen/ongoing_activity_chip_icon_size"
             android:tint="?android:attr/colorPrimary"

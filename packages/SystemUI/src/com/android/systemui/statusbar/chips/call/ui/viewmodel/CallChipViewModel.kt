@@ -132,7 +132,7 @@ constructor(
         private val phoneIcon =
             Icon.Resource(
                 com.android.internal.R.drawable.ic_phone,
-                ContentDescription.Resource(R.string.ongoing_phone_call_content_description),
+                ContentDescription.Resource(R.string.ongoing_call_content_description),
             )
         private val TAG = "CallVM".pad()
     }

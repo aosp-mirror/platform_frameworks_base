@@ -149,10 +149,9 @@ object OngoingActivityChipBinder {
         // 1. Set up the right visual params.
         with(iconView) {
             id = CUSTOM_ICON_VIEW_ID
-            // TODO(b/354930838): Update the content description to not include "phone" and maybe
-            // include the app name.
+            // TODO(b/354930838): For RON chips, use the app name for the content description.
             contentDescription =
-                context.resources.getString(R.string.ongoing_phone_call_content_description)
+                context.resources.getString(R.string.ongoing_call_content_description)
             tintView(iconTint)
         }
 
