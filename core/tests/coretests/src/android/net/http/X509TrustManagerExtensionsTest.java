@@ -18,6 +18,8 @@ package android.net.http;
 
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.org.conscrypt.TrustManagerImpl;
@@ -32,6 +34,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class X509TrustManagerExtensionsTest {
 
