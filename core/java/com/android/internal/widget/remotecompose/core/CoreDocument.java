@@ -62,7 +62,7 @@ public class CoreDocument {
 
     // We also keep a more fine-grained BUILD number, exposed as
     // ID_API_LEVEL = DOCUMENT_API_LEVEL + BUILD
-    static final float BUILD = 0.1f;
+    static final float BUILD = 0.2f;
 
     @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
 
@@ -1058,7 +1058,7 @@ public class CoreDocument {
      * @param theme the theme we want to use for this document.
      */
     public void paint(@NonNull RemoteContext context, int theme) {
-        context.getLastOpCount();
+        context.clearLastOpCount();
         context.getPaintContext().clearNeedsRepaint();
         context.loadFloat(RemoteContext.ID_DENSITY, context.getDensity());
         context.mMode = RemoteContext.ContextMode.UNSET;

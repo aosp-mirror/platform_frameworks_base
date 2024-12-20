@@ -528,6 +528,7 @@ public class RemoteComposeState implements CollectionsAccess {
 
     public void setContext(@NonNull RemoteContext context) {
         mRemoteContext = context;
+        mRemoteContext.clearLastOpCount();
     }
 
     public void updateObject(int id, @NonNull Object value) {

@@ -743,4 +743,9 @@ public abstract class RemoteContext {
         mOpCount = 0;
         return count;
     }
+
+    /** Explicitly clear the operation counter */
+    public void clearLastOpCount() {
+        mOpCount = 0;
+    }
 }
