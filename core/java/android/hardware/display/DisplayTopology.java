@@ -201,10 +201,9 @@ public final class DisplayTopology implements Parcelable {
         // The optimal pair is the pair which has the smallest deviation. The deviation consists of
         // an x-axis component and a y-axis component, called xDeviation and yDeviation.
         //
-        // The deviations are like distances but a little different. They are calculated in two
-        // steps. The first step calculates both axes in a similar way. The next step compares the
-        // two values and chooses which axis to attach along. Depending on which axis is chosen,
-        // the deviation for one axis is updated. See below for details.
+        // The deviations are like distances but a little different. When they are calculated, each
+        // dimension is treated differently, depending on which edges (left+right or top+bottom) are
+        // attached.
         while (!needsParent.isEmpty()) {
             double bestDist = Double.POSITIVE_INFINITY;
             TreeNode bestChild = null, bestParent = null;
@@ -218,33 +217,32 @@ public final class DisplayTopology implements Parcelable {
                     float parentRight = parentPos.x + parent.getWidth();
                     float parentBottom = parentPos.y + parent.getHeight();
 
-                    // This is the smaller of the two ranges minus the amount of overlap shared
-                    // between them. The "amount of overlap" is negative if there is no overlap, but
-                    // this does not make a parenting ineligible, because we allow for attaching at
-                    // the corner and for floating point error. The overlap is more negative the
-                    // farther apart the closest corner pair is.
-                    //
-                    // For each axis, this calculates (SmallerRange - Overlap). If one range lies
-                    // completely in the other (or they are equal), the axis' deviation will be
-                    // zero.
-                    //
-                    // The "SmallerRange," which refers to smaller of the widths of the two rects,
-                    // or smaller of the heights of the two rects, is added to the deviation so that
-                    // a maximum overlap results in a deviation of zero.
-                    float xSmallerRange = Math.min(child.getWidth(), parent.getWidth());
-                    float ySmallerRange = Math.min(child.getHeight(), parent.getHeight());
-                    float xOverlap
-                            = Math.min(parentRight, childRight)
-                            - Math.max(parentPos.x, childPos.x);
-                    float yOverlap
-                            = Math.min(parentBottom, childBottom)
-                            - Math.max(parentPos.y, childPos.y);
-                    float xDeviation = xSmallerRange - xOverlap;
-                    float yDeviation = ySmallerRange - yOverlap;
+                    // The "amount of overlap" indicates how much of one display is within the other
+                    // (considering one axis only). It's zero if they only share an edge and
+                    // negative if they're away from each other.
+                    // A zero or negative overlap does not make a parenting ineligible, because we
+                    // allow for attaching at the corner and for floating point error.
+                    float xOverlap =
+                            Math.min(parentRight, childRight) - Math.max(parentPos.x, childPos.x);
+                    float yOverlap =
+                            Math.min(parentBottom, childBottom) - Math.max(parentPos.y, childPos.y);
+                    float xDeviation, yDeviation;
 
                     float offset;
                     int pos;
-                    if (xDeviation <= yDeviation) {
+                    if (Math.abs(xOverlap) > Math.abs(yOverlap)) {
+                        // Deviation in each dimension is a penalty in the potential parenting. To
+                        // get the X deviation, overlap is subtracted from the lesser width so that
+                        // a maximum overlap results in a deviation of zero.
+                        // Note that because xOverlap is *subtracted* from the lesser width, no
+                        // overlap in X becomes a *penalty* if we are attaching on the top+bottom
+                        // edges.
+                        //
+                        // The Y deviation is simply the distance from the clamping edges.
+                        //
+                        // Treatment of the X and Y deviations are swapped for
+                        // POSITION_LEFT/POSITION_RIGHT attachments in the "else" block below.
+                        xDeviation = Math.min(child.getWidth(), parent.getWidth()) - xOverlap;
                         if (childPos.y < parentPos.y) {
                             yDeviation = childBottom - parentPos.y;
                             pos = POSITION_TOP;
@@ -254,6 +252,7 @@ public final class DisplayTopology implements Parcelable {
                         }
                         offset = childPos.x - parentPos.x;
                     } else {
+                        yDeviation = Math.min(child.getHeight(), parent.getHeight()) - yOverlap;
                         if (childPos.x < parentPos.x) {
                             xDeviation = childRight - parentPos.x;
                             pos = POSITION_LEFT;
