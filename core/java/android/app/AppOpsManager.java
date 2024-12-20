@@ -2814,7 +2814,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED)
             .build(),
         new AppOpInfo.Builder(OP_TAKE_AUDIO_FOCUS, OPSTR_TAKE_AUDIO_FOCUS, "TAKE_AUDIO_FOCUS")
-            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+            .setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
         new AppOpInfo.Builder(OP_AUDIO_MASTER_VOLUME, OPSTR_AUDIO_MASTER_VOLUME,
                 "AUDIO_MASTER_VOLUME").setSwitchCode(OP_AUDIO_MASTER_VOLUME)
             .setRestriction(UserManager.DISALLOW_ADJUST_VOLUME)
@@ -3377,10 +3377,6 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        if (op == OP_TAKE_AUDIO_FOCUS && roForegroundAudioControl()) {
-            // when removing the flag, change the entry in sAppOpInfos for OP_TAKE_AUDIO_FOCUS
-            return AppOpsManager.MODE_FOREGROUND;
-        }
         return sAppOpInfos[op].defaultMode;
     }
 
