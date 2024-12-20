@@ -119,6 +119,10 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         val permissions = service.getState { with(permissionPolicy) { getPermissions() } }
 
         for (appOpCode in 0 until AppOpsManager._NUM_OP) {
+            // Ops that default to MODE_FOREGROUND are foregroundable.
+            if (AppOpsManager.opToDefaultMode(appOpCode) == AppOpsManager.MODE_FOREGROUND) {
+                foregroundableOps[appOpCode] = true
+            }
             AppOpsManager.opToPermission(appOpCode)?.let { permissionName ->
                 // Multiple ops might map to a single permission but only one is considered the
                 // runtime appop calculations.
