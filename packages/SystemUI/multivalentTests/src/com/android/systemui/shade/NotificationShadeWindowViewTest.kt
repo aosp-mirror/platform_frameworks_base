@@ -19,6 +19,8 @@ import android.content.res.Configuration
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
+import android.view.Choreographer
+import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -44,6 +46,7 @@ import com.android.systemui.settings.brightness.data.repository.BrightnessMirror
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.DragDownHelper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationInsetsController
@@ -66,6 +69,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.window.ui.viewmodel.WindowRootViewModel
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,6 +95,9 @@ import org.mockito.kotlin.eq
 @SmallTest
 class NotificationShadeWindowViewTest : SysuiTestCase() {
 
+    @Mock private lateinit var choreographer: Choreographer
+    @Mock private lateinit var blurUtils: BlurUtils
+    @Mock private lateinit var windowRootViewModelFactory: WindowRootViewModel.Factory
     @Mock private lateinit var dragDownHelper: DragDownHelper
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var shadeController: ShadeController
@@ -168,6 +175,9 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         testScope = TestScope()
         controller =
             NotificationShadeWindowViewController(
+                blurUtils,
+                windowRootViewModelFactory,
+                choreographer,
                 lockscreenShadeTransitionController,
                 FalsingCollectorFake(),
                 statusBarStateController,

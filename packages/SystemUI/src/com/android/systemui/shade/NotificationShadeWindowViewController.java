@@ -23,6 +23,7 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -60,6 +61,7 @@ import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirr
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
+import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationInsetsController;
@@ -79,6 +81,8 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.window.ui.WindowRootViewBinder;
+import com.android.systemui.window.ui.viewmodel.WindowRootViewModel;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -160,6 +164,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
     @ExperimentalCoroutinesApi
     @Inject
     public NotificationShadeWindowViewController(
+            BlurUtils blurUtils,
+            WindowRootViewModel.Factory windowRootViewModelFactory,
+            Choreographer choreographer,
             LockscreenShadeTransitionController transitionController,
             FalsingCollector falsingCollector,
             SysuiStatusBarStateController statusBarStateController,
@@ -259,7 +266,16 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (ShadeWindowGoesAround.isEnabled()) {
             mView.setConfigurationForwarder(configurationForwarder.get());
         }
+        bindWindowRootView(blurUtils, windowRootViewModelFactory, choreographer);
         dumpManager.registerDumpable(this);
+    }
+
+    private void bindWindowRootView(BlurUtils blurUtils,
+            WindowRootViewModel.Factory windowRootViewModelFactory, Choreographer choreographer) {
+        if (SceneContainerFlag.isEnabled()) return;
+
+        WindowRootViewBinder.INSTANCE.bind(mView, windowRootViewModelFactory, blurUtils,
+                choreographer);
     }
 
     private void bindBouncer(BouncerViewBinder bouncerViewBinder) {
