@@ -28,6 +28,7 @@ import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
+import android.view.KeyEvent.KEYCODE_EQUALS
 import android.view.KeyEvent.KEYCODE_LEFT_BRACKET
 import android.view.KeyEvent.KEYCODE_MINUS
 import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
@@ -147,10 +148,19 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     }
 
     /** Click maximise button on the app header for the given app. */
-    fun maximiseDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
-        val caption = getCaptionForTheApp(wmHelper, device)
-        val maximizeButton = getMaximizeButtonForTheApp(caption)
-        maximizeButton.click()
+    fun maximiseDesktopApp(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        usingKeyboard: Boolean = false
+    ) {
+        if (usingKeyboard) {
+            val keyEventHelper = KeyEventHelper(getInstrumentation())
+            keyEventHelper.press(KEYCODE_EQUALS, META_META_ON)
+        } else {
+            val caption = getCaptionForTheApp(wmHelper, device)
+            val maximizeButton = getMaximizeButtonForTheApp(caption)
+            maximizeButton.click()
+        }
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 
