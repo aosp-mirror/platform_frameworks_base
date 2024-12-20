@@ -426,7 +426,7 @@ class DesktopMixedTransitionHandler(
 
     private fun isWallpaperActivityClosing(info: TransitionInfo) =
         info.changes.any { change ->
-            change.mode == TRANSIT_CLOSE &&
+            TransitionUtil.isClosingMode(change.mode) &&
                 change.taskInfo != null &&
                 DesktopWallpaperActivity.isWallpaperTask(change.taskInfo!!)
         }
