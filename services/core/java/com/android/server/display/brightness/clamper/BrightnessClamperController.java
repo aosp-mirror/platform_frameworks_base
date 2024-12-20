@@ -195,6 +195,19 @@ public class BrightnessClamperController {
         mModifiers.forEach(BrightnessStateModifier::stop);
     }
 
+    /**
+     * returns max allowed brightness.
+     * TODO(b/387452517): introduce constrainBrightness method
+     */
+    public float getMaxBrightness() {
+        return mModifiersAggregatedState.mMaxBrightness;
+    }
+
+    public boolean isThrottled() {
+        return mModifiersAggregatedState.mMaxBrightnessReason
+                != BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+    }
+
 
     // Called in DisplayControllerHandler
     private void recalculateModifiersState() {
@@ -306,7 +319,7 @@ public class BrightnessClamperController {
             BrightnessWearBedtimeModeModifier.WearBedtimeModeData {
         @NonNull
         private final String mUniqueDisplayId;
-        @NonNull
+        @Nullable
         private final String mThermalThrottlingDataId;
         @NonNull
         private final String mPowerThrottlingDataId;
@@ -322,7 +335,7 @@ public class BrightnessClamperController {
         final int mDisplayId;
 
         public DisplayDeviceData(@NonNull String uniqueDisplayId,
-                @NonNull String thermalThrottlingDataId,
+                @Nullable String thermalThrottlingDataId,
                 @NonNull String powerThrottlingDataId,
                 @NonNull DisplayDeviceConfig displayDeviceConfig,
                 int width,
@@ -345,7 +358,7 @@ public class BrightnessClamperController {
             return mUniqueDisplayId;
         }
 
-        @NonNull
+        @Nullable
         @Override
         public String getThermalThrottlingDataId() {
             return mThermalThrottlingDataId;
@@ -354,6 +367,9 @@ public class BrightnessClamperController {
         @Nullable
         @Override
         public ThermalBrightnessThrottlingData getThermalBrightnessThrottlingData() {
+            if (mThermalThrottlingDataId == null) {
+                return null;
+            }
             return mDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId().get(
                     mThermalThrottlingDataId);
         }
