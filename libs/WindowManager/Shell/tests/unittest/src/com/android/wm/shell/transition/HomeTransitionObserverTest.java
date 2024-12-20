@@ -25,7 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;

@@ -37,6 +37,9 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.animation.FloatProperties
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.animation.PhysicsAnimator
@@ -46,9 +49,6 @@ import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UND
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
-import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
-import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator.Companion.DRAG_FREEFORM_SCALE
