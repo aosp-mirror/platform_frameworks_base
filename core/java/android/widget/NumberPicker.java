@@ -59,6 +59,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -790,7 +791,11 @@ public class NumberPicker extends LinearLayout {
         paint.setAntiAlias(true);
         paint.setTextAlign(Align.CENTER);
         paint.setTextSize(mTextSize);
-        paint.setTypeface(mInputText.getTypeface());
+        if (Flags.fixUnboldedTypefaceForNumberpicker()) {
+            paint.setTypeface(mInputText.getPaint().getTypeface());
+        } else {
+            paint.setTypeface(mInputText.getTypeface());
+        }
         ColorStateList colors = mInputText.getTextColors();
         int color = colors.getColorForState(ENABLED_STATE_SET, Color.WHITE);
         paint.setColor(color);
