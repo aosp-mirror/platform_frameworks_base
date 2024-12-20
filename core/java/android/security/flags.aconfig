@@ -146,3 +146,10 @@ flag {
     bug: "380120712"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "disable_adaptive_auth_counter_lock"
+    namespace: "biometrics"
+    description: "Flag to allow an adb secure setting to disable the adaptive auth lock"
+    bug: "371057865"
+}
