@@ -96,6 +96,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserPackage;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryStatsInternal;
@@ -1784,7 +1785,8 @@ public class AlarmManagerService extends SystemService {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms()
-                && UserManager.supportsMultipleUsers();
+                && UserManager.supportsMultipleUsers() && Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_allowAlarmsOnStoppedUsers);
         if (mStartUserBeforeScheduledAlarms) {
             mUserWakeupStore = new UserWakeupStore();
             mUserWakeupStore.init();
