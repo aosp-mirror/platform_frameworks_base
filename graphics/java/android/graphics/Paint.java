@@ -1586,18 +1586,6 @@ public class Paint {
      * @return         typeface
      */
     public Typeface setTypeface(Typeface typeface) {
-        if (Flags.typefaceRedesignReadonly() && typeface != null
-                && typeface.isVariationInstance()) {
-            Log.w(TAG, "Attempting to set a Typeface on a Paint object that was previously "
-                    + "configured with setFontVariationSettings(). This is no longer supported as "
-                    + "of Target SDK " + Build.VERSION_CODES.BAKLAVA + ". To apply font"
-                    + " variations, call setFontVariationSettings() directly on the Paint object"
-                    + " instead.");
-        }
-        return setTypefaceWithoutWarning(typeface);
-    }
-
-    private Typeface setTypefaceWithoutWarning(Typeface typeface) {
         final long typefaceNative = typeface == null ? 0 : typeface.native_instance;
         nSetTypeface(mNativePaint, typefaceNative);
         mTypeface = typeface;
@@ -2195,7 +2183,7 @@ public class Paint {
 
         if (settings == null || settings.length() == 0) {
             mFontVariationSettings = null;
-            setTypefaceWithoutWarning(Typeface.createFromTypefaceWithVariation(mTypeface,
+            setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface,
                       Collections.emptyList()));
             return true;
         }
@@ -2214,8 +2202,7 @@ public class Paint {
             return false;
         }
         mFontVariationSettings = settings;
-        setTypefaceWithoutWarning(
-                Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
+        setTypeface(Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
         return true;
     }
 
