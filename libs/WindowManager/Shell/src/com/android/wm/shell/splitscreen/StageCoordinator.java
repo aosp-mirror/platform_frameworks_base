@@ -746,6 +746,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "Reordering hide-task to bottom");
             wct.reorder(hideTaskToken, false /* onTop */);
         }
+        prepareTasksForSplitScreen(new int[] {taskId}, wct);
         wct.startTask(taskId, options);
         // If this should be mixed, send the task to avoid split handle transition directly.
         if (mMixedHandler != null && mMixedHandler.isTaskInPip(taskId, mTaskOrganizer)) {
