@@ -86,7 +86,6 @@ class CarrierConfigRepositoryImplTest : SysuiTestCase() {
                 carrierConfigManager,
                 dumpManager,
                 logger,
-                testScope.backgroundScope,
             )
 
         carrierConfigCoreStartable =

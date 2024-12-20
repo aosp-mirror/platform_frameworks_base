@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.util.IndentingPrintWriter
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.log.table.logDiffsForTable
@@ -54,7 +54,7 @@ class FullMobileConnectionRepository(
     subscriptionModel: Flow<SubscriptionModel?>,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
     private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,
 ) : MobileConnectionRepository {
@@ -403,7 +403,7 @@ class FullMobileConnectionRepository(
     class Factory
     @Inject
     constructor(
-        @Application private val scope: CoroutineScope,
+        @Background private val scope: CoroutineScope,
         private val logFactory: TableLogBufferFactory,
         private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
         private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,

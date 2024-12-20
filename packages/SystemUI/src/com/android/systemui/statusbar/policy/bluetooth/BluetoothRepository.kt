@@ -16,15 +16,14 @@ package com.android.systemui.statusbar.policy.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothProfile
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -52,7 +51,7 @@ interface BluetoothRepository {
 class BluetoothRepositoryImpl
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val localBluetoothManager: LocalBluetoothManager?,
 ) : BluetoothRepository {
@@ -67,7 +66,7 @@ constructor(
     }
 
     private suspend fun fetchConnectionStatus(
-        currentDevices: Collection<CachedBluetoothDevice>,
+        currentDevices: Collection<CachedBluetoothDevice>
     ): ConnectionStatusModel {
         return withContext(bgDispatcher) {
             val minimumMaxConnectionState =

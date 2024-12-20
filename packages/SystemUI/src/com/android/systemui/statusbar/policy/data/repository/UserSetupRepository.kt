@@ -16,11 +16,10 @@
 
 package com.android.systemui.statusbar.policy.data.repository
 
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +48,7 @@ class UserSetupRepositoryImpl
 constructor(
     private val deviceProvisionedController: DeviceProvisionedController,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
 ) : UserSetupRepository {
     override val isUserSetUp: StateFlow<Boolean> =
         conflatedCallbackFlow {

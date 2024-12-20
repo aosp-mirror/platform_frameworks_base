@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 import android.content.Context
 import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -63,7 +63,7 @@ constructor(
     private val context: Context,
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     interactor: WifiInteractor,
-    @Application private val scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     wifiConstants: WifiConstants,
 ) : WifiViewModelCommon {
     override val wifiIcon: StateFlow<WifiIcon> =
@@ -89,15 +89,11 @@ constructor(
                     else -> WifiIcon.Hidden
                 }
             }
-            .logDiffsForTable(
-                wifiTableLogBuffer,
-                columnPrefix = "",
-                initialValue = WifiIcon.Hidden,
-            )
+            .logDiffsForTable(wifiTableLogBuffer, columnPrefix = "", initialValue = WifiIcon.Hidden)
             .stateIn(
                 scope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = WifiIcon.Hidden
+                initialValue = WifiIcon.Hidden,
             )
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */

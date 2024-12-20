@@ -17,9 +17,10 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -41,7 +42,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * View model for describing the system's current mobile cellular connections. The result is a list
@@ -59,7 +59,7 @@ constructor(
     private val airplaneModeInteractor: AirplaneModeInteractor,
     private val constants: ConnectivityConstants,
     private val flags: FeatureFlagsClassic,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
 ) {
     @VisibleForTesting
     val reuseCache = mutableMapOf<Int, Pair<MobileIconViewModel, CoroutineScope>>()

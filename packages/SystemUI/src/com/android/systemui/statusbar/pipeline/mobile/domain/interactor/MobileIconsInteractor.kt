@@ -23,7 +23,7 @@ import android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS
 import com.android.systemui.log.table.TableLogBuffer
@@ -138,7 +138,7 @@ constructor(
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     private val context: Context,
     private val featureFlagsClassic: FeatureFlagsClassic,
 ) : MobileIconsInteractor {
