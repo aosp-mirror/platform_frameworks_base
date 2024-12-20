@@ -86,8 +86,8 @@ public class X509TrustManagerExtensions {
         try {
             checkServerTrustedOcspAndTlsData = tm.getClass().getMethod("checkServerTrusted",
                     X509Certificate[].class,
-                    Byte[].class,
-                    Byte[].class,
+                    byte[].class,
+                    byte[].class,
                     String.class,
                     String.class);
         } catch (ReflectiveOperationException ignored) { }
@@ -179,7 +179,7 @@ public class X509TrustManagerExtensions {
         }
         try {
             result = (List<X509Certificate>) mCheckServerTrustedOcspAndTlsData.invoke(mTrustManager,
-                    ocspData, tlsSctData, chain, authType, host);
+                    chain, ocspData, tlsSctData, authType, host);
             return result == null ? Collections.emptyList() : result;
         } catch (IllegalAccessException e) {
             throw new CertificateException("Failed to call checkServerTrusted", e);
