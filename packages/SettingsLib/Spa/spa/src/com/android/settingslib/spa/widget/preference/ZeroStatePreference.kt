@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,8 +48,8 @@ import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.star
 import androidx.graphics.shapes.toPath
-import com.android.settingslib.spa.framework.theme.toSemiBoldWeight
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ZeroStatePreference(icon: ImageVector, text: String? = null, description: String? = null) {
     val zeroStateShape = remember {
@@ -81,7 +82,7 @@ fun ZeroStatePreference(icon: ImageVector, text: String? = null, description: St
             Text(
                 text = text,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium.toSemiBoldWeight(),
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 24.dp),
             )

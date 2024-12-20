@@ -195,7 +195,9 @@ private fun SpinnerText(
                     else Modifier
                 ),
         color = color,
-        style = MaterialTheme.typography.labelLarge,
+        style =
+            if (isSpaExpressiveEnabled) MaterialTheme.typography.titleMedium
+            else MaterialTheme.typography.labelLarge,
     )
 }
 
