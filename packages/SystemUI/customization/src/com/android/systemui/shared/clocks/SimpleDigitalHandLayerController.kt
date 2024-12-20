@@ -17,8 +17,8 @@
 package com.android.systemui.shared.clocks
 
 import android.graphics.Rect
-import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Interpolator
 import android.widget.RelativeLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
@@ -32,22 +32,56 @@ import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
-import com.android.systemui.shared.clocks.view.SimpleDigitalClockView
+import com.android.systemui.shared.clocks.view.HorizontalAlignment
+import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
+import com.android.systemui.shared.clocks.view.VerticalAlignment
 import java.util.Locale
 import java.util.TimeZone
 
 private val TAG = SimpleDigitalHandLayerController::class.simpleName!!
 
-open class SimpleDigitalHandLayerController<T>(
-    private val clockCtx: ClockContext,
-    private val layer: DigitalHandLayer,
-    override val view: T,
-) : SimpleClockLayerController where T : View, T : SimpleDigitalClockView {
-    private val logger = Logger(clockCtx.messageBuffer, TAG)
-    val timespec = DigitalTimespecHandler(layer.timespec, layer.dateTimeFormat)
+// TODO(b/364680879): The remains of ClockDesign. Cut further.
+data class LayerConfig(
+    val style: FontTextStyle,
+    val aodStyle: FontTextStyle,
+    val alignment: DigitalAlignment,
+    val timespec: DigitalTimespec,
+    val dateTimeFormat: String,
+) {
+    fun generateDigitalLayerIdString(): String {
+        return when {
+            timespec == DigitalTimespec.TIME_FULL_FORMAT -> "$timespec"
+            "h" in dateTimeFormat -> "HOUR_$timespec"
+            else -> "MINUTE_$timespec"
+        }
+    }
+}
 
-    @VisibleForTesting
-    fun hasLeadingZero() = layer.dateTimeFormat.startsWith("hh") || timespec.is24Hr
+data class DigitalAlignment(
+    val horizontalAlignment: HorizontalAlignment?,
+    val verticalAlignment: VerticalAlignment?,
+)
+
+data class FontTextStyle(
+    val lineHeight: Float? = null,
+    val fontSizeScale: Float? = null,
+    val transitionDuration: Long = -1L,
+    val transitionInterpolator: Interpolator? = null,
+)
+
+enum class DigitalTimespec {
+    TIME_FULL_FORMAT,
+    FIRST_DIGIT,
+    SECOND_DIGIT,
+}
+
+open class SimpleDigitalHandLayerController(
+    private val clockCtx: ClockContext,
+    private val layerCfg: LayerConfig,
+) : SimpleClockLayerController {
+    override val view = SimpleDigitalClockTextView(clockCtx)
+    private val logger = Logger(clockCtx.messageBuffer, TAG)
+    val timespec = DigitalTimespecHandler(layerCfg.timespec, layerCfg.dateTimeFormat)
 
     @VisibleForTesting
     override var fakeTimeMills: Long?
@@ -65,143 +99,15 @@ open class SimpleDigitalHandLayerController<T>(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             )
-        if (layer.alignment != null) {
-            layer.alignment.verticalAlignment?.let { view.verticalAlignment = it }
-            layer.alignment.horizontalAlignment?.let { view.horizontalAlignment = it }
-        }
-        view.applyStyles(layer.style, layer.aodStyle)
+        layerCfg.alignment.verticalAlignment?.let { view.verticalAlignment = it }
+        layerCfg.alignment.horizontalAlignment?.let { view.horizontalAlignment = it }
+        view.applyStyles(layerCfg.style, layerCfg.aodStyle)
         view.id =
             clockCtx.resources.getIdentifier(
-                generateDigitalLayerIdString(layer),
+                layerCfg.generateDigitalLayerIdString(),
                 "id",
                 clockCtx.context.getPackageName(),
             )
-    }
-
-    fun applyLayout(layout: DigitalFaceLayout?) {
-        when (layout) {
-            DigitalFaceLayout.FOUR_DIGITS_ALIGN_CENTER,
-            DigitalFaceLayout.FOUR_DIGITS_HORIZONTAL -> applyFourDigitsLayout(layout)
-            DigitalFaceLayout.TWO_PAIRS_HORIZONTAL,
-            DigitalFaceLayout.TWO_PAIRS_VERTICAL -> applyTwoPairsLayout(layout)
-            else -> {
-                // one view always use FrameLayout
-                // no need to change here
-            }
-        }
-        applyMargin()
-    }
-
-    private fun applyMargin() {
-        if (view.layoutParams is RelativeLayout.LayoutParams) {
-            val lp = view.layoutParams as RelativeLayout.LayoutParams
-            layer.marginRatio?.let {
-                lp.setMargins(
-                    /* left = */ (it.left * view.measuredWidth).toInt(),
-                    /* top = */ (it.top * view.measuredHeight).toInt(),
-                    /* right = */ (it.right * view.measuredWidth).toInt(),
-                    /* bottom = */ (it.bottom * view.measuredHeight).toInt(),
-                )
-            }
-            view.layoutParams = lp
-        }
-    }
-
-    private fun applyTwoPairsLayout(twoPairsLayout: DigitalFaceLayout) {
-        val lp = view.layoutParams as RelativeLayout.LayoutParams
-        lp.addRule(RelativeLayout.TEXT_ALIGNMENT_CENTER)
-        if (twoPairsLayout == DigitalFaceLayout.TWO_PAIRS_HORIZONTAL) {
-            when (view.id) {
-                R.id.HOUR_DIGIT_PAIR -> {
-                    lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                    lp.addRule(RelativeLayout.ALIGN_PARENT_START)
-                }
-                R.id.MINUTE_DIGIT_PAIR -> {
-                    lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                    lp.addRule(RelativeLayout.END_OF, R.id.HOUR_DIGIT_PAIR)
-                }
-                else -> {
-                    throw Exception("cannot apply two pairs layout to view ${view.id}")
-                }
-            }
-        } else {
-            when (view.id) {
-                R.id.HOUR_DIGIT_PAIR -> {
-                    lp.addRule(RelativeLayout.CENTER_HORIZONTAL)
-                    lp.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                }
-                R.id.MINUTE_DIGIT_PAIR -> {
-                    lp.addRule(RelativeLayout.CENTER_HORIZONTAL)
-                    lp.addRule(RelativeLayout.BELOW, R.id.HOUR_DIGIT_PAIR)
-                }
-                else -> {
-                    throw Exception("cannot apply two pairs layout to view ${view.id}")
-                }
-            }
-        }
-        view.layoutParams = lp
-    }
-
-    private fun applyFourDigitsLayout(fourDigitsfaceLayout: DigitalFaceLayout) {
-        val lp = view.layoutParams as RelativeLayout.LayoutParams
-        when (fourDigitsfaceLayout) {
-            DigitalFaceLayout.FOUR_DIGITS_ALIGN_CENTER -> {
-                when (view.id) {
-                    R.id.HOUR_FIRST_DIGIT -> {
-                        lp.addRule(RelativeLayout.ALIGN_PARENT_START)
-                        lp.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-                    }
-                    R.id.HOUR_SECOND_DIGIT -> {
-                        lp.addRule(RelativeLayout.END_OF, R.id.HOUR_FIRST_DIGIT)
-                        lp.addRule(RelativeLayout.ALIGN_TOP, R.id.HOUR_FIRST_DIGIT)
-                    }
-                    R.id.MINUTE_FIRST_DIGIT -> {
-                        lp.addRule(RelativeLayout.ALIGN_START, R.id.HOUR_FIRST_DIGIT)
-                        lp.addRule(RelativeLayout.BELOW, R.id.HOUR_FIRST_DIGIT)
-                    }
-                    R.id.MINUTE_SECOND_DIGIT -> {
-                        lp.addRule(RelativeLayout.ALIGN_START, R.id.HOUR_SECOND_DIGIT)
-                        lp.addRule(RelativeLayout.BELOW, R.id.HOUR_SECOND_DIGIT)
-                    }
-                    else -> {
-                        throw Exception("cannot apply four digits layout to view ${view.id}")
-                    }
-                }
-            }
-            DigitalFaceLayout.FOUR_DIGITS_HORIZONTAL -> {
-                when (view.id) {
-                    R.id.HOUR_FIRST_DIGIT -> {
-                        lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                        lp.addRule(RelativeLayout.ALIGN_PARENT_START)
-                    }
-                    R.id.HOUR_SECOND_DIGIT -> {
-                        lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                        lp.addRule(RelativeLayout.END_OF, R.id.HOUR_FIRST_DIGIT)
-                    }
-                    R.id.MINUTE_FIRST_DIGIT -> {
-                        lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                        lp.addRule(RelativeLayout.END_OF, R.id.HOUR_SECOND_DIGIT)
-                    }
-                    R.id.MINUTE_SECOND_DIGIT -> {
-                        lp.addRule(RelativeLayout.CENTER_VERTICAL)
-                        lp.addRule(RelativeLayout.END_OF, R.id.MINUTE_FIRST_DIGIT)
-                    }
-                    else -> {
-                        throw Exception("cannot apply FOUR_DIGITS_HORIZONTAL to view ${view.id}")
-                    }
-                }
-            }
-            else -> {
-                throw IllegalArgumentException(
-                    "applyFourDigitsLayout function should not " +
-                        "have parameters as ${layer.faceLayout}"
-                )
-            }
-        }
-        if (lp == view.layoutParams) {
-            return
-        }
-        view.layoutParams = lp
     }
 
     fun refreshTime() {
@@ -248,7 +154,6 @@ open class SimpleDigitalHandLayerController<T>(
     override val animations =
         object : ClockAnimations {
             override fun enter() {
-                applyLayout(layer.faceLayout)
                 refreshTime()
             }
 
@@ -264,7 +169,6 @@ open class SimpleDigitalHandLayerController<T>(
             }
 
             override fun fold(fraction: Float) {
-                applyLayout(layer.faceLayout)
                 refreshTime()
             }
 
@@ -283,17 +187,13 @@ open class SimpleDigitalHandLayerController<T>(
         object : ClockFaceEvents {
             override fun onTimeTick() {
                 refreshTime()
-                if (
-                    layer.timespec == DigitalTimespec.TIME_FULL_FORMAT ||
-                        layer.timespec == DigitalTimespec.DATE_FORMAT
-                ) {
+                if (layerCfg.timespec == DigitalTimespec.TIME_FULL_FORMAT) {
                     view.contentDescription = timespec.getContentDescription()
                 }
             }
 
             override fun onFontSettingChanged(fontSizePx: Float) {
                 view.applyTextSize(fontSizePx)
-                applyMargin()
             }
 
             override fun onThemeChanged(theme: ThemeConfig) {
