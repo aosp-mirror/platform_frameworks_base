@@ -65,11 +65,11 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
-class FromSplitScreenAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
+open class FromSplitScreenAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
-    private val secondAppForSplitScreen =
+    internal val secondAppForSplitScreen =
         SimpleAppHelper(
             instrumentation,
             ActivityOptions.SplitScreen.Primary.LABEL,

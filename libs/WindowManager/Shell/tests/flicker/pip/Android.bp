@@ -122,6 +122,8 @@ test_module_config {
         "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaExpandButtonTest",
         "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest",
         "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfSetRequestedOrientationWhilePinned",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfFromSplitScreenAutoEnterPipOnGoToHomeTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfFromSplitScreenEnterPipOnUserLeaveHintTest",
     ],
     test_suites: ["device-tests"],
 }
@@ -321,6 +323,20 @@ test_module_config {
     name: "WMShellFlickerTestsPip-BottomHalfSetRequestedOrientationWhilePinned",
     base: "WMShellFlickerTestsPip",
     include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfSetRequestedOrientationWhilePinned"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfFromSplitScreenAutoEnterPipOnGoToHomeTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfFromSplitScreenAutoEnterPipOnGoToHomeTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfFromSplitScreenEnterPipOnUserLeaveHintTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfFromSplitScreenEnterPipOnUserLeaveHintTest"],
     test_suites: ["device-tests"],
 }
 
