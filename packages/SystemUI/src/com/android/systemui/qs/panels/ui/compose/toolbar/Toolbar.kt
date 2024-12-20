@@ -18,12 +18,9 @@ package com.android.systemui.qs.panels.ui.compose.toolbar
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.qs.footer.ui.compose.IconButton
@@ -33,10 +30,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.toolbar.ToolbarViewModel
 fun Toolbar(toolbarViewModelFactory: ToolbarViewModel.Factory, modifier: Modifier = Modifier) {
     val viewModel = rememberViewModel("Toolbar") { toolbarViewModelFactory.create() }
 
-    Row(
-        modifier = modifier.fillMaxWidth().requiredHeight(48.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         viewModel.userSwitcherViewModel?.let {
             IconButton(it, Modifier.sysuiResTag("multi_user_switch"))
         }
