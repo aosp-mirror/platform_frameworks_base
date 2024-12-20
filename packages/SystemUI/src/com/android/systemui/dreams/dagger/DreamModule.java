@@ -48,6 +48,8 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
+import com.google.android.systemui.lowlightclock.LowLightClockDreamService;
+
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
@@ -238,15 +240,24 @@ public interface DreamModule {
     ComponentName bindsLowLightClockDream();
 
     /**
+     * Provides low light clock dream service component.
+     */
+    @Provides
+    @Named(LOW_LIGHT_CLOCK_DREAM)
+    static ComponentName providesLowLightClockDream(Context context) {
+        return new ComponentName(context, LowLightClockDreamService.class);
+    }
+
+    /**
      * Provides the component name of the low light dream, or null if not configured.
      */
     @Provides
     @Nullable
     @Named(LOW_LIGHT_DREAM_SERVICE)
     static ComponentName providesLowLightDreamService(Context context,
-            @Named(LOW_LIGHT_CLOCK_DREAM) Optional<ComponentName> clockDream) {
-        if (Flags.lowLightClockDream() && clockDream.isPresent()) {
-            return clockDream.get();
+            @Named(LOW_LIGHT_CLOCK_DREAM) ComponentName clockDream) {
+        if (Flags.lowLightClockDream()) {
+            return clockDream;
         }
 
         String lowLightDreamComponent = context.getResources().getString(

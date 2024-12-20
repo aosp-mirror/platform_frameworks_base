@@ -260,4 +260,8 @@
     <!-- Rear Display Education -->
     <color name="rear_display_overlay_animation_background_color">#1E1B17</color>
     <color name="rear_display_overlay_dialog_background_color">#1E1B17</color>
+
+    <!-- Low light Dream -->
+    <color name="low_light_clock_background_color">#000000</color>
+    <color name="low_light_clock_text_color">#CCCCCC</color>
 </resources>

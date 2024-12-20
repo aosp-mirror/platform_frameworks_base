@@ -1614,6 +1614,18 @@
     <!-- GLANCEABLE_HUB -> DREAMING transition: Amount to shift dream overlay on entering -->
     <dimen name="hub_to_dreaming_transition_dream_overlay_translation_x">824dp</dimen>
 
+    <!-- Low light clock -->
+    <!-- The text size of the low light clock is intentionally defined in dp to avoid scaling -->
+    <dimen name="low_light_clock_text_size">260dp</dimen>
+    <dimen name="low_light_clock_charging_text_size">14sp</dimen>
+    <dimen name="low_light_clock_charging_text_min_height">48dp</dimen>
+    <integer name="low_light_clock_charging_text_font_weight">500</integer>
+
+    <dimen name="low_light_clock_translate_animation_offset">40dp</dimen>
+    <integer name="low_light_clock_translate_animation_duration_ms">1167</integer>
+    <integer name="low_light_clock_alpha_animation_in_start_delay_ms">233</integer>
+    <integer name="low_light_clock_alpha_animation_duration_ms">250</integer>
+
     <!-- Distance that the full shade transition takes in order for media to fully transition to
          the shade -->
     <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>

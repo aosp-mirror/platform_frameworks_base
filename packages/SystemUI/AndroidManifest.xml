@@ -1171,5 +1171,16 @@
             android:exported="false"
             />
 
+	<service
+            android:name="com.google.android.systemui.lowlightclock.LowLightClockDreamService"
+            android:enabled="false"
+            android:exported="false"
+            android:directBootAware="true"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
