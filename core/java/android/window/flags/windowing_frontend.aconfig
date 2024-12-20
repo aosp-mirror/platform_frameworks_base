@@ -235,6 +235,17 @@ flag {
 }
 
 flag {
+  name: "scheduling_for_notification_shade"
+  namespace: "windowing_frontend"
+  description: "Demote top-app when notification shade is expanded"
+  bug: "362467878"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "release_snapshot_aggressively"
     namespace: "windowing_frontend"
     description: "Actively release task snapshot memory"
