@@ -84,7 +84,7 @@ object KeyguardPreviewClockViewBinder {
                             lastClock = currentClock
                             updateClockAppearance(
                                 currentClock,
-                                clockPreviewConfig.previewContext.resources,
+                                clockPreviewConfig.context.resources,
                             )
 
                             if (viewModel.shouldHighlightSelectedAffordance) {

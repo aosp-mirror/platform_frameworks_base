@@ -17,10 +17,24 @@
 package com.android.systemui.plugins.clocks
 
 import android.content.Context
+import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.plugins.clocks.ContextExt.getDimen
 
 data class ClockPreviewConfig(
-    val previewContext: Context,
+    val context: Context,
     val isShadeLayoutWide: Boolean,
     val isSceneContainerFlagEnabled: Boolean = false,
     val lockId: Int? = null,
-)
+) {
+    fun getSmallClockTopPadding(
+        statusBarHeight: Int = SystemBarUtils.getStatusBarHeight(context)
+    ): Int {
+        return if (isShadeLayoutWide) {
+            context.getDimen("keyguard_split_shade_top_margin") -
+                if (isSceneContainerFlagEnabled) statusBarHeight else 0
+        } else {
+            context.getDimen("keyguard_clock_top_margin") +
+                if (!isSceneContainerFlagEnabled) statusBarHeight else 0
+        }
+    }
+}
