@@ -42,7 +42,6 @@ import com.android.compose.animation.scene.ElementStateScope
 import com.android.compose.animation.scene.MovableElement
 import com.android.compose.animation.scene.MovableElementContentScope
 import com.android.compose.animation.scene.MovableElementKey
-import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneTransitionLayoutForTesting
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.SceneTransitionLayoutScope
@@ -57,7 +56,6 @@ import com.android.compose.animation.scene.effect.OffsetOverscrollEffect
 import com.android.compose.animation.scene.effect.VisualEffect
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
-import com.android.compose.animation.scene.nestedScrollToScene
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.ContainerState
 import com.android.compose.ui.graphics.container
@@ -170,32 +168,6 @@ internal class ContentScopeImpl(
             value = value,
             type = type,
             canOverflow = canOverflow,
-        )
-    }
-
-    override fun Modifier.horizontalNestedScrollToScene(
-        leftBehavior: NestedScrollBehavior,
-        rightBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean,
-    ): Modifier {
-        return nestedScrollToScene(
-            draggableHandler = layoutImpl.horizontalDraggableHandler,
-            topOrLeftBehavior = leftBehavior,
-            bottomOrRightBehavior = rightBehavior,
-            isExternalOverscrollGesture = isExternalOverscrollGesture,
-        )
-    }
-
-    override fun Modifier.verticalNestedScrollToScene(
-        topBehavior: NestedScrollBehavior,
-        bottomBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean,
-    ): Modifier {
-        return nestedScrollToScene(
-            draggableHandler = layoutImpl.verticalDraggableHandler,
-            topOrLeftBehavior = topBehavior,
-            bottomOrRightBehavior = bottomBehavior,
-            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
     }
 

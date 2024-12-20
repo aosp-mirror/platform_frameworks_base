@@ -648,68 +648,6 @@ class ElementTest {
         rule.onNode(isElement(TestElements.Foo)).assertSizeIsEqualTo(20.dp, 20.dp)
     }
 
-    private fun setupOverscrollScenario(
-        layoutWidth: Dp,
-        layoutHeight: Dp,
-        sceneTransitions: SceneTransitionsBuilder.() -> Unit,
-        firstScroll: Float,
-        animatedFloatRange: ClosedFloatingPointRange<Float>,
-        onAnimatedFloat: (Float) -> Unit,
-    ): MutableSceneTransitionLayoutStateImpl {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    initialScene = SceneA,
-                    transitions = transitions(sceneTransitions),
-                )
-                    as MutableSceneTransitionLayoutStateImpl
-            }
-
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(
-                state = state,
-                modifier = Modifier.size(layoutWidth, layoutHeight),
-            ) {
-                scene(key = SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    animateContentFloatAsState(
-                        value = animatedFloatRange.start,
-                        key = TestValues.Value1,
-                        false,
-                    )
-                    Spacer(Modifier.fillMaxSize())
-                }
-                scene(SceneB) {
-                    val animatedFloat by
-                        animateContentFloatAsState(
-                            value = animatedFloatRange.endInclusive,
-                            key = TestValues.Value1,
-                            canOverflow = false,
-                        )
-                    Spacer(Modifier.element(TestElements.Foo).fillMaxSize())
-                    LaunchedEffect(Unit) {
-                        snapshotFlow { animatedFloat }.collect { onAnimatedFloat(it) }
-                    }
-                }
-            }
-        }
-
-        assertThat(state.transitionState).isIdle()
-
-        // Swipe by half of verticalSwipeDistance.
-        rule.onRoot().performTouchInput {
-            val middleTop = Offset((layoutWidth / 2).toPx(), 0f)
-            down(middleTop)
-            val firstScrollHeight = layoutHeight.toPx() * firstScroll
-            moveBy(Offset(0f, touchSlop + firstScrollHeight), delayMillis = 1_000)
-        }
-        return state
-    }
-
     private fun expectedOffset(currentOffset: Dp, density: Density): Dp {
         return with(density) {
             OffsetOverscrollEffect.computeOffset(density, currentOffset.toPx()).toDp()

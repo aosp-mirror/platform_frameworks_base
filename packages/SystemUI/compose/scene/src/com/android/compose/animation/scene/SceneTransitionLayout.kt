@@ -26,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
@@ -231,32 +230,6 @@ interface BaseContentScope : ElementStateScope {
         // ElementScope.movableContent {}.
         content: @Composable ElementScope<MovableElementContentScope>.() -> Unit,
     )
-
-    /**
-     * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
-     * component.
-     *
-     * @param leftBehavior when we should perform the overscroll animation at the left.
-     * @param rightBehavior when we should perform the overscroll animation at the right.
-     */
-    fun Modifier.horizontalNestedScrollToScene(
-        leftBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
-        rightBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
-        isExternalOverscrollGesture: () -> Boolean = { false },
-    ): Modifier
-
-    /**
-     * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
-     * component.
-     *
-     * @param topBehavior when we should perform the overscroll animation at the top.
-     * @param bottomBehavior when we should perform the overscroll animation at the bottom.
-     */
-    fun Modifier.verticalNestedScrollToScene(
-        topBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
-        bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.Default,
-        isExternalOverscrollGesture: () -> Boolean = { false },
-    ): Modifier
 
     /**
      * Don't resize during transitions. This can for instance be used to make sure that scrollable

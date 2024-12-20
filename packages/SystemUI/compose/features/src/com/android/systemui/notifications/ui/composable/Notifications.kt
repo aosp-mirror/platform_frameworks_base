@@ -88,7 +88,6 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
@@ -236,10 +235,7 @@ fun ContentScope.SnoozeableHeadsUpNotificationSpace(
                     )
                 }
                 .thenIf(isHeadsUp) {
-                    Modifier.verticalNestedScrollToScene(
-                            bottomBehavior = NestedScrollBehavior.EdgeAlways
-                        )
-                        .nestedScroll(nestedScrollConnection)
+                    Modifier.nestedScroll(nestedScrollConnection)
                         .scrollable(orientation = Orientation.Vertical, state = scrollableState)
                 },
     )
@@ -571,11 +567,7 @@ fun ContentScope.NotificationScrollingStack(
         ) {
             Column(
                 modifier =
-                    Modifier.verticalNestedScrollToScene(
-                            topBehavior = NestedScrollBehavior.EdgeWithPreview,
-                            isExternalOverscrollGesture = { isCurrentGestureOverscroll.value },
-                        )
-                        .thenIf(supportNestedScrolling) {
+                    Modifier.thenIf(supportNestedScrolling) {
                             Modifier.nestedScroll(scrimNestedScrollConnection)
                         }
                         .stackVerticalOverscroll(coroutineScope) { scrollState.canScrollForward }
