@@ -522,3 +522,10 @@ flag {
     description: "Enables having a DesktopWallpaperActivity at a per-display level."
     bug: "381935663"
 }
+
+flag {
+    name: "enable_desktop_wallpaper_activity_on_system_user"
+    namespace: "lse_desktop_experience"
+    description: "Enables starting DesktopWallpaperActivity on system user."
+    bug: "385294350"
+}
