@@ -37,11 +37,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_WAKEUP
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -61,7 +59,6 @@ import org.mockito.Mockito.anyFloat
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -266,52 +263,6 @@ class NotificationWakeUpCoordinatorTest(flags: FlagsParameterization) : SysuiTes
         assertThat(notificationWakeUpCoordinator.statusBarState).isEqualTo(StatusBarState.SHADE)
     }
 
-    private val delayedDozeDelay = WAKEUP_ANIMATION_DELAY_MS.toLong()
-    private val delayedDozeDuration = ANIMATION_DURATION_WAKEUP.toLong()
-
-    @Test
-    fun dozeAmountOutputClampsTo1WhenDelayStarts() {
-        notificationWakeUpCoordinator.setWakingUp(true, requestDelayedAnimation = true)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-
-        // verify further doze amount changes have no effect on output
-        setDozeAmount(0.5f)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-    }
-
-    @Test
-    fun verifyDozeAmountOutputTracksDelay() {
-        dozeAmountOutputClampsTo1WhenDelayStarts()
-
-        // Animator waiting the delay amount should not yet affect the output
-        animatorTestRule.advanceTimeBy(delayedDozeDelay)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-
-        // input doze amount change to 0 has no effect
-        setDozeAmount(0.0f)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-
-        // Advancing the delay to 50% will cause the 50% output
-        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 0.5f, hideAmount = 0.5f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
-
-        // Now advance delay to 100% completion; notifications become fully visible
-        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 0f, hideAmount = 0f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
-
-        // Now advance delay to 200% completion -- should not invoke anything else
-        animatorTestRule.advanceTimeBy(delayedDozeDuration)
-        verify(stackScrollerController, never()).setDozeAmount(anyFloat())
-        verify(stackScrollerController, never()).setHideAmount(anyFloat(), anyFloat())
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
-    }
-
     @Test
     fun verifyWakeUpListenerCallbacksWhenDozing() {
         // prime internal state as dozing, then add the listener
@@ -332,85 +283,6 @@ class NotificationWakeUpCoordinatorTest(flags: FlagsParameterization) : SysuiTes
         setDozeAmount(1f)
         verify(wakeUpListener).onFullyHiddenChanged(eq(true))
         verifyNoMoreInteractions(wakeUpListener)
-    }
-
-    @Test
-    fun verifyWakeUpListenerCallbacksWhenDelayingAnimation() {
-        // prime internal state as dozing, then add the listener
-        setDozeAmount(1f)
-        notificationWakeUpCoordinator.addListener(wakeUpListener)
-
-        // setWakingUp() doesn't do anything yet
-        notificationWakeUpCoordinator.setWakingUp(true, requestDelayedAnimation = true)
-        verifyNoMoreInteractions(wakeUpListener)
-
-        // verify further doze amount changes have no effect
-        setDozeAmount(0.5f)
-        verifyNoMoreInteractions(wakeUpListener)
-
-        // advancing to just before the start time should not invoke the listener
-        animatorTestRule.advanceTimeBy(delayedDozeDelay - 1)
-        verifyNoMoreInteractions(wakeUpListener)
-
-        animatorTestRule.advanceTimeBy(1)
-        verify(wakeUpListener).onDelayedDozeAmountAnimationRunning(eq(true))
-        verifyNoMoreInteractions(wakeUpListener)
-        clearInvocations(wakeUpListener)
-
-        // input doze amount change to 0 has no effect
-        setDozeAmount(0.0f)
-        verifyNoMoreInteractions(wakeUpListener)
-
-        // Advancing the delay to 50% will cause notifications to no longer be fully hidden
-        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2)
-        verify(wakeUpListener).onFullyHiddenChanged(eq(false))
-        verifyNoMoreInteractions(wakeUpListener)
-        clearInvocations(wakeUpListener)
-
-        // Now advance delay to 99.x% completion; notifications become fully visible
-        animatorTestRule.advanceTimeBy(delayedDozeDuration / 2 - 1)
-        verifyNoMoreInteractions(wakeUpListener)
-
-        // advance to 100%; animation no longer running
-        animatorTestRule.advanceTimeBy(1)
-        verify(wakeUpListener).onDelayedDozeAmountAnimationRunning(eq(false))
-        verifyNoMoreInteractions(wakeUpListener)
-        clearInvocations(wakeUpListener)
-
-        // Now advance delay to 200% completion -- should not invoke anything else
-        animatorTestRule.advanceTimeBy(delayedDozeDuration)
-        verifyNoMoreInteractions(wakeUpListener)
-    }
-
-    @Test
-    fun verifyDelayedDozeAmountCanBeOverridden() {
-        dozeAmountOutputClampsTo1WhenDelayStarts()
-
-        // input doze amount change to 0 has no effect
-        setDozeAmount(0.0f)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-
-        // Advancing the delay to 50% will cause the 50% output
-        animatorTestRule.advanceTimeBy(delayedDozeDelay + delayedDozeDuration / 2)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 0.5f, hideAmount = 0.5f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
-
-        // Enabling bypass and showing keyguard will override back to fully dozing/hidden
-        setBypassEnabled(true)
-        setStatusBarState(StatusBarState.KEYGUARD)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 1f, hideAmount = 1f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isTrue()
-    }
-
-    @Test
-    fun verifyRemovingOverrideRestoresOtherwiseCalculatedDozeAmount() {
-        verifyDelayedDozeAmountCanBeOverridden()
-
-        // Disabling bypass will return back to the 50% value
-        setBypassEnabled(false)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 0.5f, hideAmount = 0.5f)
-        assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
     }
 
     private fun verifyStackScrollerDozeAndHideAmount(dozeAmount: Float, hideAmount: Float) {

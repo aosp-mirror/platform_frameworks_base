@@ -569,13 +569,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
     private boolean mUseExternalTouch = false;
-
-    /**
-     * Whether we're waking up and will play the delayed doze animation in
-     * {@link NotificationWakeUpCoordinator}. If so, we'll want to keep the clock centered until the
-     * delayed doze animation starts.
-     */
-    private boolean mWillPlayDelayedDozeAmountAnimation = false;
     private final DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
     private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
@@ -1007,12 +1000,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             @Override
             public void onFullyHiddenChanged(boolean isFullyHidden) {
                 mKeyguardStatusBarViewController.updateForHeadsUp();
-            }
-
-            @Override
-            public void onDelayedDozeAmountAnimationRunning(boolean running) {
-                // On running OR finished, the animation is no longer waiting to play
-                setWillPlayDelayedDozeAmountAnimation(false);
             }
         });
 
@@ -1592,24 +1579,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // Pulsing notification appears on the right. Move clock left to avoid overlap.
             return false;
         }
-        if (mWillPlayDelayedDozeAmountAnimation) {
-            return true;
-        }
         // "Visible" notifications are actually not visible on AOD (unless pulsing), so it is safe
         // to center the clock without overlap.
         return isOnAod();
-    }
-
-    @Override
-    public void setWillPlayDelayedDozeAmountAnimation(boolean willPlay) {
-        if (mWillPlayDelayedDozeAmountAnimation == willPlay) return;
-
-        mWillPlayDelayedDozeAmountAnimation = willPlay;
-        mWakeUpCoordinator.logDelayingClockWakeUpAnimation(willPlay);
-        mKeyguardMediaController.setDozeWakeUpAnimationWaiting(willPlay);
-
-        // Once changing this value, see if we should move the clock.
-        positionClockAndNotifications();
     }
 
     private boolean isOnAod() {

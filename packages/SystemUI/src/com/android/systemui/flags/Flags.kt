@@ -335,11 +335,6 @@ object Flags {
 
     // 2900 - Zero Jank fixes. Naming convention is: zj_<bug number>_<cuj name>
 
-    // TODO:(b/285623104): Tracking bug
-    @JvmField
-    val ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD =
-        releasedFlag("zj_285570694_lockscreen_transition_from_aod")
-
     // TODO(b/283447257): Tracking bug
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
