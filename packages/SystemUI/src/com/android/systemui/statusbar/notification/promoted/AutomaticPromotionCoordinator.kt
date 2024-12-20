@@ -22,7 +22,16 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import javax.inject.Inject
 
 /** A coordinator that may automatically promote certain notifications. */
-interface AutomaticPromotionCoordinator : Coordinator
+interface AutomaticPromotionCoordinator : Coordinator {
+    companion object {
+        /**
+         * An extra that should be set on notifications that were automatically promoted. Used in
+         * case we want to disable certain features for only automatically promoted notifications
+         * (but not normally promoted notifications).
+         */
+        const val EXTRA_WAS_AUTOMATICALLY_PROMOTED = "android.wasAutomaticallyPromoted"
+    }
+}
 
 /** A default implementation of [AutomaticPromotionCoordinator] that doesn't promote anything. */
 @CoordinatorScope

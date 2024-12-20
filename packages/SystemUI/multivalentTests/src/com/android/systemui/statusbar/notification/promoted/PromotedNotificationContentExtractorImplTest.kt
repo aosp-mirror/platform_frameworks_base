@@ -35,6 +35,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
 import com.android.systemui.testKosmos
@@ -106,6 +107,26 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
         assertThat(content?.subText).isEqualTo(TEST_SUB_TEXT)
         assertThat(content?.title).isEqualTo(TEST_CONTENT_TITLE)
         assertThat(content?.text).isEqualTo(TEST_CONTENT_TEXT)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractContent_wasPromotedAutomatically_false() {
+        val entry = createEntry { extras.putBoolean(EXTRA_WAS_AUTOMATICALLY_PROMOTED, false) }
+
+        val content = extractContent(entry)
+
+        assertThat(content!!.wasPromotedAutomatically).isFalse()
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun extractContent_wasPromotedAutomatically_true() {
+        val entry = createEntry { extras.putBoolean(EXTRA_WAS_AUTOMATICALLY_PROMOTED, true) }
+
+        val content = extractContent(entry)
+
+        assertThat(content!!.wasPromotedAutomatically).isTrue()
     }
 
     @Test
