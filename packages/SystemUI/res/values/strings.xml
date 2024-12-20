@@ -289,8 +289,9 @@
     <!-- Screen recording permission option for recording just a single app [CHAR LIMIT=50] -->
     <string name="screenrecord_permission_dialog_option_text_single_app">Record one app</string>
     <!-- Screen recording permission option for recording the whole screen [CHAR LIMIT=50] -->
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" >Record entire screen</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display">Record entire screen: %s</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" >Record this screen</string>
+    <!-- Screen recording permission option for recording a connected external display. %s will be replaced by the display name [CHAR LIMIT=50] -->
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display">Record %s</string>
     <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
     <string name="screenrecord_permission_dialog_warning_entire_screen">When you’re recording your entire screen, anything shown on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
