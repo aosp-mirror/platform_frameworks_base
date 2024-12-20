@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -90,7 +89,11 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
                     onStep = {
-                        MathUtils.lerp(blurConfig.minBlurRadiusPx, blurConfig.maxBlurRadiusPx, it)
+                        transitionProgressToBlurRadius(
+                            starBlurRadius = blurConfig.minBlurRadiusPx,
+                            endBlurRadius = blurConfig.maxBlurRadiusPx,
+                            transitionProgress = it,
+                        )
                     },
                 ),
         )

@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.util.MathUtils
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
@@ -118,7 +117,11 @@ constructor(
                 if (willRunDismissFromKeyguard) {
                     blurConfig.minBlurRadiusPx
                 } else {
-                    MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, it)
+                    transitionProgressToBlurRadius(
+                        starBlurRadius = blurConfig.maxBlurRadiusPx,
+                        endBlurRadius = blurConfig.minBlurRadiusPx,
+                        transitionProgress = it,
+                    )
                 }
             },
         )
