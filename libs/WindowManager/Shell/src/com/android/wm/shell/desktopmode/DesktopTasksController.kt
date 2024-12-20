@@ -73,6 +73,7 @@ import com.android.wm.shell.Flags.enableFlexibleSplit
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.bubbles.BubbleController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ExternalInterfaceBinder
@@ -172,6 +173,7 @@ class DesktopTasksController(
     private val desktopModeUiEventLogger: DesktopModeUiEventLogger,
     private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
     private val desktopWallpaperActivityTokenProvider: DesktopWallpaperActivityTokenProvider,
+    private val bubbleController: Optional<BubbleController>,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -2187,6 +2189,19 @@ class DesktopTasksController(
                     taskInfo.configuration.windowConfiguration.bounds,
                 )
             }
+        }
+    }
+
+    /** Requests a task be transitioned from whatever mode it's in to a bubble. */
+    fun requestFloat(taskInfo: RunningTaskInfo) {
+        val isDragging = dragToDesktopTransitionHandler.inProgress
+        val shouldRequestFloat =
+            taskInfo.isFullscreen || taskInfo.isFreeform || isDragging || taskInfo.isMultiWindow
+        if (!shouldRequestFloat) return
+        if (isDragging) {
+            releaseVisualIndicator()
+        } else {
+            bubbleController.ifPresent { it.expandStackAndSelectBubble(taskInfo) }
         }
     }
 

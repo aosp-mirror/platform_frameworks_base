@@ -776,6 +776,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN);
     }
 
+    private void onToFloat(int taskId) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+        if (decoration == null) {
+            return;
+        }
+        decoration.closeHandleMenu();
+        // When the app enters float, the handle will no longer be visible, meaning
+        // we shouldn't receive input for it any longer.
+        decoration.disposeStatusBarInputLayer();
+        mDesktopTasksController.requestFloat(decoration.mTaskInfo);
+    }
+
     private void onNewWindow(int taskId) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
         if (decoration == null) {
@@ -1729,6 +1741,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         });
         windowDecoration.setOnToSplitScreenClickListener(() -> {
             onToSplitScreen(taskInfo.taskId);
+            return Unit.INSTANCE;
+        });
+        windowDecoration.setOnToFloatClickListener(() -> {
+            onToFloat(taskInfo.taskId);
             return Unit.INSTANCE;
         });
         windowDecoration.setOpenInBrowserClickListener((intent) -> {

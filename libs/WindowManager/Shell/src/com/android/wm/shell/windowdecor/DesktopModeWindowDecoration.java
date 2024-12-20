@@ -155,6 +155,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Consumer<DesktopModeTransitionSource> mOnToDesktopClickListener;
     private Function0<Unit> mOnToFullscreenClickListener;
     private Function0<Unit> mOnToSplitscreenClickListener;
+    private Function0<Unit> mOnToFloatClickListener;
     private Function0<Unit> mOnNewWindowClickListener;
     private Function0<Unit> mOnManageWindowsClickListener;
     private Function0<Unit> mOnChangeAspectRatioClickListener;
@@ -349,6 +350,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Registers a listener to be called when the decoration's to-split action is triggered. */
     void setOnToSplitScreenClickListener(Function0<Unit> listener) {
         mOnToSplitscreenClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the decoration's to-split action is triggered. */
+    void setOnToFloatClickListener(Function0<Unit> listener) {
+        mOnToFloatClickListener = listener;
     }
 
     /**
@@ -1372,6 +1378,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 },
                 /* onToFullscreenClickListener= */ mOnToFullscreenClickListener,
                 /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
+                /* onToFloatClickListener= */ mOnToFloatClickListener,
                 /* onNewWindowClickListener= */ mOnNewWindowClickListener,
                 /* onManageWindowsClickListener= */ mOnManageWindowsClickListener,
                 /* onAspectRatioSettingsClickListener= */ mOnChangeAspectRatioClickListener,

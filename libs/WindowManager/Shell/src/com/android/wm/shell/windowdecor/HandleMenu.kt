@@ -144,6 +144,7 @@ class HandleMenu(
         onToDesktopClickListener: () -> Unit,
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
+        onToFloatClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
         onChangeAspectRatioClickListener: () -> Unit,
@@ -162,6 +163,7 @@ class HandleMenu(
             onToDesktopClickListener = onToDesktopClickListener,
             onToFullscreenClickListener = onToFullscreenClickListener,
             onToSplitScreenClickListener = onToSplitScreenClickListener,
+            onToFloatClickListener = onToFloatClickListener,
             onNewWindowClickListener = onNewWindowClickListener,
             onManageWindowsClickListener = onManageWindowsClickListener,
             onChangeAspectRatioClickListener = onChangeAspectRatioClickListener,
@@ -183,6 +185,7 @@ class HandleMenu(
         onToDesktopClickListener: () -> Unit,
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
+        onToFloatClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
         onChangeAspectRatioClickListener: () -> Unit,
@@ -208,6 +211,7 @@ class HandleMenu(
             this.onToDesktopClickListener = onToDesktopClickListener
             this.onToFullscreenClickListener = onToFullscreenClickListener
             this.onToSplitScreenClickListener = onToSplitScreenClickListener
+            this.onToFloatClickListener = onToFloatClickListener
             this.onNewWindowClickListener = onNewWindowClickListener
             this.onManageWindowsClickListener = onManageWindowsClickListener
             this.onChangeAspectRatioClickListener = onChangeAspectRatioClickListener
@@ -502,6 +506,7 @@ class HandleMenu(
         var onToDesktopClickListener: (() -> Unit)? = null
         var onToFullscreenClickListener: (() -> Unit)? = null
         var onToSplitScreenClickListener: (() -> Unit)? = null
+        var onToFloatClickListener: (() -> Unit)? = null
         var onNewWindowClickListener: (() -> Unit)? = null
         var onManageWindowsClickListener: (() -> Unit)? = null
         var onChangeAspectRatioClickListener: (() -> Unit)? = null
@@ -515,6 +520,7 @@ class HandleMenu(
             splitscreenBtn.setOnClickListener { onToSplitScreenClickListener?.invoke() }
             desktopBtn.setOnClickListener { onToDesktopClickListener?.invoke() }
             openInAppOrBrowserBtn.setOnClickListener { onOpenInAppOrBrowserClickListener?.invoke() }
+            floatingBtn.setOnClickListener { onToFloatClickListener?.invoke() }
             openByDefaultBtn.setOnClickListener {
                 onOpenByDefaultClickListener?.invoke()
             }
@@ -640,8 +646,9 @@ class HandleMenu(
         private fun bindWindowingPill(style: MenuStyle) {
             windowingPill.background.setTint(style.backgroundColor)
 
-            // TODO: Remove once implemented.
-            floatingBtn.visibility = View.GONE
+            if (!com.android.wm.shell.Flags.enableBubbleAnything()) {
+                floatingBtn.visibility = View.GONE
+            }
 
             fullscreenBtn.isSelected = taskInfo.isFullscreen
             fullscreenBtn.isEnabled = !taskInfo.isFullscreen
