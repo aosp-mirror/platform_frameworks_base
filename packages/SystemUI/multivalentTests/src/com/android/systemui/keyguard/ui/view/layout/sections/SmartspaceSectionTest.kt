@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
-import android.platform.test.annotations.EnableFlags
 import android.view.View
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -26,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintSet.GONE
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
@@ -50,7 +48,6 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
-@EnableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class SmartspaceSectionTest : SysuiTestCase() {
     private lateinit var underTest: SmartspaceSection
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel

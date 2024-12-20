@@ -31,7 +31,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotification
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultUdfpsAccessibilityOverlaySection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule.Companion.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSliceViewSection
@@ -60,7 +59,6 @@ constructor(
     @Named(KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
-    defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
@@ -80,7 +78,6 @@ constructor(
             defaultShortcutsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
-            defaultStatusViewSection,
             defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
             aodNotificationIconsSection,

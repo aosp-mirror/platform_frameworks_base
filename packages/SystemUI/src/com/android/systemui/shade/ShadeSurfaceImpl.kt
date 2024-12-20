@@ -65,10 +65,6 @@ class ShadeSurfaceImpl @Inject constructor() : ShadeSurface, ShadeViewController
         // Do nothing
     }
 
-    override fun onScreenTurningOn() {
-        // Do nothing
-    }
-
     override fun onThemeChanged() {
         // Do nothing
     }

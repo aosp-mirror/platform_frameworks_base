@@ -19,8 +19,6 @@ package com.android.systemui.unfold
 import android.hardware.devicestate.DeviceStateManager
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener
 import android.os.PowerManager
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
@@ -74,10 +72,6 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
     @Mock lateinit var shadeViewController: ShadeViewController
 
-    @Mock lateinit var viewGroup: ViewGroup
-
-    @Mock lateinit var viewTreeObserver: ViewTreeObserver
-
     @Mock lateinit var shadeFoldAnimator: ShadeFoldAnimator
 
     @Mock lateinit var foldTransitionInteractor: ToAodFoldTransitionInteractor
@@ -97,11 +91,8 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
         deviceStates = FoldableTestUtils.findDeviceStates(context)
 
-        // TODO(b/254878364): remove this call to NPVC.getView()
         whenever(shadeViewController.shadeFoldAnimator).thenReturn(shadeFoldAnimator)
         whenever(foldTransitionInteractor.foldAnimator).thenReturn(shadeFoldAnimator)
-        whenever(shadeFoldAnimator.view).thenReturn(viewGroup)
-        whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
             .thenReturn(PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD)
         whenever(shadeFoldAnimator.startFoldToAodAnimation(any(), any(), any())).then {

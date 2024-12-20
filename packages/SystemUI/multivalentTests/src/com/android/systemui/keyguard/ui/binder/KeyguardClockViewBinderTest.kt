@@ -21,8 +21,6 @@ import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -80,6 +78,7 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         verify(rootView).addView(smallClockView)
         verify(rootView).addView(largeClockView)
     }
+
     @Test
     fun addClockViewsToBurnInLayer_LargeWeatherClock() {
         setupWeatherClock()
@@ -110,7 +109,7 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
                 name = "",
                 description = "",
                 useAlternateSmartspaceAODTransition = true,
-                useCustomClockScene = true
+                useCustomClockScene = true,
             )
         whenever(clock.config).thenReturn(clockConfig)
     }

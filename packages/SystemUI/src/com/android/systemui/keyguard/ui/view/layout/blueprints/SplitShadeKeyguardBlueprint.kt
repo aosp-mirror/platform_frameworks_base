@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAr
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
@@ -57,7 +56,6 @@ constructor(
     @Named(KeyguardSectionsModule.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
     defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
-    defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
     splitShadeNotificationStackScrollLayoutSection: SplitShadeNotificationStackScrollLayoutSection,
     splitShadeGuidelines: SplitShadeGuidelines,
@@ -77,7 +75,6 @@ constructor(
             defaultShortcutsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
-            defaultStatusViewSection,
             defaultStatusBarSection,
             splitShadeNotificationStackScrollLayoutSection,
             splitShadeGuidelines,

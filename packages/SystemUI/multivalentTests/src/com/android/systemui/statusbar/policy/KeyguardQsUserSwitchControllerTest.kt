@@ -24,11 +24,10 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.user.UserSwitchDialogController
-import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -47,32 +46,21 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 @RunWith(AndroidJUnit4::class)
 class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
-    @Mock
-    private lateinit var userSwitcherController: UserSwitcherController
+    @Mock private lateinit var userSwitcherController: UserSwitcherController
 
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
 
-    @Mock
-    private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var falsingManager: FalsingManager
 
-    @Mock
-    private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var configurationController: ConfigurationController
 
-    @Mock
-    private lateinit var statusBarStateController: SysuiStatusBarStateController
+    @Mock private lateinit var dozeParameters: DozeParameters
 
-    @Mock
-    private lateinit var dozeParameters: DozeParameters
+    @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
 
-    @Mock
-    private lateinit var screenOffAnimationController: ScreenOffAnimationController
+    @Mock private lateinit var userSwitchDialogController: UserSwitchDialogController
 
-    @Mock
-    private lateinit var userSwitchDialogController: UserSwitchDialogController
-
-    @Mock
-    private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private lateinit var view: FrameLayout
     private lateinit var testableLooper: TestableLooper
@@ -83,10 +71,12 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
-        view = LayoutInflater.from(context)
-                .inflate(R.layout.keyguard_qs_user_switch, null) as FrameLayout
+        view =
+            LayoutInflater.from(context).inflate(R.layout.keyguard_qs_user_switch, null)
+                as FrameLayout
 
-        keyguardQsUserSwitchController = KeyguardQsUserSwitchController(
+        keyguardQsUserSwitchController =
+            KeyguardQsUserSwitchController(
                 view,
                 context,
                 context.resources,
@@ -94,11 +84,11 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
                 keyguardStateController,
                 falsingManager,
                 configurationController,
-                statusBarStateController,
                 dozeParameters,
                 screenOffAnimationController,
                 userSwitchDialogController,
-                uiEventLogger)
+                uiEventLogger,
+            )
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -117,7 +107,7 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
     fun testUiEventLogged() {
         view.findViewById<View>(R.id.kg_multi_user_avatar)?.performClick()
         verify(uiEventLogger, times(1))
-                .log(LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP)
+            .log(LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP)
     }
 
     @Test

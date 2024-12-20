@@ -170,7 +170,7 @@ constructor(
     private val notificationShadeWindowController: NotificationShadeWindowController,
     private val powerManager: PowerManager,
     private val wallpaperManager: WallpaperManager,
-    private val deviceStateManager: DeviceStateManager
+    private val deviceStateManager: DeviceStateManager,
 ) : KeyguardStateController.Callback, ISysuiUnlockAnimationController.Stub() {
 
     interface KeyguardUnlockAnimationListener {
@@ -194,7 +194,7 @@ constructor(
             playingCannedAnimation: Boolean,
             isWakeAndUnlockNotFromDream: Boolean,
             unlockAnimationStartDelay: Long,
-            unlockAnimationDuration: Long
+            unlockAnimationDuration: Long,
         ) {}
 
         /**
@@ -250,7 +250,7 @@ constructor(
      */
     override fun setLauncherUnlockController(
         activityClass: String,
-        callback: ILauncherUnlockAnimationController?
+        callback: ILauncherUnlockAnimationController?,
     ) {
         launcherActivityClass = activityClass
         launcherUnlockController = callback
@@ -370,7 +370,7 @@ constructor(
                             Log.d(
                                 TAG,
                                 "skip finishSurfaceBehindRemoteAnimation" +
-                                    " surfaceBehindAlpha=$surfaceBehindAlpha"
+                                    " surfaceBehindAlpha=$surfaceBehindAlpha",
                             )
                         }
                     }
@@ -387,7 +387,7 @@ constructor(
             addUpdateListener { valueAnimator: ValueAnimator ->
                 setWallpaperAppearAmount(
                     valueAnimator.animatedValue as Float,
-                    openingWallpaperTargets
+                    openingWallpaperTargets,
                 )
             }
             addListener(
@@ -418,7 +418,7 @@ constructor(
                 addUpdateListener { valueAnimator: ValueAnimator ->
                     setWallpaperAppearAmount(
                         valueAnimator.animatedValue as Float,
-                        closingWallpaperTargets
+                        closingWallpaperTargets,
                     )
                 }
             }
@@ -488,7 +488,7 @@ constructor(
         Log.wtf(
             TAG,
             "  !notificationShadeWindowController.isLaunchingActivity: " +
-                "${!notificationShadeWindowController.isLaunchingActivity}"
+                "${!notificationShadeWindowController.isLaunchingActivity}",
         )
         Log.wtf(TAG, "  launcherUnlockController != null: ${launcherUnlockController != null}")
         Log.wtf(TAG, "  !isFoldable(context): ${!isDeviceFoldable(resources, deviceStateManager)}")
@@ -516,7 +516,7 @@ constructor(
             try {
                 launcherUnlockController?.setUnlockAmount(
                     1f,
-                    biometricUnlockControllerLazy.get().isWakeAndUnlock /* forceIfAnimating */
+                    biometricUnlockControllerLazy.get().isWakeAndUnlock, /* forceIfAnimating */
                 )
             } catch (e: DeadObjectException) {
                 Log.e(
@@ -524,7 +524,7 @@ constructor(
                     "launcherUnlockAnimationController was dead, but non-null in " +
                         "onKeyguardGoingAwayChanged(). Catching exception as this should mean " +
                         "Launcher is in the process of being destroyed, but the IPC to System UI " +
-                        "telling us hasn't arrived yet."
+                        "telling us hasn't arrived yet.",
                 )
             }
         }
@@ -569,7 +569,7 @@ constructor(
                     offset(
                         0,
                         (lockscreenSmartspace as? BcSmartspaceDataPlugin.SmartspaceView)
-                            ?.currentCardTopPadding ?: 0
+                            ?.currentCardTopPadding ?: 0,
                     )
                 }
         }
@@ -583,7 +583,7 @@ constructor(
             launcherUnlockController?.prepareForUnlock(
                 willUnlockWithSmartspaceTransition, /* willAnimateSmartspace */
                 lockscreenSmartspaceBounds, /* lockscreenSmartspaceBounds */
-                selectedPage /* selectedPage */
+                selectedPage, /* selectedPage */
             )
 
             launcherPreparedForUnlock = true
@@ -611,7 +611,7 @@ constructor(
         openingWallpapers: Array<RemoteAnimationTarget>,
         closingWallpapers: Array<RemoteAnimationTarget>,
         startTime: Long,
-        requestedShowSurfaceBehindKeyguard: Boolean
+        requestedShowSurfaceBehindKeyguard: Boolean,
     ) {
         if (surfaceTransactionApplier == null) {
             surfaceTransactionApplier =
@@ -650,7 +650,7 @@ constructor(
                     launcherUnlockController?.playUnlockAnimation(
                         true,
                         unlockAnimationDurationMs() + cannedUnlockStartDelayMs(),
-                        0 /* startDelay */
+                        0, /* startDelay */
                     )
                 } catch (e: DeadObjectException) {
                     // Hello! If you are here investigating a bug where Launcher is blank (no icons)
@@ -663,7 +663,7 @@ constructor(
                         "launcherUnlockAnimationController was dead, but non-null. " +
                             "Catching exception as this should mean Launcher is in the process " +
                             "of being destroyed, but the IPC to System UI telling us hasn't " +
-                            "arrived yet."
+                            "arrived yet.",
                     )
                 }
 
@@ -689,7 +689,7 @@ constructor(
                 playingCannedUnlockAnimation /* playingCannedAnimation */,
                 isWakeAndUnlockNotFromDream /* isWakeAndUnlockNotFromDream */,
                 cannedUnlockStartDelayMs() /* unlockStartDelay */,
-                LAUNCHER_ICONS_ANIMATION_DURATION_MS /* unlockAnimationDuration */
+                LAUNCHER_ICONS_ANIMATION_DURATION_MS, /* unlockAnimationDuration */
             )
         }
 
@@ -742,7 +742,7 @@ constructor(
             Log.wtf(
                 TAG,
                 "Launcher is prepared for unlock, so we should have started the " +
-                    "in-window animation, however we apparently did not."
+                    "in-window animation, however we apparently did not.",
             )
             logInWindowAnimationConditions()
         }
@@ -762,7 +762,7 @@ constructor(
             launcherUnlockController?.playUnlockAnimation(
                 true /* unlocked */,
                 LAUNCHER_ICONS_ANIMATION_DURATION_MS /* duration */,
-                cannedUnlockStartDelayMs() /* startDelay */
+                cannedUnlockStartDelayMs(), /* startDelay */
             )
         } catch (e: DeadObjectException) {
             // Hello! If you are here investigating a bug where Launcher is blank (no icons)
@@ -775,7 +775,7 @@ constructor(
                 "launcherUnlockAnimationController was dead, but non-null. " +
                     "Catching exception as this should mean Launcher is in the process " +
                     "of being destroyed, but the IPC to System UI telling us hasn't " +
-                    "arrived yet."
+                    "arrived yet.",
             )
         }
 
@@ -805,7 +805,7 @@ constructor(
                     Log.e(
                         TAG,
                         "Finish keyguard exit animation delayed Runnable ran, but we are " +
-                            "showing and not going away."
+                            "showing and not going away.",
                     )
                     return@postDelayed
                 }
@@ -819,7 +819,7 @@ constructor(
                         .exitKeyguardAndFinishSurfaceBehindRemoteAnimation(false /* cancelled */)
                 }
             },
-            cannedUnlockStartDelayMs()
+            cannedUnlockStartDelayMs(),
         )
     }
 
@@ -998,7 +998,7 @@ constructor(
                 surfaceBehindMatrix.setTranslate(
                     surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
                     surfaceBehindRemoteAnimationTarget.screenSpaceBounds.top.toFloat() +
-                        surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
+                        surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount),
                 )
 
                 // Scale up from a point at the center-bottom of the surface.
@@ -1006,7 +1006,7 @@ constructor(
                     scaleFactor,
                     scaleFactor,
                     keyguardViewController.viewRootImpl.width / 2f,
-                    surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
+                    surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y,
                 )
 
                 // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
@@ -1141,14 +1141,14 @@ constructor(
             if (!KeyguardWmStateRefactor.isEnabled) {
                 keyguardViewController.hide(
                     surfaceBehindRemoteAnimationStartTime,
-                    0 /* fadeOutDuration */
+                    0, /* fadeOutDuration */
                 )
             }
         } else {
             Log.i(
                 TAG,
                 "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
-                    "showing. Ignoring..."
+                    "showing. Ignoring...",
             )
         }
     }

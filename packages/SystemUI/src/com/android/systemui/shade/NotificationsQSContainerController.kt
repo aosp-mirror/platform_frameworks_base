@@ -27,7 +27,6 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
@@ -271,7 +270,6 @@ constructor(
         ensureAllViewsHaveIds(mView)
         val constraintSet = ConstraintSet()
         constraintSet.clone(mView)
-        setKeyguardStatusViewConstraints(constraintSet)
         setQsConstraints(constraintSet)
         setLargeScreenShadeHeaderConstraints(constraintSet)
         mView.applyConstraints(constraintSet)
@@ -292,15 +290,6 @@ constructor(
             setMargin(R.id.qs_frame, START, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, END, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, TOP, topMargin)
-        }
-    }
-
-    private fun setKeyguardStatusViewConstraints(constraintSet: ConstraintSet) {
-        val statusViewMarginHorizontal =
-            resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
-        constraintSet.apply {
-            setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal)
-            setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal)
         }
     }
 

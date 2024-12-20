@@ -24,7 +24,6 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.common.shared.model.NotificationContainerBounds
@@ -91,8 +90,6 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-// SharedNotificationContainerViewModel is only bound when FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT is on
-@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     companion object {

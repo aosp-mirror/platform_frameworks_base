@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.view.ViewGroup
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shade.ShadeFoldAnimator
@@ -25,16 +24,12 @@ import javax.inject.Inject
 @SysUISingleton
 class ToAodFoldTransitionInteractor
 @Inject
-constructor(
-    private val keyguardClockInteractor: KeyguardClockInteractor,
-) {
+constructor(private val keyguardClockInteractor: KeyguardClockInteractor) {
     private var parentAnimator: NotificationPanelViewController.ShadeFoldAnimatorImpl? = null
 
     // TODO(b/331770313): Migrate to PowerInteractor; Deprecate ShadeFoldAnimator again
     val foldAnimator =
         object : ShadeFoldAnimator {
-            override val view: ViewGroup?
-                get() = throw NotImplementedError("Deprecated. Do not call.")
 
             override fun prepareFoldToAodAnimation() {
                 parentAnimator?.prepareFoldToAodAnimation()
@@ -43,7 +38,7 @@ constructor(
             override fun startFoldToAodAnimation(
                 startAction: Runnable,
                 endAction: Runnable,
-                cancelAction: Runnable
+                cancelAction: Runnable,
             ) {
                 parentAnimator?.let {
                     it.buildViewAnimator(startAction, endAction, cancelAction)
