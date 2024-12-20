@@ -20,7 +20,7 @@ import android.view.MotionEvent
 import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
+import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import java.util.function.Consumer
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.filter
@@ -30,10 +30,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 
 class EasterEggGestureViewModel(
-    gestureRecognizer: EasterEggGestureRecognizer = EasterEggGestureRecognizer()
+    private val gestureRecognizer: EasterEggGestureRecognizer = EasterEggGestureRecognizer()
 ) : Consumer<MotionEvent> {
-
-    private val handler = TouchpadGestureHandler(gestureRecognizer)
 
     private val gestureDone =
         GestureFlowAdapter(gestureRecognizer).gestureStateAsFlow.filter {
@@ -56,7 +54,7 @@ class EasterEggGestureViewModel(
             .onStart { emit(false) }
 
     override fun accept(event: MotionEvent) {
-        handler.onMotionEvent(event)
+        gestureRecognizer.handleTouchpadMotionEvent(event)
     }
 
     fun onEasterEggFinished() {

@@ -33,7 +33,6 @@ class EasterEggGestureRecognizerTest : SysuiTestCase() {
 
     private var triggered = false
     private val gestureRecognizer = EasterEggGestureRecognizer()
-    private val handler = TouchpadGestureHandler(gestureRecognizer)
 
     @Before
     fun setup() {
@@ -99,7 +98,7 @@ class EasterEggGestureRecognizerTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, wasTriggered: Boolean) {
-        events.forEach { handler.onMotionEvent(it) }
+        events.forEach { gestureRecognizer.accept(it) }
         assertThat(triggered).isEqualTo(wasTriggered)
     }
 

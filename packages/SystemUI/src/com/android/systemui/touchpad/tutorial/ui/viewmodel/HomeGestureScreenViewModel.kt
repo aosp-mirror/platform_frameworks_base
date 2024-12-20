@@ -26,9 +26,9 @@ import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
+import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +45,7 @@ constructor(
     val velocityTracker: VelocityTracker = VerticalVelocityTracker(),
 ) : TouchpadTutorialScreenViewModel {
 
-    private var handler: TouchpadGestureHandler? = null
+    private var recognizer: HomeGestureRecognizer? = null
 
     private val distanceThreshold: Flow<Int> =
         configurationInteractor
@@ -62,14 +62,13 @@ constructor(
         distanceThreshold
             .combine(velocityThreshold, { distance, velocity -> distance to velocity })
             .flatMapLatest { (distance, velocity) ->
-                val recognizer =
+                recognizer =
                     HomeGestureRecognizer(
                         gestureDistanceThresholdPx = distance,
                         velocityThresholdPxPerMs = velocity,
                         velocityTracker = velocityTracker,
                     )
-                handler = TouchpadGestureHandler(recognizer)
-                GestureFlowAdapter(recognizer).gestureStateAsFlow
+                GestureFlowAdapter(recognizer!!).gestureStateAsFlow
             }
             .map { toGestureUiState(it) }
 
@@ -81,6 +80,6 @@ constructor(
         )
 
     override fun handleEvent(event: MotionEvent): Boolean {
-        return handler?.onMotionEvent(event) ?: false
+        return recognizer?.handleTouchpadMotionEvent(event) ?: false
     }
 }
