@@ -17,6 +17,7 @@
 package com.android.systemui.education.domain.interactor
 
 import android.os.SystemProperties
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.contextualeducation.GestureType
@@ -56,7 +57,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Allow listening to new contextual education triggered */
 @SysUISingleton
@@ -278,7 +278,8 @@ constructor(
         }
 
     private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
-        val oobeLaunchTime = tutorialRepository.launchTime(deviceType) ?: return false
+        val oobeLaunchTime =
+            tutorialRepository.getScheduledTutorialLaunchTime(deviceType) ?: return false
         return clock
             .instant()
             .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))

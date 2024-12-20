@@ -20,14 +20,17 @@ import java.time.Instant
 
 data class DeviceSchedulerInfo(
     var launchTime: Instant? = null,
-    var firstConnectionTime: Instant? = null
+    var firstConnectionTime: Instant? = null,
+    var isNotified: Boolean = false,
 ) {
     constructor(
         launchTimeSec: Long?,
-        firstConnectionTimeSec: Long?
+        firstConnectionTimeSec: Long?,
+        isNotified: Boolean = false,
     ) : this(
         launchTimeSec?.let { Instant.ofEpochSecond(it) },
-        firstConnectionTimeSec?.let { Instant.ofEpochSecond(it) }
+        firstConnectionTimeSec?.let { Instant.ofEpochSecond(it) },
+        isNotified,
     )
 
     val wasEverConnected: Boolean

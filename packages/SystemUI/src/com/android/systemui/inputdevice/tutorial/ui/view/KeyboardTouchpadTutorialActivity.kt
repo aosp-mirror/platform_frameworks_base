@@ -33,6 +33,8 @@ import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
 import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.TutorialType
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel.Factory.ViewModelFactoryAssistedProvider
@@ -51,6 +53,7 @@ class KeyboardTouchpadTutorialActivity
 constructor(
     private val viewModelFactoryAssistedProvider: ViewModelFactoryAssistedProvider,
     private val touchpadTutorialScreensProvider: Optional<TouchpadTutorialScreensProvider>,
+    private val schedulerInteractor: TutorialSchedulerInteractor,
     private val logger: InputDeviceTutorialLogger,
     private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
 ) : ComponentActivity() {
@@ -93,14 +96,27 @@ constructor(
         setContent {
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
         }
-        // TODO(b/376692701): Update launchTime when the activity is launched by Companion App
         if (savedInstanceState == null) {
-            metricsLogger.logPeripheralTutorialLaunched(
-                intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
-                intent.getStringExtra(INTENT_TUTORIAL_SCOPE_KEY),
-            )
             logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
+
+            val entryPointExtra = intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY)
+            val tutorialTypeExtra = intent.getStringExtra(INTENT_TUTORIAL_SCOPE_KEY)
+            metricsLogger.logPeripheralTutorialLaunched(entryPointExtra, tutorialTypeExtra)
+            // We only update launched info when the tutorial is triggered by the scheduler
+            if (entryPointExtra.equals(INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER))
+                updateLaunchInfo(tutorialTypeExtra)
         }
+    }
+
+    private fun updateLaunchInfo(tutorialTypeExtra: String?) {
+        val type =
+            when (tutorialTypeExtra) {
+                INTENT_TUTORIAL_SCOPE_KEYBOARD -> TutorialType.KEYBOARD
+                INTENT_TUTORIAL_SCOPE_TOUCHPAD -> TutorialType.TOUCHPAD
+                INTENT_TUTORIAL_SCOPE_ALL -> TutorialType.BOTH
+                else -> TutorialType.NONE
+            }
+        schedulerInteractor.updateLaunchInfo(type)
     }
 }
 

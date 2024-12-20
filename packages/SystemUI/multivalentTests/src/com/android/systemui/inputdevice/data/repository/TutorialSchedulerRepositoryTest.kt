@@ -22,13 +22,12 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.backgroundScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import java.time.Instant
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +37,7 @@ import org.junit.runner.RunWith
 class TutorialSchedulerRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: TutorialSchedulerRepository
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     @Before
@@ -46,45 +45,57 @@ class TutorialSchedulerRepositoryTest : SysuiTestCase() {
         underTest =
             TutorialSchedulerRepository(
                 context,
-                testScope.backgroundScope,
+                kosmos.backgroundScope,
                 "TutorialSchedulerRepositoryTest",
             )
     }
 
-    @After
-    fun clear() {
-        testScope.launch { underTest.clear() }
+    @Test
+    fun initialState() = runTestAndClear {
+        assertThat(underTest.wasEverConnected(KEYBOARD)).isFalse()
+        assertThat(underTest.wasEverConnected(TOUCHPAD)).isFalse()
+        assertThat(underTest.isNotified(KEYBOARD)).isFalse()
+        assertThat(underTest.isNotified(TOUCHPAD)).isFalse()
+        assertThat(underTest.isScheduledTutorialLaunched(KEYBOARD)).isFalse()
+        assertThat(underTest.isScheduledTutorialLaunched(TOUCHPAD)).isFalse()
     }
 
     @Test
-    fun initialState() =
-        testScope.runTest {
-            assertThat(underTest.wasEverConnected(KEYBOARD)).isFalse()
-            assertThat(underTest.wasEverConnected(TOUCHPAD)).isFalse()
-            assertThat(underTest.isLaunched(KEYBOARD)).isFalse()
-            assertThat(underTest.isLaunched(TOUCHPAD)).isFalse()
-        }
+    fun connectKeyboard() = runTestAndClear {
+        val now = Instant.now()
+        underTest.setFirstConnectionTime(KEYBOARD, now)
+
+        assertThat(underTest.wasEverConnected(KEYBOARD)).isTrue()
+        assertThat(underTest.getFirstConnectionTime(KEYBOARD)!!.epochSecond)
+            .isEqualTo(now.epochSecond)
+        assertThat(underTest.wasEverConnected(TOUCHPAD)).isFalse()
+    }
 
     @Test
-    fun connectKeyboard() =
-        testScope.runTest {
-            val now = Instant.now()
-            underTest.updateFirstConnectionTime(KEYBOARD, now)
+    fun launchKeyboard() = runTestAndClear {
+        val now = Instant.now()
+        underTest.setScheduledTutorialLaunchTime(KEYBOARD, now)
 
-            assertThat(underTest.wasEverConnected(KEYBOARD)).isTrue()
-            assertThat(underTest.firstConnectionTime(KEYBOARD)!!.epochSecond)
-                .isEqualTo(now.epochSecond)
-            assertThat(underTest.wasEverConnected(TOUCHPAD)).isFalse()
-        }
+        assertThat(underTest.isScheduledTutorialLaunched(KEYBOARD)).isTrue()
+        assertThat(underTest.getScheduledTutorialLaunchTime(KEYBOARD)!!.epochSecond)
+            .isEqualTo(now.epochSecond)
+        assertThat(underTest.isScheduledTutorialLaunched(TOUCHPAD)).isFalse()
+    }
 
     @Test
-    fun launchKeyboard() =
-        testScope.runTest {
-            val now = Instant.now()
-            underTest.updateLaunchTime(KEYBOARD, now)
+    fun notifyKeyboard() = runTestAndClear {
+        underTest.setNotified(KEYBOARD)
 
-            assertThat(underTest.isLaunched(KEYBOARD)).isTrue()
-            assertThat(underTest.launchTime(KEYBOARD)!!.epochSecond).isEqualTo(now.epochSecond)
-            assertThat(underTest.isLaunched(TOUCHPAD)).isFalse()
+        assertThat(underTest.isNotified(KEYBOARD)).isTrue()
+        assertThat(underTest.isNotified(TOUCHPAD)).isFalse()
+    }
+
+    private fun runTestAndClear(block: suspend () -> Unit) =
+        testScope.runTest {
+            try {
+                block()
+            } finally {
+                underTest.clear()
+            }
         }
 }
