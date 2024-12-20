@@ -1488,7 +1488,7 @@
     <dimen name="screenrecord_spinner_height">72dp</dimen>
     <dimen name="screenrecord_spinner_margin">24dp</dimen>
     <dimen name="screenrecord_spinner_text_padding_start">20dp</dimen>
-    <dimen name="screenrecord_spinner_text_padding_end">80dp</dimen>
+    <dimen name="screenrecord_spinner_text_padding_end">20dp</dimen>
     <dimen name="screenrecord_spinner_arrow_size">24dp</dimen>
     <dimen name="screenrecord_spinner_background_radius">28dp</dimen>
 

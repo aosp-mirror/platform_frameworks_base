@@ -51,6 +51,7 @@
             android:layout_height="@dimen/screenrecord_spinner_height"
             android:layout_marginTop="@dimen/screenrecord_spinner_margin"
             android:layout_marginBottom="@dimen/screenrecord_spinner_margin"
+            android:dropDownWidth="match_parent"
             android:gravity="center_vertical"
             android:background="@drawable/screenshare_options_spinner_background"
             android:popupBackground="@drawable/screenrecord_options_spinner_popup_background"/>
