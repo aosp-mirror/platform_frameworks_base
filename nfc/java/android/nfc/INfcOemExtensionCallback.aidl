@@ -45,7 +45,7 @@ interface INfcOemExtensionCallback {
    void onHceEventReceived(int action);
    void onReaderOptionChanged(boolean enabled);
    void onCardEmulationActivated(boolean isActivated);
-   void onRfFieldActivated(boolean isActivated);
+   void onRfFieldDetected(boolean isActive);
    void onRfDiscoveryStarted(boolean isDiscoveryStarted);
    void onEeListenActivated(boolean isActivated);
    void onEeUpdated();

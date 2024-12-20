@@ -408,12 +408,12 @@ public final class NfcOemExtension {
         void onCardEmulationActivated(boolean isActivated);
 
         /**
-        * Notifies the Remote NFC Endpoint RF Field is activated.
+        * Notifies the Remote NFC Endpoint RF Field is detected.
         * NFC Forum NCI-2.3 ch.5.3 specification
         *
-        * @param isActivated true, if RF Field is ON, else RF Field is OFF.
+        * @param isActive true, if RF Field is ON, else RF Field is OFF.
         */
-        void onRfFieldActivated(boolean isActivated);
+        void onRfFieldDetected(boolean isActive);
 
         /**
         * Notifies the NFC RF discovery is started or in the IDLE state.
@@ -596,7 +596,7 @@ public final class NfcOemExtension {
             Log.i(TAG, "updateNfCState");
             executor.execute(() -> {
                 callback.onCardEmulationActivated(mCardEmulationActivated);
-                callback.onRfFieldActivated(mRfFieldActivated);
+                callback.onRfFieldDetected(mRfFieldActivated);
                 callback.onRfDiscoveryStarted(mRfDiscoveryStarted);
                 callback.onEeListenActivated(mEeListenActivated);
             });
@@ -936,10 +936,10 @@ public final class NfcOemExtension {
         }
 
         @Override
-        public void onRfFieldActivated(boolean isActivated) throws RemoteException {
-            mRfFieldActivated = isActivated;
+        public void onRfFieldDetected(boolean isActive) throws RemoteException {
+            mRfFieldActivated = isActive;
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoidCallback(isActivated, cb::onRfFieldActivated, ex));
+                    handleVoidCallback(isActive, cb::onRfFieldDetected, ex));
         }
 
         @Override
