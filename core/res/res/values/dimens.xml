@@ -390,8 +390,23 @@
     <!-- the height of the expand button pill -->
     <dimen name="notification_expand_button_pill_height">24dp</dimen>
 
+    <!-- the height of the expand button pill (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_pill_height">20dp</dimen>
+
+    <!-- the width of the expand button pill (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_pill_width">28dp</dimen>
+
+    <!-- the size of the expand arrow (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_icon_size">16sp</dimen>
+
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_expand_button_icon_padding">2dp</dimen>
+
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_2025_expand_button_vertical_icon_padding">2dp</dimen>
+
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_2025_expand_button_horizontal_icon_padding">6dp</dimen>
 
     <!-- the size of the notification close button -->
     <dimen name="notification_close_button_size">16dp</dimen>

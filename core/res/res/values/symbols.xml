@@ -3227,6 +3227,8 @@
   <java-symbol type="id" name="header_text_divider" />
   <java-symbol type="id" name="header_text_secondary_divider" />
   <java-symbol type="drawable" name="ic_expand_notification" />
+  <java-symbol type="drawable" name="ic_notification_2025_collapse" />
+  <java-symbol type="drawable" name="ic_notification_2025_expand" />
   <java-symbol type="drawable" name="ic_collapse_notification" />
   <java-symbol type="drawable" name="notification_close_button_icon" />
   <java-symbol type="drawable" name="ic_expand_bundle" />
