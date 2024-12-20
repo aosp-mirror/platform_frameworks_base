@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
 
+import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
 
 import android.app.ActivityManager;
@@ -232,7 +233,7 @@ public class GestureLauncherService extends SystemService {
     }
 
     @VisibleForTesting
-    GestureLauncherService(Context context, MetricsLogger metricsLogger,
+    public GestureLauncherService(Context context, MetricsLogger metricsLogger,
             QuickAccessWalletClient quickAccessWalletClient, UiEventLogger uiEventLogger) {
         super(context);
         mContext = context;
@@ -600,6 +601,45 @@ public class GestureLauncherService extends SystemService {
         return res;
     }
 
+    /**
+     * Processes a power key event in GestureLauncherService without performing an action. This
+     * method is called on every KEYCODE_POWER ACTION_DOWN event and ensures that, even if
+     * KEYCODE_POWER events are passed to and handled by the app, the GestureLauncherService still
+     * keeps track of all running KEYCODE_POWER events for its gesture detection and relevant
+     * actions.
+     */
+    public void processPowerKeyDown(KeyEvent event) {
+        if (mEmergencyGestureEnabled && mEmergencyGesturePowerButtonCooldownPeriodMs >= 0
+                && event.getEventTime() - mLastEmergencyGestureTriggered
+                < mEmergencyGesturePowerButtonCooldownPeriodMs) {
+            return;
+        }
+        if (event.isLongPress()) {
+            return;
+        }
+
+        final long powerTapInterval;
+
+        synchronized (this) {
+            powerTapInterval = event.getEventTime() - mLastPowerDown;
+            mLastPowerDown = event.getEventTime();
+            if (powerTapInterval >= POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
+                // Tap too slow, reset consecutive tap counts.
+                mFirstPowerDown = event.getEventTime();
+                mPowerButtonConsecutiveTaps = 1;
+                mPowerButtonSlowConsecutiveTaps = 1;
+            } else if (powerTapInterval >= POWER_DOUBLE_TAP_MAX_TIME_MS) {
+                // Tap too slow for shortcuts
+                mFirstPowerDown = event.getEventTime();
+                mPowerButtonConsecutiveTaps = 1;
+                mPowerButtonSlowConsecutiveTaps++;
+            } else if (!overridePowerKeyBehaviorInFocusedWindow() || powerTapInterval > 0) {
+                // Fast consecutive tap
+                mPowerButtonConsecutiveTaps++;
+                mPowerButtonSlowConsecutiveTaps++;
+            }
+        }
+    }
 
     /**
      * Attempts to intercept power key down event by detecting certain gesture patterns
@@ -648,7 +688,7 @@ public class GestureLauncherService extends SystemService {
                 mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps++;
-            } else {
+            } else if (powerTapInterval > 0) {
                 // Fast consecutive tap
                 mPowerButtonConsecutiveTaps++;
                 mPowerButtonSlowConsecutiveTaps++;

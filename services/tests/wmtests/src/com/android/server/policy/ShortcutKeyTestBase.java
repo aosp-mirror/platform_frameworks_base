@@ -85,7 +85,9 @@ class ShortcutKeyTestBase {
     private Resources mResources;
     private PackageManager mPackageManager;
     TestPhoneWindowManager mPhoneWindowManager;
-    DispatchedKeyHandler mDispatchedKeyHandler = event -> false;
+    DispatchedKeyHandler mDispatchedKeyHandler;
+    private int mDownKeysDispatched;
+    private int mUpKeysDispatched;
     Context mContext;
 
     /** Modifier key to meta state */
@@ -116,6 +118,9 @@ class ShortcutKeyTestBase {
         XmlResourceParser testBookmarks = mResources.getXml(
                 com.android.frameworks.wmtests.R.xml.bookmarks);
         doReturn(testBookmarks).when(mResources).getXml(com.android.internal.R.xml.bookmarks);
+        mDispatchedKeyHandler = event -> false;
+        mDownKeysDispatched = 0;
+        mUpKeysDispatched = 0;
 
         try {
             // Keep packageName / className in sync with
@@ -229,6 +234,10 @@ class ShortcutKeyTestBase {
         sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
     }
 
+    void sendKey(int keyCode, long durationMillis) {
+        sendKeyCombination(new int[]{keyCode}, durationMillis, false, DEFAULT_DISPLAY);
+    }
+
     boolean sendKeyGestureEventStart(int gestureType) {
         return mPhoneWindowManager.sendKeyGestureEvent(
                 new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
@@ -278,12 +287,25 @@ class ShortcutKeyTestBase {
         doReturn(expectedBehavior).when(mResources).getInteger(eq(resId));
     }
 
+    int getDownKeysDispatched() {
+        return mDownKeysDispatched;
+    }
+
+    int getUpKeysDispatched() {
+        return mUpKeysDispatched;
+    }
+
     private void interceptKey(KeyEvent keyEvent) {
         int actions = mPhoneWindowManager.interceptKeyBeforeQueueing(keyEvent);
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             if (0 == mPhoneWindowManager.interceptKeyBeforeDispatching(keyEvent)) {
                 if (!mDispatchedKeyHandler.onKeyDispatched(keyEvent)) {
                     mPhoneWindowManager.interceptUnhandledKey(keyEvent);
+                }
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                    ++mDownKeysDispatched;
+                } else {
+                    ++mUpKeysDispatched;
                 }
             }
         }
