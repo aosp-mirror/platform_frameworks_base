@@ -4559,7 +4559,8 @@
          @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.companion.virtualdevice.flags.enable_limited_vdm_role" />
 
     <!-- Allows application to request to be associated with a vehicle head unit capable of
          automotive projection
