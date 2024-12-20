@@ -31,9 +31,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -73,12 +71,9 @@ public class DisplayLayout {
     public static final int NAV_BAR_RIGHT = 1 << 1;
     public static final int NAV_BAR_BOTTOM = 1 << 2;
 
-    private static final String TAG = "DisplayLayout";
-
     private int mUiMode;
     private int mWidth;
     private int mHeight;
-    private RectF mGlobalBoundsDp;
     private DisplayCutout mCutout;
     private int mRotation;
     private int mDensityDpi;
@@ -114,7 +109,6 @@ public class DisplayLayout {
         return mUiMode == other.mUiMode
                 && mWidth == other.mWidth
                 && mHeight == other.mHeight
-                && Objects.equals(mGlobalBoundsDp, other.mGlobalBoundsDp)
                 && Objects.equals(mCutout, other.mCutout)
                 && mRotation == other.mRotation
                 && mDensityDpi == other.mDensityDpi
@@ -133,8 +127,8 @@ public class DisplayLayout {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUiMode, mWidth, mHeight, mGlobalBoundsDp, mCutout, mRotation,
-                mDensityDpi, mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
+        return Objects.hash(mUiMode, mWidth, mHeight, mCutout, mRotation, mDensityDpi,
+                mNonDecorInsets, mStableInsets, mHasNavigationBar, mHasStatusBar,
                 mNavBarFrameHeight, mTaskbarFrameHeight, mAllowSeamlessRotationDespiteNavBarMoving,
                 mNavigationBarCanMove, mReverseDefaultRotation, mInsetsState);
     }
@@ -176,7 +170,6 @@ public class DisplayLayout {
         mUiMode = dl.mUiMode;
         mWidth = dl.mWidth;
         mHeight = dl.mHeight;
-        mGlobalBoundsDp = dl.mGlobalBoundsDp;
         mCutout = dl.mCutout;
         mRotation = dl.mRotation;
         mDensityDpi = dl.mDensityDpi;
@@ -200,7 +193,6 @@ public class DisplayLayout {
         mRotation = info.rotation;
         mCutout = info.displayCutout;
         mDensityDpi = info.logicalDensityDpi;
-        mGlobalBoundsDp = new RectF(0, 0, pxToDp(mWidth), pxToDp(mHeight));
         mHasNavigationBar = hasNavigationBar;
         mHasStatusBar = hasStatusBar;
         mAllowSeamlessRotationDespiteNavBarMoving = res.getBoolean(
@@ -263,11 +255,6 @@ public class DisplayLayout {
         recalcInsets(res);
     }
 
-    /** Update the global bounds of this layout, in DP. */
-    public void setGlobalBoundsDp(RectF bounds) {
-        mGlobalBoundsDp = bounds;
-    }
-
     /** Get this layout's non-decor insets. */
     public Rect nonDecorInsets() {
         return mNonDecorInsets;
@@ -278,19 +265,14 @@ public class DisplayLayout {
         return mStableInsets;
     }
 
-    /** Get this layout's width in pixels. */
+    /** Get this layout's width. */
     public int width() {
         return mWidth;
     }
 
-    /** Get this layout's height in pixels. */
+    /** Get this layout's height. */
     public int height() {
         return mHeight;
-    }
-
-    /** Get this layout's global bounds in the multi-display coordinate system in DP. */
-    public RectF globalBoundsDp() {
-        return mGlobalBoundsDp;
     }
 
     /** Get this layout's display rotation. */
@@ -503,49 +485,5 @@ public class DisplayLayout {
         return res.getDimensionPixelSize(landscape
                 ? R.dimen.navigation_bar_frame_height_landscape
                 : R.dimen.navigation_bar_frame_height);
-    }
-
-    /**
-     * Converts a pixel value to a density-independent pixel (dp) value.
-     *
-     * @param px The pixel value to convert.
-     * @return The equivalent value in DP units.
-     */
-    public float pxToDp(Number px) {
-        return px.floatValue() * DisplayMetrics.DENSITY_DEFAULT / mDensityDpi;
-    }
-
-    /**
-     * Converts a density-independent pixel (dp) value to a pixel value.
-     *
-     * @param dp The DP value to convert.
-     * @return The equivalent value in pixel units.
-     */
-    public float dpToPx(Number dp) {
-        return dp.floatValue() * mDensityDpi / DisplayMetrics.DENSITY_DEFAULT;
-    }
-
-    /**
-     * Converts local pixel coordinates on this layout to global DP coordinates.
-     *
-     * @param xPx The x-coordinate in pixels, relative to the layout's origin.
-     * @param yPx The y-coordinate in pixels, relative to the layout's origin.
-     * @return A PointF object representing the coordinates in global DP units.
-     */
-    public PointF localPxToGlobalDp(Number xPx, Number yPx) {
-        return new PointF(mGlobalBoundsDp.left + pxToDp(xPx),
-                mGlobalBoundsDp.top + pxToDp(yPx));
-    }
-
-    /**
-     * Converts global DP coordinates to local pixel coordinates on this layout.
-     *
-     * @param xDp The x-coordinate in global DP units.
-     * @param yDp The y-coordinate in global DP units.
-     * @return A PointF object representing the coordinates in local pixel units on this layout.
-     */
-    public PointF globalDpToLocalPx(Number xDp, Number yDp) {
-        return new PointF(dpToPx(xDp.floatValue() - mGlobalBoundsDp.left),
-                dpToPx(yDp.floatValue() - mGlobalBoundsDp.top));
     }
 }
