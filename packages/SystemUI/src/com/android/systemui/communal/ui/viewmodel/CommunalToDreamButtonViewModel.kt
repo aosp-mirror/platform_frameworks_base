@@ -20,7 +20,9 @@ import android.annotation.SuppressLint
 import android.app.DreamManager
 import android.content.Intent
 import android.provider.Settings
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.ActivityStarter
@@ -48,6 +50,7 @@ constructor(
     private val settingsInteractor: CommunalSettingsInteractor,
     private val activityStarter: ActivityStarter,
     private val dreamManager: DreamManager,
+    private val uiEventLogger: UiEventLogger,
 ) : ExclusiveActivatable() {
 
     private val _requests = Channel<Unit>(Channel.BUFFERED)
@@ -59,6 +62,7 @@ constructor(
 
     /** Handle a tap on the "show dream" button. */
     fun onShowDreamButtonTap() {
+        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_SHOW_DREAM_BUTTON_TAP)
         _requests.trySend(Unit)
     }
 
