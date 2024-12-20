@@ -30,7 +30,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -130,11 +130,10 @@ class PrimaryBouncerToDozingTransitionViewModelTest : SysuiTestCase() {
 
             kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
-                startValue = PrimaryBouncerTransition.MIN_BACKGROUND_BLUR_RADIUS,
-                endValue = PrimaryBouncerTransition.MIN_BACKGROUND_BLUR_RADIUS,
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.minBlurRadiusPx,
                 actualValuesProvider = { values },
                 transitionFactory = ::step,
-                checkInterpolatedValues = false,
             )
         }
 

@@ -22,16 +22,16 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 @SysUISingleton
 class PrimaryBouncerToGlanceableHubTransitionViewModel
 @Inject
-constructor(animationFlow: KeyguardTransitionAnimationFlow) :
+constructor(private val blurConfig: BlurConfig, animationFlow: KeyguardTransitionAnimationFlow) :
     DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
@@ -42,5 +42,5 @@ constructor(animationFlow: KeyguardTransitionAnimationFlow) :
         transitionAnimation.immediatelyTransitionTo(1f)
 
     override val windowBlurRadius: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(MIN_BACKGROUND_BLUR_RADIUS)
+        transitionAnimation.immediatelyTransitionTo(blurConfig.minBlurRadiusPx)
 }

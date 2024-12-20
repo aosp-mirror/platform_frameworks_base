@@ -23,10 +23,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
-import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MIN_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
@@ -46,6 +45,7 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
+    blurConfig: BlurConfig,
     shadeDependentFlows: ShadeDependentFlows,
 ) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
@@ -82,14 +82,14 @@ constructor(
     override val windowBlurRadius: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsExpanded =
-                transitionAnimation.immediatelyTransitionTo(MAX_BACKGROUND_BLUR_RADIUS),
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
             flowWhenShadeIsNotExpanded =
                 transitionAnimation.sharedFlow(
                     duration = FromAlternateBouncerTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
                     onStep = { step ->
-                        MathUtils.lerp(MIN_BACKGROUND_BLUR_RADIUS, MAX_BACKGROUND_BLUR_RADIUS, step)
+                        MathUtils.lerp(blurConfig.minBlurRadiusPx, blurConfig.maxBlurRadiusPx, step)
                     },
-                    onFinish = { MAX_BACKGROUND_BLUR_RADIUS },
+                    onFinish = { blurConfig.maxBlurRadiusPx },
                 ),
         )
 }

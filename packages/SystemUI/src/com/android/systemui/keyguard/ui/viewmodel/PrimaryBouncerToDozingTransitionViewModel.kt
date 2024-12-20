@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_DOZING_DURATION
@@ -23,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.model.Scenes
@@ -41,6 +43,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 class PrimaryBouncerToDozingTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition, PrimaryBouncerTransition {
@@ -67,7 +70,11 @@ constructor(
         }
 
     override val windowBlurRadius: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(
-            PrimaryBouncerTransition.MIN_BACKGROUND_BLUR_RADIUS
+        transitionAnimation.sharedFlow(
+            duration = TO_DOZING_DURATION,
+            onStep = { step ->
+                MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, step)
+            },
+            onFinish = { blurConfig.minBlurRadiusPx },
         )
 }

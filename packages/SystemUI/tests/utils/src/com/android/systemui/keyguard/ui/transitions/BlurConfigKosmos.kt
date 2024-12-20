@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+package com.android.systemui.keyguard.ui.transitions
 
-import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
-import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.primaryBouncerToGlanceableHubTransitionViewModel by Fixture {
-    PrimaryBouncerToGlanceableHubTransitionViewModel(
-        animationFlow = keyguardTransitionAnimationFlow,
-        blurConfig = blurConfig,
-    )
-}
+val Kosmos.blurConfig by Fixture { BlurConfig(minBlurRadiusPx = 1.0f, maxBlurRadiusPx = 100.0f) }
