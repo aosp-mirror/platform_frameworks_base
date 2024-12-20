@@ -296,7 +296,7 @@ public class HubEndpoint {
                     }
 
                     if (activeSession == null || mMessageCallback == null) {
-                        if (message.getDeliveryParams().isResponseRequired()) {
+                        if (message.isResponseRequired()) {
                             try {
                                 mServiceToken.sendMessageDeliveryStatus(
                                         sessionId,
@@ -313,7 +313,7 @@ public class HubEndpoint {
                     mMessageCallbackExecutor.execute(
                             () -> {
                                 mMessageCallback.onMessageReceived(activeSession, message);
-                                if (message.getDeliveryParams().isResponseRequired()) {
+                                if (message.isResponseRequired()) {
                                     try {
                                         mServiceToken.sendMessageDeliveryStatus(
                                                 sessionId,
