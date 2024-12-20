@@ -79,7 +79,7 @@ public class HubEndpointSession implements AutoCloseable {
             throw new IllegalStateException("Session is already closed.");
         }
 
-        boolean isResponseRequired = message.getDeliveryParams().isResponseRequired();
+        boolean isResponseRequired = message.isResponseRequired();
         ContextHubTransaction<Void> ret =
                 new ContextHubTransaction<>(
                         isResponseRequired

@@ -482,10 +482,7 @@ import java.util.List;
     /* package */
     static Message createHalMessage(HubMessage message) {
         Message outMessage = new Message();
-        outMessage.flags =
-                message.getDeliveryParams().isResponseRequired()
-                        ? Message.FLAG_REQUIRES_DELIVERY_STATUS
-                        : 0;
+        outMessage.flags = message.isResponseRequired() ? Message.FLAG_REQUIRES_DELIVERY_STATUS : 0;
         outMessage.permissions = new String[0];
         outMessage.sequenceNumber = message.getMessageSequenceNumber();
         outMessage.type = message.getMessageType();
@@ -502,8 +499,9 @@ import java.util.List;
     /* package */
     static HubMessage createHubMessage(Message message) {
         boolean isReliable = (message.flags & Message.FLAG_REQUIRES_DELIVERY_STATUS) != 0;
-        return new HubMessage(
-                message.type, message.content, new HubMessage.DeliveryParams(isReliable));
+        return new HubMessage.Builder(message.type, message.content)
+                .setResponseRequired(isReliable)
+                .build();
     }
 
     /**
