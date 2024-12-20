@@ -118,7 +118,7 @@ package android.nfc {
     method public void onNdefRead(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onReaderOptionChanged(boolean);
     method public void onRfDiscoveryStarted(boolean);
-    method public void onRfFieldActivated(boolean);
+    method public void onRfFieldDetected(boolean);
     method public void onRoutingChanged(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onRoutingTableFull();
     method public void onStateUpdated(int);
