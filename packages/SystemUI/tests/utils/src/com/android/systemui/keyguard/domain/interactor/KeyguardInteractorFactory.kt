@@ -54,6 +54,7 @@ object KeyguardInteractorFactory {
         fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
         fromOccludedTransitionInteractor: FromOccludedTransitionInteractor = mock(),
+        fromAlternateBouncerTransitionInteractor: FromAlternateBouncerTransitionInteractor = mock(),
         powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
         testScope: CoroutineScope = TestScope(),
     ): WithDependencies {
@@ -84,6 +85,9 @@ object KeyguardInteractorFactory {
                 fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
                 fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
                 fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
+                fromAlternateBouncerTransitionInteractor = {
+                    fromAlternateBouncerTransitionInteractor
+                },
                 applicationScope = testScope,
             ),
         )
