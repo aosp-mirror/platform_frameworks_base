@@ -440,7 +440,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private boolean mSandboxDisplayApis = true;
 
     /** Whether {@link #setIgnoreOrientationRequest} is called to override the default policy. */
-    @VisibleForTesting
     boolean mHasSetIgnoreOrientationRequest;
 
     /**

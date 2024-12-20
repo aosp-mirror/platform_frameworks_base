@@ -376,6 +376,9 @@ class DisplayWindowSettings {
 
         if (settings.mIgnoreOrientationRequest != null) {
             dc.setIgnoreOrientationRequest(settings.mIgnoreOrientationRequest);
+        } else if (dc.mHasSetIgnoreOrientationRequest) {
+            // Null entry is default behavior, i.e. do not ignore.
+            dc.setIgnoreOrientationRequest(false);
         }
 
         dc.getDisplayRotation().resetAllowAllRotations();
