@@ -51,6 +51,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(AndroidJUnit4.class)
 public class CardemulationTest {
 
@@ -171,7 +174,7 @@ public class CardemulationTest {
     }
 
     @Test
-    public void testRemovePollingLoopFilterForService()throws RemoteException {
+    public void testRemovePollingLoopFilterForService() throws RemoteException {
         UserHandle userHandle = mock(UserHandle.class);
         when(userHandle.getIdentifier()).thenReturn(1);
         when(mContext.getUser()).thenReturn(userHandle);
@@ -182,5 +185,100 @@ public class CardemulationTest {
                 .removePollingLoopFilterForService(componentName, "A0000000041010");
         assertThat(result).isTrue();
         verify(mINfcCardEmulation).removePollingLoopFilterForService(anyInt(), any(), anyString());
+    }
+
+    @Test
+    public void testRegisterPollingLoopPatternFilterForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.registerPollingLoopPatternFilterForService(anyInt(), any(),
+                anyString(), anyBoolean())).thenReturn(true);
+        boolean result = mCardEmulation.registerPollingLoopPatternFilterForService(componentName,
+                "A0000000041010", true);
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).registerPollingLoopPatternFilterForService(anyInt(), any(),
+                anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testRemovePollingLoopPatternFilterForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.removePollingLoopPatternFilterForService(anyInt(), any(),
+                anyString())).thenReturn(true);
+        boolean result = mCardEmulation.removePollingLoopPatternFilterForService(componentName,
+                "A0000000041010");
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).removePollingLoopPatternFilterForService(anyInt(), any(),
+                anyString());
+    }
+
+    @Test
+    public void testRegisterAidsForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.registerAidGroupForService(anyInt(), any(),
+                any())).thenReturn(true);
+        List<String> aids = new ArrayList<>();
+        aids.add("A0000000041010");
+        boolean result = mCardEmulation.registerAidsForService(componentName, "payment",
+                aids);
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).registerAidGroupForService(anyInt(), any(),
+                any());
+    }
+
+    @Test
+    public void testUnsetOffHostForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.unsetOffHostForService(1, componentName)).thenReturn(true);
+        boolean result = mCardEmulation.unsetOffHostForService(componentName);
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).unsetOffHostForService(1, componentName);
+    }
+
+    @Test
+    public void testSetOffHostForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        when(NfcAdapter.getDefaultAdapter(any())).thenReturn(mNfcAdapter);
+        List<String> elements = new ArrayList<>();
+        elements.add("eSE");
+        when(mNfcAdapter.getSupportedOffHostSecureElements()).thenReturn(elements);
+        ComponentName componentName = mock(ComponentName.class);
+        when(mINfcCardEmulation.setOffHostForService(anyInt(), any(), anyString()))
+                .thenReturn(true);
+        boolean result = mCardEmulation.setOffHostForService(componentName,
+                "eSE");
+        assertThat(result).isTrue();
+        verify(mINfcCardEmulation).setOffHostForService(anyInt(), any(), anyString());
+    }
+
+    @Test
+    public void testGetAidsForService() throws RemoteException {
+        UserHandle userHandle = mock(UserHandle.class);
+        when(userHandle.getIdentifier()).thenReturn(1);
+        when(mContext.getUser()).thenReturn(userHandle);
+        ComponentName componentName = mock(ComponentName.class);
+        List<String> elements = new ArrayList<>();
+        elements.add("eSE");
+        AidGroup aidGroup = mock(AidGroup.class);
+        when(aidGroup.getAids()).thenReturn(elements);
+        when(mINfcCardEmulation.getAidGroupForService(1, componentName, "payment"))
+                .thenReturn(aidGroup);
+        List<String> result = mCardEmulation.getAidsForService(componentName, "payment");
+        assertThat(result).isNotNull();
+        assertThat(result.size()).isGreaterThan(0);
+        verify(mINfcCardEmulation).getAidGroupForService(1, componentName, "payment");
     }
 }
