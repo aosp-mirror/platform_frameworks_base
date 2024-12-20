@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.annotation.ArrayRes
 import androidx.annotation.IntDef
 import com.android.settingslib.datastore.KeyValueStore
+import com.android.settingslib.datastore.Permissions
 
 /** Permit of read and write request. */
 @IntDef(
@@ -69,7 +70,7 @@ interface PersistentPreference<T> {
         PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
 
     /** Returns the required permissions to read preference value. */
-    fun getReadPermissions(context: Context): Array<String> = arrayOf()
+    fun getReadPermissions(context: Context): Permissions? = null
 
     /**
      * Returns if the external application (identified by [callingPid] and [callingUid]) is
@@ -88,7 +89,7 @@ interface PersistentPreference<T> {
         )
 
     /** Returns the required permissions to write preference value. */
-    fun getWritePermissions(context: Context): Array<String> = arrayOf()
+    fun getWritePermissions(context: Context): Permissions? = null
 
     /**
      * Returns if the external application (identified by [callingPid] and [callingUid]) is

@@ -22,7 +22,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -393,10 +392,12 @@ fun PreferenceMetadata.toProto(
     if (persistent) {
         if (metadata is PersistentPreference<*>) {
             sensitivityLevel = metadata.sensitivityLevel
-            val readPermissions = metadata.getReadPermissions(context)
-            readPermissions.forEach { addReadPermissions(it) }
-            val writePermissions = metadata.getWritePermissions(context)
-            writePermissions.forEach { addWritePermissions(it) }
+            metadata.getReadPermissions(context)?.let {
+                if (it.size > 0) readPermissions = it.toProto()
+            }
+            metadata.getWritePermissions(context)?.let {
+                if (it.size > 0) writePermissions = it.toProto()
+            }
         }
         if (
             flags.includeValue() &&
@@ -439,14 +440,12 @@ fun <T> PersistentPreference<T>.evalReadPermit(
     context: Context,
     callingPid: Int,
     callingUid: Int,
-): Int {
-    for (permission in getReadPermissions(context)) {
-        if (context.checkPermission(permission, callingPid, callingUid) != PERMISSION_GRANTED) {
-            return ReadWritePermit.REQUIRE_APP_PERMISSION
-        }
+): Int =
+    when {
+        getReadPermissions(context)?.check(context, callingPid, callingUid) == false ->
+            ReadWritePermit.REQUIRE_APP_PERMISSION
+        else -> getReadPermit(context, callingPid, callingUid)
     }
-    return getReadPermit(context, callingPid, callingUid)
-}
 
 private fun PreferenceMetadata.getTitleTextProto(context: Context, isRoot: Boolean): TextProto? {
     if (isRoot && this is PreferenceScreenMetadata) {

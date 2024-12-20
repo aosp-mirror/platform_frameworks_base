@@ -18,7 +18,6 @@ package com.android.settingslib.graph
 
 import android.app.Application
 import android.content.Context
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import androidx.annotation.IntDef
 import com.android.settingslib.graph.proto.PreferenceValueProto
@@ -185,14 +184,12 @@ fun <T> PersistentPreference<T>.evalWritePermit(
     value: T?,
     callingPid: Int,
     callingUid: Int,
-): Int {
-    for (permission in getWritePermissions(context)) {
-        if (context.checkPermission(permission, callingPid, callingUid) != PERMISSION_GRANTED) {
-            return ReadWritePermit.REQUIRE_APP_PERMISSION
-        }
+): Int =
+    when {
+        getWritePermissions(context)?.check(context, callingPid, callingUid) == false ->
+            ReadWritePermit.REQUIRE_APP_PERMISSION
+        else -> getWritePermit(context, value, callingPid, callingUid)
     }
-    return getWritePermit(context, value, callingPid, callingUid)
-}
 
 /** Message codec for [PreferenceSetterRequest]. */
 object PreferenceSetterRequestCodec : MessageCodec<PreferenceSetterRequest> {
