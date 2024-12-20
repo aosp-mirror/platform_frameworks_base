@@ -2409,6 +2409,12 @@ public abstract class WallpaperService extends Service {
                 };
 
         private Surface getOrCreateBLASTSurface(int width, int height, int format) {
+            if (mBbqSurfaceControl == null || !mBbqSurfaceControl.isValid()) {
+                Log.w(TAG, "Skipping BlastBufferQueue update/create"
+                    + " - invalid surface control");
+                return null;
+            }
+
             Surface ret = null;
             if (mBlastBufferQueue == null) {
                 mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mBbqSurfaceControl,
@@ -2418,11 +2424,7 @@ public abstract class WallpaperService extends Service {
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();
             } else {
-                if (mBbqSurfaceControl != null && mBbqSurfaceControl.isValid()) {
-                    mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
-                } else {
-                    Log.w(TAG, "Skipping BlastBufferQueue update - invalid surface control");
-                }
+                mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
             }
 
             return ret;
