@@ -184,7 +184,7 @@ public class BubbleBarLayerView extends FrameLayout
         }
         BubbleViewProvider previousBubble = null;
         if (mExpandedBubble != null && !b.getKey().equals(mExpandedBubble.getKey())) {
-            if (mIsExpanded) {
+            if (mIsExpanded && mExpandedBubble.getBubbleBarExpandedView() != null) {
                 // Previous expanded view open, keep it visible to animate the switch
                 previousBubble = mExpandedBubble;
             } else {
