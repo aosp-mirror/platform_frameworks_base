@@ -20,11 +20,13 @@ import android.content.Context
 import android.util.AttributeSet
 import com.android.systemui.res.R
 
-class DelayableMarqueeTextView @JvmOverloads constructor(
+open class DelayableMarqueeTextView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
 ) : SafeMarqueeTextView(context, attrs, defStyleAttr, defStyleRes) {
 
     var marqueeDelay: Long = DEFAULT_MARQUEE_DELAY
@@ -39,16 +41,20 @@ class DelayableMarqueeTextView @JvmOverloads constructor(
     }
 
     init {
-        val typedArray = context.theme.obtainStyledAttributes(
+        val typedArray =
+            context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.DelayableMarqueeTextView,
                 defStyleAttr,
-                defStyleRes
-        )
-        marqueeDelay = typedArray.getInteger(
-                R.styleable.DelayableMarqueeTextView_marqueeDelay,
-                DEFAULT_MARQUEE_DELAY.toInt()
-        ).toLong()
+                defStyleRes,
+            )
+        marqueeDelay =
+            typedArray
+                .getInteger(
+                    R.styleable.DelayableMarqueeTextView_marqueeDelay,
+                    DEFAULT_MARQUEE_DELAY.toInt(),
+                )
+                .toLong()
         typedArray.recycle()
     }
 
