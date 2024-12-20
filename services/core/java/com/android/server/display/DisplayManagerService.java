@@ -5845,6 +5845,15 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public int getGroupIdForDisplay(int displayId) {
+            synchronized (mSyncRoot) {
+                final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (display == null) return Display.INVALID_DISPLAY_GROUP;
+                return display.getDisplayInfoLocked().displayGroupId;
+            }
+        }
+
+        @Override
         public DisplayManagerInternal.DisplayOffloadSession registerDisplayOffloader(
                 int displayId, @NonNull DisplayManagerInternal.DisplayOffloader displayOffloader) {
             if (!mFlags.isDisplayOffloadEnabled()) {

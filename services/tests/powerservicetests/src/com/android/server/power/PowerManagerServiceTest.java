@@ -20,6 +20,8 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP_SLEEPING;
+import static android.os.PowerManager.SCREEN_TIMEOUT_KEEP_DISPLAY_ON;
+import static android.os.PowerManager.SCREEN_TIMEOUT_ACTIVE;
 import static android.os.PowerManager.USER_ACTIVITY_EVENT_BUTTON;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -69,6 +71,7 @@ import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.power.Boost;
 import android.hardware.power.Mode;
@@ -79,6 +82,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IWakeLockCallback;
+import android.os.IScreenTimeoutPolicyListener;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -132,6 +136,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -166,6 +171,7 @@ public class PowerManagerServiceTest {
     @Mock private BatterySaverStateMachine mBatterySaverStateMachineMock;
     @Mock private LightsManager mLightsManagerMock;
     @Mock private DisplayManagerInternal mDisplayManagerInternalMock;
+    @Mock private DisplayManager mDisplayManagerMock;
     @Mock private BatteryManagerInternal mBatteryManagerInternalMock;
     @Mock private ActivityManagerInternal mActivityManagerInternalMock;
     @Mock private AttentionManagerInternal mAttentionManagerInternalMock;
@@ -184,6 +190,8 @@ public class PowerManagerServiceTest {
     @Mock private PowerManagerService.PowerPropertiesWrapper mPowerPropertiesWrapper;
     @Mock private DeviceStateManager mDeviceStateManagerMock;
     @Mock private DeviceConfigParameterProvider mDeviceParameterProvider;
+
+    @Captor private ArgumentCaptor<DisplayManager.DisplayListener> mDisplayListenerArgumentCaptor;
 
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
@@ -254,6 +262,7 @@ public class PowerManagerServiceTest {
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
+        when(mContextSpy.getSystemService(DisplayManager.class)).thenReturn(mDisplayManagerMock);
         setBatterySaverSupported();
 
         MockContentResolver cr = new MockContentResolver(mContextSpy);
@@ -2947,13 +2956,17 @@ public class PowerManagerServiceTest {
         assertThat(mService.getPowerGroupSize()).isEqualTo(4);
     }
 
-    private WakeLock acquireWakeLock(String tag, int flags) {
+    private WakeLock acquireWakeLock(String tag, int flags, int displayId) {
         IBinder token = new Binder();
         String packageName = "pkg.name";
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
-                null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY,
+                null /* workSource */, null /* historyTag */, displayId,
                 null /* callback */);
         return mService.findWakeLockLocked(token);
+    }
+
+    private WakeLock acquireWakeLock(String tag, int flags) {
+        return acquireWakeLock(tag, flags, Display.INVALID_DISPLAY);
     }
 
     /**
@@ -3440,6 +3453,106 @@ public class PowerManagerServiceTest {
                 mService.getBinderServiceInstance().releaseWakeLock(token, 0);
             }
         }
+    }
+
+    @Test
+    public void testAddWakeLockKeepingScreenOn_addsToNotifierAndReportsTimeoutPolicyChange() {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY))
+                .thenReturn(displayInfo);
+
+        createService();
+        startSystem();
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        mService.getBinderServiceInstance().addScreenTimeoutPolicyListener(
+                Display.DEFAULT_DISPLAY_GROUP, listener);
+        verify(mNotifierMock).addScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_ACTIVE, listener);
+        clearInvocations(mNotifierMock);
+
+        acquireWakeLock("screenBright", PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+                    Display.DEFAULT_DISPLAY);
+        verify(mNotifierMock).notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
+    }
+
+    @Test
+    public void test_addAndRemoveScreenTimeoutListener_propagatesToNotifier()
+            throws Exception {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY))
+                .thenReturn(displayInfo);
+
+        createService();
+        startSystem();
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        mService.getBinderServiceInstance().addScreenTimeoutPolicyListener(
+                Display.DEFAULT_DISPLAY, listener);
+
+        clearInvocations(mNotifierMock);
+        mService.getBinderServiceInstance().removeScreenTimeoutPolicyListener(
+                Display.DEFAULT_DISPLAY, listener);
+        verify(mNotifierMock).removeScreenTimeoutPolicyListener(Display.DEFAULT_DISPLAY,
+                listener);
+    }
+
+    @Test
+    public void test_displayIsRemoved_clearsScreenTimeoutListeners()
+            throws Exception {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY))
+                .thenReturn(displayInfo);
+
+        createService();
+        startSystem();
+        verify(mDisplayManagerMock).registerDisplayListener(
+                mDisplayListenerArgumentCaptor.capture(), any());
+        clearInvocations(mNotifierMock);
+
+        mDisplayListenerArgumentCaptor.getValue().onDisplayRemoved(Display.DEFAULT_DISPLAY);
+
+        verify(mNotifierMock).clearScreenTimeoutPolicyListeners(Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testScreenWakeLockListener_screenHasWakelocks_addsWithHeldTimeoutPolicyToNotifier()
+            throws Exception {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY))
+                .thenReturn(displayInfo);
+
+        createService();
+        startSystem();
+
+        acquireWakeLock("screenBright", PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+                Display.DEFAULT_DISPLAY);
+
+        final IScreenTimeoutPolicyListener listener = Mockito.mock(
+                IScreenTimeoutPolicyListener.class);
+        mService.getBinderServiceInstance().addScreenTimeoutPolicyListener(
+                Display.DEFAULT_DISPLAY_GROUP, listener);
+        verify(mNotifierMock).notifyScreenTimeoutPolicyChanges(Display.DEFAULT_DISPLAY_GROUP,
+                SCREEN_TIMEOUT_KEEP_DISPLAY_ON);
     }
 
     @Test

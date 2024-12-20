@@ -37,11 +37,14 @@ import android.os.BatteryStatsInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IWakeLockCallback;
+import android.os.IScreenTimeoutPolicyListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.ScreenTimeoutPolicy;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -52,6 +55,7 @@ import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -151,6 +155,11 @@ public class Notifier {
     private final Intent mScreenOnIntent;
     private final Intent mScreenOffIntent;
     private final Bundle mScreenOnOffOptions;
+
+    // Display id -> ScreenTimeoutPolicyListenersContainer that contains list of screen
+    // wake lock listeners
+    private final SparseArray<ScreenTimeoutPolicyListenersContainer> mScreenTimeoutPolicyListeners
+            = new SparseArray<>();
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
@@ -1267,6 +1276,146 @@ public class Notifier {
                             + "Notifier." + e.getLocalizedMessage());
                 }
             });
+        }
+    }
+
+    /**
+     * Adds a listener for the screen timeout policy
+     * @param displayId display ID
+     * @param screenTimeoutPolicy initial state of the timeout policy
+     * @param listener callback to receive screen timeout policy updates
+     */
+    void addScreenTimeoutPolicyListener(int displayId, @ScreenTimeoutPolicy int screenTimeoutPolicy,
+            IScreenTimeoutPolicyListener listener) {
+        synchronized (mLock) {
+            ScreenTimeoutPolicyListenersContainer listenersContainer =
+                    mScreenTimeoutPolicyListeners.get(displayId);
+            if (listenersContainer == null) {
+                listenersContainer = new ScreenTimeoutPolicyListenersContainer(
+                        screenTimeoutPolicy);
+                mScreenTimeoutPolicyListeners.set(displayId, listenersContainer);
+            }
+
+            listenersContainer.addListener(listener);
+        }
+    }
+
+    /**
+     * Removes a listener for the screen timeout policy
+     * @param displayId display id from which the listener should be removed
+     * @param listener the instance of the listener
+     */
+    void removeScreenTimeoutPolicyListener(int displayId,
+            IScreenTimeoutPolicyListener listener) {
+        synchronized (mLock) {
+            ScreenTimeoutPolicyListenersContainer listenersContainer =
+                    mScreenTimeoutPolicyListeners.get(displayId);
+            if (listenersContainer == null) {
+                return;
+            }
+
+            listenersContainer.removeListener(listener);
+
+            if (listenersContainer.isEmpty()) {
+                mScreenTimeoutPolicyListeners.remove(displayId);
+            }
+        }
+    }
+
+    /**
+     * Clears all screen timeout policy listeners for the specified display id
+     * @param displayId display id from which the listeners should be cleared
+     */
+    void clearScreenTimeoutPolicyListeners(int displayId) {
+        synchronized (mLock) {
+            mScreenTimeoutPolicyListeners.remove(displayId);
+        }
+    }
+
+    /**
+     * Notifies about screen timeout policy changes of the corresponding display group if
+     * it has changed
+     * @param displayGroupId the id of the display group to report
+     * @param screenTimeoutPolicy screen timeout policy
+     */
+    void notifyScreenTimeoutPolicyChanges(int displayGroupId,
+            @ScreenTimeoutPolicy int screenTimeoutPolicy) {
+        synchronized (mLock) {
+            for (int idx = 0; idx < mScreenTimeoutPolicyListeners.size(); idx++) {
+                final int displayId = mScreenTimeoutPolicyListeners.keyAt(idx);
+                if (mDisplayManagerInternal.getGroupIdForDisplay(displayId) == displayGroupId) {
+                    final ScreenTimeoutPolicyListenersContainer container =
+                            mScreenTimeoutPolicyListeners.valueAt(idx);
+                    container.updateScreenTimeoutPolicyAndNotifyIfNeeded(screenTimeoutPolicy);
+                }
+            }
+        }
+    }
+
+    private final class ScreenTimeoutPolicyListenersContainer {
+        private final RemoteCallbackList<IScreenTimeoutPolicyListener> mListeners;
+        private final ArrayMap<IScreenTimeoutPolicyListener, Integer> mLastReportedState =
+                new ArrayMap<>();
+
+        @ScreenTimeoutPolicy
+        private volatile int mScreenTimeoutPolicy;
+
+        ScreenTimeoutPolicyListenersContainer(int screenTimeoutPolicy) {
+            mScreenTimeoutPolicy = screenTimeoutPolicy;
+            mListeners = new RemoteCallbackList<IScreenTimeoutPolicyListener>() {
+                @Override
+                public void onCallbackDied(IScreenTimeoutPolicyListener callbackInterface) {
+                    mLastReportedState.remove(callbackInterface);
+                }
+            };
+        }
+
+        void updateScreenTimeoutPolicyAndNotifyIfNeeded(
+                @ScreenTimeoutPolicy int screenTimeoutPolicy) {
+            mScreenTimeoutPolicy = screenTimeoutPolicy;
+
+            mHandler.post(() -> {
+                for (int i = mListeners.beginBroadcast() - 1; i >= 0; i--) {
+                    final IScreenTimeoutPolicyListener listener = mListeners.getBroadcastItem(i);
+                    notifyListenerIfNeeded(listener);
+                }
+                mListeners.finishBroadcast();
+            });
+        }
+
+        void addListener(IScreenTimeoutPolicyListener listener) {
+            mListeners.register(listener);
+            mHandler.post(() -> notifyListenerIfNeeded(listener));
+        }
+
+        void removeListener(IScreenTimeoutPolicyListener listener) {
+            mListeners.unregister(listener);
+            mLastReportedState.remove(listener);
+        }
+
+        boolean isEmpty() {
+            return mListeners.getRegisteredCallbackCount() == 0;
+        }
+
+        private void notifyListenerIfNeeded(IScreenTimeoutPolicyListener listener) {
+            final int currentScreenTimeoutPolicy = mScreenTimeoutPolicy;
+            final Integer reportedScreenTimeoutPolicy = mLastReportedState.get(listener);
+            final boolean needsReporting = reportedScreenTimeoutPolicy == null
+                    || !reportedScreenTimeoutPolicy.equals(currentScreenTimeoutPolicy);
+
+            if (!needsReporting) return;
+
+            try {
+                listener.onScreenTimeoutPolicyChanged(currentScreenTimeoutPolicy);
+                mLastReportedState.put(listener, currentScreenTimeoutPolicy);
+            } catch (RemoteException e) {
+                // The RemoteCallbackList will take care of removing
+                // the dead object for us.
+                Slog.e(TAG, "Remote exception when notifying screen timeout policy change", e);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Exception when notifying screen timeout policy change", e);
+                removeListener(listener);
+            }
         }
     }
 

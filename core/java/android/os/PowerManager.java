@@ -34,6 +34,7 @@ import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.os.IScreenTimeoutPolicyListener;
 import android.service.dreams.Sandman;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1049,6 +1050,29 @@ public final class PowerManager {
     }
 
     /**
+     * Screen timeout policy type: the screen turns off after a timeout
+     * @hide
+     */
+    public static final int SCREEN_TIMEOUT_ACTIVE = 0;
+
+    /**
+     * Screen timeout policy type: the screen is kept 'on' (no timeout)
+     * @hide
+     */
+    public static final int SCREEN_TIMEOUT_KEEP_DISPLAY_ON = 1;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "SCREEN_TIMEOUT_" }, value = {
+            SCREEN_TIMEOUT_ACTIVE,
+            SCREEN_TIMEOUT_KEEP_DISPLAY_ON
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScreenTimeoutPolicy{}
+
+
+    /**
      * Either the location providers shouldn't be affected by battery saver,
      * or battery saver is off.
      */
@@ -1207,6 +1231,9 @@ public final class PowerManager {
     @GuardedBy("mThermalHeadroomListenerMap")
     private final ArrayMap<OnThermalHeadroomChangedListener, IThermalHeadroomListener>
             mThermalHeadroomListenerMap = new ArrayMap<>();
+
+    private final ArrayMap<ScreenTimeoutPolicyListener, IScreenTimeoutPolicyListener>
+            mScreenTimeoutPolicyListeners = new ArrayMap<>();
 
     /**
      * {@hide}
@@ -1744,6 +1771,77 @@ public final class PowerManager {
     public void boostScreenBrightness(long time) {
         try {
             mService.boostScreenBrightness(time);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds a listener to be notified about changes in screen timeout policy.
+     *
+     * <p>The screen timeout policy determines the behavior of the device's screen
+     * after a period of inactivity. It can be used to understand if the display is going
+     * to be turned off after a timeout to conserve power, or if it will be kept on indefinitely.
+     * For example, it might be useful for adjusting display switch conditions on foldable
+     * devices based on the current timeout policy.
+     *
+     * <p>See {@link ScreenTimeoutPolicy} for possible values.
+     *
+     * <p>The listener will be fired with the initial state upon subscribing.
+     *
+     * <p>IScreenTimeoutPolicyListener is called on either system server's main thread or
+     * on a binder thread if subscribed outside the system service process.
+     *
+     * @param displayId display id for which to be notified about screen timeout policy changes
+     * @param executor executor on which to execute ScreenTimeoutPolicyListener methods
+     * @param listener listener that will be fired on screem timeout policy updates
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void addScreenTimeoutPolicyListener(int displayId,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ScreenTimeoutPolicyListener listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Preconditions.checkArgument(!mScreenTimeoutPolicyListeners.containsKey(listener),
+                "Listener already registered: %s", listener);
+
+        final IScreenTimeoutPolicyListener stub = new IScreenTimeoutPolicyListener.Stub() {
+            public void onScreenTimeoutPolicyChanged(int screenTimeoutPolicy) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            listener.onScreenTimeoutPolicyChanged(screenTimeoutPolicy));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
+
+        try {
+            mService.addScreenTimeoutPolicyListener(displayId, stub);
+            mScreenTimeoutPolicyListeners.put(listener, stub);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a listener that is used to listen for screen timeout policy changes.
+     * @see PowerManager#addScreenTimeoutPolicyListener(int, ScreenTimeoutPolicyListener)
+     * @param displayId display id for which to be notified about screen timeout changes
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void removeScreenTimeoutPolicyListener(int displayId,
+            @NonNull ScreenTimeoutPolicyListener listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        IScreenTimeoutPolicyListener internalListener = mScreenTimeoutPolicyListeners.get(listener);
+        Preconditions.checkArgument(internalListener != null, "Listener was not added");
+
+        try {
+            mService.removeScreenTimeoutPolicyListener(displayId, internalListener);
+            mScreenTimeoutPolicyListeners.remove(listener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3822,6 +3920,21 @@ public final class PowerManager {
          * @param enabled true is enabled, false is disabled.
          */
         void onStateChanged(boolean enabled);
+    }
+
+    /**
+     * Listener for screen timeout policy changes
+     * @see PowerManager#addScreenTimeoutPolicyListener(int, ScreenTimeoutPolicyListener)
+     * @hide
+     */
+    public interface ScreenTimeoutPolicyListener {
+        /**
+         * Invoked on changes in screen timeout policy.
+         *
+         * @param screenTimeoutPolicy Screen timeout policy, one of {@link ScreenTimeoutPolicy}
+         * @see PowerManager#addScreenTimeoutPolicyListener
+         */
+        void onScreenTimeoutPolicyChanged(@ScreenTimeoutPolicy int screenTimeoutPolicy);
     }
 
     /**
