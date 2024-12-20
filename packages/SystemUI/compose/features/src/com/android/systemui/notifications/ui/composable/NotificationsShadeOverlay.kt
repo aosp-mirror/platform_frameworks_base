@@ -16,12 +16,15 @@
 
 package com.android.systemui.notifications.ui.composable
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.res.dimensionResource
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.UserAction
@@ -34,6 +37,7 @@ import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayActionsViewModel
 import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeOverlayContentViewModel
+import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
@@ -61,7 +65,6 @@ constructor(
     private val clockSection: DefaultClockSection,
     private val clockInteractor: KeyguardClockInteractor,
 ) : Overlay {
-
     override val key = Overlays.NotificationsShade
 
     private val actionsViewModel: NotificationsShadeOverlayActionsViewModel by lazy {
@@ -76,6 +79,9 @@ constructor(
 
     @Composable
     override fun ContentScope.Content(modifier: Modifier) {
+
+        val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
+
         val viewModel =
             rememberViewModel("NotificationsShadeOverlay-viewModel") {
                 contentViewModelFactory.create()
@@ -90,47 +96,52 @@ constructor(
             modifier = modifier,
             onScrimClicked = viewModel::onScrimClicked,
         ) {
-            Column {
-                if (viewModel.showHeader) {
-                    val burnIn = rememberBurnIn(clockInteractor)
+            Box {
+                Column {
+                    if (viewModel.showHeader) {
+                        val burnIn = rememberBurnIn(clockInteractor)
 
-                    CollapsedShadeHeader(
-                        viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                        createTintedIconManager = tintedIconManagerFactory::create,
-                        createBatteryMeterViewController =
-                            batteryMeterViewControllerFactory::create,
-                        statusBarIconController = statusBarIconController,
-                        modifier =
-                            Modifier.element(NotificationsShade.Elements.StatusBar)
-                                .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
-                    )
-
-                    with(clockSection) {
-                        SmallClock(
-                            burnInParams = burnIn.parameters,
-                            onTopChanged = burnIn.onSmallClockTopChanged,
-                            modifier = Modifier.fillMaxWidth(),
+                        CollapsedShadeHeader(
+                            viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                            createTintedIconManager = tintedIconManagerFactory::create,
+                            createBatteryMeterViewController =
+                                batteryMeterViewControllerFactory::create,
+                            statusBarIconController = statusBarIconController,
+                            modifier =
+                                Modifier.element(NotificationsShade.Elements.StatusBar)
+                                    .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
                         )
+
+                        with(clockSection) {
+                            SmallClock(
+                                burnInParams = burnIn.parameters,
+                                onTopChanged = burnIn.onSmallClockTopChanged,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
+
+                    NotificationScrollingStack(
+                        shadeSession = shadeSession,
+                        stackScrollView = stackScrollView.get(),
+                        viewModel = placeholderViewModel,
+                        maxScrimTop = { 0f },
+                        stackTopPadding = notificationStackPadding,
+                        stackBottomPadding = notificationStackPadding,
+                        shouldPunchHoleBehindScrim = false,
+                        shouldFillMaxSize = false,
+                        shouldShowScrim = false,
+                        supportNestedScrolling = false,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-
-                NotificationScrollingStack(
-                    shadeSession = shadeSession,
-                    stackScrollView = stackScrollView.get(),
-                    viewModel = placeholderViewModel,
-                    maxScrimTop = { 0f },
-                    shouldPunchHoleBehindScrim = false,
-                    shouldFillMaxSize = false,
-                    shouldReserveSpaceForNavBar = false,
-                    shouldShowScrim = false,
-                    supportNestedScrolling = false,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-
                 // Communicates the bottom position of the drawable area within the shade to NSSL.
                 NotificationStackCutoffGuideline(
                     stackScrollView = stackScrollView.get(),
                     viewModel = placeholderViewModel,
+                    modifier =
+                        Modifier.align(Alignment.BottomCenter)
+                            .padding(bottom = notificationStackPadding),
                 )
             }
         }

@@ -74,7 +74,6 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
@@ -433,12 +432,15 @@ private fun SceneScope.QuickSettingsScene(
         // A 1 pixel is added to compensate for any kind of rounding errors to make sure 100% that
         // the notification stack is entirely "below" the entire screen.
         val minNotificationStackTop = screenHeight.roundToInt() + 1
+        val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
         NotificationScrollingStack(
             shadeSession = shadeSession,
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
             maxScrimTop = { minNotificationStackTop.toFloat() },
             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+            stackTopPadding = notificationStackPadding,
+            stackBottomPadding = navBarBottomHeight,
             shouldIncludeHeadsUpSpace = false,
             supportNestedScrolling = true,
             modifier =
@@ -453,7 +455,12 @@ private fun SceneScope.QuickSettingsScene(
                 Modifier.align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .offset { IntOffset(x = 0, y = minNotificationStackTop) }
-                    .padding(horizontal = shadeHorizontalPadding),
+                    .padding(
+                        start = shadeHorizontalPadding,
+                        top = 0.dp,
+                        end = shadeHorizontalPadding,
+                        bottom = navBarBottomHeight,
+                    ),
         )
     }
 }
