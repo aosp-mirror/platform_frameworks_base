@@ -2590,6 +2590,32 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT;
     }
 
+    /**
+     * Returns whether the key code passed as argument is allowed for visible background users.
+     * Visible background users are expected to run on secondary displays with certain limitations
+     * on system keys.
+     *
+     * @hide
+     */
+    public static boolean isVisibleBackgroundUserAllowedKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_POWER:
+            case KeyEvent.KEYCODE_SLEEP:
+            case KeyEvent.KEYCODE_WAKEUP:
+            case KeyEvent.KEYCODE_CALL:
+            case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_ASSIST:
+            case KeyEvent.KEYCODE_VOICE_ASSIST:
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+            case KeyEvent.KEYCODE_RECENT_APPS:
+            case KeyEvent.KEYCODE_APP_SWITCH:
+            case KeyEvent.KEYCODE_NOTIFICATION:
+                return false;
+        }
+        return true;
+    }
+
     /** {@inheritDoc} */
     @Override
     public final int getDeviceId() {

@@ -191,7 +191,6 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.MutableBoolean;
@@ -724,23 +723,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mKeyguardDrawnTimeout = 1000;
 
     private final boolean mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
-
-    // Key codes that should be ignored for visible background users in MUMD environment.
-    private static final Set<Integer> KEY_CODES_IGNORED_FOR_VISIBLE_BACKGROUND_USERS =
-            new ArraySet<>(Arrays.asList(
-                    KeyEvent.KEYCODE_POWER,
-                    KeyEvent.KEYCODE_SLEEP,
-                    KeyEvent.KEYCODE_WAKEUP,
-                    KeyEvent.KEYCODE_CALL,
-                    KeyEvent.KEYCODE_ENDCALL,
-                    KeyEvent.KEYCODE_ASSIST,
-                    KeyEvent.KEYCODE_VOICE_ASSIST,
-                    KeyEvent.KEYCODE_MUTE,
-                    KeyEvent.KEYCODE_VOLUME_MUTE,
-                    KeyEvent.KEYCODE_RECENT_APPS,
-                    KeyEvent.KEYCODE_APP_SWITCH,
-                    KeyEvent.KEYCODE_NOTIFICATION
-            ));
 
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
@@ -5127,7 +5109,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // There are key events that perform the operation as the current user,
         // and these should be ignored for visible background users.
         if (mVisibleBackgroundUsersEnabled
-                && KEY_CODES_IGNORED_FOR_VISIBLE_BACKGROUND_USERS.contains(keyCode)
+                && !KeyEvent.isVisibleBackgroundUserAllowedKey(keyCode)
                 && !isKeyEventForCurrentUser(event.getDisplayId(), keyCode, null)) {
             return 0;
         }
