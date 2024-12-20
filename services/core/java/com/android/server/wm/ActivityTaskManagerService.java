@@ -5015,7 +5015,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return showDialogs;
     }
 
-    private void updateFontScaleIfNeeded(@UserIdInt int userId) {
+    void updateFontScaleIfNeeded(@UserIdInt int userId) {
         if (userId != getCurrentUserId()) {
             return;
         }

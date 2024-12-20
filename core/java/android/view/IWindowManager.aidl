@@ -70,6 +70,7 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.AddToSurfaceSyncGroupResult;
+import android.window.ConfigurationChangeSetting;
 import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
@@ -136,6 +137,24 @@ interface IWindowManager
     void setForcedDisplayDensityForUser(int displayId, int density, int userId);
     @EnforcePermission("WRITE_SECURE_SETTINGS")
     void clearForcedDisplayDensityForUser(int displayId, int userId);
+
+    /**
+     * Sets settings for a specific user in a batch to minimize configuration updates.
+     *
+     * <p>This method allows for applying multiple settings changes as a batch, which can
+     * help avoid multiple configuration updates.
+     *
+     * @param settings list of {@link android.window.ConfigurationChangeSetting} objects
+     *                 representing the settings to be applied.
+     * @param userId   the ID of the user whose settings should be applied.
+     * @throws SecurityException if the caller does not have the {@link WRITE_SECURE_SETTINGS}
+     *                           permission.
+     * @hide
+     */
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
+    void setConfigurationChangeSettingsForUser(
+            in List<ConfigurationChangeSetting> settings, int userId);
+
     @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 

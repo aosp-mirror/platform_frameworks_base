@@ -106,6 +106,7 @@ android_test {
         "TestParameterInjector",
         "android.content.res.flags-aconfig-java",
         "android.security.flags-aconfig-java",
+        "mockito-kotlin2",
     ],
 
     libs: [

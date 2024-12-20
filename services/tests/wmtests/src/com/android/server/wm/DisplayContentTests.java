@@ -2332,7 +2332,7 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
         // Trigger display changed.
         updateDisplay(dc);
-        // Ensure overridden size and denisty match the most up-to-date values in settings for the
+        // Ensure overridden size and density match the most up-to-date values in settings for the
         // display.
         verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
     }

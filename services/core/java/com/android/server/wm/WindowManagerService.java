@@ -313,6 +313,7 @@ import android.widget.Toast;
 import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
+import android.window.ConfigurationChangeSetting;
 import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
@@ -1457,6 +1458,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }, mTransactionFactory);
         mSystemPerformanceHinter.mTraceTag = TRACE_TAG_WINDOW_MANAGER;
+
+        if (Flags.condenseConfigurationChangeForSimpleMode()) {
+            LocalServices.addService(
+                    ConfigurationChangeSetting.ConfigurationChangeSettingInternal.class,
+                    new ConfigurationChangeSettingInternalImpl());
+        }
     }
 
     DisplayAreaPolicy.Provider getDisplayAreaPolicyProvider() {
@@ -6187,19 +6194,30 @@ public class WindowManagerService extends IWindowManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.setForcedDensity(density, targetUserId);
-                } else {
-                    DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
-                    if (info != null) {
-                        mDisplayWindowSettings.setForcedDensity(info, density, userId);
-                    }
-                }
+                setForcedDensityLockedInternal(displayId, density, targetUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @GuardedBy("mGlobalLock")
+    private void setForcedDensityLockedInternal(final int displayId, final int density,
+            @UserIdInt final int targetUserId) {
+        final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+        if (displayContent != null) {
+            displayContent.setForcedDensity(density, targetUserId);
+            return;
+        }
+
+        final DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
+        if (info == null) {
+            ProtoLog.e(WM_ERROR, "Failed to get information about logical display %d. "
+                    + "Skip setting forced display density.", displayId);
+            return;
+        }
+
+        mDisplayWindowSettings.setForcedDensity(info, density, targetUserId);
     }
 
     @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
@@ -6217,12 +6235,51 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayContent != null) {
                     displayContent.setForcedDensity(displayContent.getInitialDisplayDensity(),
                             callingUserId);
-                } else {
-                    DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
-                    if (info != null) {
-                        mDisplayWindowSettings.setForcedDensity(info, info.logicalDensityDpi,
-                                userId);
+                    return;
+                }
+
+                final DisplayInfo info = mDisplayManagerInternal.getDisplayInfo(displayId);
+                if (info == null) {
+                    ProtoLog.e(WM_ERROR, "Failed to get information about logical display %d. "
+                            + "Skip clearing forced display density.", displayId);
+                    return;
+                }
+
+                mDisplayWindowSettings.setForcedDensity(info, info.logicalDensityDpi,
+                        userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @EnforcePermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @Override
+    public void setConfigurationChangeSettingsForUser(
+            @NonNull List<ConfigurationChangeSetting> settings, int userId) {
+        setConfigurationChangeSettingsForUser_enforcePermission();
+        if (!Flags.condenseConfigurationChangeForSimpleMode()) {
+            throw new IllegalStateException(
+                    "setConfigurationChangeSettingsForUser shouldn't be called when "
+                            + "condenseConfigurationChangeForSimpleMode is disabled, "
+                            + "please enable the flag.");
+        }
+
+        final int callingUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true,
+                "setConfigurationChangeSettingsForUser",
+                null);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mAtmService.deferWindowLayout();
+                try {
+                    // Apply the settings.
+                    for (int i = 0; i < settings.size(); i++) {
+                        settings.get(i).apply(callingUserId);
                     }
+                } finally {
+                    mAtmService.continueWindowLayout();
                 }
             }
         } finally {
@@ -10539,5 +10596,49 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("Got a RemoteException while dumping the window");
             }
         });
+    }
+
+    private final class ConfigurationChangeSettingInternalImpl implements
+            ConfigurationChangeSetting.ConfigurationChangeSettingInternal {
+        @NonNull
+        @Override
+        public ConfigurationChangeSetting createImplFromParcel(
+                @ConfigurationChangeSetting.SettingType int settingType, @NonNull Parcel in) {
+            switch (settingType) {
+                case ConfigurationChangeSetting.SETTING_TYPE_DISPLAY_DENSITY:
+                    return new DensitySettingImpl(in);
+                case ConfigurationChangeSetting.SETTING_TYPE_FONT_SCALE:
+                    return new FontScaleSettingImpl(in);
+                default:
+                    throw new IllegalArgumentException("Unknown setting type " + settingType);
+            }
+        }
+
+        private final class DensitySettingImpl extends ConfigurationChangeSetting.DensitySetting {
+            private DensitySettingImpl(Parcel in) {
+                super(in);
+            }
+
+            @Override
+            @GuardedBy("mGlobalLock")
+            public void apply(@UserIdInt int userId) {
+                setForcedDensityLockedInternal(mDisplayId, mDensity, userId);
+            }
+        }
+
+        private final class FontScaleSettingImpl extends
+                ConfigurationChangeSetting.FontScaleSetting {
+            private FontScaleSettingImpl(Parcel in) {
+                super(in);
+            }
+
+            @Override
+            @GuardedBy("mGlobalLock")
+            public void apply(@UserIdInt int userId) {
+                Settings.System.putFloat(mContext.getContentResolver(),
+                        Settings.System.FONT_SCALE, mFontScaleFactor);
+                mAtmService.updateFontScaleIfNeeded(userId);
+            }
+        }
     }
 }

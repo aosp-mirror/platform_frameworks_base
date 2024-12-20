@@ -75,6 +75,7 @@ import android.util.Log;
 import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
+import android.window.ConfigurationChangeSetting;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.os.BackgroundThread;
@@ -99,6 +100,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.testutils.StubTransaction;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.window.flags.Flags;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -501,6 +503,10 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.removeServiceForTest(ImeTargetVisibilityPolicy.class);
         LocalServices.removeServiceForTest(GrammaticalInflectionManagerInternal.class);
+        if (Flags.condenseConfigurationChangeForSimpleMode()) {
+            LocalServices.removeServiceForTest(
+                    ConfigurationChangeSetting.ConfigurationChangeSettingInternal.class);
+        }
     }
 
     Description getDescription() {
