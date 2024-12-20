@@ -422,75 +422,6 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
 
     @Test
     @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreSettings_agentMetricsAreEnabled_agentMetricsAreLogged() {
-        mAgentUnderTest.onCreate(
-            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
-        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
-                new SettingsBackupAgent.SettingsBackupAllowlist(
-                        new String[] {OVERRIDDEN_TEST_SETTING},
-                        TEST_VALUES_VALIDATORS);
-        mAgentUnderTest.setSettingsAllowlist(allowlist);
-        mAgentUnderTest.setBlockedSettings();
-        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
-        mAgentUnderTest.mSettingsHelper = settingsHelper;
-
-        byte[] backupData = generateBackupData(TEST_VALUES);
-        mAgentUnderTest
-            .restoreSettings(
-                backupData,
-                /* pos= */ 0,
-                backupData.length,
-                TEST_URI,
-                /* movedToGlobal= */ null,
-                /* movedToSecure= */ null,
-                /* movedToSystem= */ null,
-                /* blockedSettingsArrayId= */ 0,
-                /* dynamicBlockList= */ Collections.emptySet(),
-                /* settingsToPreserve= */ Collections.emptySet(),
-                TEST_KEY);
-
-        DataTypeResult loggingResult =
-            getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest);
-        assertNotNull(loggingResult);
-        assertEquals(loggingResult.getSuccessCount(), 1);
-    }
-
-    @Test
-    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreSettings_agentMetricsAreDisabled_agentMetricsAreNotLogged() {
-        mAgentUnderTest.onCreate(
-            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
-        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
-                new SettingsBackupAgent.SettingsBackupAllowlist(
-                        new String[] {OVERRIDDEN_TEST_SETTING},
-                        TEST_VALUES_VALIDATORS);
-        mAgentUnderTest.setSettingsAllowlist(allowlist);
-        mAgentUnderTest.setBlockedSettings();
-        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
-        mAgentUnderTest.mSettingsHelper = settingsHelper;
-
-        byte[] backupData = generateBackupData(TEST_VALUES);
-        mAgentUnderTest
-            .restoreSettings(
-                backupData,
-                /* pos= */ 0,
-                backupData.length,
-                TEST_URI,
-                /* movedToGlobal= */ null,
-                /* movedToSecure= */ null,
-                /* movedToSystem= */ null,
-                /* blockedSettingsArrayId= */ 0,
-                /* dynamicBlockList= */ Collections.emptySet(),
-                /* settingsToPreserve= */ Collections.emptySet(),
-                TEST_KEY);
-
-        DataTypeResult loggingResult =
-            getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest);
-        assertNull(loggingResult);
-    }
-
-    @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
     public void restoreSettings_agentMetricsAreEnabled_readEntityDataFails_failureIsLogged()
         throws IOException {
         when(mBackupDataInput.readEntityData(any(byte[].class), anyInt(), anyInt()))
@@ -577,6 +508,40 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreSettings_agentMetricsAreDisabled_settingIsSkippedBySystem_failureIsNotLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        String[] settingBlockedBySystem = new String[] {OVERRIDDEN_TEST_SETTING};
+        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
+                new SettingsBackupAgent.SettingsBackupAllowlist(
+                        settingBlockedBySystem,
+                        TEST_VALUES_VALIDATORS);
+        mAgentUnderTest.setSettingsAllowlist(allowlist);
+        mAgentUnderTest.setBlockedSettings(settingBlockedBySystem);
+        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
+        mAgentUnderTest.mSettingsHelper = settingsHelper;
+
+        byte[] backupData = generateBackupData(TEST_VALUES);
+        mAgentUnderTest
+            .restoreSettings(
+                backupData,
+                /* pos= */ 0,
+                backupData.length,
+                TEST_URI,
+                /* movedToGlobal= */ null,
+                /* movedToSecure= */ null,
+                /* movedToSystem= */ null,
+                /* blockedSettingsArrayId= */ 0,
+                /* dynamicBlockList= */ Collections.emptySet(),
+                /* settingsToPreserve= */ Collections.emptySet(),
+                TEST_KEY);
+
+        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
+    }
+
+    @Test
     @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
     public void restoreSettings_agentMetricsAreEnabled_settingIsSkippedByBlockList_failureIsLogged() {
         mAgentUnderTest.onCreate(
@@ -612,6 +577,41 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         assertNotNull(loggingResult);
         assertEquals(loggingResult.getFailCount(), 1);
         assertTrue(loggingResult.getErrors().containsKey(ERROR_SKIPPED_BY_BLOCKLIST));
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreSettings_agentMetricsAreDisabled_settingIsSkippedByBlockList_failureIsNotLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
+                new SettingsBackupAgent.SettingsBackupAllowlist(
+                        new String[] {OVERRIDDEN_TEST_SETTING},
+                        TEST_VALUES_VALIDATORS);
+        mAgentUnderTest.setSettingsAllowlist(allowlist);
+        mAgentUnderTest.setBlockedSettings();
+        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
+        mAgentUnderTest.mSettingsHelper = settingsHelper;
+        Set<String> dynamicBlockList =
+            Set.of(Uri.withAppendedPath(TEST_URI, OVERRIDDEN_TEST_SETTING).toString());
+
+        byte[] backupData = generateBackupData(TEST_VALUES);
+        mAgentUnderTest
+            .restoreSettings(
+                backupData,
+                /* pos= */ 0,
+                backupData.length,
+                TEST_URI,
+                /* movedToGlobal= */ null,
+                /* movedToSecure= */ null,
+                /* movedToSystem= */ null,
+                /* blockedSettingsArrayId= */ 0,
+                dynamicBlockList,
+                /* settingsToPreserve= */ Collections.emptySet(),
+                TEST_KEY);
+
+        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
     }
 
     @Test
@@ -653,6 +653,40 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     }
 
     @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreSettings_agentMetricsAreDisabled_settingIsPreserved_failureIsNotLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
+                new SettingsBackupAgent.SettingsBackupAllowlist(
+                        new String[] {OVERRIDDEN_TEST_SETTING},
+                        TEST_VALUES_VALIDATORS);
+        mAgentUnderTest.setSettingsAllowlist(allowlist);
+        mAgentUnderTest.setBlockedSettings();
+        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
+        mAgentUnderTest.mSettingsHelper = settingsHelper;
+        Set<String> preservedSettings =
+            Set.of(Uri.withAppendedPath(TEST_URI, OVERRIDDEN_TEST_SETTING).toString());
+
+        byte[] backupData = generateBackupData(TEST_VALUES);
+        mAgentUnderTest
+            .restoreSettings(
+                backupData,
+                /* pos= */ 0,
+                backupData.length,
+                TEST_URI,
+                /* movedToGlobal= */ null,
+                /* movedToSecure= */ null,
+                /* movedToSystem= */ null,
+                /* blockedSettingsArrayId= */ 0,
+                /* dynamicBlockList = */ Collections.emptySet(),
+                preservedSettings,
+                TEST_KEY);
+
+        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
+    }
+
+    @Test
     @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
     public void restoreSettings_agentMetricsAreEnabled_settingIsNotValid_failureIsLogged() {
         mAgentUnderTest.onCreate(
@@ -689,86 +723,14 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     }
 
     @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreSettings_agentMetricsAreEnabled_settingIsMarkedAsMovedToGlobal_agentMetricsAreLoggedWithGlobalKey() {
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreSettings_agentMetricsAreDisabled_settingIsNotValid_failureIsNotLogged() {
         mAgentUnderTest.onCreate(
             UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
         SettingsBackupAgent.SettingsBackupAllowlist allowlist =
                 new SettingsBackupAgent.SettingsBackupAllowlist(
                         new String[] {OVERRIDDEN_TEST_SETTING},
-                        TEST_VALUES_VALIDATORS);
-        mAgentUnderTest.setSettingsAllowlist(allowlist);
-        mAgentUnderTest.setBlockedSettings();
-        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
-        mAgentUnderTest.mSettingsHelper = settingsHelper;
-
-        byte[] backupData = generateBackupData(TEST_VALUES);
-        mAgentUnderTest
-            .restoreSettings(
-                backupData,
-                /* pos= */ 0,
-                backupData.length,
-                TEST_URI,
-                /* movedToGlobal= */ Set.of(OVERRIDDEN_TEST_SETTING),
-                /* movedToSecure= */ null,
-                /* movedToSystem= */ null,
-                /* blockedSettingsArrayId= */ 0,
-                /* dynamicBlockList= */ Collections.emptySet(),
-                /* settingsToPreserve= */ Collections.emptySet(),
-                TEST_KEY);
-
-        DataTypeResult loggingResult =
-            getLoggingResultForDatatype(KEY_GLOBAL, mAgentUnderTest);
-        assertNotNull(loggingResult);
-        assertEquals(loggingResult.getSuccessCount(), 1);
-        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
-    }
-
-    @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreSettings_agentMetricsAreEnabled_settingIsMarkedAsMovedToSecure_agentMetricsAreLoggedWithSecureKey() {
-        mAgentUnderTest.onCreate(
-            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
-        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
-                new SettingsBackupAgent.SettingsBackupAllowlist(
-                        new String[] {OVERRIDDEN_TEST_SETTING},
-                        TEST_VALUES_VALIDATORS);
-        mAgentUnderTest.setSettingsAllowlist(allowlist);
-        mAgentUnderTest.setBlockedSettings();
-        TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
-        mAgentUnderTest.mSettingsHelper = settingsHelper;
-
-        byte[] backupData = generateBackupData(TEST_VALUES);
-        mAgentUnderTest
-            .restoreSettings(
-                backupData,
-                /* pos= */ 0,
-                backupData.length,
-                TEST_URI,
-                /* movedToGlobal= */ null,
-                /* movedToSecure= */ Set.of(OVERRIDDEN_TEST_SETTING),
-                /* movedToSystem= */ null,
-                /* blockedSettingsArrayId= */ 0,
-                /* dynamicBlockList= */ Collections.emptySet(),
-                /* settingsToPreserve= */ Collections.emptySet(),
-                TEST_KEY);
-
-        DataTypeResult loggingResult =
-            getLoggingResultForDatatype(KEY_SECURE, mAgentUnderTest);
-        assertNotNull(loggingResult);
-        assertEquals(loggingResult.getSuccessCount(), 1);
-        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
-    }
-
-    @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreSettings_agentMetricsAreEnabled_settingIsMarkedAsMovedToSystem_agentMetricsAreLoggedWithSystemKey() {
-        mAgentUnderTest.onCreate(
-            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
-        SettingsBackupAgent.SettingsBackupAllowlist allowlist =
-                new SettingsBackupAgent.SettingsBackupAllowlist(
-                        new String[] {OVERRIDDEN_TEST_SETTING},
-                        TEST_VALUES_VALIDATORS);
+                        /* settingsValidators= */ null);
         mAgentUnderTest.setSettingsAllowlist(allowlist);
         mAgentUnderTest.setBlockedSettings();
         TestSettingsHelper settingsHelper = new TestSettingsHelper(mContext);
@@ -783,16 +745,12 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
                 TEST_URI,
                 /* movedToGlobal= */ null,
                 /* movedToSecure= */ null,
-                /* movedToSystem= */ Set.of(OVERRIDDEN_TEST_SETTING),
+                /* movedToSystem= */ null,
                 /* blockedSettingsArrayId= */ 0,
-                /* dynamicBlockList= */ Collections.emptySet(),
+                /* dynamicBlockList = */ Collections.emptySet(),
                 /* settingsToPreserve= */ Collections.emptySet(),
                 TEST_KEY);
 
-        DataTypeResult loggingResult =
-            getLoggingResultForDatatype(KEY_SYSTEM, mAgentUnderTest);
-        assertNotNull(loggingResult);
-        assertEquals(loggingResult.getSuccessCount(), 1);
         assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
     }
 
