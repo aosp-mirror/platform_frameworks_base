@@ -1222,6 +1222,13 @@ flag {
 }
 
 flag {
+  name: "low_light_clock_dream"
+  namespace: "systemui"
+  description: "Enables low light clock dream experience on mobile phones"
+  bug: "378174125"
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"

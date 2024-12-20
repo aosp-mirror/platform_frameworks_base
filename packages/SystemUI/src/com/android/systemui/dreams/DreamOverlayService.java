@@ -48,7 +48,6 @@ import androidx.lifecycle.ViewModelStore;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.compose.animation.scene.SceneKey;
-import com.android.dream.lowlight.dagger.LowLightDreamModule;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
@@ -67,6 +66,7 @@ import com.android.systemui.communal.shared.model.CommunalTransitionKeys;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
+import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
@@ -391,7 +391,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             SystemDialogsCloser systemDialogsCloser,
             UiEventLogger uiEventLogger,
             @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
-            @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
+            @Nullable @Named(DreamModule.LOW_LIGHT_DREAM_SERVICE)
             ComponentName lowLightDreamComponent,
             @Nullable @Named(HOME_CONTROL_PANEL_DREAM_COMPONENT)
             ComponentName homeControlPanelDreamComponent,
