@@ -1753,12 +1753,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            val wallpaperChange =
-                hierarchyOps.find { op -> op.container == wallpaperToken.asBinder() }
-            assertThat(wallpaperChange).isNotNull()
-            assertThat(wallpaperChange!!.type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
-        }
+        val wallpaperChange =
+            getLatestWct(type = TRANSIT_CHANGE).hierarchyOps.find { op ->
+                op.container == wallpaperToken.asBinder()
+            }
+        assertNotNull(wallpaperChange)
+        assertThat(wallpaperChange.type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
     }
 
     @Test
@@ -1788,15 +1788,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            val taskChange = changes[task.token.asBinder()]
-            assertThat(taskChange).isNotNull()
-            // To preserve DP size, pixel size is changed to 320x240. The ratio of the left margin
-            // to the right margin and the ratio of the top margin to bottom margin are also
-            // preserved.
-            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
-                .isEqualTo(Rect(240, 160, 560, 400))
-        }
+        val taskChange = getLatestWct(type = TRANSIT_CHANGE).changes[task.token.asBinder()]
+        assertNotNull(taskChange)
+        // To preserve DP size, pixel size is changed to 320x240. The ratio of the left margin
+        // to the right margin and the ratio of the top margin to bottom margin are also
+        // preserved.
+        assertThat(taskChange.configuration.windowConfiguration.bounds)
+            .isEqualTo(Rect(240, 160, 560, 400))
     }
 
     @Test
@@ -1827,12 +1825,10 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            val taskChange = changes[task.token.asBinder()]
-            assertThat(taskChange).isNotNull()
-            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
-                .isEqualTo(Rect(960, 480, 1280, 720))
-        }
+        val taskChange = getLatestWct(type = TRANSIT_CHANGE).changes[task.token.asBinder()]
+        assertNotNull(taskChange)
+        assertThat(taskChange.configuration.windowConfiguration.bounds)
+            .isEqualTo(Rect(960, 480, 1280, 720))
     }
 
     @Test
@@ -1860,13 +1856,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            val taskChange = changes[task.token.asBinder()]
-            assertThat(taskChange).isNotNull()
-            // DP size is preserved. The window is centered in the destination display.
-            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
-                .isEqualTo(Rect(320, 120, 960, 600))
-        }
+        val taskChange = getLatestWct(type = TRANSIT_CHANGE).changes[task.token.asBinder()]
+        assertNotNull(taskChange)
+        // DP size is preserved. The window is centered in the destination display.
+        assertThat(taskChange.configuration.windowConfiguration.bounds)
+            .isEqualTo(Rect(320, 120, 960, 600))
     }
 
     @Test
@@ -1899,14 +1893,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            val taskChange = changes[task.token.asBinder()]
-            assertThat(taskChange).isNotNull()
-            assertThat(taskChange!!.configuration.windowConfiguration.bounds.left).isAtLeast(0)
-            assertThat(taskChange.configuration.windowConfiguration.bounds.top).isAtLeast(0)
-            assertThat(taskChange.configuration.windowConfiguration.bounds.right).isAtMost(640)
-            assertThat(taskChange.configuration.windowConfiguration.bounds.bottom).isAtMost(480)
-        }
+        val taskChange = getLatestWct(type = TRANSIT_CHANGE).changes[task.token.asBinder()]
+        assertNotNull(taskChange)
+        assertThat(taskChange.configuration.windowConfiguration.bounds.left).isAtLeast(0)
+        assertThat(taskChange.configuration.windowConfiguration.bounds.top).isAtLeast(0)
+        assertThat(taskChange.configuration.windowConfiguration.bounds.right).isAtMost(640)
+        assertThat(taskChange.configuration.windowConfiguration.bounds.bottom).isAtMost(480)
     }
 
     @Test
