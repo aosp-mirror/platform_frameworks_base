@@ -25,6 +25,7 @@ import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.mouseScrollingAcceleration;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
@@ -392,6 +393,15 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for toggling the mouse scrolling acceleration is enabled.
+     *
+     * @hide
+     */
+    public static boolean isMouseScrollingAccelerationFeatureFlagEnabled() {
+        return mouseScrollingAcceleration();
+    }
+
+    /**
      * Returns true if the feature flag for mouse reverse vertical scrolling is enabled.
      * @hide
      */
@@ -593,7 +603,44 @@ public class InputSettings {
     }
 
     /**
-     * Whether mouse vertical scrolling is enabled, this applies only to connected mice.
+     * Whether mouse scrolling acceleration is enabled. This applies only to connected mice.
+     *
+     * @param context The application context.
+     * @return Whether the mouse scrolling is accelerated based on the user's scrolling speed.
+     *
+     * @hide
+     */
+    public static boolean isMouseScrollingAccelerationEnabled(@NonNull Context context) {
+        if (!isMouseScrollingAccelerationFeatureFlagEnabled()) {
+            return true;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+            Settings.System.MOUSE_SCROLLING_ACCELERATION, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Sets whether the connected mouse scrolling acceleration is enabled.
+     *
+     * @param context The application context.
+     * @param scrollingAcceleration Whether mouse scrolling acceleration is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseScrollingAcceleration(@NonNull Context context,
+            boolean scrollingAcceleration) {
+        if (!isMouseScrollingAccelerationFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SCROLLING_ACCELERATION, scrollingAcceleration ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether mouse vertical scrolling is reversed. This applies only to connected mice.
      *
      * @param context The application context.
      * @return Whether the mouse will have its vertical scrolling reversed
