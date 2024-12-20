@@ -196,13 +196,7 @@ private fun shouldComposeMovableElement(
         is TransitionState.Transition -> {
             // During transitions, always compose movable elements in the scene picked by their
             // content picker.
-            shouldComposeMoveableElement(
-                layoutImpl,
-                content,
-                element,
-                elementState,
-                element.contentPicker.contents,
-            )
+            shouldComposeMoveableElement(layoutImpl, content, element, elementState)
         }
     }
 }
@@ -212,26 +206,7 @@ private fun shouldComposeMoveableElement(
     content: ContentKey,
     elementKey: ElementKey,
     transition: TransitionState.Transition,
-    containingContents: Set<ContentKey>,
 ): Boolean {
-    val overscrollContent = transition.currentOverscrollSpec?.content
-    if (overscrollContent != null) {
-        return when (transition) {
-            // If we are overscrolling between scenes, only place/compose the element in the
-            // overscrolling scene.
-            is TransitionState.Transition.ChangeScene -> content == overscrollContent
-
-            // If we are overscrolling an overlay, place/compose the element if [content] is the
-            // overscrolling content or if [content] is the current scene and the overscrolling
-            // overlay does not contain the element.
-            is TransitionState.Transition.ReplaceOverlay,
-            is TransitionState.Transition.ShowOrHideOverlay ->
-                content == overscrollContent ||
-                    (content == transition.currentScene &&
-                        !containingContents.contains(overscrollContent))
-        }
-    }
-
     val scenePicker = elementKey.contentPicker
     val pickedScene =
         scenePicker.contentDuringTransition(

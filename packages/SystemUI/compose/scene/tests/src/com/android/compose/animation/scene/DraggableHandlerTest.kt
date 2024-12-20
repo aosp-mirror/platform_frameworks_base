@@ -1034,7 +1034,6 @@ class DraggableHandlerTest {
         // We didn't overscroll at the end of the transition.
         assertIdle(SceneB)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasNoOverscrollSpec()
     }
 
     @Test
@@ -1064,7 +1063,6 @@ class DraggableHandlerTest {
         // We didn't overscroll at the end of the transition.
         assertIdle(SceneC)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasNoOverscrollSpec()
     }
 
     @Test

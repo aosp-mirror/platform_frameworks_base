@@ -1,7 +1,6 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.animation.core.spring
-import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.notifications.ui.composable.Notifications
@@ -49,7 +48,6 @@ val SceneContainerTransitions = transitions {
     interruptionHandler = SceneContainerInterruptionHandler
 
     // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
-    defaultOverscrollProgressConverter = ProgressConverter.tanh(maxProgress = 0.2f, tilt = 3f)
     defaultSwipeSpec = spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
 
     // Scene transitions

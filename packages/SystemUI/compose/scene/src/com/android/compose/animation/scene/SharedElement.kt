@@ -56,24 +56,6 @@ internal fun shouldPlaceSharedElement(
         return element.shouldBeRenderedBy(content)
     }
 
-    val overscrollContent = transition.currentOverscrollSpec?.content
-    if (overscrollContent != null) {
-        return when (transition) {
-            // If we are overscrolling between scenes, only place/compose the element in the
-            // overscrolling scene.
-            is TransitionState.Transition.ChangeScene -> content == overscrollContent
-
-            // If we are overscrolling an overlay, place/compose the element if [content] is the
-            // overscrolling content or if [content] is the current scene and the overscrolling
-            // overlay does not contain the element.
-            is TransitionState.Transition.ReplaceOverlay,
-            is TransitionState.Transition.ShowOrHideOverlay ->
-                content == overscrollContent ||
-                    (content == transition.currentScene &&
-                        overscrollContent !in element.stateByContent)
-        }
-    }
-
     val scenePicker = elementKey.contentPicker
     val pickedScene =
         scenePicker.contentDuringTransition(
