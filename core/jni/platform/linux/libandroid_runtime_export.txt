@@ -1,0 +1,49 @@
+#
+# Copyright (C) 2024 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+{
+  global:
+    # symbols needed for the JNI operations
+    JNI_OnLoad;
+    ANativeWindow*;
+
+    # symbols needed to link with layoutlib_jni
+    __android_log*;
+    _ZNK7android7RefBase*;
+    _ZN7android4base9SetLogger*;
+    _ZN7android4base10SetAborter*;
+    _ZN7android4base11GetProperty*;
+    _ZN7android4Rect*;
+    _ZN7android5Fence*;
+    _ZN7android7RefBase*;
+    _ZN7android7String*;
+    _ZN7android10VectorImpl*;
+    _ZN7android11BufferQueue*;
+    _ZN7android14AndroidRuntime*;
+    _ZN7android14sp_report_raceEv*;
+    _ZN7android15KeyCharacterMap*;
+    _ZN7android15InputDeviceInfo*;
+    _ZN7android31android_view_InputDevice_create*;
+    _ZN7android53android_view_Surface_createFromIGraphicBufferProducer*;
+
+    # symbols needed by Ravenwood to override system properties
+    __system_property_find;
+    __system_property_get;
+    __system_property_read_callback;
+    __system_property_set;
+  local:
+    *;
+};

@@ -484,11 +484,22 @@ cc_library_shared_for_libandroid_runtime {
                 "libbinder",
                 "libhidlbase", // libhwbinder is in here
             ],
+            version_script: "platform/linux/libandroid_runtime_export.txt",
+        },
+        darwin: {
+            host_ldlibs: [
+                "-framework AppKit",
+            ],
+            dist: {
+                targets: ["layoutlib_jni"],
+                dir: "layoutlib_native/darwin",
+            },
+            exported_symbols_list: "platform/darwin/libandroid_runtime_export.exp",
         },
         linux_glibc_x86_64: {
             ldflags: ["-static-libgcc"],
             dist: {
-                targets: ["layoutlib"],
+                targets: ["layoutlib_jni"],
                 dir: "layoutlib_native/linux",
                 tag: "stripped_all",
             },
