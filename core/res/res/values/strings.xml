@@ -246,6 +246,8 @@
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
+    <!-- Displayed to tell the user that the notification can be permanently turned off -->
+    <string name="emergency_calling_do_not_show_again">Do Not Show Again</string>
     <!-- Displayed to tell the user that emergency calls might not be available; this is shown to
          the user when only WiFi calling is available and the carrier does not support emergency
          calls over WiFi calling. -->
