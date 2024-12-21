@@ -59,6 +59,21 @@ android_library {
         "android-support-core-ui",
         "android-support-fragment",
         "android-support-annotations",
+        "printspooler_aconfig_flags_java_lib",
     ],
     manifest: "AndroidManifest.xml",
+}
+
+aconfig_declarations {
+    name: "printspooler_aconfig_declarations",
+    package: "com.android.printspooler.flags",
+    container: "system",
+    srcs: [
+        "flags/flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "printspooler_aconfig_flags_java_lib",
+    aconfig_declarations: "printspooler_aconfig_declarations",
 }
