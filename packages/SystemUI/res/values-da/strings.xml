@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Konstant notifikation om skærmoptagelse"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Vil du optage din skærm?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Optag én app"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Optag hele skærmen"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Optag hele skærmen: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Når du optager hele skærmen, bliver alt det, der vises på skærmen, optaget. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Når du optager en app, optages alt det, der vises eller afspilles i den pågældende app. Vær derfor forsigtig med ting såsom adgangskoder, betalingsoplysninger, beskeder, billeder, lyd og video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Optag skærm"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Forindstillingen kunne ikke opdateres"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Forindstilling"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Valgt"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Værktøjer"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Livetekstning"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Note"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Vis ikoner for notifikationer med lav prioritet"</string>
     <string name="other" msgid="429768510980739978">"Andet"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"fjern felt"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"føj feltet til slutningen"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Flyt felt"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tilføj felt"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Flyt til <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Føj til lokation <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Positionen er ugyldig."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"vælge bruger"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Intet internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Åbn <xliff:g id="ID_1">%s</xliff:g>-indstillinger."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Rediger rækkefølgen af indstillinger."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu for afbryderknappen"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskærm"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(afbrudt)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Det var ikke muligt at skifte. Tryk for at prøve igen."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Tilknyt en enhed"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Enheder, der er tilgængelige for lydudgang."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Gå til startsiden"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Se seneste apps"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Udfør"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Prøv igen!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gå tilbage"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Stryg til venstre eller højre med tre fingre på touchpladen"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Sådan!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Du har udført bevægelsen for Gå tilbage."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Du kan gå tilbage ved at stryge til venstre eller højre med tre fingre på touchpladen"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gå til startskærmen"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Stryg opad med tre fingre på touchpladen"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Flot!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Du har udført bevægelsen for at gå til startsiden"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Stryg opad med tre fingre på touchpladen for at gå til din startskærm"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Se seneste apps"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Stryg opad, og hold tre fingre på touchpladen"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Godt klaret!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du har udført bevægelsen for at se de seneste apps."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Du kan se nyligt brugte apps ved at stryge opad og holde tre fingre nede på touchpladen"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Se alle apps"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tryk på handlingstasten på dit tastatur"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Flot klaret!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Du har udført bevægelsen for at se alle apps"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Tryk på handlingstasten på dit tastatur for at se alle dine apps"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animation med vejledning. Klik for at sætte afspilningen på pause og genoptage den."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastaturets baggrundslys"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d af %2$d"</string>

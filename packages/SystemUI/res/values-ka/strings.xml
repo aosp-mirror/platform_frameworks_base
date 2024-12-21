@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"უწყვეტი შეტყობინება ეკრანის ჩაწერის სესიისთვის"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"გსურთ თქვენი ეკრანის ჩაწერა?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ერთი აპის ჩაწერა"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"მთლიანი ეკრანის ჩაწერა"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"მთლიანი ეკრანის ჩაწერა: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"მთლიანი ეკრანის ჩაწერისას ჩაიწერება ყველაფერი, რაც თქვენს ეკრანზე გამოჩნდება. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"აპის ჩაწერისას ჩაიწერება ყველაფერი, რაც ამ აპში გამოჩნდება ან დაიკვრება. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ეკრანის ჩაწერა"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"წინასწარ დაყენებული პარამეტრების განახლება ვერ მოხერხდა"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"წინასწარ დაყენებული"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"არჩეულია"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ხელსაწყოები"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ავტოსუბტიტრები"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"ჩანიშვნა"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"დაბალი პრიორიტეტის მქონე შეტყობინებების ხატულების ჩვენება"</string>
     <string name="other" msgid="429768510980739978">"სხვა"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"მოზაიკის ფილის წაშლა"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ფილის ბოლოში დამატება"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"მოზაიკის გადატანა"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"მოზაიკის დამატება"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"გადატანა <xliff:g id="POSITION">%1$d</xliff:g>-ზე"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"დამატება პოზიციაზე <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"პოზიცია არასწორია."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"მომხმარებლის არჩევა"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ინტერნეტ-კავშირი არ არის"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> პარამეტრების გახსნა."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"პარამეტრების მიმდევრობის რედაქტირება."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ჩართვის მენიუ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"გვერდი <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>-დან"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ჩაკეტილი ეკრანი"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(კავშირი გაწყვეტილია)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"ვერ გადაირთო. შეეხეთ ხელახლა საცდელად."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"მოწყობილობასთან დაკავშირება"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ამ სესიის ტრანსლირებისთვის გახსენით აპი."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"უცნობი აპი"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ტრანსლირების შეწყვეტა"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ხელმისაწვდომი მოწყობილობები გამომავალი აუდიოსთვის."</string>

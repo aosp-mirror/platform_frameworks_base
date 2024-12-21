@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Дэлгэцээ бичих үү?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Нэг аппыг бичих"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Бүтэн дэлгэцийг бичих"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Дэлгэцийг бүхэлд нь бичих: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Таныг бүтэн дэлгэцээ бичиж байхад дэлгэц дээр тань харуулж буй аливаа зүйлийг бичдэг. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Таныг апп бичиж байхад тухайн аппад харуулж эсвэл тоглуулж буй аливаа зүйлийг бичдэг. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Дэлгэцийг бичих"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Урьдчилсан тохируулгыг шинэчилж чадсангүй"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Урьдчилсан тохируулга"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Сонгосон"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Хэрэгсэл"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Шууд тайлбар"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Тэмдэглэл"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Бага ач холбогдолтой мэдэгдлийн дүрс тэмдгийг харуулах"</string>
     <string name="other" msgid="429768510980739978">"Бусад"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"хавтанг хасна уу"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"дуусгахын тулд хавтан нэмэх"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Хавтанг зөөх"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Хавтан нэмэх"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> руу зөөнө үү"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> байрлалд нэмнэ үү"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Байрлал буруу байна."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"хэрэглэгчийг сонгох"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Интернэт алга"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> тохиргоог нээнэ үү."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Тохиргооны дарааллыг өөрчилнө үү."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Асаах/унтраах цэс"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжээтэй дэлгэц"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(салсан)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Сэлгэх боломжгүй. Дахин оролдохын тулд товшино уу."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Төхөөрөмж холбох"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Энэ үйл явдлыг дамжуулахын тулд аппыг нээнэ үү."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Үл мэдэгдэх апп"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Дамжуулахыг зогсоох"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Аудио гаралт хийх боломжтой төхөөрөмжүүд."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Нүүр хуудас руу очих"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Саяхны аппуудыг харах"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Болсон"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Дахин оролдоно уу!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Буцах"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Мэдрэгч самбар дээрээ гурван хуруугаа ашиглан зүүн эсвэл баруун тийш шударна уу"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Янзтай!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Та буцах зангааг гүйцэтгэлээ."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Мэдрэгч самбараа буцааж ашиглахын тулд гурван хуруугаараа зүүн эсвэл баруун тийш шударна уу"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Үндсэн нүүр лүү очих"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Мэдрэгч самбар дээрээ гурван хуруугаараа дээш шударна уу"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Үнэхээр сайн ажиллалаа!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Та үндсэн нүүр лүү очих зангааг гүйцэтгэлээ"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Үндсэн нүүр лүүгээ очихын тулд мэдрэгч самбар дээрээ гурван хуруугаараа дээш шударна уу"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Саяхны аппуудыг харах"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Мэдрэгч самбар дээрээ гурван хуруугаа ашиглан дээш шудраад, удаан дарна уу"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Сайн байна!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Та саяхны аппуудыг харах зангааг гүйцэтгэсэн."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Саяхны аппуудыг харахын тулд мэдрэгч самбар дээрээ гурван хуруугаараа дээш шудраад, удаан дарна уу"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Бүх аппыг харах"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Гар дээрх тусгай товчлуурыг дарна уу"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Сайн байна!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Та бүх аппыг харах зангааг гүйцэтгэлээ"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Бүх аппаа харахын тулд гар дээрээ байх тусгай товчлуурыг дарна уу"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Зааврын анимаци, түр зогсоохын тулд товшиж, үргэлжлүүлэн тоглуулна уу."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Гарын арын гэрэл"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-с %1$d-р түвшин"</string>

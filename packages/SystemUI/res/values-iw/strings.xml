@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"התראה מתמשכת לסשן הקלטת מסך"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"להקליט את המסך?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"הקלטה של אפליקציה אחת"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"הקלטה של כל המסך"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"‏הקלטת התוכן של כל המסך: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"כשמקליטים את כל המסך, כל מה שמופיע במסך מוקלט. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"כשמקליטים אפליקציה, כל מה שרואים או מפעילים בה מוקלט. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"הקלטת המסך"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"לא ניתן לעדכן את ההגדרה הקבועה מראש"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"הגדרה קבועה מראש"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"נבחר"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"כלים"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"כתוביות מיידיות"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"פתק"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"הצגת סמלי התראות בעדיפות נמוכה"</string>
     <string name="other" msgid="429768510980739978">"אחר"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"הסרת הלחצן"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"הוספת הלחצן בסוף הרשימה"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"העברת הלחצן"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"המיקום לא תקין."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"בחירת משתמש"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"אין אינטרנט"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"פתיחת הגדרות של <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"עריכת סדר ההגדרות."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"תפריט הפעלה"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"דף <xliff:g id="ID_1">%1$d</xliff:g> מתוך <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"מסך נעילה"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"לא ניתן להחליף. צריך להקיש כדי לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"חיבור מכשיר"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להפעיל Cast של הסשן הזה, צריך לפתוח את האפליקציה."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"אפליקציה לא ידועה"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‏עצירת ההעברה (casting)"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"מכשירים זמינים לפלט אודיו."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"חזרה לדף הבית"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"הצגת האפליקציות האחרונות"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"צריך לנסות שוב."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"מחליקים שמאלה או ימינה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"איזה יופי!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"סיימת לתרגל את התנועה \'הקודם\'."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"כדי לחזור אחורה באמצעות לוח המגע, צריך להחליק שמאלה או ימינה עם שלוש אצבעות"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר למסך הבית"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"מחליקים כלפי מעלה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"מעולה!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"סיימת לתרגל את תנועת החזרה למסך הבית"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"כדי לעבור למסך הבית, צריך להחליק כלפי מעלה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"הצגת האפליקציות האחרונות"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"מחליקים למעלה עם שלוש אצבעות על לוח המגע ומשאירים אותן במגע עם הלוח"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"מעולה!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"סיימת לתרגל את התנועה להצגת האפליקציות האחרונות."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"כדי לראות את האפליקציות האחרונות, צריך להחליק למעלה וללחוץ לחיצה ארוכה עם שלוש אצבעות על לוח המגע"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"צפייה בכל האפליקציות"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"צריך להקיש על מקש הפעולה במקלדת"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"כל הכבוד!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"סיימת לתרגל את התנועה להצגת כל האפליקציות"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"כדי לראות את כל האפליקציות, צריך להקיש על מקש הפעולה במקלדת"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"אנימציה של הדרכה, אפשר ללחוץ כדי להשהות ולהמשיך את ההפעלה."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>

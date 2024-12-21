@@ -111,8 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Record your screen?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Record one app"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Record entire screen"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Record entire screen: %s"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Record this screen"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Record %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you’re recording your entire screen, anything shown on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you’re recording an app, anything shown or played in that app is recorded. So be careful with things like passwords, payment details, messages, photos, and audio and video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Record screen"</string>
@@ -415,6 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Couldn\'t update preset"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Preset"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Selected"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Surroundings"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Left"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Right"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Expand to left and right separated controls"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Collapse to unified control"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Mute surroundings"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Unmute surroundings"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tools"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Live Caption"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Note"</string>
@@ -960,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Show low-priority notification icons"</string>
     <string name="other" msgid="429768510980739978">"Other"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"remove tile"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"add tile to end"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"add tile to the last position"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Move tile"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Add tile"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Add tile to desired position"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Move to <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Add to position <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Position invalid."</string>
@@ -978,7 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"choose user"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"No internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Open <xliff:g id="ID_1">%s</xliff:g> settings."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Edit order of settings."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Edit order of Quick Settings."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Power menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> of <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
@@ -1209,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(disconnected)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Can\'t switch. Tap to try again."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Connect a device"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"To cast this session, please open the app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Unknown app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop casting"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Available devices for audio output."</string>
