@@ -21,12 +21,12 @@ import android.cts.input.EventVerifier
 import android.graphics.PointF
 import android.hardware.input.InputManager
 import android.os.ParcelFileDescriptor
+import android.server.wm.CtsWindowInfoUtils.waitForWindowOnTop
 import android.util.Log
 import android.util.Size
 import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.test.platform.app.InstrumentationRegistry
-import android.server.wm.CtsWindowInfoUtils.waitForStableWindowGeometry
 import com.android.cts.input.BatchedEventSplitter
 import com.android.cts.input.InputJsonParser
 import com.android.cts.input.VirtualDisplayActivityScenario
@@ -37,7 +37,6 @@ import com.android.cts.input.inputeventmatchers.withMotionAction
 import com.android.cts.input.inputeventmatchers.withPressure
 import com.android.cts.input.inputeventmatchers.withRawCoords
 import com.android.cts.input.inputeventmatchers.withSource
-import java.time.Duration
 import junit.framework.Assert.fail
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
@@ -115,7 +114,7 @@ class UinputRecordingIntegrationTests {
             testName,
             size = testData.displaySize
         ).use { scenario ->
-            waitForStableWindowGeometry(Duration.ofSeconds(5))
+            waitForWindowOnTop(scenario.activity.window)
             scenario.activity.window.decorView.requestUnbufferedDispatch(INPUT_DEVICE_SOURCE_ALL)
 
             try {
