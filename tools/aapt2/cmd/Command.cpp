@@ -53,61 +53,67 @@ std::string GetSafePath(StringPiece arg) {
 
 void Command::AddRequiredFlag(StringPiece name, StringPiece description, std::string* value,
                               uint32_t flags) {
-  auto func = [value, flags](StringPiece arg) -> bool {
+  auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
     *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ true, /* num_args */ 1, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ true, /* num_args */ 1, std::move(func)));
 }
 
 void Command::AddRequiredFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](StringPiece arg) -> bool {
+  auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
     value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ true, /* num_args */ 1, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ true, /* num_args */ 1, std::move(func)));
 }
 
 void Command::AddOptionalFlag(StringPiece name, StringPiece description,
                               std::optional<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](StringPiece arg) -> bool {
+  auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
     *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ false, /* num_args */ 1, std::move(func)));
 }
 
 void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
-  auto func = [value, flags](StringPiece arg) -> bool {
+  auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
     value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ false, /* num_args */ 1, std::move(func)));
 }
 
 void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::unordered_set<std::string>* value) {
-  auto func = [value](StringPiece arg) -> bool {
+  auto func = [value](StringPiece arg, std::ostream* out_error) -> bool {
     value->emplace(arg);
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 1, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ false, /* num_args */ 1, std::move(func)));
 }
 
 void Command::AddOptionalSwitch(StringPiece name, StringPiece description, bool* value) {
-  auto func = [value](StringPiece arg) -> bool {
+  auto func = [value](StringPiece arg, std::ostream* out_error) -> bool {
     *value = true;
     return true;
   };
 
-  flags_.emplace_back(Flag(name, description, /* required */ false, /* num_args */ 0, func));
+  flags_.emplace_back(
+      Flag(name, description, /* required */ false, /* num_args */ 0, std::move(func)));
 }
 
 void Command::AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand, bool experimental) {
@@ -172,19 +178,74 @@ void Command::Usage(std::ostream* out) {
       argline = " ";
     }
   }
-  *out << " " << std::setw(kWidth) << std::left << "-h"
-       << "Displays this help menu\n";
   out->flush();
 }
 
-int Command::Execute(const std::vector<StringPiece>& args, std::ostream* out_error) {
+const std::string& Command::addEnvironmentArg(const Flag& flag, const char* env) {
+  if (*env && flag.num_args > 0) {
+    return environment_args_.emplace_back(flag.name + '=' + env);
+  }
+  return flag.name;
+}
+
+//
+// Looks for the flags specified in the environment and adds them to |args|.
+// Expected format:
+// - _AAPT2_UPPERCASE_NAME are added before all of the command line flags, so it's
+//   a default for the flag that may get overridden by the command line.
+// - AAPT2_UPPERCASE_NAME_ are added after them, making this to be the final value
+//   even if there was something on the command line.
+// - All dashes in the flag name get replaced with underscores, the rest of it is
+//   intact.
+//
+// E.g.
+//  --set-some-flag becomes either _AAPT2_SET_SOME_FLAG or AAPT2_SET_SOME_FLAG_
+//  --set-param=2 is _AAPT2_SET_SOME_FLAG=2
+//
+// Values get passed as it, with no processing or quoting.
+//
+// This way one can make sure aapt2 has the flags they need even when it is
+// launched in a way they can't control, e.g. deep inside a build.
+//
+void Command::parseFlagsFromEnvironment(std::vector<StringPiece>& args) {
+  // If the first argument is a subcommand then skip it and prepend the flags past that (the root
+  // command should only have a single '-h' flag anyway).
+  const int insert_pos = args.empty() ? 0 : args.front().starts_with('-') ? 0 : 1;
+
+  std::string env_name;
+  for (const Flag& flag : flags_) {
+    // First, the prefix version.
+    env_name.assign("_AAPT2_");
+    // Append the uppercased flag name, skipping all dashes in front and replacing them with
+    // underscores later.
+    auto name_start = flag.name.begin();
+    while (name_start != flag.name.end() && *name_start == '-') {
+      ++name_start;
+    }
+    std::transform(name_start, flag.name.end(), std::back_inserter(env_name),
+                   [](char c) { return c == '-' ? '_' : toupper(c); });
+    if (auto prefix_env = getenv(env_name.c_str())) {
+      args.insert(args.begin() + insert_pos, addEnvironmentArg(flag, prefix_env));
+    }
+    // Now reuse the same name variable to construct a suffix version: append the
+    // underscore and just skip the one in front.
+    env_name += '_';
+    if (auto suffix_env = getenv(env_name.c_str() + 1)) {
+      args.push_back(addEnvironmentArg(flag, suffix_env));
+    }
+  }
+}
+
+int Command::Execute(std::vector<StringPiece>& args, std::ostream* out_error) {
   TRACE_NAME_ARGS("Command::Execute", args);
   std::vector<std::string> file_args;
+
+  parseFlagsFromEnvironment(args);
 
   for (size_t i = 0; i < args.size(); i++) {
     StringPiece arg = args[i];
     if (*(arg.data()) != '-') {
-      // Continue parsing as the subcommand if the first argument matches one of the subcommands
+      // Continue parsing as a subcommand if the first argument matches one of the subcommands
       if (i == 0) {
         for (auto& subcommand : subcommands_) {
           if (arg == subcommand->name_ || (!subcommand->short_name_.empty()
@@ -211,37 +272,67 @@ int Command::Execute(const std::vector<StringPiece>& args, std::ostream* out_err
       return 1;
     }
 
+    static constexpr auto matchShortArg = [](std::string_view arg, const Flag& flag) static {
+      return flag.name.starts_with("--") &&
+             arg.compare(0, 2, std::string_view(flag.name.c_str() + 1, 2)) == 0;
+    };
+
     bool match = false;
     for (Flag& flag : flags_) {
-      // Allow both "--arg value" and "--arg=value" syntax.
+      // Allow both "--arg value" and "--arg=value" syntax, and look for the cases where we can
+      // safely deduce the "--arg" flag from the short "-a" version when there's no value expected
+      bool matched_current = false;
       if (arg.starts_with(flag.name) &&
           (arg.size() == flag.name.size() || (flag.num_args > 0 && arg[flag.name.size()] == '='))) {
-        if (flag.num_args > 0) {
-          if (arg.size() == flag.name.size()) {
-            i++;
-            if (i >= args.size()) {
-              *out_error << flag.name << " missing argument.\n\n";
-              Usage(out_error);
-              return 1;
-            }
-            arg = args[i];
-          } else {
-            arg.remove_prefix(flag.name.size() + 1);
-            // Disallow empty arguments after '='.
-            if (arg.empty()) {
-              *out_error << flag.name << " has empty argument.\n\n";
-              Usage(out_error);
-              return 1;
-            }
+        matched_current = true;
+      } else if (flag.num_args == 0 && matchShortArg(arg, flag)) {
+        matched_current = true;
+        // It matches, now need to make sure no other flag would match as well.
+        // This is really inefficient, but we don't expect to have enough flags for it to matter
+        // (famous last words).
+        for (const Flag& other_flag : flags_) {
+          if (&other_flag == &flag) {
+            continue;
           }
-          flag.action(arg);
-        } else {
-          flag.action({});
+          if (matchShortArg(arg, other_flag)) {
+            matched_current = false;  // ambiguous, skip this match
+            break;
+          }
         }
-        flag.found = true;
-        match = true;
-        break;
       }
+      if (!matched_current) {
+        continue;
+      }
+
+      if (flag.num_args > 0) {
+        if (arg.size() == flag.name.size()) {
+          i++;
+          if (i >= args.size()) {
+            *out_error << flag.name << " missing argument.\n\n";
+            Usage(out_error);
+            return 1;
+          }
+          arg = args[i];
+        } else {
+          arg.remove_prefix(flag.name.size() + 1);
+          // Disallow empty arguments after '='.
+          if (arg.empty()) {
+            *out_error << flag.name << " has empty argument.\n\n";
+            Usage(out_error);
+            return 1;
+          }
+        }
+        if (!flag.action(arg, out_error)) {
+          return 1;
+        }
+      } else {
+        if (!flag.action({}, out_error)) {
+          return 1;
+        }
+      }
+      flag.found = true;
+      match = true;
+      break;
     }
 
     if (!match) {
