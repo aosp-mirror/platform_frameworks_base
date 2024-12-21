@@ -25,7 +25,7 @@
     <string name="dialog_sign_in_options_button" msgid="448002958902615054">"Opções de login"</string>
     <string name="sign_in_options_title" msgid="6720572645638986680">"Opções de login"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"Gerenciar logins"</string>
-    <string name="choose_sign_in_title" msgid="3616025924746872202">"Escolher opção de login"</string>
+    <string name="choose_sign_in_title" msgid="3616025924746872202">"Escolha um login"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"Escolher chave de acesso"</string>
     <string name="choose_password_title" msgid="7610721820858017214">"Escolher senha"</string>
     <string name="sign_in_on_phone_button" msgid="7618621977586522403">"Fazer login no smartphone"</string>
