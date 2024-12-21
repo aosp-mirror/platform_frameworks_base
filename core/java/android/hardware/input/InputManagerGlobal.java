@@ -63,6 +63,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -76,8 +77,9 @@ import java.util.concurrent.Executor;
 public final class InputManagerGlobal {
     private static final String TAG = "InputManagerGlobal";
     // To enable these logs, run: 'adb shell setprop log.tag.InputManagerGlobal DEBUG'
-    // (requires restart)
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private boolean debug() {
+        return Log.isLoggable(TAG, Log.DEBUG);
+    }
 
     @GuardedBy("mInputDeviceListeners")
     @Nullable private SparseArray<InputDevice> mInputDevices;
@@ -269,16 +271,19 @@ public final class InputManagerGlobal {
     }
 
     private void onInputDevicesChanged(int[] deviceIdAndGeneration) {
-        if (DEBUG) {
-            Log.d(TAG, "Received input devices changed.");
+        final boolean enableDebugLogs = debug();
+        if (enableDebugLogs) {
+            Log.d(TAG, "Received input devices changed: " + Arrays.toString(deviceIdAndGeneration));
         }
 
         synchronized (mInputDeviceListeners) {
             for (int i = mInputDevices.size(); --i > 0; ) {
                 final int deviceId = mInputDevices.keyAt(i);
                 if (!containsDeviceId(deviceIdAndGeneration, deviceId)) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Device removed: " + deviceId);
+                    if (enableDebugLogs) {
+                        final InputDevice device = mInputDevices.valueAt(i);
+                        final String name = device != null ? device.getName() : "<null>";
+                        Log.d(TAG, "Device removed: " + deviceId + " (" + name + ")");
                     }
                     mInputDevices.removeAt(i);
                     if (mInputDeviceSensorManager != null) {
@@ -297,8 +302,9 @@ public final class InputManagerGlobal {
                     if (device != null) {
                         final int generation = deviceIdAndGeneration[i + 1];
                         if (device.getGeneration() != generation) {
-                            if (DEBUG) {
-                                Log.d(TAG, "Device changed: " + deviceId);
+                            if (enableDebugLogs) {
+                                Log.d(TAG, "Device changed: " + deviceId + " ("
+                                        + device.getName() + ")");
                             }
                             mInputDevices.setValueAt(index, null);
                             if (mInputDeviceSensorManager != null) {
@@ -309,7 +315,7 @@ public final class InputManagerGlobal {
                         }
                     }
                 } else {
-                    if (DEBUG) {
+                    if (enableDebugLogs) {
                         Log.d(TAG, "Device added: " + deviceId);
                     }
                     mInputDevices.put(deviceId, null);
@@ -517,7 +523,7 @@ public final class InputManagerGlobal {
     }
 
     private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-        if (DEBUG) {
+        if (debug()) {
             Log.d(TAG, "Received tablet mode changed: "
                     + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
         }
