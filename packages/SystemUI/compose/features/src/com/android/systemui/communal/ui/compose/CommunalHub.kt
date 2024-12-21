@@ -112,6 +112,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -1708,23 +1709,29 @@ private fun Umo(
 private fun UmoLegacy(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier =
-            modifier.pointerInput(Unit) {
-                detectHorizontalDragGestures { change, _ ->
-                    change.consume()
-                    val upTime = SystemClock.uptimeMillis()
-                    val event =
-                        MotionEvent.obtain(
-                            upTime,
-                            upTime,
-                            MotionEvent.ACTION_MOVE,
-                            change.position.x,
-                            change.position.y,
-                            0,
-                        )
-                    viewModel.mediaHost.hostView.dispatchTouchEvent(event)
-                    event.recycle()
-                }
-            },
+            modifier
+                .clip(
+                    shape =
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                )
+                .background(MaterialTheme.colorScheme.primary)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, _ ->
+                        change.consume()
+                        val upTime = SystemClock.uptimeMillis()
+                        val event =
+                            MotionEvent.obtain(
+                                upTime,
+                                upTime,
+                                MotionEvent.ACTION_MOVE,
+                                change.position.x,
+                                change.position.y,
+                                0,
+                            )
+                        viewModel.mediaHost.hostView.dispatchTouchEvent(event)
+                        event.recycle()
+                    }
+                },
         factory = { _ ->
             viewModel.mediaHost.hostView.apply {
                 layoutParams =
