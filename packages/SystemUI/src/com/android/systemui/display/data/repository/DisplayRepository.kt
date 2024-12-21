@@ -20,9 +20,9 @@ import android.annotation.SuppressLint
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED
 import android.hardware.display.DisplayManager.DisplayListener
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_ADDED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_CHANGED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_REMOVED
 import android.os.Handler
 import android.util.Log
 import android.view.Display
@@ -147,9 +147,9 @@ constructor(
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
-                    EVENT_FLAG_DISPLAY_ADDED or
-                        EVENT_FLAG_DISPLAY_CHANGED or
-                        EVENT_FLAG_DISPLAY_REMOVED,
+                    EVENT_TYPE_DISPLAY_ADDED or
+                        EVENT_TYPE_DISPLAY_CHANGED or
+                        EVENT_TYPE_DISPLAY_REMOVED,
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
@@ -279,7 +279,7 @@ constructor(
                     callback,
                     backgroundHandler,
                     /* eventFlags */ 0,
-                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED,
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }

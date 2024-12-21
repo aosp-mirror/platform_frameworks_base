@@ -205,6 +205,13 @@ public class WakefulnessSessionObserver {
                         UserHandle.USER_ALL);
 
         mPhysicalDisplayPortIdForDefaultDisplay = getPhysicalDisplayPortId(DEFAULT_DISPLAY);
+        registerDisplayListener();
+        mPowerGroups.append(
+                Display.DEFAULT_DISPLAY_GROUP,
+                new WakefulnessSessionPowerGroup(Display.DEFAULT_DISPLAY_GROUP));
+    }
+
+    private void registerDisplayListener() {
         DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         if (displayManager != null) {
             displayManager.registerDisplayListener(
@@ -226,12 +233,8 @@ public class WakefulnessSessionObserver {
                         }
                     },
                     mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED);
+                    DisplayManager.EVENT_TYPE_DISPLAY_CHANGED);
         }
-
-        mPowerGroups.append(
-                Display.DEFAULT_DISPLAY_GROUP,
-                new WakefulnessSessionPowerGroup(Display.DEFAULT_DISPLAY_GROUP));
     }
 
     /**

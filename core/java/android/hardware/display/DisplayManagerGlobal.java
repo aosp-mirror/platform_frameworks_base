@@ -18,7 +18,7 @@ package android.hardware.display;
 
 
 import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
-import static android.hardware.display.DisplayManager.EventFlag;
+import static android.hardware.display.DisplayManager.EventType;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.HdrCapabilities.HdrType;
 
@@ -1737,35 +1737,35 @@ public final class DisplayManagerGlobal {
      * @return returns the bitmask of both public and private event flags unified to
      * InternalEventFlag
      */
-    public @InternalEventFlag long mapFlagsToInternalEventFlag(@EventFlag long eventFlags,
-            @DisplayManager.PrivateEventFlag long privateEventFlags) {
+    public @InternalEventFlag long mapFiltersToInternalEventFlag(@EventType long eventFlags,
+            @DisplayManager.PrivateEventType long privateEventFlags) {
         return mapPrivateEventFlags(privateEventFlags) | mapPublicEventFlags(eventFlags);
     }
 
-    private long mapPrivateEventFlags(@DisplayManager.PrivateEventFlag long privateEventFlags) {
+    private long mapPrivateEventFlags(@DisplayManager.PrivateEventType long privateEventFlags) {
         long baseEventMask = 0;
-        if ((privateEventFlags & DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0) {
+        if ((privateEventFlags & DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED;
         }
 
-        if ((privateEventFlags & DisplayManager.PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0) {
+        if ((privateEventFlags & DisplayManager.PRIVATE_EVENT_TYPE_HDR_SDR_RATIO_CHANGED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED;
         }
 
         if ((privateEventFlags
-                & DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                & DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED;
         }
         return baseEventMask;
     }
 
-    private long mapPublicEventFlags(@EventFlag long eventFlags) {
+    private long mapPublicEventFlags(@EventType long eventFlags) {
         long baseEventMask = 0;
-        if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
+        if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_ADDED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_ADDED;
         }
 
-        if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0) {
+        if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_CHANGED) != 0) {
             // For backward compatibility, a client subscribing to
             // DisplayManager.EVENT_FLAG_DISPLAY_CHANGED will be enrolled to both Basic and
             // RR changes
@@ -1774,16 +1774,16 @@ public final class DisplayManagerGlobal {
         }
 
         if ((eventFlags
-                & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
+                & DisplayManager.EVENT_TYPE_DISPLAY_REMOVED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
 
         if (Flags.displayListenerPerformanceImprovements()) {
-            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE) != 0) {
+            if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_REFRESH_RATE) != 0) {
                 baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
             }
 
-            if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_STATE) != 0) {
+            if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_STATE) != 0) {
                 baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_STATE;
             }
         }

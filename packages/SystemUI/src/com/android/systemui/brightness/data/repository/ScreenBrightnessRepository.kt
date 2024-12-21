@@ -133,7 +133,7 @@ constructor(
                     listener,
                     null,
                     /* eventFlags */ 0,
-                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS,
                 )
 
                 awaitClose { displayManager.unregisterDisplayListener(listener) }
@@ -181,10 +181,11 @@ constructor(
             .logDiffForTable(tableBuffer, TABLE_PREFIX_LINEAR, TABLE_COLUMN_BRIGHTNESS, null)
             .stateIn(applicationScope, SharingStarted.WhileSubscribed(), LinearBrightness(0f))
 
-    override val isBrightnessOverriddenByWindow = brightnessInfo
-        .filterNotNull()
-        .map { it.isBrightnessOverrideByWindow }
-        .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+    override val isBrightnessOverriddenByWindow =
+        brightnessInfo
+            .filterNotNull()
+            .map { it.isBrightnessOverrideByWindow }
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
     override fun setTemporaryBrightness(value: LinearBrightness) {
         apiQueue.trySend(SetBrightnessMethod.Temporary(value))

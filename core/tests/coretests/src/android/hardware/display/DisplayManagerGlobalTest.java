@@ -302,48 +302,48 @@ public class DisplayManagerGlobalTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public void testMapFlagsToInternalEventFlag() {
+    public void testMapFiltersToInternalEventFlag() {
         // Test public flags mapping
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_ADDED, 0));
+                        .mapFiltersToInternalEventFlag(DisplayManager.EVENT_TYPE_DISPLAY_ADDED, 0));
         assertEquals(DISPLAY_CHANGE_EVENTS, mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, 0));
+                .mapFiltersToInternalEventFlag(DisplayManager.EVENT_TYPE_DISPLAY_CHANGED, 0));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
-                mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_REMOVED, 0));
+                mDisplayManagerGlobal.mapFiltersToInternalEventFlag(
+                        DisplayManager.EVENT_TYPE_DISPLAY_REMOVED, 0));
         assertEquals(INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(
-                                DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE,
+                        .mapFiltersToInternalEventFlag(
+                                DisplayManager.EVENT_TYPE_DISPLAY_REFRESH_RATE,
                                 0));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(
-                                DisplayManager.EVENT_FLAG_DISPLAY_STATE,
+                        .mapFiltersToInternalEventFlag(
+                                DisplayManager.EVENT_TYPE_DISPLAY_STATE,
                                 0));
 
         // test private flags mapping
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(0,
-                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED));
+                        .mapFiltersToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(0,
-                                DisplayManager.PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED));
+                        .mapFiltersToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_TYPE_HDR_SDR_RATIO_CHANGED));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(0,
-                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                        .mapFiltersToInternalEventFlag(0,
+                                DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS));
 
         // Test both public and private flags mapping
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED
                         | INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
                 mDisplayManagerGlobal
-                        .mapFlagsToInternalEventFlag(
-                                DisplayManager.EVENT_FLAG_DISPLAY_REFRESH_RATE,
-                                DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                        .mapFiltersToInternalEventFlag(
+                                DisplayManager.EVENT_TYPE_DISPLAY_REFRESH_RATE,
+                                DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS));
     }
 
     private void waitForHandler() {

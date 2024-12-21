@@ -17,7 +17,7 @@
 package com.android.systemui.settings
 
 import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS
+import android.hardware.display.DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS
 import android.os.Handler
 import android.view.Display
 import androidx.annotation.GuardedBy
@@ -104,7 +104,7 @@ internal constructor(
                     displayBrightnessChangedListener,
                     backgroundHandler,
                     /* eventFlags */ 0,
-                    PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS,
+                    PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS,
                 )
             }
             brightnessCallbacks.add(DisplayTrackerDataItem(WeakReference(callback), executor))
