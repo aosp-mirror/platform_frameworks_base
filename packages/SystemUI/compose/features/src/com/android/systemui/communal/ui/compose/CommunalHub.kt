@@ -760,10 +760,12 @@ fun calculateWidgetSize(
 private fun HorizontalGridWrapper(
     minContentPadding: PaddingValues,
     gridState: LazyGridState,
+    dragDropState: GridDragDropState?,
     setContentOffset: (offset: Offset) -> Unit,
     modifier: Modifier = Modifier,
     content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
 ) {
+    val isDragging = dragDropState?.draggingItemKey != null
     if (communalResponsiveGrid()) {
         val flingBehavior =
             rememberSnapFlingBehavior(lazyGridState = gridState, snapPosition = SnapPosition.Start)
@@ -776,6 +778,10 @@ private fun HorizontalGridWrapper(
             minHorizontalArrangement = Dimensions.ItemSpacing,
             minVerticalArrangement = Dimensions.ItemSpacing,
             setContentOffset = setContentOffset,
+            // Temporarily disable user gesture scrolling while dragging a widget to prevent
+            // conflicts between the drag and scroll gestures. Programmatic scrolling remains
+            // enabled to allow dragging a widget beyond the visible boundaries.
+            userScrollEnabled = !isDragging,
             content = content,
         )
     } else {
@@ -794,6 +800,10 @@ private fun HorizontalGridWrapper(
             contentPadding = minContentPadding,
             horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
             verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+            // Temporarily disable user gesture scrolling while dragging a widget to prevent
+            // conflicts between the drag and scroll gestures. Programmatic scrolling remains
+            // enabled to allow dragging a widget beyond the visible boundaries.
+            userScrollEnabled = !isDragging,
         ) {
             content(null)
         }
@@ -863,6 +873,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     HorizontalGridWrapper(
         modifier = gridModifier,
         gridState = gridState,
+        dragDropState = dragDropState,
         minContentPadding = minContentPadding,
         setContentOffset = setContentOffset,
     ) { sizeInfo ->
