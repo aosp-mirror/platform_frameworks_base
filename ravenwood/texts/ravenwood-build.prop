@@ -42,3 +42,4 @@ ro.build.version.release=$$$ro.build.version.release
 ro.build.version.release_or_codename=$$$ro.build.version.release_or_codename
 ro.build.version.release_or_preview_display=$$$ro.build.version.release_or_preview_display
 ro.build.version.sdk=$$$ro.build.version.sdk
+ro.build.version.sdk_full=$$$ro.build.version.sdk_full
