@@ -16,17 +16,24 @@
 
 #define LOG_TAG "perf_hint"
 
+#include <aidl/android/hardware/power/ChannelConfig.h>
+#include <aidl/android/hardware/power/ChannelMessage.h>
+#include <aidl/android/hardware/power/SessionConfig.h>
 #include <aidl/android/hardware/power/SessionHint.h>
 #include <aidl/android/hardware/power/SessionMode.h>
 #include <aidl/android/hardware/power/SessionTag.h>
 #include <aidl/android/hardware/power/WorkDuration.h>
+#include <aidl/android/hardware/power/WorkDurationFixedV1.h>
 #include <aidl/android/os/IHintManager.h>
 #include <aidl/android/os/IHintSession.h>
 #include <android-base/stringprintf.h>
+#include <android-base/thread_annotations.h>
 #include <android/binder_manager.h>
 #include <android/binder_status.h>
 #include <android/performance_hint.h>
 #include <android/trace.h>
+#include <android_os.h>
+#include <fmq/AidlMessageQueue.h>
 #include <inttypes.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
@@ -44,6 +51,10 @@ using namespace std::chrono_literals;
 // Namespace for AIDL types coming from the PowerHAL
 namespace hal = aidl::android::hardware::power;
 
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
+using HalChannelMessageContents = hal::ChannelMessage::ChannelMessageContents;
+using HalMessageQueue = ::android::AidlMessageQueue<hal::ChannelMessage, SynchronizedReadWrite>;
+using HalFlagQueue = ::android::AidlMessageQueue<int8_t, SynchronizedReadWrite>;
 using android::base::StringPrintf;
 
 struct APerformanceHintSession;
@@ -53,18 +64,60 @@ struct AWorkDuration : public hal::WorkDuration {};
 
 // Shared lock for the whole PerformanceHintManager and sessions
 static std::mutex sHintMutex = std::mutex{};
+class FMQWrapper {
+public:
+    bool isActive();
+    bool isSupported();
+    bool startChannel(IHintManager* manager);
+    void stopChannel(IHintManager* manager);
+    // Number of elements the FMQ can hold
+    bool reportActualWorkDurations(std::optional<hal::SessionConfig>& config,
+                                   hal::WorkDuration* durations, size_t count) REQUIRES(sHintMutex);
+    bool updateTargetWorkDuration(std::optional<hal::SessionConfig>& config,
+                                  int64_t targetDurationNanos) REQUIRES(sHintMutex);
+    bool sendHint(std::optional<hal::SessionConfig>& config, SessionHint hint) REQUIRES(sHintMutex);
+    bool setMode(std::optional<hal::SessionConfig>& config, hal::SessionMode, bool enabled)
+            REQUIRES(sHintMutex);
+    void setToken(ndk::SpAIBinder& token);
+    void attemptWake();
+    void setUnsupported();
+
+private:
+    template <HalChannelMessageContents::Tag T, bool urgent = false,
+              class C = HalChannelMessageContents::_at<T>>
+    bool sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count = 1)
+            REQUIRES(sHintMutex);
+    template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
+    void writeBuffer(C* message, hal::SessionConfig& config, size_t count) REQUIRES(sHintMutex);
+
+    bool isActiveLocked() REQUIRES(sHintMutex);
+    bool updatePersistentTransaction() REQUIRES(sHintMutex);
+    std::shared_ptr<HalMessageQueue> mQueue GUARDED_BY(sHintMutex) = nullptr;
+    std::shared_ptr<HalFlagQueue> mFlagQueue GUARDED_BY(sHintMutex) = nullptr;
+    // android::hardware::EventFlag* mEventFlag GUARDED_BY(sHintMutex) = nullptr;
+    android::hardware::EventFlag* mEventFlag = nullptr;
+    int32_t mWriteMask;
+    ndk::SpAIBinder mToken = nullptr;
+    // Used to track if operating on the fmq consistently fails
+    bool mCorrupted = false;
+    // Used to keep a persistent transaction open with FMQ to reduce latency a bit
+    size_t mAvailableSlots GUARDED_BY(sHintMutex) = 0;
+    bool mHalSupported = true;
+    HalMessageQueue::MemTransaction mFmqTransaction GUARDED_BY(sHintMutex);
+};
 
 struct APerformanceHintManager {
 public:
     static APerformanceHintManager* getInstance();
-    APerformanceHintManager(std::shared_ptr<IHintManager> service, int64_t preferredRateNanos);
+    APerformanceHintManager(std::shared_ptr<IHintManager>& service, int64_t preferredRateNanos);
     APerformanceHintManager() = delete;
-    ~APerformanceHintManager() = default;
+    ~APerformanceHintManager();
 
     APerformanceHintSession* createSession(const int32_t* threadIds, size_t size,
                                            int64_t initialTargetWorkDurationNanos,
                                            hal::SessionTag tag = hal::SessionTag::APP);
     int64_t getPreferredRateNanos() const;
+    FMQWrapper& getFMQWrapper();
 
 private:
     // Necessary to create an empty binder object
@@ -82,6 +135,7 @@ private:
     std::shared_ptr<IHintManager> mHintManager;
     ndk::SpAIBinder mToken;
     const int64_t mPreferredRateNanos;
+    FMQWrapper mFMQWrapper;
 };
 
 struct APerformanceHintSession {
@@ -111,22 +165,22 @@ private:
     // HAL preferred update rate
     const int64_t mPreferredRateNanos;
     // Target duration for choosing update rate
-    int64_t mTargetDurationNanos;
+    int64_t mTargetDurationNanos GUARDED_BY(sHintMutex);
     // First target hit timestamp
-    int64_t mFirstTargetMetTimestamp;
+    int64_t mFirstTargetMetTimestamp GUARDED_BY(sHintMutex);
     // Last target hit timestamp
-    int64_t mLastTargetMetTimestamp;
+    int64_t mLastTargetMetTimestamp GUARDED_BY(sHintMutex);
     // Last hint reported from sendHint indexed by hint value
-    std::vector<int64_t> mLastHintSentTimestamp;
+    std::vector<int64_t> mLastHintSentTimestamp GUARDED_BY(sHintMutex);
     // Cached samples
-    std::vector<hal::WorkDuration> mActualWorkDurations;
+    std::vector<hal::WorkDuration> mActualWorkDurations GUARDED_BY(sHintMutex);
     std::string mSessionName;
-    static int64_t sIDCounter;
+    static int64_t sIDCounter GUARDED_BY(sHintMutex);
     // The most recent set of thread IDs
-    std::vector<int32_t> mLastThreadIDs;
-    std::optional<hal::SessionConfig> mSessionConfig;
+    std::vector<int32_t> mLastThreadIDs GUARDED_BY(sHintMutex);
+    std::optional<hal::SessionConfig> mSessionConfig GUARDED_BY(sHintMutex);
     // Tracing helpers
-    void traceThreads(std::vector<int32_t>& tids);
+    void traceThreads(std::vector<int32_t>& tids) REQUIRES(sHintMutex);
     void tracePowerEfficient(bool powerEfficient);
     void traceActualDuration(int64_t actualDuration);
     void traceBatchSize(size_t batchSize);
@@ -134,26 +188,43 @@ private:
 };
 
 static std::shared_ptr<IHintManager>* gIHintManagerForTesting = nullptr;
-static APerformanceHintManager* gHintManagerForTesting = nullptr;
+static std::shared_ptr<APerformanceHintManager> gHintManagerForTesting = nullptr;
+
+static std::optional<bool> gForceFMQEnabled = std::nullopt;
+
 // Start above the int32 range so we don't collide with config sessions
 int64_t APerformanceHintSession::sIDCounter = INT32_MAX;
 
+static FMQWrapper& getFMQ() {
+    return APerformanceHintManager::getInstance()->getFMQWrapper();
+}
+
 // ===================================== APerformanceHintManager implementation
-APerformanceHintManager::APerformanceHintManager(std::shared_ptr<IHintManager> manager,
+APerformanceHintManager::APerformanceHintManager(std::shared_ptr<IHintManager>& manager,
                                                  int64_t preferredRateNanos)
       : mHintManager(std::move(manager)), mPreferredRateNanos(preferredRateNanos) {
     static AIBinder_Class* tokenBinderClass =
             AIBinder_Class_define("phm_token", tokenStubOnCreate, tokenStubOnDestroy,
                                   tokenStubOnTransact);
     mToken = ndk::SpAIBinder(AIBinder_new(tokenBinderClass, nullptr));
+    if (mFMQWrapper.isSupported()) {
+        mFMQWrapper.setToken(mToken);
+        mFMQWrapper.startChannel(mHintManager.get());
+    }
+}
+
+APerformanceHintManager::~APerformanceHintManager() {
+    mFMQWrapper.stopChannel(mHintManager.get());
 }
 
 APerformanceHintManager* APerformanceHintManager::getInstance() {
-    if (gHintManagerForTesting) return gHintManagerForTesting;
+    if (gHintManagerForTesting) {
+        return gHintManagerForTesting.get();
+    }
     if (gIHintManagerForTesting) {
-        APerformanceHintManager* manager = create(*gIHintManagerForTesting);
-        gIHintManagerForTesting = nullptr;
-        return manager;
+        gHintManagerForTesting =
+                std::shared_ptr<APerformanceHintManager>(create(*gIHintManagerForTesting));
+        return gHintManagerForTesting.get();
     }
     static APerformanceHintManager* instance = create(nullptr);
     return instance;
@@ -177,7 +248,7 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
     if (preferredRateNanos <= 0) {
         preferredRateNanos = -1L;
     }
-    return new APerformanceHintManager(std::move(manager), preferredRateNanos);
+    return new APerformanceHintManager(manager, preferredRateNanos);
 }
 
 APerformanceHintSession* APerformanceHintManager::createSession(
@@ -186,15 +257,20 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     std::vector<int32_t> tids(threadIds, threadIds + size);
     std::shared_ptr<IHintSession> session;
     ndk::ScopedAStatus ret;
-    std::optional<hal::SessionConfig> sessionConfig;
+    hal::SessionConfig sessionConfig{.id = -1};
     ret = mHintManager->createHintSessionWithConfig(mToken, tids, initialTargetWorkDurationNanos,
                                                     tag, &sessionConfig, &session);
 
     if (!ret.isOk() || !session) {
+        ALOGE("%s: PerformanceHint cannot create session. %s", __FUNCTION__, ret.getMessage());
         return nullptr;
     }
     auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
-                                           initialTargetWorkDurationNanos, sessionConfig);
+                                           initialTargetWorkDurationNanos,
+                                           sessionConfig.id == -1
+                                                   ? std::nullopt
+                                                   : std::make_optional<hal::SessionConfig>(
+                                                             std::move(sessionConfig)));
     std::scoped_lock lock(sHintMutex);
     out->traceThreads(tids);
     out->traceTargetDuration(initialTargetWorkDurationNanos);
@@ -206,7 +282,14 @@ int64_t APerformanceHintManager::getPreferredRateNanos() const {
     return mPreferredRateNanos;
 }
 
+FMQWrapper& APerformanceHintManager::getFMQWrapper() {
+    return mFMQWrapper;
+}
+
 // ===================================== APerformanceHintSession implementation
+
+constexpr int kNumEnums =
+        ndk::enum_range<hal::SessionHint>().end() - ndk::enum_range<hal::SessionHint>().begin();
 
 APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
                                                  std::shared_ptr<IHintSession> session,
@@ -219,14 +302,11 @@ APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> h
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
         mLastTargetMetTimestamp(0),
+        mLastHintSentTimestamp(std::vector<int64_t>(kNumEnums, 0)),
         mSessionConfig(sessionConfig) {
     if (sessionConfig->id > INT32_MAX) {
         ALOGE("Session ID too large, must fit 32-bit integer");
     }
-    std::scoped_lock lock(sHintMutex);
-    constexpr int numEnums =
-            ndk::enum_range<hal::SessionHint>().end() - ndk::enum_range<hal::SessionHint>().begin();
-    mLastHintSentTimestamp = std::vector<int64_t>(numEnums, 0);
     int64_t traceId = sessionConfig.has_value() ? sessionConfig->id : ++sIDCounter;
     mSessionName = android::base::StringPrintf("ADPF Session %" PRId64, traceId);
 }
@@ -243,13 +323,18 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
         ALOGE("%s: targetDurationNanos must be positive", __FUNCTION__);
         return EINVAL;
     }
-    ndk::ScopedAStatus ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
-    if (!ret.isOk()) {
-        ALOGE("%s: HintSession updateTargetWorkDuration failed: %s", __FUNCTION__,
-              ret.getMessage());
-        return EPIPE;
-    }
     std::scoped_lock lock(sHintMutex);
+    if (mTargetDurationNanos == targetDurationNanos) {
+        return 0;
+    }
+    if (!getFMQ().updateTargetWorkDuration(mSessionConfig, targetDurationNanos)) {
+        ndk::ScopedAStatus ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
+        if (!ret.isOk()) {
+            ALOGE("%s: HintSession updateTargetWorkDuration failed: %s", __FUNCTION__,
+                  ret.getMessage());
+            return EPIPE;
+        }
+    }
     mTargetDurationNanos = targetDurationNanos;
     /**
      * Most of the workload is target_duration dependent, so now clear the cached samples
@@ -285,11 +370,13 @@ int APerformanceHintSession::sendHint(SessionHint hint) {
         return 0;
     }
 
-    ndk::ScopedAStatus ret = mHintSession->sendHint(hint);
+    if (!getFMQ().sendHint(mSessionConfig, hint)) {
+        ndk::ScopedAStatus ret = mHintSession->sendHint(hint);
 
-    if (!ret.isOk()) {
-        ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.getMessage());
-        return EPIPE;
+        if (!ret.isOk()) {
+            ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.getMessage());
+            return EPIPE;
+        }
     }
     mLastHintSentTimestamp[hint] = now;
     return 0;
@@ -362,10 +449,10 @@ int APerformanceHintSession::reportActualWorkDuration(AWorkDuration* workDuratio
 
 int APerformanceHintSession::reportActualWorkDurationInternal(AWorkDuration* workDuration) {
     int64_t actualTotalDurationNanos = workDuration->durationNanos;
+    traceActualDuration(workDuration->durationNanos);
     int64_t now = uptimeNanos();
     workDuration->timeStampNanos = now;
     std::scoped_lock lock(sHintMutex);
-    traceActualDuration(workDuration->durationNanos);
     mActualWorkDurations.push_back(std::move(*workDuration));
 
     if (actualTotalDurationNanos >= mTargetDurationNanos) {
@@ -389,20 +476,177 @@ int APerformanceHintSession::reportActualWorkDurationInternal(AWorkDuration* wor
         mLastTargetMetTimestamp = now;
     }
 
-    ndk::ScopedAStatus ret = mHintSession->reportActualWorkDuration2(mActualWorkDurations);
-    if (!ret.isOk()) {
-        ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
-              ret.getMessage());
-        mFirstTargetMetTimestamp = 0;
-        mLastTargetMetTimestamp = 0;
-        traceBatchSize(mActualWorkDurations.size());
-        return ret.getExceptionCode() == EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
+    if (!getFMQ().reportActualWorkDurations(mSessionConfig, mActualWorkDurations.data(),
+                                            mActualWorkDurations.size())) {
+        ndk::ScopedAStatus ret = mHintSession->reportActualWorkDuration2(mActualWorkDurations);
+        if (!ret.isOk()) {
+            ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
+                  ret.getMessage());
+            mFirstTargetMetTimestamp = 0;
+            mLastTargetMetTimestamp = 0;
+            traceBatchSize(mActualWorkDurations.size());
+            return ret.getExceptionCode() == EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
+        }
     }
+
     mActualWorkDurations.clear();
     traceBatchSize(0);
 
     return 0;
 }
+
+// ===================================== FMQ wrapper implementation
+
+bool FMQWrapper::isActive() {
+    std::scoped_lock lock{sHintMutex};
+    return isActiveLocked();
+}
+
+bool FMQWrapper::isActiveLocked() {
+    return mQueue != nullptr;
+}
+
+void FMQWrapper::setUnsupported() {
+    mHalSupported = false;
+}
+
+bool FMQWrapper::isSupported() {
+    if (!mHalSupported) {
+        return false;
+    }
+    // Used for testing
+    if (gForceFMQEnabled.has_value()) {
+        return *gForceFMQEnabled;
+    }
+    return android::os::adpf_use_fmq_channel_fixed();
+}
+
+bool FMQWrapper::startChannel(IHintManager* manager) {
+    if (isSupported() && !isActive()) {
+        std::optional<hal::ChannelConfig> config;
+        auto ret = manager->getSessionChannel(mToken, &config);
+        if (ret.isOk() && config.has_value()) {
+            std::scoped_lock lock{sHintMutex};
+            mQueue = std::make_shared<HalMessageQueue>(config->channelDescriptor, true);
+            if (config->eventFlagDescriptor.has_value()) {
+                mFlagQueue = std::make_shared<HalFlagQueue>(*config->eventFlagDescriptor, true);
+                android::hardware::EventFlag::createEventFlag(mFlagQueue->getEventFlagWord(),
+                                                              &mEventFlag);
+                mWriteMask = config->writeFlagBitmask;
+            }
+            updatePersistentTransaction();
+        } else if (ret.isOk() && !config.has_value()) {
+            ALOGV("FMQ channel enabled but unsupported.");
+            setUnsupported();
+        } else {
+            ALOGE("%s: FMQ channel initialization failed: %s", __FUNCTION__, ret.getMessage());
+        }
+    }
+    return isActive();
+}
+
+void FMQWrapper::stopChannel(IHintManager* manager) {
+    {
+        std::scoped_lock lock{sHintMutex};
+        if (!isActiveLocked()) {
+            return;
+        }
+        mFlagQueue = nullptr;
+        mQueue = nullptr;
+    }
+    manager->closeSessionChannel();
+}
+
+template <HalChannelMessageContents::Tag T, class C>
+void FMQWrapper::writeBuffer(C* message, hal::SessionConfig& config, size_t) {
+    new (mFmqTransaction.getSlot(0)) hal::ChannelMessage{
+            .sessionID = static_cast<int32_t>(config.id),
+            .timeStampNanos = ::android::uptimeNanos(),
+            .data = HalChannelMessageContents::make<T, C>(std::move(*message)),
+    };
+}
+
+template <>
+void FMQWrapper::writeBuffer<HalChannelMessageContents::workDuration>(hal::WorkDuration* messages,
+                                                                      hal::SessionConfig& config,
+                                                                      size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        hal::WorkDuration& message = messages[i];
+        new (mFmqTransaction.getSlot(i)) hal::ChannelMessage{
+                .sessionID = static_cast<int32_t>(config.id),
+                .timeStampNanos =
+                        (i == count - 1) ? ::android::uptimeNanos() : message.timeStampNanos,
+                .data = HalChannelMessageContents::make<HalChannelMessageContents::workDuration,
+                                                        hal::WorkDurationFixedV1>({
+                        .durationNanos = message.cpuDurationNanos,
+                        .workPeriodStartTimestampNanos = message.workPeriodStartTimestampNanos,
+                        .cpuDurationNanos = message.cpuDurationNanos,
+                        .gpuDurationNanos = message.gpuDurationNanos,
+                }),
+        };
+    }
+}
+
+template <HalChannelMessageContents::Tag T, bool urgent, class C>
+bool FMQWrapper::sendMessages(std::optional<hal::SessionConfig>& config, C* message, size_t count) {
+    if (!isActiveLocked() || !config.has_value() || mCorrupted) {
+        return false;
+    }
+    // If we didn't reserve enough space, try re-creating the transaction
+    if (count > mAvailableSlots) {
+        if (!updatePersistentTransaction()) {
+            return false;
+        }
+        // If we actually don't have enough space, give up
+        if (count > mAvailableSlots) {
+            return false;
+        }
+    }
+    writeBuffer<T, C>(message, *config, count);
+    mQueue->commitWrite(count);
+    mEventFlag->wake(mWriteMask);
+    // Re-create the persistent transaction after writing
+    updatePersistentTransaction();
+    return true;
+}
+
+void FMQWrapper::setToken(ndk::SpAIBinder& token) {
+    mToken = token;
+}
+
+bool FMQWrapper::updatePersistentTransaction() {
+    mAvailableSlots = mQueue->availableToWrite();
+    if (mAvailableSlots > 0 && !mQueue->beginWrite(mAvailableSlots, &mFmqTransaction)) {
+        ALOGE("ADPF FMQ became corrupted, falling back to binder calls!");
+        mCorrupted = true;
+        return false;
+    }
+    return true;
+}
+
+bool FMQWrapper::reportActualWorkDurations(std::optional<hal::SessionConfig>& config,
+                                           hal::WorkDuration* durations, size_t count) {
+    return sendMessages<HalChannelMessageContents::workDuration>(config, durations, count);
+}
+
+bool FMQWrapper::updateTargetWorkDuration(std::optional<hal::SessionConfig>& config,
+                                          int64_t targetDurationNanos) {
+    return sendMessages<HalChannelMessageContents::targetDuration>(config, &targetDurationNanos);
+}
+
+bool FMQWrapper::sendHint(std::optional<hal::SessionConfig>& config, SessionHint hint) {
+    return sendMessages<HalChannelMessageContents::hint>(config,
+                                                         reinterpret_cast<hal::SessionHint*>(
+                                                                 &hint));
+}
+
+bool FMQWrapper::setMode(std::optional<hal::SessionConfig>& config, hal::SessionMode mode,
+                         bool enabled) {
+    hal::ChannelMessage::ChannelMessageContents::SessionModeSetter modeObj{.modeInt = mode,
+                                                                           .enabled = enabled};
+    return sendMessages<HalChannelMessageContents::mode, true>(config, &modeObj);
+}
+
 // ===================================== Tracing helpers
 
 void APerformanceHintSession::traceThreads(std::vector<int32_t>& tids) {
@@ -578,7 +822,12 @@ void AWorkDuration_setActualGpuDurationNanos(AWorkDuration* aWorkDuration,
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {
-    delete gHintManagerForTesting;
-    gHintManagerForTesting = nullptr;
+    if (iManager == nullptr) {
+        gHintManagerForTesting = nullptr;
+    }
     gIHintManagerForTesting = static_cast<std::shared_ptr<IHintManager>*>(iManager);
+}
+
+void APerformanceHint_setUseFMQForTesting(bool enabled) {
+    gForceFMQEnabled = enabled;
 }

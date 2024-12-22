@@ -20,9 +20,9 @@ import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.View
 import com.android.wm.shell.bubbles.BubblePositioner
-import com.android.wm.shell.common.bubbles.DismissView
-import com.android.wm.shell.common.bubbles.RelativeTouchListener
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject
+import com.android.wm.shell.shared.bubbles.DismissView
+import com.android.wm.shell.shared.bubbles.RelativeTouchListener
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject
 
 /** Controller for handling drag interactions with [BubbleBarExpandedView] */
 @SuppressLint("ClickableViewAccessibility")
@@ -36,6 +36,9 @@ class BubbleBarExpandedViewDragController(
 ) {
 
     var isStuckToDismiss: Boolean = false
+        private set
+
+    var isDragged: Boolean = false
         private set
 
     private var expandedViewInitialTranslationX = 0f
@@ -94,6 +97,7 @@ class BubbleBarExpandedViewDragController(
             // While animating, don't allow new touch events
             if (expandedView.isAnimating) return false
             pinController.onDragStart(bubblePositioner.isBubbleBarOnLeft)
+            isDragged = true
             return true
         }
 
@@ -141,6 +145,7 @@ class BubbleBarExpandedViewDragController(
                 dismissView.hide()
             }
             isMoving = false
+            isDragged = false
         }
     }
 

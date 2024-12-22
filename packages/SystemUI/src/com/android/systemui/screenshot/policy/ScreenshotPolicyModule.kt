@@ -19,14 +19,11 @@ package com.android.systemui.screenshot.policy
 import android.content.ComponentName
 import android.content.Context
 import android.os.Process
-import com.android.systemui.Flags.screenshotPrivateProfileBehaviorFix
 import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenshot.ImageCapture
-import com.android.systemui.screenshot.RequestProcessor
-import com.android.systemui.screenshot.ScreenshotPolicy
 import com.android.systemui.screenshot.ScreenshotRequestProcessor
 import com.android.systemui.screenshot.data.repository.DisplayContentRepository
 import com.android.systemui.screenshot.data.repository.DisplayContentRepositoryImpl
@@ -68,23 +65,18 @@ interface ScreenshotPolicyModule {
             @Application context: Context,
             @Background background: CoroutineDispatcher,
             imageCapture: ImageCapture,
-            policyProvider: Provider<ScreenshotPolicy>,
-            displayContentRepoProvider: Provider<DisplayContentRepository>,
+            displayContentRepo: DisplayContentRepository,
             policyListProvider: Provider<List<CapturePolicy>>,
         ): ScreenshotRequestProcessor {
-            return if (screenshotPrivateProfileBehaviorFix()) {
-                PolicyRequestProcessor(
-                    background = background,
-                    capture = imageCapture,
-                    displayTasks = displayContentRepoProvider.get(),
-                    policies = policyListProvider.get(),
-                    defaultOwner = Process.myUserHandle(),
-                    defaultComponent =
-                        ComponentName(context.packageName, SystemUIService::class.java.toString())
-                )
-            } else {
-                RequestProcessor(imageCapture, policyProvider.get())
-            }
+            return PolicyRequestProcessor(
+                background = background,
+                capture = imageCapture,
+                displayTasks = displayContentRepo,
+                policies = policyListProvider.get(),
+                defaultOwner = Process.myUserHandle(),
+                defaultComponent =
+                    ComponentName(context.packageName, SystemUIService::class.java.toString())
+            )
         }
     }
 }

@@ -16,10 +16,11 @@
 
 package com.android.credentialmanager.ui.screens.multiple
 
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import com.android.credentialmanager.R
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,6 +39,10 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.ui.components.BottomSpacer
 import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
+import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
 
 /**
  * Screen that shows multiple credentials to select from.
@@ -53,60 +58,77 @@ fun MultiCredentialsFoldScreen(
     flowEngine: FlowEngine,
 ) {
     val selectEntry = flowEngine.getEntrySelector()
-    ScalingLazyColumn(
-        columnState = columnState,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        // flatten all credentials into one
-        val credentials = credentialSelectorUiState.sortedEntries
-        item {
-            var title = stringResource(R.string.choose_sign_in_title)
-
-            if (credentials.isEmpty()) {
-                title = stringResource(R.string.choose_sign_in_title)
-            } else if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
-                title = stringResource(R.string.choose_passkey_title)
-            } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
-                title = stringResource(R.string.choose_password_title)
-            }
-
-            SignInHeader(
-                icon = credentialSelectorUiState.icon,
-                title = title,
-            )
-        }
-
-        credentials.forEach { credential: CredentialEntryInfo ->
+    Row {
+        Spacer(Modifier.weight(0.052f)) // 5.2% side margin
+        ScalingLazyColumn(
+            columnState = columnState,
+            modifier = Modifier.weight(0.896f).fillMaxSize(),
+        ) {
+            // flatten all credentials into one
+            val credentials = credentialSelectorUiState.sortedEntries
             item {
-                CredentialsScreenChip(
-                    label = credential.userName,
-                    onClick = { selectEntry(credential, false) },
-                    secondaryLabel = credential.credentialTypeDisplayName,
-                    icon = credential.icon,
-                )
-                CredentialsScreenChipSpacer()
-            }
-        }
-
-        credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
-            item {
-                LockedProviderChip(authenticationEntryInfo) {
-                    selectEntry(authenticationEntryInfo, false)
+                var title = stringResource(R.string.choose_sign_in_title)
+                if (credentials.isNotEmpty()) {
+                    if (credentials.all { it.credentialType == CredentialType.PASSKEY }) {
+                        title = stringResource(R.string.choose_passkey_title)
+                    } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
+                        title = stringResource(R.string.choose_password_title)
+                    }
                 }
-                CredentialsScreenChipSpacer()
+
+                SignInHeader(
+                    icon = credentialSelectorUiState.icon,
+                    title = title,
+                )
+            }
+
+            credentials.forEach { credential: CredentialEntryInfo ->
+                item {
+                    CredentialsScreenChip(
+                        primaryText =
+                        {
+                            WearButtonText(
+                                text = credential.userName,
+                                textAlign = TextAlign.Start,
+                                maxLines = 2
+                            )
+                        },
+                        onClick = { selectEntry(credential, false) },
+                        secondaryText = {
+                            WearSecondaryLabel(
+                                text = credential.credentialTypeDisplayName.ifEmpty {
+                                    credential.providerDisplayName
+                                },
+                                color = WearMaterialTheme.colors.onSurfaceVariant,
+                                maxLines = 1 // See b/359649621 for context
+                            )
+                        },
+                        icon = credential.icon,
+                    )
+                    CredentialsScreenChipSpacer()
+                }
+            }
+
+            credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
+                item {
+                    LockedProviderChip(authenticationEntryInfo) {
+                        selectEntry(authenticationEntryInfo, false)
+                    }
+                    CredentialsScreenChipSpacer()
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+
+            item {
+                SignInOptionsChip { flowEngine.openSecondaryScreen() }
+            }
+            item {
+                DismissChip { flowEngine.cancel() }
+                BottomSpacer()
             }
         }
-
-        item {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(Modifier.weight(0.052f)) // 5.2% side margin
         }
-
-        item {
-            SignInOptionsChip { flowEngine.openSecondaryScreen() }
-        }
-        item {
-            DismissChip { flowEngine.cancel() }
-            BottomSpacer()
-        }
-    }
 }

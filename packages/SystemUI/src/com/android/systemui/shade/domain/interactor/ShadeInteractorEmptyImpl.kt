@@ -46,4 +46,11 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
     override val isShadeTouchable: Flow<Boolean> = inactiveFlowBoolean
     override val isExpandToQsEnabled: Flow<Boolean> = inactiveFlowBoolean
     override val shadeMode: StateFlow<ShadeMode> = MutableStateFlow(ShadeMode.Single)
+    override val isShadeLayoutWide: StateFlow<Boolean> = inactiveFlowBoolean
+
+    override fun getTopEdgeSplitFraction(): Float = 0.5f
+
+    override fun expandNotificationShade(loggingReason: String) {}
+
+    override fun expandQuickSettingsShade(loggingReason: String) {}
 }

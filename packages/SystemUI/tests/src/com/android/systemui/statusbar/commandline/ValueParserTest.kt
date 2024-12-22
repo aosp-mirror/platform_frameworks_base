@@ -1,13 +1,16 @@
 package com.android.systemui.statusbar.commandline
 
 import android.graphics.Rect
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ValueParserTest : SysuiTestCase() {
     @Test
     fun parseString() {
@@ -34,6 +37,15 @@ class ValueParserTest : SysuiTestCase() {
         assertThat(Type.Boolean.parseValue("false")).isEqualTo(Result.success(false))
 
         assertTrue(Type.Boolean.parseValue("not a Boolean").isFailure)
+    }
+
+    @Test
+    fun parseColor() {
+        assertThat(Type.Color.parseValue("#434343").isSuccess).isTrue()
+        assertThat(Type.Color.parseValue("#aa123456").isSuccess).isTrue()
+        assertThat(Type.Color.parseValue("red").isSuccess).isTrue()
+
+        assertThat(Type.Color.parseValue("not a color").isFailure).isTrue()
     }
 
     @Test

@@ -18,9 +18,9 @@ package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.accessibility.domain.interactor.captioningInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.view.accessibility.data.repository.captioningInteractor
 
 val Kosmos.captioningViewModel by
     Kosmos.Fixture {

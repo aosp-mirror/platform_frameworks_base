@@ -2,6 +2,13 @@ package: "com.android.graphics.hwui.flags"
 container: "system"
 
 flag {
+  name: "runtime_color_filters_blenders"
+  namespace: "core_graphics"
+  description: "API for AGSL authored runtime color filters and blenders"
+  bug: "358126864"
+}
+
+flag {
   name: "clip_shader"
   is_exported: true
   namespace: "core_graphics"
@@ -96,4 +103,29 @@ flag {
   namespace: "core_graphics"
   description: "Initialize GL even when HWUI is set to use Vulkan. This improves app startup time for apps using GL."
   bug: "335172671"
+}
+
+flag {
+  name: "skip_eglmanager_telemetry"
+  namespace: "core_graphics"
+  description: "Skip telemetry in EglManager's calls to eglCreateContext to avoid polluting telemetry"
+  bug: "347911216"
+}
+
+flag {
+  name: "resample_gainmap_regions"
+  namespace: "core_graphics"
+  description: "Resample gainmaps when decoding regions, to improve visual quality"
+  bug: "352847821"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "iso_gainmap_apis"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "APIs that expose gainmap metadata corresponding to those defined in ISO 21496-1"
+  bug: "349357636"
 }

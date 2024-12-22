@@ -15,11 +15,13 @@
  */
 package android.os.connectivity;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.BatteryStats;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +37,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 @SystemApi
 public final class CellularBatteryStats implements Parcelable {
 
@@ -83,11 +86,17 @@ public final class CellularBatteryStats implements Parcelable {
                 }
             };
 
-    /** @hide **/
+    /**
+     * This constructor should only be used in tests.
+     * @hide
+     */
+    @FlaggedApi(
+            com.android.server.power.optimization.Flags.FLAG_STREAMLINED_CONNECTIVITY_BATTERY_STATS)
+    @TestApi
     public CellularBatteryStats(long loggingDurationMs, long kernelActiveTimeMs, long numPacketsTx,
             long numBytesTx, long numPacketsRx, long numBytesRx, long sleepTimeMs, long idleTimeMs,
-            long rxTimeMs, Long energyConsumedMaMs, long[] timeInRatMs,
-            long[] timeInRxSignalStrengthLevelMs, long[] txTimeMs,
+            long rxTimeMs, long energyConsumedMaMs, @NonNull long[] timeInRatMs,
+            @NonNull long[] timeInRxSignalStrengthLevelMs, @NonNull long[] txTimeMs,
             long monitoredRailChargeConsumedMaMs) {
 
         mLoggingDurationMs = loggingDurationMs;
@@ -270,7 +279,6 @@ public final class CellularBatteryStats implements Parcelable {
      * @return The amount of time the phone spends in the {@code networkType} network type. The
      * unit is in microseconds.
      */
-    @NonNull
     @SuppressLint("MethodNameUnits")
     public long getTimeInRatMicros(@NetworkType int networkType) {
         if (networkType >= mTimeInRatMs.length) {
@@ -289,7 +297,6 @@ public final class CellularBatteryStats implements Parcelable {
      * @return Amount of time phone spends in specific cellular rx signal strength levels
      * in microseconds. The index is signal strength bin.
      */
-    @NonNull
     @SuppressLint("MethodNameUnits")
     public long getTimeInRxSignalStrengthLevelMicros(
             @IntRange(from = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN,
@@ -315,10 +322,9 @@ public final class CellularBatteryStats implements Parcelable {
      * <li> index 3 = 15dBm < tx_power < 20dBm. </li>
      * <li> index 4 = tx_power > 20dBm. </li>
      * </ul>
-     *
-     * @hide
      */
-    @NonNull
+    @FlaggedApi(
+            com.android.server.power.optimization.Flags.FLAG_STREAMLINED_CONNECTIVITY_BATTERY_STATS)
     public long getTxTimeMillis(
             @IntRange(from = ModemActivityInfo.TX_POWER_LEVEL_0,
                     to = ModemActivityInfo.TX_POWER_LEVEL_4) int level) {

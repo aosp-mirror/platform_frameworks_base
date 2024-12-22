@@ -258,6 +258,7 @@ public class ExternalDisplayPolicyTest {
 
         when(mMockedLogicalDisplay.isEnabledLocked()).thenReturn(false);
         mExternalDisplayPolicy.handleExternalDisplayConnectedLocked(mMockedLogicalDisplay);
+        mHandler.flush();
         verify(mMockedInjector, never()).sendExternalDisplayEventLocked(any(), anyInt());
         verify(mMockedDisplayNotificationManager, times(2))
                 .onHighTemperatureExternalDisplayNotAllowed();

@@ -7,22 +7,17 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
@@ -31,16 +26,16 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.CommunalSwipeDetector
-import com.android.compose.animation.scene.DefaultSwipeDetector
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.FixedSizeEdgeDetector
-import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -50,22 +45,22 @@ import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.systemui.Flags
-import com.android.systemui.Flags.glanceableHubFullscreenSwipe
+import com.android.internal.R.attr.focusable
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
-import com.android.systemui.communal.ui.compose.Dimensions.SlideOffsetY
+import com.android.systemui.communal.ui.compose.Dimensions.Companion.SlideOffsetY
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
-import com.android.systemui.res.R
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
+import kotlin.time.DurationUnit
 
 object Communal {
     object Elements {
-        val Scrim = ElementKey("Scrim", scenePicker = LowestZIndexScenePicker)
+        val Scrim = ElementKey("Scrim", contentPicker = LowestZIndexContentPicker)
         val Grid = ElementKey("CommunalContent")
         val LockIcon = ElementKey("CommunalLockIcon")
         val IndicationArea = ElementKey("CommunalIndicationArea")
@@ -74,10 +69,10 @@ object Communal {
 }
 
 object AllElements : ElementMatcher {
-    override fun matches(key: ElementKey, scene: SceneKey) = true
+    override fun matches(key: ElementKey, content: ContentKey) = true
 }
 
-private object TransitionDuration {
+object TransitionDuration {
     const val BETWEEN_HUB_AND_EDIT_MODE_MS = 1000
     const val EDIT_MODE_TO_HUB_CONTENT_MS = 167
     const val EDIT_MODE_TO_HUB_GRID_DELAY_MS = 167
@@ -91,14 +86,18 @@ val sceneTransitions = transitions {
         spec = tween(durationMillis = 250)
         fade(AllElements)
     }
+    to(CommunalScenes.Blank, key = CommunalTransitionKeys.SimpleFade) {
+        spec = tween(durationMillis = TO_GONE_DURATION.toInt(DurationUnit.MILLISECONDS))
+        fade(AllElements)
+    }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(startMillis = 167, endMillis = 334) { fade(AllElements) }
     }
     to(CommunalScenes.Blank) {
         spec = tween(durationMillis = 1000)
-        translate(Communal.Elements.Grid, Edge.Right)
+        translate(Communal.Elements.Grid, Edge.End)
         timestampRange(endMillis = 167) {
             fade(Communal.Elements.Grid)
             fade(Communal.Elements.IndicationArea)
@@ -131,6 +130,9 @@ val sceneTransitions = transitions {
             fade(Communal.Elements.Grid)
         }
     }
+    // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
+    // can lead to inconsistent KeyguardState changes.
+    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**
@@ -150,12 +152,10 @@ fun CommunalContainer(
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by
         viewModel.currentScene.collectAsStateWithLifecycle(CommunalScenes.Blank)
-    val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle(initialValue = false)
-    val showGestureIndicator by
-        viewModel.showGestureIndicator.collectAsStateWithLifecycle(initialValue = false)
+    val touchesAllowed by viewModel.touchesAllowed.collectAsStateWithLifecycle()
     val backgroundType by
         viewModel.communalBackground.collectAsStateWithLifecycle(
-            initialValue = CommunalBackgroundType.DEFAULT
+            initialValue = CommunalBackgroundType.ANIMATED
         )
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
@@ -181,55 +181,31 @@ fun CommunalContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    val swipeSourceDetector =
-        if (glanceableHubFullscreenSwipe()) {
-            detector
-        } else {
-            FixedSizeEdgeDetector(dimensionResource(id = R.dimen.communal_gesture_initiation_width))
-        }
-
-    val swipeDetector =
-        if (glanceableHubFullscreenSwipe()) {
-            detector
-        } else {
-            DefaultSwipeDetector
-        }
-
     SceneTransitionLayout(
         state = state,
         modifier = modifier.fillMaxSize(),
-        swipeSourceDetector = swipeSourceDetector,
-        swipeDetector = swipeDetector,
+        swipeSourceDetector = detector,
+        swipeDetector = detector,
     ) {
         scene(
             CommunalScenes.Blank,
             userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to CommunalScenes.Communal
-                )
+                mapOf(Swipe(SwipeDirection.Start, fromSource = Edge.End) to CommunalScenes.Communal)
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
-            // TODO(b/339667383): remove this temporary swipe gesture handle
-            Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
-                if (showGestureIndicator && Flags.glanceableHubGestureHandle()) {
-                    Box(
-                        modifier =
-                            Modifier.height(220.dp)
-                                .width(4.dp)
-                                .align(Alignment.CenterVertically)
-                                .background(color = Color.White, RoundedCornerShape(4.dp))
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-            }
+            Box(modifier = Modifier.fillMaxSize())
         }
 
-        scene(
-            CommunalScenes.Communal,
-            userActions =
-                mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank)
-        ) {
-            CommunalScene(backgroundType, colors, content)
+        val userActions = mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
+
+        scene(CommunalScenes.Communal, userActions = userActions) {
+            CommunalScene(
+                backgroundType = backgroundType,
+                colors = colors,
+                content = content,
+                viewModel = viewModel,
+                modifier = Modifier.horizontalNestedScrollToScene(),
+            )
         }
     }
 
@@ -240,21 +216,45 @@ fun CommunalContainer(
 
 /** Scene containing the glanceable hub UI. */
 @Composable
-private fun SceneScope.CommunalScene(
+fun SceneScope.CommunalScene(
     backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,
+    viewModel: CommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = Modifier.element(Communal.Elements.Scrim).fillMaxSize()) {
+    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
+
+    Box(
+        modifier =
+            Modifier.element(Communal.Elements.Scrim)
+                .fillMaxSize()
+                .then(
+                    if (isFocusable) {
+                        Modifier.focusable()
+                    } else {
+                        Modifier.semantics { disabled() }.clearAndSetSemantics {}
+                    }
+                )
+    ) {
         when (backgroundType) {
-            CommunalBackgroundType.DEFAULT -> DefaultBackground(colors = colors)
+            CommunalBackgroundType.STATIC -> DefaultBackground(colors = colors)
             CommunalBackgroundType.STATIC_GRADIENT -> StaticLinearGradient()
             CommunalBackgroundType.ANIMATED -> AnimatedLinearGradient()
             CommunalBackgroundType.NONE -> BackgroundTopScrim()
         }
+
+        with(content) {
+            Content(
+                modifier =
+                    modifier.focusable(isFocusable).semantics {
+                        if (!isFocusable) {
+                            disabled()
+                        }
+                    }
+            )
+        }
     }
-    with(content) { Content(modifier = modifier) }
 }
 
 /** Default background of the hub, a single color */

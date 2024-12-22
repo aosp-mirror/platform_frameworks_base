@@ -239,6 +239,13 @@ abstract class StatusBarPipelineModule {
             return factory.create("VerboseDeviceBasedSatelliteInputLog", 200)
         }
 
+        @Provides
+        @SysUISingleton
+        @DeviceBasedSatelliteTableLog
+        fun provideDeviceBasedSatelliteTableLog(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("DeviceBasedSatelliteTableLog", 200)
+        }
+
         const val FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON =
             "FirstMobileSubShowingNetworkTypeIcon"
     }

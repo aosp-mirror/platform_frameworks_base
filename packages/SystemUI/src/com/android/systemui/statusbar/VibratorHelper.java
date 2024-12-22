@@ -54,6 +54,8 @@ public class VibratorHelper {
             VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+    private static final VibrationAttributes COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
 
     private final Executor mExecutor;
 
@@ -151,7 +153,7 @@ public class VibratorHelper {
         vibrate(Process.myUid(),
                 "com.android.systemui",
                 BIOMETRIC_SUCCESS_VIBRATION_EFFECT, reason,
-                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+                COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES);
     }
 
     /**
@@ -160,7 +162,7 @@ public class VibratorHelper {
     public void vibrateAuthError(String reason) {
         vibrate(Process.myUid(), "com.android.systemui",
                 BIOMETRIC_ERROR_VIBRATION_EFFECT, reason,
-                HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+                COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES);
     }
 
     /**

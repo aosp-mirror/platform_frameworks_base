@@ -24,17 +24,20 @@ import android.app.StatusBarManager.DISABLE_EXPAND
 import android.app.StatusBarManager.DISABLE_NAVIGATION
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_TICKER
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class DisableStateTrackerTest : SysuiTestCase() {
 
     private lateinit var underTest: DisableStateTracker

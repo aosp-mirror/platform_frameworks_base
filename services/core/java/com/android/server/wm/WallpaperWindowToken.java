@@ -31,8 +31,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.window.flags.Flags;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.function.Consumer;
 
@@ -85,7 +84,7 @@ class WallpaperWindowToken extends WindowToken {
     public void prepareSurfaces() {
         super.prepareSurfaces();
 
-        if (Flags.ensureWallpaperInTransitions()) {
+        if (mWmService.mFlags.mEnsureWallpaperInTransitions) {
             // Similar to Task.prepareSurfaces, outside of transitions we need to apply visibility
             // changes directly. In transitions the transition player will take care of applying the
             // visibility change.
@@ -162,15 +161,7 @@ class WallpaperWindowToken extends WindowToken {
                 mDisplayContent.mWallpaperController.getWallpaperTarget();
 
         if (visible && wallpaperTarget != null) {
-            final RecentsAnimationController recentsAnimationController =
-                    mWmService.getRecentsAnimationController();
-            if (recentsAnimationController != null
-                    && recentsAnimationController.isAnimatingTask(wallpaperTarget.getTask())) {
-                // If the Recents animation is running, and the wallpaper target is the animating
-                // task we want the wallpaper to be rotated in the same orientation as the
-                // RecentsAnimation's target (e.g the launcher)
-                recentsAnimationController.linkFixedRotationTransformIfNeeded(this);
-            } else if ((wallpaperTarget.mActivityRecord == null
+            if ((wallpaperTarget.mActivityRecord == null
                     // Ignore invisible activity because it may be moving to background.
                     || wallpaperTarget.mActivityRecord.isVisibleRequested())
                     && wallpaperTarget.mToken.hasFixedRotationTransform()) {

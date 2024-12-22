@@ -230,18 +230,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
         val isSoftRestricted =
             if (permission.isSoftRestricted && !isExempt) {
-                val targetSdkVersion =
-                    reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT) {
-                        targetSdkVersion,
-                        packageState ->
-                        if (permissionName in packageState.androidPackage!!.requestedPermissions) {
-                            targetSdkVersion.coerceAtMost(
-                                packageState.androidPackage!!.targetSdkVersion
-                            )
-                        } else {
-                            targetSdkVersion
-                        }
-                    }
+                val targetSdkVersion = getAppIdTargetSdkVersion(appId, permissionName)
                 !anyPackageInAppId(appId) {
                     permissionName in it.androidPackage!!.requestedPermissions &&
                         isSoftRestrictedPermissionExemptForPackage(
@@ -718,18 +707,8 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
         // If the app is updated, and has scoped storage permissions, then it is possible that the
         // app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
-        val oldTargetSdkVersion =
-            reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, oldState) {
-                targetSdkVersion,
-                packageState ->
-                targetSdkVersion.coerceAtMost(packageState.androidPackage!!.targetSdkVersion)
-            }
-        val newTargetSdkVersion =
-            reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, newState) {
-                targetSdkVersion,
-                packageState ->
-                targetSdkVersion.coerceAtMost(packageState.androidPackage!!.targetSdkVersion)
-            }
+        val oldTargetSdkVersion = getAppIdTargetSdkVersion(appId, null, oldState)
+        val newTargetSdkVersion = getAppIdTargetSdkVersion(appId, null, newState)
         @Suppress("ConvertTwoComparisonsToRangeCheck")
         val isTargetSdkVersionDowngraded =
             oldTargetSdkVersion >= Build.VERSION_CODES.Q &&
@@ -909,7 +888,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     val mayGrantByPrivileged =
                         !permission.isPrivileged ||
                             requestingPackageStates.anyIndexed { _, it ->
-                                checkPrivilegedPermissionAllowlist(it, permission)
+                                checkPrivilegedPermissionAllowlistIfNeeded(it, permission)
                             }
                     val shouldGrantBySignature =
                         permission.isSignature &&
@@ -1115,10 +1094,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     private fun MutateStateScope.inheritImplicitPermissionStates(appId: Int, userId: Int) {
-        var targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
+        val targetSdkVersion = getAppIdTargetSdkVersion(appId, null)
         val implicitPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
-            targetSdkVersion = targetSdkVersion.coerceAtMost(it.androidPackage!!.targetSdkVersion)
             implicitPermissions += it.androidPackage!!.implicitPermissions
         }
         implicitPermissions.forEachIndexed implicitPermissions@{ _, implicitPermissionName ->
@@ -1302,7 +1280,16 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
     }
 
-    private fun MutateStateScope.checkPrivilegedPermissionAllowlist(
+    /**
+     * We only check privileged permission allowlist for system privileged apps. Hence, for platform
+     * or for normal apps, we return true to indicate that we don't need to check the allowlist and
+     * will let follow-up checks to decide whether we should grant the permission.
+     *
+     * @return `true`, if the permission is allowlisted for system privileged apps, or if we
+     *         don't need to check the allowlist (for platform or for normal apps).
+     *         `false`, if the permission is not allowlisted for system privileged apps.
+     */
+    private fun MutateStateScope.checkPrivilegedPermissionAllowlistIfNeeded(
         packageState: PackageState,
         permission: Permission
     ): Boolean {
@@ -1416,6 +1403,22 @@ class AppIdPermissionPolicy : SchemePolicy() {
             Manifest.permission.WRITE_EXTERNAL_STORAGE ->
                 appIdTargetSdkVersion >= Build.VERSION_CODES.Q
             else -> false
+        }
+
+    private fun MutateStateScope.getAppIdTargetSdkVersion(
+        appId: Int,
+        permissionName: String?,
+        state: AccessState = newState
+    ): Int =
+        reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT, state) {
+            targetSdkVersion,
+            packageState ->
+            val androidPackage = packageState.androidPackage!!
+            if (permissionName == null || permissionName in androidPackage.requestedPermissions) {
+                targetSdkVersion.coerceAtMost(androidPackage.targetSdkVersion)
+            } else {
+                targetSdkVersion
+            }
         }
 
     private inline fun MutateStateScope.anyPackageInAppId(

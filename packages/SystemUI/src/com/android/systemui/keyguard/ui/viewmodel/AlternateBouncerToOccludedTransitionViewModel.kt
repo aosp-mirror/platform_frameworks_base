@@ -28,21 +28,21 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Breaks down ALTERNATE_BOUNCER->GONE transition into discrete steps for corresponding views to
+ * Breaks down ALTERNATE_BOUNCER->OCCLUDED transition into discrete steps for corresponding views to
  * consume.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class AlternateBouncerToOccludedTransitionViewModel
 @Inject
-constructor(
-    animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_OCCLUDED_DURATION,
             edge = Edge.create(from = ALTERNATE_BOUNCER, to = OCCLUDED),
         )
+
+    val lockscreenAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(0f)
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

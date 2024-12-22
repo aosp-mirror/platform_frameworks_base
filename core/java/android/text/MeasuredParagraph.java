@@ -199,14 +199,11 @@ public class MeasuredParagraph {
      * @hide
      */
     public @Layout.Direction int getParagraphDir() {
-        if (ClientFlags.icuBidiMigration()) {
-            if (mBidi == null) {
-                return Layout.DIR_LEFT_TO_RIGHT;
-            }
-            return (mBidi.getParaLevel() & 0x01) == 0
-                    ? Layout.DIR_LEFT_TO_RIGHT : Layout.DIR_RIGHT_TO_LEFT;
+        if (mBidi == null) {
+            return Layout.DIR_LEFT_TO_RIGHT;
         }
-        return mParaDir;
+        return (mBidi.getParaLevel() & 0x01) == 0
+                ? Layout.DIR_LEFT_TO_RIGHT : Layout.DIR_RIGHT_TO_LEFT;
     }
 
     /**
@@ -217,71 +214,62 @@ public class MeasuredParagraph {
      */
     public Directions getDirections(@IntRange(from = 0) int start,  // inclusive
                                     @IntRange(from = 0) int end) {  // exclusive
-        if (ClientFlags.icuBidiMigration()) {
-            // Easy case: mBidi == null means the text is all LTR and no bidi suppot is needed.
-            if (mBidi == null) {
-                return Layout.DIRS_ALL_LEFT_TO_RIGHT;
-            }
-
-            // Easy case: If the original text only contains single directionality run, the
-            // substring is only single run.
-            if (start == end) {
-                if ((mBidi.getParaLevel() & 0x01) == 0) {
-                    return Layout.DIRS_ALL_LEFT_TO_RIGHT;
-                } else {
-                    return Layout.DIRS_ALL_RIGHT_TO_LEFT;
-                }
-            }
-
-            // Okay, now we need to generate the line instance.
-            Bidi bidi = mBidi.createLineBidi(start, end);
-
-            // Easy case: If the line instance only contains single directionality run, no need
-            // to reorder visually.
-            if (bidi.getRunCount() == 1) {
-                if (bidi.getRunLevel(0) == 1) {
-                    return Layout.DIRS_ALL_RIGHT_TO_LEFT;
-                } else if (bidi.getRunLevel(0) == 0) {
-                    return Layout.DIRS_ALL_LEFT_TO_RIGHT;
-                } else {
-                    return new Directions(new int[] {
-                            0, bidi.getRunLevel(0) << Layout.RUN_LEVEL_SHIFT | (end - start)});
-                }
-            }
-
-            // Reorder directionality run visually.
-            byte[] levels = new byte[bidi.getRunCount()];
-            for (int i = 0; i < bidi.getRunCount(); ++i) {
-                levels[i] = (byte) bidi.getRunLevel(i);
-            }
-            int[] visualOrders = Bidi.reorderVisual(levels);
-
-            int[] dirs = new int[bidi.getRunCount() * 2];
-            for (int i = 0; i < bidi.getRunCount(); ++i) {
-                int vIndex;
-                if ((mBidi.getBaseLevel() & 0x01) == 1) {
-                    // For the historical reasons, if the base directionality is RTL, the Android
-                    // draws from the right, i.e. the visually reordered run needs to be reversed.
-                    vIndex = visualOrders[bidi.getRunCount() - i - 1];
-                } else {
-                    vIndex = visualOrders[i];
-                }
-
-                // Special packing of dire
-                dirs[i * 2] = bidi.getRunStart(vIndex);
-                dirs[i * 2 + 1] = bidi.getRunLevel(vIndex) << Layout.RUN_LEVEL_SHIFT
-                        | (bidi.getRunLimit(vIndex) - dirs[i * 2]);
-            }
-
-            return new Directions(dirs);
-        }
-        if (mLtrWithoutBidi) {
+        // Easy case: mBidi == null means the text is all LTR and no bidi suppot is needed.
+        if (mBidi == null) {
             return Layout.DIRS_ALL_LEFT_TO_RIGHT;
         }
 
-        final int length = end - start;
-        return AndroidBidi.directions(mParaDir, mLevels.getRawArray(), start, mCopiedBuffer, start,
-                length);
+        // Easy case: If the original text only contains single directionality run, the
+        // substring is only single run.
+        if (start == end) {
+            if ((mBidi.getParaLevel() & 0x01) == 0) {
+                return Layout.DIRS_ALL_LEFT_TO_RIGHT;
+            } else {
+                return Layout.DIRS_ALL_RIGHT_TO_LEFT;
+            }
+        }
+
+        // Okay, now we need to generate the line instance.
+        Bidi bidi = mBidi.createLineBidi(start, end);
+
+        // Easy case: If the line instance only contains single directionality run, no need
+        // to reorder visually.
+        if (bidi.getRunCount() == 1) {
+            if (bidi.getRunLevel(0) == 1) {
+                return Layout.DIRS_ALL_RIGHT_TO_LEFT;
+            } else if (bidi.getRunLevel(0) == 0) {
+                return Layout.DIRS_ALL_LEFT_TO_RIGHT;
+            } else {
+                return new Directions(new int[] {
+                        0, bidi.getRunLevel(0) << Layout.RUN_LEVEL_SHIFT | (end - start)});
+            }
+        }
+
+        // Reorder directionality run visually.
+        byte[] levels = new byte[bidi.getRunCount()];
+        for (int i = 0; i < bidi.getRunCount(); ++i) {
+            levels[i] = (byte) bidi.getRunLevel(i);
+        }
+        int[] visualOrders = Bidi.reorderVisual(levels);
+
+        int[] dirs = new int[bidi.getRunCount() * 2];
+        for (int i = 0; i < bidi.getRunCount(); ++i) {
+            int vIndex;
+            if ((mBidi.getBaseLevel() & 0x01) == 1) {
+                // For the historical reasons, if the base directionality is RTL, the Android
+                // draws from the right, i.e. the visually reordered run needs to be reversed.
+                vIndex = visualOrders[bidi.getRunCount() - i - 1];
+            } else {
+                vIndex = visualOrders[i];
+            }
+
+            // Special packing of dire
+            dirs[i * 2] = bidi.getRunStart(vIndex);
+            dirs[i * 2 + 1] = bidi.getRunLevel(vIndex) << Layout.RUN_LEVEL_SHIFT
+                    | (bidi.getRunLimit(vIndex) - dirs[i * 2]);
+        }
+
+        return new Directions(dirs);
     }
 
     /**
@@ -679,84 +667,56 @@ public class MeasuredParagraph {
             }
         }
 
-        if (ClientFlags.icuBidiMigration()) {
-            if ((textDir == TextDirectionHeuristics.LTR
-                    || textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR
-                    || textDir == TextDirectionHeuristics.ANYRTL_LTR)
-                    && TextUtils.doesNotNeedBidi(mCopiedBuffer, 0, mTextLength)) {
-                mLevels.clear();
-                mLtrWithoutBidi = true;
-                return;
-            }
-            final int bidiRequest;
-            if (textDir == TextDirectionHeuristics.LTR) {
-                bidiRequest = Bidi.LTR;
-            } else if (textDir == TextDirectionHeuristics.RTL) {
-                bidiRequest = Bidi.RTL;
-            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR) {
-                bidiRequest = Bidi.LEVEL_DEFAULT_LTR;
-            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_RTL) {
-                bidiRequest = Bidi.LEVEL_DEFAULT_RTL;
-            } else {
-                final boolean isRtl = textDir.isRtl(mCopiedBuffer, 0, mTextLength);
-                bidiRequest = isRtl ? Bidi.RTL : Bidi.LTR;
-            }
-            mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
-
-            if (mCopiedBuffer.length > 0
-                    && mBidi.getParagraphIndex(mCopiedBuffer.length - 1) != 0) {
-                // Historically, the MeasuredParagraph does not treat the CR letters as paragraph
-                // breaker but ICU BiDi treats it as paragraph breaker. In the MeasureParagraph,
-                // the given range always represents a single paragraph, so if the BiDi object has
-                // multiple paragraph, it should contains a CR letters in the text. Using CR is not
-                // common in Android and also it should not penalize the easy case, e.g. all LTR,
-                // check the paragraph count here and replace the CR letters and re-calculate
-                // BiDi again.
-                for (int i = 0; i < mTextLength; ++i) {
-                    if (Character.isSurrogate(mCopiedBuffer[i])) {
-                        // All block separators are in BMP.
-                        continue;
-                    }
-                    if (UCharacter.getDirection(mCopiedBuffer[i])
-                            == UCharacterDirection.BLOCK_SEPARATOR) {
-                        mCopiedBuffer[i] = OBJECT_REPLACEMENT_CHARACTER;
-                    }
-                }
-                mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
-            }
-            mLevels.resize(mTextLength);
-            byte[] rawArray = mLevels.getRawArray();
-            for (int i = 0; i < mTextLength; ++i) {
-                rawArray[i] = mBidi.getLevelAt(i);
-            }
-            mLtrWithoutBidi = false;
-            return;
-        }
         if ((textDir == TextDirectionHeuristics.LTR
                 || textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR
                 || textDir == TextDirectionHeuristics.ANYRTL_LTR)
                 && TextUtils.doesNotNeedBidi(mCopiedBuffer, 0, mTextLength)) {
             mLevels.clear();
-            mParaDir = Layout.DIR_LEFT_TO_RIGHT;
             mLtrWithoutBidi = true;
-        } else {
-            final int bidiRequest;
-            if (textDir == TextDirectionHeuristics.LTR) {
-                bidiRequest = Layout.DIR_REQUEST_LTR;
-            } else if (textDir == TextDirectionHeuristics.RTL) {
-                bidiRequest = Layout.DIR_REQUEST_RTL;
-            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR) {
-                bidiRequest = Layout.DIR_REQUEST_DEFAULT_LTR;
-            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_RTL) {
-                bidiRequest = Layout.DIR_REQUEST_DEFAULT_RTL;
-            } else {
-                final boolean isRtl = textDir.isRtl(mCopiedBuffer, 0, mTextLength);
-                bidiRequest = isRtl ? Layout.DIR_REQUEST_RTL : Layout.DIR_REQUEST_LTR;
-            }
-            mLevels.resize(mTextLength);
-            mParaDir = AndroidBidi.bidi(bidiRequest, mCopiedBuffer, mLevels.getRawArray());
-            mLtrWithoutBidi = false;
+            return;
         }
+        final int bidiRequest;
+        if (textDir == TextDirectionHeuristics.LTR) {
+            bidiRequest = Bidi.LTR;
+        } else if (textDir == TextDirectionHeuristics.RTL) {
+            bidiRequest = Bidi.RTL;
+        } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR) {
+            bidiRequest = Bidi.LEVEL_DEFAULT_LTR;
+        } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_RTL) {
+            bidiRequest = Bidi.LEVEL_DEFAULT_RTL;
+        } else {
+            final boolean isRtl = textDir.isRtl(mCopiedBuffer, 0, mTextLength);
+            bidiRequest = isRtl ? Bidi.RTL : Bidi.LTR;
+        }
+        mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
+
+        if (mCopiedBuffer.length > 0
+                && mBidi.getParagraphIndex(mCopiedBuffer.length - 1) != 0) {
+            // Historically, the MeasuredParagraph does not treat the CR letters as paragraph
+            // breaker but ICU BiDi treats it as paragraph breaker. In the MeasureParagraph,
+            // the given range always represents a single paragraph, so if the BiDi object has
+            // multiple paragraph, it should contains a CR letters in the text. Using CR is not
+            // common in Android and also it should not penalize the easy case, e.g. all LTR,
+            // check the paragraph count here and replace the CR letters and re-calculate
+            // BiDi again.
+            for (int i = 0; i < mTextLength; ++i) {
+                if (Character.isSurrogate(mCopiedBuffer[i])) {
+                    // All block separators are in BMP.
+                    continue;
+                }
+                if (UCharacter.getDirection(mCopiedBuffer[i])
+                        == UCharacterDirection.BLOCK_SEPARATOR) {
+                    mCopiedBuffer[i] = OBJECT_REPLACEMENT_CHARACTER;
+                }
+            }
+            mBidi = new Bidi(mCopiedBuffer, 0, null, 0, mCopiedBuffer.length, bidiRequest);
+        }
+        mLevels.resize(mTextLength);
+        byte[] rawArray = mLevels.getRawArray();
+        for (int i = 0; i < mTextLength; ++i) {
+            rawArray[i] = mBidi.getLevelAt(i);
+        }
+        mLtrWithoutBidi = false;
     }
 
     private void applyReplacementRun(@NonNull ReplacementSpan replacement,

@@ -40,6 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -47,7 +48,6 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -152,11 +152,7 @@ public class NotificationShelf extends ActivatableNotificationView {
                 R.dimen.notification_corner_animation_distance);
         mEnableNotificationClipping = res.getBoolean(R.bool.notification_enable_clipping);
 
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            mShelfIcons.setOverrideIconColor(true);
-        } else {
-            mShelfIcons.setInNotificationIconShelf(true);
-        }
+        mShelfIcons.setOverrideIconColor(true);
         if (!mShowNotificationShelf) {
             setVisibility(GONE);
         }
@@ -227,9 +223,6 @@ public class NotificationShelf extends ActivatableNotificationView {
             } else {
                 viewState.setAlpha(1f - ambientState.getHideAmount());
             }
-            if (!NotificationIconContainerRefactor.isEnabled()) {
-                viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
-            }
             viewState.hideSensitive = false;
             viewState.setXTranslation(getTranslationX());
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
@@ -261,41 +254,21 @@ public class NotificationShelf extends ActivatableNotificationView {
             viewState.hasItemsInStableShelf = false;
         }
 
-        final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
+        final float stackBottom = SceneContainerFlag.isEnabled()
+                ? ambientState.getStackTop() + ambientState.getInterpolatedStackHeight()
+                : ambientState.getStackY() + ambientState.getInterpolatedStackHeight();
+
         if (viewState.hidden) {
             // if the shelf is hidden, position it at the end of the stack (plus the clip
             // padding), such that when it appears animated, it will smoothly move in from the
             // bottom, without jump cutting any notifications
-            viewState.setYTranslation(stackEnd + mPaddingBetweenElements);
+            viewState.setYTranslation(stackBottom + mPaddingBetweenElements);
         } else {
-            viewState.setYTranslation(stackEnd - viewState.height);
+            viewState.setYTranslation(stackBottom - viewState.height);
         }
-    }
-
-    private int getSpeedBumpIndex() {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-        return mHostLayout.getSpeedBumpIndex();
-    }
-
-    /**
-     * @param fractionToShade Fraction of lockscreen to shade transition
-     * @param shortestWidth   Shortest width to use for lockscreen shelf
-     */
-    @VisibleForTesting
-    public void updateActualWidth(float fractionToShade, float shortestWidth) {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-        final float actualWidth = mAmbientState.isOnKeyguard()
-                ? MathUtils.lerp(shortestWidth, getWidth(), fractionToShade)
-                : getWidth();
-        setBackgroundWidth((int) actualWidth);
-        if (mShelfIcons != null) {
-            mShelfIcons.setActualLayoutWidth((int) actualWidth);
-        }
-        mActualWidth = actualWidth;
     }
 
     private void setActualWidth(float actualWidth) {
-        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
@@ -478,25 +451,17 @@ public class NotificationShelf extends ActivatableNotificationView {
         final float fractionToShade = Interpolators.STANDARD.getInterpolation(
                 mAmbientState.getFractionToShade());
 
-        if (NotificationIconContainerRefactor.isEnabled()) {
-            if (mAmbientState.isOnKeyguard()) {
-                float numViews = MathUtils.min(numViewsInShelf, mMaxIconsOnLockscreen + 1);
-                float shortestWidth = mShelfIcons.calculateWidthFor(numViews);
-                float actualWidth = MathUtils.lerp(shortestWidth, getWidth(), fractionToShade);
-                setActualWidth(actualWidth);
-            } else {
-                setActualWidth(getWidth());
-            }
+        if (mAmbientState.isOnKeyguard()) {
+            float numViews = MathUtils.min(numViewsInShelf, mMaxIconsOnLockscreen + 1);
+            float shortestWidth = mShelfIcons.calculateWidthFor(numViews);
+            float actualWidth = MathUtils.lerp(shortestWidth, getWidth(), fractionToShade);
+            setActualWidth(actualWidth);
         } else {
-            final float shortestWidth = mShelfIcons.calculateWidthFor(numViewsInShelf);
-            updateActualWidth(fractionToShade, shortestWidth);
+            setActualWidth(getWidth());
         }
 
         // TODO(b/172289889) transition last icon in shelf to notification icon and vice versa.
         setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE);
-        if (!NotificationIconContainerRefactor.isEnabled()) {
-            mShelfIcons.setSpeedBumpIndex(getSpeedBumpIndex());
-        }
         mShelfIcons.calculateIconXTranslations();
         mShelfIcons.applyIconStates();
         for (int i = 0; i < getHostLayoutChildCount(); i++) {

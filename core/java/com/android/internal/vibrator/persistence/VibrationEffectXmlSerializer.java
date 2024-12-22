@@ -17,13 +17,15 @@
 package com.android.internal.vibrator.persistence;
 
 import android.annotation.NonNull;
+import android.os.PersistableBundle;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 
-import com.android.internal.vibrator.persistence.SerializedVibrationEffect.SerializedSegment;
+import com.android.internal.vibrator.persistence.SerializedComposedEffect.SerializedSegment;
 import com.android.internal.vibrator.persistence.XmlConstants.PredefinedEffectName;
 import com.android.internal.vibrator.persistence.XmlConstants.PrimitiveEffectName;
 
@@ -41,6 +43,7 @@ import java.util.List;
  *     <li>{@link VibrationEffect#createWaveform(long[], int[], int)}
  *     <li>A composition created exclusively via
  *         {@link VibrationEffect.Composition#addPrimitive(int, float, int)}
+ *     <li>{@link VibrationEffect#createVendorEffect(PersistableBundle)}
  * </ul>
  *
  * @hide
@@ -49,13 +52,16 @@ public final class VibrationEffectXmlSerializer {
 
     /**
      * Creates a serialized representation of the input {@code vibration}.
-     *
-     * @see XmlSerializer#serialize
      */
     @NonNull
-    public static XmlSerializedVibration<VibrationEffect> serialize(
+    public static XmlSerializedVibration<? extends VibrationEffect> serialize(
             @NonNull VibrationEffect vibration, @XmlConstants.Flags int flags)
             throws XmlSerializerException {
+        if (Flags.vendorVibrationEffects()
+                && (vibration instanceof VibrationEffect.VendorEffect vendorEffect)) {
+            return serializeVendorEffect(vendorEffect);
+        }
+
         XmlValidator.checkSerializerCondition(vibration instanceof VibrationEffect.Composed,
                 "Unsupported VibrationEffect type %s", vibration);
 
@@ -73,7 +79,7 @@ public final class VibrationEffectXmlSerializer {
         return serializeWaveformEffect(composed);
     }
 
-    private static SerializedVibrationEffect serializePredefinedEffect(
+    private static SerializedComposedEffect serializePredefinedEffect(
             VibrationEffect.Composed effect, @XmlConstants.Flags int flags)
             throws XmlSerializerException {
         List<VibrationEffectSegment> segments = effect.getSegments();
@@ -81,10 +87,15 @@ public final class VibrationEffectXmlSerializer {
                 "Unsupported repeating predefined effect %s", effect);
         XmlValidator.checkSerializerCondition(segments.size() == 1,
                 "Unsupported multiple segments in predefined effect %s", effect);
-        return new SerializedVibrationEffect(serializePrebakedSegment(segments.get(0), flags));
+        return new SerializedComposedEffect(serializePrebakedSegment(segments.get(0), flags));
     }
 
-    private static SerializedVibrationEffect serializePrimitiveEffect(
+    private static SerializedVendorEffect serializeVendorEffect(
+            VibrationEffect.VendorEffect effect) {
+        return new SerializedVendorEffect(effect.getVendorData());
+    }
+
+    private static SerializedComposedEffect serializePrimitiveEffect(
             VibrationEffect.Composed effect) throws XmlSerializerException {
         List<VibrationEffectSegment> segments = effect.getSegments();
         XmlValidator.checkSerializerCondition(effect.getRepeatIndex() == -1,
@@ -95,10 +106,10 @@ public final class VibrationEffectXmlSerializer {
             primitives[i] = serializePrimitiveSegment(segments.get(i));
         }
 
-        return new SerializedVibrationEffect(primitives);
+        return new SerializedComposedEffect(primitives);
     }
 
-    private static SerializedVibrationEffect serializeWaveformEffect(
+    private static SerializedComposedEffect serializeWaveformEffect(
             VibrationEffect.Composed effect) throws XmlSerializerException {
         SerializedAmplitudeStepWaveform.Builder serializedWaveformBuilder =
                 new SerializedAmplitudeStepWaveform.Builder();
@@ -120,7 +131,7 @@ public final class VibrationEffectXmlSerializer {
                     segment.getDuration(), toAmplitudeInt(segment.getAmplitude()));
         }
 
-        return new SerializedVibrationEffect(serializedWaveformBuilder.build());
+        return new SerializedComposedEffect(serializedWaveformBuilder.build());
     }
 
     private static SerializedPredefinedEffect serializePrebakedSegment(

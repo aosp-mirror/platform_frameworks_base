@@ -14,18 +14,18 @@
 
 package com.android.systemui.tuner;
 
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.KEY;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.KEY_CODE_END;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.KEY_CODE_START;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.KEY_IMAGE_DELIM;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.MENU_IME_ROTATE;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.NAVSPACE;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.NAV_BAR_LEFT;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.NAV_BAR_RIGHT;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.NAV_BAR_VIEWS;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.extractButton;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.extractImage;
-import static com.android.systemui.navigationbar.NavigationBarInflaterView.extractKeycode;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.KEY;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.KEY_CODE_END;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.KEY_CODE_START;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.KEY_IMAGE_DELIM;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.MENU_IME_ROTATE;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.NAVSPACE;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.NAV_BAR_LEFT;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.NAV_BAR_RIGHT;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.NAV_BAR_VIEWS;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.extractButton;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.extractImage;
+import static com.android.systemui.navigationbar.views.NavigationBarInflaterView.extractKeycode;
 
 import android.annotation.Nullable;
 import android.app.AlertDialog;

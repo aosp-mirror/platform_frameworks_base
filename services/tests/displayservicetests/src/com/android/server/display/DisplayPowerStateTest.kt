@@ -60,7 +60,7 @@ class DisplayPowerStateTest {
     }
 
     @Test
-    fun `destroys ColorFade on stop`() {
+    fun destroysColorFadeOnStop() {
         displayPowerState.stop()
         val runnableCaptor = argumentCaptor<Runnable>()
 
@@ -71,13 +71,13 @@ class DisplayPowerStateTest {
     }
 
     @Test
-    fun `GIVEN not prepared WHEN draw runnable is called THEN colorFade not drawn`() {
+    fun testColorFadeDraw_notPrepared() {
         displayPowerState.mColorFadeDrawRunnable.run()
 
         verify(mockColorFade, never()).draw(anyFloat())
     }
     @Test
-    fun `GIVEN prepared WHEN draw runnable is called THEN colorFade is drawn`() {
+    fun testColorFadeDraw_prepared() {
         displayPowerState.prepareColorFade(mockContext, ColorFade.MODE_FADE)
         clearInvocations(mockColorFade)
 
@@ -87,7 +87,7 @@ class DisplayPowerStateTest {
     }
 
     @Test
-    fun `GIVEN prepared AND stopped WHEN draw runnable is called THEN colorFade is not drawn`() {
+    fun testColorFadeDraw_preparedAndStopped() {
         displayPowerState.prepareColorFade(mockContext, ColorFade.MODE_FADE)
         clearInvocations(mockColorFade)
         displayPowerState.stop()

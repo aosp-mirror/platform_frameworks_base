@@ -497,25 +497,32 @@ public abstract class WebSettings {
     public abstract  boolean getUseWebViewBackgroundForOverscrollBackground();
 
     /**
-     * Sets whether the WebView should save form data. In Android O, the
-     * platform has implemented a fully functional Autofill feature to store
-     * form data. Therefore, the Webview form data save feature is disabled.
+     * Sets whether the WebView should save form data. In {@link android.os.Build.VERSION_CODES#O},
+     * the platform has implemented a fully functional Autofill feature to store form data.
+     * Therefore, the Webview form data save feature is disabled.
      *
-     * Note that the feature will continue to be supported on older versions of
+     * <p>Note that the feature will continue to be supported on older versions of
      * Android as before.
      *
-     * @deprecated In Android O and afterwards, this function does not have
-     * any effect, the form data will be saved to platform's autofill service
-     * if applicable.
+     * @see #getSaveFormData
+     * @deprecated In Android O and afterwards, this function does not have any effect. Form data
+     * will be saved to platform's autofill service if applicable.
      */
     @Deprecated
     public abstract  void setSaveFormData(boolean save);
 
     /**
-     * Gets whether the WebView saves form data.
+     * Gets whether the WebView saves form data. In {@link android.os.Build.VERSION_CODES#O}, the
+     * platform has implemented a fully functional Autofill feature to store form data. Therefore,
+     * the Webview form data save feature is disabled.
+     *
+     * <p>Note that the feature will continue to be supported on older versions of
+     * Android as before.
      *
      * @return whether the WebView saves form data
      * @see #setSaveFormData
+     * @deprecated In Android O and afterwards, this function does not have any effect. Form data
+     * will be filled from the platform's autofill service if applicable.
      */
     @Deprecated
     public abstract boolean getSaveFormData();
@@ -741,9 +748,17 @@ public abstract class WebSettings {
     public abstract boolean getUseWideViewPort();
 
     /**
-     * Sets whether the WebView whether supports multiple windows. If set to
-     * true, {@link WebChromeClient#onCreateWindow} must be implemented by the
-     * host application. The default is {@code false}.
+     * Sets whether the WebView should support multiple windows.
+     *
+     * <p>If set to {@code true}, the {@link WebChromeClient#onCreateWindow}
+     * callback must be implemented by the application to handle the
+     * creation of new windows.
+     *
+     * <p>The default is {@code false}. When multiple window support is disabled,
+     * requests to open new windows (either from the {@code window.open()}
+     * JavaScript API or from links with {@code target="_blank"}) will instead
+     * be treated as top-level navigations, replacing the current page in the
+     * same WebView.
      *
      * @param support whether to support multiple windows
      */
@@ -1338,18 +1353,24 @@ public abstract class WebSettings {
     }
 
     /**
-     * Tells JavaScript to open windows automatically. This applies to the
-     * JavaScript function {@code window.open()}. The default is {@code false}.
+     * Allows JavaScript to open windows without a user gesture. This applies to
+     * the JavaScript function {@code window.open()}. The default is
+     * {@code false}: attempts without a user gesture will fail and do nothing.
+     * <p>
+     * This is not affected by the {@link #setSupportMultipleWindows} setting;
+     * the user gesture requirement is enforced even if multiple windows are
+     * disabled.
      *
-     * @param flag {@code true} if JavaScript can open windows automatically
+     * @param flag {@code true} if JavaScript can open windows without a user
+     *             gesture.
      */
     public abstract void setJavaScriptCanOpenWindowsAutomatically(boolean flag);
 
     /**
-     * Gets whether JavaScript can open windows automatically.
+     * Gets whether JavaScript can open windows without a user gesture.
      *
-     * @return {@code true} if JavaScript can open windows automatically during
-     *         {@code window.open()}
+     * @return {@code true} if JavaScript can open windows without a user
+     *         gesture using {@code window.open()}
      * @see #setJavaScriptCanOpenWindowsAutomatically
      */
     public abstract boolean getJavaScriptCanOpenWindowsAutomatically();

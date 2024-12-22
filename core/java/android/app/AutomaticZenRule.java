@@ -49,7 +49,7 @@ public final class AutomaticZenRule implements Parcelable {
 
     /**
      * Rule is of an unknown type. This is the default value if not provided by the owning app,
-     * and the value returned if the true type was added in an API level lower than the calling
+     * and the value returned if the true type was added in an API level higher than the calling
      * app's targetSdk.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
@@ -315,7 +315,8 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     /**
-     * Gets the zen policy.
+     * Gets the {@link ZenPolicy} applied if {@link #getInterruptionFilter()} is
+     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY}.
      */
     @Nullable
     public ZenPolicy getZenPolicy() {
@@ -345,6 +346,17 @@ public final class AutomaticZenRule implements Parcelable {
 
     /**
      * Sets the interruption filter that is applied when this rule is active.
+     *
+     * <ul>
+     *     <li>When {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY}, the rule will use
+     *     the {@link ZenPolicy} supplied to {@link #setZenPolicy} (or a default one).
+     *     <li>When {@link NotificationManager#INTERRUPTION_FILTER_ALARMS} or
+     *     {@link NotificationManager#INTERRUPTION_FILTER_NONE}, the rule will use a fixed
+     *     {@link ZenPolicy} matching the filter.
+     *     <li>When {@link NotificationManager#INTERRUPTION_FILTER_ALL}, the rule will not block
+     *     notifications, but can still have {@link ZenDeviceEffects}.
+     * </ul>
+     *
      * @param interruptionFilter The do not disturb mode to enter when this rule is active.
      */
     public void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
@@ -374,7 +386,8 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     /**
-     * Sets the zen policy.
+     * Sets the {@link ZenPolicy} applied if {@link #getInterruptionFilter()} is
+     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY}.
      *
      * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
      * a {@code null} value here means the previous policy is retained.
@@ -394,6 +407,23 @@ public final class AutomaticZenRule implements Parcelable {
     @FlaggedApi(Flags.FLAG_MODES_API)
     public void setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
         mDeviceEffects = deviceEffects;
+    }
+
+    /**
+     * Sets the component name of the
+     * {@link android.service.notification.ConditionProviderService} that manages this rule
+     * (but note that {@link android.service.notification.ConditionProviderService} is
+     * deprecated in favor of using {@link NotificationManager#setAutomaticZenRuleState} to
+     * notify the system about the state of your rule).
+     *
+     * <p>This is exclusive with {@link #setConfigurationActivity}; rules where a configuration
+     * activity is set will not use the component set here to determine whether the rule
+     * should be active.
+     *
+     * @hide
+     */
+    public void setOwner(@Nullable ComponentName owner) {
+        this.owner = owner;
     }
 
     /**

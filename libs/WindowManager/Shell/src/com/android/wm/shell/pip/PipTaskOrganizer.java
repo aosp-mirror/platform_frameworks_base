@@ -25,8 +25,6 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
@@ -42,6 +40,8 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isRemovePipDirection;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
@@ -73,10 +73,9 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
@@ -90,7 +89,9 @@ import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
@@ -98,6 +99,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
@@ -361,8 +363,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     SurfaceControl mPipOverlay;
 
     /**
-     * The app bounds used for the buffer size of the
-     * {@link com.android.wm.shell.pip.PipContentOverlay.PipAppIconOverlay}.
+     * The app bounds used for the buffer size of the {@link PipContentOverlay.PipAppIconOverlay}.
      *
      * Note that this is empty if the overlay is removed or if it's some other type of overlay
      * defined in {@link PipContentOverlay}.
@@ -423,7 +424,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             });
             mPipTransitionController.setPipOrganizer(this);
             displayController.addDisplayWindowListener(this);
-            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+            pipTransitionController.registerPipTransitionCallback(
+                    mPipTransitionCallback, mMainExecutor);
         }
     }
 
@@ -495,7 +497,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "startSwipePipToHome: %s, state=%s", componentName, mPipTransitionState);
         mPipTransitionState.setInSwipePipToHomeTransition(true);
-        sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        if (ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.onStartSwipePipToHome();
+        } else {
+            sendOnPipTransitionStarted(TRANSITION_DIRECTION_TO_PIP);
+        }
         setBoundsStateForEntry(componentName, pictureInPictureParams, activityInfo);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();
     }
@@ -605,6 +611,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void exitPip(int animationDurationMs, boolean requestEnterSplit) {
         if (!mPipTransitionState.isInPip()
                 || mPipTransitionState.getTransitionState() == PipTransitionState.EXITING_PIP
+                || mPipTransitionState.getInSwipePipToHomeTransition()
                 || mToken == null) {
             ProtoLog.wtf(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Not allowed to exitPip in current state"
@@ -825,6 +832,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     mPictureInPictureParams.getTitle());
             mPipParamsChangedForwarder.notifySubtitleChanged(
                     mPictureInPictureParams.getSubtitle());
+            logRemoteActions(mPictureInPictureParams);
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
@@ -1106,6 +1114,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
         applyNewPictureInPictureParams(newParams);
         mPictureInPictureParams = newParams;
+        logRemoteActions(mPictureInPictureParams);
     }
 
     @Override
@@ -1412,6 +1421,16 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mPipParamsChangedForwarder.notifyActionsChanged(params.getActions(),
                     params.getCloseAction());
         }
+    }
+
+    private void logRemoteActions(@NonNull PictureInPictureParams params) {
+        StringJoiner sj = new StringJoiner("|", "[", "]");
+        if (params.hasSetActions()) {
+            params.getActions().forEach((action) -> sj.add(action.getTitle()));
+        }
+
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: PIP remote actions=%s", TAG, sj.toString());
     }
 
     /**
@@ -1979,12 +1998,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             }
             clearContentOverlay();
         }
-        if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
-            // Avoid double removal, which is fatal.
-            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: trying to remove overlay (%s) while in UNDEFINED state", TAG, surface);
-            return;
-        }
         if (surface == null || !surface.isValid()) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: trying to remove invalid content overlay (%s)", TAG, surface);
@@ -2020,7 +2033,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         tx.apply();
     }
 
-    private void cancelCurrentAnimator() {
+    /**
+     * Cancels the currently running animator if there is one and removes an overlay if present.
+     */
+    public void cancelCurrentAnimator() {
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
         // remove any overlays if present
@@ -2028,7 +2044,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             removeContentOverlay(mPipOverlay, null /* callback */);
         }
         if (animator != null) {
-            PipAnimationController.quietCancel(animator);
+            animator.cancel();
             mPipAnimationController.resetAnimatorState();
         }
     }

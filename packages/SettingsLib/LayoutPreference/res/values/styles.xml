@@ -22,6 +22,39 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
+    <style name="SettingsLibEntityHeader" parent="EntityHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderContent">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderIcon">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:antialias">true</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:textAppearance">@style/TextAppearance.EntityHeaderTitle</item>
+    </style>
+
     <style name="CrossProfileEntityHeaderIcon">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>

@@ -56,6 +56,7 @@ final class MediaRoute2ProviderWatcher {
     private final PackageManager mPackageManager;
 
     private final ArrayList<MediaRoute2ProviderServiceProxy> mProxies = new ArrayList<>();
+    private final Runnable mScanPackagesRunnable = this::scanPackages;
     private boolean mRunning;
 
     MediaRoute2ProviderWatcher(Context context,
@@ -106,7 +107,7 @@ final class MediaRoute2ProviderWatcher {
             mRunning = false;
 
             mContext.unregisterReceiver(mScanPackagesReceiver);
-            mHandler.removeCallbacks(this::scanPackages);
+            mHandler.removeCallbacks(mScanPackagesRunnable);
 
             // Stop all providers.
             for (int i = mProxies.size() - 1; i >= 0; i--) {
@@ -189,8 +190,8 @@ final class MediaRoute2ProviderWatcher {
     }
 
     private void postScanPackagesIfNeeded() {
-        if (!mHandler.hasCallbacks(this::scanPackages)) {
-            mHandler.post(this::scanPackages);
+        if (!mHandler.hasCallbacks(mScanPackagesRunnable)) {
+            mHandler.post(mScanPackagesRunnable);
         }
     }
 

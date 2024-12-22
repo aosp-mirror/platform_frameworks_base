@@ -103,13 +103,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> энэ дэлгэцийн агшныг илрүүлсэн."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> болон бусад нээлттэй апп энэ дэлгэцийн агшныг илрүүлсэн."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Тэмдэглэлд нэмэх"</string>
+    <string name="backlinks_include_link" msgid="4562093591148248158">"Холбоосыг оруулах"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Бусад профайлаас холбоос нэмэх боломжгүй"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Дэлгэцийн үйлдэл бичигч"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Дэлгэц бичлэг боловсруулж байна"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Дэлгэц бичих горимын үргэлжилж буй мэдэгдэл"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Бичиж эхлэх үү?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Таныг бичиж байх үед Android нь таны дэлгэцэд харуулсан эсвэл төхөөрөмжид тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио болон видео зэрэг зүйлд болгоомжтой хандаарай."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Таныг апп бичиж байх үед Android тухайн аппад харуулсан эсвэл тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
-    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Бичиж эхлэх"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Дэлгэцээ бичих үү?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Нэг аппыг бичих"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Бүтэн дэлгэцийг бичих"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Таныг бүтэн дэлгэцээ бичиж байхад дэлгэц дээр тань харуулж буй аливаа зүйлийг бичдэг. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Таныг апп бичиж байхад тухайн аппад харуулж эсвэл тоглуулж буй аливаа зүйлийг бичдэг. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Дэлгэцийг бичих"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Бичих апп сонгох"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио бичих"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Төхөөрөмжийн аудио"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Хөгжим, дуудлага болон хонхны ая зэрэг таны төхөөрөмжийн дуу"</string>
@@ -125,22 +131,25 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Харахын тулд товшино уу"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Дэлгэцийн бичлэгийг хадгалахад алдаа гарлаа"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Дэлгэцийн бичлэгийг эхлүүлэхэд алдаа гарлаа"</string>
-    <!-- no translation found for screenrecord_stop_dialog_title (2685522129492260887) -->
-    <skip />
-    <!-- no translation found for screenrecord_stop_dialog_message (1926783607059442889) -->
-    <skip />
-    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5285148796772616326">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г бичихээ болино"</string>
+    <string name="screenrecord_stop_dialog_title" msgid="8716193661764511095">"Бичлэгийг зогсоох уу?"</string>
+    <string name="screenrecord_stop_dialog_message" msgid="6262768207331626817">"Та одоогоор дэлгэцээ бүтнээр нь бичиж байна"</string>
+    <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Та одоогоор <xliff:g id="APP_NAME">%1$s</xliff:g>-г бичиж байна"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Бичихийг зогсоох"</string>
+    <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Дэлгэцийг хуваалцаж байна"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Дэлгэц хуваалцахыг зогсоох уу?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message (3181723638915877339) -->
-    <skip />
-    <string name="share_to_app_stop_dialog_message_specific_app" msgid="124371406810544777">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г хуваалцахаа болино"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Та одоогоор дэлгэцээ бүтнээр нь <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>-тай хуваалцаж байна"</string>
+    <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Та одоогоор дэлгэцээ бүтнээр нь нэг апптай хуваалцаж байна"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Та одоогоор <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>-г хуваалцаж байна"</string>
+    <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Та одоогоор нэг аппыг хуваалцаж байна"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Хуваалцахыг зогсоох"</string>
-    <!-- no translation found for cast_to_other_device_stop_dialog_title (1910372600290258193) -->
-    <skip />
-    <!-- no translation found for cast_to_other_device_stop_dialog_message (1502520537030715412) -->
-    <skip />
-    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="4891536209254041850">"Та &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-г дамжуулахаа болино"</string>
+    <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Дэлгэцийг дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Дамжуулахaa болих уу?"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen_with_device" msgid="1474703115926205251">"Та одоогоор дэлгэцээ бүтнээр нь <xliff:g id="DEVICE_NAME">%1$s</xliff:g> руу дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_message_entire_screen" msgid="8419219169553867625">"Та одоогоор дэлгэцээ бүтнээр нь ойролцоох төхөөрөмж рүү дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app_with_device" msgid="2715934698604085519">"Та одоогоор <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>-г <xliff:g id="DEVICE_NAME">%2$s</xliff:g> руу дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_message_specific_app" msgid="8616103075630934513">"Та одоогоор <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>-г ойролцоох төхөөрөмж рүү дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic_with_device" msgid="9213582497852420203">"Та одоогоор <xliff:g id="DEVICE_NAME">%1$s</xliff:g> руу дамжуулж байна"</string>
+    <string name="cast_to_other_device_stop_dialog_message_generic" msgid="4100272100480415076">"Та одоогоор ойролцоох төхөөрөмж рүү дамжуулж байна"</string>
     <string name="cast_to_other_device_stop_dialog_button" msgid="6420183747435521834">"Дамжуулахыг зогсоох"</string>
     <string name="close_dialog_button" msgid="4749497706540104133">"Хаах"</string>
     <string name="issuerecord_title" msgid="286627115110121849">"Асуудал бичигч"</string>
@@ -172,8 +181,6 @@
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Илгээх"</string>
     <string name="cancel" msgid="1089011503403416730">"Цуцлах"</string>
     <string name="biometric_dialog_logo" msgid="7681107853070774595">"Аппын лого"</string>
-  <string-array name="biometric_dialog_package_names_for_logo_with_overrides">
-  </string-array>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Баталгаажуулах"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Дахин оролдох"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Нотолгоог цуцлахын тулд товшино уу"</string>
@@ -286,6 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Дэлгэц амраагч"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Этернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Бүү саад бол"</string>
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Горим"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Хослуулсан төхөөрөмж байхгүй"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Төхөөрөмжийг холбох эсвэл салгахын тулд товшино уу"</string>
@@ -294,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth-г ашиглах"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Холбогдсон"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Аудио хуваалцах"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Аудиог сэлгэх эсвэл хуваалцахын тулд товшино уу"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Хадгалсан"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"салгах"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"идэвхжүүлэх"</string>
@@ -302,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth-г маргааш өглөө асаана"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Аудио хуваалцах"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Аудио хуваалцаж байна"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"аудио хуваалцах тохиргоог оруулах"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> батарей"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Чихэвч"</string>
@@ -383,6 +393,9 @@
     <string name="performance" msgid="6552785217174378320">"Гүйцэтгэл"</string>
     <string name="user_interface" msgid="3712869377953950887">"Хэрэглэгчийн интерфейс"</string>
     <string name="thermal" msgid="6758074791325414831">"Дулааны"</string>
+    <string name="custom" msgid="3337456985275158299">"Захиалгат"</string>
+    <string name="custom_trace_settings_dialog_title" msgid="2608570500144830554">"Захиалгат ул мөрийн тохиргоо"</string>
+    <string name="restore_default" msgid="5259420807486239755">"Өгөгдмөлийг сэргээх"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Нэг гарын горим"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Сонсголын төхөөрөмжүүд"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Идэвхтэй"</string>
@@ -392,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Шинэ төхөөрөмж хослуулахын тулд товшино уу"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Урьдчилсан тохируулгыг шинэчилж чадсангүй"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Урьдчилсан тохируулга"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"Шууд тайлбар"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Шууд тайлбар"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Төхөөрөмжийн микрофоныг блокоос гаргах уу?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Төхөөрөмжийн камерыг блокоос гаргах уу?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Төхөөрөмжийн камер болон микрофоныг блокоос гаргах уу?"</string>
@@ -421,6 +434,15 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Тохиргоог нээх"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Бусад төхөөрөмж"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Тоймыг асаах/унтраах"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Горим"</string>
+    <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Болсон"</string>
+    <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Тохиргоо"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"Асаалттай"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Асаасан • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
+    <string name="zen_mode_off" msgid="1736604456618147306">"Унтраалттай"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Тохируулах"</string>
+    <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Тохиргоонд удирдах"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ямар ч идэвхтэй горим байхгүй}=1{{mode} идэвхтэй байна}other{# горим идэвхтэй байна}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Танд сэрүүлэг, сануулга, арга хэмжээ, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Танд сэрүүлгээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Тохируулах"</string>
@@ -459,6 +481,7 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Удаан цэнэглэж байна • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-н дараа дүүрнэ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Цэнэглэж байна • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-н дараа дүүрнэ"</string>
     <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Түгжээтэй дэлгэц дээрх виджетүүд"</string>
+    <string name="accessibility_announcement_communal_widget_added" msgid="6911593106099328271">"<xliff:g id="WIDGET_NAME">%1$s</xliff:g> виджетийг түгжээтэй дэлгэцэд нэмсэн"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Нийтийн практик хичээлийг эхлүүлэхийн тулд зүүн тийш шударна уу"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Өөрчлөх"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Хаах"</string>
@@ -466,6 +489,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Илүү олон виджет нэмэх"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Виджетүүдийг өөрчлөхийн тулд удаан дарна уу"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Виджетүүдийг өөрчлөх"</string>
+    <string name="unlock_reason_to_customize_widgets" msgid="5011909432460546033">"Виджетийг өөрчлөхийн тулд түгжээг тайлна уу"</string>
     <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Идэвхгүй болгосон виджетийн аппын дүрс тэмдэг"</string>
     <string name="icon_description_for_pending_widget" msgid="8413816401868001755">"Виджет суулгах явцын аппын дүрс тэмдэг"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Виджетийг засах"</string>
@@ -484,6 +508,12 @@
     <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"виджет сонгох"</string>
     <string name="accessibility_action_label_remove_widget" msgid="3373779447448758070">"виджетийг хасах"</string>
     <string name="accessibility_action_label_place_widget" msgid="1914197458644168978">"сонгосон виджетийг байрлуулах"</string>
+    <string name="communal_widget_picker_title" msgid="1953369090475731663">"Түгжээтэй дэлгэцийн виджет"</string>
+    <string name="communal_widget_picker_description" msgid="490515450110487871">"Таны таблет түгжээтэй байсан ч түгжээтэй дэлгэцийн виджетийг тань дурын хүн үзнэ"</string>
+    <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"виджетийн сонголтыг болиулах"</string>
+    <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Түгжээтэй дэлгэцийн виджет"</string>
+    <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Виджет ашиглан аппыг нээхийн тулд та өөрийгөө мөн болохыг баталгаажуулах шаардлагатай болно. Мөн таны таблет түгжээтэй байсан ч тэдгээрийг дурын хүн үзэж болохыг санаарай. Зарим виджет таны түгжээтэй дэлгэцэд зориулагдаагүй байж магадгүй ба энд нэмэхэд аюултай байж болзошгүй."</string>
+    <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ойлголоо"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Хэрэглэгчийг сэлгэх"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"эвхмэл цэс"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Энэ харилцан үйлдлийн бүх апп болон дата устах болно."</string>
@@ -503,22 +533,31 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь бичлэг хийх эсвэл дамжуулах үед таны дэлгэцэд харуулсан эсвэл таны төхөөрөмжөөс тоглуулсан бүх мэдээлэлд хандах эрхтэй байна. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, зураг, мессеж болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Бичлэг хийж эсвэл дамжуулж эхлэх үү?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Энэ функцийг олгож буй үйлчилгээ нь бичлэг хийж эсвэл дамжуулж байх үед таны дэлгэцэд харуулсан эсвэл төхөөрөмжөөс тань тоглуулсан бүх мэдээлэлд хандах эрхтэй. Үүнд нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг болон таны тоглуулдаг аудио зэрэг мэдээлэл багтана."</string>
-    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Бүтэн дэлгэц"</string>
-    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Нэг апп"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Апп хуваалцах эсвэл бичих"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-р бичлэг хийж эсвэл дамжуулж эхлэх үү?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Таныг хуваалцаж, бичиж эсвэл дамжуулж байх үед <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь таны дэлгэцэд харагдаж буй зүйл эсвэл төхөөрөмжид тань тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн мэдээлэл, мессеж, зураг, аудио болон видео зэрэг зүйлд болгоомжтой хандаарай."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Таныг хуваалцаж, бичлэг хийж эсвэл апп дамжуулж байх үед <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> нь тухайн аппад харуулсан эсвэл тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио болон видео зэрэг бусад зүйлд болгоомжтой хандаарай."</string>
-    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Эхлүүлэх"</string>
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Апп хуваалцах эсвэл бичих"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Дэлгэцээ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-тай хуваалцах уу?"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Нэг апп хуваалцах"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Дэлгэцийг бүтнээр нь хуваалцах"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Таныг дэлгэцээ бүхэлд нь хуваалцаж байхад дэлгэц дээр тань байгаа аливаа зүйл <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-д харагдана. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Таныг апп хуваалцаж байхад тухайн аппад харуулж эсвэл тоглуулж буй аливаа зүйл <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-д харагдана. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Дэлгэцийг хуваалцах"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> энэ сонголтыг идэвхгүй болгосон"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Дамжуулж эхлэх үү?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Таныг дамжуулж байх үед Android таны дэлгэцэд харагдаж буй эсвэл төхөөрөмжид тань тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн мэдээлэл, мессеж, зураг, аудио болон видео зэрэг зүйлд болгоомжтой хандаарай."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Таныг апп дамжуулж байх үед Android тухайн аппад харуулсан эсвэл тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн мэдээлэл, мессеж, зураг, аудио болон видео зэрэг зүйлд болгоомжтой хандаарай."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Дамжуулж эхлэх"</string>
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Хуваалцах апп сонгох"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Дэлгэцээ дамжуулах уу?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Нэг апп дамжуулах"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Дэлгэцийг бүхэлд нь дамжуулах"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Та дэлгэцээ бүхэлд нь дамжуулах үед дэлгэц дээр тань байгаа аливаа зүйл харагдана. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Та апп дамжуулах үед тухайн аппад харуулж эсвэл тоглуулж буй аливаа зүйл харагдана. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио, видео зэрэг зүйлд болгоомжтой хандаарай."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Дэлгэц дамжуулах"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Дамжуулах апп сонгох"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Хуваалцаж эхлэх үү?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Таныг хуваалцаж, бичлэг хийж эсвэл дамжуулж байх үед Android таны дэлгэцэд харуулсан эсвэл төхөөрөмжид тань тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио болон видео зэрэг зүйлд болгоомжтой хандаарай."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Таныг хуваалцаж, бичлэг хийж эсвэл дамжуулж байх үед Android тухайн аппад харуулсан эсвэл тоглуулсан аливаа зүйлд хандах эрхтэй. Тиймээс нууц үг, төлбөрийн дэлгэрэнгүй, мессеж, зураг, аудио болон видео зэрэг бусад зүйлд болгоомжтой хандаарай."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Эхлүүлэх"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue_single_app" msgid="5920814988611877051">"Дараах"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Таныг аппууд сэлгэх үед хуваалцахыг түр зогсооно"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Оронд нь энэ аппыг хуваалцах"</string>
     <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Буцаж сэлгэх"</string>
@@ -537,6 +576,9 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Одоо эхлүүлэх"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Мэдэгдэл байхгүй"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Шинэ мэдэгдэл алга"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Мэдэгдлийн хөргөлт асаалттай байна"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Таныг хэт олон мэдэгдэл нэг дор авахад таны төхөөрөмжийн дууны түвшин болон дохиог 2 хүртэлх минутын турш автоматаар багасгадаг."</string>
+    <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Унтраах"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Хуучин мэдэгдлийг харах бол түгжээг тайл"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Энэ төхөөрөмжийг таны эцэг эх удирддаг"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Танай байгууллага энэ төхөөрөмжийг эзэмшдэг бөгөөд сүлжээний ачааллыг хянаж болно"</string>
@@ -683,6 +725,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Хиймэл дагуул, холболт сайн байна"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Хиймэл дагуул, холболт боломжтой"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Хиймэл дагуул SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Яаралтай дуудлага эсвэл SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ажлын профайл"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Системийн UI Tохируулагч нь Android хэрэглэгчийн интерфэйсийг тааруулах, өөрчлөх нэмэлт аргыг зааж өгөх болно. Эдгээр туршилтын тохиргоо нь цаашид өөрчлөгдөх, эвдрэх, алга болох магадлалтай. Үйлдлийг болгоомжтой хийнэ үү."</string>
@@ -702,7 +745,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Өгөгдмөл"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Автомат"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дуу эсвэл чичиргээ байхгүй"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дуу эсвэл чичиргээ байхгүй бөгөөд харилцан ярианы хэсгийн доод талд харагдана"</string>
+    <string name="notification_conversation_summary_low" msgid="3855696451919728790">"Дуу чимээ эсвэл чичиргээгүй хэдий ч харилцан ярианы хэсэгт харагдсаар байна"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"Төхөөрөмжийн тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичиргэж болзошгүй"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"Төхөөрөмжийн тохиргоонд тулгуурлан хонх дуугаргах эсвэл чичиргэж болзошгүй. <xliff:g id="APP_NAME">%1$s</xliff:g>-н харилцан яриаг өгөгдмөлөөр бөмбөлөг болгоно."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Энэ мэдэгдэл дуу гаргах эсвэл чичрэх эсэхийг системээр тодорхойлуулаарай"</string>
@@ -759,6 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Хуудас дээш"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Хуудас доош"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Устгах"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Нүүр хуудас"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Төгсгөл"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Оруулах"</string>
@@ -1135,6 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Чанга яригч ба дэлгэц"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Санал болгосон төхөөрөмжүүд"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Оролт"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Гаралт"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Өөр төхөөрөмж рүү медиа зөөхийн тулд хуваалцсан харилцан үйлдлээ зогсооно уу"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Зогсоох"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Нэвтрүүлэлт хэрхэн ажилладаг вэ?"</string>
@@ -1200,7 +1246,6 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Баталгаажуулалт шаардлагатай. Баталгаажуулахын тулд хурууны хээ мэдрэгчид хүрнэ үү."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Үргэлжилж буй утасны дуудлага"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобайл дата"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Холбогдсон"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Түр зуур холбогдсон"</string>
     <string name="mobile_data_poor_connection" msgid="819617772268371434">"Холболт сул байна"</string>
@@ -1246,6 +1291,7 @@
     <string name="add" msgid="81036585205287996">"Нэмэх"</string>
     <string name="manage_users" msgid="1823875311934643849">"Хэрэглэгчдийг удирдах"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Энэ мэдэгдэл нь дэлгэцийг хуваах горим руу чирэхийг дэмждэггүй"</string>
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"Байршил идэвхтэй"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi боломжгүй"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Чухал горим"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Сэрүүлгийг тохируулсан"</string>
@@ -1302,6 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Түгжээтэй дэлгэцийг өөрчлөх"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Түгжээтэй дэлгэцийг өөрчлөхийн тулд түгжээг тайлна уу"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi боломжгүй байна"</string>
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"Байршил идэвхтэй"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камерыг блоклосон"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камер болон микрофоныг блоклосон"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофоныг блоклосон"</string>
@@ -1334,21 +1381,76 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ашиглаж байна"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Саяхан <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ашигласан"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Систем"</string>
+    <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Системийн тохиргоо"</string>
+    <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системийн аппууд"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Олон ажил зэрэг хийх"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Саяхны аппууд"</string>
+    <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Дэлгэцийг хуваах"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Оролт"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Аппын товчлол"</string>
+    <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Одоогийн апп"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Хандалт"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Товчлуурын шууд холбоос"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Товчлолууд хайх"</string>
+    <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ямар ч хайлтын илэрц байхгүй"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Хураах дүрс тэмдэг"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Дэлгэх дүрс тэмдэг"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"эсвэл"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Чирэх бариул"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Гараа ашиглан шилжих"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Товчлуурын шууд холбоосыг мэдэж аваарай"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Мэдрэгч самбараа ашиглан шилжээрэй"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Мэдрэгч самбарын зангааг мэдэж аваарай"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Гар эсвэл мэдрэгч самбараа ашиглан шилжээрэй"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Мэдрэгч самбарын зангаа, товчлуурын шууд холбоос болон бусад зүйлийг мэдэж аваарай"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Буцах зангаа"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Үндсэн нүүрний зангаа"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Тусгай товчлуур"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Саяхны аппуудыг харах"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Болсон"</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Буцах"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Буцахын тулд мэдрэгч самбар дээр гурван хуруугаар хүссэн газраа зүүн эсвэл баруун тийш шударна уу.\n\nТа мөн үүнийг хийхэд Action + ESC товчлуурын шууд холбоосыг ашиглах боломжтой."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Үнэхээр сайн ажиллалаа!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Та буцах зангааг гүйцэтгэлээ."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Үндсэн нүүр лүү очих"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Үндсэн нүүр лүүгээ хүссэн үедээ очихын тулд дэлгэцийнхээ доод талаас гурван хуруугаараа дээш шударна уу."</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Янзтай!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Та үндсэн нүүр лүү очих зангааг гүйцэтгэлээ."</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Саяхны аппуудыг харах"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Мэдрэгч самбар дээрээ гурван хуруугаа ашиглан дээш шудраад, удаан дарна уу."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Сайн байна!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Та саяхны аппуудыг харах зангааг гүйцэтгэсэн."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Тусгай товчлуур"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Аппууддаа хандахын тулд гар дээр тань байх тусгай товчлуурыг дарна уу."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Баяр хүргэе!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Та тусгай товчлуурын зангааг гүйцэтгэлээ.\n\nТусгай товчлуур болох + / нь танд боломжтой бүх товчлолыг харуулна."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Гарын арын гэрэл"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-с %1$d-р түвшин"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Гэрийн удирдлага"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Гэрийн удирдлагадаа дэлгэц амраагчаар шуурхай ханд"</string>
+    <string name="volume_undo_action" msgid="5815519725211877114">"Болих"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Буцахын тулд мэдрэгч самбар дээр гурван хуруугаараа зүүн эсвэл баруун тийш шударна уу"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Нүүр хуудас руу очихын тулд мэдрэгч самбар дээр гурван хуруугаараа дээш шударна уу"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Саяхны аппуудыг харахын тулд мэдрэгч самбар дээр гурван хуруугаараа дээш шудраад, удаан дарна уу"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Бүх аппаа харахын тулд гар дээр тань байх тусгай товчлуурыг дарна уу"</string>
+    <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Хассан"</string>
+    <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Харахын тулд түгжээг тайлна уу"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"Буцахын тулд мэдрэгч самбараа ашиглах"</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Гурван хуруугаараа зүүн эсвэл баруун тийш шударна уу. Илүү олон зангаа сурахын тулд товшино уу."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Нүүр хуудас руу очихын тулд мэдрэгч самбараа ашиглах"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Гурван хуруугаа ашиглан дээш шударна уу. Илүү олон зангаа сурахын тулд товшино уу."</string>
+    <string name="overview_edu_notification_title" msgid="1265824157319562406">"Саяхны аппуудыг харахын тулд мэдрэгч самбараа ашиглах"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Гурван хуруугаа ашиглан дээш шудраад, удаан дарна уу. Илүү олон зангаа сурахын тулд товшино уу."</string>
+    <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Бүх аппыг харахын тулд гараа ашиглах"</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Тусгай товчлуурыг хүссэн үедээ дарна уу. Илүү олон зангаа сурахын тулд товшино уу."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Хэт бүүдгэр онцлог одоо гэрэлтүүлгийн гулсуулагчийн нэг хэсэг боллоо"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Та одоо гэрэлтүүлгийн түвшнийг бүр илүү багасгаснаар дэлгэцийг хэт бүүдгэр болгох боломжтой.\n\nЭнэ онцлог нь одоо гэрэлтүүлгийн гулсуулагчийн нэг хэсэг болсон тул Хэт бүүдгэр онцлогийн тохиргоог хасаж байна."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Хэт бүүдгэр онцлогийн товчлолыг хасах"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Хэт бүүдгэр онцлогийн товчлолыг хассан"</string>
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Холболт"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Хандалт"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Хэрэгсэл"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Нууцлал"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Аппуудаас өгсөн"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Дэлгэц"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Тодорхойгүй"</string>
 </resources>

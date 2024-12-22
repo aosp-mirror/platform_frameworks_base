@@ -762,6 +762,27 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public static final int FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY = 0x00010000;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set by the system if this notification is silent.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
+    public static final int FLAG_SILENT = 1 << 17;  //0x00020000
+
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set by the system if this notification is a promoted ongoing notification, either via a
+     * user setting or allowlist.
+     *
+     * Applications cannot set this flag directly, but the posting app and
+     * {@link android.service.notification.NotificationListenerService} can read it.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final int FLAG_PROMOTED_ONGOING = 0x00040000;
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -784,7 +805,8 @@ public class Notification implements Parcelable
             FLAG_BUBBLE,
             FLAG_NO_DISMISS,
             FLAG_FSI_REQUESTED_BUT_DENIED,
-            FLAG_USER_INITIATED_JOB
+            FLAG_USER_INITIATED_JOB,
+            FLAG_SILENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFlags{};
@@ -1270,6 +1292,15 @@ public class Notification implements Parcelable
     public static final String EXTRA_BIG_TEXT = "android.bigText";
 
     /**
+     * {@link #extras} key: very short text summarizing the most critical information contained in
+     * the notification.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_SHORT_CRITICAL_TEXT = "android.shortCriticalText";
+
+    /**
      * {@link #extras} key: this is the resource ID of the notification's main small icon, as
      * supplied to {@link Builder#setSmallIcon(int)}.
      *
@@ -1567,6 +1598,22 @@ public class Notification implements Parcelable
     public static final String EXTRA_DECLINE_COLOR = "android.declineColor";
 
     /**
+     * {@link #extras} key: {@link Icon} of an image used as an overlay Icon on
+     * {@link Notification#mLargeIcon} for {@link EnRouteStyle} notifications.
+     * This extra is an {@code Icon}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_ENROUTE_OVERLAY_ICON = "android.enrouteOverlayIcon";
+
+    /**
+     * {@link #extras} key: text used as a sub-text for the largeIcon of
+     * {@link EnRouteStyle} notification. This extra is a {@code CharSequence}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final String EXTRA_ENROUTE_LARGE_ICON_SUBTEXT = "android.enrouteLargeIconSubText";
+    /**
      * {@link #extras} key: whether the notification should be colorized as
      * supplied to {@link Builder#setColorized(boolean)}.
      */
@@ -1692,6 +1739,7 @@ public class Notification implements Parcelable
      *
      * @hide
      */
+    @Deprecated
     public static final String GROUP_KEY_SILENT = "silent";
 
     private int mGroupAlertBehavior = GROUP_ALERT_ALL;
@@ -2678,14 +2726,9 @@ public class Notification implements Parcelable
         if (mAllowlistToken == null) {
             mAllowlistToken = processAllowlistToken;
         }
-        if (Flags.secureAllowlistToken()) {
-            // Propagate this token to all pending intents that are unmarshalled from the parcel,
-            // or keep the one we're already propagating, if that's the case.
-            if (!parcel.hasClassCookie(PendingIntent.class)) {
-                parcel.setClassCookie(PendingIntent.class, mAllowlistToken);
-            }
-        } else {
-            // Propagate this token to all pending intents that are unmarshalled from the parcel.
+        // Propagate this token to all pending intents that are unmarshalled from the parcel,
+        // or keep the one we're already propagating, if that's the case.
+        if (!parcel.hasClassCookie(PendingIntent.class)) {
             parcel.setClassCookie(PendingIntent.class, mAllowlistToken);
         }
 
@@ -3027,6 +3070,10 @@ public class Notification implements Parcelable
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
         }
 
+        if (Flags.apiRichOngoing()) {
+            visitIconUri(visitor, extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class));
+        }
+
         if (mBubbleMetadata != null) {
             visitIconUri(visitor, mBubbleMetadata.getIcon());
         }
@@ -3071,6 +3118,53 @@ public class Notification implements Parcelable
         } finally {
             Trace.endSection();
         }
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean containsCustomViews() {
+        return contentView != null
+                || bigContentView != null
+                || headsUpContentView != null
+                || (publicVersion != null
+                && (publicVersion.contentView != null
+                || publicVersion.bigContentView != null
+                || publicVersion.headsUpContentView != null));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasTitle() {
+        return extras != null
+                && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
+                || !TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE_BIG)));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableStyle() {
+        //TODO(b/367739672): Add progress style
+        return extras == null || !extras.containsKey(Notification.EXTRA_TEMPLATE)
+                || isStyle(Notification.BigPictureStyle.class)
+                || isStyle(Notification.BigTextStyle.class)
+                || isStyle(Notification.CallStyle.class);
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableCharacteristics() {
+        return isColorized()
+                && hasTitle()
+                && !containsCustomViews()
+                && hasPromotableStyle();
     }
 
     /**
@@ -3301,28 +3395,22 @@ public class Notification implements Parcelable
             PendingIntent.addOnMarshaledListener(addedListener);
         }
         try {
-            if (Flags.secureAllowlistToken()) {
-                boolean mustClearCookie = false;
-                if (!parcel.hasClassCookie(Notification.class)) {
-                    // This is the "root" notification, and not an "inner" notification (including
-                    // publicVersion or anything else that might be embedded in extras). So we want
-                    // to use its token for every inner notification (might be null).
-                    parcel.setClassCookie(Notification.class, mAllowlistToken);
-                    mustClearCookie = true;
-                }
-                try {
-                    // IMPORTANT: Add marshaling code in writeToParcelImpl as we
-                    // want to intercept all pending events written to the parcel.
-                    writeToParcelImpl(parcel, flags);
-                } finally {
-                    if (mustClearCookie) {
-                        parcel.removeClassCookie(Notification.class, mAllowlistToken);
-                    }
-                }
-            } else {
+            boolean mustClearCookie = false;
+            if (!parcel.hasClassCookie(Notification.class)) {
+                // This is the "root" notification, and not an "inner" notification (including
+                // publicVersion or anything else that might be embedded in extras). So we want
+                // to use its token for every inner notification (might be null).
+                parcel.setClassCookie(Notification.class, mAllowlistToken);
+                mustClearCookie = true;
+            }
+            try {
                 // IMPORTANT: Add marshaling code in writeToParcelImpl as we
                 // want to intercept all pending events written to the parcel.
                 writeToParcelImpl(parcel, flags);
+            } finally {
+                if (mustClearCookie) {
+                    parcel.removeClassCookie(Notification.class, mAllowlistToken);
+                }
             }
 
             synchronized (this) {
@@ -3339,13 +3427,9 @@ public class Notification implements Parcelable
     private void writeToParcelImpl(Parcel parcel, int flags) {
         parcel.writeInt(1);
 
-        if (Flags.secureAllowlistToken()) {
-            // Always use the same token as the root notification (might be null).
-            IBinder rootNotificationToken = (IBinder) parcel.getClassCookie(Notification.class);
-            parcel.writeStrongBinder(rootNotificationToken);
-        } else {
-            parcel.writeStrongBinder(mAllowlistToken);
-        }
+        // Always use the same token as the root notification (might be null).
+        IBinder rootNotificationToken = (IBinder) parcel.getClassCookie(Notification.class);
+        parcel.writeStrongBinder(rootNotificationToken);
 
         parcel.writeLong(when);
         parcel.writeLong(creationTime);
@@ -3984,6 +4068,13 @@ public class Notification implements Parcelable
             }
         }
 
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if ((flags & FLAG_SILENT) != 0) {
+                flagStrings.add("SILENT");
+                flags &= ~FLAG_SILENT;
+            }
+        }
+
         if (flagStrings.isEmpty()) {
             return "0";
         }
@@ -4024,6 +4115,17 @@ public class Notification implements Parcelable
         }
 
         return String.join("|", defaultStrings);
+    }
+
+
+    /**
+     * Returns the very short text summarizing the most critical information contained in the
+     * notification, or null if this field was not set.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public String getShortCriticalText() {
+        return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
     }
 
     /**
@@ -4120,6 +4222,17 @@ public class Notification implements Parcelable
      */
     public @GroupAlertBehavior int getGroupAlertBehavior() {
         return mGroupAlertBehavior;
+    }
+
+    /**
+     * Sets which type of notifications in a group are responsible for audibly alerting the
+     * user. See {@link #GROUP_ALERT_ALL}, {@link #GROUP_ALERT_CHILDREN},
+     * {@link #GROUP_ALERT_SUMMARY}.
+     * @param groupAlertBehavior
+     * @hide
+     */
+    public void setGroupAlertBehavior(@GroupAlertBehavior int groupAlertBehavior) {
+        mGroupAlertBehavior = groupAlertBehavior;
     }
 
     /**
@@ -4306,6 +4419,31 @@ public class Notification implements Parcelable
             }
         }
         return contextualActions;
+    }
+
+    /**
+     * Sets the FLAG_SILENT flag to mark the notification as silent and clears the group key.
+     * @hide
+     */
+    public void fixSilentGroup() {
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (GROUP_KEY_SILENT.equals(mGroupKey)) {
+                mGroupKey = null;
+                flags |= FLAG_SILENT;
+            }
+        }
+    }
+
+    /**
+     * @return whether this notification is silent. See {@link Builder#setSilent()}
+     * @hide
+     */
+    public boolean isSilent() {
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            return (flags & Notification.FLAG_SILENT) != 0;
+        } else {
+            return GROUP_KEY_SILENT.equals(getGroup()) && suppressAlertingDueToGrouping();
+        }
     }
 
     /**
@@ -4759,8 +4897,12 @@ public class Notification implements Parcelable
             mN.defaults &= ~DEFAULT_VIBRATE;
             setDefaults(mN.defaults);
 
-            if (TextUtils.isEmpty(mN.mGroupKey)) {
-                setGroup(GROUP_KEY_SILENT);
+            if (android.service.notification.Flags.notificationSilentFlag()) {
+                mN.flags |= FLAG_SILENT;
+            } else {
+                if (TextUtils.isEmpty(mN.mGroupKey)) {
+                    setGroup(GROUP_KEY_SILENT);
+                }
             }
             return this;
         }
@@ -4927,6 +5069,18 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Sets a very short string summarizing the most critical information contained in the
+         * notification. Suggested max length is 5 characters, and there is no guarantee how much or
+         * how little of this text will be shown.
+         */
+        @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+        @NonNull
+        public Builder setShortCriticalText(@Nullable String shortCriticalText) {
+            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, shortCriticalText);
+            return this;
+        }
+
+        /**
          * Set the progress this notification represents.
          *
          * The platform template will represent this using a {@link ProgressBar}.
@@ -5058,6 +5212,7 @@ public class Notification implements Parcelable
          * @see Notification#fullScreenIntent
          */
         @NonNull
+        @RequiresPermission(android.Manifest.permission.USE_FULL_SCREEN_INTENT)
         public Builder setFullScreenIntent(PendingIntent intent, boolean highPriority) {
             mN.fullScreenIntent = intent;
             setFlag(FLAG_HIGH_PRIORITY, highPriority);
@@ -6050,6 +6205,7 @@ public class Notification implements Parcelable
             bindProfileBadge(contentView, p);
             bindAlertedIcon(contentView, p);
             bindExpandButton(contentView, p);
+            bindCloseButton(contentView, p);
             mN.mUsesStandardHeader = true;
         }
 
@@ -6069,6 +6225,15 @@ public class Notification implements Parcelable
             }
             contentView.setInt(R.id.expand_button, "setHighlightTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setHighlightPillColor", pillColor);
+        }
+
+        private void bindCloseButton(RemoteViews contentView, StandardTemplateParams p) {
+            // set default colors
+            int bgColor = getBackgroundColor(p);
+            int backgroundColor = Colors.flattenAlpha(getColors(p).getProtectionColor(), bgColor);
+            int foregroundColor = Colors.flattenAlpha(getPrimaryTextColor(p), backgroundColor);
+            contentView.setInt(R.id.close_button, "setForegroundColor", foregroundColor);
+            contentView.setInt(R.id.close_button, "setBackgroundColor", backgroundColor);
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView,
@@ -6222,6 +6387,7 @@ public class Notification implements Parcelable
                 if (appIconRes != 0) {
                     mN.mAppIcon = Icon.createWithResource(mContext, appIconRes);
                     contentView.setImageViewIcon(R.id.icon, mN.mAppIcon);
+                    contentView.setBoolean(R.id.icon, "setShouldShowAppIcon", true);
                     usingAppIcon = true;
                 } else {
                     Log.w(TAG, "bindSmallIcon: could not get the app icon");
@@ -7528,7 +7694,6 @@ public class Notification implements Parcelable
 
         if (mLargeIcon != null || largeIcon != null) {
             Resources resources = context.getResources();
-            Class<? extends Style> style = getNotificationStyle();
             int maxSize = resources.getDimensionPixelSize(isLowRam
                     ? R.dimen.notification_right_icon_size_low_ram
                     : R.dimen.notification_right_icon_size);
@@ -10904,6 +11069,144 @@ public class Notification implements Parcelable
             return !Objects.equals(mCallType, otherS.mCallType)
                     || !Objects.equals(mPerson, otherS.mPerson)
                     || !Objects.equals(mVerificationText, otherS.mVerificationText);
+        }
+    }
+
+    /**
+     * TODO(b/360827871): Make EnRouteStyle public.
+     * A style used to represent the progress of a real-world journey with a known destination.
+     * For example:
+     * <ul>
+     *     <li>Delivery tracking</li>
+     *     <li>Ride progress</li>
+     *     <li>Flight tracking</li>
+     * </ul>
+     *
+     * The exact fields from {@link Notification} that are shown with this style may vary by
+     * the surface where this update appears, but the following fields are recommended:
+     * <ul>
+     *     <li>{@link Notification.Builder#setContentTitle}</li>
+     *     <li>{@link Notification.Builder#setContentText}</li>
+     *     <li>{@link Notification.Builder#setSubText}</li>
+     *     <li>{@link Notification.Builder#setLargeIcon}</li>
+     *     <li>{@link Notification.Builder#setProgress}</li>
+     *     <li>{@link Notification.Builder#setWhen} - This should be the future time of the next,
+     *     final, or most important stop on this journey.</li>
+     * </ul>
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static class EnRouteStyle extends Notification.Style {
+
+        @Nullable
+        private Icon mOverlayIcon = null;
+
+        @Nullable
+        private CharSequence mLargeIconSubText = null;
+
+        public EnRouteStyle() {
+        }
+
+        /**
+         * Returns the overlay icon to be displayed on {@link Notification#mLargeIcon}.
+         * @see EnRouteStyle#setOverlayIcon
+         */
+        @Nullable
+        public Icon getOverlayIcon() {
+            return mOverlayIcon;
+        }
+
+        /**
+         * Optional icon to be displayed on {@link Notification#mLargeIcon}.
+         *
+         * This image will be cropped to a circle and will obscure
+         * a semicircle of the right side of the large icon.
+         */
+        @NonNull
+        public EnRouteStyle setOverlayIcon(@Nullable Icon overlayIcon) {
+            mOverlayIcon = overlayIcon;
+            return this;
+        }
+
+        /**
+         * Returns the sub-text for {@link Notification#mLargeIcon}.
+         * @see EnRouteStyle#setLargeIconSubText
+         */
+        @Nullable
+        public CharSequence getLargeIconSubText() {
+            return mLargeIconSubText;
+        }
+
+        /**
+         * Optional text which generally related to
+         * the {@link Notification.Builder#setLargeIcon} or {@link #setOverlayIcon} or both.
+         */
+        @NonNull
+        public EnRouteStyle setLargeIconSubText(@Nullable CharSequence largeIconSubText) {
+            mLargeIconSubText = stripStyling(largeIconSubText);
+            return this;
+        }
+
+         /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+
+            final EnRouteStyle enRouteStyle = (EnRouteStyle) other;
+            return !Objects.equals(mOverlayIcon, enRouteStyle.mOverlayIcon)
+                    || !Objects.equals(mLargeIconSubText, enRouteStyle.mLargeIconSubText);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void addExtras(Bundle extras) {
+            super.addExtras(extras);
+            extras.putParcelable(EXTRA_ENROUTE_OVERLAY_ICON, mOverlayIcon);
+            extras.putCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT, mLargeIconSubText);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        protected void restoreFromExtras(Bundle extras) {
+            super.restoreFromExtras(extras);
+            mOverlayIcon = extras.getParcelable(EXTRA_ENROUTE_OVERLAY_ICON, Icon.class);
+            mLargeIconSubText = extras.getCharSequence(EXTRA_ENROUTE_LARGE_ICON_SUBTEXT);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void purgeResources() {
+            super.purgeResources();
+            if (mOverlayIcon != null) {
+                mOverlayIcon.convertToAshmem();
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public void reduceImageSizes(Context context) {
+            super.reduceImageSizes(context);
+            if (mOverlayIcon != null) {
+                final Resources resources = context.getResources();
+                final boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
+
+                int rightIconSize = resources.getDimensionPixelSize(isLowRam
+                        ? R.dimen.notification_right_icon_size_low_ram
+                        : R.dimen.notification_right_icon_size);
+                mOverlayIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
+            }
         }
     }
 

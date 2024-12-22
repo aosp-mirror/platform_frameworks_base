@@ -32,8 +32,11 @@ import com.android.internal.util.DataClass;
  * registered to monitor that type of event on the targeted display.
  *
  * @hide
+ * @deprecated See {@link android.hardware.input.InputManager#monitorGestureInput(String, int)}
+ *             for more details.
  */
 @DataClass(genToString = true)
+@Deprecated
 public final class InputMonitor implements Parcelable {
     private static final String TAG = "InputMonitor";
 
@@ -47,13 +50,12 @@ public final class InputMonitor implements Parcelable {
     private final SurfaceControl mSurface;
 
     /**
-     * Takes all of the current pointer events streams that are currently being sent to this
-     * monitor and generates appropriate cancellations for the windows that would normally get
-     * them.
+     * Pilfer pointers from this input monitor.
      *
-     * This method should be used with caution as unexpected pilfering can break fundamental user
-     * interactions.
+     * @see android.hardware.input.InputManager#pilferPointers(IBinder)
+     * @deprecated
      */
+    @Deprecated
     public void pilferPointers() {
         try {
             mHost.pilferPointers();
@@ -194,10 +196,10 @@ public final class InputMonitor implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1679692514588L,
+            time = 1720819824835L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/InputMonitor.java",
-            inputSignatures = "private static final  java.lang.String TAG\nprivate static final  boolean DEBUG\nprivate final @android.annotation.NonNull android.view.InputChannel mInputChannel\nprivate final @android.annotation.NonNull android.view.IInputMonitorHost mHost\nprivate final @android.annotation.NonNull android.view.SurfaceControl mSurface\npublic  void pilferPointers()\npublic  void dispose()\nclass InputMonitor extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true)")
+            inputSignatures = "private static final  java.lang.String TAG\nprivate static final  boolean DEBUG\nprivate final @android.annotation.NonNull android.view.InputChannel mInputChannel\nprivate final @android.annotation.NonNull android.view.IInputMonitorHost mHost\nprivate final @android.annotation.NonNull android.view.SurfaceControl mSurface\npublic @java.lang.Deprecated void pilferPointers()\npublic  void dispose()\nclass InputMonitor extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true)")
     @Deprecated
     private void __metadata() {}
 

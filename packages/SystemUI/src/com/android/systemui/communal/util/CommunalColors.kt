@@ -56,7 +56,7 @@ constructor(
         Color.valueOf(
             Utils.getColorAttrDefaultColor(
                 context,
-                com.android.internal.R.attr.materialColorOutlineVariant
+                com.android.internal.R.attr.materialColorPrimary
             )
         )
 }

@@ -20,7 +20,7 @@ import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainerThumbnailProto.HEIGHT;
 import static com.android.server.wm.WindowContainerThumbnailProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerThumbnailProto.WIDTH;
@@ -39,7 +39,7 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 
@@ -118,14 +118,7 @@ class WindowContainerThumbnail implements Animatable {
                         mWindowContainer.getDisplayContent().mAppTransition.canSkipFirstFrame(),
                         mWindowContainer.getDisplayContent().getWindowCornerRadius()),
                 mWindowContainer.mWmService.mSurfaceAnimationRunner), false /* hidden */,
-                ANIMATION_TYPE_RECENTS);
-    }
-
-    /**
-     * Start animation with existing adapter.
-     */
-    void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        mSurfaceAnimator.startAnimation(t, anim, hidden, ANIMATION_TYPE_RECENTS);
+                ANIMATION_TYPE_APP_TRANSITION);
     }
 
     private void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {

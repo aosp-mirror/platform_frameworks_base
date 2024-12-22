@@ -19,8 +19,8 @@ package android.util;
 import android.os.SystemProperties;
 import android.test.PerformanceTestCase;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.Suppress;
-import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.TestCase;
 

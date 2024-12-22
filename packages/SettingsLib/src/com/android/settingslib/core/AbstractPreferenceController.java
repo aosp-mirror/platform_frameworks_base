@@ -25,7 +25,6 @@ import android.util.Log;
 import androidx.annotation.EmptySuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.core.os.BuildCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceGroup;
@@ -141,7 +140,7 @@ public abstract class AbstractPreferenceController {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     protected void replaceEnterpriseStringTitle(PreferenceScreen screen,
             String preferenceKey, String overrideKey, int resource) {
-        if (!BuildCompat.isAtLeastT() || mDevicePolicyManager == null) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || mDevicePolicyManager == null) {
             return;
         }
 
@@ -159,7 +158,7 @@ public abstract class AbstractPreferenceController {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     protected void replaceEnterpriseStringSummary(
             PreferenceScreen screen, String preferenceKey, String overrideKey, int resource) {
-        if (!BuildCompat.isAtLeastT() || mDevicePolicyManager == null) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || mDevicePolicyManager == null) {
             return;
         }
 

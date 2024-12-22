@@ -1,0 +1,34 @@
+package {
+    default_team: "trendy_team_games",
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "PerformanceHintTests",
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "flag-junit",
+        "junit",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "services.core",
+        "truth",
+    ],
+    libs: [
+        "android.test.base.stubs.system",
+    ],
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    platform_apis: true,
+    certificate: "platform",
+    dxflags: ["--multi-dex"],
+    optimize: {
+        enabled: false,
+    },
+}

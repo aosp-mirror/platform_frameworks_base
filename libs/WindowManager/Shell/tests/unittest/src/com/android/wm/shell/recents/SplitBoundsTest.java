@@ -1,6 +1,6 @@
 package com.android.wm.shell.recents;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,7 +12,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.util.SplitBounds;
+import com.android.wm.shell.shared.split.SplitBounds;
 
 import org.junit.Before;
 import org.junit.Test;

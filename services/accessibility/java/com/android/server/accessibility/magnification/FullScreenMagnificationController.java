@@ -1131,7 +1131,10 @@ public class FullScreenMagnificationController implements
             }
 
             if (isAlwaysOnMagnificationEnabled()) {
-                zoomOutFromService(displayId);
+                if (!mControllerCtx.getContext().getResources().getBoolean(
+                        R.bool.config_magnification_keep_zoom_level_when_context_changed)) {
+                    zoomOutFromService(displayId);
+                }
             } else {
                 reset(displayId, true);
             }

@@ -760,6 +760,14 @@ public final class TvInputManager {
      * @hide
      */
     public static final int UNKNOWN_CLIENT_PID = -1;
+    /**
+     * An unknown state of the client userId gets from the TvInputManager. Client gets this value
+     * when query through {@link #getClientUserId(String sessionId)} fails.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_KIDS_MODE_TVDB_SHARING)
+    public static final int UNKNOWN_CLIENT_USER_ID = -1;
 
     /**
      * Broadcast intent action when the user blocked content ratings change. For use with the
@@ -2510,6 +2518,21 @@ public final class TvInputManager {
     };
 
     /**
+     * Get a the client user id when creating the session with the session id provided.
+     *
+     * @param sessionId a String of session id that is used to query the client user id.
+     * @return the client pid when created the session. Returns {@link #UNKNOWN_CLIENT_USER_ID}
+     *         if the call fails.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    @FlaggedApi(Flags.FLAG_KIDS_MODE_TVDB_SHARING)
+    public int getClientUserId(@NonNull String sessionId) {
+        return getClientUserIdInternal(sessionId);
+    }
+
+    /**
      * Returns a priority for the given use case type and the client's foreground or background
      * status.
      *
@@ -2597,6 +2620,18 @@ public final class TvInputManager {
             throw e.rethrowFromSystemServer();
         }
         return clientPid;
+    }
+
+    @FlaggedApi(Flags.FLAG_KIDS_MODE_TVDB_SHARING)
+    private int getClientUserIdInternal(String sessionId) {
+        Preconditions.checkNotNull(sessionId);
+        int clientUserId = UNKNOWN_CLIENT_USER_ID;
+        try {
+            clientUserId = mService.getClientUserId(sessionId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return clientUserId;
     }
 
     private int getClientPriorityInternal(int useCase, String sessionId) {
@@ -4218,8 +4253,8 @@ public final class TvInputManager {
          *        AudioFormat.CHANNEL_OUT_DEFAULT.
          * @param format desired format. Use default when it's AudioFormat.ENCODING_DEFAULT.
          */
-        public void overrideAudioSink(int audioType, String audioAddress, int samplingRate,
-                int channelMask, int format) {
+        public void overrideAudioSink(@AudioDeviceInfo.AudioDeviceType int audioType,
+                String audioAddress, int samplingRate, int channelMask, int format) {
             try {
                 mInterface.overrideAudioSink(audioType, audioAddress, samplingRate, channelMask,
                         format);

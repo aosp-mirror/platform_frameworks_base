@@ -17,12 +17,13 @@
 // #define LOG_NDEBUG 0
 #define LOG_TAG "AndroidMediaUtils"
 
+#include "android_media_Utils.h"
+
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 #include <aidl/android/hardware/graphics/common/PlaneLayoutComponentType.h>
 #include <ui/GraphicBufferMapper.h>
 #include <ui/GraphicTypes.h>
 #include <utils/Log.h>
-
-#include "android_media_Utils.h"
 
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
@@ -32,6 +33,8 @@
 namespace android {
 
 // -----------Utility functions used by ImageReader/Writer JNI-----------------
+
+using AidlPixelFormat = aidl::android::hardware::graphics::common::PixelFormat;
 
 enum {
     IMAGE_MAX_NUM_PLANES = 3,
@@ -74,6 +77,7 @@ bool isPossiblyYUV(PixelFormat format) {
         case HAL_PIXEL_FORMAT_BLOB:
         case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
         case HAL_PIXEL_FORMAT_YCBCR_P010:
+        case static_cast<int>(AidlPixelFormat::YCBCR_P210):
             return false;
 
         case HAL_PIXEL_FORMAT_YV12:
@@ -105,6 +109,7 @@ bool isPossibly10BitYUV(PixelFormat format) {
             return false;
 
         case HAL_PIXEL_FORMAT_YCBCR_P010:
+        case static_cast<int>(AidlPixelFormat::YCBCR_P210):
         default:
             return true;
     }
@@ -340,6 +345,47 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
             cb = buffer->data + ySize;
             cr = cb + 2;
 
+            pData = (idx == 0) ? buffer->data : (idx == 1) ? cb : cr;
+            dataSize = (idx == 0) ? ySize : cSize;
+            rStride = buffer->stride * 2;
+            break;
+        case static_cast<int>(AidlPixelFormat::YCBCR_P210):
+            if (buffer->height % 2 != 0) {
+                ALOGE("YCBCR_P210: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YCBCR_P210: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YCBCR_210: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+            if (buffer->dataCb && buffer->dataCr) {
+                pData = (idx == 0) ? buffer->data : (idx == 1) ? buffer->dataCb : buffer->dataCr;
+                // only map until last pixel
+                if (idx == 0) {
+                    pStride = 2;
+                    rStride = buffer->stride;
+                    dataSize = buffer->stride * (buffer->height - 1) + buffer->width * 2;
+                } else {
+                    pStride = buffer->chromaStep;
+                    rStride = buffer->chromaStride;
+                    dataSize = buffer->chromaStride * (buffer->height - 1) +
+                            buffer->chromaStep * (buffer->width / 2);
+                }
+                break;
+            }
+
+            ySize = (buffer->stride * 2) * buffer->height;
+            cSize = ySize;
+            pStride = (idx == 0) ? 2 : 4;
+            cb = buffer->data + ySize;
+            cr = cb + 2;
+
             pData = (idx == 0) ?  buffer->data : (idx == 1) ?  cb : cr;
             dataSize = (idx == 0) ? ySize : cSize;
             rStride = buffer->stride * 2;
@@ -544,6 +590,80 @@ static status_t extractP010Gralloc4PlaneLayout(
     return OK;
 }
 
+static status_t extractP210Gralloc4PlaneLayout(sp<GraphicBuffer> buffer, void *pData, int format,
+                                               LockedImage *outputImage) {
+    using aidl::android::hardware::graphics::common::PlaneLayoutComponent;
+    using aidl::android::hardware::graphics::common::PlaneLayoutComponentType;
+
+    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+    std::vector<ui::PlaneLayout> planeLayouts;
+    status_t res = mapper.getPlaneLayouts(buffer->handle, &planeLayouts);
+    if (res != OK) {
+        return res;
+    }
+    constexpr int64_t Y_PLANE_COMPONENTS = int64_t(PlaneLayoutComponentType::Y);
+    constexpr int64_t CBCR_PLANE_COMPONENTS =
+            int64_t(PlaneLayoutComponentType::CB) | int64_t(PlaneLayoutComponentType::CR);
+    uint8_t *dataY = nullptr;
+    uint8_t *dataCb = nullptr;
+    uint8_t *dataCr = nullptr;
+    uint32_t strideY = 0;
+    uint32_t strideCbCr = 0;
+    for (const ui::PlaneLayout &layout : planeLayouts) {
+        ALOGV("gralloc4 plane: %s", layout.toString().c_str());
+        int64_t components = 0;
+        for (const PlaneLayoutComponent &component : layout.components) {
+            if (component.sizeInBits != 10) {
+                return BAD_VALUE;
+            }
+            components |= component.type.value;
+        }
+        if (components == Y_PLANE_COMPONENTS) {
+            if (layout.sampleIncrementInBits != 16) {
+                return BAD_VALUE;
+            }
+            if (layout.components[0].offsetInBits != 6) {
+                return BAD_VALUE;
+            }
+            dataY = (uint8_t *)pData + layout.offsetInBytes;
+            strideY = layout.strideInBytes;
+        } else if (components == CBCR_PLANE_COMPONENTS) {
+            if (layout.sampleIncrementInBits != 32) {
+                return BAD_VALUE;
+            }
+            for (const PlaneLayoutComponent &component : layout.components) {
+                if (component.type.value == int64_t(PlaneLayoutComponentType::CB) &&
+                    component.offsetInBits != 6) {
+                    return BAD_VALUE;
+                }
+                if (component.type.value == int64_t(PlaneLayoutComponentType::CR) &&
+                    component.offsetInBits != 22) {
+                    return BAD_VALUE;
+                }
+            }
+            dataCb = (uint8_t *)pData + layout.offsetInBytes;
+            dataCr = (uint8_t *)pData + layout.offsetInBytes + 2;
+            strideCbCr = layout.strideInBytes;
+        } else {
+            return BAD_VALUE;
+        }
+    }
+
+    outputImage->data = dataY;
+    outputImage->width = buffer->getWidth();
+    outputImage->height = buffer->getHeight();
+    outputImage->format = format;
+    outputImage->flexFormat =
+            static_cast<int>(AidlPixelFormat::YCBCR_P210);
+    outputImage->stride = strideY;
+
+    outputImage->dataCb = dataCb;
+    outputImage->dataCr = dataCr;
+    outputImage->chromaStride = strideCbCr;
+    outputImage->chromaStep = 4;
+    return OK;
+}
+
 status_t lockImageFromBuffer(sp<GraphicBuffer> buffer, uint32_t inUsage,
         const Rect& rect, int fenceFd, LockedImage* outputImage) {
     ALOGV("%s: Try to lock the GraphicBuffer", __FUNCTION__);
@@ -581,10 +701,17 @@ status_t lockImageFromBuffer(sp<GraphicBuffer> buffer, uint32_t inUsage,
             ALOGE("Lock buffer failed!");
             return res;
         }
-        if (isPossibly10BitYUV(format)
-                && OK == extractP010Gralloc4PlaneLayout(buffer, pData, format, outputImage)) {
-            ALOGV("%s: Successfully locked the P010 image", __FUNCTION__);
-            return OK;
+        if (isPossibly10BitYUV(format)) {
+            if (format == HAL_PIXEL_FORMAT_YCBCR_P010 &&
+                OK == extractP010Gralloc4PlaneLayout(buffer, pData, format, outputImage)) {
+                ALOGV("%s: Successfully locked the P010 image", __FUNCTION__);
+                return OK;
+            } else if ((format ==
+                        static_cast<int>(AidlPixelFormat::YCBCR_P210)) &&
+                       OK == extractP210Gralloc4PlaneLayout(buffer, pData, format, outputImage)) {
+                ALOGV("%s: Successfully locked the P210 image", __FUNCTION__);
+                return OK;
+            }
         }
     }
 

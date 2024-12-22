@@ -54,6 +54,7 @@ import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -71,6 +72,8 @@ public class KeyboardShortcutsTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        when(mWindowManager.getApplicationLaunchKeyboardShortcuts(anyInt())).thenReturn(
+                new KeyboardShortcutGroup("", Collections.emptyList()));
         mKeyboardShortcuts = new KeyboardShortcuts(mContext, mWindowManager);
         KeyboardShortcuts.sInstance = mKeyboardShortcuts;
         mKeyboardShortcuts.mKeyboardShortcutsDialog = mDialog;

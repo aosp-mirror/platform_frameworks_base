@@ -16,10 +16,52 @@
 
 package com.android.systemui.scene.ui.composable.transitions
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.TransitionBuilder
+import com.android.compose.animation.scene.UserActionDistance
+import com.android.compose.animation.scene.UserActionDistanceScope
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.notifications.ui.composable.Notifications
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.shade.ui.composable.Shade
+import com.android.systemui.shade.ui.composable.ShadeHeader
+import kotlin.time.Duration.Companion.milliseconds
 
 fun TransitionBuilder.goneToSplitShadeTransition(
     durationScale: Double = 1.0,
 ) {
-    toSplitShadeTransition(durationScale)
+    spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
+    swipeSpec =
+        spring(
+            stiffness = Spring.StiffnessMediumLow,
+            visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
+        )
+    distance =
+        object : UserActionDistance {
+            override fun UserActionDistanceScope.absoluteDistance(
+                fromSceneSize: IntSize,
+                orientation: Orientation,
+            ): Float {
+                return fromSceneSize.height.toFloat() * 2 / 3f
+            }
+        }
+
+    fractionRange(end = .33f) { fade(Shade.Elements.BackgroundScrim) }
+
+    fractionRange(start = .33f) {
+        fade(MediaCarousel.Elements.Content)
+        fade(ShadeHeader.Elements.Clock)
+        fade(ShadeHeader.Elements.CollapsedContentStart)
+        fade(ShadeHeader.Elements.CollapsedContentEnd)
+        fade(ShadeHeader.Elements.PrivacyChip)
+        fade(QuickSettings.Elements.SplitShadeQuickSettings)
+        fade(QuickSettings.Elements.FooterActions)
+        fade(Notifications.Elements.NotificationScrim)
+    }
 }
+
+private val DefaultDuration = 500.milliseconds

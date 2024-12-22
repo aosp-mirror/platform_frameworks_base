@@ -35,7 +35,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginLifecycleManager;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.PluginWrapper;
+import com.android.systemui.plugins.TestPlugin;
 import com.android.systemui.plugins.annotations.Requires;
 
 import org.junit.Before;
@@ -60,7 +61,7 @@ public class PluginInstanceTest extends SysuiTestCase {
 
     private FakeListener mPluginListener;
     private VersionInfo mVersionInfo;
-    private VersionInfo.InvalidVersionException mVersionException;
+    private boolean mVersionCheckResult = true;
     private PluginInstance.VersionChecker mVersionChecker;
 
     private RefCounter mCounter;
@@ -83,14 +84,16 @@ public class PluginInstanceTest extends SysuiTestCase {
         mVersionInfo = new VersionInfo();
         mVersionChecker = new PluginInstance.VersionChecker() {
             @Override
-            public <T extends Plugin> VersionInfo checkVersion(
+            public <T extends Plugin> boolean checkVersion(
                     Class<T> instanceClass,
                     Class<T> pluginClass,
                     Plugin plugin
             ) {
-                if (mVersionException != null) {
-                    throw mVersionException;
-                }
+                return mVersionCheckResult;
+            }
+
+            @Override
+            public <T extends Plugin> VersionInfo getVersionInfo(Class<T> instanceClass) {
                 return mVersionInfo;
             }
         };
@@ -117,21 +120,29 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCorrectVersion() {
-        assertNotNull(mPluginInstance);
+    public void testCorrectVersion_onCreateBuildsPlugin() {
+        mVersionCheckResult = true;
+        assertFalse(mPluginInstance.hasError());
+
+        mPluginInstance.onCreate();
+        assertFalse(mPluginInstance.hasError());
+        assertNotNull(mPluginInstance.getPlugin());
     }
 
-    @Test(expected = VersionInfo.InvalidVersionException.class)
-    public void testIncorrectVersion() throws Exception {
+    @Test
+    public void testIncorrectVersion_destroysPluginInstance() throws Exception {
         ComponentName wrongVersionTestPluginComponentName =
                 new ComponentName(PRIVILEGED_PACKAGE, TestPlugin.class.getName());
 
-        mVersionException = new VersionInfo.InvalidVersionException("test", true);
+        mVersionCheckResult = false;
+        assertFalse(mPluginInstance.hasError());
 
         mPluginInstanceFactory.create(
                 mContext, mAppInfo, wrongVersionTestPluginComponentName,
                 TestPlugin.class, mPluginListener);
         mPluginInstance.onCreate();
+        assertTrue(mPluginInstance.hasError());
+        assertNull(mPluginInstance.getPlugin());
     }
 
     @Test
@@ -139,7 +150,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.onCreate();
         assertEquals(1, mPluginListener.mAttachedCount);
         assertEquals(1, mPluginListener.mLoadCount);
-        assertEquals(mPlugin.get(), mPluginInstance.getPlugin());
+        assertEquals(mPlugin.get(), unwrap(mPluginInstance.getPlugin()));
         assertInstances(1, 1);
     }
 
@@ -173,6 +184,17 @@ public class PluginInstanceTest extends SysuiTestCase {
         assertEquals(0, mPluginListener.mLoadCount);
         assertNull(mPluginInstance.getPlugin());
         assertInstances(0, 0);
+    }
+
+    @Test
+    public void testLinkageError_caughtAndPluginDestroyed() {
+        mPluginInstance.onCreate();
+        assertFalse(mPluginInstance.hasError());
+
+        Object result = mPluginInstance.getPlugin().methodThrowsError();
+        assertNotNull(result);  // Wrapper function should return non-null;
+        assertTrue(mPluginInstance.hasError());
+        assertNull(mPluginInstance.getPlugin());
     }
 
     @Test
@@ -232,6 +254,13 @@ public class PluginInstanceTest extends SysuiTestCase {
         assertNull(mPluginInstance.getPlugin());
     }
 
+    private static <T> T unwrap(T plugin) {
+        if (plugin instanceof PluginWrapper) {
+            return ((PluginWrapper<T>) plugin).getPlugin();
+        }
+        return plugin;
+    }
+
     private boolean getLock(Semaphore lock, long millis) {
         try {
             return lock.tryAcquire(millis, TimeUnit.MILLISECONDS);
@@ -241,14 +270,6 @@ public class PluginInstanceTest extends SysuiTestCase {
             fail();
             return false;
         }
-    }
-
-    // This target class doesn't matter, it just needs to have a Requires to hit the flow where
-    // the mock version info is called.
-    @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)
-    public interface TestPlugin extends Plugin {
-        int VERSION = 1;
-        String ACTION = "testAction";
     }
 
     private void assertInstances(int allocated, int created) {
@@ -300,6 +321,11 @@ public class PluginInstanceTest extends SysuiTestCase {
         public void onDestroy() {
             mCounter.mCreatedInstances.getAndDecrement();
         }
+
+        @Override
+        public Object methodThrowsError() {
+            throw new LinkageError();
+        }
     }
 
     public class FakeListener implements PluginListener<TestPlugin> {
@@ -337,7 +363,7 @@ public class PluginInstanceTest extends SysuiTestCase {
             mLoadCount++;
             TestPlugin expectedPlugin = PluginInstanceTest.this.mPlugin.get();
             if (expectedPlugin != null) {
-                assertEquals(expectedPlugin, plugin);
+                assertEquals(expectedPlugin, unwrap(plugin));
             }
             Context expectedContext = PluginInstanceTest.this.mPluginContext.get();
             if (expectedContext != null) {
@@ -357,7 +383,7 @@ public class PluginInstanceTest extends SysuiTestCase {
             mUnloadCount++;
             TestPlugin expectedPlugin = PluginInstanceTest.this.mPlugin.get();
             if (expectedPlugin != null) {
-                assertEquals(expectedPlugin, plugin);
+                assertEquals(expectedPlugin, unwrap(plugin));
             }
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
             if (mOnUnload != null) {

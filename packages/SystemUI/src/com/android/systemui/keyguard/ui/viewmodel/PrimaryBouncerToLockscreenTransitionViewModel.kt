@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
@@ -58,7 +59,14 @@ constructor(
             onStep = { it }
         )
 
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var currentAlpha = 0f
+        return transitionAnimation.sharedFlow(
+            duration = 250.milliseconds,
+            onStart = { currentAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(currentAlpha, 1f, it) },
+        )
+    }
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)

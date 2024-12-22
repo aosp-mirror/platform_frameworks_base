@@ -48,6 +48,7 @@ constructor(
                         Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

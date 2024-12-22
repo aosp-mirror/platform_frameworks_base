@@ -91,3 +91,23 @@ cc_test_library {
     ],
     gtest: false,
 }
+
+cc_test_library {
+    name: "libAppOpsTest_jni",
+    srcs: ["AppOpsLoggingTest*.cpp"],
+    shared_libs: [
+        "libbinder",
+        "libpermission",
+        "libutils",
+        "liblog",
+    ],
+
+    header_libs: ["jni_headers"],
+    stl: "libc++_static",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+    gtest: false,
+}

@@ -20,7 +20,6 @@ import android.content.ComponentName
 import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -98,8 +97,6 @@ class NoLowNumberOfTilesTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_QS_NEW_PIPELINE)
-
         with(kosmos) {
             restoreReconciliationInteractor.start()
             autoAddInteractor.init(kosmos.currentTilesInteractor)

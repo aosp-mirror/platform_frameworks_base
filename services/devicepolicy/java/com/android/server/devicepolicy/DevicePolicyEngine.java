@@ -230,11 +230,9 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                if (!handleAdminPolicySizeLimit(localPolicyState, enforcingAdmin, value,
-                        policyDefinition, userId)) {
-                    return;
-                }
+            if (!handleAdminPolicySizeLimit(localPolicyState, enforcingAdmin, value,
+                    policyDefinition, userId)) {
+                return;
             }
 
             if (policyDefinition.isNonCoexistablePolicy()) {
@@ -354,9 +352,7 @@ final class DevicePolicyEngine {
             }
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
 
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                decreasePolicySizeForAdmin(localPolicyState, enforcingAdmin);
-            }
+            decreasePolicySizeForAdmin(localPolicyState, enforcingAdmin);
 
             if (policyDefinition.isNonCoexistablePolicy()) {
                 setNonCoexistableLocalPolicyLocked(policyDefinition, localPolicyState,
@@ -500,11 +496,9 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                if (!handleAdminPolicySizeLimit(globalPolicyState, enforcingAdmin, value,
-                        policyDefinition, UserHandle.USER_ALL)) {
-                    return;
-                }
+            if (!handleAdminPolicySizeLimit(globalPolicyState, enforcingAdmin, value,
+                    policyDefinition, UserHandle.USER_ALL)) {
+                return;
             }
             // TODO(b/270999567): Move error handling for DISALLOW_CELLULAR_2G into the code
             //  that honors the restriction once there's an API available
@@ -571,9 +565,7 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
 
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                decreasePolicySizeForAdmin(policyState, enforcingAdmin);
-            }
+            decreasePolicySizeForAdmin(policyState, enforcingAdmin);
 
             boolean policyChanged = policyState.removePolicy(enforcingAdmin);
 
@@ -1739,25 +1731,23 @@ final class DevicePolicyEngine {
                 pw.println();
             }
             pw.decreaseIndent();
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                pw.println();
+            pw.println();
 
-                pw.println("Default admin policy size limit: " + DEFAULT_POLICY_SIZE_LIMIT);
-                pw.println("Current admin policy size limit: " + mPolicySizeLimit);
-                pw.println("Admin Policies size: ");
-                for (int i = 0; i < mAdminPolicySize.size(); i++) {
-                    int userId = mAdminPolicySize.keyAt(i);
-                    pw.printf("User %d:\n", userId);
-                    pw.increaseIndent();
-                    for (EnforcingAdmin admin : mAdminPolicySize.get(userId).keySet()) {
-                        pw.printf("Admin : " + admin + " : " + mAdminPolicySize.get(userId).get(
-                                admin));
-                        pw.println();
-                    }
-                    pw.decreaseIndent();
+            pw.println("Default admin policy size limit: " + DEFAULT_POLICY_SIZE_LIMIT);
+            pw.println("Current admin policy size limit: " + mPolicySizeLimit);
+            pw.println("Admin Policies size: ");
+            for (int i = 0; i < mAdminPolicySize.size(); i++) {
+                int userId = mAdminPolicySize.keyAt(i);
+                pw.printf("User %d:\n", userId);
+                pw.increaseIndent();
+                for (EnforcingAdmin admin : mAdminPolicySize.get(userId).keySet()) {
+                    pw.printf("Admin : " + admin + " : " + mAdminPolicySize.get(userId).get(
+                            admin));
+                    pw.println();
                 }
                 pw.decreaseIndent();
             }
+            pw.decreaseIndent();
         }
     }
 
@@ -2018,23 +2008,21 @@ final class DevicePolicyEngine {
 
         private void writeEnforcingAdminSizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                if (mAdminPolicySize != null) {
-                    for (int i = 0; i < mAdminPolicySize.size(); i++) {
-                        int userId = mAdminPolicySize.keyAt(i);
-                        for (EnforcingAdmin admin : mAdminPolicySize.get(
-                                userId).keySet()) {
-                            serializer.startTag(/* namespace= */ null,
-                                    TAG_ENFORCING_ADMIN_AND_SIZE);
-                            serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN);
-                            admin.saveToXml(serializer);
-                            serializer.endTag(/* namespace= */ null, TAG_ENFORCING_ADMIN);
-                            serializer.startTag(/* namespace= */ null, TAG_POLICY_SUM_SIZE);
-                            serializer.attributeInt(/* namespace= */ null, ATTR_POLICY_SUM_SIZE,
-                                    mAdminPolicySize.get(userId).get(admin));
-                            serializer.endTag(/* namespace= */ null, TAG_POLICY_SUM_SIZE);
-                            serializer.endTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_AND_SIZE);
-                        }
+            if (mAdminPolicySize != null) {
+                for (int i = 0; i < mAdminPolicySize.size(); i++) {
+                    int userId = mAdminPolicySize.keyAt(i);
+                    for (EnforcingAdmin admin : mAdminPolicySize.get(
+                            userId).keySet()) {
+                        serializer.startTag(/* namespace= */ null,
+                                TAG_ENFORCING_ADMIN_AND_SIZE);
+                        serializer.startTag(/* namespace= */ null, TAG_ENFORCING_ADMIN);
+                        admin.saveToXml(serializer);
+                        serializer.endTag(/* namespace= */ null, TAG_ENFORCING_ADMIN);
+                        serializer.startTag(/* namespace= */ null, TAG_POLICY_SUM_SIZE);
+                        serializer.attributeInt(/* namespace= */ null, ATTR_POLICY_SUM_SIZE,
+                                mAdminPolicySize.get(userId).get(admin));
+                        serializer.endTag(/* namespace= */ null, TAG_POLICY_SUM_SIZE);
+                        serializer.endTag(/* namespace= */ null, TAG_ENFORCING_ADMIN_AND_SIZE);
                     }
                 }
             }
@@ -2042,9 +2030,6 @@ final class DevicePolicyEngine {
 
         private void writeMaxPolicySizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                return;
-            }
             serializer.startTag(/* namespace= */ null, TAG_MAX_POLICY_SIZE_LIMIT);
             serializer.attributeInt(
                     /* namespace= */ null, ATTR_POLICY_SUM_SIZE, mPolicySizeLimit);
@@ -2080,10 +2065,14 @@ final class DevicePolicyEngine {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_LOCAL_POLICY_ENTRY:
-                        readLocalPoliciesInner(parser);
+                        int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
+                        if (!mLocalPolicies.contains(userId)) {
+                            mLocalPolicies.put(userId, new HashMap<>());
+                        }
+                        readPoliciesInner(parser, mLocalPolicies.get(userId));
                         break;
                     case TAG_GLOBAL_POLICY_ENTRY:
-                        readGlobalPoliciesInner(parser);
+                        readPoliciesInner(parser, mGlobalPolicies);
                         break;
                     case TAG_ENFORCING_ADMINS_ENTRY:
                         readEnforcingAdminsInner(parser);
@@ -2100,64 +2089,45 @@ final class DevicePolicyEngine {
             }
         }
 
-        private void readLocalPoliciesInner(TypedXmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
-            PolicyKey policyKey = null;
-            PolicyState<?> policyState = null;
-            int outerDepth = parser.getDepth();
-            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-                String tag = parser.getName();
-                switch (tag) {
-                    case TAG_POLICY_KEY_ENTRY:
-                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
-                        break;
-                    case TAG_POLICY_STATE_ENTRY:
-                        policyState = PolicyState.readFromXml(parser);
-                        break;
-                    default:
-                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
-                }
-            }
-
-            if (policyKey != null && policyState != null) {
-                if (!mLocalPolicies.contains(userId)) {
-                    mLocalPolicies.put(userId, new HashMap<>());
-                }
-                mLocalPolicies.get(userId).put(policyKey, policyState);
-            } else {
-                Slogf.wtf(TAG, "Error parsing local policy, policyKey is "
-                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
-                        + (policyState == null ? "null" : policyState) + ".");
-            }
-        }
-
-        private void readGlobalPoliciesInner(TypedXmlPullParser parser)
+        private static void readPoliciesInner(
+                TypedXmlPullParser parser, Map<PolicyKey, PolicyState<?>> policyStateMap)
                 throws IOException, XmlPullParserException {
             PolicyKey policyKey = null;
+            PolicyDefinition<?> policyDefinition = null;
             PolicyState<?> policyState = null;
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 String tag = parser.getName();
                 switch (tag) {
                     case TAG_POLICY_KEY_ENTRY:
-                        policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition()) {
+                            policyDefinition = PolicyDefinition.readFromXml(parser);
+                            if (policyDefinition != null) {
+                                policyKey = policyDefinition.getPolicyKey();
+                            }
+                        } else {
+                            policyKey = PolicyDefinition.readPolicyKeyFromXml(parser);
+                        }
                         break;
                     case TAG_POLICY_STATE_ENTRY:
-                        policyState = PolicyState.readFromXml(parser);
+                        if (Flags.dontReadPolicyDefinition() && policyDefinition == null) {
+                            Slogf.w(TAG, "Skipping policy state - unknown policy definition");
+                        } else {
+                            policyState = PolicyState.readFromXml(policyDefinition, parser);
+                        }
                         break;
                     default:
-                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for policy entry" + tag);
                 }
             }
 
-            if (policyKey != null && policyState != null) {
-                mGlobalPolicies.put(policyKey, policyState);
-            } else {
-                Slogf.wtf(TAG, "Error parsing global policy, policyKey is "
-                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
-                        + (policyState == null ? "null" : policyState) + ".");
+            if (policyKey == null || policyState == null) {
+                Slogf.wtf(TAG, "Error parsing policy, policyKey is %s, and policyState is %s.",
+                        policyKey, policyState);
+                return;
             }
+
+            policyStateMap.put(policyKey, policyState);
         }
 
         private void readEnforcingAdminsInner(TypedXmlPullParser parser)
@@ -2207,9 +2177,6 @@ final class DevicePolicyEngine {
 
         private void readMaxPolicySizeInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
-            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-                return;
-            }
             mPolicySizeLimit = parser.getAttributeInt(/* namespace= */ null, ATTR_POLICY_SUM_SIZE);
         }
     }

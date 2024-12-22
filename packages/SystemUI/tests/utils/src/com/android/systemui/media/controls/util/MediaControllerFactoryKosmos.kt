@@ -19,4 +19,5 @@ package com.android.systemui.media.controls.util
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.mediaControllerFactory by Kosmos.Fixture { MediaControllerFactory(applicationContext) }
+val Kosmos.fakeMediaControllerFactory by
+    Kosmos.Fixture { FakeMediaControllerFactory(applicationContext) }

@@ -166,12 +166,12 @@ class AnrTest {
         val displayManager =
             instrumentation.context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
         val display = displayManager.getDisplay(obj.getDisplayId())
-        val touchScreen = UinputTouchScreen(instrumentation, display)
-
         val rect: Rect = obj.visibleBounds
-        val pointer = touchScreen.touchDown(rect.centerX(), rect.centerY())
-        pointer.lift()
-        touchScreen.close()
+        UinputTouchScreen(instrumentation, display).use { touchScreen ->
+            touchScreen
+                .touchDown(rect.centerX(), rect.centerY())
+                .lift()
+        }
     }
 
     private fun triggerAnr() {

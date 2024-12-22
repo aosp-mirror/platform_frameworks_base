@@ -16,7 +16,7 @@
 
 package com.android.systemui.brightness.ui.compose
 
-import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -57,12 +57,12 @@ private fun BrightnessSlider(
 ) {
     var value by remember(gammaValue) { mutableIntStateOf(gammaValue) }
     val animatedValue by
-        animateIntAsState(targetValue = value, label = "BrightnessSliderAnimatedValue")
+        animateFloatAsState(targetValue = value.toFloat(), label = "BrightnessSliderAnimatedValue")
     val floatValueRange = valueRange.first.toFloat()..valueRange.last.toFloat()
-    val isRestricted = restriction is PolicyRestriction.Restricted
+    val isRestricted = remember(restriction) { restriction is PolicyRestriction.Restricted }
 
     PlatformSlider(
-        value = animatedValue.toFloat(),
+        value = animatedValue,
         valueRange = floatValueRange,
         enabled = !isRestricted,
         onValueChange = {

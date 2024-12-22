@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -27,8 +26,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -46,6 +45,7 @@ import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -69,6 +69,37 @@ public class DesktopModeVisualIndicator {
         TO_SPLIT_RIGHT_INDICATOR
     }
 
+    /**
+     * The conditions surrounding the drag event that led to the indicator's creation.
+     */
+    public enum DragStartState {
+        /** The indicator is resulting from a freeform task drag. */
+        FROM_FREEFORM,
+        /** The indicator is resulting from a split screen task drag */
+        FROM_SPLIT,
+        /** The indicator is resulting from a fullscreen task drag */
+        FROM_FULLSCREEN,
+        /** The indicator is resulting from an Intent generated during a drag-and-drop event */
+        DRAGGED_INTENT;
+
+        /**
+         * Get the {@link DragStartState} of a drag event based on the windowing mode of the task.
+         * Note that DRAGGED_INTENT will be specified by the caller if needed and not returned
+         * here.
+         */
+        public static DesktopModeVisualIndicator.DragStartState getDragStartState(
+                ActivityManager.RunningTaskInfo taskInfo
+        ) {
+            if (taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                return FROM_FULLSCREEN;
+            } else if (taskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+                return FROM_SPLIT;
+            } else if (taskInfo.isFreeform()) {
+                return FROM_FREEFORM;
+            } else return null;
+        }
+    }
+
     private final Context mContext;
     private final DisplayController mDisplayController;
     private final RootTaskDisplayAreaOrganizer mRootTdaOrganizer;
@@ -81,11 +112,13 @@ public class DesktopModeVisualIndicator {
 
     private View mView;
     private IndicatorType mCurrentType;
+    private DragStartState mDragStartState;
 
     public DesktopModeVisualIndicator(SyncTransactionQueue syncQueue,
             ActivityManager.RunningTaskInfo taskInfo, DisplayController displayController,
             Context context, SurfaceControl taskSurface,
-            RootTaskDisplayAreaOrganizer taskDisplayAreaOrganizer) {
+            RootTaskDisplayAreaOrganizer taskDisplayAreaOrganizer,
+            DragStartState dragStartState) {
         mSyncQueue = syncQueue;
         mTaskInfo = taskInfo;
         mDisplayController = displayController;
@@ -93,6 +126,7 @@ public class DesktopModeVisualIndicator {
         mTaskSurface = taskSurface;
         mRootTdaOrganizer = taskDisplayAreaOrganizer;
         mCurrentType = IndicatorType.NO_INDICATOR;
+        mDragStartState = dragStartState;
     }
 
     /**
@@ -100,24 +134,23 @@ public class DesktopModeVisualIndicator {
      * display, including no visible indicator.
      */
     @NonNull
-    IndicatorType updateIndicatorType(PointF inputCoordinates, int windowingMode) {
+    IndicatorType updateIndicatorType(PointF inputCoordinates) {
         final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
         // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
         IndicatorType result = IndicatorType.NO_INDICATOR;
         final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_width);
+                com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness);
         // Because drags in freeform use task position for indicator calculation, we need to
         // account for the possibility of the task going off the top of the screen by captionHeight
         final int captionHeight = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_freeform_decor_caption_height);
-        final Region fullscreenRegion = calculateFullscreenRegion(layout, windowingMode,
+        final Region fullscreenRegion = calculateFullscreenRegion(layout, captionHeight);
+        final Region splitLeftRegion = calculateSplitLeftRegion(layout, transitionAreaWidth,
                 captionHeight);
-        final Region splitLeftRegion = calculateSplitLeftRegion(layout, windowingMode,
-                transitionAreaWidth, captionHeight);
-        final Region splitRightRegion = calculateSplitRightRegion(layout, windowingMode,
-                transitionAreaWidth, captionHeight);
-        final Region toDesktopRegion = calculateToDesktopRegion(layout, windowingMode,
-                splitLeftRegion, splitRightRegion, fullscreenRegion);
+        final Region splitRightRegion = calculateSplitRightRegion(layout, transitionAreaWidth,
+                captionHeight);
+        final Region toDesktopRegion = calculateToDesktopRegion(layout, splitLeftRegion,
+                splitRightRegion, fullscreenRegion);
         if (fullscreenRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_FULLSCREEN_INDICATOR;
         }
@@ -130,30 +163,34 @@ public class DesktopModeVisualIndicator {
         if (toDesktopRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_DESKTOP_INDICATOR;
         }
-        transitionIndicator(result);
+        if (mDragStartState != DragStartState.DRAGGED_INTENT) {
+            transitionIndicator(result);
+        }
         return result;
     }
 
     @VisibleForTesting
-    Region calculateFullscreenRegion(DisplayLayout layout,
-            @WindowConfiguration.WindowingMode int windowingMode, int captionHeight) {
+    Region calculateFullscreenRegion(DisplayLayout layout, int captionHeight) {
         final Region region = new Region();
-        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
-                ? mContext.getResources().getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height)
+        int transitionHeight = mDragStartState == DragStartState.FROM_FREEFORM
+                || mDragStartState == DragStartState.DRAGGED_INTENT
+                ? SystemBarUtils.getStatusBarHeight(mContext)
                 : 2 * layout.stableInsets().top;
-        // A thin, short Rect at the top of the screen.
-        if (windowingMode == WINDOWING_MODE_FREEFORM) {
-            int fromFreeformWidth = mContext.getResources().getDimensionPixelSize(
-                    com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_width);
-            region.union(new Rect((layout.width() / 2) - (fromFreeformWidth / 2),
+        // A Rect at the top of the screen that takes up the center 40%.
+        if (mDragStartState == DragStartState.FROM_FREEFORM) {
+            final float toFullscreenScale = mContext.getResources().getFloat(
+                    R.dimen.desktop_mode_fullscreen_region_scale);
+            final float toFullscreenWidth = (layout.width() * toFullscreenScale);
+            region.union(new Rect((int) ((layout.width() / 2f) - (toFullscreenWidth / 2f)),
                     -captionHeight,
-                    (layout.width() / 2) + (fromFreeformWidth / 2),
+                    (int) ((layout.width() / 2f) + (toFullscreenWidth / 2f)),
                     transitionHeight));
         }
-        // A screen-wide, shorter Rect if the task is in fullscreen or split.
-        if (windowingMode == WINDOWING_MODE_FULLSCREEN
-                || windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+        // A screen-wide Rect if the task is in fullscreen, split, or a dragged intent.
+        if (mDragStartState == DragStartState.FROM_FULLSCREEN
+                || mDragStartState == DragStartState.FROM_SPLIT
+                || mDragStartState == DragStartState.DRAGGED_INTENT
+        ) {
             region.union(new Rect(0,
                     -captionHeight,
                     layout.width(),
@@ -164,12 +201,11 @@ public class DesktopModeVisualIndicator {
 
     @VisibleForTesting
     Region calculateToDesktopRegion(DisplayLayout layout,
-            @WindowConfiguration.WindowingMode int windowingMode,
             Region splitLeftRegion, Region splitRightRegion,
             Region toFullscreenRegion) {
         final Region region = new Region();
         // If in desktop, we need no region. Otherwise it's the same for all windowing modes.
-        if (windowingMode != WINDOWING_MODE_FREEFORM) {
+        if (mDragStartState != DragStartState.FROM_FREEFORM) {
             region.union(new Rect(0, 0, layout.width(), layout.height()));
             region.op(splitLeftRegion, Region.Op.DIFFERENCE);
             region.op(splitRightRegion, Region.Op.DIFFERENCE);
@@ -180,11 +216,10 @@ public class DesktopModeVisualIndicator {
 
     @VisibleForTesting
     Region calculateSplitLeftRegion(DisplayLayout layout,
-            @WindowConfiguration.WindowingMode int windowingMode,
             int transitionEdgeWidth, int captionHeight) {
         final Region region = new Region();
         // In freeform, keep the top corners clear.
-        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
+        int transitionHeight = mDragStartState == DragStartState.FROM_FREEFORM
                 ? mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
                 -captionHeight;
@@ -194,11 +229,10 @@ public class DesktopModeVisualIndicator {
 
     @VisibleForTesting
     Region calculateSplitRightRegion(DisplayLayout layout,
-            @WindowConfiguration.WindowingMode int windowingMode,
             int transitionEdgeWidth, int captionHeight) {
         final Region region = new Region();
         // In freeform, keep the top corners clear.
-        int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
+        int transitionHeight = mDragStartState == DragStartState.FROM_FREEFORM
                 ? mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_split_from_desktop_height) :
                 -captionHeight;
@@ -261,12 +295,22 @@ public class DesktopModeVisualIndicator {
 
     /**
      * Fade out indicator without fully releasing it. Animator fades it out while shrinking bounds.
+     *
+     * @param finishCallback called when animation ends or gets cancelled
      */
-    private void fadeOutIndicator() {
+    void fadeOutIndicator(@Nullable Runnable finishCallback) {
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
                 .fadeBoundsOut(mView, mCurrentType,
                         mDisplayController.getDisplayLayout(mTaskInfo.displayId));
         animator.start();
+        if (finishCallback != null) {
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    finishCallback.run();
+                }
+            });
+        }
         mCurrentType = IndicatorType.NO_INDICATOR;
     }
 
@@ -281,7 +325,7 @@ public class DesktopModeVisualIndicator {
         if (mCurrentType == IndicatorType.NO_INDICATOR) {
             fadeInIndicator(newType);
         } else if (newType == IndicatorType.NO_INDICATOR) {
-            fadeOutIndicator();
+            fadeOutIndicator(null /* finishCallback */);
         } else {
             final VisualIndicatorAnimator animator = VisualIndicatorAnimator.animateIndicatorType(
                     mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId), mCurrentType,

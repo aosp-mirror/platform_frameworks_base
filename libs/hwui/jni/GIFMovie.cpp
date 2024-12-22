@@ -30,7 +30,7 @@ public:
 
 protected:
     virtual bool onGetInfo(Info*);
-    virtual bool onSetTime(SkMSec);
+    virtual bool onSetTime(Movie::MSec);
     virtual bool onGetBitmap(SkBitmap*);
 
 private:
@@ -72,7 +72,7 @@ GIFMovie::~GIFMovie()
         DGifCloseFile(fGIF, nullptr);
 }
 
-static SkMSec savedimage_duration(const SavedImage* image)
+static Movie::MSec savedimage_duration(const SavedImage* image)
 {
     for (int j = 0; j < image->ExtensionBlockCount; j++)
     {
@@ -91,7 +91,7 @@ bool GIFMovie::onGetInfo(Info* info)
     if (nullptr == fGIF)
         return false;
 
-    SkMSec dur = 0;
+    Movie::MSec dur = 0;
     for (int i = 0; i < fGIF->ImageCount; i++)
         dur += savedimage_duration(&fGIF->SavedImages[i]);
 
@@ -102,12 +102,12 @@ bool GIFMovie::onGetInfo(Info* info)
     return true;
 }
 
-bool GIFMovie::onSetTime(SkMSec time)
+bool GIFMovie::onSetTime(Movie::MSec time)
 {
     if (nullptr == fGIF)
         return false;
 
-    SkMSec dur = 0;
+    Movie::MSec dur = 0;
     for (int i = 0; i < fGIF->ImageCount; i++)
     {
         dur += savedimage_duration(&fGIF->SavedImages[i]);

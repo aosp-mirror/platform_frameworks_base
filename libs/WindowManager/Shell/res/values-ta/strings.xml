@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"கீழே வலதுபுறமாக நகர்த்து"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"மெனுவை விரிவாக்கு"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"மெனுவைச் சுருக்கு"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"இடப்புறம் நகர்த்து"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"வலப்புறம் நகர்த்து"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ஐ விரிவாக்கும்"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ஐச் சுருக்கும்"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> அமைப்புகள்"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"குமிழை அகற்று"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"முழுத்திரைக்கு மாற்று"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"உரையாடலைக் குமிழாக்காதே"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"குமிழ்களைப் பயன்படுத்தி அரட்டையடியுங்கள்"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"புதிய உரையாடல்கள் மிதக்கும் ஐகான்களாகவோ குமிழ்களாகவோ தோன்றும். குமிழைத் திறக்க தட்டவும். நகர்த்த இழுக்கவும்."</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"சிறிதாக்கும்"</string>
     <string name="close_button_text" msgid="2913281996024033299">"மூடும்"</string>
     <string name="back_button_text" msgid="1469718707134137085">"பின்செல்லும்"</string>
-    <string name="handle_text" msgid="1766582106752184456">"ஹேண்டில்"</string>
+    <string name="handle_text" msgid="4419667835599523257">"ஆப்ஸ் ஹேண்டில்"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"ஆப்ஸ் ஐகான்"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"முழுத்திரை"</string>
     <string name="desktop_text" msgid="1077633567027630454">"டெஸ்க்டாப் பயன்முறை"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"மிதக்கும் சாளரம்"</string>
     <string name="select_text" msgid="5139083974039906583">"தேர்ந்தெடுக்கும்"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ஸ்கிரீன்ஷாட்"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"உலாவியில் திறக்கும்"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"புதிய சாளரம்"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"சாளரங்களை நிர்வகிக்கலாம்"</string>
     <string name="close_text" msgid="4986518933445178928">"மூடும்"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"மெனுவை மூடும்"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"மெனுவைத் திற"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"மெனுவைத் திறக்கும்"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"திரையைப் பெரிதாக்கு"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"திரையை ஸ்னாப் செய்"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"இந்த ஆப்ஸின் அளவை மாற்ற முடியாது"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"பெரிதாக்கும்"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"இடதுபுறம் நகர்த்தும்"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"வலதுபுறம் நகர்த்தும்"</string>
 </resources>

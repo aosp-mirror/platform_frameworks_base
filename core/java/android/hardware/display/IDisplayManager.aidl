@@ -117,6 +117,9 @@ interface IDisplayManager {
     // No permissions required but must be same Uid as the creator.
     void setVirtualDisplayState(in IVirtualDisplayCallback token, boolean isOn);
 
+    // No permissions required but must be same Uid as the creator.
+    void setVirtualDisplayRotation(in IVirtualDisplayCallback token, int rotation);
+
     // Get a stable metric for the device's display size. No permissions required.
     Point getStableDisplaySize();
 
@@ -236,11 +239,22 @@ interface IDisplayManager {
     @EnforcePermission("MANAGE_DISPLAYS")
     void disableConnectedDisplay(int displayId);
 
-    // Request to power display ON or OFF.
+    // Request to power display OFF or reset it to a power state it supposed to have.
     @EnforcePermission("MANAGE_DISPLAYS")
-    boolean requestDisplayPower(int displayId, boolean on);
+    boolean requestDisplayPower(int displayId, int state);
 
     // Restricts display modes to specified modeIds.
     @EnforcePermission("RESTRICT_DISPLAY_MODES")
     void requestDisplayModes(in IBinder token, int displayId, in @nullable int[] modeIds);
+
+    // Get the highest defined HDR/SDR ratio for a display.
+    float getHighestHdrSdrRatio(int displayId);
+
+    // Get the mapping between the doze brightness sensor values and brightness values
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
+    float[] getDozeBrightnessSensorValueToBrightness(int displayId);
+
+    // Get the default doze brightness
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
+    float getDefaultDozeBrightness(int displayId);
 }

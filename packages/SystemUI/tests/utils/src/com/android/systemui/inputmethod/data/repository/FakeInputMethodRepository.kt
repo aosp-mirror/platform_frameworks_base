@@ -16,6 +16,7 @@
 
 package com.android.systemui.inputmethod.data.repository
 
+import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.inputmethod.data.model.InputMethodModel
 import kotlinx.coroutines.flow.Flow
@@ -40,14 +41,15 @@ class FakeInputMethodRepository : InputMethodRepository {
     }
 
     override suspend fun enabledInputMethods(
-        userId: Int,
-        fetchSubtypes: Boolean,
+        user: UserHandle,
+        fetchSubtypes: Boolean
     ): Flow<InputMethodModel> {
-        return usersToEnabledInputMethods[userId] ?: flowOf()
+        return usersToEnabledInputMethods[user.identifier] ?: flowOf()
     }
 
-    override suspend fun selectedInputMethodSubtypes(): List<InputMethodModel.Subtype> =
-        selectedInputMethodSubtypes
+    override suspend fun selectedInputMethodSubtypes(
+        user: UserHandle,
+    ): List<InputMethodModel.Subtype> = selectedInputMethodSubtypes
 
     override suspend fun showInputMethodPicker(displayId: Int, showAuxiliarySubtypes: Boolean) {
         inputMethodPickerShownDisplayId = displayId

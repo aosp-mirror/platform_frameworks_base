@@ -20,12 +20,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 
 @Composable
-fun TileGrid(viewModel: TileGridViewModel, modifier: Modifier = Modifier) {
+fun SceneScope.TileGrid(
+    viewModel: TileGridViewModel,
+    modifier: Modifier = Modifier,
+    editModeStart: () -> Unit,
+) {
     val gridLayout by viewModel.gridLayout.collectAsStateWithLifecycle()
     val tiles by viewModel.tileViewModels.collectAsStateWithLifecycle(emptyList())
 
-    gridLayout.TileGrid(tiles, modifier)
+    with(gridLayout) { TileGrid(tiles, modifier, editModeStart) }
 }

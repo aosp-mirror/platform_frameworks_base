@@ -16,12 +16,18 @@
 
 package com.android.asllib.marshallable;
 
+import static org.junit.Assert.assertThrows;
+
 import com.android.asllib.testutils.TestUtils;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.w3c.dom.Element;
+
+import java.nio.file.Paths;
 
 @RunWith(JUnit4.class)
 public class ThirdPartyVerificationTest {
@@ -58,30 +64,48 @@ public class ThirdPartyVerificationTest {
     }
 
     private void hrToOdExpectException(String fileName) {
-        TestUtils.hrToOdExpectException(
-                new ThirdPartyVerificationFactory(), THIRD_PARTY_VERIFICATION_HR_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new ThirdPartyVerificationFactory()
+                            .createFromHrElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(THIRD_PARTY_VERIFICATION_HR_PATH, fileName)));
+                });
     }
 
     private void odToHrExpectException(String fileName) {
-        TestUtils.odToHrExpectException(
-                new ThirdPartyVerificationFactory(), THIRD_PARTY_VERIFICATION_OD_PATH, fileName);
+        assertThrows(
+                MalformedXmlException.class,
+                () -> {
+                    new ThirdPartyVerificationFactory()
+                            .createFromOdElement(
+                                    TestUtils.getElementFromResource(
+                                            Paths.get(THIRD_PARTY_VERIFICATION_OD_PATH, fileName)));
+                });
     }
 
     private void testHrToOdThirdPartyVerification(String fileName) throws Exception {
-        TestUtils.testHrToOd(
-                TestUtils.document(),
-                new ThirdPartyVerificationFactory(),
-                THIRD_PARTY_VERIFICATION_HR_PATH,
-                THIRD_PARTY_VERIFICATION_OD_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        ThirdPartyVerification thirdPartyVerification =
+                new ThirdPartyVerificationFactory()
+                        .createFromHrElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(THIRD_PARTY_VERIFICATION_HR_PATH, fileName)));
+        Element ele = thirdPartyVerification.toOdDomElement(doc);
+        doc.appendChild(ele);
+        TestUtils.testFormatToFormat(doc, Paths.get(THIRD_PARTY_VERIFICATION_OD_PATH, fileName));
     }
 
     private void testOdToHrThirdPartyVerification(String fileName) throws Exception {
-        TestUtils.testOdToHr(
-                TestUtils.document(),
-                new ThirdPartyVerificationFactory(),
-                THIRD_PARTY_VERIFICATION_OD_PATH,
-                THIRD_PARTY_VERIFICATION_HR_PATH,
-                fileName);
+        var doc = TestUtils.document();
+        ThirdPartyVerification thirdPartyVerification =
+                new ThirdPartyVerificationFactory()
+                        .createFromOdElement(
+                                TestUtils.getElementFromResource(
+                                        Paths.get(THIRD_PARTY_VERIFICATION_OD_PATH, fileName)));
+        Element ele = thirdPartyVerification.toHrDomElement(doc);
+        doc.appendChild(ele);
+        TestUtils.testFormatToFormat(doc, Paths.get(THIRD_PARTY_VERIFICATION_HR_PATH, fileName));
     }
 }

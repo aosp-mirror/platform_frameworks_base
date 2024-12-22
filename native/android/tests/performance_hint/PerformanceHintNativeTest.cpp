@@ -24,6 +24,7 @@
 #include <android/binder_manager.h>
 #include <android/binder_status.h>
 #include <android/performance_hint.h>
+#include <fmq/AidlMessageQueue.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <performance_hint_private.h>
@@ -31,11 +32,16 @@
 #include <memory>
 #include <vector>
 
+using namespace std::chrono_literals;
 namespace hal = aidl::android::hardware::power;
 using aidl::android::os::IHintManager;
 using aidl::android::os::IHintSession;
 using ndk::ScopedAStatus;
 using ndk::SpAIBinder;
+using HalChannelMessageContents = hal::ChannelMessage::ChannelMessageContents;
+
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
+using HalFlagQueue = ::android::AidlMessageQueue<int8_t, SynchronizedReadWrite>;
 
 using namespace android;
 using namespace testing;
@@ -44,7 +50,7 @@ class MockIHintManager : public IHintManager {
 public:
     MOCK_METHOD(ScopedAStatus, createHintSessionWithConfig,
                 (const SpAIBinder& token, const ::std::vector<int32_t>& tids, int64_t durationNanos,
-                 hal::SessionTag tag, std::optional<hal::SessionConfig>* config,
+                 hal::SessionTag tag, hal::SessionConfig* config,
                  std::shared_ptr<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(ScopedAStatus, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
@@ -56,7 +62,9 @@ public:
                 (const std::shared_ptr<IHintSession>& hintSession, ::std::vector<int32_t>* tids),
                 (override));
     MOCK_METHOD(ScopedAStatus, getSessionChannel,
-                (const ::ndk::SpAIBinder& in_token, hal::ChannelConfig* _aidl_return), (override));
+                (const ::ndk::SpAIBinder& in_token,
+                 std::optional<hal::ChannelConfig>* _aidl_return),
+                (override));
     MOCK_METHOD(ScopedAStatus, closeSessionChannel, (), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
@@ -92,10 +100,12 @@ public:
     }
 
     APerformanceHintManager* createManager() {
+        APerformanceHint_setUseFMQForTesting(mUsingFMQ);
         ON_CALL(*mMockIHintManager, getHintSessionPreferredRate(_))
                 .WillByDefault(DoAll(SetArgPointee<0>(123L), [] { return ScopedAStatus::ok(); }));
         return APerformanceHint_getManager();
     }
+
     APerformanceHintSession* createSession(APerformanceHintManager* manager,
                                            int64_t targetDuration = 56789L, bool isHwui = false) {
         mMockSession = ndk::SharedRefBase::make<NiceMock<MockIHintSession>>();
@@ -106,8 +116,7 @@ public:
 
         ON_CALL(*mMockIHintManager,
                 createHintSessionWithConfig(_, Eq(tids), Eq(targetDuration), _, _, _))
-                .WillByDefault(DoAll(SetArgPointee<4>(std::make_optional<hal::SessionConfig>(
-                                             {.id = sessionId})),
+                .WillByDefault(DoAll(SetArgPointee<4>(hal::SessionConfig({.id = sessionId})),
                                      SetArgPointee<5>(std::shared_ptr<IHintSession>(mMockSession)),
                                      [] { return ScopedAStatus::ok(); }));
 
@@ -133,8 +142,47 @@ public:
         return APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
     }
 
+    void setFMQEnabled(bool enabled) {
+        mUsingFMQ = enabled;
+        if (enabled) {
+            mMockFMQ = std::make_shared<
+                    AidlMessageQueue<hal::ChannelMessage, SynchronizedReadWrite>>(kMockQueueSize,
+                                                                                  true);
+            mMockFlagQueue =
+                    std::make_shared<AidlMessageQueue<int8_t, SynchronizedReadWrite>>(1, true);
+            hardware::EventFlag::createEventFlag(mMockFlagQueue->getEventFlagWord(), &mEventFlag);
+
+            ON_CALL(*mMockIHintManager, getSessionChannel(_, _))
+                    .WillByDefault([&](ndk::SpAIBinder, std::optional<hal::ChannelConfig>* config) {
+                        config->emplace(
+                                hal::ChannelConfig{.channelDescriptor = mMockFMQ->dupeDesc(),
+                                                   .eventFlagDescriptor =
+                                                           mMockFlagQueue->dupeDesc(),
+                                                   .readFlagBitmask =
+                                                           static_cast<int32_t>(mReadBits),
+                                                   .writeFlagBitmask =
+                                                           static_cast<int32_t>(mWriteBits)});
+                        return ::ndk::ScopedAStatus::ok();
+                    });
+        }
+    }
+    uint32_t mReadBits = 0x00000001;
+    uint32_t mWriteBits = 0x00000002;
     std::shared_ptr<NiceMock<MockIHintManager>> mMockIHintManager = nullptr;
     std::shared_ptr<NiceMock<MockIHintSession>> mMockSession = nullptr;
+    std::shared_ptr<AidlMessageQueue<hal::ChannelMessage, SynchronizedReadWrite>> mMockFMQ;
+    std::shared_ptr<AidlMessageQueue<int8_t, SynchronizedReadWrite>> mMockFlagQueue;
+    hardware::EventFlag* mEventFlag;
+    int kMockQueueSize = 20;
+    bool mUsingFMQ = false;
+
+    template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
+    void expectToReadFromFmq(C expected) {
+        hal::ChannelMessage readData;
+        mMockFMQ->readBlocking(&readData, 1, mReadBits, mWriteBits, 1000000000, mEventFlag);
+        C got = static_cast<C>(readData.data.get<T>());
+        ASSERT_EQ(got, expected);
+    }
 };
 
 bool equalsWithoutTimestamp(hal::WorkDuration lhs, hal::WorkDuration rhs) {
@@ -157,6 +205,10 @@ TEST_F(PerformanceHintTest, TestSession) {
     int64_t targetDurationNanos = 10;
     EXPECT_CALL(*mMockSession, updateTargetWorkDuration(Eq(targetDurationNanos))).Times(Exactly(1));
     int result = APerformanceHint_updateTargetWorkDuration(session, targetDurationNanos);
+    EXPECT_EQ(0, result);
+
+    // subsequent call with same target should be ignored but return no error
+    result = APerformanceHint_updateTargetWorkDuration(session, targetDurationNanos);
     EXPECT_EQ(0, result);
 
     usleep(2); // Sleep for longer than preferredUpdateRateNanos.
@@ -302,7 +354,7 @@ TEST_F(PerformanceHintTest, TestAPerformanceHint_reportActualWorkDuration2) {
         actualWorkDurations.push_back(pair.duration);
 
         EXPECT_CALL(*mMockSession, reportActualWorkDuration2(WorkDurationEq(actualWorkDurations)))
-                .Times(Exactly(1));
+                .Times(Exactly(pair.expectedResult == OK));
         result = APerformanceHint_reportActualWorkDuration2(session,
                                                             reinterpret_cast<AWorkDuration*>(
                                                                     &pair.duration));
@@ -322,4 +374,49 @@ TEST_F(PerformanceHintTest, TestAWorkDuration) {
     AWorkDuration_setActualCpuDurationNanos(aWorkDuration, 13);
     AWorkDuration_setActualGpuDurationNanos(aWorkDuration, 8);
     AWorkDuration_release(aWorkDuration);
+}
+
+TEST_F(PerformanceHintTest, TestCreateUsingFMQ) {
+    setFMQEnabled(true);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager);
+    ASSERT_TRUE(session);
+}
+
+TEST_F(PerformanceHintTest, TestUpdateTargetWorkDurationUsingFMQ) {
+    setFMQEnabled(true);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager);
+    APerformanceHint_updateTargetWorkDuration(session, 456);
+    expectToReadFromFmq<HalChannelMessageContents::Tag::targetDuration>(456);
+}
+
+TEST_F(PerformanceHintTest, TestSendHintUsingFMQ) {
+    setFMQEnabled(true);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager);
+    APerformanceHint_sendHint(session, SessionHint::CPU_LOAD_UP);
+    expectToReadFromFmq<HalChannelMessageContents::Tag::hint>(hal::SessionHint::CPU_LOAD_UP);
+}
+
+TEST_F(PerformanceHintTest, TestReportActualUsingFMQ) {
+    setFMQEnabled(true);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager);
+    hal::WorkDuration duration{.timeStampNanos = 3,
+                               .durationNanos = 999999,
+                               .workPeriodStartTimestampNanos = 1,
+                               .cpuDurationNanos = 999999,
+                               .gpuDurationNanos = 999999};
+
+    hal::WorkDurationFixedV1 durationExpected{
+            .durationNanos = duration.durationNanos,
+            .workPeriodStartTimestampNanos = duration.workPeriodStartTimestampNanos,
+            .cpuDurationNanos = duration.cpuDurationNanos,
+            .gpuDurationNanos = duration.gpuDurationNanos,
+    };
+
+    APerformanceHint_reportActualWorkDuration2(session,
+                                               reinterpret_cast<AWorkDuration*>(&duration));
+    expectToReadFromFmq<HalChannelMessageContents::Tag::workDuration>(durationExpected);
 }

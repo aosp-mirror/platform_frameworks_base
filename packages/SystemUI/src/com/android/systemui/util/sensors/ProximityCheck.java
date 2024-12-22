@@ -86,12 +86,15 @@ public class ProximityCheck implements Runnable {
     }
 
     private void onProximityEvent(ThresholdSensorEvent proximityEvent) {
-        mCallbacks.forEach(
+        // Move the callbacks to a local to avoid ConcurrentModificationException
+        List<Consumer<Boolean>> oldCallbacks = mCallbacks;
+        mCallbacks = new ArrayList<>();
+        // Unregister from the ProximitySensor to ensure a re-entrant check will re-register
+        unregister();
+        // Notify the callbacks
+        oldCallbacks.forEach(
                 booleanConsumer ->
                         booleanConsumer.accept(
                                 proximityEvent == null ? null : proximityEvent.getBelow()));
-        mCallbacks.clear();
-        unregister();
-        mRegistered.set(false);
     }
 }

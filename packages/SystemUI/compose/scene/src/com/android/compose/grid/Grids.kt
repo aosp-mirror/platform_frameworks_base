@@ -99,10 +99,7 @@ private fun Grid(
         }
     }
 
-    Layout(
-        modifier = modifier,
-        content = content,
-    ) { measurables, constraints ->
+    Layout(modifier = modifier, content = content) { measurables, constraints ->
         val cells = measurables.size
         val columns: Int
         val rows: Int
@@ -142,7 +139,7 @@ private fun Grid(
                         (constraints.maxHeight - totalVerticalSpacingBetweenChildren) / rows
                     } else {
                         Constraints.Infinity
-                    }
+                    },
             )
 
         val placeables = buildList {

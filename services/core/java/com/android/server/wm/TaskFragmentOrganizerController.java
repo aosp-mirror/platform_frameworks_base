@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENTS_INFO;
+import static android.window.TaskFragmentOrganizer.KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO;
 import static android.window.TaskFragmentOrganizer.putErrorInfoInBundle;
 import static android.window.TaskFragmentTransaction.TYPE_ACTIVITY_REPARENTED_TO_TASK;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_APPEARED;
@@ -58,8 +60,8 @@ import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
@@ -87,6 +89,12 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     private final ArrayMap<IBinder, TaskFragmentOrganizerState> mTaskFragmentOrganizerState =
             new ArrayMap<>();
     /**
+     * The cached {@link TaskFragmentOrganizerState} for the {@link ITaskFragmentOrganizer} that
+     * have no running process.
+     */
+    private final ArrayList<TaskFragmentOrganizerState> mCachedTaskFragmentOrganizerStates =
+            new ArrayList<>();
+    /**
      * Map from {@link ITaskFragmentOrganizer} to a list of related {@link PendingTaskFragmentEvent}
      */
     private final ArrayMap<IBinder, List<PendingTaskFragmentEvent>> mPendingTaskFragmentEvents =
@@ -106,11 +114,16 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
      * {@link TaskFragment TaskFragments}.
      */
     private class TaskFragmentOrganizerState implements IBinder.DeathRecipient {
+        @NonNull
         private final ArrayList<TaskFragment> mOrganizedTaskFragments = new ArrayList<>();
-        private final IApplicationThread mAppThread;
-        private final ITaskFragmentOrganizer mOrganizer;
-        private final int mOrganizerPid;
         private final int mOrganizerUid;
+        @NonNull
+        private IApplicationThread mAppThread;
+        @NonNull
+        private ITaskFragmentOrganizer mOrganizer;
+        private int mOrganizerPid;
+        @Nullable
+        private Bundle mSavedState;
 
         /**
          * Map from {@link TaskFragment} to the last {@link TaskFragmentInfo} sent to the
@@ -171,11 +184,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
 
         TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
                 boolean isSystemOrganizer) {
-            if (Flags.bundleClientTransactionFlag()) {
-                mAppThread = getAppThread(pid, uid);
-            } else {
-                mAppThread = null;
-            }
+            mAppThread = getAppThread(pid, uid);
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
@@ -192,6 +201,30 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             synchronized (mGlobalLock) {
                 removeOrganizer(mOrganizer, "client died");
             }
+        }
+
+        void restore(@NonNull ITaskFragmentOrganizer organizer, int pid) {
+            mOrganizer = organizer;
+            mOrganizerPid = pid;
+            mAppThread = getAppThread(pid, mOrganizerUid);
+            for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
+                final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
+                if (taskFragment.isAttached()
+                        && taskFragment.getTopNonFinishingActivity() != null) {
+                    taskFragment.onTaskFragmentOrganizerRestarted(organizer);
+                } else {
+                    mOrganizedTaskFragments.remove(taskFragment);
+                }
+            }
+            try {
+                mOrganizer.asBinder().linkToDeath(this, 0 /*flags*/);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "TaskFragmentOrganizer failed to register death recipient");
+            }
+        }
+
+        boolean hasSavedState() {
+            return mSavedState != null && !mSavedState.isEmpty();
         }
 
         /**
@@ -238,12 +271,18 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         containsNonEmbeddedActivity ? null : task,
                         null /* remoteTransition */, null /* displayChange */);
             }
+
             // Defer to avoid unnecessary layout when there are multiple TaskFragments removal.
             mAtmService.deferWindowLayout();
             try {
-                while (!mOrganizedTaskFragments.isEmpty()) {
-                    final TaskFragment taskFragment = mOrganizedTaskFragments.remove(0);
-                    taskFragment.removeImmediately();
+                // Removes the TaskFragments if no saved state or is empty.
+                final boolean haveSavedState = hasSavedState();
+                for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
+                    final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
+                    if (!haveSavedState || !taskFragment.hasChild()) {
+                        mOrganizedTaskFragments.remove(i);
+                        taskFragment.removeImmediately();
+                    }
                 }
             } finally {
                 mAtmService.continueWindowLayout();
@@ -390,7 +429,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
 
             final IBinder activityToken;
-            if (activity.getPid() == mOrganizerPid) {
+            if (activity.getPid() == mOrganizerPid && activity.getUid() == mOrganizerUid) {
                 // We only pass the actual token if the activity belongs to the organizer process.
                 activityToken = activity.token;
             } else {
@@ -419,8 +458,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 change.setTaskFragmentToken(lastParentTfToken);
             }
             // Only pass the activity token to the client if it belongs to the same process.
-            if (Flags.fixPipRestoreToOverlay() && nextFillTaskActivity != null
-                    && nextFillTaskActivity.getPid() == mOrganizerPid) {
+            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid
+                    && nextFillTaskActivity.getUid() == mOrganizerUid) {
                 change.setOtherActivityToken(nextFillTaskActivity.token);
             }
             return change;
@@ -431,13 +470,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 return;
             }
             try {
-                if (Flags.bundleClientTransactionFlag()) {
-                    // Dispatch through IApplicationThread to ensure the binder call is in order
-                    // with ClientTransaction.
-                    mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
-                } else {
-                    mOrganizer.onTransactionReady(transaction);
-                }
+                // Dispatch through IApplicationThread to ensure the binder call is in order
+                // with ClientTransaction.
+                mAppThread.scheduleTaskFragmentTransaction(mOrganizer, transaction);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;
@@ -495,15 +530,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
     }
 
     @Override
-    public void registerOrganizer(
-            @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
-        registerOrganizerInternal(
-                organizer,
-                Flags.taskFragmentSystemOrganizerFlag() && isSystemOrganizer);
+    public void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer,
+            boolean isSystemOrganizer, @NonNull Bundle outSavedState) {
+        registerOrganizerInternal(organizer,
+                Flags.taskFragmentSystemOrganizerFlag() && isSystemOrganizer, outSavedState);
     }
 
     private void registerOrganizerInternal(
-            @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
+            @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer,
+            @NonNull Bundle outSavedState) {
         if (isSystemOrganizer) {
             enforceTaskPermission("registerSystemOrganizer()");
         }
@@ -513,14 +548,72 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                     "Register task fragment organizer=%s uid=%d pid=%d",
                     organizer.asBinder(), uid, pid);
+
             if (isOrganizerRegistered(organizer)) {
                 throw new IllegalStateException(
                         "Replacing existing organizer currently unsupported");
             }
+
+            if (pid <= 0) {
+                throw new IllegalStateException("Cannot register from invalid pid: " + pid);
+            }
+
+            if (restoreFromCachedStateIfPossible(organizer, pid, uid, outSavedState)) {
+                return;
+            }
+
             mTaskFragmentOrganizerState.put(organizer.asBinder(),
                     new TaskFragmentOrganizerState(organizer, pid, uid, isSystemOrganizer));
             mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
         }
+    }
+
+    private boolean restoreFromCachedStateIfPossible(@NonNull ITaskFragmentOrganizer organizer,
+            int pid, int uid, @NonNull Bundle outSavedState) {
+        if (!Flags.aeBackStackRestore()) {
+            return false;
+        }
+
+        TaskFragmentOrganizerState cachedState = null;
+        int i = mCachedTaskFragmentOrganizerStates.size() - 1;
+        for (; i >= 0; i--) {
+            final TaskFragmentOrganizerState state = mCachedTaskFragmentOrganizerStates.get(i);
+            if (state.mOrganizerUid == uid) {
+                cachedState = state;
+                break;
+            }
+        }
+        if (cachedState == null) {
+            return false;
+        }
+
+        mCachedTaskFragmentOrganizerStates.remove(cachedState);
+        cachedState.restore(organizer, pid);
+        outSavedState.putAll(cachedState.mSavedState);
+
+        // Collect the organized TfInfo and TfParentInfo in the system.
+        final ArrayList<TaskFragmentInfo> infos = new ArrayList<>();
+        final ArrayMap<Integer, Task> tasks = new ArrayMap<>();
+        final int fragmentCount = cachedState.mOrganizedTaskFragments.size();
+        for (int j = 0; j < fragmentCount; j++) {
+            final TaskFragment tf = cachedState.mOrganizedTaskFragments.get(j);
+            infos.add(tf.getTaskFragmentInfo());
+            if (!tasks.containsKey(tf.getTask().mTaskId)) {
+                tasks.put(tf.getTask().mTaskId, tf.getTask());
+            }
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENTS_INFO, infos);
+
+        final ArrayList<TaskFragmentParentInfo> parentInfos = new ArrayList<>();
+        for (int j = tasks.size() - 1; j >= 0; j--) {
+            parentInfos.add(tasks.valueAt(j).getTaskFragmentParentInfo());
+        }
+        outSavedState.putParcelableArrayList(KEY_RESTORE_TASK_FRAGMENT_PARENT_INFO,
+                parentInfos);
+
+        mTaskFragmentOrganizerState.put(organizer.asBinder(), cachedState);
+        mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
+        return true;
     }
 
     @Override
@@ -581,6 +674,23 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
 
             organizerState.mRemoteAnimationDefinition = null;
+        }
+    }
+
+    @Override
+    public void setSavedState(@NonNull ITaskFragmentOrganizer organizer, @Nullable Bundle state) {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        synchronized (mGlobalLock) {
+            ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Set state for organizer=%s uid=%d pid=%d",
+                    organizer.asBinder(), uid, pid);
+            final TaskFragmentOrganizerState organizerState = mTaskFragmentOrganizerState.get(
+                    organizer.asBinder());
+            if (organizerState == null) {
+                throw new IllegalStateException("The organizer hasn't been registered.");
+            }
+
+            organizerState.mSavedState = state;
         }
     }
 
@@ -848,9 +958,11 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // Remove any pending event of this organizer first because state.dispose() may trigger
         // event dispatch as result of surface placement.
         mPendingTaskFragmentEvents.remove(organizer.asBinder());
-        // remove all of the children of the organized TaskFragment
         state.dispose(reason);
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
+        if (state.hasSavedState()) {
+            mCachedTaskFragmentOrganizerStates.add(state);
+        }
     }
 
     /**
@@ -1245,16 +1357,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         event.mTaskFragmentToken);
             default:
                 throw new IllegalArgumentException("Unknown TaskFragmentEvent=" + event.mEventType);
-        }
-    }
-
-    @Override
-    public boolean isActivityEmbedded(IBinder activityToken) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord activity = ActivityRecord.forTokenLocked(activityToken);
-            return activity != null
-                    ? activity.isEmbeddedInHostContainer()
-                    : false;
         }
     }
 

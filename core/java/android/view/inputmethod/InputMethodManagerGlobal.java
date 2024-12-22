@@ -95,11 +95,13 @@ public class InputMethodManagerGlobal {
     /**
      * Invokes {@link IInputMethodManager#removeImeSurface()}
      *
+     * @param displayId display ID from which this request originates.
      * @param exceptionHandler an optional {@link RemoteException} handler.
      */
     @AnyThread
     @RequiresPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-    public static void removeImeSurface(@Nullable Consumer<RemoteException> exceptionHandler) {
-        IInputMethodManagerGlobalInvoker.removeImeSurface(exceptionHandler);
+    public static void removeImeSurface(int displayId,
+            @Nullable Consumer<RemoteException> exceptionHandler) {
+        IInputMethodManagerGlobalInvoker.removeImeSurface(displayId, exceptionHandler);
     }
 }

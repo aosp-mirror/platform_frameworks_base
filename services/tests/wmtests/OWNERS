@@ -4,4 +4,7 @@ include /services/core/java/com/android/server/wm/OWNERS
 # Voice Interaction
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 
+# Keyboard shortcuts
+per-file res/xml/bookmarks.xml = file:/services/core/java/com/android/server/input/OWNERS
+
 natanieljr@google.com

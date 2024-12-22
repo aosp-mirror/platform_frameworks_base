@@ -18,6 +18,7 @@ package com.android.systemui.common.data.repository
 
 import android.content.pm.PackageInstaller
 import android.os.Handler
+import android.text.TextUtils
 import com.android.internal.annotations.GuardedBy
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.dagger.SysUISingleton
@@ -63,6 +64,7 @@ constructor(
                         synchronized(sessions) {
                             sessions.putAll(
                                 packageInstaller.allSessions
+                                    .filter { !TextUtils.isEmpty(it.appPackageName) }
                                     .map { session -> session.toModel() }
                                     .associateBy { it.sessionId }
                             )

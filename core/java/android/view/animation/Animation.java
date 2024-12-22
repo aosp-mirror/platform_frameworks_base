@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.WindowInsets;
 
 import dalvik.system.CloseGuard;
 
@@ -881,12 +882,13 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
-     * @return if a window animation has outsets applied to it.
+     * @return the edges to which outsets should be applied if run as a windoow animation.
      *
      * @hide
      */
-    public boolean hasExtension() {
-        return false;
+    @WindowInsets.Side.InsetsSide
+    public int getExtensionEdges() {
+        return 0x0;
     }
 
     /**

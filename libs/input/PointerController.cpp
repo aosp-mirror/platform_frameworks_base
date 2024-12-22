@@ -25,6 +25,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
 #include <ftl/enum.h>
+#include <input/PrintTools.h>
 
 #include <mutex>
 
@@ -135,10 +136,6 @@ PointerController::~PointerController() {
 
 std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
-}
-
-std::optional<FloatRect> PointerController::getBounds() const {
-    return mCursorController.getBounds();
 }
 
 void PointerController::move(float deltaX, float deltaY) {
@@ -353,6 +350,8 @@ std::string PointerController::dump() {
     for (const auto& [_, spotController] : mLocked.spotControllers) {
         spotController.dump(dump, INDENT3);
     }
+    dump += INDENT2 "Cursor Controller:\n";
+    dump += addLinePrefix(mCursorController.dump(), INDENT3);
     return dump;
 }
 

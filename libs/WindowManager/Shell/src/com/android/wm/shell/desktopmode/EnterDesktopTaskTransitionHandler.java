@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
+import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
 import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.getEnterTransitionType;
 import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isEnterDesktopModeTransition;
 
@@ -39,7 +40,8 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener;
 
@@ -60,18 +62,21 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
+    private final InteractionJankMonitor mInteractionJankMonitor;
 
     private OnTaskResizeAnimationListener mOnTaskResizeAnimationListener;
 
     public EnterDesktopTaskTransitionHandler(
-            Transitions transitions) {
-        this(transitions, SurfaceControl.Transaction::new);
+            Transitions transitions, InteractionJankMonitor interactionJankMonitor) {
+        this(transitions, interactionJankMonitor, SurfaceControl.Transaction::new);
     }
 
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions,
+            InteractionJankMonitor interactionJankMonitor,
             Supplier<SurfaceControl.Transaction> supplier) {
         mTransitions = transitions;
+        mInteractionJankMonitor = interactionJankMonitor;
         mTransactionSupplier = supplier;
     }
 
@@ -175,6 +180,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                 mOnTaskResizeAnimationListener.onAnimationEnd(taskInfo.taskId);
                 mTransitions.getMainExecutor().execute(
                         () -> finishCallback.onTransitionFinished(null));
+                mInteractionJankMonitor.end(CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU);
             }
         });
         animator.start();

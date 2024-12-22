@@ -36,6 +36,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaTimeoutListener
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.media.controls.util.MediaSmartspaceLogger
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -104,7 +105,7 @@ constructor(
     val currentMedia: StateFlow<List<MediaCommonModel>> = mediaFilterRepository.currentMedia
 
     override fun start() {
-        if (!mediaFlags.isSceneContainerEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             return
         }
 
@@ -204,11 +205,14 @@ constructor(
         mediaDataProcessor.setMediaResumptionEnabled(isEnabled)
     }
 
-    override fun onSwipeToDismiss() {
-        mediaDataFilter.onSwipeToDismiss()
+    override fun onSwipeToDismiss() = unsupported
+
+    fun onSwipeToDismiss(location: Int) {
+        mediaDataFilter.onSwipeToDismiss(MediaSmartspaceLogger.getSurface(location))
     }
 
-    override fun hasActiveMediaOrRecommendation() = hasActiveMediaOrRecommendation.value
+    override fun hasActiveMediaOrRecommendation() =
+        mediaFilterRepository.hasActiveMediaOrRecommendation()
 
     override fun hasAnyMediaOrRecommendation() = hasAnyMediaOrRecommendation.value
 
@@ -220,6 +224,14 @@ constructor(
 
     fun reorderMedia() {
         mediaFilterRepository.setOrderedMedia()
+    }
+
+    fun logSmartspaceSeenCard(visibleIndex: Int, location: Int, isMediaCardUpdate: Boolean) {
+        mediaFilterRepository.logSmartspaceCardSeen(
+            MediaSmartspaceLogger.getSurface(location),
+            visibleIndex,
+            isMediaCardUpdate
+        )
     }
 
     /** Add a listener for internal events. */

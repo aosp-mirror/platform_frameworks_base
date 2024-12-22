@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.OutcomeReceiver
 import android.telephony.satellite.SatelliteManager
+import android.telephony.satellite.SatelliteModemStateCallback
 import android.util.Log
 import android.view.WindowManager
 import androidx.lifecycle.LifecycleOwner
@@ -31,12 +32,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resume
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 
 /** A util for Satellite dialog */
 object SatelliteDialogUtils {
@@ -70,7 +78,7 @@ object SatelliteDialogUtils {
             coroutineScope.launch {
                 var isSatelliteModeOn = false
                 try {
-                    isSatelliteModeOn = requestIsEnabled(context)
+                    isSatelliteModeOn = requestIsSessionStarted(context)
                 } catch (e: InterruptedException) {
                     Log.w(TAG, "Error to get satellite status : $e")
                 } catch (e: ExecutionException) {
@@ -118,19 +126,107 @@ object SatelliteDialogUtils {
         }
 
         suspendCancellableCoroutine {continuation ->
-            satelliteManager?.requestIsEnabled(Default.asExecutor(),
-                    object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
-                        override fun onResult(result: Boolean) {
-                            Log.i(TAG, "Satellite modem enabled status: $result")
-                            continuation.resume(result)
-                        }
+            try {
+                satelliteManager?.requestIsEnabled(Default.asExecutor(),
+                        object : OutcomeReceiver<Boolean, SatelliteManager.SatelliteException> {
+                            override fun onResult(result: Boolean) {
+                                Log.i(TAG, "Satellite modem enabled status: $result")
+                                continuation.resume(result)
+                            }
 
-                        override fun onError(error: SatelliteManager.SatelliteException) {
-                            super.onError(error)
-                            Log.w(TAG, "Can't get satellite modem enabled status", error)
-                            continuation.resume(false)
-                        }
-                    })
+                            override fun onError(error: SatelliteManager.SatelliteException) {
+                                super.onError(error)
+                                Log.w(TAG, "Can't get satellite modem enabled status", error)
+                                continuation.resume(false)
+                            }
+                        })
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "IllegalStateException: $e")
+                continuation.resume(false)
+            }
+        }
+    }
+
+    private suspend fun requestIsSessionStarted(
+            context: Context
+    ): Boolean = withContext(Default) {
+        val satelliteManager: SatelliteManager? =
+                context.getSystemService(SatelliteManager::class.java)
+        if (satelliteManager == null) {
+            Log.w(TAG, "SatelliteManager is null")
+            return@withContext false
+        }
+
+        getIsSessionStartedFlow(context).conflate().first()
+    }
+
+    /**
+     * Provides a Flow that emits the session state of the satellite modem. Updates are triggered
+     * when the modem state changes.
+     *
+     * @param defaultDispatcher The CoroutineDispatcher to use (Defaults to `Dispatchers.Default`).
+     * @return A Flow emitting `true` when the session is started and `false` otherwise.
+     */
+    private fun getIsSessionStartedFlow(
+            context: Context
+    ): Flow<Boolean> {
+        val satelliteManager: SatelliteManager? =
+                context.getSystemService(SatelliteManager::class.java)
+        if (satelliteManager == null) {
+            Log.w(TAG, "SatelliteManager is null")
+            return flowOf(false)
+        }
+
+        return callbackFlow {
+            val callback = SatelliteModemStateCallback { state ->
+                val isSessionStarted = isSatelliteSessionStarted(state)
+                Log.i(TAG, "Satellite modem state changed: state=$state"
+                        + ", isSessionStarted=$isSessionStarted")
+                trySend(isSessionStarted)
+            }
+
+            var registerResult = SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN
+            try {
+                registerResult = satelliteManager.registerForModemStateChanged(
+                        Default.asExecutor(),
+                        callback
+                )
+            } catch (e: IllegalStateException) {
+                Log.w(TAG, "IllegalStateException: $e")
+            }
+
+
+            if (registerResult != SatelliteManager.SATELLITE_RESULT_SUCCESS) {
+                // If the registration failed (e.g., device doesn't support satellite),
+                // SatelliteManager will not emit the current state by callback.
+                // We send `false` value by ourself to make sure the flow has initial value.
+                Log.w(TAG, "Failed to register for satellite modem state change: $registerResult")
+                trySend(false)
+            }
+
+            awaitClose {
+                try {
+                    satelliteManager.unregisterForModemStateChanged(callback)
+                } catch (e: IllegalStateException) {
+                    Log.w(TAG, "IllegalStateException: $e")
+                }
+            }
+        }.flowOn(Default)
+    }
+
+
+    /**
+     * Check if the modem is in a satellite session.
+     *
+     * @param state The SatelliteModemState provided by the SatelliteManager.
+     * @return `true` if the modem is in a satellite session, `false` otherwise.
+     */
+    fun isSatelliteSessionStarted(@SatelliteManager.SatelliteModemState state: Int): Boolean {
+        return when (state) {
+            SatelliteManager.SATELLITE_MODEM_STATE_OFF,
+            SatelliteManager.SATELLITE_MODEM_STATE_UNAVAILABLE,
+            SatelliteManager.SATELLITE_MODEM_STATE_UNKNOWN -> false
+            else -> true
         }
     }
 

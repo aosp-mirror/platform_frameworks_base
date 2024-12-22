@@ -274,6 +274,14 @@ public interface PackageState {
     boolean isPendingRestore();
 
     /**
+     * @see ApplicationInfo#FLAG_DEBUGGABLE
+     * @see R.styleable#AndroidManifestApplication_debuggable
+     * @see AndroidPackage#isDebuggable
+     * @hide
+     */
+    boolean isDebuggable();
+
+    /**
      * Retrieves the shared user app ID. Note that the actual shared user data is not available here
      * and must be queried separately.
      *
@@ -480,4 +488,10 @@ public interface PackageState {
      * @hide
      */
     boolean isScannedAsStoppedSystemApp();
+
+    /**
+     * see AndroidPackage#isLeavingSharedUser()
+     * @hide
+     */
+    boolean isLeavingSharedUser();
 }

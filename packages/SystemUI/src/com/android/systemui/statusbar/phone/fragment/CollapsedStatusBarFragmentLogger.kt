@@ -16,16 +16,18 @@
 
 package com.android.systemui.statusbar.phone.fragment
 
-import com.android.systemui.log.dagger.CollapsedSbFragmentLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.dagger.CollapsedSbFragmentLog
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
 import javax.inject.Inject
 
 /** Used by [CollapsedStatusBarFragment] to log messages to a [LogBuffer]. */
-class CollapsedStatusBarFragmentLogger @Inject constructor(
-        @CollapsedSbFragmentLog private val buffer: LogBuffer,
-        private val disableFlagsLogger: DisableFlagsLogger,
+class CollapsedStatusBarFragmentLogger
+@Inject
+constructor(
+    @CollapsedSbFragmentLog private val buffer: LogBuffer,
+    private val disableFlagsLogger: DisableFlagsLogger,
 ) {
 
     /**
@@ -38,17 +40,17 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
         new: DisableFlagsLogger.DisableState,
     ) {
         buffer.log(
-                TAG,
-                LogLevel.INFO,
-                {
-                    int1 = new.disable1
-                    int2 = new.disable2
-                },
-                {
-                    disableFlagsLogger.getDisableFlagsString(
-                        DisableFlagsLogger.DisableState(int1, int2),
-                    )
-                }
+            TAG,
+            LogLevel.INFO,
+            {
+                int1 = new.disable1
+                int2 = new.disable2
+            },
+            {
+                disableFlagsLogger.getDisableFlagsString(
+                    DisableFlagsLogger.DisableState(int1, int2),
+                )
+            }
         )
     }
 
@@ -59,13 +61,16 @@ class CollapsedStatusBarFragmentLogger @Inject constructor(
             {
                 bool1 = model.showClock
                 bool2 = model.showNotificationIcons
-                bool3 = model.showOngoingActivityChip
+                bool3 = model.showPrimaryOngoingActivityChip
+                int1 = if (model.showSecondaryOngoingActivityChip) 1 else 0
                 bool4 = model.showSystemInfo
             },
-            { "New visibilities calculated internally. " +
+            {
+                "New visibilities calculated internally. " +
                     "showClock=$bool1 " +
                     "showNotificationIcons=$bool2 " +
-                    "showOngoingActivityChip=$bool3 " +
+                    "showPrimaryOngoingActivityChip=$bool3 " +
+                    "showSecondaryOngoingActivityChip=${if (int1 == 1) "true" else "false"}" +
                     "showSystemInfo=$bool4"
             }
         )

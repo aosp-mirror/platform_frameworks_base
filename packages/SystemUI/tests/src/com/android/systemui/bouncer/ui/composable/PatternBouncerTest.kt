@@ -24,14 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
-import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.bouncer.ui.viewmodel.patternBouncerViewModelFactory
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
 import com.android.systemui.testKosmos
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.takeWhile
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,15 +52,16 @@ class PatternBouncerTest : SysuiTestCase() {
 
     @get:Rule val motionTestRule = createSysUiComposeMotionTestRule(kosmos)
 
-    private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
-    private val viewModel by lazy {
-        PatternBouncerViewModel(
-            applicationContext = context,
-            viewModelScope = kosmos.testScope.backgroundScope,
-            interactor = bouncerInteractor,
+    private val viewModel =
+        kosmos.patternBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
             onIntentionalUserInput = {},
+            bouncerHapticPlayer = kosmos.bouncerHapticPlayer,
         )
+
+    @Before
+    fun setUp() {
+        viewModel.activateIn(motionTestRule.toolkit.testScope)
     }
 
     @Composable
@@ -75,11 +77,11 @@ class PatternBouncerTest : SysuiTestCase() {
                     content = { play -> if (play) PatternBouncerUnderTest() },
                     ComposeRecordingSpec.until(
                         recordBefore = false,
-                        checkDone = { motionTestValueOfNode(MotionTestKeys.entryCompleted) }
+                        checkDone = { motionTestValueOfNode(MotionTestKeys.entryCompleted) },
                     ) {
                         feature(MotionTestKeys.dotAppearFadeIn, floatArray)
                         feature(MotionTestKeys.dotAppearMoveUp, floatArray)
-                    }
+                    },
                 )
 
             assertThat(motion).timeSeriesMatchesGolden()
@@ -100,7 +102,7 @@ class PatternBouncerTest : SysuiTestCase() {
                         viewModel.onDragEnd()
                         // Failure animation starts when animateFailure flips to true...
                         viewModel.animateFailure.takeWhile { !it }.collect {}
-                    }
+                    },
                 ) {
                     // ... and ends when the composable flips it back to false.
                     viewModel.animateFailure.takeWhile { it }.collect {}
@@ -111,7 +113,7 @@ class PatternBouncerTest : SysuiTestCase() {
                     content = { PatternBouncerUnderTest() },
                     ComposeRecordingSpec(failureAnimationMotionControl) {
                         feature(MotionTestKeys.dotScaling, floatArray)
-                    }
+                    },
                 )
             assertThat(motion).timeSeriesMatchesGolden()
         }

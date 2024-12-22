@@ -5111,8 +5111,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(mContext, 0 /* code */, intent, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(mContext, 0 /* code */, intent,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5505,8 +5506,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5554,8 +5556,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, fillIn, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, fillIn,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -5591,8 +5594,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityLaunchAllowed(false);
-            target.sendIntent(context, 0, intent, null /* onFinished */,
-                    null /* handler */, null /* requiredPermission */, options.toBundle());
+            target.sendIntent(context, 0, intent,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }

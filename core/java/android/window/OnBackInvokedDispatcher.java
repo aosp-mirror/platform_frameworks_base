@@ -76,7 +76,7 @@ public interface OnBackInvokedDispatcher {
      * @param callback The callback to be registered. If the callback instance has been already
      *                 registered, the existing instance (no matter its priority) will be
      *                 unregistered and registered again.
-     * @throws {@link IllegalArgumentException} if the priority is negative.
+     * @throws IllegalArgumentException if the priority is negative.
      */
     @SuppressLint({"ExecutorRegistration"})
     void registerOnBackInvokedCallback(

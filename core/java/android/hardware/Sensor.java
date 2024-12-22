@@ -17,7 +17,9 @@
 
 package android.hardware;
 
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputSensorInfo;
 import android.os.Build;
@@ -1182,6 +1184,8 @@ public final class Sensor {
 
     /** @hide */
     @UnsupportedAppUsage
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public int getHandle() {
         return mHandle;
     }

@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 class RequestedRefreshRateVoteTest {
 
     @Test
-    fun `updates requestedRefreshRates`() {
+    fun testUpdatesRequestedRefreshRates() {
         val refreshRate = 90f
         val vote = RequestedRefreshRateVote(refreshRate)
         val summary = createVotesSummary()
@@ -40,7 +40,7 @@ class RequestedRefreshRateVoteTest {
     }
 
     @Test
-    fun `updates requestedRefreshRates with multiple refresh rates`() {
+    fun testUpdatesRequestedRefreshRates_multipleVotes() {
         val refreshRate1 = 90f
         val vote1 = RequestedRefreshRateVote(refreshRate1)
 

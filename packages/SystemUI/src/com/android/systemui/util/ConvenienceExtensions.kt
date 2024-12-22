@@ -20,6 +20,7 @@ import android.graphics.Rect
 import android.util.IndentingPrintWriter
 import android.view.View
 import android.view.ViewGroup
+import dagger.Lazy
 import java.io.PrintWriter
 
 /** [Sequence] that yields all of the direct children of this [ViewGroup] */
@@ -56,3 +57,8 @@ val View.boundsOnScreen: Rect
         getBoundsOnScreen(bounds)
         return bounds
     }
+
+/** Extension method to convert [dagger.Lazy] to [kotlin.Lazy] for object of any class [T]. */
+fun <T> Lazy<T>.toKotlinLazy(): kotlin.Lazy<T> {
+    return lazy { this.get() }
+}

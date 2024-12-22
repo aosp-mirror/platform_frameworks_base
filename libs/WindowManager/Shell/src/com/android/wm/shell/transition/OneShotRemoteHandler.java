@@ -30,7 +30,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowAnimationState;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -192,6 +192,8 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
             @Nullable SurfaceControl.Transaction finishTransaction) {
         try {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "OneShot onTransitionConsumed for %s", mRemote);
             mRemote.getRemoteTransition().onTransitionConsumed(transition, aborted);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error calling onTransitionConsumed()", e);

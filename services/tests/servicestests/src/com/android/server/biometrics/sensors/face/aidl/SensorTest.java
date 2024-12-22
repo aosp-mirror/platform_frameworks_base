@@ -50,6 +50,7 @@ import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.UserSwitchProvider;
+import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +91,8 @@ public class SensorTest {
     private AidlSession mCurrentSession;
     @Mock
     private AidlResponseHandler.AidlResponseHandlerCallback mAidlResponseHandlerCallback;
+    @Mock
+    private FaceUtils mBiometricUtils;
 
     private final TestLooper mLooper = new TestLooper();
     private final LockoutCache mLockoutCache = new LockoutCache();
@@ -114,7 +117,7 @@ public class SensorTest {
                 mUserSwitchProvider);
         mHalCallback = new AidlResponseHandler(mContext, mScheduler, SENSOR_ID, USER_ID,
                 mLockoutCache, mLockoutResetDispatcher, mAuthSessionCoordinator,
-                mAidlResponseHandlerCallback);
+                mAidlResponseHandlerCallback, mBiometricUtils);
     }
 
     @Test

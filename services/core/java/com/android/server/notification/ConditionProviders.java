@@ -16,9 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.service.notification.Condition.STATE_TRUE;
-import static android.service.notification.ZenModeConfig.UPDATE_ORIGIN_USER;
-
 import android.app.INotificationManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -322,20 +319,7 @@ public class ConditionProviders extends ManagedServices {
                 final Condition c = conditions[i];
                 final ConditionRecord r = getRecordLocked(c.id, info.component, true /*create*/);
                 r.info = info;
-                if (android.app.Flags.modesUi()) {
-                    // if user turned on the mode, ignore the update unless the app also wants the
-                    // mode on. this will update the origin of the mode and let the owner turn it
-                    // off when the context ends
-                    if (r.condition != null && r.condition.source == UPDATE_ORIGIN_USER) {
-                        if (r.condition.state == STATE_TRUE && c.state == STATE_TRUE) {
-                            r.condition = c;
-                        }
-                    } else {
-                        r.condition = c;
-                    }
-                } else {
-                    r.condition = c;
-                }
+                r.condition = c;
             }
         }
         final int N = conditions.length;

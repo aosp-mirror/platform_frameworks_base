@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2014 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<com.android.systemui.statusbar.notification.row.ui.view.EnRouteView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@*android:id/status_bar_latest_event_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clipChildren="false"
+    android:tag="big"
+    >
+
+    <LinearLayout
+        android:id="@*android:id/notification_action_list_margin_target"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@*android:dimen/notification_content_margin"
+        android:orientation="vertical"
+        >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="top"
+            >
+
+            <include layout="@*android:layout/notification_template_header" />
+
+            <LinearLayout
+                android:id="@*android:id/notification_main_column"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@*android:dimen/notification_content_margin_start"
+                android:layout_marginEnd="@*android:dimen/notification_content_margin_end"
+                android:layout_marginTop="@*android:dimen/notification_content_margin_top"
+                android:orientation="vertical"
+                >
+
+                <include layout="@*android:layout/notification_template_part_line1" />
+
+                <include layout="@*android:layout/notification_template_text_multiline" />
+
+                <include
+                    android:layout_width="match_parent"
+                    android:layout_height="@*android:dimen/notification_progress_bar_height"
+                    android:layout_marginTop="@*android:dimen/notification_progress_margin_top"
+                    layout="@*android:layout/notification_template_progress"
+                    />
+            </LinearLayout>
+
+            <include layout="@*android:layout/notification_template_right_icon" />
+        </FrameLayout>
+
+        <ViewStub
+            android:layout="@*android:layout/notification_material_reply_text"
+            android:id="@*android:id/notification_material_reply_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <include
+            layout="@*android:layout/notification_template_smart_reply_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@*android:dimen/notification_content_margin_start"
+            android:layout_marginEnd="@*android:dimen/notification_content_margin_end"
+            android:layout_marginTop="@*android:dimen/notification_content_margin"
+            />
+
+        <include layout="@*android:layout/notification_material_action_list" />
+    </LinearLayout>
+</com.android.systemui.statusbar.notification.row.ui.view.EnRouteView>

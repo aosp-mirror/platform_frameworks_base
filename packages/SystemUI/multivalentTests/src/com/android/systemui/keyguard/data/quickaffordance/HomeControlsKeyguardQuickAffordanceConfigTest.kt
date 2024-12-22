@@ -105,7 +105,8 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
             val onClickedResult = underTest.onTriggered(expandable)
 
             assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
-            assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked).isTrue()
+            assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
+                .isTrue()
         }
 
     @Test

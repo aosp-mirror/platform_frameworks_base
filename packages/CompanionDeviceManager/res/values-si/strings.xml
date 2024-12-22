@@ -21,26 +21,21 @@
     <string name="profile_name_watch" msgid="576290739483672360">"ඔරලෝසුව"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; විසින් කළමනා කරනු ලැබීමට උපාංගයක් තෝරන්න"</string>
     <string name="chooser_title" msgid="2235819929238267637">"සැකසීමට <xliff:g id="PROFILE_NAME">%1$s</xliff:g>ක් තෝරන්න"</string>
-    <string name="summary_watch" msgid="7962014927042971830">"මෙම යෙදුමට අමතන කෙනෙකුගේ නම වැනි, තොරතුරු සමමුහූර්ත කිරීමට, සහ ඔබේ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> මත මෙම අවසර වෙත ප්‍රවේශ වීමට ඉඩ දෙනු ලැබේ"</string>
+    <string name="summary_watch" msgid="8134580124808507407">"මෙම යෙදුමට අමතන කෙනෙකුගේ නම වැනි, තතු සමමුහුර්ත කිරීමට, සහ ඔබේ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> මත මෙම අවසර වෙත ප්‍රවේශ වීමට ඉඩ දෙනු ඇත"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; කළමනා කිරීමට ඉඩ දෙන්න ද?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"උපාංගය"</string>
-    <string name="summary_glasses" msgid="2872254734959842579">"මෙම යෙදුමට ඔබේ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> මත මෙම අවසර වෙත ප්‍රවේශ වීමට ඉඩ දෙනු ලැබේ"</string>
-    <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඔබගේ දුරකථනයෙන් මෙම තොරතුරුවලට ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
-    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"ඔබේ දුරකථනයේ යෙදුම් ප්‍රවාහ කිරීමට &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හා ඉඩ දෙන්න ද?"</string>
-    <string name="summary_app_streaming" msgid="295548145144086753">"ශ්‍රව්‍ය, ඡායාරූප, මුරපද සහ පණිවිඩ ඇතුළු දුරකථනය මත දැකිය හැකි හෝ වාදනය කර ඇති ඕනෑම දෙයකට %1$s හට ප්‍රවේශය තිබෙනු ඇත. ඔබ මෙම අවසරය වෙත ප්‍රවේශය ඉවත් කරන තෙක් &lt;br/&gt;&lt;br/&gt;%1$s හට යෙදුම් ප්‍රවාහ කිරීමට හැකි වෙනු ඇත."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"හරස්-උපාංග සේවා"</string>
-    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> වෙනුවෙන් ඔබේ උපාංග අතර යෙදුම් ප්‍රවාහ කිරීමට අවසරය ඉල්ලමින් සිටියි"</string>
-    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"ඔබේ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> වෙනුවෙන් <xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ උපාංග අතර යෙදුම් සංදර්ශනය කිරීමට සහ ප්‍රවාහ කිරීමට අවසර ඉල්ලයි"</string>
+    <string name="summary_glasses" msgid="5469208629679579157">"මෙම යෙදුමට ඔබේ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> මත මෙම අවසර වෙත ප්‍රවේශ වීමට ඉඩ දෙනු ඇත"</string>
+    <string name="title_app_streaming" msgid="6845373585257287200">"ඔබේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> හි යෙදුම් &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; වෙත ප්‍රවාහ කිරීමට &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඉඩ දෙන්න ද?"</string>
+    <string name="summary_app_streaming" msgid="1274464413649731829">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> හට ශ්‍රව්‍ය, ඡායාරූප, මුරපද සහ පණිවිඩ ඇතුළුව <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> හි දෘශ්‍යමාන හෝ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත.&lt;br/&gt;&lt;br/&gt;ඔබ මෙම අවසරයට ප්‍රවේශය ඉවත් කරන තෙක් <xliff:g id="APP_NAME_1">%1$s</xliff:g> හට <xliff:g id="DEVICE_NAME">%3$s</xliff:g> වෙත යෙදුම් ප්‍රවාහ කිරීමට හැකි වනු ඇත."</string>
+    <string name="helper_summary_app_streaming" msgid="1944832605534698562">"ඔබේ උපාංග අතර යෙදුම් සංදර්ශනය කිරීමට සහ ප්‍රවාහ කිරීමට <xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> වෙනුවෙන් අවසර ඉල්ලා සිටියි"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඔබගේ දුරකථනයෙන් මෙම තොරතුරුවලට ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
+    <string name="title_computer" msgid="4782923323932440751">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඔබේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> වෙතින් මෙම තොරතුරු වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play සේවා"</string>
-    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> වෙනුවෙන් ඔබේ දුරකථනයේ ඡායාරූප, මාධ්‍ය, සහ දැනුම්දීම් වෙත ප්‍රවේශ වීමට අවසරය ඉල්ලමින් සිටියි"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"මෙම ක්‍රියාව කිරීමට &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඉඩ දෙන්න ද?"</string>
-    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"ඔබේ දුරකථනයේ යෙදුම් සහ පද්ධති විශේෂාංග ප්‍රවාහ කිරීමට &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; හට ඉඩ දෙන්න ද?"</string>
-    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"ශ්‍රව්‍ය, ඡායාරූප, ගෙවීම් තතු, මුරපද සහ පණිවිඩ ඇතුළු දුරකථනය මත දැකිය හැකි හෝ වාදනය කර ඇති ඕනෑම දෙයකට %1$s හට ප්‍රවේශය තිබෙනු ඇත. ඔබ මෙම අවසරය වෙත ප්‍රවේශය ඉවත් කරන තෙක් &lt;br/&gt;&lt;br/&gt;%1$s හට යෙදුම් සහ පද්ධති විශේෂාංග ප්‍රවාහ කිරීමට හැකි වෙනු ඇත."</string>
-    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> වෙනුවෙන් යෙදුම් සහ අනෙකුත් පද්ධති විශේෂාංග අවට උපාංග වෙත ප්‍රවාහ කිරීමට අවසර ඉල්ලයි"</string>
+    <string name="helper_summary_computer" msgid="2298803016482139668">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> වෙනුවෙන් ඔබේ <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> හි ඡායාරූප, මාධ්‍ය, සහ දැනුම්දීම් වෙත ප්‍රවේශ වීමට අවසරය ඉල්ලමින් සිටියි"</string>
+    <string name="title_nearby_device_streaming" msgid="4295322493408411976">"ඔබේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> හි යෙදුම් සහ පද්ධති විශේෂාංග &lt;strong&gt;<xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>&lt;/strong&gt; වෙත ප්‍රවාහ කිරීමට &lt;strong&gt;<xliff:g id="DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; හට ඉඩ දෙන්න ද?"</string>
+    <string name="summary_nearby_device_streaming" msgid="962267343109051648">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> හට ශ්‍රව්‍ය, ඡායාරූප, ගෙවීම් තොරතුරු, මුරපද සහ පණිවිඩ ඇතුළුව ඔබේ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> හි දෘශ්‍යමාන හෝ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත.&lt;br/&gt;&lt;br/&gt;ඔබ මෙම අවසරයට ප්‍රවේශය ඉවත් කරන තෙක් <xliff:g id="APP_NAME_1">%1$s</xliff:g> හට යෙදුම් සහ පද්ධති විශේෂාංග <xliff:g id="DEVICE_NAME">%3$s</xliff:g> වෙත ප්‍රවාහ කිරීමට හැකි වනු ඇත."</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="8509848562931818793">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබේ <xliff:g id="DEVICE_NAME">%2$s</xliff:g> වෙනුවෙන් ඔබේ උපාංග අතර යෙදුම් සහ අනෙකුත් පද්ධති විශේෂාංග ප්‍රවාහ කිරීමට අවසර ඉල්ලයි"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"උපාංගය"</string>
     <string name="summary_generic" msgid="1761976003668044801">"මෙම යෙදුමට ඔබේ දුරකථනය සහ තෝරා ගත් උපාංගය අතර, අමතන කෙනෙකුගේ නම වැනි, තතු සමමුහුර්ත කිරීමට හැකි වනු ඇත"</string>
     <string name="consent_yes" msgid="8344487259618762872">"ඉඩ දෙන්න"</string>
@@ -62,8 +57,6 @@
     <string name="permission_media_routing_control" msgid="5498639511586715253">"මාධ්‍ය ප්‍රතිදානය වෙනස් කරන්න"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ඡායාරූප සහ මාධ්‍ය"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"දැනුම්දීම්"</string>
-    <string name="permission_app_streaming" msgid="6009695219091526422">"යෙදුම්"</string>
-    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"ප්‍රවාහ කිරීම"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"දුරකථන ඇමතුම් ගැනීම සහ කළමනාකරණය කිරීම"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"දුරකථන ඇමතුම් ලොගය කියවන්න සහ ලියන්න"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
@@ -73,10 +66,10 @@
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"අවට උපාංගවල සාපේක්ෂ පිහිටීම සොයා ගන්න, සම්බන්ධ වන්න, සහ තීරණය කරන්න"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"සම්බන්ධතා, පණිවිඩ, සහ ඡායාරූප වැනි තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් කියවන්න"</string>
     <string name="permission_notifications_summary" msgid="2272810466047367030">"• සම්බන්ධතා, පණිවිඩ, සහ ඡායාරූප වැනි තතු ඇතුළුව, සියලු දැනුම්දීම් කියවන්න&lt;br/&gt;• දැනුම්දීම් යවන්න&lt;br/&gt;&lt;br/&gt;ඔබට සැකසීම් &gt; දැනුම්දීම් තුළ ඕනෑම වේලාවක මෙම යෙදුමට දැනුම්දීම් කියවීමට සහ යැවීමට ඇති හැකියාව කළමනාකරණය කළ හැක."</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"ඔබේ දුරකථනයේ යෙදුම් ප්‍රවාහ කරන්න"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"ඔබේ දුරකථනයෙන් යෙදුම් සහ අනෙකුත් පද්ධති විශේෂාංග ප්‍රවාහ කරන්න"</string>
     <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"පවතින උපාංග ලැයිස්තුවකට ප්‍රවේශ වන්න සහ වෙනත් යෙදුම් වෙතින් ශ්‍රව්‍ය හෝ වීඩියෝ ප්‍රවාහ කරන්නේ කුමන එකක් ද යන්න පාලනය කරන්න"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"දුරකථනය"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"ටැබ්ලටය"</string>
+    <string name="device_type" product="tv" msgid="5355611506659405636">"රූපවාහිනිය"</string>
+    <string name="device_type" product="device" msgid="1526125965802507189">"උපාංගය"</string>
 </resources>

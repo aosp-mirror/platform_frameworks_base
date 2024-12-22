@@ -2,6 +2,27 @@ package: "android.location.flags"
 container: "system"
 
 flag {
+    name: "deprecate_provider_request_apis"
+    namespace: "location"
+    description: "Deprecates LocationManager ProviderChanged APIs"
+    bug: "361811782"
+}
+
+flag {
+    name: "keep_gnss_stationary_throttling"
+    namespace: "location"
+    description: "Keeps stationary throttling for the GNSS provider even if the disable_stationary_throttling flag is true."
+    bug: "354000147"
+}
+
+flag {
+    name: "disable_stationary_throttling"
+    namespace: "location"
+    description: "Disables stationary throttling for all providers"
+    bug: "354000147"
+}
+
+flag {
     name: "new_geocoder"
     namespace: "location"
     description: "Flag for new Geocoder APIs"
@@ -45,13 +66,6 @@ flag {
 }
 
 flag {
-    name: "gnss_call_stop_before_set_position_mode"
-    namespace: "location"
-    description: "Flag for calling stop() before setPositionMode()"
-    bug: "306874828"
-}
-
-flag {
     name: "gnss_api_measurement_request_work_source"
     namespace: "location"
     description: "Flag for GnssMeasurementRequest WorkSource API"
@@ -80,6 +94,16 @@ flag {
 }
 
 flag {
+    name: "use_legacy_ntp_time"
+    namespace: "location"
+    description: "Flag for switching to legacy NtpNetworkTimeHelper"
+    bug: "368034558"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "subscriptions_changed_listener_thread"
     namespace: "location"
     description: "Flag for running onSubscriptionsChangedListener on FgThread"
@@ -94,4 +118,26 @@ flag {
     namespace: "location"
     description: "Flag for GNSS configuration from resource"
     bug: "317734846"
+}
+
+flag {
+    name: "enable_ni_supl_message_injection_by_carrier_config_bugfix"
+    namespace: "location"
+    description: "Flag for enabling NI SUPL message injection by carrier config"
+    bug: "242105192"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_ni_supl_message_injection_by_carrier_config"
+    namespace: "location"
+    description: "Flag for enabling NI SUPL message injection by carrier config"
+    bug: "242105192"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
