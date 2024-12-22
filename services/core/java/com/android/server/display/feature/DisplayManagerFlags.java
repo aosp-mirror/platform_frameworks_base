@@ -46,10 +46,6 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,
             Flags::enableConnectedDisplayManagement);
 
-    private final FlagState mHdrClamperFlagState = new FlagState(
-            Flags.FLAG_ENABLE_HDR_CLAMPER,
-            Flags::enableHdrClamper);
-
     private final FlagState mAdaptiveToneImprovements1 = new FlagState(
             Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
             Flags::enableAdaptiveToneImprovements1);
@@ -276,11 +272,6 @@ public class DisplayManagerFlags {
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
-    }
-
-    /** Returns whether hdr clamper is enabled on not. */
-    public boolean isHdrClamperEnabled() {
-        return mHdrClamperFlagState.isEnabled();
     }
 
     /** Returns whether power throttling clamper is enabled on not. */
@@ -585,7 +576,6 @@ public class DisplayManagerFlags {
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
         pw.println(" " + mDisplayTopology);
-        pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);

@@ -1401,33 +1401,9 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
-    public void testRampRateForHdrContent_HdrClamperOff() {
-        float hdrBrightness = 0.8f;
-        float clampedBrightness = 0.6f;
-        float transitionRate = 1.5f;
-
-        DisplayPowerRequest dpr = new DisplayPowerRequest();
-        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
-        when(mHolder.displayPowerState.getScreenBrightness()).thenReturn(.2f);
-        when(mHolder.displayPowerState.getSdrScreenBrightness()).thenReturn(.1f);
-        when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
-                BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
-        when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(hdrBrightness);
-        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(clampedBrightness);
-        when(mHolder.hdrClamper.getTransitionRate()).thenReturn(transitionRate);
-
-        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1); // Run updatePowerState
-
-        verify(mHolder.animator, atLeastOnce()).animateTo(eq(hdrBrightness), anyFloat(),
-                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
-    }
-
-    @Test
     public void testRampRateForHdrContent_HdrClamperOn() {
         float clampedBrightness = 0.6f;
         float transitionRate = 1.5f;
-        when(mDisplayManagerFlagsMock.isHdrClamperEnabled()).thenReturn(true);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ true);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
@@ -2631,6 +2607,8 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(hdrClamper.clamp(anyFloat())).thenAnswer(
+                invocation -> invocation.getArgument(0));
         when(clamperController.clamp(any(), any(), anyFloat(), anyBoolean(),
                 anyInt())).thenAnswer(
                 invocation -> DisplayBrightnessState.Builder.from(mDisplayBrightnessState)
