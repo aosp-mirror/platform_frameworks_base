@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.view.inputmethod.ImeTracker;
 
@@ -70,8 +69,8 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
     private final Object mLock = new Object();
 
-    ImeTrackerService(@NonNull Looper looper) {
-        mHandler = new Handler(looper, null /* callback */, true /* async */);
+    ImeTrackerService(@NonNull Handler handler) {
+        mHandler = handler;
     }
 
     @NonNull

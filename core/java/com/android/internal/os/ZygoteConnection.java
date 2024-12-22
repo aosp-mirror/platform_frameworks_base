@@ -165,14 +165,6 @@ class ZygoteConnection {
                     return null;
                 }
 
-                if (parsedArgs.mPreloadPackage != null) {
-                    handlePreloadPackage(parsedArgs.mPreloadPackage,
-                            parsedArgs.mPreloadPackageLibs,
-                            parsedArgs.mPreloadPackageLibFileName,
-                            parsedArgs.mPreloadPackageCacheKey);
-                    return null;
-                }
-
                 if (canPreloadApp() && parsedArgs.mPreloadApp != null) {
                     byte[] rawParcelData = Base64.getDecoder().decode(parsedArgs.mPreloadApp);
                     Parcel appInfoParcel = Parcel.obtain();
@@ -473,11 +465,6 @@ class ZygoteConnection {
 
     protected DataOutputStream getSocketOutputStream() {
         return mSocketOutStream;
-    }
-
-    protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
-            String cacheKey) {
-        throw new RuntimeException("Zygote does not support package preloading");
     }
 
     protected boolean canPreloadApp() {

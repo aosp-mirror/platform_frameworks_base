@@ -19,7 +19,18 @@ package com.android.systemui.keyboard.shortcut
 import android.app.Activity
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.keyboardShortcutHelperRewrite
-import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperRepository
+import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
+import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.CurrentAppShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.InputShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.KeyboardShortcutGroupsSource
+import com.android.systemui.keyboard.shortcut.data.source.MultitaskingShortcutsSource
+import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
+import com.android.systemui.keyboard.shortcut.qualifiers.AppCategoriesShortcuts
+import com.android.systemui.keyboard.shortcut.qualifiers.CurrentAppShortcuts
+import com.android.systemui.keyboard.shortcut.qualifiers.InputShortcuts
+import com.android.systemui.keyboard.shortcut.qualifiers.MultitaskingShortcuts
+import com.android.systemui.keyboard.shortcut.qualifiers.SystemShortcuts
 import com.android.systemui.keyboard.shortcut.ui.ShortcutHelperActivityStarter
 import com.android.systemui.keyboard.shortcut.ui.view.ShortcutHelperActivity
 import dagger.Binds
@@ -37,6 +48,28 @@ interface ShortcutHelperModule {
     @ClassKey(ShortcutHelperActivity::class)
     fun activity(impl: ShortcutHelperActivity): Activity
 
+    @Binds
+    @SystemShortcuts
+    fun systemShortcutsSource(impl: SystemShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @MultitaskingShortcuts
+    fun multitaskingShortcutsSource(impl: MultitaskingShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @CurrentAppShortcuts
+    fun currentAppShortcutsSource(impl: CurrentAppShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @InputShortcuts
+    fun inputShortcutsSources(impl: InputShortcutsSource): KeyboardShortcutGroupsSource
+
+    @Binds
+    @AppCategoriesShortcuts
+    fun appCategoriesShortcutsSource(
+        impl: AppCategoriesShortcutsSource
+    ): KeyboardShortcutGroupsSource
+
     companion object {
         @Provides
         @IntoMap
@@ -52,8 +85,8 @@ interface ShortcutHelperModule {
 
         @Provides
         @IntoMap
-        @ClassKey(ShortcutHelperRepository::class)
-        fun repo(implLazy: Lazy<ShortcutHelperRepository>): CoreStartable {
+        @ClassKey(ShortcutHelperStateRepository::class)
+        fun repo(implLazy: Lazy<ShortcutHelperStateRepository>): CoreStartable {
             return if (keyboardShortcutHelperRewrite()) {
                 implLazy.get()
             } else {

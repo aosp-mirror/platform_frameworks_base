@@ -27,5 +27,5 @@ fun interface ScreenshotRequestProcessor {
     suspend fun process(original: ScreenshotData): ScreenshotData
 }
 
-/** Exception thrown by [RequestProcessor] if something goes wrong. */
+/** Exception thrown by [ScreenshotRequestProcessor] if something goes wrong. */
 class RequestProcessorException(message: String) : IllegalStateException(message)

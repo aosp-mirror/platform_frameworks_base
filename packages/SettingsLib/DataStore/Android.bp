@@ -17,6 +17,7 @@ android_library {
         "androidx.annotation_annotation",
         "androidx.collection_collection-ktx",
         "androidx.core_core-ktx",
+        "error_prone_annotations",
         "guava",
     ],
     kotlincflags: ["-Xjvm-default=all"],

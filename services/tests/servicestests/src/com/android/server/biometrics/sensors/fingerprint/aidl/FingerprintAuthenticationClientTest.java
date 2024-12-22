@@ -117,7 +117,6 @@ public class FingerprintAuthenticationClientTest {
     private static final int TOUCH_Y = 20;
     private static final float TOUCH_MAJOR = 4.4f;
     private static final float TOUCH_MINOR = 5.5f;
-    private static final int FINGER_UP = 111;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -383,6 +382,8 @@ public class FingerprintAuthenticationClientTest {
 
     @Test
     public void subscribeContextAndStartHal() throws RemoteException {
+        when(mHal.authenticateWithContext(anyLong(), any())).thenReturn(mCancellationSignal);
+
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
@@ -689,6 +690,17 @@ public class FingerprintAuthenticationClientTest {
 
         verify(mLockoutTracker, never()).resetFailedAttemptsForUser(anyBoolean(), anyInt());
         verify(mLockoutTracker).addFailedAttemptForUser(USER_ID);
+    }
+
+    @Test
+    public void testCancelAuth_whenClientWaitingForCookie() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClientWithoutBackgroundAuth();
+        client.waitForCookie(mCallback);
+        client.cancel();
+        mLooper.moveTimeForward(10);
+        mLooper.dispatchAll();
+
+        verify(mCallback).onClientFinished(client, false);
     }
 
     private FingerprintAuthenticationClient createClient() throws RemoteException {

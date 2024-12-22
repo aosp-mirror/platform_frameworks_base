@@ -88,20 +88,19 @@ void nativeDestroy(JNIEnv* env, jclass clazz, jlong ptr) {
 
 void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<TunnelModeEnabledListener> listener = reinterpret_cast<TunnelModeEnabledListener*>(ptr);
-    if (SurfaceComposerClient::addTunnelModeEnabledListener(listener) != OK) {
-        constexpr auto error_msg = "Couldn't addTunnelModeEnabledListener";
-        ALOGE(error_msg);
-        jniThrowRuntimeException(env, error_msg);
+    status_t status = SurfaceComposerClient::addTunnelModeEnabledListener(listener);
+    if (status != OK) {
+        ALOGE("Couldn't addTunnelModeEnabledListener (%d)", status);
+        jniThrowRuntimeException(env, "Couldn't addTunnelModeEnabledListener");
     }
 }
 
 void nativeUnregister(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<TunnelModeEnabledListener> listener = reinterpret_cast<TunnelModeEnabledListener*>(ptr);
-
-    if (SurfaceComposerClient::removeTunnelModeEnabledListener(listener) != OK) {
-        constexpr auto error_msg = "Couldn't removeTunnelModeEnabledListener";
-        ALOGE(error_msg);
-        jniThrowRuntimeException(env, error_msg);
+    status_t status = SurfaceComposerClient::removeTunnelModeEnabledListener(listener);
+    if (status != OK) {
+        ALOGE("Couldn't removeTunnelModeEnabledListener (%d)", status);
+        jniThrowRuntimeException(env, "Couldn't removeTunnelModeEnabledListener");
     }
 }
 

@@ -72,6 +72,8 @@ public class PhoneMediaDevice extends MediaDevice {
             return context.getString(R.string.media_transfer_this_device_name_tv);
         } else if (isTablet()) {
             return context.getString(R.string.media_transfer_this_device_name_tablet);
+        } else if (inputRoutingEnabledAndIsDesktop()) {
+            return context.getString(R.string.media_transfer_this_device_name_desktop);
         } else {
             return context.getString(R.string.media_transfer_this_device_name);
         }
@@ -85,10 +87,18 @@ public class PhoneMediaDevice extends MediaDevice {
         switch (routeInfo.getType()) {
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
+                name =
+                        inputRoutingEnabledAndIsDesktop()
+                                ? context.getString(R.string.media_transfer_headphone_name)
+                                : context.getString(R.string.media_transfer_wired_headphone_name);
+                break;
             case TYPE_USB_DEVICE:
             case TYPE_USB_HEADSET:
             case TYPE_USB_ACCESSORY:
-                name = context.getString(R.string.media_transfer_wired_usb_device_name);
+                name =
+                        inputRoutingEnabledAndIsDesktop()
+                                ? context.getString(R.string.media_transfer_usb_speaker_name)
+                                : context.getString(R.string.media_transfer_wired_headphone_name);
                 break;
             case TYPE_DOCK:
                 name = context.getString(R.string.media_transfer_dock_speaker_device_name);
@@ -137,6 +147,16 @@ public class PhoneMediaDevice extends MediaDevice {
     static boolean isTablet() {
         return Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
                 .contains("tablet");
+    }
+
+    static boolean isDesktop() {
+        return Arrays.asList(SystemProperties.get("ro.build.characteristics").split(","))
+                .contains("desktop");
+    }
+
+    static boolean inputRoutingEnabledAndIsDesktop() {
+        return com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl()
+                && isDesktop();
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.

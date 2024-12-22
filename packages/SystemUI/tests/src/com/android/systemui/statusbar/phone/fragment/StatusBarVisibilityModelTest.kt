@@ -19,14 +19,17 @@ import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP
 import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.fragment.StatusBarVisibilityModel.Companion.createDefaultModel
 import com.android.systemui.statusbar.phone.fragment.StatusBarVisibilityModel.Companion.createModelFromFlags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class StatusBarVisibilityModelTest : SysuiTestCase() {
     @Test
     fun createDefaultModel_everythingEnabled() {
@@ -36,7 +39,8 @@ class StatusBarVisibilityModelTest : SysuiTestCase() {
             StatusBarVisibilityModel(
                 showClock = true,
                 showNotificationIcons = true,
-                showOngoingActivityChip = true,
+                showPrimaryOngoingActivityChip = true,
+                showSecondaryOngoingActivityChip = true,
                 showSystemInfo = true,
             )
 
@@ -72,17 +76,19 @@ class StatusBarVisibilityModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun createModelFromFlags_ongoingCallChipNotDisabled_showOngoingActivityChipTrue() {
+    fun createModelFromFlags_ongoingCallChipNotDisabled_showOngoingActivityChipsTrue() {
         val result = createModelFromFlags(disabled1 = 0, disabled2 = 0)
 
-        assertThat(result.showOngoingActivityChip).isTrue()
+        assertThat(result.showPrimaryOngoingActivityChip).isTrue()
+        assertThat(result.showSecondaryOngoingActivityChip).isTrue()
     }
 
     @Test
-    fun createModelFromFlags_ongoingCallChipDisabled_showOngoingActivityChipFalse() {
+    fun createModelFromFlags_ongoingCallChipDisabled_showOngoingActivityChipsFalse() {
         val result = createModelFromFlags(disabled1 = DISABLE_ONGOING_CALL_CHIP, disabled2 = 0)
 
-        assertThat(result.showOngoingActivityChip).isFalse()
+        assertThat(result.showPrimaryOngoingActivityChip).isFalse()
+        assertThat(result.showSecondaryOngoingActivityChip).isFalse()
     }
 
     @Test

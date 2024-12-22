@@ -19,6 +19,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.pm.UserInfo
 import android.graphics.drawable.Drawable
+import android.multiuser.Flags
 import android.os.UserManager
 import com.android.internal.util.UserIcons
 import com.android.settingslib.users.UserCreatingDialog
@@ -91,7 +92,17 @@ constructor(
         return userManager.isAdminUser
     }
 
-    fun isMultipleAdminEnabled(): Boolean {
-        return UserManager.isMultipleAdminEnabled()
+    /**
+     * Checks if the creation of a new admin user is allowed.
+     *
+     * @return `true` if creating a new admin is allowed, `false` otherwise.
+     */
+    fun canCreateAdminUser(): Boolean {
+        return if (Flags.unicornModeRefactoringForHsumReadOnly()) {
+            UserManager.isMultipleAdminEnabled() &&
+                !userManager.hasUserRestriction(UserManager.DISALLOW_GRANT_ADMIN)
+        } else {
+            UserManager.isMultipleAdminEnabled()
+        }
     }
 }

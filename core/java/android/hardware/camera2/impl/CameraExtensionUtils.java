@@ -113,32 +113,13 @@ public final class CameraExtensionUtils {
 
         SurfaceInfo surfaceInfo = querySurface(outputConfig.getSurface());
 
-        if (Flags.extension10Bit()) {
-            Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
-            if (supportedPostviewSizes.get(surfaceInfo.mFormat)
-                    .contains(postviewSize)) {
-                return outputConfig.getSurface();
-            } else {
-                throw new IllegalArgumentException("Postview size not supported!");
-            }
+        Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
+        if (supportedPostviewSizes.get(surfaceInfo.mFormat)
+                .contains(postviewSize)) {
+            return outputConfig.getSurface();
         } else {
-            if (surfaceInfo.mFormat == captureFormat) {
-                if (supportedPostviewSizes.containsKey(captureFormat)) {
-                    Size postviewSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
-                    if (supportedPostviewSizes.get(surfaceInfo.mFormat)
-                            .contains(postviewSize)) {
-                        return outputConfig.getSurface();
-                    } else {
-                        throw new IllegalArgumentException("Postview size not supported!");
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException("Postview format should be equivalent to "
-                        + " the capture format!");
-            }
+            throw new IllegalArgumentException("Postview size not supported!");
         }
-
-        return null;
     }
 
     public static Surface getBurstCaptureSurface(
@@ -148,9 +129,7 @@ public final class CameraExtensionUtils {
                 new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
         supportedCaptureOutputFormats.addAll(
                 CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
-        if (Flags.extension10Bit()) {
-            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
-        }
+        supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
         for (OutputConfiguration config : outputConfigs) {
             SurfaceInfo surfaceInfo = querySurface(config.getSurface());
             for (int supportedFormat : supportedCaptureOutputFormats.toArray()) {

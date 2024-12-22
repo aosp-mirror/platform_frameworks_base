@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
@@ -39,10 +38,8 @@ import kotlinx.coroutines.flow.Flow
 class DreamingToLockscreenTransitionViewModel
 @Inject
 constructor(
-    private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
-    fun startTransition() = fromDreamingTransitionInteractor.startToLockscreenTransition()
 
     private val transitionAnimation =
         animationFlow.setup(
@@ -95,5 +92,11 @@ constructor(
         )
 
     val deviceEntryBackgroundViewAlpha = transitionAnimation.immediatelyTransitionTo(1f)
-    override val deviceEntryParentViewAlpha = lockscreenAlpha
+    override val deviceEntryParentViewAlpha =
+        transitionAnimation.sharedFlow(
+            startTime = 233.milliseconds,
+            duration = 250.milliseconds,
+            onCancel = { 1f },
+            onStep = { it },
+        )
 }

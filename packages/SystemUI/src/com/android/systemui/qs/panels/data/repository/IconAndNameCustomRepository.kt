@@ -24,10 +24,10 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.panels.shared.model.EditTileData
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 @SysUISingleton
@@ -60,6 +60,7 @@ constructor(
                             Icon.Loaded(icon, ContentDescription.Loaded(label.toString())),
                             Text.Loaded(label.toString()),
                             Text.Loaded(appName.toString()),
+                            TileCategory.PROVIDED_BY_APP,
                         )
                     } else {
                         null

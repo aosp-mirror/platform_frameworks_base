@@ -17,8 +17,8 @@
 #include <androidfw/BigBuffer.h>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
-#include <vector>
 
 #include "android-base/logging.h"
 
@@ -78,10 +78,27 @@ void* BigBuffer::NextBlock(size_t* out_size) {
 
 std::string BigBuffer::to_string() const {
   std::string result;
+  result.reserve(size_);
   for (const Block& block : blocks_) {
     result.append(block.buffer.get(), block.buffer.get() + block.size);
   }
   return result;
+}
+
+void BigBuffer::AppendBuffer(BigBuffer&& buffer) {
+  std::move(buffer.blocks_.begin(), buffer.blocks_.end(), std::back_inserter(blocks_));
+  size_ += buffer.size_;
+  buffer.blocks_.clear();
+  buffer.size_ = 0;
+}
+
+void BigBuffer::BackUp(size_t count) {
+  Block& block = blocks_.back();
+  block.size -= count;
+  size_ -= count;
+  // BigBuffer is supposed to always give zeroed memory, but backing up usually means
+  // something has been already written into the block. Erase it.
+  std::fill_n(block.buffer.get() + block.size, count, 0);
 }
 
 }  // namespace android

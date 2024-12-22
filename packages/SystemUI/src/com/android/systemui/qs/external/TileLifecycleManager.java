@@ -50,10 +50,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.time.SystemClock;
 
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -95,6 +97,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
     private static final long DEFAULT_BIND_RETRY_DELAY = 5 * DateUtils.SECOND_IN_MILLIS;
+    private static final long ACTIVE_TILE_BIND_RETRY_DELAY = 1 * DateUtils.SECOND_IN_MILLIS;
     private static final long LOW_MEMORY_BIND_RETRY_DELAY = 20 * DateUtils.SECOND_IN_MILLIS;
     private static final long TILE_SERVICE_ONCLICK_ALLOW_LIST_DEFAULT_DURATION_MS = 15_000;
     private static final String PROPERTY_TILE_SERVICE_ONCLICK_ALLOW_LIST_DURATION =
@@ -107,6 +110,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final Intent mIntent;
     private final UserHandle mUser;
     private final DelayableExecutor mExecutor;
+    private final SystemClock mSystemClock;
     private final IBinder mToken = new Binder();
     private final PackageManagerAdapter mPackageManagerAdapter;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -120,7 +124,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IBinder mClickBinder;
 
     private int mBindTryCount;
-    private long mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
     private AtomicBoolean isDeathRebindScheduled = new AtomicBoolean(false);
     private AtomicBoolean mBound = new AtomicBoolean(false);
     private AtomicBoolean mPackageReceiverRegistered = new AtomicBoolean(false);
@@ -138,7 +141,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
             PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
             @Assisted Intent intent, @Assisted UserHandle user, ActivityManager activityManager,
-            IDeviceIdleController deviceIdleController, @Background DelayableExecutor executor) {
+            IDeviceIdleController deviceIdleController, @Background DelayableExecutor executor,
+            SystemClock systemClock) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
@@ -146,6 +150,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
         mExecutor = executor;
+        mSystemClock = systemClock;
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
         mActivityManager = activityManager;
@@ -188,10 +193,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public boolean isActiveTile() {
         try {
             ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
-                    META_DATA_QUERY_FLAGS);
-            return info.metaData != null
+                    META_DATA_QUERY_FLAGS, mUser.getIdentifier());
+            return info != null && info.metaData != null
                     && info.metaData.getBoolean(TileService.META_DATA_ACTIVE_TILE, false);
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (RemoteException e) {
             return false;
         }
     }
@@ -206,10 +211,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public boolean isToggleableTile() {
         try {
             ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
-                    META_DATA_QUERY_FLAGS);
-            return info.metaData != null
+                    META_DATA_QUERY_FLAGS, mUser.getIdentifier());
+            return info != null && info.metaData != null
                     && info.metaData.getBoolean(TileService.META_DATA_TOGGLEABLE_TILE, false);
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (RemoteException e) {
             return false;
         }
     }
@@ -222,6 +227,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mUnbindImmediate.set(true);
             setBindService(true);
         });
+    }
+
+    boolean isBound() {
+        return mBound.get();
     }
 
     @WorkerThread
@@ -432,25 +441,31 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             // If mBound is true (meaning that we should be bound), then reschedule binding for
             // later.
             if (mBound.get() && checkComponentState()) {
-                if (isDeathRebindScheduled.compareAndSet(false, true)) {
+                if (isDeathRebindScheduled.compareAndSet(false, true)) { // if already not scheduled
+
+
                     mExecutor.executeDelayed(() -> {
                         // Only rebind if we are supposed to, but remove the scheduling anyway.
                         if (mBound.get()) {
                             setBindService(true);
                         }
-                        isDeathRebindScheduled.set(false);
+                        isDeathRebindScheduled.set(false); // allow scheduling again
                     }, getRebindDelay());
                 }
             }
         });
     }
 
+    private long mLastRebind = 0;
     /**
      * @return the delay to automatically rebind after a service died. It provides a longer delay if
      * the device is a low memory state because the service is likely to get killed again by the
      * system. In this case we want to rebind later and not to cause a loop of a frequent rebinds.
+     * It also provides a longer delay if called quickly (a few seconds) after a first call.
      */
     private long getRebindDelay() {
+        final long now = mSystemClock.currentTimeMillis();
+
         final ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
         mActivityManager.getMemoryInfo(info);
 
@@ -458,7 +473,20 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (info.lowMemory) {
             delay = LOW_MEMORY_BIND_RETRY_DELAY;
         } else {
-            delay = mBindRetryDelay;
+            if (Flags.qsQuickRebindActiveTiles()) {
+                final long elapsedTimeSinceLastRebind = now - mLastRebind;
+                final boolean justAttemptedRebind =
+                        elapsedTimeSinceLastRebind < DEFAULT_BIND_RETRY_DELAY;
+                if (isActiveTile() && !justAttemptedRebind) {
+                    delay = ACTIVE_TILE_BIND_RETRY_DELAY;
+                } else {
+                    delay = DEFAULT_BIND_RETRY_DELAY;
+                }
+            } else {
+                delay = DEFAULT_BIND_RETRY_DELAY;
+            }
+
+            mLastRebind = now;
         }
         if (mDebug) Log.i(TAG, "Rebinding with a delay=" + delay + " - " + getComponent());
         return delay;

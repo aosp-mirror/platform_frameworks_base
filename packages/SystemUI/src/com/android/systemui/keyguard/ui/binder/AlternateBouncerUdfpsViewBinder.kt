@@ -26,6 +26,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -52,7 +53,11 @@ object AlternateBouncerUdfpsViewBinder {
                     }
                 }
 
-                launch("$TAG#viewModel.alpha") { viewModel.alpha.collect { view.alpha = it } }
+                if (SceneContainerFlag.isEnabled) {
+                    view.alpha = 1f
+                } else {
+                    launch("$TAG#viewModel.alpha") { viewModel.alpha.collect { view.alpha = it } }
+                }
             }
         }
 

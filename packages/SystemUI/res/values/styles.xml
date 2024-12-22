@@ -505,14 +505,14 @@
         <item name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="outline">?androidprv:attr/materialColorOutline</item>
 
-        <item name="shadeActive">@color/material_dynamic_primary90</item>
-        <item name="onShadeActive">@color/material_dynamic_primary10</item>
-        <item name="onShadeActiveVariant">@color/material_dynamic_primary30</item>
-        <item name="shadeInactive">@color/material_dynamic_neutral20</item>
-        <item name="onShadeInactive">@color/material_dynamic_neutral90</item>
-        <item name="onShadeInactiveVariant">@color/material_dynamic_neutral_variant80</item>
-        <item name="shadeDisabled">@color/shade_disabled</item>
-        <item name="underSurface">@color/material_dynamic_neutral0</item>
+        <item name="shadeActive">?androidprv:attr/customColorShadeActive</item>
+        <item name="onShadeActive">?androidprv:attr/customColorOnShadeActive</item>
+        <item name="onShadeActiveVariant">?androidprv:attr/customColorOnShadeActiveVariant</item>
+        <item name="shadeInactive">?androidprv:attr/customColorShadeInactive</item>
+        <item name="onShadeInactive">?androidprv:attr/customColorOnShadeInactive</item>
+        <item name="onShadeInactiveVariant">?androidprv:attr/customColorOnShadeInactiveVariant</item>
+        <item name="shadeDisabled">?androidprv:attr/customColorShadeDisabled</item>
+        <item name="underSurface">?androidprv:attr/customColorUnderSurface</item>
         <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
     </style>
 
@@ -1455,6 +1455,12 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 
+    <style name="BluetoothTileDialog.AudioSharingButton" parent="Widget.Dialog.Button">
+        <item name="android:background">@drawable/audio_sharing_btn_background</item>
+        <item name="android:textColor">@color/audio_sharing_btn_text_color</item>
+        <item name="android:drawableTint">@color/audio_sharing_btn_text_color</item>
+    </style>
+
     <style name="BroadcastDialog">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -1622,7 +1628,6 @@
         <item name="android:fontFamily">google-sans</item>
         <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
         <item name="android:textSize">@dimen/magnification_setting_text_size</item>
-        <item name="android:singleLine">true</item>
     </style>
 
     <style name="TextAppearance.MagnificationSetting.EditButton">

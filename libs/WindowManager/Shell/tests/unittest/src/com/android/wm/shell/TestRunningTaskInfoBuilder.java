@@ -47,6 +47,8 @@ public final class TestRunningTaskInfoBuilder {
     private ActivityManager.TaskDescription.Builder mTaskDescriptionBuilder = null;
     private final Point mPositionInParent = new Point();
     private boolean mIsVisible = false;
+    private boolean mIsTopActivityTransparent = false;
+    private int mNumActivities = 1;
     private long mLastActiveTime;
 
     public static WindowContainerToken createMockWCToken() {
@@ -113,6 +115,16 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setTopActivityTransparent(boolean isTopActivityTransparent) {
+        mIsTopActivityTransparent = isTopActivityTransparent;
+        return this;
+    }
+
+    public TestRunningTaskInfoBuilder setNumActivities(int numActivities) {
+        mNumActivities = numActivities;
+        return this;
+    }
+
     public TestRunningTaskInfoBuilder setLastActiveTime(long lastActiveTime) {
         mLastActiveTime = lastActiveTime;
         return this;
@@ -134,6 +146,8 @@ public final class TestRunningTaskInfoBuilder {
                 mTaskDescriptionBuilder != null ? mTaskDescriptionBuilder.build() : null;
         info.positionInParent = mPositionInParent;
         info.isVisible = mIsVisible;
+        info.isTopActivityTransparent = mIsTopActivityTransparent;
+        info.numActivities = mNumActivities;
         info.lastActiveTime = mLastActiveTime;
         return info;
     }

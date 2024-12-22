@@ -22,12 +22,12 @@ import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
@@ -41,7 +41,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -49,7 +48,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class GuestUserInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: UserManager
@@ -68,14 +67,13 @@ class GuestUserInteractorTest : SysuiTestCase() {
     private val testScope = TestScope(testDispatcher)
     private lateinit var underTest: GuestUserInteractor
 
-    private lateinit var repository: FakeUserRepository
+    private val repository = FakeUserRepository()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(manager.createGuest(any())).thenReturn(GUEST_USER_INFO)
 
-        repository = FakeUserRepository()
         repository.setUserInfos(ALL_USERS)
 
         underTest = initGuestUserInteractor(context)

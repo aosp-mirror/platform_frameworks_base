@@ -65,6 +65,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -184,7 +185,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private GlobalSettings mGlobalSettings;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private ConnectivityManager.NetworkCallback mConnectivityManagerNetworkCallback;
-    private WindowManager mWindowManager;
+    private ViewCaptureAwareWindowManager mWindowManager;
     private ToastFactory mToastFactory;
     private SignalDrawable mSignalDrawable;
     private SignalDrawable mSecondarySignalDrawable; // For the secondary mobile data sub in DSDS
@@ -246,7 +247,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             @Main Handler handler, @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher, KeyguardUpdateMonitor keyguardUpdateMonitor,
             GlobalSettings globalSettings, KeyguardStateController keyguardStateController,
-            WindowManager windowManager, ToastFactory toastFactory,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager, ToastFactory toastFactory,
             @Background Handler workerHandler,
             CarrierConfigTracker carrierConfigTracker,
             LocationController locationController,
@@ -278,7 +279,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mAccessPointController = accessPointController;
         mWifiIconInjector = new WifiUtils.InternetIconInjector(mContext);
         mConnectivityManagerNetworkCallback = new DataConnectivityListener();
-        mWindowManager = windowManager;
+        mWindowManager = viewCaptureAwareWindowManager;
         mToastFactory = toastFactory;
         mSignalDrawable = new SignalDrawable(mContext);
         mSecondarySignalDrawable = new SignalDrawable(mContext);
@@ -310,10 +311,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mConfig = MobileMappings.Config.readConfig(mContext);
         mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
         mSubIdTelephonyManagerMap.put(mDefaultDataSubId, mTelephonyManager);
-        InternetTelephonyCallback telephonyCallback =
-                new InternetTelephonyCallback(mDefaultDataSubId);
-        mSubIdTelephonyCallbackMap.put(mDefaultDataSubId, telephonyCallback);
-        mTelephonyManager.registerTelephonyCallback(mExecutor, telephonyCallback);
+        registerInternetTelephonyCallback(mTelephonyManager, mDefaultDataSubId);
         // Listen the connectivity changes
         mConnectivityManager.registerDefaultNetworkCallback(mConnectivityManagerNetworkCallback);
         mCanConfigWifi = canConfigWifi;
@@ -345,7 +343,23 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mCallback = null;
     }
 
-    @VisibleForTesting
+    /**
+     * This is to generate and register the new callback to Telephony for uncached subscription id,
+     * then cache it. Telephony also cached this callback into
+     * {@link com.android.server.TelephonyRegistry}, so if subscription id and callback were cached
+     * already, it shall do nothing to avoid registering redundant callback to Telephony.
+     */
+    private void registerInternetTelephonyCallback(
+            TelephonyManager telephonyManager, int subId) {
+        if (mSubIdTelephonyCallbackMap.containsKey(subId)) {
+            // Avoid to generate and register unnecessary callback to Telephony.
+            return;
+        }
+        InternetTelephonyCallback telephonyCallback = new InternetTelephonyCallback(subId);
+        mSubIdTelephonyCallbackMap.put(subId, telephonyCallback);
+        telephonyManager.registerTelephonyCallback(mExecutor, telephonyCallback);
+    }
+
     boolean isAirplaneModeEnabled() {
         return mGlobalSettings.getInt(Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
     }
@@ -673,9 +687,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             int subId = subInfo.getSubscriptionId();
             if (mSubIdTelephonyManagerMap.get(subId) == null) {
                 TelephonyManager secondaryTm = mTelephonyManager.createForSubscriptionId(subId);
-                InternetTelephonyCallback telephonyCallback = new InternetTelephonyCallback(subId);
-                secondaryTm.registerTelephonyCallback(mExecutor, telephonyCallback);
-                mSubIdTelephonyCallbackMap.put(subId, telephonyCallback);
+                registerInternetTelephonyCallback(secondaryTm, subId);
                 mSubIdTelephonyManagerMap.put(subId, secondaryTm);
             }
             return subId;
@@ -735,7 +747,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         // Set network description for the carrier network when connecting to the carrier network
         // under the airplane mode ON.
         if (activeNetworkIsCellular() || isCarrierNetworkActive()) {
-            summary = context.getString(R.string.preference_summary_default_combination,
+            summary = context.getString(
+                    com.android.settingslib.R.string.preference_summary_default_combination,
                     context.getString(
                             isForDds // if nonDds is active, explains Dds status as poor connection
                                     ? (isOnNonDds ? R.string.mobile_data_poor_connection
@@ -1350,6 +1363,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (DEBUG) {
             Log.d(TAG, "DDS: defaultDataSubId:" + defaultDataSubId);
         }
+
         if (SubscriptionManager.isUsableSubscriptionId(defaultDataSubId)) {
             // clean up old defaultDataSubId
             TelephonyCallback oldCallback = mSubIdTelephonyCallbackMap.get(mDefaultDataSubId);
@@ -1365,9 +1379,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             // create for new defaultDataSubId
             mTelephonyManager = mTelephonyManager.createForSubscriptionId(defaultDataSubId);
             mSubIdTelephonyManagerMap.put(defaultDataSubId, mTelephonyManager);
-            InternetTelephonyCallback newCallback = new InternetTelephonyCallback(defaultDataSubId);
-            mSubIdTelephonyCallbackMap.put(defaultDataSubId, newCallback);
-            mTelephonyManager.registerTelephonyCallback(mHandler::post, newCallback);
+            registerInternetTelephonyCallback(mTelephonyManager, defaultDataSubId);
             mCallback.onSubscriptionsChanged(defaultDataSubId);
         }
         mDefaultDataSubId = defaultDataSubId;

@@ -17,10 +17,7 @@
 package com.android.credentialmanager.ui.screens.single.signInWithProvider
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.AccountRow
@@ -47,7 +44,6 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 fun SignInWithProviderScreen(
     entry: CredentialEntryInfo,
     columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
     flowEngine: FlowEngine,
 ) {
     SingleAccountScreen(
@@ -59,20 +55,19 @@ fun SignInWithProviderScreen(
         },
         accountContent = {
             val displayName = entry.displayName
-            if (displayName == null ||
+            if (displayName.isNullOrBlank() ||
                 entry.displayName.equals(entry.userName, ignoreCase = true)) {
                 AccountRow(
                     primaryText = entry.userName,
                 )
             } else {
                 AccountRow(
-                    primaryText = displayName,
-                    secondaryText = entry.userName,
+                    primaryText = entry.userName,
+                    secondaryText = displayName,
                 )
             }
         },
         columnState = columnState,
-        modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
             val selectEntry = flowEngine.getEntrySelector()

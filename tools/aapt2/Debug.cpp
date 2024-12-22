@@ -763,10 +763,35 @@ class ChunkPrinter {
     pool->setTo(chunk, android::util::DeviceToHost32(
                            (reinterpret_cast<const ResChunk_header*>(chunk))->size));
 
-    printer_->Print("\n");
+    printer_->Print(StringPrintf(" strings: %zd styles %zd flags: %s|%s\n", pool->size(),
+                                 pool->styleCount(), pool->isUTF8() ? "UTF-8" : "UTF-16",
+                                 pool->isSorted() ? "SORTED" : "NON-SORTED"));
 
     for (size_t i = 0; i < pool->size(); i++) {
       printer_->Print(StringPrintf("#%zd : %s\n", i, android::util::GetString(*pool, i).c_str()));
+      if (i < pool->styleCount()) {
+        printer_->Print(" [Style] ");
+        auto maybe_style = pool->styleAt(i);
+        if (!maybe_style) {
+          printer_->Print("??? missing\n");
+        } else {
+          std::vector<const ResStringPool_span*> spans;
+          for (auto style = maybe_style.value().unsafe_ptr();
+               style->name.index != android::ResStringPool_span::END; ++style) {
+            spans.push_back(style);
+          }
+          printer_->Print(StringPrintf("(%zd)", spans.size()));
+          if (!spans.empty()) {
+            printer_->Print(" :");
+            for (const auto& span : spans) {
+              printer_->Print(StringPrintf(
+                  " %s:%u,%u", android::util::GetString(*pool, span->name.index).c_str(),
+                  span->firstChar, span->lastChar));
+            }
+            printer_->Print("\n");
+          }
+        }
+      }
     }
   }
 

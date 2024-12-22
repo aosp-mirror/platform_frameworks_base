@@ -58,51 +58,50 @@ public class ProtoLogImplTest {
     public void d_logCalled() {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogImpl.d(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
+        ProtoLogImpl.d(TestProtoLogGroup.TEST_GROUP, 1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.DEBUG), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     @Test
     public void v_logCalled() {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogImpl.v(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
+        ProtoLogImpl.v(TestProtoLogGroup.TEST_GROUP, 1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.VERBOSE), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     @Test
     public void i_logCalled() {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogImpl.i(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
+        ProtoLogImpl.i(TestProtoLogGroup.TEST_GROUP, 1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.INFO), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     @Test
     public void w_logCalled() {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogImpl.w(TestProtoLogGroup.TEST_GROUP, 1234,
-                4321, "test %d");
+        ProtoLogImpl.w(TestProtoLogGroup.TEST_GROUP, 1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.WARN), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     @Test
     public void e_logCalled() {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogImpl.e(TestProtoLogGroup.TEST_GROUP, 1234, 4321, "test %d");
+        ProtoLogImpl.e(TestProtoLogGroup.TEST_GROUP, 1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.ERROR), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     @Test
@@ -110,10 +109,10 @@ public class ProtoLogImplTest {
         IProtoLog mockedProtoLog = mock(IProtoLog.class);
         ProtoLogImpl.setSingleInstance(mockedProtoLog);
         ProtoLogImpl.wtf(TestProtoLogGroup.TEST_GROUP,
-                1234, 4321, "test %d");
+                1234, 4321);
         verify(mockedProtoLog).log(eq(LogLevel.WTF), eq(
                 TestProtoLogGroup.TEST_GROUP),
-                eq(1234L), eq(4321), eq("test %d"), eq(new Object[]{}));
+                eq(1234L), eq(4321), eq(new Object[]{}));
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

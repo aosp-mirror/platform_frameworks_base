@@ -68,26 +68,26 @@ public class CustomEnergyConsumerPowerCalculatorTest {
         mStatsRule.apply(calculator);
 
         UidBatteryConsumer uid = mStatsRule.getUidBatteryConsumer(APP_UID);
-        assertThat(uid.getConsumedPowerForCustomComponent(
+        assertThat(uid.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
                 .isWithin(PRECISION).of(8.333333);
-        assertThat(uid.getConsumedPowerForCustomComponent(
+        assertThat(uid.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
                 .isWithin(PRECISION).of(33.33333);
 
         final BatteryConsumer deviceBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
-        assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(deviceBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
                 .isWithin(PRECISION).of(27.77777);
-        assertThat(deviceBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(deviceBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
                 .isWithin(PRECISION).of(55.55555);
 
         final BatteryConsumer appsBatteryConsumer = mStatsRule.getDeviceBatteryConsumer();
-        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(appsBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID))
                 .isWithin(PRECISION).of(27.77777);
-        assertThat(appsBatteryConsumer.getConsumedPowerForCustomComponent(
+        assertThat(appsBatteryConsumer.getConsumedPower(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1))
                 .isWithin(PRECISION).of(55.55555);
     }

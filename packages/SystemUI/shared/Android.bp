@@ -48,7 +48,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.aidl",
         ":wm_shell-aidls",
-        ":wm_shell_util-sources",
+        ":wm_shell-shared-aidls",
     ],
     static_libs: [
         "BiometricsSharedLib",
@@ -69,6 +69,7 @@ android_library {
         "dagger2",
         "jsr330",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
+        "//frameworks/libs/systemui:msdl",
     ],
     resource_dirs: [
         "res",

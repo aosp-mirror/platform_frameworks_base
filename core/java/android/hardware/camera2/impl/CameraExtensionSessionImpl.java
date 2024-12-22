@@ -190,9 +190,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
         supportedCaptureOutputFormats.addAll(
                 CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
-        if (Flags.extension10Bit()) {
-            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
-        }
+        supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
         for (int format : supportedCaptureOutputFormats.toArray()) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
@@ -401,7 +399,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
-                } else if (Flags.extension10Bit() && mClientPostviewSurface != null) {
+                } else if (mClientPostviewSurface != null) {
                     // Handles case when postview is JPEG and capture is YUV
                     CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
                             CameraExtensionUtils.querySurface(mClientPostviewSurface);

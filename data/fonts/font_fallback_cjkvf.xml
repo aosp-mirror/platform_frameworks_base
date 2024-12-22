@@ -304,7 +304,7 @@
         <font postScriptName="NotoSansBengali-Regular" supportedAxes="wght">
             NotoSansBengali-VF.ttf
         </font>
-        <font fallbackFor="serif" postScriptName="NotoSerifBengali-Regular">
+        <font fallbackFor="serif" postScriptName="NotoSerifBengali-Regular" supportedAxes="wght">
             NotoSerifBengali-VF.ttf
         </font>
     </family>
@@ -354,7 +354,7 @@
         <font postScriptName="NotoSansSinhala-Regular" supportedAxes="wght">
             NotoSansSinhala-VF.ttf
         </font>
-        <font fallbackFor="serif" postScriptName="NotoSerifSinhala-Regular">
+        <font fallbackFor="serif" postScriptName="NotoSerifSinhala-Regular" supportedAxes="wght">
             NotoSerifSinhala-VF.ttf
         </font>
     </family>
@@ -943,23 +943,23 @@
             NotoSansMedefaidrin-VF.ttf
         </font>
     </family>
-    <family lang="und-Soyo" supportedAxes="wght">
-        <font postScriptName="NotoSansSoyombo-Regular">
+    <family lang="und-Soyo">
+        <font postScriptName="NotoSansSoyombo-Regular" supportedAxes="wght">
             NotoSansSoyombo-VF.ttf
         </font>
     </family>
-    <family lang="und-Takr" supportedAxes="wght">
-        <font postScriptName="NotoSansTakri-Regular">
+    <family lang="und-Takr">
+        <font postScriptName="NotoSansTakri-Regular" supportedAxes="wght">
             NotoSansTakri-VF.ttf
         </font>
     </family>
-    <family lang="und-Hmnp" supportedAxes="wght">
-        <font postScriptName="NotoSerifHmongNyiakeng-Regular">
+    <family lang="und-Hmnp">
+        <font postScriptName="NotoSerifHmongNyiakeng-Regular" supportedAxes="wght">
             NotoSerifNyiakengPuachueHmong-VF.ttf
         </font>
     </family>
-    <family lang="und-Yezi" supportedAxes="wght">
-        <font postScriptName="NotoSerifYezidi-Regular">
+    <family lang="und-Yezi">
+        <font postScriptName="NotoSerifYezidi-Regular" supportedAxes="wght">
             NotoSerifYezidi-VF.ttf
         </font>
     </family>

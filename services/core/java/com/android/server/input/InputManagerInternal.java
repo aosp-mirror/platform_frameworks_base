@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
@@ -227,4 +228,35 @@ public abstract class InputManagerInternal {
      *     since boot.
      */
     public abstract int getLastUsedInputDeviceId();
+
+    /**
+     * Notify key gesture was completed by the user.
+     *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
+            @KeyGestureEvent.KeyGestureType int event);
+
+    /**
+     * Notify that a key gesture was detected by another system component, and it should be handled
+     * appropriately by KeyGestureController.
+     *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
+            int modifierState, @KeyGestureEvent.KeyGestureType int event);
 }

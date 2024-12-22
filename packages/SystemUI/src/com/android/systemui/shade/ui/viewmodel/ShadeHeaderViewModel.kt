@@ -24,8 +24,7 @@ import android.icu.text.DisplayContext
 import android.os.UserHandle
 import android.provider.Settings
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
@@ -38,44 +37,40 @@ import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Models UI state for the shade header. */
-@SysUISingleton
 class ShadeHeaderViewModel
-@Inject
+@AssistedInject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    context: Context,
+    private val context: Context,
     private val activityStarter: ActivityStarter,
     private val sceneInteractor: SceneInteractor,
-    shadeInteractor: ShadeInteractor,
-    mobileIconsInteractor: MobileIconsInteractor,
+    private val shadeInteractor: ShadeInteractor,
+    private val mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
     private val privacyChipInteractor: PrivacyChipInteractor,
     private val clockInteractor: ShadeHeaderClockInteractor,
-    broadcastDispatcher: BroadcastDispatcher,
-) {
+    private val broadcastDispatcher: BroadcastDispatcher,
+) : ExclusiveActivatable() {
     /** True if there is exactly one mobile connection. */
     val isSingleCarrier: StateFlow<Boolean> = mobileIconsInteractor.isSingleCarrier
 
+    private val _mobileSubIds = MutableStateFlow(emptyList<Int>())
     /** The list of subscription Ids for current mobile connections. */
-    val mobileSubIds =
-        mobileIconsInteractor.filteredSubscriptions
-            .map { list -> list.map { it.subscriptionId } }
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), emptyList())
+    val mobileSubIds: StateFlow<List<Int>> = _mobileSubIds.asStateFlow()
 
     /** The list of PrivacyItems to be displayed by the privacy chip. */
     val privacyItems: StateFlow<List<PrivacyItem>> = privacyChipInteractor.privacyItems
@@ -94,11 +89,9 @@ constructor(
     /** Whether or not the privacy chip is enabled in the device privacy config. */
     val isPrivacyChipEnabled: StateFlow<Boolean> = privacyChipInteractor.isChipEnabled
 
+    private val _isDisabled = MutableStateFlow(false)
     /** Whether or not the Shade Header should be disabled based on disableFlags. */
-    val isDisabled: StateFlow<Boolean> =
-        shadeInteractor.isQsEnabled
-            .map { !it }
-            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+    val isDisabled: StateFlow<Boolean> = _isDisabled.asStateFlow()
 
     private val longerPattern = context.getString(R.string.abbrev_wday_month_day_no_year_alarm)
     private val shorterPattern = context.getString(R.string.abbrev_month_day_no_year)
@@ -111,26 +104,40 @@ constructor(
     private val _longerDateText: MutableStateFlow<String> = MutableStateFlow("")
     val longerDateText: StateFlow<String> = _longerDateText.asStateFlow()
 
-    init {
-        broadcastDispatcher
-            .broadcastFlow(
-                filter =
-                    IntentFilter().apply {
-                        addAction(Intent.ACTION_TIME_TICK)
-                        addAction(Intent.ACTION_TIME_CHANGED)
-                        addAction(Intent.ACTION_TIMEZONE_CHANGED)
-                        addAction(Intent.ACTION_LOCALE_CHANGED)
-                    },
-                user = UserHandle.SYSTEM,
-                map = { intent, _ ->
-                    intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
-                        intent.action == Intent.ACTION_LOCALE_CHANGED
-                }
-            )
-            .onEach { invalidateFormats -> updateDateTexts(invalidateFormats) }
-            .launchIn(applicationScope)
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                broadcastDispatcher
+                    .broadcastFlow(
+                        filter =
+                            IntentFilter().apply {
+                                addAction(Intent.ACTION_TIME_TICK)
+                                addAction(Intent.ACTION_TIME_CHANGED)
+                                addAction(Intent.ACTION_TIMEZONE_CHANGED)
+                                addAction(Intent.ACTION_LOCALE_CHANGED)
+                            },
+                        user = UserHandle.SYSTEM,
+                        map = { intent, _ ->
+                            intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
+                                intent.action == Intent.ACTION_LOCALE_CHANGED
+                        }
+                    )
+                    .onEach { invalidateFormats -> updateDateTexts(invalidateFormats) }
+                    .launchIn(this)
+            }
 
-        applicationScope.launch { updateDateTexts(false) }
+            launch { updateDateTexts(false) }
+
+            launch {
+                mobileIconsInteractor.filteredSubscriptions
+                    .map { list -> list.map { it.subscriptionId } }
+                    .collect { _mobileSubIds.value = it }
+            }
+
+            launch { shadeInteractor.isQsEnabled.map { !it }.collect { _isDisabled.value = it } }
+
+            awaitCancellation()
+        }
     }
 
     /** Notifies that the privacy chip was clicked. */
@@ -181,5 +188,10 @@ constructor(
         // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
         format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE)
         return format
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): ShadeHeaderViewModel
     }
 }

@@ -18,6 +18,7 @@ package com.android.server.inputmethod;
 
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -32,6 +33,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManagerInternal;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -70,7 +73,7 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
-    @UserIdInt final int mUserId;
+    @UserIdInt private final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final AutofillSuggestionsController mAutofillController;
@@ -95,6 +98,20 @@ final class InputMethodBindingController {
     /** The display id for which the latest startInput was called. */
     @GuardedBy("ImfLock.class") private int mDisplayIdToShowIme = INVALID_DISPLAY;
     @GuardedBy("ImfLock.class") private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
+
+    /**
+     * A set of status bits regarding the active IME.
+     *
+     * <em>Do not update this value outside of {@link #setImeWindowVis} and
+     * {@link InputMethodBindingController#unbindCurrentMethod}.</em>
+     */
+    @ImeWindowVisibility
+    @GuardedBy("ImfLock.class")
+    private int mImeWindowVis;
+
+    @BackDispositionMode
+    @GuardedBy("ImfLock.class")
+    private int mBackDisposition = BACK_DISPOSITION_DEFAULT;
 
     @Nullable private CountDownLatch mLatchForTesting;
 
@@ -382,9 +399,10 @@ final class InputMethodBindingController {
                         InputMethodManager
                                 .invalidateLocalConnectionlessStylusHandwritingAvailabilityCaches();
                     }
-                    mService.initializeImeLocked(mCurMethod, mCurToken);
+                    mService.initializeImeLocked(mCurMethod, mCurToken,
+                            InputMethodBindingController.this);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
-                    mService.reRequestCurrentClientSessionLocked();
+                    mService.reRequestCurrentClientSessionLocked(mUserId);
                     mAutofillController.performOnCreateInlineSuggestionsRequest();
                 }
 
@@ -436,8 +454,9 @@ final class InputMethodBindingController {
                     // should now try to restart the service for us.
                     mLastBindTime = SystemClock.uptimeMillis();
                     clearCurMethodAndSessions();
-                    mService.clearInputShownLocked();
-                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
+                    final var userData = mService.getUserData(mUserId);
+                    userData.mVisibilityStateComputer.setInputShown(false);
+                    mService.unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME, mUserId);
                 }
             }
         }
@@ -473,7 +492,7 @@ final class InputMethodBindingController {
 
         if (getCurToken() != null) {
             removeCurrentToken();
-            mService.resetSystemUiLocked();
+            mService.resetSystemUiLocked(this);
             mAutofillController.onResetSystemUi();
         }
 
@@ -483,7 +502,7 @@ final class InputMethodBindingController {
 
     @GuardedBy("ImfLock.class")
     private void clearCurMethodAndSessions() {
-        mService.clearClientSessionsLocked();
+        mService.clearClientSessionsLocked(this);
         mCurMethod = null;
         mCurMethodUid = Process.INVALID_UID;
     }
@@ -638,6 +657,36 @@ final class InputMethodBindingController {
         }
     }
 
+    /**
+     * Returns the current {@link InputMethodSubtype}.
+     *
+     * <p>Also this method has had questionable behaviors:</p>
+     * <ul>
+     *     <li>Calling this method can update {@link #mCurrentSubtype}.</li>
+     *     <li>This method may return {@link #mCurrentSubtype} as-is, even if it does not belong to
+     *     the current IME.</li>
+     * </ul>
+     * <p>TODO(b/347083680): Address above issues.</p>
+     */
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodSubtype getCurrentInputMethodSubtype() {
+        final var selectedMethodId = getSelectedMethodId();
+        if (selectedMethodId == null) {
+            return null;
+        }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(mUserId);
+        final InputMethodInfo imi = settings.getMethodMap().get(selectedMethodId);
+        if (imi == null || imi.getSubtypeCount() == 0) {
+            return null;
+        }
+        final var subtype = SubtypeUtils.getCurrentInputMethodSubtype(imi, settings,
+                mCurrentSubtype);
+        mCurrentSubtype = subtype;
+        return subtype;
+    }
+
+
     @GuardedBy("ImfLock.class")
     void setDisplayIdToShowIme(int displayId) {
         mDisplayIdToShowIme = displayId;
@@ -656,5 +705,32 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     int getDeviceIdToShowIme() {
         return mDeviceIdToShowIme;
+    }
+
+    @UserIdInt
+    int getUserId() {
+        return mUserId;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setImeWindowVis(@ImeWindowVisibility int imeWindowVis) {
+        mImeWindowVis = imeWindowVis;
+    }
+
+    @ImeWindowVisibility
+    @GuardedBy("ImfLock.class")
+    int getImeWindowVis() {
+        return mImeWindowVis;
+    }
+
+    @BackDispositionMode
+    @GuardedBy("ImfLock.class")
+    int getBackDisposition() {
+        return mBackDisposition;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void setBackDisposition(@BackDispositionMode int backDisposition) {
+        mBackDisposition = backDisposition;
     }
 }

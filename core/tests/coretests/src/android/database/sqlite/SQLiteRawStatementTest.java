@@ -27,12 +27,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.SystemClock;
-import android.test.AndroidTestCase;
 import android.util.Log;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -996,6 +995,33 @@ public class SQLiteRawStatementTest {
             assertTrue(s.step());
             assertEquals(2, s.getColumnInt(0));
             assertEquals(cat, s.getColumnName(0));
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * This test verifies that the JNI exception thrown because of a bad column is actually thrown
+     * and does not crash the VM.
+     */
+    @Test
+    public void testJniExceptions() {
+        // Create the t1 table.
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (i int, j int);");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            s.step();
+            s.getColumnText(5); // out-of-range column
+            fail("JNI exception not thrown");
+        } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
+            // Passing case.
         } finally {
             mDatabase.endTransaction();
         }

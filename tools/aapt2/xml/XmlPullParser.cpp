@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#include <iostream>
+#include "xml/XmlPullParser.h"
+
+#include <algorithm>
 #include <string>
+#include <tuple>
 
 #include "util/Util.h"
-#include "xml/XmlPullParser.h"
 #include "xml/XmlUtil.h"
 
 using ::android::InputStream;
@@ -307,7 +309,14 @@ void XMLCALL XmlPullParser::EndCdataSectionHandler(void* user_data) {
 }
 
 std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, StringPiece name) {
-  auto iter = parser->FindAttribute("", name);
+  return FindAttribute(parser, "", name);
+}
+
+std::optional<android::StringPiece> FindAttribute(const XmlPullParser* parser,
+                                                  android::StringPiece namespace_uri,
+                                                  android::StringPiece name) {
+  auto iter = parser->FindAttribute(namespace_uri, name);
+
   if (iter != parser->end_attributes()) {
     return StringPiece(util::TrimWhitespace(iter->value));
   }
@@ -323,6 +332,19 @@ std::optional<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser, St
     }
   }
   return {};
+}
+
+XmlPullParser::const_iterator XmlPullParser::FindAttribute(android::StringPiece namespace_uri,
+                                                           android::StringPiece name) const {
+  const auto end_iter = end_attributes();
+  const auto iter = std::lower_bound(begin_attributes(), end_iter, std::tuple(namespace_uri, name),
+                                     [](const Attribute& attr, const auto& rhs) {
+                                       return std::tie(attr.namespace_uri, attr.name) < rhs;
+                                     });
+  if (iter != end_iter && namespace_uri == iter->namespace_uri && name == iter->name) {
+    return iter;
+  }
+  return end_iter;
 }
 
 }  // namespace xml

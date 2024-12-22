@@ -16,15 +16,11 @@
 
 package com.android.systemui.media.controls.ui.viewmodel
 
-import android.annotation.ColorInt
 import android.graphics.drawable.Drawable
 
 /** Models UI state for media guts menu */
 data class GutsViewModel(
     val gutsText: CharSequence,
-    @ColorInt val textPrimaryColor: Int,
-    @ColorInt val accentPrimaryColor: Int,
-    @ColorInt val surfaceColor: Int,
     val isDismissEnabled: Boolean = true,
     val onDismissClicked: () -> Unit,
     val cancelTextBackground: Drawable?,

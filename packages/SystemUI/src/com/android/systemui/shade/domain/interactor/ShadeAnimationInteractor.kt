@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -38,4 +39,7 @@ abstract class ShadeAnimationInteractor(
      * that is not considered "closing".
      */
     abstract val isAnyCloseAnimationRunning: StateFlow<Boolean>
+
+    /** Whether a short animation to expand or collapse is running after user input has ended. */
+    abstract val isAnyFlingAnimationRunning: Flow<Boolean>
 }

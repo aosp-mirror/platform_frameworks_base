@@ -140,12 +140,50 @@ public final class UidBatteryConsumer extends BatteryConsumer {
                     skipEmptyComponents);
             appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_CACHED,
                     skipEmptyComponents);
-            pw.print(sb);
+            pw.println(sb);
+        } else {
+            pw.println();
         }
 
-        pw.print(" ( ");
-        mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
-        pw.print(" ) ");
+        pw.print("      ");
+        mPowerComponents.dump(pw, SCREEN_STATE_ANY, POWER_STATE_ANY, skipEmptyComponents);
+
+        if (mData.layout.powerStateDataIncluded || mData.layout.screenStateDataIncluded) {
+            for (int powerState = 0; powerState < POWER_STATE_COUNT; powerState++) {
+                if (mData.layout.powerStateDataIncluded && powerState == POWER_STATE_UNSPECIFIED) {
+                    continue;
+                }
+
+                for (int screenState = 0; screenState < SCREEN_STATE_COUNT; screenState++) {
+                    if (mData.layout.screenStateDataIncluded
+                            && screenState == POWER_STATE_UNSPECIFIED) {
+                        continue;
+                    }
+
+                    final double consumedPower = mPowerComponents.getConsumedPower(
+                            POWER_COMPONENT_ANY,
+                            PROCESS_STATE_ANY, screenState, powerState);
+                    if (consumedPower == 0) {
+                        continue;
+                    }
+
+                    pw.print("      (");
+                    if (powerState != POWER_STATE_UNSPECIFIED) {
+                        pw.print(BatteryConsumer.powerStateToString(powerState));
+                    }
+                    if (screenState != SCREEN_STATE_UNSPECIFIED) {
+                        if (powerState != POWER_STATE_UNSPECIFIED) {
+                            pw.print(", ");
+                        }
+                        pw.print("screen ");
+                        pw.print(BatteryConsumer.screenStateToString(screenState));
+                    }
+                    pw.print(") ");
+                    mPowerComponents.dump(pw, screenState, powerState,
+                            skipEmptyComponents  /* skipTotalPowerComponent */);
+                }
+            }
+        }
     }
 
     private void appendProcessStateData(StringBuilder sb, @ProcessState int processState,
@@ -158,10 +196,6 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         sb.append(" ").append(processStateToString(processState)).append(": ")
                 .append(BatteryStats.formatCharge(power));
-    }
-
-    static UidBatteryConsumer create(BatteryConsumerData data) {
-        return new UidBatteryConsumer(data);
     }
 
     /** Serializes this object to XML */

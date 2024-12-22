@@ -16,14 +16,16 @@
 
 package com.android.server.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import android.app.Application;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.net.Uri;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -63,7 +65,13 @@ public class EventConditionProviderTest extends UiServiceTestCase {
         service.onCreate();
         service.onBind(startIntent);
         mService = spy(service);
-   }
+    }
+
+    @Test
+    public void getComponent_returnsComponent() {
+        assertThat(mService.getComponent()).isEqualTo(new ComponentName("android",
+                "com.android.server.notification.EventConditionProvider"));
+    }
 
     @Test
     public void testGetPendingIntent() {

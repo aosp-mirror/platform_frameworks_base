@@ -102,9 +102,6 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
             new BooleanPolicySerializer());
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (packageName and permission name)
-    // when reading the policies from xml.
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
                     new PackagePermissionPolicyKey(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY),
@@ -123,15 +120,10 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setPermissionGrantState,
                     new IntegerPolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code packageName} or {@code permissionName} will return a
-     * {@link #GENERIC_PERMISSION_GRANT}.
-     */
     static PolicyDefinition<Integer> PERMISSION_GRANT(
             @NonNull String packageName, @NonNull String permissionName) {
-        if (packageName == null || permissionName == null) {
-            return GENERIC_PERMISSION_GRANT;
-        }
+        Objects.requireNonNull(packageName, "packageName must not be null");
+        Objects.requireNonNull(permissionName, "permissionName must not be null");
         return GENERIC_PERMISSION_GRANT.createPolicyDefinition(
                 new PackagePermissionPolicyKey(
                         DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
@@ -171,9 +163,6 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setUserControlDisabledPackages,
                     new PackageSetPolicySerializer());
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
-    // xml.
     static PolicyDefinition<ComponentName> GENERIC_PERSISTENT_PREFERRED_ACTIVITY =
             new PolicyDefinition<>(
                     new IntentFilterPolicyKey(
@@ -185,24 +174,15 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::addPersistentPreferredActivity,
             new ComponentNamePolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code intentFilter} will return
-     * {@link #GENERIC_PERSISTENT_PREFERRED_ACTIVITY}.
-     */
     static PolicyDefinition<ComponentName> PERSISTENT_PREFERRED_ACTIVITY(
-            IntentFilter intentFilter) {
-        if (intentFilter == null) {
-            return GENERIC_PERSISTENT_PREFERRED_ACTIVITY;
-        }
+            @NonNull IntentFilter intentFilter) {
+        Objects.requireNonNull(intentFilter, "intentFilter must not be null");
         return GENERIC_PERSISTENT_PREFERRED_ACTIVITY.createPolicyDefinition(
                 new IntentFilterPolicyKey(
                         DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
                         intentFilter));
     }
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
-    // xml.
     static PolicyDefinition<Boolean> GENERIC_PACKAGE_UNINSTALL_BLOCKED =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
@@ -212,23 +192,13 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setUninstallBlocked,
                     new BooleanPolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code packageName} will return
-     * {@link #GENERIC_PACKAGE_UNINSTALL_BLOCKED}.
-     */
-    static PolicyDefinition<Boolean> PACKAGE_UNINSTALL_BLOCKED(
-            String packageName) {
-        if (packageName == null) {
-            return GENERIC_PACKAGE_UNINSTALL_BLOCKED;
-        }
+    static PolicyDefinition<Boolean> PACKAGE_UNINSTALL_BLOCKED(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
         return GENERIC_PACKAGE_UNINSTALL_BLOCKED.createPolicyDefinition(
                 new PackagePolicyKey(
                         DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
     }
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
-    // xml.
     static PolicyDefinition<Bundle> GENERIC_APPLICATION_RESTRICTIONS =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
@@ -243,14 +213,8 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setApplicationRestrictions,
                     new BundlePolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code packageName} will return
-     * {@link #GENERIC_APPLICATION_RESTRICTIONS}.
-     */
-    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(String packageName) {
-        if (packageName == null) {
-            return GENERIC_APPLICATION_RESTRICTIONS;
-        }
+    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
         return GENERIC_APPLICATION_RESTRICTIONS.createPolicyDefinition(
                 new PackagePolicyKey(
                         DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY, packageName));
@@ -274,9 +238,6 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::noOp,
             new IntegerPolicySerializer());
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
-    // xml.
     static PolicyDefinition<Boolean> GENERIC_APPLICATION_HIDDEN =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
@@ -289,22 +250,13 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setApplicationHidden,
                     new BooleanPolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code packageName} will return
-     * {@link #GENERIC_APPLICATION_HIDDEN}.
-     */
-    static PolicyDefinition<Boolean> APPLICATION_HIDDEN(String packageName) {
-        if (packageName == null) {
-            return GENERIC_APPLICATION_HIDDEN;
-        }
+    static PolicyDefinition<Boolean> APPLICATION_HIDDEN(@NonNull String packageName) {
+        Objects.requireNonNull(packageName, "packageName must not be null");
         return GENERIC_APPLICATION_HIDDEN.createPolicyDefinition(
                 new PackagePolicyKey(
                         DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY, packageName));
     }
 
-    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
-    // xml.
     static PolicyDefinition<Boolean> GENERIC_ACCOUNT_MANAGEMENT_DISABLED =
             new PolicyDefinition<>(
                     new AccountTypePolicyKey(
@@ -315,14 +267,8 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::noOp,
                     new BooleanPolicySerializer());
 
-    /**
-     * Passing in {@code null} for {@code accountType} will return
-     * {@link #GENERIC_ACCOUNT_MANAGEMENT_DISABLED}.
-     */
-    static PolicyDefinition<Boolean> ACCOUNT_MANAGEMENT_DISABLED(String accountType) {
-        if (accountType == null) {
-            return GENERIC_ACCOUNT_MANAGEMENT_DISABLED;
-        }
+    static PolicyDefinition<Boolean> ACCOUNT_MANAGEMENT_DISABLED(@NonNull String accountType) {
+        Objects.requireNonNull(accountType, "accountType must not be null");
         return GENERIC_ACCOUNT_MANAGEMENT_DISABLED.createPolicyDefinition(
                 new AccountTypePolicyKey(
                         DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY, accountType));
@@ -538,6 +484,9 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
+                POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_SIM_GLOBALLY,
                 POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ASSIST_CONTENT, /* flags= */ 0);
@@ -545,7 +494,6 @@ final class PolicyDefinition<V> {
             USER_RESTRICTION_FLAGS.put(
                     UserManager.DISALLOW_THREAD_NETWORK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         }
-        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ASSIST_CONTENT, /* flags= */ 0);
         for (String key : USER_RESTRICTION_FLAGS.keySet()) {
             createAndAddUserRestrictionPolicyDefinition(key, USER_RESTRICTION_FLAGS.get(key));
         }
@@ -678,8 +626,6 @@ final class PolicyDefinition<V> {
             throw new UnsupportedOperationException("Non-coexistable global policies not supported,"
                     + "please add support.");
         }
-        // TODO: maybe use this instead of manually adding to the map
-//        sPolicyDefinitions.put(policyDefinitionKey, this);
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
@@ -705,17 +651,15 @@ final class PolicyDefinition<V> {
     }
 
     @Nullable
-    static <V> PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
+    static PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
-        // TODO: can we avoid casting?
         PolicyKey policyKey = PolicyKey.readGenericPolicyKeyFromXml(parser);
         if (policyKey == null) {
             Slogf.wtf(TAG, "Error parsing PolicyKey, GenericPolicyKey is null");
             return null;
         }
-        PolicyDefinition<PolicyValue<V>> genericPolicyDefinition =
-                (PolicyDefinition<PolicyValue<V>>) POLICY_DEFINITIONS.get(
-                        policyKey.getIdentifier());
+        PolicyDefinition<?> genericPolicyDefinition =
+                POLICY_DEFINITIONS.get(policyKey.getIdentifier());
         if (genericPolicyDefinition == null) {
             Slogf.wtf(TAG, "Error parsing PolicyKey, Unknown generic policy key: " + policyKey);
             return null;

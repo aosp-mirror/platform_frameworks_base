@@ -18,11 +18,15 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
@@ -42,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
@@ -55,6 +60,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var burnInInteractor: BurnInInteractor
     @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
+    @Mock
+    private lateinit var lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
 
     private val kosmos = testKosmos()
@@ -67,25 +74,30 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val burnInFlow = MutableStateFlow(BurnInModel())
 
     @Before
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @DisableSceneContainer
     fun setUp() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
+        whenever(goneToAodTransitionViewModel.enterFromSideTranslationX(anyInt()))
+            .thenReturn(emptyFlow())
+        whenever(lockscreenToAodTransitionViewModel.enterFromSideTranslationX(anyInt()))
+            .thenReturn(emptyFlow())
         kosmos.goneToAodTransitionViewModel = goneToAodTransitionViewModel
+        kosmos.lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel
         kosmos.fakeKeyguardClockRepository.setCurrentClock(clockController)
 
         underTest = kosmos.aodBurnInViewModel
+        underTest.updateBurnInParams(burnInParameters)
     }
 
     @Test
     fun movement_initializedToDefaultValues() =
         testScope.runTest {
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
             assertThat(movement?.translationY).isEqualTo(0)
             assertThat(movement?.translationX).isEqualTo(0)
             assertThat(movement?.scale).isEqualTo(1f)
@@ -94,7 +106,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @Test
     fun translationAndScale_whenNotDozing() =
         testScope.runTest {
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to not dozing (on lockscreen)
             keyguardTransitionRepository.sendTransitionStep(
@@ -102,18 +114,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.AOD,
                     to = KeyguardState.LOCKSCREEN,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
 
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = 30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = 30, scale = 0.5f)
 
             assertThat(movement?.translationX).isEqualTo(0)
             assertThat(movement?.translationY).isEqualTo(0)
@@ -124,8 +131,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @Test
     fun translationAndScale_whenFullyDozing() =
         testScope.runTest {
-            burnInParameters = burnInParameters.copy(minViewY = 100)
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -133,17 +140,12 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = 30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = 30, scale = 0.5f)
 
             assertThat(movement?.translationX).isEqualTo(20)
             assertThat(movement?.translationY).isEqualTo(30)
@@ -156,7 +158,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 0f,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 ),
                 validateStep = false,
             )
@@ -167,16 +169,11 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOff_staysOutOfTopInset() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-
-            burnInParameters =
-                burnInParameters.copy(
-                    minViewY = 100,
-                    topInset = 80,
-                )
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100, topInset = 80))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -184,18 +181,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
 
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = -30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = -30, scale = 0.5f)
             assertThat(movement?.translationX).isEqualTo(20)
             // -20 instead of -30, due to inset of 80
             assertThat(movement?.translationY).isEqualTo(-20)
@@ -208,7 +200,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 0f,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 ),
                 validateStep = false,
             )
@@ -219,16 +211,11 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOn_staysOutOfTopInset() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-
-            burnInParameters =
-                burnInParameters.copy(
-                    minViewY = 100,
-                    topInset = 80,
-                )
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100, topInset = 80))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -236,18 +223,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
 
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = -30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = -30, scale = 0.5f)
             assertThat(movement?.translationX).isEqualTo(20)
             // -20 instead of -30, due to inset of 80
             assertThat(movement?.translationY).isEqualTo(-20)
@@ -260,7 +242,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 0f,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 ),
                 validateStep = false,
             )
@@ -275,7 +257,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         testScope.runTest {
             whenever(clockController.config.useAlternateSmartspaceAODTransition).thenReturn(true)
 
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -283,18 +265,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
 
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = 30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = 30, scale = 0.5f)
 
             assertThat(movement?.translationX).isEqualTo(20)
             assertThat(movement?.translationY).isEqualTo(30)
@@ -303,104 +280,92 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun translationAndScale_composeFlagOff_weatherLargeClock() =
+    @DisableSceneContainer
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    fun translationAndScale_sceneContainerOff_weatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
-    fun translationAndScale_composeFlagOff_weatherSmallClock() =
+    @DisableSceneContainer
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    fun translationAndScale_sceneContainerOff_weatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = true,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
         )
 
     @Test
-    fun translationAndScale_composeFlagOff_nonWeatherLargeClock() =
-        testBurnInViewModelForClocks(
-            isSmallClock = false,
-            isWeatherClock = false,
-            expectedScaleOnly = true,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
-        )
-
-    @Test
-    fun translationAndScale_composeFlagOff_nonWeatherSmallClock() =
-        testBurnInViewModelForClocks(
-            isSmallClock = true,
-            isWeatherClock = false,
-            expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = false
-        )
-
-    @Test
-    fun translationAndScale_composeFlagOn_weatherLargeClock() =
-        testBurnInViewModelForClocks(
-            isSmallClock = false,
-            isWeatherClock = true,
-            expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
-        )
-
-    @Test
-    fun translationAndScale_composeFlagOn_weatherSmallClock() =
-        testBurnInViewModelForClocks(
-            isSmallClock = true,
-            isWeatherClock = true,
-            expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
-        )
-
-    @Test
-    fun translationAndScale_composeFlagOn_nonWeatherLargeClock() =
+    @DisableSceneContainer
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    fun translationAndScale_sceneContainerOff_nonWeatherLargeClock() =
         testBurnInViewModelForClocks(
             isSmallClock = false,
             isWeatherClock = false,
             expectedScaleOnly = true,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
         )
 
     @Test
-    fun translationAndScale_composeFlagOn_nonWeatherSmallClock() =
+    @DisableSceneContainer
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    fun translationAndScale_sceneContainerOff_nonWeatherSmallClock() =
         testBurnInViewModelForClocks(
             isSmallClock = true,
             isWeatherClock = false,
             expectedScaleOnly = false,
-            enableMigrateClocksToBlueprintFlag = true,
-            enableComposeLockscreenFlag = true
+        )
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @EnableSceneContainer
+    fun translationAndScale_sceneContainerOn_weatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+        )
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @EnableSceneContainer
+    fun translationAndScale_sceneContainerOn_weatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = true,
+            expectedScaleOnly = false,
+        )
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @EnableSceneContainer
+    fun translationAndScale_sceneContainerOn_nonWeatherLargeClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = false,
+            isWeatherClock = false,
+            expectedScaleOnly = true,
+        )
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    @EnableSceneContainer
+    @Ignore("b/367659687")
+    fun translationAndScale_sceneContainerOn_nonWeatherSmallClock() =
+        testBurnInViewModelForClocks(
+            isSmallClock = true,
+            isWeatherClock = false,
+            expectedScaleOnly = false,
         )
 
     private fun testBurnInViewModelForClocks(
         isSmallClock: Boolean,
         isWeatherClock: Boolean,
         expectedScaleOnly: Boolean,
-        enableMigrateClocksToBlueprintFlag: Boolean,
-        enableComposeLockscreenFlag: Boolean
     ) =
         testScope.runTest {
-            if (enableMigrateClocksToBlueprintFlag) {
-                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-            } else {
-                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-            }
-
-            if (enableComposeLockscreenFlag) {
-                mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-            } else {
-                mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
-            }
             if (isSmallClock) {
                 keyguardClockRepository.setClockSize(ClockSize.SMALL)
                 // we need the following step to update stateFlow value
@@ -410,7 +375,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
             whenever(clockController.config.useAlternateSmartspaceAODTransition)
                 .thenReturn(if (isWeatherClock) true else false)
 
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -418,18 +383,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     value = 1f,
-                    transitionState = TransitionState.FINISHED
+                    transitionState = TransitionState.FINISHED,
                 ),
                 validateStep = false,
             )
 
             // Trigger a change to the burn-in model
-            burnInFlow.value =
-                BurnInModel(
-                    translationX = 20,
-                    translationY = 30,
-                    scale = 0.5f,
-                )
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = 30, scale = 0.5f)
 
             assertThat(movement?.translationX).isEqualTo(20)
             assertThat(movement?.translationY).isEqualTo(30)

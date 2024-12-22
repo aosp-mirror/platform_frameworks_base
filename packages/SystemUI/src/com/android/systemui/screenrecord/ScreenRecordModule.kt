@@ -16,8 +16,12 @@
 
 package com.android.systemui.screenrecord
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.ScreenRecordTile
 import com.android.systemui.qs.tiles.base.interactor.QSTileAvailabilityInteractor
@@ -53,7 +57,7 @@ interface ScreenRecordModule {
     @IntoMap
     @StringKey(SCREEN_RECORD_TILE_SPEC)
     fun provideScreenRecordAvailabilityInteractor(
-            impl: ScreenRecordTileDataInteractor
+        impl: ScreenRecordTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -71,6 +75,7 @@ interface ScreenRecordModule {
                         labelRes = R.string.quick_settings_screen_record_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /** Inject ScreenRecord Tile into tileViewModelMap in QSModule */
@@ -89,5 +94,12 @@ interface ScreenRecordModule {
                 stateInteractor,
                 mapper,
             )
+
+        @Provides
+        @SysUISingleton
+        @RecordingControllerLog
+        fun provideRecordingControllerLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("RecordingControllerLog", 50)
+        }
     }
 }

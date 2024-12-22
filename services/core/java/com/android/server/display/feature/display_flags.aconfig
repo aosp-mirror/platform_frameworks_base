@@ -92,6 +92,14 @@ flag {
 }
 
 flag {
+    name: "display_topology"
+    namespace: "display_manager"
+    description: "Display topology for moving cursors and windows between extended displays"
+    bug: "278199220"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_displays_refresh_rates_synchronization"
     namespace: "display_manager"
     description: "Enables synchronization of refresh rates across displays"
@@ -246,6 +254,29 @@ flag {
 }
 
 flag {
+    name: "highest_hdr_sdr_ratio_api"
+    namespace: "display_manager"
+    description: "Feature flag for an API to get the highest defined HDR/SDR ratio for a display."
+    bug: "335181559"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "doze_brightness_float"
+    namespace: "display_manager"
+    description: "Define doze brightness in the float scale [0, 1]."
+    bug: "343796384"
+}
+
+flag {
+    name: "normal_brightness_for_doze_parameter"
+    namespace: "wear_frameworks"
+    description: "Feature flag for the parameter specifying whether brightness should be adjusted while dozing."
+    bug: "343283838"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "offload_controls_doze_auto_brightness"
     namespace: "display_manager"
     description: "Allows the registered DisplayOffloader to control if auto-brightness is used in doze"
@@ -298,4 +329,39 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "offload_session_cancel_block_screen_on"
+    namespace: "wear_frameworks"
+    description: "Flag for DisplayPowerController to start notifying DisplayOffloadSession about cancelling screen on blocker."
+    bug: "331725519"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "new_hdr_brightness_modifier"
+    namespace: "display_manager"
+    description: "Flag for new HDR brightness clamper."
+    bug: "331275392"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "idle_screen_config_in_subscribing_light_sensor"
+    namespace: "display_manager"
+    description: "Account for Idle screen refresh rate configs while subscribing to light sensor"
+    bug: "358019330"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_battery_stats_for_all_displays"
+    namespace: "display_manager"
+    description: "Flag to enable battery stats for all displays."
+    bug: "366112793"
+    is_fixed_read_only: true
 }

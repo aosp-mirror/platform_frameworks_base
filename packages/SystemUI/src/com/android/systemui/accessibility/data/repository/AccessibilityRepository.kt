@@ -18,10 +18,10 @@ package com.android.systemui.accessibility.data.repository
 
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import com.android.app.tracing.FlowTracing.tracedAwaitClose
+import com.android.app.tracing.FlowTracing.tracedConflatedCallbackFlow
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -38,24 +38,28 @@ interface AccessibilityRepository {
     }
 }
 
+private const val TAG = "AccessibilityRepository"
+
 private class AccessibilityRepositoryImpl(
     manager: AccessibilityManager,
 ) : AccessibilityRepository {
     override val isTouchExplorationEnabled: Flow<Boolean> =
-        conflatedCallbackFlow {
+        tracedConflatedCallbackFlow(TAG) {
                 val listener = TouchExplorationStateChangeListener(::trySend)
                 manager.addTouchExplorationStateChangeListener(listener)
                 trySend(manager.isTouchExplorationEnabled)
-                awaitClose { manager.removeTouchExplorationStateChangeListener(listener) }
+                tracedAwaitClose(TAG) {
+                    manager.removeTouchExplorationStateChangeListener(listener)
+                }
             }
             .distinctUntilChanged()
 
     override val isEnabled: Flow<Boolean> =
-        conflatedCallbackFlow {
+        tracedConflatedCallbackFlow(TAG) {
                 val listener = AccessibilityManager.AccessibilityStateChangeListener(::trySend)
                 manager.addAccessibilityStateChangeListener(listener)
                 trySend(manager.isEnabled)
-                awaitClose { manager.removeAccessibilityStateChangeListener(listener) }
+                tracedAwaitClose(TAG) { manager.removeAccessibilityStateChangeListener(listener) }
             }
             .distinctUntilChanged()
 }

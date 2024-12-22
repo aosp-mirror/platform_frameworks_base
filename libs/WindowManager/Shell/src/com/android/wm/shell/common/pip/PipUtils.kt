@@ -24,16 +24,16 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.RemoteException
-import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import android.window.TaskSnapshot
-import com.android.internal.protolog.common.ProtoLog
+import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /** A class that includes convenience methods.  */
 object PipUtils {
@@ -149,16 +149,16 @@ object PipUtils {
         val appBoundsAspRatio = appBounds.width().toFloat() / appBounds.height()
         val width: Int
         val height: Int
-        var left = 0
-        var top = 0
+        var left = appBounds.left
+        var top = appBounds.top
         if (appBoundsAspRatio < aspectRatio) {
             width = appBounds.width()
-            height = Math.round(width / aspectRatio)
-            top = (appBounds.height() - height) / 2
+            height = (width / aspectRatio).roundToInt()
+            top = appBounds.top + (appBounds.height() - height) / 2
         } else {
             height = appBounds.height()
-            width = Math.round(height * aspectRatio)
-            left = (appBounds.width() - width) / 2
+            width = (height * aspectRatio).roundToInt()
+            left = appBounds.left + (appBounds.width() - width) / 2
         }
         return Rect(left, top, left + width, top + height)
     }
@@ -177,9 +177,7 @@ object PipUtils {
                 "org.chromium.arc", 0)
             val isTv = AppGlobals.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK, 0)
-            isPip2ExperimentEnabled = SystemProperties.getBoolean(
-                    "persist.wm_shell.pip2", false) ||
-                    (Flags.enablePip2Implementation() && !isArc && !isTv)
+            isPip2ExperimentEnabled = Flags.enablePip2() && !isArc && !isTv
         }
         return isPip2ExperimentEnabled as Boolean
     }

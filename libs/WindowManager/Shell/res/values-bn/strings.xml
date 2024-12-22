@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"উপরে ডানদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"নিচে ডান দিকে সরান"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"মেনু বড় করে দেখুন"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"মেনু আড়াল করুন"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"বাঁদিকে সরান"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"ডানদিকে সরান"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> বড় করুন"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> আড়াল করুন"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> সেটিংস"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"বাবল খারিজ করুন"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"ফুল-স্ক্রিন ব্যবহার করুন"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"বাবল ব্যবহার করে চ্যাট করুন"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"ছোট করুন"</string>
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ করুন"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ফিরে যান"</string>
-    <string name="handle_text" msgid="1766582106752184456">"হাতল"</string>
+    <string name="handle_text" msgid="4419667835599523257">"অ্যাপের হ্যান্ডেল"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"অ্যাপ আইকন"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ফুলস্ক্রিন"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ডেস্কটপ মোড"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"ফ্লোট"</string>
     <string name="select_text" msgid="5139083974039906583">"বেছে নিন"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"স্ক্রিনশট"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"ব্রাউজারে খুলুন"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"নতুন উইন্ডো"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"উইন্ডো ম্যানেজ করুন"</string>
     <string name="close_text" msgid="4986518933445178928">"বন্ধ করুন"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"\'মেনু\' বন্ধ করুন"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"মেনু খুলুন"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"মেনু খুলুন"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"স্ক্রিন বড় করুন"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"স্ক্রিনে অ্যাপ মানানসই হিসেবে ছোট বড় করুন"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"এই অ্যাপ ছোট বড় করা যাবে না"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"বড় করুন"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"বাঁদিকে স্ন্যাপ করুন"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ডানদিকে স্ন্যাপ করুন"</string>
 </resources>

@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -42,7 +43,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.internal.jank.Cuj;
+import com.android.internal.jank.InteractionJankMonitor;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
@@ -60,6 +64,9 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     private final Context mContext;
     private final Transitions mTransitions;
+    private final InteractionJankMonitor mInteractionJankMonitor;
+    @ShellMainThread
+    private final Handler mHandler;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
@@ -67,17 +74,25 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
     public ExitDesktopTaskTransitionHandler(
             Transitions transitions,
-            Context context) {
-        this(transitions, SurfaceControl.Transaction::new, context);
+            Context context,
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler
+    ) {
+        this(transitions, SurfaceControl.Transaction::new, context, interactionJankMonitor,
+                handler);
     }
 
     private ExitDesktopTaskTransitionHandler(
             Transitions transitions,
             Supplier<SurfaceControl.Transaction> supplier,
-            Context context) {
+            Context context,
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler) {
         mTransitions = transitions;
         mTransactionSupplier = supplier;
         mContext = context;
+        mInteractionJankMonitor = interactionJankMonitor;
+        mHandler = handler;
     }
 
     /**
@@ -146,6 +161,8 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final int screenHeight = metrics.heightPixels;
             final SurfaceControl sc = change.getLeash();
             final Rect endBounds = change.getEndAbsBounds();
+            mInteractionJankMonitor
+                    .begin(sc, mContext, mHandler, Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
             // Hide the first (fullscreen) frame because the animation will start from the freeform
             // size.
             startT.hide(sc)
@@ -175,6 +192,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                     if (mOnAnimationFinishedCallback != null) {
                         mOnAnimationFinishedCallback.accept(finishT);
                     }
+                    mInteractionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_EXIT_MODE);
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null));
                 }

@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 
 import com.android.server.SystemClockTime.TimeConfidence;
@@ -35,6 +36,16 @@ public interface AlarmManagerInternal {
 
     /** Returns true if AlarmManager is delaying alarms due to device idle. */
     boolean isIdling();
+
+    /**
+     * Returns the time at which the next alarm for the given user is going to trigger, or 0 if
+     * there is none.
+     *
+     * <p>This value is UTC wall clock time in milliseconds, as returned by
+     * {@link System#currentTimeMillis()} for example.
+     * @see android.app.AlarmManager.AlarmClockInfo#getTriggerTime()
+     */
+    long getNextAlarmTriggerTimeForUser(@UserIdInt int userId);
 
     public void removeAlarmsForUid(int uid);
 

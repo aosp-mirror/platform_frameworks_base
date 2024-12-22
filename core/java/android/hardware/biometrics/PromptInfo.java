@@ -57,7 +57,8 @@ public class PromptInfo implements Parcelable {
     private boolean mIsForLegacyFingerprintManager = false;
     private boolean mShowEmergencyCallButton = false;
     private boolean mUseParentProfileForDeviceCredential = false;
-    private ComponentName mComponentNameForConfirmDeviceCredentialActivity = null;
+    private ComponentName mRealCallerForConfirmDeviceCredentialActivity = null;
+    private String mClassNameIfItIsConfirmDeviceCredentialActivity = null;
 
     public PromptInfo() {
 
@@ -89,8 +90,9 @@ public class PromptInfo implements Parcelable {
         mIsForLegacyFingerprintManager = in.readBoolean();
         mShowEmergencyCallButton = in.readBoolean();
         mUseParentProfileForDeviceCredential = in.readBoolean();
-        mComponentNameForConfirmDeviceCredentialActivity = in.readParcelable(
+        mRealCallerForConfirmDeviceCredentialActivity = in.readParcelable(
                 ComponentName.class.getClassLoader(), ComponentName.class);
+        mClassNameIfItIsConfirmDeviceCredentialActivity = in.readString();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -136,7 +138,8 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mIsForLegacyFingerprintManager);
         dest.writeBoolean(mShowEmergencyCallButton);
         dest.writeBoolean(mUseParentProfileForDeviceCredential);
-        dest.writeParcelable(mComponentNameForConfirmDeviceCredentialActivity, 0);
+        dest.writeParcelable(mRealCallerForConfirmDeviceCredentialActivity, 0);
+        dest.writeString(mClassNameIfItIsConfirmDeviceCredentialActivity);
     }
 
     // LINT.IfChange
@@ -155,7 +158,7 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mShowEmergencyCallButton) {
             return true;
-        } else if (mComponentNameForConfirmDeviceCredentialActivity != null) {
+        } else if (mRealCallerForConfirmDeviceCredentialActivity != null) {
             return true;
         }
         return false;
@@ -194,6 +197,10 @@ public class PromptInfo implements Parcelable {
         } else if (mLogoDescription != null) {
             return true;
         } else if (mContentView != null && isContentViewMoreOptionsButtonUsed()) {
+            return true;
+        } else if (Flags.mandatoryBiometrics()
+                && (mAuthenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
+                != 0) {
             return true;
         }
         return false;
@@ -317,16 +324,22 @@ public class PromptInfo implements Parcelable {
         mShowEmergencyCallButton = showEmergencyCallButton;
     }
 
-    public void setComponentNameForConfirmDeviceCredentialActivity(
-            ComponentName componentNameForConfirmDeviceCredentialActivity) {
-        mComponentNameForConfirmDeviceCredentialActivity =
-                componentNameForConfirmDeviceCredentialActivity;
+    public void setRealCallerForConfirmDeviceCredentialActivity(ComponentName realCaller) {
+        mRealCallerForConfirmDeviceCredentialActivity = realCaller;
     }
 
     public void setUseParentProfileForDeviceCredential(
             boolean useParentProfileForDeviceCredential) {
         mUseParentProfileForDeviceCredential = useParentProfileForDeviceCredential;
     }
+
+    /**
+     * Set the class name of ConfirmDeviceCredentialActivity.
+     */
+    void setClassNameIfItIsConfirmDeviceCredentialActivity(String className) {
+        mClassNameIfItIsConfirmDeviceCredentialActivity = className;
+    }
+
 
     // Getters
 
@@ -451,8 +464,15 @@ public class PromptInfo implements Parcelable {
         return mShowEmergencyCallButton;
     }
 
-    public ComponentName getComponentNameForConfirmDeviceCredentialActivity() {
-        return mComponentNameForConfirmDeviceCredentialActivity;
+    public ComponentName getRealCallerForConfirmDeviceCredentialActivity() {
+        return mRealCallerForConfirmDeviceCredentialActivity;
     }
 
+    /**
+     * Get the class name of ConfirmDeviceCredentialActivity. Returns null if the direct caller is
+     * not ConfirmDeviceCredentialActivity.
+     */
+    public String getClassNameIfItIsConfirmDeviceCredentialActivity() {
+       return mClassNameIfItIsConfirmDeviceCredentialActivity;
+    }
 }

@@ -32,3 +32,41 @@ android_test {
     static_libs: ["FlickerTestsBase"],
     data: ["trace_config/*"],
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Begin breakdowns for FlickerTestsQuickswitch module
+
+test_module_config {
+    name: "FlickerTestsQuickswitch-CatchAll",
+    base: "FlickerTestsQuickswitch",
+    exclude_filters: [
+        "com.android.server.wm.flicker.quickswitch.QuickSwitchBetweenTwoAppsBackTest",
+        "com.android.server.wm.flicker.quickswitch.QuickSwitchBetweenTwoAppsForwardTest",
+        "com.android.server.wm.flicker.quickswitch.QuickSwitchFromLauncherTest",
+    ],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsQuickswitch-QuickSwitchBetweenTwoAppsBackTest",
+    base: "FlickerTestsQuickswitch",
+    include_filters: ["com.android.server.wm.flicker.quickswitch.QuickSwitchBetweenTwoAppsBackTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsQuickswitch-QuickSwitchBetweenTwoAppsForwardTest",
+    base: "FlickerTestsQuickswitch",
+    include_filters: ["com.android.server.wm.flicker.quickswitch.QuickSwitchBetweenTwoAppsForwardTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "FlickerTestsQuickswitch-QuickSwitchFromLauncherTest",
+    base: "FlickerTestsQuickswitch",
+    include_filters: ["com.android.server.wm.flicker.quickswitch.QuickSwitchFromLauncherTest"],
+    test_suites: ["device-tests"],
+}
+
+// End breakdowns for FlickerTestsQuickswitch module
+////////////////////////////////////////////////////////////////////////////////

@@ -49,6 +49,10 @@ static inline SkImageInfo createImageInfo(int32_t width, int32_t height, int32_t
             colorType = kRGBA_1010102_SkColorType;
             alphaType = kPremul_SkAlphaType;
             break;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM:
+            colorType = kRGBA_10x6_SkColorType;
+            alphaType = kPremul_SkAlphaType;
+            break;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
             colorType = kRGBA_F16_SkColorType;
             alphaType = kPremul_SkAlphaType;
@@ -86,6 +90,8 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
             return AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM;
         case kRGBA_1010102_SkColorType:
             return AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM;
+        case kRGBA_10x6_SkColorType:
+            return AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM;
         case kARGB_4444_SkColorType:
             // Hardcoding the value from android::PixelFormat
             static constexpr uint64_t kRGBA4444 = 7;
@@ -108,6 +114,8 @@ SkColorType BufferFormatToColorType(uint32_t format) {
             return kRGB_565_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
             return kRGBA_1010102_SkColorType;
+        case AHARDWAREBUFFER_FORMAT_R10G10B10A10_UNORM:
+            return kRGBA_10x6_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
             return kRGBA_F16_SkColorType;
         case AHARDWAREBUFFER_FORMAT_R8_UNORM:

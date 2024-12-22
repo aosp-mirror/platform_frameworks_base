@@ -18,8 +18,7 @@ package com.android.compose.animation.scene.transition.link
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
-import com.android.compose.animation.scene.TransitionState
-import kotlinx.coroutines.Job
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A linked transition which is driven by a [originalTransition]. */
 internal class LinkedTransition(
@@ -27,13 +26,13 @@ internal class LinkedTransition(
     fromScene: SceneKey,
     toScene: SceneKey,
     override val key: TransitionKey? = null,
-) : TransitionState.Transition(fromScene, toScene) {
+) : TransitionState.Transition.ChangeScene(fromScene, toScene) {
 
     override val currentScene: SceneKey
         get() {
             return when (originalTransition.currentScene) {
-                originalTransition.fromScene -> fromScene
-                originalTransition.toScene -> toScene
+                originalTransition.fromContent -> fromScene
+                originalTransition.toContent -> toScene
                 else -> error("Original currentScene is neither FromScene nor ToScene")
             }
         }
@@ -50,5 +49,11 @@ internal class LinkedTransition(
     override val progressVelocity: Float
         get() = originalTransition.progressVelocity
 
-    override fun finish(): Job = originalTransition.finish()
+    override suspend fun run() {
+        originalTransition.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        originalTransition.freezeAndAnimateToCurrentState()
+    }
 }

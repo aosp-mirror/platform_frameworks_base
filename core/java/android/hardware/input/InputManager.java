@@ -19,6 +19,7 @@ package android.hardware.input;
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
+import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -156,6 +157,34 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
+
+    /**
+     * Broadcast Action: Query available keyboard glyph maps.
+     * <p>
+     * The input manager service locates available keyboard glyph maps
+     * by querying broadcast receivers that are registered for this action.
+     * An application can offer additional keyboard glyph maps to the user
+     * by declaring a suitable broadcast receiver in its manifest.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_QUERY_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.action.QUERY_KEYBOARD_GLYPH_MAPS";
+
+    /**
+     * Metadata Key: Keyboard glyph map metadata associated with
+     * {@link #ACTION_QUERY_KEYBOARD_GLYPH_MAPS}.
+     * <p>
+     * Specifies the resource id of a XML resource that describes the keyboard
+     * glyph maps that are provided by the application.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String META_DATA_KEYBOARD_GLYPH_MAPS =
+            "android.hardware.input.metadata.KEYBOARD_GLYPH_MAPS";
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -898,6 +927,23 @@ public final class InputManager {
     }
 
     /**
+     * Provides associated glyph map for the keyboard device (if available)
+     *
+     * @hide
+     */
+    @Nullable
+    public KeyGlyphMap getKeyGlyphMap(int deviceId) {
+        if (!keyboardGlyphMap()) {
+            return null;
+        }
+        try {
+            return mIm.getKeyGlyphMap(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Injects an input event into the event system, targeting windows owned by the provided uid.
      *
      * If a valid targetUid is provided, the system will only consider injecting the input event
@@ -1025,8 +1071,18 @@ public final class InputManager {
     /**
      * Monitor input on the specified display for gestures.
      *
+     * NOTE: New usages of Gesture Monitors are strongly discouraged. Gesture Monitors are
+     * deprecated, in favor of spy windows (see {@link LayoutParams#INPUT_FEATURE_SPY}).
+     * The spy window should be configured specifically to receive the desired events,
+     * unlike the gesture monitor which receives all events on the display.
+     *
      * @hide
+     * @deprecated
+     * @see LayoutParams#INPUT_FEATURE_SPY
+     * @see android.os.InputConfig#SPY
+     * @see #pilferPointers(IBinder)
      */
+    @Deprecated
     public InputMonitor monitorGestureInput(String name, int displayId) {
         return mGlobal.monitorGestureInput(name, displayId);
     }
@@ -1195,8 +1251,22 @@ public final class InputManager {
      * canceled. Only the pilfering window will continue to receive events for the affected pointers
      * until the pointer is lifted.
      *
-     * This method should be used with caution as unexpected pilfering can break fundamental user
-     * interactions.
+     * Furthermore, if any new pointers go down within the touchable region of the pilfering window
+     * and are part of the same gesture, those new pointers will be pilfered as well, and will not
+     * be sent to any other windows.
+     *
+     * Pilfering is designed to be used only once per gesture. Once the gesture is complete
+     * (i.e. on {@link MotionEvent#ACTION_UP}, {@link MotionEvent#ACTION_CANCEL},
+     * or {@link MotionEvent#ACTION_HOVER_EXIT}), the system will resume dispatching pointers
+     * to the appropriately touched windows.
+     *
+     * NOTE: This method should be used with caution as unexpected pilfering can break fundamental
+     * user interactions.
+     *
+     * NOTE: Since this method pilfers pointers based on gesture stream that is
+     * currently active for the window, the behavior will depend on the state of the system, and
+     * is inherently racy. For example, a pilfer request on a quick tap may not be successful if
+     * the tap is already complete by the time the pilfer request is received by the system.
      *
      * @see android.os.InputConfig#SPY
      * @hide
@@ -1308,6 +1378,61 @@ public final class InputManager {
     }
 
     /**
+     * Registers a key gesture event listener for {@link KeyGestureEvent} being triggered.
+     *
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link KeyGestureEventListener}
+     * @throws IllegalArgumentException if {@code listener} has already been registered previously.
+     * @throws NullPointerException     if {@code listener} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventListener(@NonNull Executor executor,
+            @NonNull KeyGestureEventListener listener) throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventListener(executor, listener);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event listener.
+     *
+     * @param listener the {@link KeyGestureEventListener}
+     * @hide
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventListener(@NonNull KeyGestureEventListener listener) {
+        mGlobal.unregisterKeyGestureEventListener(listener);
+    }
+
+    /**
+     * Registers a key gesture event handler for {@link KeyGestureEvent} handling.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @throws IllegalArgumentException if {@code handler} has already been registered previously.
+     * @throws NullPointerException     if {@code handler} or {@code executor} is null.
+     * @hide
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void registerKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler)
+            throws IllegalArgumentException {
+        mGlobal.registerKeyGestureEventHandler(handler);
+    }
+
+    /**
+     * Unregisters a previously added key gesture event handler.
+     *
+     * @param handler the {@link KeyGestureEventHandler}
+     * @hide
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    public void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
+        mGlobal.unregisterKeyGestureEventHandler(handler);
+    }
+
+    /**
      * A callback used to be notified about battery state changes for an input device. The
      * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
      * listener is successfully registered to provide the initial battery state of the device.
@@ -1407,5 +1532,52 @@ public final class InputManager {
          * @param state the new sticky modifier state, never null.
          */
         void onStickyModifierStateChanged(@NonNull StickyModifierState state);
+    }
+
+    /**
+     * A callback used to notify about key gesture event on completion.
+     *
+     * @see #registerKeyGestureEventListener(Executor, KeyGestureEventListener)
+     * @see #unregisterKeyGestureEventListener(KeyGestureEventListener)
+     * @hide
+     */
+    public interface KeyGestureEventListener {
+        /**
+         * Called when a key gesture event occurs.
+         *
+         * @param event the gesture event that occurred.
+         */
+        void onKeyGestureEvent(@NonNull KeyGestureEvent event);
+    }
+
+    /**
+     * A callback used to notify about key gesture event start, complete and cancel. Unlike
+     * {@see KeyGestureEventListener} which is to listen to successfully handled key gestures, this
+     * interface allows system components to register handler for handling key gestures.
+     *
+     * @see #registerKeyGestureEventHandler(KeyGestureEventHandler)
+     * @see #unregisterKeyGestureEventHandler(KeyGestureEventHandler)
+     *
+     * <p> NOTE: All callbacks will occur on system main and input threads, so the caller needs
+     * to move time-consuming operations to appropriate handler threads.
+     * @hide
+     */
+    public interface KeyGestureEventHandler {
+        /**
+         * Called when a key gesture event starts, is completed, or is cancelled. If a handler
+         * returns {@code true}, it implies that the handler intends to handle the key gesture and
+         * only this handler will receive the future events for this key gesture.
+         *
+         * @param event the gesture event
+         */
+        boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
+                @Nullable IBinder focusedToken);
+
+        /**
+         * Called to identify if a particular gesture is of interest to a handler.
+         *
+         * NOTE: If no active handler supports certain gestures, the gestures will not be captured.
+         */
+        boolean isKeyGestureSupported(@KeyGestureEvent.KeyGestureType int gestureType);
     }
 }

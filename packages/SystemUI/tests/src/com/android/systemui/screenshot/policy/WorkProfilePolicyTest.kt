@@ -17,10 +17,14 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.res.Resources
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.internal.R
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
@@ -48,14 +52,36 @@ import com.android.systemui.screenshot.policy.WorkProfilePolicy.Companion.WORK_T
 import com.android.window.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
+import org.mockito.kotlin.whenever
 
+@RunWith(AndroidJUnit4::class)
 class WorkProfilePolicyTest {
-    @JvmField @Rule val setFlagsRule = SetFlagsRule()
+
+    @JvmField @Rule(order = 1) val setFlagsRule = SetFlagsRule()
+
+    @JvmField @Rule(order = 2) val mockitoRule: MockitoRule = MockitoJUnit.rule()
+
+    @Mock lateinit var mContext: Context
+    @Mock lateinit var mResources: Resources
 
     private val kosmos = Kosmos()
-    private val policy = WorkProfilePolicy(kosmos.profileTypeRepository)
+    private lateinit var policy: WorkProfilePolicy
+
+    @Before
+    fun setUp() {
+        // Set desktop mode supported
+        whenever(mContext.resources).thenReturn(mResources)
+        whenever(mResources.getBoolean(R.bool.config_isDesktopModeSupported)).thenReturn(true)
+
+        policy = WorkProfilePolicy(kosmos.profileTypeRepository, mContext)
+    }
 
     /**
      * There is no guarantee that every RootTaskInfo contains a non-empty list of child tasks. Test

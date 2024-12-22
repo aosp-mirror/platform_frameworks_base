@@ -18,8 +18,8 @@ package com.android.wm.shell.desktopmode;
 
 import android.graphics.Region;
 
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.annotations.ExternalThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;

@@ -26,6 +26,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -197,7 +198,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
             return;
         }
 
-        mNotificationManager.cancel(DISPLAY_NOTIFICATION_TAG, DISPLAY_NOTIFICATION_ID);
+        mNotificationManager.cancelAsUser(DISPLAY_NOTIFICATION_TAG, DISPLAY_NOTIFICATION_ID,
+                UserHandle.CURRENT);
     }
 
     /**
@@ -210,8 +212,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
             return;
         }
 
-        mNotificationManager.notify(DISPLAY_NOTIFICATION_TAG, DISPLAY_NOTIFICATION_ID,
-                notification);
+        mNotificationManager.notifyAsUser(DISPLAY_NOTIFICATION_TAG, DISPLAY_NOTIFICATION_ID,
+                notification, UserHandle.CURRENT);
     }
 
     /**

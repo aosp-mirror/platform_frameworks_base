@@ -26,11 +26,5 @@ interface GridLayoutType
 /** Grid type representing a scrollable vertical grid. */
 data object InfiniteGridLayoutType : GridLayoutType
 
-/**
- * Grid type representing a scrollable vertical grid where tiles will stretch to fill in empty
- * spaces.
- */
-data object StretchedGridLayoutType : GridLayoutType
-
-/** Grid type grouping large tiles on top and icon tiles at the bottom. */
-data object PartitionedGridLayoutType : GridLayoutType
+/** Grid type for a paginated list of tiles. It will delegate to some other layout type. */
+data object PaginatedGridLayoutType : GridLayoutType

@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ଉପର-ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"ମେନୁକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"ମେନୁକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"ବାମକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"ଡାହାଣକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ସେଟିଂସ୍"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ବବଲ୍ ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"ପୂର୍ଣ୍ଣସ୍କ୍ରିନକୁ ମୁଭ କରନ୍ତୁ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଫ୍ଲୋଟିଂ ଆଇକନ୍ କିମ୍ବା ବବଲ୍ ଭାବେ ଦେଖାଯିବ। ବବଲ୍ ଖୋଲିବାକୁ ଟାପ୍ କରନ୍ତୁ। ଏହାକୁ ମୁଭ୍ କରିବାକୁ ଟାଣନ୍ତୁ।"</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ପଛକୁ ଫେରନ୍ତୁ"</string>
-    <string name="handle_text" msgid="1766582106752184456">"ହେଣ୍ଡେଲ"</string>
+    <string name="handle_text" msgid="4419667835599523257">"ଆପର ହେଣ୍ଡେଲ"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"ଆପ ଆଇକନ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ପୂର୍ଣ୍ଣସ୍କ୍ରିନ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ଡେସ୍କଟପ ମୋଡ"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"ଫ୍ଲୋଟ"</string>
     <string name="select_text" msgid="5139083974039906583">"ଚୟନ କରନ୍ତୁ"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ସ୍କ୍ରିନସଟ"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"ବ୍ରାଉଜରରେ ଖୋଲନ୍ତୁ"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"ନୂଆ ୱିଣ୍ଡୋ"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="close_text" msgid="4986518933445178928">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ମେନୁ ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ସ୍କ୍ରିନକୁ ବଡ଼ କରନ୍ତୁ"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ସ୍କ୍ରିନକୁ ସ୍ନାପ କରନ୍ତୁ"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ଏହି ଆପକୁ ରିସାଇଜ କରାଯାଇପାରିବ ନାହିଁ"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"ବଡ଼ କରନ୍ତୁ"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ବାମରେ ସ୍ନାପ କରନ୍ତୁ"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ଡାହାଣରେ ସ୍ନାପ କରନ୍ତୁ"</string>
 </resources>

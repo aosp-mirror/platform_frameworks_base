@@ -17,13 +17,16 @@
 package com.android.systemui.model
 
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_COMMUNAL_HUB_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
@@ -56,12 +59,12 @@ constructor(
 
         val transitionState = sceneInteractor.get().transitionState.value
         val idleTransitionStateOrNull = transitionState as? ObservableTransitionState.Idle
-        val currentSceneOrNull = idleTransitionStateOrNull?.currentScene
         val invisibleDueToOcclusion = occlusionInteractor.get().invisibleDueToOcclusion.value
-        return currentSceneOrNull?.let { sceneKey ->
+        return idleTransitionStateOrNull?.let { idleState ->
             EvaluatorByFlag[flag]?.invoke(
                 SceneContainerPluginState(
-                    scene = sceneKey,
+                    scene = idleState.currentScene,
+                    overlays = idleState.currentOverlays,
                     invisibleDueToOcclusion = invisibleDueToOcclusion,
                 )
             )
@@ -84,13 +87,18 @@ constructor(
                 SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to { it.scene != Scenes.Gone },
                 SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to
                     {
-                        it.scene == Scenes.Lockscreen ||
-                            it.scene == Scenes.NotificationsShade ||
-                            it.scene == Scenes.Shade
+                        when {
+                            it.invisibleDueToOcclusion -> false
+                            it.scene == Scenes.Lockscreen -> true
+                            it.scene == Scenes.Shade -> true
+                            Overlays.NotificationsShade in it.overlays -> true
+                            else -> false
+                        }
                     },
                 SYSUI_STATE_QUICK_SETTINGS_EXPANDED to
                     {
-                        it.scene == Scenes.QuickSettingsShade || it.scene == Scenes.QuickSettings
+                        it.scene == Scenes.QuickSettings ||
+                            Overlays.QuickSettingsShade in it.overlays
                     },
                 SYSUI_STATE_BOUNCER_SHOWING to { it.scene == Scenes.Bouncer },
                 SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to
@@ -101,11 +109,13 @@ constructor(
                     {
                         it.scene == Scenes.Lockscreen && it.invisibleDueToOcclusion
                     },
+                SYSUI_STATE_COMMUNAL_HUB_SHOWING to { it.scene == Scenes.Communal },
             )
     }
 
     data class SceneContainerPluginState(
         val scene: SceneKey,
+        val overlays: Set<OverlayKey>,
         val invisibleDueToOcclusion: Boolean,
     )
 }

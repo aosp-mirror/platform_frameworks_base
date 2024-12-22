@@ -38,10 +38,6 @@ import android.view.WindowManager;
 
 import com.android.server.UiThread;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-import java.util.function.IntConsumer;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -55,12 +51,6 @@ public class Letterbox {
 
     private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
-    private final BooleanSupplier mAreCornersRounded;
-    private final Supplier<Color> mColorSupplier;
-    // Parameters for "blurred wallpaper" letterbox background.
-    private final BooleanSupplier mHasWallpaperBackgroundSupplier;
-    private final IntSupplier mBlurRadiusSupplier;
-    private final DoubleSupplier mDarkScrimAlphaSupplier;
     private final Supplier<SurfaceControl> mParentSurfaceSupplier;
 
     private final Rect mOuter = new Rect();
@@ -76,9 +66,10 @@ public class Letterbox {
     // for overlaping an app window and letterbox surfaces.
     private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
-    // Reachability gestures.
-    private final IntConsumer mDoubleTapCallbackX;
-    private final IntConsumer mDoubleTapCallbackY;
+    @NonNull
+    private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
+    @NonNull
+    private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
 
     /**
      * Constructs a Letterbox.
@@ -87,23 +78,13 @@ public class Letterbox {
      */
     public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            BooleanSupplier areCornersRounded,
-            Supplier<Color> colorSupplier,
-            BooleanSupplier hasWallpaperBackgroundSupplier,
-            IntSupplier blurRadiusSupplier,
-            DoubleSupplier darkScrimAlphaSupplier,
-            IntConsumer doubleTapCallbackX,
-            IntConsumer doubleTapCallbackY,
+            @NonNull AppCompatReachabilityPolicy appCompatReachabilityPolicy,
+            @NonNull AppCompatLetterboxOverrides appCompatLetterboxOverrides,
             Supplier<SurfaceControl> parentSurface) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
-        mAreCornersRounded = areCornersRounded;
-        mColorSupplier = colorSupplier;
-        mHasWallpaperBackgroundSupplier = hasWallpaperBackgroundSupplier;
-        mBlurRadiusSupplier = blurRadiusSupplier;
-        mDarkScrimAlphaSupplier = darkScrimAlphaSupplier;
-        mDoubleTapCallbackX = doubleTapCallbackX;
-        mDoubleTapCallbackY = doubleTapCallbackY;
+        mAppCompatReachabilityPolicy = appCompatReachabilityPolicy;
+        mAppCompatLetterboxOverrides = appCompatLetterboxOverrides;
         mParentSurfaceSupplier = parentSurface;
     }
 
@@ -254,7 +235,8 @@ public class Letterbox {
      * Returns {@code true} when using {@link #mFullWindowSurface} instead of {@link mSurfaces}.
      */
     private boolean useFullWindowSurface() {
-        return mAreCornersRounded.getAsBoolean() || mHasWallpaperBackgroundSupplier.getAsBoolean();
+        return mAppCompatLetterboxOverrides.shouldLetterboxHaveRoundedCorners()
+                || mAppCompatLetterboxOverrides.hasWallpaperBackgroundForLetterbox();
     }
 
     private final class TapEventReceiver extends InputEventReceiver {
@@ -290,8 +272,8 @@ public class Letterbox {
                 // This check prevents late events to be handled in case the Letterbox has been
                 // already destroyed and so mOuter.isEmpty() is true.
                 if (!mOuter.isEmpty() && e.getAction() == MotionEvent.ACTION_UP) {
-                    mDoubleTapCallbackX.accept((int) e.getRawX());
-                    mDoubleTapCallbackY.accept((int) e.getRawY());
+                    mAppCompatReachabilityPolicy.handleDoubleTap((int) e.getRawX(),
+                            (int) e.getRawY());
                     return true;
                 }
                 return false;
@@ -433,7 +415,7 @@ public class Letterbox {
                     createSurface(t);
                 }
 
-                mColor = mColorSupplier.get();
+                mColor = mAppCompatLetterboxOverrides.getLetterboxBackgroundColor();
                 mParentSurface = mParentSurfaceSupplier.get();
                 t.setColor(mSurface, getRgbColorArray());
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
@@ -441,7 +423,8 @@ public class Letterbox {
                         mSurfaceFrameRelative.height());
                 t.reparent(mSurface, mParentSurface);
 
-                mHasWallpaperBackground = mHasWallpaperBackgroundSupplier.getAsBoolean();
+                mHasWallpaperBackground = mAppCompatLetterboxOverrides
+                        .hasWallpaperBackgroundForLetterbox();
                 updateAlphaAndBlur(t);
 
                 t.show(mSurface);
@@ -462,17 +445,19 @@ public class Letterbox {
                 t.setBackgroundBlurRadius(mSurface, 0);
                 return;
             }
-            final float alpha = (float) mDarkScrimAlphaSupplier.getAsDouble();
+            final float alpha = mAppCompatLetterboxOverrides.getLetterboxWallpaperDarkScrimAlpha();
             t.setAlpha(mSurface, alpha);
 
             // Translucent dark scrim can be shown without blur.
-            if (mBlurRadiusSupplier.getAsInt() <= 0) {
+            final int blurRadiusPx = mAppCompatLetterboxOverrides
+                    .getLetterboxWallpaperBlurRadiusPx();
+            if (blurRadiusPx <= 0) {
                 // Removing pre-exesting blur
                 t.setBackgroundBlurRadius(mSurface, 0);
                 return;
             }
 
-            t.setBackgroundBlurRadius(mSurface, mBlurRadiusSupplier.getAsInt());
+            t.setBackgroundBlurRadius(mSurface, blurRadiusPx);
         }
 
         private float[] getRgbColorArray() {
@@ -489,8 +474,9 @@ public class Letterbox {
                     // and mParentSurface may never be updated in applySurfaceChanges but this
                     // doesn't mean that update is needed.
                     || !mSurfaceFrameRelative.isEmpty()
-                    && (mHasWallpaperBackgroundSupplier.getAsBoolean() != mHasWallpaperBackground
-                    || !mColorSupplier.get().equals(mColor)
+                    && (mAppCompatLetterboxOverrides.hasWallpaperBackgroundForLetterbox()
+                        != mHasWallpaperBackground
+                    || !mAppCompatLetterboxOverrides.getLetterboxBackgroundColor().equals(mColor)
                     || mParentSurfaceSupplier.get() != mParentSurface);
         }
     }

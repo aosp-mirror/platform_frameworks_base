@@ -63,6 +63,7 @@ import java.util.Objects;
  */
 @FlaggedApi(Flags.FLAG_RELATIVE_REFERENCE_INTENT_FILTERS)
 public final class UriRelativeFilterGroup {
+    private static final String TAG = "UriRelativeFilterGroup";
     private static final String ALLOW_STR = "allow";
     private static final String URI_RELATIVE_FILTER_GROUP_STR = "uriRelativeFilterGroup";
 
@@ -233,9 +234,16 @@ public final class UriRelativeFilterGroup {
         final int n = mUriRelativeFilters.size();
         if (n > 0) {
             dest.writeInt(n);
+            int i = 0;
             Iterator<UriRelativeFilter> it = mUriRelativeFilters.iterator();
             while (it.hasNext()) {
                 it.next().writeToParcel(dest, flags);
+                i++;
+            }
+            if (i != n) {
+                Log.e(TAG, "UriRelativeFilters was unexpectedly"
+                        + " modified while writing to parcel. Expected "
+                        + n + " but found " + i + " filters", new Exception());
             }
         } else {
             dest.writeInt(0);

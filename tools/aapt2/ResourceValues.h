@@ -65,6 +65,14 @@ class Value {
     return translatable_;
   }
 
+  void SetFlagStatus(FlagStatus val) {
+    flag_status_ = val;
+  }
+
+  FlagStatus GetFlagStatus() const {
+    return flag_status_;
+  }
+
   // Returns the source where this value was defined.
   const android::Source& GetSource() const {
     return source_;
@@ -109,6 +117,10 @@ class Value {
   // of brevity and readability. Default implementation just calls Print().
   virtual void PrettyPrint(text::Printer* printer) const;
 
+  // Removes any part of the value that is beind a disabled flag.
+  virtual void RemoveFlagDisabledElements() {
+  }
+
   friend std::ostream& operator<<(std::ostream& out, const Value& value);
 
  protected:
@@ -116,6 +128,7 @@ class Value {
   std::string comment_;
   bool weak_ = false;
   bool translatable_ = true;
+  FlagStatus flag_status_ = FlagStatus::NoFlag;
 
  private:
   virtual Value* TransformValueImpl(ValueTransformer& transformer) const = 0;
@@ -346,6 +359,7 @@ struct Array : public TransformableValue<Array, BaseValue<Array>> {
 
   bool Equals(const Value* value) const override;
   void Print(std::ostream* out) const override;
+  void RemoveFlagDisabledElements() override;
 };
 
 struct Plural : public TransformableValue<Plural, BaseValue<Plural>> {

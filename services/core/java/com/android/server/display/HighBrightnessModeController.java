@@ -36,8 +36,8 @@ import android.view.SurfaceControlHdrLayerInfoListener;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.DisplayManagerService.Clock;
+import com.android.server.display.config.HighBrightnessModeData;
 import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
@@ -266,7 +266,7 @@ class HighBrightnessModeController {
         mSettingsObserver.stopObserving();
     }
 
-    void setHighBrightnessModeMetadata(HighBrightnessModeMetadata hbmInfo) {
+    void setHighBrightnessModeMetadata(@Nullable HighBrightnessModeMetadata hbmInfo) {
         mHighBrightnessModeMetadata = hbmInfo;
     }
 

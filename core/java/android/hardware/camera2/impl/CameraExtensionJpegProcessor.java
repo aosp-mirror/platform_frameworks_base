@@ -208,10 +208,6 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     }
 
     public void onOutputSurface(Surface surface, int format) throws RemoteException {
-        if (!Flags.extension10Bit() && format != ImageFormat.JPEG) {
-            Log.e(TAG, "Unsupported output format: " + format);
-            return;
-        }
         CameraExtensionUtils.SurfaceInfo surfaceInfo = CameraExtensionUtils.querySurface(surface);
         mCaptureFormat = surfaceInfo.mFormat;
         mOutputSurface = surface;
@@ -221,10 +217,6 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     public void onPostviewOutputSurface(Surface surface) throws RemoteException {
         CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
                 CameraExtensionUtils.querySurface(surface);
-        if (!Flags.extension10Bit() && postviewSurfaceInfo.mFormat != ImageFormat.JPEG) {
-            Log.e(TAG, "Unsupported output format: " + postviewSurfaceInfo.mFormat);
-            return;
-        }
         mPostviewFormat = postviewSurfaceInfo.mFormat;
         mPostviewOutputSurface = surface;
         initializePostviewPipeline();
@@ -240,10 +232,6 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     }
 
     public void onImageFormatUpdate(int format) throws RemoteException {
-        if (!Flags.extension10Bit() && format != ImageFormat.YUV_420_888) {
-            Log.e(TAG, "Unsupported input format: " + format);
-            return;
-        }
         mFormat = format;
         initializePipeline();
     }
@@ -251,7 +239,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     private void initializePipeline() throws RemoteException {
         if ((mFormat != -1) && (mOutputSurface != null) && (mResolution != null) &&
                 (mYuvReader == null)) {
-            if (Flags.extension10Bit() && mCaptureFormat == ImageFormat.YUV_420_888) {
+            if (mCaptureFormat == ImageFormat.YUV_420_888) {
                 // For the case when postview is JPEG and capture is YUV
                 mProcessor.onOutputSurface(mOutputSurface, mCaptureFormat);
             } else {
@@ -274,7 +262,7 @@ public class CameraExtensionJpegProcessor implements ICaptureProcessorImpl {
     private void initializePostviewPipeline() throws RemoteException {
         if ((mFormat != -1) && (mPostviewOutputSurface != null) && (mPostviewResolution != null)
                 && (mPostviewYuvReader == null)) {
-            if (Flags.extension10Bit() && mPostviewFormat == ImageFormat.YUV_420_888) {
+            if (mPostviewFormat == ImageFormat.YUV_420_888) {
                 // For the case when postview is YUV and capture is JPEG
                 mProcessor.onPostviewOutputSurface(mPostviewOutputSurface);
             } else {

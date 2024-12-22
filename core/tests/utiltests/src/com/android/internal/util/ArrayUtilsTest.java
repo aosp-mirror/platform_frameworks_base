@@ -161,15 +161,15 @@ public class ArrayUtilsTest {
     }
 
     @Test
-    public void testAppendBoolean() throws Exception {
+    public void testAppendBooleanDuplicatesAllowed() throws Exception {
         assertArrayEquals(new boolean[] { true },
-                ArrayUtils.appendBoolean(null, true));
+                ArrayUtils.appendBooleanDuplicatesAllowed(null, true));
         assertArrayEquals(new boolean[] { true },
-                ArrayUtils.appendBoolean(new boolean[] { }, true));
+                ArrayUtils.appendBooleanDuplicatesAllowed(new boolean[] { }, true));
         assertArrayEquals(new boolean[] { true, false },
-                ArrayUtils.appendBoolean(new boolean[] { true }, false));
+                ArrayUtils.appendBooleanDuplicatesAllowed(new boolean[] { true }, false));
         assertArrayEquals(new boolean[] { true, true },
-                ArrayUtils.appendBoolean(new boolean[] { true }, true));
+                ArrayUtils.appendBooleanDuplicatesAllowed(new boolean[] { true }, true));
     }
 
     @Test

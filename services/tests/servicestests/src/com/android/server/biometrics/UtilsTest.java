@@ -16,26 +16,58 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_ADVANCED;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+
+import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @Presubmit
 @SmallTest
 public class UtilsTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule
+    public MockitoRule mockitorule = MockitoJUnit.rule();
+
+    @Mock
+    private Context mContext;
+
+    @Before
+    public void setUp() {
+        doThrow(SecurityException.class).when(mContext).enforceCallingOrSelfPermission(
+                eq(SET_BIOMETRIC_DIALOG_ADVANCED), any());
+    }
 
     @Test
     public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andKeyAuthenticators() {
@@ -153,36 +185,54 @@ public class UtilsTest {
 
     @Test
     public void testIsValidAuthenticatorConfig() {
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.EMPTY_SET));
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.EMPTY_SET));
 
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_STRONG));
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.BIOMETRIC_STRONG));
 
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_WEAK));
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.BIOMETRIC_WEAK));
 
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL));
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.DEVICE_CREDENTIAL));
 
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.DEVICE_CREDENTIAL
                 | Authenticators.BIOMETRIC_STRONG));
 
-        assertTrue(Utils.isValidAuthenticatorConfig(Authenticators.DEVICE_CREDENTIAL
+        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.DEVICE_CREDENTIAL
                 | Authenticators.BIOMETRIC_WEAK));
 
-        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_CONVENIENCE));
+        assertFalse(Utils.isValidAuthenticatorConfig(
+                mContext, Authenticators.BIOMETRIC_CONVENIENCE));
 
-        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_CONVENIENCE
+        assertFalse(Utils.isValidAuthenticatorConfig(mContext, Authenticators.BIOMETRIC_CONVENIENCE
                 | Authenticators.DEVICE_CREDENTIAL));
 
-        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_MAX_STRENGTH));
+        assertFalse(Utils.isValidAuthenticatorConfig(
+                mContext, Authenticators.BIOMETRIC_MAX_STRENGTH));
 
-        assertFalse(Utils.isValidAuthenticatorConfig(Authenticators.BIOMETRIC_MIN_STRENGTH));
+        assertFalse(Utils.isValidAuthenticatorConfig(
+                mContext, Authenticators.BIOMETRIC_MIN_STRENGTH));
+
+        assertThrows(SecurityException.class, () -> Utils.isValidAuthenticatorConfig(
+                        mContext, Authenticators.MANDATORY_BIOMETRICS));
+
+        doNothing().when(mContext).enforceCallingOrSelfPermission(
+                eq(SET_BIOMETRIC_DIALOG_ADVANCED), any());
+
+        if (Flags.mandatoryBiometrics()) {
+            assertTrue(Utils.isValidAuthenticatorConfig(mContext,
+                    Authenticators.MANDATORY_BIOMETRICS));
+        } else {
+            assertFalse(Utils.isValidAuthenticatorConfig(mContext,
+                    Authenticators.MANDATORY_BIOMETRICS));
+        }
 
         // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {
             final int authenticator = 1 << i;
-            if (authenticator == Authenticators.DEVICE_CREDENTIAL) {
+            if (authenticator == Authenticators.DEVICE_CREDENTIAL
+                    || authenticator == Authenticators.MANDATORY_BIOMETRICS) {
                 continue;
             }
-            assertFalse(Utils.isValidAuthenticatorConfig(1 << i));
+            assertFalse(Utils.isValidAuthenticatorConfig(mContext, 1 << i));
         }
     }
 
@@ -214,7 +264,8 @@ public class UtilsTest {
     }
 
     @Test
-    public void testBiometricConstantsConversion() {
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testBiometricConstantsConversionLegacy() {
         final int[][] testCases = {
                 {BiometricConstants.BIOMETRIC_SUCCESS,
                         BiometricManager.BIOMETRIC_SUCCESS},
@@ -230,6 +281,34 @@ public class UtilsTest {
                         BiometricManager.BIOMETRIC_SUCCESS},
                 {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
                         BiometricManager.BIOMETRIC_SUCCESS}
+        };
+
+        for (int i = 0; i < testCases.length; i++) {
+            assertEquals(testCases[i][1],
+                    Utils.biometricConstantsToBiometricManager(testCases[i][0]));
+        }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testBiometricConstantsConversion() {
+        final int[][] testCases = {
+                {BiometricConstants.BIOMETRIC_SUCCESS,
+                        BiometricManager.BIOMETRIC_SUCCESS},
+                {BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
+                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED},
+                {BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL,
+                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED},
+                {BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE},
+                {BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT,
+                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                        BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
+                {BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                        BiometricManager.BIOMETRIC_ERROR_LOCKOUT},
+                {BiometricConstants.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE,
+                        BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE}
         };
 
         for (int i = 0; i < testCases.length; i++) {

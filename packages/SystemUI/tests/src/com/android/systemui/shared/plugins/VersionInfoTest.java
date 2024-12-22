@@ -17,6 +17,7 @@ package com.android.systemui.shared.plugins;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -29,8 +30,10 @@ import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class VersionInfoTest extends SysuiTestCase {
 
     @Rule

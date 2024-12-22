@@ -16,14 +16,21 @@
 
 package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
+import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
@@ -45,47 +52,79 @@ constructor(
     interactor: CallChipInteractor,
     systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) : OngoingActivityChipViewModel {
     override val chip: StateFlow<OngoingActivityChipModel> =
         interactor.ongoingCallState
             .map { state ->
                 when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden
+                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
-                        // This mimics OngoingCallController#updateChip.
-                        // TODO(b/332662551): Handle `state.startTimeMs = 0` correctly (see
-                        // b/192379214 and
-                        // OngoingCallController.CallNotificationInfo.hasValidStartTime).
-                        val startTimeInElapsedRealtime =
-                            state.startTimeMs - systemClock.currentTimeMillis() +
-                                systemClock.elapsedRealtime()
-                        OngoingActivityChipModel.Shown(
-                            icon =
-                                Icon.Resource(
-                                    com.android.internal.R.drawable.ic_phone,
-                                    contentDescription = null,
-                                ),
-                            startTimeMs = startTimeInElapsedRealtime,
-                        ) {
-                            if (state.intent != null) {
-                                val backgroundView =
-                                    it.requireViewById<ChipBackgroundContainer>(
-                                        R.id.ongoing_activity_chip_background
-                                    )
-                                // TODO(b/332662551): Log the click event.
-                                // This mimics OngoingCallController#updateChipClickListener.
-                                activityStarter.postStartActivityDismissingKeyguard(
-                                    state.intent,
-                                    ActivityTransitionAnimator.Controller.fromView(
-                                        backgroundView,
-                                        InteractionJankMonitor
-                                            .CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                                    )
+                        val icon =
+                            if (
+                                Flags.statusBarCallChipNotificationIcon() &&
+                                    state.notificationIconView != null
+                            ) {
+                                OngoingActivityChipModel.ChipIcon.StatusBarView(
+                                    state.notificationIconView
                                 )
+                            } else {
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)
                             }
+
+                        // This block mimics OngoingCallController#updateChip.
+                        if (state.startTimeMs <= 0L) {
+                            // If the start time is invalid, don't show a timer and show just an
+                            // icon. See b/192379214.
+                            OngoingActivityChipModel.Shown.IconOnly(
+                                icon = icon,
+                                colors = ColorsModel.Themed,
+                                getOnClickListener(state),
+                            )
+                        } else {
+                            val startTimeInElapsedRealtime =
+                                state.startTimeMs - systemClock.currentTimeMillis() +
+                                    systemClock.elapsedRealtime()
+                            OngoingActivityChipModel.Shown.Timer(
+                                icon = icon,
+                                colors = ColorsModel.Themed,
+                                startTimeMs = startTimeInElapsedRealtime,
+                                getOnClickListener(state),
+                            )
                         }
                     }
                 }
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingActivityChipModel.Hidden())
+
+    private fun getOnClickListener(state: OngoingCallModel.InCall): View.OnClickListener? {
+        if (state.intent == null) {
+            return null
+        }
+
+        return View.OnClickListener { view ->
+            logger.log(TAG, LogLevel.INFO, {}, { "Chip clicked" })
+            val backgroundView =
+                view.requireViewById<ChipBackgroundContainer>(R.id.ongoing_activity_chip_background)
+            // This mimics OngoingCallController#updateChipClickListener.
+            activityStarter.postStartActivityDismissingKeyguard(
+                state.intent,
+                ActivityTransitionAnimator.Controller.fromView(
+                    backgroundView,
+                    InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+                )
+            )
+        }
+    }
+
+    companion object {
+        private val phoneIcon =
+            Icon.Resource(
+                com.android.internal.R.drawable.ic_phone,
+                ContentDescription.Resource(
+                    R.string.ongoing_phone_call_content_description,
+                ),
+            )
+        private const val TAG = "CallVM"
+    }
 }

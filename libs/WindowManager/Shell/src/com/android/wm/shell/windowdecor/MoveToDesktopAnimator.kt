@@ -7,6 +7,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.SurfaceControl
+import android.view.VelocityTracker
 import com.android.wm.shell.R
 
 /**
@@ -34,6 +35,7 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
     val scale: Float
         get() = dragToDesktopAnimator.animatedValue as Float
     private val mostRecentInput = PointF()
+    private val velocityTracker = VelocityTracker.obtain()
     private val dragToDesktopAnimator: ValueAnimator = ValueAnimator.ofFloat(1f,
             DRAG_FREEFORM_SCALE)
             .setDuration(ANIMATION_DURATION.toLong())
@@ -90,6 +92,7 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
         if (!allowSurfaceChangesOnMove || dragToDesktopAnimator.isRunning) {
             return
         }
+        velocityTracker.addMovement(ev)
         setTaskPosition(ev.rawX, ev.rawY)
         val t = transactionFactory()
         t.setPosition(taskSurface, position.x, position.y)
@@ -109,6 +112,15 @@ class MoveToDesktopAnimator @JvmOverloads constructor(
      * Cancels the animation, intended to be used when another animator will take over.
      */
     fun cancelAnimator() {
+        velocityTracker.clear()
         dragToDesktopAnimator.cancel()
+    }
+
+    /**
+     * Computes the current velocity per second based on the points that have been collected.
+     */
+    fun computeCurrentVelocity(): PointF {
+        velocityTracker.computeCurrentVelocity(/* units = */ 1000)
+        return PointF(velocityTracker.xVelocity, velocityTracker.yVelocity)
     }
 }

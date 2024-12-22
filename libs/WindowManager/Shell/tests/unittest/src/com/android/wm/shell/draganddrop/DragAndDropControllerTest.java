@@ -76,6 +76,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
+    private ShellTaskOrganizer mShellTaskOrganizer;
+    @Mock
     private DisplayController mDisplayController;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -96,8 +98,8 @@ public class DragAndDropControllerTest extends ShellTestCase {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mController = new DragAndDropController(mContext, mShellInit, mShellController,
-                mShellCommandHandler, mDisplayController, mUiEventLogger, mIconProvider,
-                mGlobalDragListener, mTransitions, mMainExecutor);
+                mShellCommandHandler, mShellTaskOrganizer, mDisplayController, mUiEventLogger,
+                mIconProvider, mGlobalDragListener, mTransitions, mMainExecutor);
         mController.onInit();
     }
 

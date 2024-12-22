@@ -28,12 +28,26 @@ class FakeCommunalMediaRepository : CommunalMediaRepository {
     fun mediaActive(timestamp: Long = 0L) {
         _mediaModel.value =
             CommunalMediaModel(
-                hasActiveMediaOrRecommendation = true,
+                hasAnyMediaOrRecommendation = true,
                 createdTimestampMillis = timestamp,
             )
     }
 
     fun mediaInactive() {
         _mediaModel.value = CommunalMediaModel.INACTIVE
+    }
+
+    private var isListening = false
+
+    override fun startListening() {
+        isListening = true
+    }
+
+    override fun stopListening() {
+        isListening = false
+    }
+
+    fun isListening(): Boolean {
+        return isListening
     }
 }

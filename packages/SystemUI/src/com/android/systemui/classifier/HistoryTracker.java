@@ -20,9 +20,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.util.time.SystemClock;
 
-import java.util.ArrayList;
+import com.google.common.collect.Sets;
+
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,7 @@ public class HistoryTracker {
     private final SystemClock mSystemClock;
 
     DelayQueue<CombinedResult> mResults = new DelayQueue<>();
-    private final List<BeliefListener> mBeliefListeners = new ArrayList<>();
+    private final Set<BeliefListener> mBeliefListeners = Sets.newConcurrentHashSet();
 
     @Inject
     HistoryTracker(SystemClock systemClock) {
@@ -161,11 +162,15 @@ public class HistoryTracker {
     }
 
     void addBeliefListener(BeliefListener listener) {
-        mBeliefListeners.add(listener);
+        if (listener != null) {
+            mBeliefListeners.add(listener);
+        }
     }
 
     void removeBeliefListener(BeliefListener listener) {
-        mBeliefListeners.remove(listener);
+        if (listener != null) {
+            mBeliefListeners.remove(listener);
+        }
     }
     /**
      * Represents a falsing score combing all the classifiers together.

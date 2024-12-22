@@ -15,6 +15,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -52,6 +53,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        underTest.activateIn(testScope)
     }
 
     @Test
@@ -107,15 +109,15 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
 
     @Test
     fun onSystemIconContainerClicked_unlocked_collapsesShadeToGone() =
-            testScope.runTest {
-                setDeviceEntered(true)
-                setScene(Scenes.Shade)
+        testScope.runTest {
+            setDeviceEntered(true)
+            setScene(Scenes.Shade)
 
-                underTest.onSystemIconContainerClicked()
-                runCurrent()
+            underTest.onSystemIconContainerClicked()
+            runCurrent()
 
-                assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
-            }
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
+        }
 
     companion object {
         private val SUB_1 =
@@ -137,7 +139,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
     private fun setScene(key: SceneKey) {
         sceneInteractor.changeScene(key, "test")
         sceneInteractor.setTransitionState(
-                MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
+            MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(key))
         )
         testScope.runCurrent()
     }
@@ -146,16 +148,16 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
         if (isEntered) {
             // Unlock the device marking the device has entered.
             kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
-                    SuccessFingerprintAuthenticationStatus(0, true)
+                SuccessFingerprintAuthenticationStatus(0, true)
             )
             runCurrent()
         }
         setScene(
-                if (isEntered) {
-                    Scenes.Gone
-                } else {
-                    Scenes.Lockscreen
-                }
+            if (isEntered) {
+                Scenes.Gone
+            } else {
+                Scenes.Lockscreen
+            }
         )
         assertThat(deviceEntryInteractor.isDeviceEntered.value).isEqualTo(isEntered)
     }

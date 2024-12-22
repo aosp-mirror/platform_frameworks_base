@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package com.android.settingslib.graph;
+
+option java_package = "com.android.settingslib.graph.proto";
+option java_multiple_files = true;
+
+// Proto represents preference graph.
+message PreferenceGraphProto {
+  // Preference screens appear in the graph.
+  // Key: preference key of the PreferenceScreen. Value: PreferenceScreen.
+  map<string, PreferenceScreenProto> screens = 1;
+  // Roots of the graph.
+  // Each element is a preference key of the PreferenceScreen.
+  repeated string roots = 2;
+  // Activities appear in the graph.
+  // Key: activity class. Value: preference key of associated PreferenceScreen.
+  map<string, string> activity_screens = 3;
+}
+
+// Proto of PreferenceScreen.
+message PreferenceScreenProto {
+  // Intent to show the PreferenceScreen.
+  optional IntentProto intent = 1;
+  // Root of the PreferenceScreen hierarchy.
+  optional PreferenceGroupProto root = 2;
+  // If the preference screen provides complete hierarchy by source code.
+  optional bool complete_hierarchy = 3;
+}
+
+// Proto of PreferenceGroup.
+message PreferenceGroupProto {
+  // Self information of PreferenceGroup.
+  optional PreferenceProto preference = 1;
+  // A list of children.
+  repeated PreferenceOrGroupProto preferences = 2;
+}
+
+// Proto represents either PreferenceProto or PreferenceGroupProto.
+message PreferenceOrGroupProto {
+  oneof kind {
+    // It is a Preference.
+    PreferenceProto preference = 1;
+    // It is a PreferenceGroup.
+    PreferenceGroupProto group = 2;
+  }
+}
+
+// Proto of Preference.
+message PreferenceProto {
+  // Key of the preference.
+  optional string key = 1;
+  // Title of the preference.
+  optional TextProto title = 2;
+  // Summary of the preference.
+  optional TextProto summary = 3;
+  // Icon of the preference.
+  optional int32 icon = 4;
+  // Additional keywords for indexing.
+  optional int32 keywords = 5;
+  // Extras of the preference.
+  optional BundleProto extras = 6;
+  // Whether the preference is indexable.
+  optional bool indexable = 7;
+  // Whether the preference is enabled.
+  optional bool enabled = 8;
+  // Whether the preference is available/visible.
+  optional bool available = 9;
+  // Whether the preference is persistent.
+  optional bool persistent = 10;
+  // Whether the preference is restricted by managed configurations.
+  optional bool restricted = 11;
+  // Target of the preference action.
+  optional ActionTarget action_target = 12;
+  // Preference value (if present, it means `persistent` is true).
+  optional PreferenceValueProto value = 13;
+
+  // Target of an Intent
+  message ActionTarget {
+    oneof kind {
+      // Resolved key of the preference screen located in current app.
+      // This is resolved from android:fragment or activity of current app.
+      string key = 1;
+      // Unresolvable Intent that is either an unrecognized activity of current
+      // app or activity belongs to other app.
+      IntentProto intent = 2;
+    }
+  }
+}
+
+// Proto of string or string resource id.
+message TextProto {
+  oneof text {
+    int32 resource_id = 1;
+    string string = 2;
+  }
+}
+
+// Proto of preference value.
+message PreferenceValueProto {
+  oneof value {
+    bool boolean_value = 1;
+  }
+}
+
+// Proto of android.content.Intent
+message IntentProto {
+  // The action of the Intent.
+  optional string action = 1;
+
+  // The data attribute of the Intent, expressed as a URI.
+  optional string data = 2;
+
+  // The package attribute of the Intent, which may be set to force the
+  // detection of a particular application package that can handle the event.
+  optional string pkg = 3;
+
+  // The component attribute of the Intent, which may be set to force the
+  // detection of a particular component (app). If present, this must be a
+  // package name followed by a '/' and then followed by the class name.
+  optional string component = 4;
+
+  // Flags controlling how intent is handled. The value must be bitwise OR of
+  // intent flag constants defined by Android.
+  // http://developer.android.com/reference/android/content/Intent.html#setFlags(int)
+  optional int32 flags = 5;
+
+  // Extended data from the intent.
+  optional BundleProto extras = 6;
+
+  // The MIME type of the Intent (e.g. "text/plain").
+  //
+  // For more information, see
+  // https://developer.android.com/reference/android/content/Intent#setType(java.lang.String).
+  optional string mime_type = 7;
+}
+
+// Proto of android.os.Bundle
+message BundleProto {
+  // Bundle data.
+  map<string, BundleValue> values = 1;
+
+  message BundleValue {
+    // Bundle data value for the associated key name.
+    // Can be extended to support other types of bundled data.
+    oneof value {
+      string string_value = 1;
+      bytes bytes_value = 2;
+      int32 int_value = 3;
+      int64 long_value = 4;
+      bool boolean_value = 5;
+      double double_value = 6;
+      BundleProto bundle_value = 7;
+    }
+  }
+}

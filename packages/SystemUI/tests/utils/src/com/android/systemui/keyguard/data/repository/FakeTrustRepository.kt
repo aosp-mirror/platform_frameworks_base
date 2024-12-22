@@ -33,9 +33,10 @@ class FakeTrustRepository @Inject constructor() : TrustRepository {
     private val _isTrustUsuallyManaged = MutableStateFlow(false)
     override val isCurrentUserTrustUsuallyManaged: StateFlow<Boolean>
         get() = _isTrustUsuallyManaged
+
     private val _isCurrentUserTrusted = MutableStateFlow(false)
-    override val isCurrentUserTrusted: Flow<Boolean>
-        get() = _isCurrentUserTrusted
+    override val isCurrentUserTrusted: StateFlow<Boolean>
+        get() = _isCurrentUserTrusted.asStateFlow()
 
     private val _isCurrentUserActiveUnlockAvailable = MutableStateFlow(false)
     override val isCurrentUserActiveUnlockRunning: StateFlow<Boolean> =
@@ -47,6 +48,13 @@ class FakeTrustRepository @Inject constructor() : TrustRepository {
 
     private val _requestDismissKeyguard = MutableStateFlow(TrustModel(false, 0, TrustGrantFlags(0)))
     override val trustAgentRequestingToDismissKeyguard: Flow<TrustModel> = _requestDismissKeyguard
+
+    var keyguardShowingChangeEventCount: Int = 0
+        private set
+
+    override suspend fun reportKeyguardShowingChanged() {
+        keyguardShowingChangeEventCount++
+    }
 
     fun setCurrentUserTrusted(trust: Boolean) {
         _isCurrentUserTrusted.value = trust

@@ -17,11 +17,8 @@
 package com.android.systemui.common.ui
 
 import android.content.applicationContext
-import android.view.layoutInflater
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.policy.configurationController
 
 val Kosmos.configurationState: ConfigurationState by
-    Kosmos.Fixture {
-        ConfigurationState(configurationController, applicationContext, layoutInflater)
-    }
+    Kosmos.Fixture { ConfigurationStateImpl(configurationController, applicationContext) }

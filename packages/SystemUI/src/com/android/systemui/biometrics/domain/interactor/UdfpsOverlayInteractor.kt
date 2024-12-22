@@ -83,7 +83,7 @@ constructor(
 
     /** Sets whether Udfps overlay should handle touches */
     fun setHandleTouches(shouldHandle: Boolean = true) {
-        if (authController.isUltrasonicUdfpsSupported
+        if (authController.isUdfpsSupported
                 && shouldHandle != _shouldHandleTouches.value) {
             fingerprintManager?.setIgnoreDisplayTouches(
                 requestId.value,

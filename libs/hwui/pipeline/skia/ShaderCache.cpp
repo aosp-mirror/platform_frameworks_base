@@ -16,9 +16,9 @@
 
 #include "ShaderCache.h"
 
-#include <GrDirectContext.h>
 #include <SkData.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 #include <log/log.h>
 #include <openssl/sha.h>
 

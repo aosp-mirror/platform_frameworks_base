@@ -25,20 +25,18 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-data class TransitionData(
-    val config: Config,
-    val start: Long = System.currentTimeMillis(),
-)
+data class TransitionData(val config: Config, val start: Long = System.currentTimeMillis())
 
 class KeyguardBlueprintViewModel
 @Inject
 constructor(
     @Main private val handler: Handler,
-    keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
 ) {
     val blueprint = keyguardBlueprintInteractor.blueprint
     val blueprintId = keyguardBlueprintInteractor.blueprintId
@@ -76,6 +74,9 @@ constructor(
             }
         }
 
+    fun refreshBlueprint(type: Type = Type.NoTransition) =
+        keyguardBlueprintInteractor.refreshBlueprint(type)
+
     fun updateTransitions(data: TransitionData?, mutate: MutableSet<Transition>.() -> Unit) {
         runningTransitions.mutate()
 
@@ -95,7 +96,7 @@ constructor(
                 Log.w(
                     TAG,
                     "runTransition: skipping ${transition::class.simpleName}: " +
-                        "currentPriority=$currentPriority; config=$config"
+                        "currentPriority=$currentPriority; config=$config",
                 )
             }
             apply()
@@ -106,7 +107,7 @@ constructor(
             Log.i(
                 TAG,
                 "runTransition: running ${transition::class.simpleName}: " +
-                    "currentPriority=$currentPriority; config=$config"
+                    "currentPriority=$currentPriority; config=$config",
             )
         }
 

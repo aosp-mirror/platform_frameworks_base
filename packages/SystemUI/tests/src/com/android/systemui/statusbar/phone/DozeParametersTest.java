@@ -52,6 +52,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -113,6 +115,7 @@ public class DozeParametersTest extends SysuiTestCase {
                 .thenReturn(mFoldAodAnimationController);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
+        SecureSettings secureSettings = new FakeSettings();
         mDozeParameters = new DozeParameters(
             mContext,
             mHandler,
@@ -130,7 +133,8 @@ public class DozeParametersTest extends SysuiTestCase {
             mConfigurationController,
             mStatusBarStateController,
             mUserTracker,
-            mDozeInteractor
+            mDozeInteractor,
+            secureSettings
         );
 
         verify(mBatteryController).addCallback(mBatteryStateChangeCallback.capture());

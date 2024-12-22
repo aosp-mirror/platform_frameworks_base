@@ -20,6 +20,7 @@ import android.os.Build
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricSettingsInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.log.BouncerLogger
@@ -39,6 +40,7 @@ constructor(
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
     private val bouncerLogger: BouncerLogger,
+    private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
 ) : CoreStartable {
     override fun start() {
         if (!Build.isDebuggable()) {
@@ -69,13 +71,13 @@ constructor(
             }
         }
         applicationScope.launch {
-            fingerprintAuthInteractor.isFingerprintCurrentlyAllowedOnBouncer.collectLatest {
-                newValue ->
-                bouncerLogger.interestedStateChanged(
-                    "fingerprintCurrentlyAllowedOnBouncer",
-                    newValue
-                )
-            }
+            deviceEntryBiometricsAllowedInteractor.isFingerprintCurrentlyAllowedOnBouncer
+                .collectLatest { newValue ->
+                    bouncerLogger.interestedStateChanged(
+                        "fingerprintCurrentlyAllowedOnBouncer",
+                        newValue
+                    )
+                }
         }
     }
 }

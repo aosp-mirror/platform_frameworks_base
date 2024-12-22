@@ -16,10 +16,10 @@
 
 package com.android.systemui.shade
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
@@ -59,7 +59,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
@@ -117,11 +117,11 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 deviceProvisionedController,
                 notificationShadeWindowController,
                 0,
+                Lazy { nswvc },
                 Lazy { npvc },
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
-        shadeController.setNotificationShadeWindowViewController(nswvc)
         shadeController.setVisibilityListener(mock())
     }
 

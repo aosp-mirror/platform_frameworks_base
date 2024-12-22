@@ -16,35 +16,16 @@
 
 package com.android.systemui.volume.dagger
 
-import android.view.accessibility.CaptioningManager
-import com.android.settingslib.view.accessibility.data.repository.CaptioningRepository
-import com.android.settingslib.view.accessibility.data.repository.CaptioningRepositoryImpl
-import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.accessibility.data.repository.CaptioningRepository
+import com.android.systemui.accessibility.data.repository.CaptioningRepositoryImpl
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.CoroutineScope
 
 @Module
 interface CaptioningModule {
 
-    companion object {
-
-        @Provides
-        @SysUISingleton
-        fun provideCaptioningRepository(
-            captioningManager: CaptioningManager,
-            @Background coroutineContext: CoroutineContext,
-            @Application coroutineScope: CoroutineScope,
-        ): CaptioningRepository =
-            CaptioningRepositoryImpl(captioningManager, coroutineContext, coroutineScope)
-
-        @Provides
-        @SysUISingleton
-        fun provideCaptioningInteractor(repository: CaptioningRepository): CaptioningInteractor =
-            CaptioningInteractor(repository)
-    }
+    @Binds
+    @SysUISingleton
+    fun bindCaptioningRepository(impl: CaptioningRepositoryImpl): CaptioningRepository
 }

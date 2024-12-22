@@ -28,28 +28,29 @@ import com.android.internal.os.BackgroundThread;
 import java.time.Instant;
 import java.util.concurrent.ThreadLocalRandom;
 
-public final class Utils {
+final class Utils {
 
     private static Instant lastTraceTime = Instant.EPOCH;
     private static final int TRACE_COOLDOWN_SECONDS = 30;
 
-    public static boolean withFrequency(String configName, int defaultFrequency) {
+    static boolean withFrequency(String configName, int defaultFrequency) {
         int threshold = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT, configName, defaultFrequency);
         int randomNum = ThreadLocalRandom.current().nextInt(100);
         return randomNum < threshold;
     }
 
-    public static boolean traceSystem(IProfCollectd mIProfcollect, String eventName) {
-        if (mIProfcollect == null) {
-            return false;
-        }
-        if (isInCooldownOrReset()) {
+    /**
+     * Request a system-wide trace.
+     * Will be ignored if the device does not meet trace criteria or is being rate limited.
+     */
+    static boolean traceSystem(IProfCollectd iprofcollectd, String eventName) {
+        if (!checkPrerequisites(iprofcollectd)) {
             return false;
         }
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
-                mIProfcollect.trace_system(eventName);
+                iprofcollectd.trace_system(eventName);
             } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
@@ -57,16 +58,17 @@ public final class Utils {
         return true;
     }
 
-    public static boolean traceSystem(IProfCollectd mIProfcollect, String eventName, int delayMs) {
-        if (mIProfcollect == null) {
-            return false;
-        }
-        if (isInCooldownOrReset()) {
+    /**
+     * Request a system-wide trace after a delay.
+     * Will be ignored if the device does not meet trace criteria or is being rate limited.
+     */
+    static boolean traceSystem(IProfCollectd iprofcollectd, String eventName, int delayMs) {
+        if (!checkPrerequisites(iprofcollectd)) {
             return false;
         }
         BackgroundThread.get().getThreadHandler().postDelayed(() -> {
             try {
-                mIProfcollect.trace_system(eventName);
+                iprofcollectd.trace_system(eventName);
             } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
@@ -74,17 +76,18 @@ public final class Utils {
         return true;
     }
 
-    public static boolean traceProcess(IProfCollectd mIProfcollect,
+    /**
+     * Request a single-process trace.
+     * Will be ignored if the device does not meet trace criteria or is being rate limited.
+     */
+    static boolean traceProcess(IProfCollectd iprofcollectd,
             String eventName, String processName, int durationMs) {
-        if (mIProfcollect == null) {
-            return false;
-        }
-        if (isInCooldownOrReset()) {
+        if (!checkPrerequisites(iprofcollectd)) {
             return false;
         }
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
-                mIProfcollect.trace_process(eventName,
+                iprofcollectd.trace_process(eventName,
                         processName,
                         durationMs);
             } catch (RemoteException | ServiceSpecificException e) {
@@ -104,5 +107,18 @@ public final class Utils {
             return false;
         }
         return true;
+    }
+
+    private static boolean checkPrerequisites(IProfCollectd iprofcollectd) {
+        if (iprofcollectd == null) {
+            return false;
+        }
+        if (isInCooldownOrReset()) {
+            return false;
+        }
+        return ProfcollectForwardingService.sVerityEnforced
+            && !ProfcollectForwardingService.sAdbActive
+            && ProfcollectForwardingService.sIsInteractive
+            && !ProfcollectForwardingService.sIsBatteryLow;
     }
 }

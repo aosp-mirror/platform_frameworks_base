@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone.domain.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -25,8 +26,10 @@ import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepositor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class LightsOutInteractorTest : SysuiTestCase() {
 
     private val statusBarModeRepository = FakeStatusBarModeRepository()

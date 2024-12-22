@@ -40,7 +40,7 @@ public class Utils {
      * @param n
      * @return
      */
-    static String trimString(String str, int n) {
+    public static String trimString(String str, int n) {
         if (str.length() > n) {
             str = str.substring(0, n - 3) + "...";
         }
@@ -55,6 +55,9 @@ public class Utils {
      */
     public static String floatToString(float idvalue, float value) {
         if (Float.isNaN(idvalue)) {
+            if (idFromNan(value) == 0) {
+                return "NaN";
+            }
             return "[" + idFromNan(idvalue) + "]" + floatToString(value);
         }
         return floatToString(value);
@@ -67,6 +70,9 @@ public class Utils {
      */
     public static String floatToString(float value) {
         if (Float.isNaN(value)) {
+            if (idFromNan(value) == 0) {
+                return "NaN";
+            }
             return "[" + idFromNan(value) + "]";
         }
         return Float.toString(value);
@@ -78,7 +84,9 @@ public class Utils {
      */
     public static void log(String str) {
         StackTraceElement s = new Throwable().getStackTrace()[1];
-        System.out.println("(" + s.getFileName() + ":" + s.getLineNumber() + ")." + str);
+        System.out.println("(" + s.getFileName()
+                + ":" + s.getLineNumber() + "). "
+                + s.getMethodName() + "() " + str);
     }
 
     /**
@@ -105,6 +113,7 @@ public class Utils {
     public static boolean isVariable(float v) {
         if (Float.isNaN(v)) {
             int id = idFromNan(v);
+            if (id == 0) return false;
             return id > 40 || id < 10;
         }
         return false;
@@ -220,6 +229,4 @@ public class Utils {
         }
         return 0;
     }
-
-
 }

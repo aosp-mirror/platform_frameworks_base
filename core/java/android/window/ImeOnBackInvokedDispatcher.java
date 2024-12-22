@@ -27,10 +27,12 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ViewRootImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -58,7 +60,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
     // The handler to run callbacks on. This should be on the same thread
     // the ViewRootImpl holding IME's WindowOnBackInvokedDispatcher is created on.
     private Handler mHandler;
-
+    private final ArrayDeque<Pair<Integer, Bundle>> mQueuedReceive = new ArrayDeque<>();
     public ImeOnBackInvokedDispatcher(Handler handler) {
         mResultReceiver = new ResultReceiver(handler) {
             @Override
@@ -66,10 +68,21 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
                 WindowOnBackInvokedDispatcher dispatcher = getReceivingDispatcher();
                 if (dispatcher != null) {
                     receive(resultCode, resultData, dispatcher);
+                } else {
+                    mQueuedReceive.add(new Pair<>(resultCode, resultData));
                 }
             }
         };
     }
+
+    /** Set receiving dispatcher to consume queued receiving events. */
+    public void updateReceivingDispatcher(@NonNull WindowOnBackInvokedDispatcher dispatcher) {
+        while (!mQueuedReceive.isEmpty()) {
+            final Pair<Integer, Bundle> queuedMessage = mQueuedReceive.poll();
+            receive(queuedMessage.first, queuedMessage.second, dispatcher);
+        }
+    }
+
 
     void setHandler(@NonNull Handler handler) {
         mHandler = handler;
@@ -198,6 +211,7 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             }
         }
         mImeCallbacks.clear();
+        mQueuedReceive.clear();
     }
 
     @VisibleForTesting(visibility = PACKAGE)

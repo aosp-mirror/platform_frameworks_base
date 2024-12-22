@@ -16,11 +16,15 @@
 
 package com.android.systemui.biometrics
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.keyguard.logging.BiometricMessageDeferralLogger
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -31,14 +35,29 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @android.platform.test.annotations.EnabledOnRavenwood
-class FaceHelpMessageDeferralTest : SysuiTestCase() {
+class FaceHelpMessageDeferralTest(flags: FlagsParameterization) : SysuiTestCase() {
     val threshold = .75f
     @Mock lateinit var logger: BiometricMessageDeferralLogger
     @Mock lateinit var dumpManager: DumpManager
+    val systemClock = FakeSystemClock()
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(Flags.FLAG_FACE_MESSAGE_DEFER_UPDATE)
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -111,10 +130,11 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_FACE_MESSAGE_DEFER_UPDATE)
     fun testReturnsMostFrequentDeferredMessage() {
         val biometricMessageDeferral = createMsgDeferral(setOf(1, 2))
 
-        // WHEN there's 80%of the messages are msgId=1 and 20% is msgId=2
+        // WHEN there's 80% of the messages are msgId=1 and 20% is msgId=2
         biometricMessageDeferral.processFrame(1)
         biometricMessageDeferral.processFrame(1)
         biometricMessageDeferral.processFrame(1)
@@ -124,7 +144,41 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
         biometricMessageDeferral.processFrame(2)
         biometricMessageDeferral.updateMessage(2, "msgId-2")
 
-        // THEN the most frequent deferred message is that meets the threshold is returned
+        // THEN the most frequent deferred message that meets the threshold is returned
+        assertEquals("msgId-1", biometricMessageDeferral.getDeferredMessage())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FACE_MESSAGE_DEFER_UPDATE)
+    fun testReturnsMostFrequentDeferredMessage_onlyAnalyzesLastNWindow() {
+        val biometricMessageDeferral = createMsgDeferral(setOf(1, 2))
+
+        // WHEN there's 80% of the messages are msgId=1 and 20% is msgId=2, but the last
+        // N window only contains messages with msgId=2
+        repeat(80) { biometricMessageDeferral.processFrame(1) }
+        biometricMessageDeferral.updateMessage(1, "msgId-1")
+        systemClock.setElapsedRealtime(systemClock.elapsedRealtime() + 501L)
+        repeat(20) { biometricMessageDeferral.processFrame(2) }
+        biometricMessageDeferral.updateMessage(2, "msgId-2")
+
+        // THEN the most frequent deferred message in the last N window (500L) is returned
+        assertEquals("msgId-2", biometricMessageDeferral.getDeferredMessage())
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_FACE_MESSAGE_DEFER_UPDATE)
+    fun testReturnsMostFrequentDeferredMessage_analyzesAllFrames() {
+        val biometricMessageDeferral = createMsgDeferral(setOf(1, 2))
+
+        // WHEN there's 80% of the messages are msgId=1 and 20% is msgId=2, but the last
+        // N window only contains messages with msgId=2
+        repeat(80) { biometricMessageDeferral.processFrame(1) }
+        biometricMessageDeferral.updateMessage(1, "msgId-1")
+        systemClock.setElapsedRealtime(systemClock.elapsedRealtime() + 501L)
+        repeat(20) { biometricMessageDeferral.processFrame(2) }
+        biometricMessageDeferral.updateMessage(2, "msgId-2")
+
+        // THEN the most frequent deferred message is returned
         assertEquals("msgId-1", biometricMessageDeferral.getDeferredMessage())
     }
 
@@ -213,14 +267,17 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
     private fun createMsgDeferral(
         messagesToDefer: Set<Int>,
         acquiredInfoToIgnore: Set<Int> = emptySet(),
+        windowToAnalyzeLastNFrames: Long = 500L,
     ): BiometricMessageDeferral {
         return BiometricMessageDeferral(
-            messagesToDefer,
-            acquiredInfoToIgnore,
-            threshold,
-            logger,
-            dumpManager,
-            "0",
+            messagesToDefer = messagesToDefer,
+            acquiredInfoToIgnore = acquiredInfoToIgnore,
+            threshold = threshold,
+            windowToAnalyzeLastNFrames = windowToAnalyzeLastNFrames,
+            logBuffer = logger,
+            dumpManager = dumpManager,
+            id = "0",
+            systemClock = { systemClock },
         )
     }
 }

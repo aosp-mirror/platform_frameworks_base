@@ -31,3 +31,35 @@ flag {
     description: "Add a new settings page for the RUN_BACKUP_JOBS permission."
     bug: "320563660"
 }
+
+# OWNER = tgunn TARGET=25Q1
+flag {
+    name: "allow_config_maximum_call_log_entries_per_sim"
+    is_exported: true
+    namespace: "telecom"
+    description: "Allow partners to modify the maximum number of call log size for each sim card."
+    bug: "352235494"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+# OWNER = liefuliu
+flag {
+    name: "new_default_account_api_enabled"
+    is_exported: true
+    namespace: "contacts"
+    description: "Enable the new ContactsContract Default Account APIs."
+    bug: "359957527"
+}
+
+flag {
+    name: "reduce_binder_transaction_size_for_get_all_properties"
+    namespace: "core_experiments_team_internal"
+    description: "Reduce Binder transaction size in getAllProperties calls"
+    bug: "362652574"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

@@ -42,14 +42,4 @@ public interface RecentsAnimationListener {
      * was running becomes ready for control.
      */
     void onTasksAppeared(RemoteAnimationTarget[] app);
-
-    /**
-     * Called to request that the current task tile be switched out for a screenshot (if not
-     * already). Once complete, onFinished should be called.
-     * @return true if this impl will call onFinished. No other onSwitchToScreenshot impls will
-     *         be called afterwards (to avoid multiple calls to onFinished).
-     */
-    default boolean onSwitchToScreenshot(Runnable onFinished) {
-        return false;
-    }
 }

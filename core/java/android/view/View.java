@@ -22,6 +22,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -29,6 +30,7 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -139,8 +141,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.Vibrator;
-import android.os.vibrator.Flags;
 import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
@@ -5512,6 +5512,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG = 1 << 13;
 
     /**
+     * Flag indicating that this drag will result in the caller activity's task to be hidden for the
+     * duration of the drag, this means that the source activity will not receive drag events for
+     * the current drag gesture. Only the current voice interaction service may use this flag.
+     * @hide
+     */
+    public static final int DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START = 1 << 14;
+
+    /**
      * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
      */
     private float mVerticalScrollFactor;
@@ -5701,9 +5709,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The pointer icon when the mouse hovers on this view. The default is null.
      */
     private PointerIcon mMousePointerIcon;
-
-    /** Vibrator for haptic feedback. */
-    private Vibrator mVibrator;
 
     /**
      * @hide
@@ -10994,6 +10999,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ? afm.isAutofillable(this) : false;
     }
 
+    /**
+     * Returns whether the view is autofillable.
+     *
+     * @return whether the view is autofillable, and should send out autofill request to provider.
+     */
     private boolean isAutofillable() {
         if (DBG) {
             Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
@@ -16433,7 +16443,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
             try {
-                Trace.traceBegin(TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                if (Trace.isTagEnabled(TRACE_TAG_VIEW)) {
+                    Trace.traceBegin(TRACE_TAG_VIEW,
+                            "View.onTouchListener#onTouch - " + getClass().getSimpleName()
+                                    + ", eventId - " + event.getId());
+                }
                 handled = li.mOnTouchListener.onTouch(this, event);
             } finally {
                 Trace.traceEnd(TRACE_TAG_VIEW);
@@ -17477,9 +17491,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Dispatching hover events to {@link TouchDelegate} to improve accessibility.
      * <p>
      * This method is dispatching hover events to the delegate target to support explore by touch.
-     * Similar to {@link ViewGroup#dispatchTouchEvent}, this method send proper hover events to
+     * Similar to {@link ViewGroup#dispatchTouchEvent}, this method sends proper hover events to
      * the delegate target according to the pointer and the touch area of the delegate while touch
-     * exploration enabled.
+     * exploration is enabled.
      * </p>
      *
      * @param event The motion event dispatch to the delegate target.
@@ -17511,17 +17525,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // hover events but receive accessibility focus, it should also not delegate to these
         // views when hovered.
         if (!oldHoveringTouchDelegate) {
-            if ((action == MotionEvent.ACTION_HOVER_ENTER
-                    || action == MotionEvent.ACTION_HOVER_MOVE)
-                    && !pointInHoveredChild(event)
-                    && pointInDelegateRegion) {
-                mHoveringTouchDelegate = true;
+            if (removeChildHoverCheckForTouchExploration()) {
+                if ((action == MotionEvent.ACTION_HOVER_ENTER
+                        || action == MotionEvent.ACTION_HOVER_MOVE) && pointInDelegateRegion) {
+                    mHoveringTouchDelegate = true;
+                }
+            } else {
+                if ((action == MotionEvent.ACTION_HOVER_ENTER
+                        || action == MotionEvent.ACTION_HOVER_MOVE)
+                        && !pointInHoveredChild(event)
+                        && pointInDelegateRegion) {
+                    mHoveringTouchDelegate = true;
+                }
             }
         } else {
-            if (action == MotionEvent.ACTION_HOVER_EXIT
-                    || (action == MotionEvent.ACTION_HOVER_MOVE
+            if (removeChildHoverCheckForTouchExploration()) {
+                if (action == MotionEvent.ACTION_HOVER_EXIT
+                        || (action == MotionEvent.ACTION_HOVER_MOVE)) {
+                    if (!pointInDelegateRegion) {
+                        mHoveringTouchDelegate = false;
+                    }
+                }
+            } else {
+                if (action == MotionEvent.ACTION_HOVER_EXIT
+                        || (action == MotionEvent.ACTION_HOVER_MOVE
                         && (pointInHoveredChild(event) || !pointInDelegateRegion))) {
-                mHoveringTouchDelegate = false;
+                    mHoveringTouchDelegate = false;
+                }
             }
         }
         switch (action) {
@@ -19636,7 +19666,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setLeft(int left) {
         if (left != mLeft) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -25590,6 +25619,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
                 mSizeBasedFrameRateCategoryAndReason = category | FRAME_RATE_CATEGORY_REASON_LARGE;
             }
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
         }
 
         onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
@@ -27353,6 +27383,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Modifiers the input matrix such that it maps root view's coordinates to view-local
+     * coordinates.
+     *
+     * @param matrix input matrix to modify
+     * @hide
+     */
+    public void transformMatrixRootToLocal(@NonNull Matrix matrix) {
+        final ViewParent parent = mParent;
+        if (parent instanceof final View vp) {
+            vp.transformMatrixRootToLocal(matrix);
+            matrix.postTranslate(vp.mScrollX, vp.mScrollY);
+        }
+        // This method is different from transformMatrixToLocal that it doesn't perform any
+        // transformation for ViewRootImpl
+
+        matrix.postTranslate(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            matrix.postConcat(getInverseMatrix());
+        }
+    }
+
+    /**
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", indexMapping = {
@@ -27609,6 +27662,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return (T) this;
         }
         return null;
+    }
+
+
+    /**
+     * Performs the traversal to find views that are autofillable.
+     * Autofillable views are added to the provided list.
+     *
+     * <strong>Note:</strong>This method does not stop at the root namespace
+     * boundary.
+     *
+     * @param autofillableViews The output list of autofillable Views.
+     * @hide
+     */
+    public void findAutofillableViewsByTraversal(@NonNull List<View> autofillableViews) {
+        if (isAutofillable()) {
+            autofillableViews.add(this);
+        }
     }
 
     /**
@@ -28625,37 +28695,63 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param flags Additional flags as per {@link HapticFeedbackConstants}.
      */
     public boolean performHapticFeedback(int feedbackConstant, int flags) {
-        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
-                || mAttachInfo == null) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
             return false;
+        }
+
+        int privFlags = computeHapticFeedbackPrivateFlags();
+        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, flags, privFlags);
+    }
+
+    /**
+     * <p>Provide haptic feedback to the user for this view.
+     *
+     * <p>Call this method (vs {@link #performHapticFeedback(int)}) to specify more details about
+     * the {@link InputDevice} that caused this haptic feedback. The framework will choose and
+     * provide a haptic feedback based on these details.
+     *
+     * <p>The feedback will only be performed if {@link #isHapticFeedbackEnabled()} is {@code true}.
+     *
+     * @param feedbackConstant One of the constants defined in {@link HapticFeedbackConstants}.
+     * @param inputDeviceId The ID of the {@link InputDevice} that generated the event which
+     *          triggered this haptic feedback request.
+     * @param inputSource The input source of the event which triggered this haptic feedback
+     *          request, defined as {@code InputDevice#SOURCE_*}.
+     *
+     * @hide
+     */
+    public void performHapticFeedbackForInputDevice(int feedbackConstant, int inputDeviceId,
+            int inputSource, int flags) {
+        if (isPerformHapticFeedbackSuppressed(feedbackConstant, flags)) {
+            return;
+        }
+
+        int privFlags = computeHapticFeedbackPrivateFlags();
+        mAttachInfo.mRootCallbacks.performHapticFeedbackForInputDevice(
+                feedbackConstant, inputDeviceId, inputSource, flags, privFlags);
+    }
+
+    private boolean isPerformHapticFeedbackSuppressed(int feedbackConstant, int flags) {
+        if (feedbackConstant == HapticFeedbackConstants.NO_HAPTICS
+                || mAttachInfo == null
+                || mAttachInfo.mSession == null) {
+            return true;
         }
         //noinspection SimplifiableIfStatement
         if ((flags & HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING) == 0
                 && !isHapticFeedbackEnabled()) {
-            return false;
-        }
-
-        final boolean always = (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
-        boolean fromIme = false;
-        if (mAttachInfo.mViewRootImpl != null) {
-            fromIme = mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
-        }
-        if (Flags.useVibratorHapticFeedback()) {
-            if (!mAttachInfo.canPerformHapticFeedback()) {
-                return false;
-            }
-            getSystemVibrator().performHapticFeedback(
-                    feedbackConstant, always, "View#performHapticFeedback", fromIme);
             return true;
         }
-        return mAttachInfo.mRootCallbacks.performHapticFeedback(feedbackConstant, always, fromIme);
+        return false;
     }
 
-    private Vibrator getSystemVibrator() {
-        if (mVibrator != null) {
-            return mVibrator;
+    private int computeHapticFeedbackPrivateFlags() {
+        int privFlags = 0;
+        if (mAttachInfo.mViewRootImpl != null
+                && mAttachInfo.mViewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD) {
+            privFlags = HapticFeedbackConstants.PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS;
         }
-        return mVibrator = mContext.getSystemService(Vibrator.class);
+        return privFlags;
     }
 
     /**
@@ -30577,6 +30673,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    // Note that if the function returns true, it indicates aapt did not generate this id.
+    // However false value does not indicate that aapt did generated this id.
     private static boolean isViewIdGenerated(int id) {
         return (id & 0xFF000000) == 0 && (id & 0x00FFFFFF) != 0;
     }
@@ -30615,7 +30713,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
      * customize the icon for the given pointer.
      *
-     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * For example, to always show the PointerIcon.TYPE_HANDWRITING icon for a stylus pointer,
+     * the event can be resolved in the following way:
      * <code><pre>
      * &#64;Override
      * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
@@ -30625,7 +30724,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
      *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
      *         // Show this pointer icon only if this pointer is a stylus.
-     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_HANDWRITING);
      *     }
      *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
      *     // like for the mouse cursor.
@@ -31682,7 +31781,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         interface Callbacks {
             void playSoundEffect(int effectId);
-            boolean performHapticFeedback(int effectId, boolean always, boolean fromIme);
+
+            boolean performHapticFeedback(int effectId,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
+
+            void performHapticFeedbackForInputDevice(int effectId,
+                    int inputDeviceId, int inputSource,
+                    @HapticFeedbackConstants.Flags int flags,
+                    @HapticFeedbackConstants.PrivateFlags int privFlags);
         }
 
         /**
@@ -32247,11 +32354,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             return events;
-        }
-
-        private boolean canPerformHapticFeedback() {
-            return mSession != null
-                    && (mDisplay.getFlags() & Display.FLAG_TOUCH_FEEDBACK_DISABLED) == 0;
         }
 
         @Nullable
@@ -33904,10 +34006,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected int calculateFrameRateCategory() {
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        ViewParent parent = mParent;
+        boolean isInputMethodWindowType =
+                viewRootImpl.mWindowAttributes.type == TYPE_INPUT_METHOD;
+
+        // boost frame rate when the position or the size changed.
+        if (((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                || mLastFrameTop != mTop)
+                && viewRootImpl.shouldCheckFrameRateCategory()
+                && parent instanceof View
+                && ((View) parent).getFrameContentVelocity() <= 0
+                && !isInputMethodWindowType) {
+
+            return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
+        }
         int category;
-        switch (getViewRootImpl().intermittentUpdateState()) {
-            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> category =
-                    FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+        switch (viewRootImpl.intermittentUpdateState()) {
+            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> {
+                if (!sToolkitFrameRateBySizeReadOnlyFlagValue) {
+                    category = FRAME_RATE_CATEGORY_NORMAL;
+                } else {
+                    // The size based frame rate category can only be LOW or NORMAL. If the size
+                    // based frame rate category is LOW, we shouldn't vote for NORMAL for
+                    // intermittent.
+                    category = Math.min(
+                            mSizeBasedFrameRateCategoryAndReason & ~FRAME_RATE_CATEGORY_REASON_MASK,
+                            FRAME_RATE_CATEGORY_NORMAL);
+                }
+                category |= FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+            }
             case ViewRootImpl.INTERMITTENT_STATE_NOT_INTERMITTENT ->
                     category = mSizeBasedFrameRateCategoryAndReason;
             default -> category = mLastFrameRateCategory;
@@ -33928,59 +34057,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         float velocity = mFrameContentVelocity;
         final float frameRate = mPreferredFrameRate;
-        ViewParent parent = mParent;
-        if (velocity <= 0 && Float.isNaN(frameRate)) {
-            // The most common case is when nothing is set, so this special case is called
-            // often.
-            if (mAttachInfo.mViewVelocityApi
-                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                    || mLastFrameTop != mTop)
-                    && viewRootImpl.shouldCheckFrameRate(false)
-                    && parent instanceof View
-                    && ((View) parent).mFrameContentVelocity <= 0) {
-                viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
-            }
-            if (viewRootImpl.shouldCheckFrameRateCategory()) {
-                int frameRateCategory = calculateFrameRateCategory();
-                int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
-                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
-                viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
-                mLastFrameRateCategory = frameRateCategory;
-            }
-            mLastFrameLeft = mLeft;
-            mLastFrameTop = mTop;
-            return;
-        }
-        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
+
+        if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)
+                && (frameRate > 0 || (mAttachInfo.mViewVelocityApi && velocity > 0f))) {
             float velocityFrameRate = 0f;
-            if (mAttachInfo.mViewVelocityApi) {
-                if (velocity < 0f
-                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
-                        || mLastFrameTop != mTop)
-                        && mParent instanceof View
-                        && ((View) mParent).mFrameContentVelocity <= 0
-                ) {
-                    // This current calculation is very simple. If something on the screen
-                    // moved, then it votes for the highest velocity.
-                    velocityFrameRate = MAX_FRAME_RATE;
-                } else if (velocity > 0f) {
-                    velocityFrameRate = convertVelocityToFrameRate(velocity);
-                }
+            if (mAttachInfo.mViewVelocityApi && velocity > 0f) {
+                velocityFrameRate = convertVelocityToFrameRate(velocity);
             }
-            if (velocityFrameRate > 0f || frameRate > 0f) {
-                int compatibility;
-                float frameRateToSet;
-                if (frameRate >= velocityFrameRate) {
-                    compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                    frameRateToSet = frameRate;
-                } else {
-                    compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    frameRateToSet = velocityFrameRate;
-                }
-                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
+            int compatibility;
+            float frameRateToSet;
+            if (frameRate >= velocityFrameRate) {
+                compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                frameRateToSet = frameRate;
+            } else {
+                compatibility = FRAME_RATE_COMPATIBILITY_GTE;
+                frameRateToSet = velocityFrameRate;
             }
+            viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
         }
 
         if (viewRootImpl.shouldCheckFrameRateCategory()) {
@@ -34032,14 +34125,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
-        // From UXR study, premium experience is:
-        // 1500+    dp/s: 120fps
-        // 0 - 1500 dp/s:  80fps
-        // OEMs are likely to modify this to balance battery and user experience for their
-        // specific device.
+        // Internal testing has shown that this gives a premium experience:
+        // above 300dp/s => 120fps
+        // between 300dp/s and 125fps => 80fps
+        // below 125dp/s => 60fps
         float density = mAttachInfo.mDensity;
         float velocityDps = velocityPps / density;
-        return (velocityDps >= 1500f) ? MAX_FRAME_RATE : 80f;
+        float frameRate;
+        if (velocityDps > 300f) {
+            frameRate = MAX_FRAME_RATE; // Use maximum at fast motion
+        } else if (velocityDps > 125f) {
+            frameRate = 80f; // Use medium frame rate when motion is slower
+        } else {
+            frameRate = 60f; // Use minimum frame rate when motion is very slow
+        }
+        return frameRate;
     }
 
     /**
@@ -34084,7 +34184,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
      * so use this method carefully. It's important to note that the preference is valid as
-     * long as the View is invalidated.
+     * long as the View is invalidated. Please also be aware that the requested frame rate
+     * will not propagate to child views when this API is used on a ViewGroup.
      *
      * @param frameRate the preferred frame rate of the view.
      */
@@ -34103,6 +34204,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, and REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Note that the frame rate value is valid as long as the View is invalidated.
+     * Please also be aware that the requested frame rate will not propagate to
+     * child views when this API is used on a ViewGroup.
      *
      * @return REQUESTED_FRAME_RATE_CATEGORY_DEFAULT by default,
      * or value passed to {@link #setRequestedFrameRate(float)}.

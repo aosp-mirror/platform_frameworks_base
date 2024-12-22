@@ -92,4 +92,11 @@ public final class SystemBarUtils {
         // Equals to status bar height if status bar height is bigger.
         return Math.max(defaultSize, statusBarHeight);
     }
+
+    /**
+     * Gets the taskbar frame height.
+     */
+    public static int getTaskbarHeight(Resources res) {
+        return res.getDimensionPixelSize(R.dimen.taskbar_frame_height);
+    }
 }
