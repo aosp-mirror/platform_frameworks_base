@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.shelf
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import kotlin.math.max
@@ -35,7 +36,8 @@ constructor(context: Context, attrs: AttributeSet? = null) :
     /**
      * @return The left boundary (not the RTL compatible start) of the area that icons can be added.
      */
-    override fun getLeftBound(): Float {
+    @VisibleForTesting
+    public override fun getLeftBound(): Float {
         if (!NotificationMinimalism.isEnabled) {
             return super.getLeftBound()
         }
@@ -49,7 +51,8 @@ constructor(context: Context, attrs: AttributeSet? = null) :
     /**
      * @return The right boundary (not the RTL compatible end) of the area that icons can be added.
      */
-    override fun getRightBound(): Float {
+    @VisibleForTesting
+    public override fun getRightBound(): Float {
         if (!NotificationMinimalism.isEnabled) {
             return super.getRightBound()
         }
@@ -80,7 +83,8 @@ constructor(context: Context, attrs: AttributeSet? = null) :
         return actualWidth - iconState.xTranslation - iconView.width
     }
 
-    private val isAlignedToRight: Boolean
+    @VisibleForTesting
+    val isAlignedToRight: Boolean
         get() {
             if (!NotificationMinimalism.isEnabled) {
                 return isLayoutRtl

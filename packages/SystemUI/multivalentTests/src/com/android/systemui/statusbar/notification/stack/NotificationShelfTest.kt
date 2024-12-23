@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
+import com.android.systemui.statusbar.notification.shelf.NotificationShelfIconContainer
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.StackScrollAlgorithmState
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -134,89 +135,208 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testAlignment_splitShade_LTR() {
         // Given: LTR mode, split shade
+        val width = 100
+        val actualWidth = 40
+        val iconContainerPadding = 16f
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+                iconContainerPadding = iconContainerPadding,
+            )
 
         // Then: shelf should align to end
         assertTrue(shelfSpy.isAlignedToEnd)
         assertTrue(shelfSpy.isAlignedToRight)
         assertTrue(shelfSpy.mBackgroundNormal.alignToEnd)
-        assertTrue(shelfSpy.mShelfIcons.alignToEnd)
+
+        // Then: icon container should align to end, right
+        val iconContainer = shelfSpy.shelfIcons as NotificationShelfIconContainer
+        assertTrue(iconContainer.alignToEnd)
+        assertTrue(iconContainer.isAlignedToRight)
+
+        // Then: icon container bounds are updated based on the widths and paddings
+        val actualPaddingStart = iconContainerPadding
+        val actualPaddingEnd = iconContainerPadding
+        val expectedLeftBound = width - actualWidth + actualPaddingStart
+        val expectedRightBound = width - actualPaddingEnd
+        assertEquals(expectedLeftBound, iconContainer.leftBound)
+        assertEquals(expectedRightBound, iconContainer.rightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testAlignment_nonSplitShade_LTR() {
         // Given: LTR mode, non split shade
+        val width = 100
+        val actualWidth = 40
+        val iconContainerPadding = 16f
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+                iconContainerPadding = iconContainerPadding,
+            )
 
         // Then: shelf should not align to end
+        // left bound of icon container should be 16f (actualPaddingStart)
+        // right bound of icon container should be 24f (actualWidth - actualPaddingEnd)
         assertFalse(shelfSpy.isAlignedToEnd)
         assertFalse(shelfSpy.isAlignedToRight)
         assertFalse(shelfSpy.mBackgroundNormal.alignToEnd)
-        assertFalse(shelfSpy.mShelfIcons.alignToEnd)
+
+        // Then: icon container should align to start, left
+
+        val iconContainer = shelfSpy.shelfIcons as NotificationShelfIconContainer
+        assertFalse(iconContainer.alignToEnd)
+        assertFalse(iconContainer.isAlignedToRight)
+
+        // Then: icon container bounds are updated based on the widths and paddings
+        val actualPaddingStart = iconContainerPadding
+        val actualPaddingEnd = iconContainerPadding
+        val expectedLeftBound = actualPaddingStart
+        val expectedRightBound = actualWidth - actualPaddingEnd
+        assertEquals(expectedLeftBound, iconContainer.leftBound)
+        assertEquals(expectedRightBound, iconContainer.rightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testAlignment_splitShade_RTL() {
         // Given: RTL mode, split shade
+        val width = 100
+        val actualWidth = 40
+        val iconContainerPadding = 16f
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+                iconContainerPadding = iconContainerPadding,
+            )
 
         // Then: shelf should align to end, but to left due to RTL
+        // left bound of icon container should be 16f (actualPaddingStart)
+        // right bound of icon container should be 24f (actualWidth - actualPaddingEnd)
         assertTrue(shelfSpy.isAlignedToEnd)
         assertFalse(shelfSpy.isAlignedToRight)
         assertTrue(shelfSpy.mBackgroundNormal.alignToEnd)
-        assertTrue(shelfSpy.mShelfIcons.alignToEnd)
+
+        // Then: icon container should align to end, left
+        val iconContainer = shelfSpy.shelfIcons as NotificationShelfIconContainer
+        assertTrue(iconContainer.alignToEnd)
+        assertFalse(iconContainer.isAlignedToRight)
+
+        // Then: icon container bounds are updated based on the widths and paddings
+        val actualPaddingStart = iconContainerPadding
+        val actualPaddingEnd = iconContainerPadding
+        val expectedLeftBound = actualPaddingStart
+        val expectedRightBound = actualWidth - actualPaddingEnd
+        assertEquals(expectedLeftBound, iconContainer.leftBound)
+        assertEquals(expectedRightBound, iconContainer.rightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testAlignment_nonSplitShade_RTL() {
         // Given: RTL mode, non split shade
+        val width = 100
+        val actualWidth = 40
+        val iconContainerPadding = 16f
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+                iconContainerPadding = iconContainerPadding,
+            )
 
         // Then: shelf should not align to end, but to right due to RTL
         assertFalse(shelfSpy.isAlignedToEnd)
         assertTrue(shelfSpy.isAlignedToRight)
         assertFalse(shelfSpy.mBackgroundNormal.alignToEnd)
-        assertFalse(shelfSpy.mShelfIcons.alignToEnd)
+
+        // Then: icon container should align to start, right
+        val iconContainer = shelfSpy.shelfIcons as NotificationShelfIconContainer
+        assertFalse(iconContainer.alignToEnd)
+        assertTrue(iconContainer.isAlignedToRight)
+
+        // Then: icon container bounds are updated based on the widths and paddings
+        val actualPaddingStart = iconContainerPadding
+        val actualPaddingEnd = iconContainerPadding
+        val expectedLeftBound = width - actualWidth + actualPaddingStart
+        val expectedRightBound = width - actualPaddingEnd
+        assertEquals(expectedLeftBound, iconContainer.leftBound)
+        assertEquals(expectedRightBound, iconContainer.rightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfLeftBound_splitShade_LTR() {
         // Given: LTR mode, split shade
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // When: get the left bound of the shelf
         val shelfLeftBound = shelfSpy.shelfLeftBound
 
         // Then: should be equal to shelf's width - actual width
-        assertEquals(60f, shelfLeftBound)
+        val expectedLeftBound = (width - actualWidth).toFloat()
+        assertEquals(expectedLeftBound, shelfLeftBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfRightBound_splitShade_LTR() {
         // Given: LTR mode, split shade, width 100, actual width 40
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // Then: the right bound of the shelf should be equal to shelf's width
-        assertEquals(100f, shelfSpy.shelfRightBound)
+        val expectedRightBound = width.toFloat()
+        assertEquals(expectedRightBound, shelfSpy.shelfRightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfLeftBound_nonSplitShade_LTR() {
         // Given: LTR mode, non split shade
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // When: get the left bound of the shelf
         val shelfLeftBound = shelfSpy.shelfLeftBound
@@ -229,19 +349,35 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfRightBound_nonSplitShade_LTR() {
         // Given: LTR mode, non split shade, width 100, actual width 40
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = false, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = false,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // Then: the right bound of the shelf should be equal to shelf's actual width
-        assertEquals(40f, shelfSpy.shelfRightBound)
+        assertEquals(actualWidth.toFloat(), shelfSpy.shelfRightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfLeftBound_splitShade_RTL() {
         // Given: RTL mode, split shade
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // When: get the left bound of the shelf
         val shelfLeftBound = shelfSpy.shelfLeftBound
@@ -254,36 +390,61 @@ open class NotificationShelfTest : SysuiTestCase() {
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfRightBound_splitShade_RTL() {
         // Given: RTL mode, split shade, width 100, actual width 40
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = true, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = true,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // Then: the right bound of the shelf should be equal to shelf's actual width
-        assertEquals(40f, shelfSpy.shelfRightBound)
+        assertEquals(actualWidth.toFloat(), shelfSpy.shelfRightBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfLeftBound_nonSplitShade_RTL() {
         // Given: RTL mode, non split shade
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // When: get the left bound of the shelf
         val shelfLeftBound = shelfSpy.shelfLeftBound
 
         // Then: should be equal to shelf's width - actual width
-        assertEquals(60f, shelfLeftBound)
+        val expectedLeftBound = (width - actualWidth).toFloat()
+        assertEquals(expectedLeftBound, shelfLeftBound)
     }
 
     @Test
     @EnableFlags(NotificationMinimalism.FLAG_NAME)
     fun testGetShelfRightBound_nonSplitShade_RTL() {
         // Given: LTR mode, non split shade, width 100, actual width 40
+        val width = 100
+        val actualWidth = 40
         val shelfSpy =
-            prepareShelfSpy(shelf, rtl = true, splitShade = false, width = 100, actualWidth = 40)
+            prepareShelfSpy(
+                shelf,
+                rtl = true,
+                splitShade = false,
+                width = width,
+                actualWidth = actualWidth,
+            )
 
         // Then: the right bound of the shelf should be equal to shelf's width
-        assertEquals(100f, shelfSpy.shelfRightBound)
+        assertEquals(width.toFloat(), shelfSpy.shelfRightBound)
     }
 
     private fun prepareShelfSpy(
@@ -292,12 +453,23 @@ open class NotificationShelfTest : SysuiTestCase() {
         splitShade: Boolean,
         width: Int,
         actualWidth: Int,
+        iconContainerPadding: Float? = null,
     ): NotificationShelf {
         val shelfSpy = spy(shelf)
         whenever(shelfSpy.isLayoutRtl).thenReturn(rtl)
         whenever(ambientState.useSplitShade).thenReturn(splitShade)
-        whenever(shelfSpy.width).thenReturn(width)
+        shelfSpy.layout(0, 0, width, 5)
+        shelfSpy.mShelfIcons.layout(0, 0, width, 5)
+        iconContainerPadding?.let {
+            shelfSpy.mShelfIcons.actualPaddingStart = it
+            shelfSpy.mShelfIcons.setActualPaddingEnd(it)
+        }
         shelfSpy.setActualWidth(actualWidth.toFloat())
+
+        val iconContainerSpy = spy(shelf.mShelfIcons)
+        whenever(iconContainerSpy.isLayoutRtl).thenReturn(rtl)
+        whenever(shelfSpy.shelfIcons).thenReturn(iconContainerSpy)
+
         return shelfSpy
     }
 
