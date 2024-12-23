@@ -4206,12 +4206,16 @@ public class UserManager {
     private boolean getUserRestrictionFromQuery(@NonNull Pair<String, Integer> restrictionPerUser) {
         return UserManagerCache.getUserRestrictionFromQuery(
                 (Pair<String, Integer> q) -> mService.hasUserRestriction(q.first, q.second),
+                // bypass cache if the flag is disabled
+                (Pair<String, Integer> q) -> !android.multiuser.Flags.cacheUserRestrictionsReadOnly(),
                 restrictionPerUser);
     }
 
     /** @hide */
     public static final void invalidateUserRestriction() {
-        UserManagerCache.invalidateUserRestrictionFromQuery();
+        if (android.multiuser.Flags.cacheUserRestrictionsReadOnly()) {
+            UserManagerCache.invalidateUserRestrictionFromQuery();
+        }
     }
 
     /**
