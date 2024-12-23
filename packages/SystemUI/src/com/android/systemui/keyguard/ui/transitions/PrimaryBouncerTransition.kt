@@ -25,11 +25,13 @@ import com.android.systemui.keyguard.ui.viewmodel.AodToPrimaryBouncerTransitionV
 import com.android.systemui.keyguard.ui.viewmodel.DozingToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToOccludedTransitionViewModel
 import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
@@ -85,6 +87,10 @@ interface PrimaryBouncerTransitionModule {
 
     @Binds
     @IntoSet
+    fun fromOccluded(impl: OccludedToPrimaryBouncerTransitionViewModel): PrimaryBouncerTransition
+
+    @Binds
+    @IntoSet
     fun toAod(impl: PrimaryBouncerToAodTransitionViewModel): PrimaryBouncerTransition
 
     @Binds
@@ -104,6 +110,10 @@ interface PrimaryBouncerTransitionModule {
     @Binds
     @IntoSet
     fun toGone(impl: PrimaryBouncerToGoneTransitionViewModel): PrimaryBouncerTransition
+
+    @Binds
+    @IntoSet
+    fun toOccluded(impl: PrimaryBouncerToOccludedTransitionViewModel): PrimaryBouncerTransition
 
     companion object {
         @Provides
