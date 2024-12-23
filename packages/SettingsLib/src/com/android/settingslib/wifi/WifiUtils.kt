@@ -501,7 +501,7 @@ open class WifiUtils {
                 val wifiManager = context.getSystemService(WifiManager::class.java) ?: return@launch
                 val aapmManager = context.getSystemService(AdvancedProtectionManager::class.java)
                 if (isAdvancedProtectionEnabled(aapmManager)) {
-                    val intent = AdvancedProtectionManager.createSupportIntent(
+                    val intent = aapmManager.createSupportIntent(
                         AdvancedProtectionManager.FEATURE_ID_DISALLOW_WEP,
                         AdvancedProtectionManager.SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION)
                     onStartActivity(intent)
