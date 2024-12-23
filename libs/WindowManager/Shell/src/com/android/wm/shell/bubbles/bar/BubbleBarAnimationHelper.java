@@ -30,6 +30,8 @@ import static com.android.wm.shell.bubbles.bar.BubbleBarExpandedView.TASK_VIEW_A
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE;
 
+import static java.lang.Math.max;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -375,7 +377,6 @@ public class BubbleBarAnimationHelper {
         return animator;
     }
 
-
     /**
      * Animate the expanded bubble when it is being dragged
      */
@@ -584,6 +585,18 @@ public class BubbleBarAnimationHelper {
             }
             mRunningAnimator = null;
         }
+    }
+
+    /** Handles IME position changes. */
+    public void onImeTopChanged(int imeTop) {
+        BubbleBarExpandedView bbev = getExpandedView();
+        if (bbev == null) {
+            Log.w(TAG, "Bubble bar expanded view was null when IME top changed");
+            return;
+        }
+        int bbevBottom = bbev.getContentBottomOnScreen();
+        int clip = max(bbevBottom - imeTop, 0);
+        bbev.updateBottomClip(clip);
     }
 
     private @Nullable BubbleBarExpandedView getExpandedView() {

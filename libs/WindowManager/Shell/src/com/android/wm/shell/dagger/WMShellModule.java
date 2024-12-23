@@ -47,7 +47,6 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
@@ -233,7 +232,8 @@ public abstract class WMShellModule {
             FloatingContentCoordinator floatingContentCoordinator,
             IStatusBarService statusBarService,
             WindowManager windowManager,
-            WindowManagerShellWrapper windowManagerShellWrapper,
+            DisplayInsetsController displayInsetsController,
+            DisplayImeController displayImeController,
             UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
@@ -265,7 +265,8 @@ public abstract class WMShellModule {
                         new BubblePersistentRepository(context)),
                 statusBarService,
                 windowManager,
-                windowManagerShellWrapper,
+                displayInsetsController,
+                displayImeController,
                 userManager,
                 launcherApps,
                 logger,

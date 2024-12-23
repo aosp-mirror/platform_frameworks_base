@@ -3,6 +3,8 @@
 
     <application android:debuggable="true" android:supportsRtl="true" >
         <uses-library android:name="android.test.runner" />
+        <activity android:name="com.android.wm.shell.bubbles.bar.BubbleBarAnimationHelperTest$TestActivity"
+            android:exported="true"/>
     </application>
 
     <instrumentation

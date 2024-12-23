@@ -137,6 +137,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private Executor mBackgroundExecutor;
     private final Rect mSampleRect = new Rect();
     private final int[] mLoc = new int[2];
+    private final Rect mTempBounds = new Rect();
 
     /** Height of the caption inset at the top of the TaskView */
     private int mCaptionHeight;
@@ -160,6 +161,9 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private boolean mIsContentVisible = false;
     private boolean mIsAnimating;
     private boolean mIsDragging;
+
+    private boolean mIsClipping = false;
+    private int mBottomClip = 0;
 
     /** An enum value that tracks the visibility state of the task view */
     private enum TaskViewVisibilityState {
@@ -203,7 +207,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCurrentCornerRadius);
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight() - mBottomClip,
+                        mCurrentCornerRadius);
             }
         });
         // Set a touch sink to ensure that clicks on the caption area do not propagate to the parent
@@ -658,6 +663,52 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
                 mTaskView.setCornerRadius(cornerRadius);
             }
             invalidateOutline();
+        }
+    }
+
+    /** The y coordinate of the bottom of the expanded view. */
+    public int getContentBottomOnScreen() {
+        if (mOverflowView != null) {
+            mOverflowView.getBoundsOnScreen(mTempBounds);
+        }
+        if (mTaskView != null) {
+            mTaskView.getBoundsOnScreen(mTempBounds);
+        }
+        // return the bottom of the content rect, adjusted for insets so the result is in screen
+        // coordinate
+        return mTempBounds.bottom + mPositioner.getInsets().top;
+    }
+
+    /** Update the amount by which to clip the expanded view at the bottom. */
+    public void updateBottomClip(int bottomClip) {
+        mBottomClip = bottomClip;
+        onClipUpdate();
+    }
+
+    private void onClipUpdate() {
+        if (mBottomClip == 0) {
+            if (mIsClipping) {
+                mIsClipping = false;
+                if (mTaskView != null) {
+                    mTaskView.setClipBounds(null);
+                    mTaskView.setEnableSurfaceClipping(false);
+                }
+                invalidateOutline();
+            }
+        } else {
+            if (!mIsClipping) {
+                mIsClipping = true;
+                if (mTaskView != null) {
+                    mTaskView.setEnableSurfaceClipping(true);
+                }
+            }
+            invalidateOutline();
+            if (mTaskView != null) {
+                Rect clipBounds = new Rect(0, 0,
+                        mTaskView.getWidth(),
+                        mTaskView.getHeight() - mBottomClip);
+                mTaskView.setClipBounds(clipBounds);
+            }
         }
     }
 

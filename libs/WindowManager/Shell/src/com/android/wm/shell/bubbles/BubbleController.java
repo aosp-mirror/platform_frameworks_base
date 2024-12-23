@@ -90,13 +90,15 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.bubbles.shortcut.BubbleShortcutHelper;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ImeListener;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -106,7 +108,6 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
-import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
@@ -182,7 +183,8 @@ public class BubbleController implements ConfigurationChangeListener,
     @Nullable private final BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
-    private final WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private final DisplayInsetsController mDisplayInsetsController;
+    private final DisplayImeController mDisplayImeController;
     private final UserManager mUserManager;
     private final LauncherApps mLauncherApps;
     private final IStatusBarService mBarService;
@@ -291,7 +293,8 @@ public class BubbleController implements ConfigurationChangeListener,
             BubbleDataRepository dataRepository,
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
-            WindowManagerShellWrapper windowManagerShellWrapper,
+            DisplayInsetsController displayInsetsController,
+            DisplayImeController displayImeController,
             UserManager userManager,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
@@ -318,7 +321,8 @@ public class BubbleController implements ConfigurationChangeListener,
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE))
                 : statusBarService;
         mWindowManager = windowManager;
-        mWindowManagerShellWrapper = windowManagerShellWrapper;
+        mDisplayInsetsController = displayInsetsController;
+        mDisplayImeController = displayImeController;
         mUserManager = userManager;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
@@ -403,11 +407,15 @@ public class BubbleController implements ConfigurationChangeListener,
             mMainExecutor.execute(() -> removeBubble(bubble.getKey(), DISMISS_INVALID_INTENT));
         });
 
-        try {
-            mWindowManagerShellWrapper.addPinnedStackListener(new BubblesImeListener());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        BubblesImeListener bubblesImeListener =
+                new BubblesImeListener(mDisplayController, mContext.getDisplayId());
+        // the insets controller is notified whenever the IME visibility changes whether the IME is
+        // requested by a bubbled task or non-bubbled task. in the latter case, we need to update
+        // the position of the stack to avoid overlapping with the IME.
+        mDisplayInsetsController.addInsetsChangedListener(mContext.getDisplayId(),
+                bubblesImeListener);
+        // the ime controller is notified when the IME is requested only by a bubbled task.
+        mDisplayImeController.addPositionProcessor(bubblesImeListener);
 
         mBubbleData.setCurrentUserId(mCurrentUserId);
 
@@ -2515,14 +2523,55 @@ public class BubbleController implements ConfigurationChangeListener,
         return contextForUser.getPackageManager();
     }
 
-    /** PinnedStackListener that dispatches IME visibility updates to the stack. */
-    //TODO(b/170442945): Better way to do this / insets listener?
-    private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedTaskListener {
+    /** {@link ImeListener} that dispatches IME visibility updates to the stack. */
+    private class BubblesImeListener extends ImeListener implements
+            DisplayImeController.ImePositionProcessor {
+
+        BubblesImeListener(DisplayController displayController, int displayId) {
+            super(displayController, displayId);
+        }
+
         @Override
-        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            mBubblePositioner.setImeVisible(imeVisible, imeHeight);
+        protected void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            if (getDisplayId() != mContext.getDisplayId()) {
+                return;
+            }
+            // the imeHeight here is actually the ime inset; it only includes the part of the ime
+            // that overlaps with the Bubbles window. adjust it to include the bottom screen inset,
+            // so we have the total height of the ime.
+            int totalImeHeight = imeHeight + mBubblePositioner.getInsets().bottom;
+            mBubblePositioner.setImeVisible(imeVisible, totalImeHeight);
             if (mStackView != null) {
                 mStackView.setImeVisible(imeVisible);
+            }
+        }
+
+        @Override
+        public int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
+                boolean showing, boolean isFloating, SurfaceControl.Transaction t) {
+            if (mContext.getDisplayId() != displayId) {
+                return IME_ANIMATION_DEFAULT;
+            }
+
+            if (showing) {
+                mBubblePositioner.setImeVisible(true, hiddenTop - shownTop);
+            } else {
+                mBubblePositioner.setImeVisible(false, 0);
+            }
+            if (mStackView != null) {
+                mStackView.setImeVisible(showing);
+            }
+
+            return IME_ANIMATION_DEFAULT;
+        }
+
+        @Override
+        public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
+            if (mContext.getDisplayId() != displayId) {
+                return;
+            }
+            if (mLayerView != null) {
+                mLayerView.onImeTopChanged(imeTop);
             }
         }
     }

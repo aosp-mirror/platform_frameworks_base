@@ -67,6 +67,11 @@ public class BubblePositioner {
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
     private boolean mImeVisible;
+    /**
+     * The height of the IME excluding the bottom inset. If the IME is 100 pixels tall and we have
+     * 20 pixels bottom inset, the IME height is adjusted to 80 to represent the overlap with the
+     * Bubbles window.
+     */
     private int mImeHeight;
     private Rect mPositionRect;
     private int mDefaultMaxBubbles;
@@ -336,10 +341,16 @@ public class BubblePositioner {
         return mImeVisible;
     }
 
-    /** Sets whether the IME is visible. **/
+    /**
+     * Sets whether the IME is visible and its height.
+     *
+     * @param visible whether the IME is visible
+     * @param height the total height of the IME from the bottom of the physical screen
+     **/
     public void setImeVisible(boolean visible, int height) {
         mImeVisible = visible;
-        mImeHeight = height;
+        // adjust the IME to account for the height as seen by the Bubbles window
+        mImeHeight = visible ? Math.max(height - getInsets().bottom, 0) : 0;
     }
 
     private int getExpandedViewLargeScreenInsetFurthestEdge(boolean isOverflow) {
