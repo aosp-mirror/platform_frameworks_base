@@ -338,6 +338,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             // Make mImeSourceControl point to the new control before starting the animation.
             if (hadImeSourceControl && mImeSourceControl != imeSourceControl) {
                 mImeSourceControl.release(SurfaceControl::release);
+                if (android.view.inputmethod.Flags.refactorInsetsController()
+                        && !hasImeLeash && mAnimation != null) {
+                    // In case of losing the leash, the animation should be cancelled.
+                    mAnimation.cancel();
+                }
             }
             mImeSourceControl = imeSourceControl;
 
@@ -638,7 +643,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         t.setPosition(animatingLeash, x, endY);
                         t.setAlpha(animatingLeash, 1.f);
                     }
-                    dispatchEndPositioning(mDisplayId, mCancelled, t);
+                    if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+                        dispatchEndPositioning(mDisplayId, mCancelled, t);
+                    }
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
                         ImeTracker.forLogging().onProgress(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
@@ -653,6 +660,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     } else if (mCancelled) {
                         ImeTracker.forLogging().onCancelled(mStatsToken,
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
+                    }
+                    if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                        // In split screen, we also set {@link
+                        // WindowContainer#mExcludeInsetsTypes} but this should only happen after
+                        // the IME client visibility was set. Otherwise the insets will we
+                        // dispatched too early, and we get a flicker. Thus, only dispatching it
+                        // after reporting that the IME is hidden to system server.
+                        dispatchEndPositioning(mDisplayId, mCancelled, t);
                     }
                     if (DEBUG_IME_VISIBILITY) {
                         EventLog.writeEvent(IMF_IME_REMOTE_ANIM_END,
