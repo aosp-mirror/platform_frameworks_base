@@ -310,6 +310,11 @@ class DesktopTasksController(
         transitions.startTransition(transitionType, wct, handler).also { t ->
             handler?.setTransition(t)
         }
+
+        // launch from recent DesktopTaskView
+        desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
+            FREEFORM_ANIMATION_DURATION
+        )
     }
 
     /** Gets number of visible freeform tasks in [displayId]. */
