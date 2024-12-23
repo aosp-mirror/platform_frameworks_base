@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -43,6 +44,7 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -158,6 +160,7 @@ fun CommunalContainer(
             transitions = sceneTransitions,
         )
     }
+    val isUiBlurred by viewModel.isUiBlurred.collectAsStateWithLifecycle()
 
     val detector = remember { CommunalSwipeDetector() }
 
@@ -174,9 +177,11 @@ fun CommunalContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val blurRadius = with(LocalDensity.current) { viewModel.blurRadiusPx.toDp() }
+
     SceneTransitionLayout(
         state = state,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().thenIf(isUiBlurred) { Modifier.blur(blurRadius) },
         swipeSourceDetector = detector,
         swipeDetector = detector,
     ) {

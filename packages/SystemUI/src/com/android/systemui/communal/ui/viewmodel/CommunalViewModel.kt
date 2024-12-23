@@ -33,6 +33,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -92,6 +93,7 @@ constructor(
     @CommunalLog logBuffer: LogBuffer,
     private val metricsLogger: CommunalMetricsLogger,
     mediaCarouselController: MediaCarouselController,
+    blurConfig: BlurConfig,
 ) :
     BaseCommunalViewModel(
         communalSceneInteractor,
@@ -220,6 +222,15 @@ constructor(
         MutableStateFlow(false)
     val isEnableWorkProfileDialogShowing: Flow<Boolean> =
         _isEnableWorkProfileDialogShowing.asStateFlow()
+
+    val isUiBlurred: StateFlow<Boolean> =
+        if (Flags.bouncerUiRevamp()) {
+            keyguardInteractor.primaryBouncerShowing
+        } else {
+            MutableStateFlow(false)
+        }
+
+    val blurRadiusPx: Float = blurConfig.maxBlurRadiusPx / 2.0f
 
     init {
         // Initialize our media host for the UMO. This only needs to happen once and must be done
