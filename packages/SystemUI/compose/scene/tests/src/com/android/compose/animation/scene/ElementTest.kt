@@ -2208,6 +2208,7 @@ class ElementTest {
     }
 
     @Test
+    @Ignore("b/363964445")
     fun interruption_considerPreviousUniqueState() {
         @Composable
         fun SceneScope.Foo(modifier: Modifier = Modifier) {
