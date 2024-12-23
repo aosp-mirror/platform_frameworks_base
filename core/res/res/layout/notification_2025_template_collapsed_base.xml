@@ -164,10 +164,11 @@
             android:minWidth="@dimen/notification_content_margin_end"
             >
 
-            <include layout="@layout/notification_expand_button"
+            <include layout="@layout/notification_2025_expand_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end"
+                android:layout_gravity="top|end"
+                android:layout_margin="@dimen/notification_2025_margin"
                 />
 
         </FrameLayout>

@@ -148,10 +148,11 @@
                     android:clipToPadding="false"
                     android:clipChildren="false"
                     />
-                <include layout="@layout/notification_expand_button"
+                <include layout="@layout/notification_2025_expand_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="@dimen/notification_2025_margin"
                     />
             </LinearLayout>
         </LinearLayout>

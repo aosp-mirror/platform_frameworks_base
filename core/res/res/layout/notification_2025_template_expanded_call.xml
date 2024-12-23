@@ -48,8 +48,8 @@
                 android:id="@+id/notification_main_column"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginStart="@dimen/notification_2025_content_margin_start"
+                android:layout_weight="1"
                 android:orientation="vertical"
                 android:minHeight="68dp"
                 >

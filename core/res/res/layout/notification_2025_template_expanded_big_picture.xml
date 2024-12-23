@@ -32,11 +32,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top"
-        android:layout_marginTop="@dimen/notification_content_margin_top"
         android:clipToPadding="false"
         android:orientation="vertical"
         >
 
+        <!-- Note: the top margin is being set in code based on the estimated space needed for
+        the header text. -->
         <LinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"

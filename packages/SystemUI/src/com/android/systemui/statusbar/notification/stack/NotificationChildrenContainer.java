@@ -168,8 +168,10 @@ public class NotificationChildrenContainer extends ViewGroup
         mDividerHeight = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_divider_height);
         mDividerAlpha = res.getFloat(R.dimen.notification_divider_alpha);
-        mNotificationHeaderMargin = res.getDimensionPixelOffset(
-                R.dimen.notification_children_container_margin_top);
+        mNotificationHeaderMargin = notificationsRedesignTemplates()
+                ? Notification.Builder.getContentMarginTop(getContext(),
+                    R.dimen.notification_2025_children_container_margin_top)
+                : res.getDimensionPixelOffset(R.dimen.notification_children_container_margin_top);
         mNotificationTopPadding = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_top_padding);
         mHeaderHeight = notificationsRedesignTemplates()

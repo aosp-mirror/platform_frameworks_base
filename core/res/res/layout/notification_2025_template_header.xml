@@ -57,11 +57,11 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/notification_top_line"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
         android:layout_toStartOf="@id/expand_button"
         android:layout_alignWithParentIfMissing="true"
+        android:layout_marginVertical="@dimen/notification_2025_margin"
         android:clipChildren="false"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/notification_2025_content_margin_start"
@@ -81,10 +81,11 @@
         android:focusable="false"
         />
 
-    <include layout="@layout/notification_expand_button"
+    <include layout="@layout/notification_2025_expand_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/notification_2025_margin"
         android:layout_alignParentEnd="true" />
 
     <include layout="@layout/notification_close_button"

@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -130,10 +132,18 @@ public class NotificationExpandButton extends FrameLayout {
         int drawableId;
         int contentDescriptionId;
         if (mExpanded) {
-            drawableId = R.drawable.ic_collapse_notification;
+            if (notificationsRedesignTemplates()) {
+                drawableId = R.drawable.ic_notification_2025_collapse;
+            } else {
+                drawableId = R.drawable.ic_collapse_notification;
+            }
             contentDescriptionId = R.string.expand_button_content_description_expanded;
         } else {
-            drawableId = R.drawable.ic_expand_notification;
+            if (notificationsRedesignTemplates()) {
+                drawableId = R.drawable.ic_notification_2025_expand;
+            } else {
+                drawableId = R.drawable.ic_expand_notification;
+            }
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
         }
         setContentDescription(mContext.getText(contentDescriptionId));

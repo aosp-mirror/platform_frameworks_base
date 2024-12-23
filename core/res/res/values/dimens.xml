@@ -310,8 +310,14 @@
     <!-- Size of the stroke with for the emphasized notification button style -->
     <dimen name="emphasized_button_stroke_width">1dp</dimen>
 
-    <!-- height of the content margin to accomodate for the header -->
+    <!-- height of the content margin to accommodate for the header -->
     <dimen name="notification_content_margin_top">50dp</dimen>
+
+    <!-- The spacing between the content and the header text above it, scaling with text size.
+         This value is chosen so that, taking into account the text spacing for both the text in the
+         top line and the text in the content, the distance between them is 4dp with the default
+         screen configuration (and will grow accordingly for larger font sizes) -->
+    <dimen name="notification_2025_content_margin_top">10sp</dimen>
 
     <!-- height of the content margin that is applied at the end of the notification content -->
     <dimen name="notification_content_margin">20dp</dimen>
@@ -384,8 +390,23 @@
     <!-- the height of the expand button pill -->
     <dimen name="notification_expand_button_pill_height">24dp</dimen>
 
+    <!-- the height of the expand button pill (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_pill_height">20dp</dimen>
+
+    <!-- the width of the expand button pill (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_pill_width">28dp</dimen>
+
+    <!-- the size of the expand arrow (2025 redesign version) -->
+    <dimen name="notification_2025_expand_button_icon_size">16sp</dimen>
+
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_expand_button_icon_padding">2dp</dimen>
+
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_2025_expand_button_vertical_icon_padding">2dp</dimen>
+
+    <!-- the padding of the expand icon in the notification header -->
+    <dimen name="notification_2025_expand_button_horizontal_icon_padding">6dp</dimen>
 
     <!-- the size of the notification close button -->
     <dimen name="notification_close_button_size">16dp</dimen>

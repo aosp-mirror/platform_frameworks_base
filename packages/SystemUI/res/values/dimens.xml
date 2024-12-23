@@ -782,6 +782,13 @@
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">48dp</dimen>
 
+    <!-- The spacing between the notification children container in its non-expanded form, and the
+         header text above it, scaling with text size. This value is chosen so that, taking into
+         account the text spacing for both the text in the top line and the text in the container,
+         the distance between them is 4dp with the default screen configuration (and will grow
+         accordingly for larger font sizes). -->
+    <dimen name="notification_2025_children_container_margin_top">@*android:dimen/notification_2025_content_margin_top</dimen>
+
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
