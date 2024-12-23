@@ -768,6 +768,10 @@ public class NotificationManager {
         INotificationManager service = service();
         String sender = mContext.getPackageName();
 
+        if (discardNotify(mContext.getUser(), targetPackage, tag, id, notification)) {
+            return;
+        }
+
         try {
             if (localLOGV) Log.v(TAG, sender + ": notify(" + id + ", " + notification + ")");
             service.enqueueNotificationWithTag(targetPackage, sender, tag, id,
@@ -918,6 +922,10 @@ public class NotificationManager {
      * @param id An identifier for this notification.
      */
     public void cancelAsPackage(@NonNull String targetPackage, @Nullable String tag, int id) {
+        if (discardCancel(mContext.getUser(), targetPackage, tag, id)) {
+            return;
+        }
+
         INotificationManager service = service();
         try {
             service.cancelNotificationWithTag(targetPackage, mContext.getOpPackageName(),
@@ -981,16 +989,20 @@ public class NotificationManager {
      */
     public void cancelAll()
     {
+        String pkg = mContext.getPackageName();
+        UserHandle user = mContext.getUser();
+
         if (Flags.nmBinderPerfThrottleNotify()) {
             synchronized (mThrottleLock) {
                 for (NotificationKey key : mKnownNotifications.snapshot().keySet()) {
-                    mKnownNotifications.put(key, KNOWN_STATUS_CANCELLED);
+                    if (key.pkg.equals(pkg) && key.user.equals(user)) {
+                        mKnownNotifications.put(key, KNOWN_STATUS_CANCELLED);
+                    }
                 }
             }
         }
 
         INotificationManager service = service();
-        String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
             service.cancelAllNotifications(pkg, mContext.getUserId());
@@ -1014,7 +1026,7 @@ public class NotificationManager {
     public void setNotificationDelegate(@Nullable String delegate) {
         INotificationManager service = service();
         String pkg = mContext.getPackageName();
-        if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
+        if (localLOGV) Log.v(TAG, pkg + ": setNotificationDelegate()");
         try {
             service.setNotificationDelegate(pkg, delegate);
         } catch (RemoteException e) {
