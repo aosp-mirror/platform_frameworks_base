@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.promoted.shared.model
 
 import android.annotation.DrawableRes
+import android.app.Notification
+import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.graphics.drawable.Icon
 import androidx.annotation.ColorInt
 import com.android.internal.widget.NotificationProgressModel
@@ -31,6 +33,10 @@ data class PromotedNotificationContentModel(
     val identity: Identity,
 
     // for all styles:
+    /**
+     * True if this notification was automatically promoted - see [AutomaticPromotionCoordinator].
+     */
+    val wasPromotedAutomatically: Boolean,
     val skeletonSmallIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
     val appName: CharSequence?,
     val subText: CharSequence?,
@@ -58,6 +64,7 @@ data class PromotedNotificationContentModel(
     val progress: NotificationProgressModel?,
 ) {
     class Builder(val key: String) {
+        var wasPromotedAutomatically: Boolean = false
         var skeletonSmallIcon: Icon? = null
         var appName: CharSequence? = null
         var subText: CharSequence? = null
@@ -83,6 +90,7 @@ data class PromotedNotificationContentModel(
         fun build() =
             PromotedNotificationContentModel(
                 identity = Identity(key, style),
+                wasPromotedAutomatically = wasPromotedAutomatically,
                 skeletonSmallIcon = skeletonSmallIcon,
                 appName = appName,
                 subText = subText,
@@ -134,5 +142,18 @@ data class PromotedNotificationContentModel(
         @JvmStatic
         fun featureFlagEnabled(): Boolean =
             PromotedNotificationUi.isEnabled || StatusBarNotifChips.isEnabled
+
+        /**
+         * Returns true if the given notification should be considered promoted when deciding
+         * whether or not to show the status bar chip UI.
+         */
+        fun isPromotedForStatusBarChip(notification: Notification): Boolean {
+            // Notification.isPromotedOngoing checks the ui_rich_ongoing flag, but we want the
+            // status bar chip to be ready before all the features behind the ui_rich_ongoing flag
+            // are ready.
+            val isPromotedForStatusBarChip =
+                StatusBarNotifChips.isEnabled && (notification.flags and FLAG_PROMOTED_ONGOING) != 0
+            return notification.isPromotedOngoing() || isPromotedForStatusBarChip
+        }
     }
 }

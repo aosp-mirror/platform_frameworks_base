@@ -114,7 +114,8 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+            chipView =
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip_primary, null)
         }
 
         MockitoAnnotations.initMocks(this)
@@ -498,7 +499,7 @@ class OngoingCallControllerViaListenerTest : SysuiTestCase() {
         lateinit var newChipView: View
         TestableLooper.get(this).runWithLooper {
             newChipView =
-                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip_primary, null)
         }
 
         // Change the chip view associated with the controller.

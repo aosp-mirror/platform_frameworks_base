@@ -149,10 +149,9 @@ object OngoingActivityChipBinder {
         // 1. Set up the right visual params.
         with(iconView) {
             id = CUSTOM_ICON_VIEW_ID
-            // TODO(b/354930838): Update the content description to not include "phone" and maybe
-            // include the app name.
+            // TODO(b/354930838): For RON chips, use the app name for the content description.
             contentDescription =
-                context.resources.getString(R.string.ongoing_phone_call_content_description)
+                context.resources.getString(R.string.ongoing_call_content_description)
             tintView(iconTint)
         }
 
@@ -349,14 +348,21 @@ object OngoingActivityChipBinder {
         }
         // Clickable chips need to be a minimum size for accessibility purposes, but let
         // non-clickable chips be smaller.
-        if (chipModel.onClickListener != null) {
-            chipBackgroundView.minimumWidth =
+        val minimumWidth =
+            if (chipModel.onClickListener != null) {
                 chipBackgroundView.context.resources.getDimensionPixelSize(
                     R.dimen.min_clickable_item_size
                 )
-        } else {
-            chipBackgroundView.minimumWidth = 0
-        }
+            } else {
+                0
+            }
+        // The background view needs the minimum width so it only fills the area required (e.g. the
+        // 3-2-1 screen record countdown chip isn't tappable so it should have a small-width
+        // background).
+        chipBackgroundView.minimumWidth = minimumWidth
+        // The root view needs the minimum width so the second chip can hide if there isn't enough
+        // room for the chip -- see [SecondaryOngoingActivityChip].
+        chipView.minimumWidth = minimumWidth
     }
 
     @IdRes private val CUSTOM_ICON_VIEW_ID = R.id.ongoing_activity_chip_custom_icon

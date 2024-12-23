@@ -3367,8 +3367,8 @@
     <!-- Accessibility announcement to inform user to unlock using the fingerprint sensor [CHAR LIMIT=NONE] -->
     <string name="accessibility_fingerprint_bouncer">Authentication required. Touch the fingerprint sensor to authenticate.</string>
 
-    <!-- Content description for a chip in the status bar showing that the user is currently on a phone call. [CHAR LIMIT=NONE] -->
-    <string name="ongoing_phone_call_content_description">Ongoing phone call</string>
+    <!-- Content description for a chip in the status bar showing that the user is currently on a call. [CHAR LIMIT=NONE] -->
+    <string name="ongoing_call_content_description">Ongoing call</string>
 
     <!-- Provider Model: Default title of the mobile network in the mobile layout. [CHAR LIMIT=50] -->
     <string name="mobile_data_settings_title">Mobile data</string>

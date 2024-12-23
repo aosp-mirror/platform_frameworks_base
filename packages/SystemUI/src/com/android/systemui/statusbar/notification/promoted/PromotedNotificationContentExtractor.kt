@@ -24,14 +24,14 @@ import android.app.Notification.EXTRA_CHRONOMETER_COUNT_DOWN
 import android.app.Notification.EXTRA_SUB_TEXT
 import android.app.Notification.EXTRA_TEXT
 import android.app.Notification.EXTRA_TITLE
-import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.app.Notification.ProgressStyle
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.promoted.AutomaticPromotionCoordinator.Companion.EXTRA_WAS_AUTOMATICALLY_PROMOTED
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Companion.isPromotedForStatusBarChip
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.When
 import javax.inject.Inject
@@ -65,12 +65,8 @@ constructor(
             return null
         }
 
-        // Notification.isPromotedOngoing checks the ui_rich_ongoing flag, but we want the status
-        // bar chip to be ready before all the features behind the ui_rich_ongoing flag are ready.
-        val isPromotedForStatusBarChip =
-            StatusBarNotifChips.isEnabled && (notification.flags and FLAG_PROMOTED_ONGOING) != 0
-        val isPromoted = notification.isPromotedOngoing() || isPromotedForStatusBarChip
-        if (!isPromoted) {
+        // The status bar chips rely on this extractor, so take them into account for promotion.
+        if (!isPromotedForStatusBarChip(notification)) {
             logger.logExtractionSkipped(entry, "isPromotedOngoing returned false")
             return null
         }
@@ -80,6 +76,8 @@ constructor(
         // TODO: Pitch a fit if style is unsupported or mandatory fields are missing once
         // FLAG_PROMOTED_ONGOING is set reliably and we're not testing status bar chips.
 
+        contentBuilder.wasPromotedAutomatically =
+            notification.extras.getBoolean(EXTRA_WAS_AUTOMATICALLY_PROMOTED, false)
         contentBuilder.skeletonSmallIcon = entry.icons.aodIcon?.sourceIcon
         contentBuilder.appName = notification.loadHeaderAppName(context)
         contentBuilder.subText = notification.subText()

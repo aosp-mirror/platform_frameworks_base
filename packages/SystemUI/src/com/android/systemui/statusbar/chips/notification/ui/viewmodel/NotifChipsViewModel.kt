@@ -100,14 +100,14 @@ constructor(
             )
         }
 
-        if (Flags.promoteNotificationsAutomatically()) {
+        if (
+            Flags.promoteNotificationsAutomatically() &&
+                this.promotedContent.wasPromotedAutomatically
+        ) {
             // When we're promoting notifications automatically, the `when` time set on the
             // notification will likely just be set to the current time, which would cause the chip
             // to always show "now". We don't want early testers to get that experience since it's
             // not what will happen at launch, so just don't show any time.
-            // TODO(b/364653005): Only ignore the `when` time if the notification was
-            //  *automatically* promoted (as opposed to being legitimately promoted by the
-            // criteria). We'll need to track that status somehow.
             return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
         }
 

@@ -306,12 +306,13 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
-    fun chips_basicTime_hiddenIfAutomaticallyPromoted() =
+    fun chips_basicTime_timeHiddenIfAutomaticallyPromoted() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
             val promotedContentBuilder =
                 PromotedNotificationContentModel.Builder("notif").apply {
+                    this.wasPromotedAutomatically = true
                     this.time =
                         PromotedNotificationContentModel.When(
                             time = 6543L,
@@ -331,6 +332,36 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).hasSize(1)
             assertThat(latest!![0])
                 .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+        }
+
+    @Test
+    @EnableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
+    fun chips_basicTime_timeShownIfNotAutomaticallyPromoted() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.wasPromotedAutomatically = false
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 6543L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0])
+                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
         }
 
     @Test
