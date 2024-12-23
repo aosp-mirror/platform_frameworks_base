@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.notification.shared
+package com.android.systemui.statusbar.featurepods.popups
 
 import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken

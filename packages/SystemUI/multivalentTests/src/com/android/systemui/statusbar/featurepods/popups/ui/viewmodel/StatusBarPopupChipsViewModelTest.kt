@@ -22,7 +22,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.statusbar.chips.notification.shared.StatusBarPopupChips
+import com.android.systemui.statusbar.featurepods.popups.StatusBarPopupChips
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
