@@ -560,7 +560,8 @@ public class NotificationChildrenContainer extends ViewGroup
                 builder = Notification.Builder.recoverBuilder(getContext(),
                         notification.getNotification());
             }
-            header = builder.makeLowPriorityContentView(true /* useRegularSubtext */);
+            header = builder.makeLowPriorityContentView(true /* useRegularSubtext */,
+                    notificationsRedesignTemplates() /* highlightExpander */);
             if (mMinimizedGroupHeader == null) {
                 mMinimizedGroupHeader = (NotificationHeaderView) header.apply(getContext(),
                         this);
