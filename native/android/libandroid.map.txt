@@ -396,6 +396,7 @@ LIBANDROID {
     APerformanceHint_notifyWorkloadSpike; # introduced=36
     APerformanceHint_borrowSessionFromJava; # introduced=36
     APerformanceHint_setNativeSurfaces; # introduced=36
+    APerformanceHint_isFeatureSupported; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
@@ -419,7 +420,6 @@ LIBANDROID_PLATFORM {
     AThermal_setIThermalServiceForTesting;
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
-    APerformanceHint_setUseGraphicsPipelineForTesting;
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
     APerformanceHint_createSessionUsingConfigInternal;

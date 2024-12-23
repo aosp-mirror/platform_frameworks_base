@@ -42,6 +42,7 @@ import android.hardware.power.GpuHeadroomParams;
 import android.hardware.power.GpuHeadroomResult;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
+import android.hardware.power.SessionMode;
 import android.hardware.power.SessionTag;
 import android.hardware.power.SupportInfo;
 import android.hardware.power.WorkDuration;
@@ -58,6 +59,7 @@ import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SessionCreationConfig;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -80,7 +82,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.power.hint.HintManagerService.AppHintSession.SessionModes;
 import com.android.server.utils.Slogf;
 
 import java.io.BufferedReader;
@@ -407,6 +408,29 @@ public final class HintManagerService extends SystemService {
     void setProcStatPathOverride(String override) {
         mProcStatFilePathOverride = override;
         mEnforceCpuHeadroomUserModeCpuTimeCheck = true;
+    }
+
+    private boolean tooManyPipelineThreads(int uid) {
+        synchronized (mThreadsUsageObject) {
+            ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(uid);
+            int graphicsPipelineThreadCount = 0;
+            if (threadsSet != null) {
+                // We count the graphics pipeline threads that are
+                // *not* in this session, since those in this session
+                // will be replaced. Then if the count plus the new tids
+                // is over max available graphics pipeline threads we raise
+                // an exception.
+                for (ThreadUsageTracker t : threadsSet) {
+                    if (t.isGraphicsPipeline()) {
+                        graphicsPipelineThreadCount++;
+                    }
+                }
+                if (graphicsPipelineThreadCount > MAX_GRAPHICS_PIPELINE_THREADS_COUNT) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private ServiceThread createCleanUpThread() {
@@ -1307,9 +1331,9 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting
     final class BinderService extends IHintManager.Stub {
         @Override
-        public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
-                    @SessionTag int tag, SessionCreationConfig creationConfig,
-                    SessionConfig config) {
+        public IHintManager.SessionCreationReturn createHintSessionWithConfig(
+                    @NonNull IBinder token, @SessionTag int tag,
+                    SessionCreationConfig creationConfig, SessionConfig config) {
             if (!isHintSessionSupported()) {
                 throw new UnsupportedOperationException("PowerHintSessions are not supported!");
             }
@@ -1327,8 +1351,24 @@ public final class HintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             final long durationNanos = creationConfig.targetWorkDurationNanos;
 
-            Preconditions.checkArgument(checkGraphicsPipelineValid(creationConfig, callingUid),
-                    "not enough of available graphics pipeline thread.");
+            boolean isGraphicsPipeline = false;
+            boolean isAutoTimed = false;
+            if (creationConfig.modesToEnable != null) {
+                for (int mode : creationConfig.modesToEnable) {
+                    if (mode == SessionMode.GRAPHICS_PIPELINE) {
+                        isGraphicsPipeline = true;
+                    }
+                    if (mode == SessionMode.AUTO_CPU || mode == SessionMode.AUTO_GPU) {
+                        isAutoTimed = true;
+                    }
+                }
+            }
+
+            if (isAutoTimed) {
+                Preconditions.checkArgument(isGraphicsPipeline,
+                        "graphics pipeline mode not enabled for an automatically timed session");
+            }
+
             try {
                 final IntArray nonIsolated = powerhintThreadCleanup() ? new IntArray(tids.length)
                         : null;
@@ -1446,12 +1486,8 @@ public final class HintManagerService extends SystemService {
                 }
 
                 if (hs != null) {
-                    boolean isGraphicsPipeline = false;
                     if (creationConfig.modesToEnable != null) {
                         for (int sessionMode : creationConfig.modesToEnable) {
-                            if (sessionMode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
-                                isGraphicsPipeline = true;
-                            }
                             hs.setMode(sessionMode, true);
                         }
                     }
@@ -1470,7 +1506,10 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                return hs;
+                IHintManager.SessionCreationReturn out = new IHintManager.SessionCreationReturn();
+                out.pipelineThreadLimitExceeded = tooManyPipelineThreads(callingUid);
+                out.session = hs;
+                return out;
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1852,45 +1891,6 @@ public final class HintManagerService extends SystemService {
             throw new IllegalStateException("Can't find cpu line in " + filePath);
         }
 
-        private boolean checkGraphicsPipelineValid(SessionCreationConfig creationConfig, int uid) {
-            if (creationConfig.modesToEnable == null) {
-                return true;
-            }
-            boolean setGraphicsPipeline = false;
-            for (int modeToEnable : creationConfig.modesToEnable) {
-                if (modeToEnable == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
-                    setGraphicsPipeline = true;
-                }
-            }
-            if (!setGraphicsPipeline) {
-                return true;
-            }
-
-            synchronized (mThreadsUsageObject) {
-                // count used graphics pipeline threads for the calling UID
-                // consider the case that new tids are overlapping with in session tids
-                ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(uid);
-                if (threadsSet == null) {
-                    return true;
-                }
-
-                final int newThreadCount = creationConfig.tids.length;
-                int graphicsPipelineThreadCount = 0;
-                for (ThreadUsageTracker t : threadsSet) {
-                    // count graphics pipeline threads in use
-                    // and exclude overlapping ones
-                    if (t.isGraphicsPipeline()) {
-                        graphicsPipelineThreadCount++;
-                        if (contains(creationConfig.tids, t.getTid())) {
-                            graphicsPipelineThreadCount--;
-                        }
-                    }
-                }
-                return graphicsPipelineThreadCount + newThreadCount
-                        <= MAX_GRAPHICS_PIPELINE_THREADS_COUNT;
-            }
-        }
-
         private void logPerformanceHintSessionAtom(int uid, long sessionId,
                 long targetDuration, int[] tids, @SessionTag int sessionTag) {
             FrameworkStatsLog.write(FrameworkStatsLog.PERFORMANCE_HINT_SESSION_REPORTED, uid,
@@ -1927,11 +1927,6 @@ public final class HintManagerService extends SystemService {
         protected boolean mShouldForcePause;
         protected Integer mSessionId;
         protected boolean mTrackedBySF;
-
-        enum SessionModes {
-            POWER_EFFICIENCY,
-            GRAPHICS_PIPELINE,
-        };
 
         protected AppHintSession(
                 int uid, int pid, int sessionTag, int[] threadIds, IBinder token,
@@ -1985,8 +1980,8 @@ public final class HintManagerService extends SystemService {
                 if (!isHintAllowed()) {
                     return;
                 }
-                Preconditions.checkArgument(targetDurationNanos > 0, "Expected"
-                        + " the target duration to be greater than 0.");
+                Preconditions.checkArgument(targetDurationNanos >= 0, "Expected"
+                        + " the target duration to be greater than or equal to 0.");
                 mNativeWrapper.halUpdateTargetWorkDuration(mHalSessionPtr, targetDurationNanos);
                 mTargetDurationNanos = targetDurationNanos;
             }
@@ -2149,6 +2144,11 @@ public final class HintManagerService extends SystemService {
 
         public void setThreads(@NonNull int[] tids) {
             setThreadsInternal(tids, true);
+            if (tooManyPipelineThreads(Binder.getCallingUid())) {
+                // This is technically a success but we are going to throw a fit anyway
+                throw new ServiceSpecificException(5,
+                                    "Not enough available graphics pipeline threads.");
+            }
         }
 
         private void setThreadsInternal(int[] tids, boolean checkTid) {
@@ -2156,32 +2156,7 @@ public final class HintManagerService extends SystemService {
                 throw new IllegalArgumentException("Thread id list can't be empty.");
             }
 
-
             final int callingUid = Binder.getCallingUid();
-            if (mGraphicsPipeline) {
-                synchronized (mThreadsUsageObject) {
-                    // replace original tids with new tids
-                    ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(callingUid);
-                    int graphicsPipelineThreadCount = 0;
-                    if (threadsSet != null) {
-                        // We count the graphics pipeline threads that are
-                        // *not* in this session, since those in this session
-                        // will be replaced. Then if the count plus the new tids
-                        // is over max available graphics pipeline threads we raise
-                        // an exception.
-                        for (ThreadUsageTracker t : threadsSet) {
-                            if (t.isGraphicsPipeline() && !contains(mThreadIds, t.getTid())) {
-                                graphicsPipelineThreadCount++;
-                            }
-                        }
-                        if (graphicsPipelineThreadCount + tids.length
-                                > MAX_GRAPHICS_PIPELINE_THREADS_COUNT) {
-                            throw new IllegalArgumentException(
-                                    "Not enough available graphics pipeline threads.");
-                        }
-                    }
-                }
-            }
 
             synchronized (this) {
                 if (mHalSessionPtr == 0) {
@@ -2315,15 +2290,15 @@ public final class HintManagerService extends SystemService {
                 }
                 Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
                         + " greater than zero.");
-                if (mode == SessionModes.POWER_EFFICIENCY.ordinal()) {
+                if (mode == SessionMode.POWER_EFFICIENCY) {
                     mPowerEfficient = enabled;
-                } else if (mode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                } else if (mode == SessionMode.GRAPHICS_PIPELINE) {
                     mGraphicsPipeline = enabled;
                 }
                 mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
             }
             if (enabled) {
-                if (mode == SessionModes.POWER_EFFICIENCY.ordinal()) {
+                if (mode == SessionMode.POWER_EFFICIENCY) {
                     if (!mHasBeenPowerEfficient) {
                         mHasBeenPowerEfficient = true;
                         synchronized (mSessionSnapshotMapLock) {
@@ -2342,7 +2317,7 @@ public final class HintManagerService extends SystemService {
                             sessionSnapshot.logPowerEfficientSession();
                         }
                     }
-                } else if (mode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                } else if (mode == SessionMode.GRAPHICS_PIPELINE) {
                     if (!mHasBeenGraphicsPipeline) {
                         mHasBeenGraphicsPipeline = true;
                         synchronized (mSessionSnapshotMapLock) {
