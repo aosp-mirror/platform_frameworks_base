@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.overscroll
@@ -76,7 +75,6 @@ import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
-import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -283,7 +281,7 @@ private fun SceneScope.SingleShade(
             key = MediaLandscapeTopOffset,
             canOverflow = false,
         )
-
+    val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     val mediaOffsetProvider = remember {
@@ -383,6 +381,8 @@ private fun SceneScope.SingleShade(
                     viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { maxNotifScrimTop.toFloat() },
                     shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+                    stackTopPadding = notificationStackPadding,
+                    stackBottomPadding = navBarHeight,
                     supportNestedScrolling = true,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
@@ -422,8 +422,6 @@ private fun SceneScope.SplitShade(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
-    val screenCornerRadius = LocalScreenCornerRadius.current
-
     val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
     val isQsEnabled by viewModel.isQsEnabled.collectAsStateWithLifecycle()
     val isCustomizerShowing by
@@ -444,6 +442,7 @@ private fun SceneScope.SplitShade(
     val unfoldTranslationXForEndSide by
         viewModel.unfoldTranslationX(isOnStartSide = false).collectAsStateWithLifecycle(0f)
 
+    val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding by
         animateDpAsState(
@@ -604,8 +603,9 @@ private fun SceneScope.SplitShade(
                     stackScrollView = notificationStackScrollView,
                     viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { 0f },
+                    stackTopPadding = notificationStackPadding,
+                    stackBottomPadding = notificationStackPadding,
                     shouldPunchHoleBehindScrim = false,
-                    shouldReserveSpaceForNavBar = false,
                     supportNestedScrolling = false,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
@@ -624,7 +624,9 @@ private fun SceneScope.SplitShade(
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .padding(bottom = notificationStackPadding + navBarBottomHeight),
         )
     }
 }

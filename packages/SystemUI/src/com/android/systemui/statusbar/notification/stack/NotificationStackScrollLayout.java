@@ -866,9 +866,9 @@ public class NotificationStackScrollLayout
             y = (int) mAmbientState.getHeadsUpTop();
             drawDebugInfo(canvas, y, Color.GREEN, /* label= */ "getHeadsUpTop() = " + y);
 
-            y += getTopHeadsUpHeight();
+            y = (int) (mAmbientState.getStackTop() + mScrollViewFields.getIntrinsicStackHeight());
             drawDebugInfo(canvas, y, Color.BLUE,
-                    /* label= */ "getHeadsUpTop() + getTopHeadsUpHeight() = " + y);
+                    /* label= */ "getStackTop() + getIntrinsicStackHeight() = " + y);
 
             return; // the rest of the fields are not important in Flexiglass
         }
@@ -2612,20 +2612,13 @@ public class NotificationStackScrollLayout
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
 
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
-        final int footerIntrinsicHeight =
-                mFooterView != null ? mFooterView.getIntrinsicHeight() : 0;
         final int notificationsHeight = (int) mNotificationStackSizeCalculator.computeHeight(
                 /* notificationStackScrollLayout= */ this,
                 mMaxDisplayedNotifications,
                 shelfIntrinsicHeight
         );
-        // When there is a limit in the max number of notifications, we never display the footer.
-        final int fullStackHeight = mMaxDisplayedNotifications != -1
-                ? notificationsHeight
-                : notificationsHeight + footerIntrinsicHeight + mBottomPadding;
-
-        if (mScrollViewFields.getIntrinsicStackHeight() != fullStackHeight) {
-            mScrollViewFields.setIntrinsicStackHeight(fullStackHeight);
+        if (mScrollViewFields.getIntrinsicStackHeight() != notificationsHeight) {
+            mScrollViewFields.setIntrinsicStackHeight(notificationsHeight);
             notifyStackHeightChangedListeners();
         }
     }
