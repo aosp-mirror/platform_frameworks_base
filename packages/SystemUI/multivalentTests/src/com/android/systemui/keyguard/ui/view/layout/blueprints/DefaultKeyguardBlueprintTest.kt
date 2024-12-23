@@ -23,7 +23,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
@@ -71,7 +70,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
     @Mock private lateinit var aodBurnInSection: AodBurnInSection
-    @Mock private lateinit var communalTutorialIndicatorSection: CommunalTutorialIndicatorSection
     @Mock private lateinit var clockSection: ClockSection
     @Mock private lateinit var smartspaceSection: SmartspaceSection
     @Mock private lateinit var keyguardSliceViewSection: KeyguardSliceViewSection
@@ -94,7 +92,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultNSSLSection,
                 aodNotificationIconsSection,
                 aodBurnInSection,
-                communalTutorialIndicatorSection,
                 clockSection,
                 smartspaceSection,
                 keyguardSliceViewSection,
