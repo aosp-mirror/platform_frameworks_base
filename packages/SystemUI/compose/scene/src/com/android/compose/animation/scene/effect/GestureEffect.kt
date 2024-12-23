@@ -19,6 +19,7 @@ package com.android.compose.animation.scene.effect
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import com.android.compose.gesture.effect.ContentOverscrollEffect
 
 /** An overscroll effect that ensures only a single fling animation is triggered. */
 internal class GestureEffect(private val delegate: ContentOverscrollEffect) :

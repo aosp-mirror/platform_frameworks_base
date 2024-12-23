@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
-import com.android.compose.animation.scene.effect.ContentOverscrollEffect
+import com.android.compose.gesture.effect.ContentOverscrollEffect
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state

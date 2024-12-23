@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene.effect
+package com.android.compose.gesture.effect
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
