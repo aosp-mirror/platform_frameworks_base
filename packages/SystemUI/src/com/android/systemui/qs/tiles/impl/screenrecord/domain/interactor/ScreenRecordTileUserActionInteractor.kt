@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
+import android.media.projection.StopReason
 import android.util.Log
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
@@ -61,7 +62,9 @@ constructor(
                             Log.d(TAG, "Cancelling countdown")
                             withContext(backgroundContext) { recordingController.cancelCountdown() }
                         }
-                        is ScreenRecordModel.Recording -> screenRecordRepository.stopRecording()
+                        is ScreenRecordModel.Recording -> {
+                            screenRecordRepository.stopRecording(StopReason.STOP_QS_TILE)
+                        }
                         is ScreenRecordModel.DoingNothing ->
                             withContext(mainContext) {
                                 showPrompt(action.expandable, user.identifier)

@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Intent;
 import android.media.MediaRouter.RouteInfo;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -183,7 +184,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 });
             }
         } else {
-            mController.stopCasting(activeDevices.get(0));
+            mController.stopCasting(activeDevices.get(0), StopReason.STOP_QS_TILE);
         }
     }
 
