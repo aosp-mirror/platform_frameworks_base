@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToPrimaryBouncerTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToDozingTransitionViewModel
@@ -74,6 +75,12 @@ interface PrimaryBouncerTransitionModule {
     @IntoSet
     fun fromLockscreen(
         impl: LockscreenToPrimaryBouncerTransitionViewModel
+    ): PrimaryBouncerTransition
+
+    @Binds
+    @IntoSet
+    fun fromGlanceableHub(
+        impl: GlanceableHubToPrimaryBouncerTransitionViewModel
     ): PrimaryBouncerTransition
 
     @Binds
