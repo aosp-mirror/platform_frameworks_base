@@ -2469,7 +2469,7 @@ public class SettingsProvider extends ContentProvider {
         boolean isRestrictedShell = android.security.Flags.protectDeviceConfigFlags()
                 && hasAllowlistPermission;
 
-        if (!isRestrictedShell && hasWritePermission) {
+        if (hasWritePermission) {
             assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
             Set<String> allowlistedDeviceConfigNamespaces = null;
@@ -2499,7 +2499,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (!namespaceAllowed && !DeviceConfig.getAdbWritableFlags().contains(flag)) {
-                    Slog.wtf(LOG_TAG, "Permission denial for flag '" + flag
+                    throw new SecurityException("Permission denial for flag '" + flag
                             + "'; allowlist permission granted, but must add flag to the "
                             + "allowlist");
                 }
