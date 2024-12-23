@@ -17430,12 +17430,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Removes a manged profile from the device only when called from a managed profile's context
+     * Removes a managed profile from the device.
      *
-     * @param user UserHandle of the profile to be removed
+     * <p>
+     * Removes the managed profile which is specified by the context user
+     * ({@code Context.createContextAsUser()}).
+     * <p>
+     *
      * @return {@code true} when removal of managed profile was successful, {@code false} when
-     * removal was unsuccessful or throws IllegalArgumentException when provided user was not a
+     * removal was unsuccessful or throws IllegalArgumentException when specified user was not a
      * managed profile
+     *
      * @hide
      */
     @SystemApi
