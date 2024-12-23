@@ -2526,9 +2526,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         task.forAllActivities(r -> {
             if (!r.attachedToProcess()) return;
             mPipModeChangedActivities.add(r);
-            // If we are scheduling pip change, then remove this activity from multi-window
-            // change list as the processing of pip change will make sure multi-window changed
-            // message is processed in the right order relative to pip changed.
             mMultiWindowModeChangedActivities.remove(r);
         });
 

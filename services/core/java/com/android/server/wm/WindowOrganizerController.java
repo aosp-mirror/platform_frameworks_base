@@ -80,6 +80,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_ORG
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
+import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -716,6 +717,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (forceHiddenForPip) {
                     wc.asTask().setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
+                }
+                if (forceHiddenForPip && !isPip2ExperimentEnabled()) {
                     // When removing pip, make sure that onStop is sent to the app ahead of
                     // onPictureInPictureModeChanged.
                     // See also PinnedStackTests#testStopBeforeMultiWindowCallbacksOnDismiss

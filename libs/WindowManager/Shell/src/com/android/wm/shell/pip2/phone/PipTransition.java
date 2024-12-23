@@ -278,7 +278,8 @@ public class PipTransition extends PipTransitionController implements
         }
 
         if (isRemovePipTransition(info)) {
-            return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
+            mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
+            return startRemoveAnimation(info, startTransaction, finishTransaction, finishCallback);
         }
         return false;
     }
@@ -668,13 +669,18 @@ public class PipTransition extends PipTransitionController implements
         return true;
     }
 
-    private boolean removePipImmediately(@NonNull TransitionInfo info,
+    private boolean startRemoveAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        startTransaction.apply();
-        finishCallback.onTransitionFinished(null);
-        mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
+        TransitionInfo.Change pipChange = getChangeByToken(info,
+                mPipTransitionState.getPipTaskToken());
+        mFinishCallback = finishCallback;
+        PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipChange.getLeash(),
+                startTransaction, PipAlphaAnimator.FADE_OUT);
+        finishTransaction.setAlpha(pipChange.getLeash(), 0f);
+        animator.setAnimationEndCallback(this::finishTransition);
+        animator.start();
         return true;
     }
 
