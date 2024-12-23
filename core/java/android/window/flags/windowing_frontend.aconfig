@@ -442,3 +442,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "port_window_size_animation"
+    namespace: "systemui"
+    description: "Port window-resize animation from legacy to shell"
+    bug: "384976265"
+}
+
