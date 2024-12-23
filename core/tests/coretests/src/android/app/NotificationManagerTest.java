@@ -18,9 +18,11 @@ package android.app;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -104,6 +106,22 @@ public class NotificationManagerTest {
 
     @Test
     @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void notifyAsPackage_rapidUpdate_isThrottled() throws Exception {
+        Notification n = exampleNotification();
+
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.notifyAsPackage("some.package.name", "tag", 1, n);
+            mClock.advanceByMillis(5);
+        }
+
+        verify(mNotificationManager.mBackendService, atLeast(20)).enqueueNotificationWithTag(
+                eq("some.package.name"), any(), any(), anyInt(), any(), anyInt());
+        verify(mNotificationManager.mBackendService, atMost(30)).enqueueNotificationWithTag(
+                eq("some.package.name"), any(), any(), anyInt(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
     public void cancel_unnecessaryAndRapid_isThrottled() throws Exception {
 
         for (int i = 0; i < 100; i++) {
@@ -163,6 +181,66 @@ public class NotificationManagerTest {
 
         verify(mNotificationManager.mBackendService, times(100)).cancelNotificationWithTag(any(),
                 any(), any(), anyInt(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void enqueue_afterCancel_isNotUpdateAndIsNotThrottled() throws Exception {
+        // First, hit the enqueue threshold.
+        Notification n = exampleNotification();
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.notify(1, n);
+            mClock.advanceByMillis(1);
+        }
+        verify(mNotificationManager.mBackendService, atMost(30)).enqueueNotificationWithTag(any(),
+                any(), any(), anyInt(), any(), anyInt());
+        reset(mNotificationManager.mBackendService);
+
+        // Now cancel that notification and then post it again. That should work.
+        mNotificationManager.cancel(1);
+        mNotificationManager.notify(1, n);
+        verify(mNotificationManager.mBackendService).enqueueNotificationWithTag(any(), any(), any(),
+                anyInt(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void enqueue_afterCancelAsPackage_isNotUpdateAndIsNotThrottled() throws Exception {
+        // First, hit the enqueue threshold.
+        Notification n = exampleNotification();
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.notify(1, n);
+            mClock.advanceByMillis(1);
+        }
+        verify(mNotificationManager.mBackendService, atMost(30)).enqueueNotificationWithTag(any(),
+                any(), any(), anyInt(), any(), anyInt());
+        reset(mNotificationManager.mBackendService);
+
+        // Now cancel that notification and then post it again. That should work.
+        mNotificationManager.cancelAsPackage(mContext.getPackageName(), /* tag= */ null, 1);
+        mNotificationManager.notify(1, n);
+        verify(mNotificationManager.mBackendService).enqueueNotificationWithTag(any(), any(), any(),
+                anyInt(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY)
+    public void enqueue_afterCancelAll_isNotUpdateAndIsNotThrottled() throws Exception {
+        // First, hit the enqueue threshold.
+        Notification n = exampleNotification();
+        for (int i = 0; i < 100; i++) {
+            mNotificationManager.notify(1, n);
+            mClock.advanceByMillis(1);
+        }
+        verify(mNotificationManager.mBackendService, atMost(30)).enqueueNotificationWithTag(any(),
+                any(), any(), anyInt(), any(), anyInt());
+        reset(mNotificationManager.mBackendService);
+
+        // Now cancel all notifications and then post it again. That should work.
+        mNotificationManager.cancelAll();
+        mNotificationManager.notify(1, n);
+        verify(mNotificationManager.mBackendService).enqueueNotificationWithTag(any(), any(), any(),
+                anyInt(), any(), anyInt());
     }
 
     private Notification exampleNotification() {
