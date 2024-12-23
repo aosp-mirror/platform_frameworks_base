@@ -11,6 +11,16 @@ flag {
 }
 
 flag {
+    name: "disable_set_bluetooth_ad2p_on_calls"
+    namespace: "media_better_together"
+    description: "Prevents calls to AudioService.setBluetoothA2dpOn(), known to cause incorrect audio routing to the built-in speakers."
+    bug: "294968421"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_audio_input_device_routing_and_volume_control"
     namespace: "media_better_together"
     description: "Allows audio input devices routing and volume control via system settings."
