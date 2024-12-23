@@ -329,7 +329,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
-        boolean isDisplayRotationAnimationStarted = false;
+        int animatingDisplayId = Integer.MIN_VALUE;
         final boolean isDreamTransition = isDreamTransition(info);
         final boolean isOnlyTranslucent = isOnlyTranslucent(info);
         final boolean isActivityLevel = isActivityLevelOnly(info);
@@ -361,7 +361,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                                 ? ScreenRotationAnimation.FLAG_HAS_WALLPAPER : 0;
                         startRotationAnimation(startTransaction, change, info, anim, flags,
                                 animations, onAnimFinish);
-                        isDisplayRotationAnimationStarted = true;
+                        animatingDisplayId = change.getEndDisplayId();
                         continue;
                     }
                 } else {
@@ -426,8 +426,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             // Hide the invisible surface directly without animating it if there is a display
             // rotation animation playing.
-            if (isDisplayRotationAnimationStarted && TransitionUtil.isClosingType(mode)) {
-                startTransaction.hide(change.getLeash());
+            if (animatingDisplayId == change.getEndDisplayId()) {
+                if (TransitionUtil.isClosingType(mode)) {
+                    startTransaction.hide(change.getLeash());
+                }
+                // Only need to play display level animation.
                 continue;
             }
 
