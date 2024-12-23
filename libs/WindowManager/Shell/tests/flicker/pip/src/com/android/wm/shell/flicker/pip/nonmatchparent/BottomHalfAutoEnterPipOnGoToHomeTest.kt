@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.pip
+package com.android.wm.shell.flicker.pip.nonmatchparent
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
-import com.android.server.wm.flicker.helpers.PipAppHelper
-import com.android.wm.shell.Flags
-import com.android.wm.shell.flicker.pip.common.EnterPipTransition
+import androidx.test.filters.FlakyTest
+import com.android.window.flags.Flags
 import com.android.wm.shell.flicker.pip.common.widthNotSmallerThan
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -36,15 +35,17 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test entering pip from an app via auto-enter property when navigating to home.
+ * Test entering pip from an app with non-match parent layout via auto-enter property when
+ * navigating to home.
  *
- * To run this test: `atest WMShellFlickerTestsPip:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip:BottomHalfAutoEnterPipOnGoToHomeTest`
  *
  * Actions:
  * ```
- *     Launch an app in full screen
+ *     Launch [BottomHalfPipLaunchingActivity] in full screen
+ *     Launch [BottomHalfPipActivity] with bottom half layout
  *     Select "Auto-enter PiP" radio button
- *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
+ *     Press Home button or swipe up to go Home and put [BottomHalfPipActivity] in pip mode
  * ```
  *
  * Notes:
@@ -56,15 +57,20 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
+// TODO(b/380796448): re-enable tests after the support of non-match parent PIP animation for PIP2.
+@RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
+@RequiresFlagsEnabled(Flags.FLAG_BETTER_SUPPORT_NON_MATCH_PARENT_ACTIVITY)
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
-open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
-    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+class BottomHalfAutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
+    BottomHalfEnterPipTransition(flicker) {
 
-    override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }
+    override val thisTransition: FlickerBuilder.() -> Unit = { transitions {
+        tapl.goHome()
+        pipApp.waitForPip(wmHelper)
+    } }
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
@@ -73,19 +79,28 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTran
         }
     }
 
-    @Postsubmit
+    @FlakyTest(bugId = 289943985)
     @Test
-    override fun pipLayerReduces() {
-        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
-        flicker.assertLayers {
-            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
-            pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
-            }
-        }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
-    /** Checks that [pipApp] window's width is first decreasing then increasing. */
+    /* Gestural Navigation */
+
+    /**
+     * Checks that [pipApp] window's width is first decreasing then increasing.
+     *
+     * In gestural navigation mode, auto entering PiP can initially make the layer smaller before it
+     * gets larger.
+     * This tests verifies the width of the PiP layer first decreases and then increases due to
+     * size and scale animations going to different directions.
+     *
+     * Note that we still allow a margin of error of 1px, since around the time
+     * of handoff between gesture nav task view simulator and
+     * SwipePipToHomeAnimator, crop can get a bit smaller and scale can get a
+     * bit larger if swiped aggressively - this can produce off-by-1 errors for
+     * width too.
+     */
     @Postsubmit
     @Test
     fun pipLayerWidthDecreasesThenIncreases() {
@@ -107,6 +122,23 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTran
                     currentLayer = pipLayerList[++i]
                     currentLayer.widthNotSmallerThan(previousLayer)
                 }
+            }
+        }
+    }
+
+    /* 3-button Navigation */
+
+    /**
+     * The PIP layer reduces continuously in 3-Button navigation mode.
+     */
+    @Postsubmit
+    @Test
+    override fun pipLayerReduces() {
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        flicker.assertLayers {
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }
@@ -134,11 +166,5 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) : EnterPipTran
         // in gestural nav the focus goes to different activity on swipe up
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.focusChanges()
-    }
-
-    @FlakyTest(bugId = 289943985)
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 }

@@ -115,6 +115,11 @@ test_module_config {
         "com.android.wm.shell.flicker.pip.PipPinchInTest",
         "com.android.wm.shell.flicker.pip.SetRequestedOrientationWhilePinned",
         "com.android.wm.shell.flicker.pip.ShowPipAndRotateDisplay",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfAutoEnterPipOnGoToHomeTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipOnUserLeaveHintTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipViaAppUiButtonTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaExpandButtonTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest",
     ],
     test_suites: ["device-tests"],
 }
@@ -266,12 +271,7 @@ test_module_config {
     test_suites: ["device-tests"],
 }
 
-test_module_config {
-    name: "WMShellFlickerTestsPip-nonMatchParent",
-    base: "WMShellFlickerTestsPip",
-    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.*"],
-    test_suites: ["device-tests"],
-}
+// Not-match Parent test cases
 
 test_module_config {
     name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaExpandButtonTest",
@@ -284,6 +284,27 @@ test_module_config {
     name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaIntentTest",
     base: "WMShellFlickerTestsPip",
     include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfAutoEnterPipOnGoToHomeTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfAutoEnterPipOnGoToHomeTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfEnterPipOnUserLeaveHintTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipOnUserLeaveHintTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfEnterPipViaAppUiButtonTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipViaAppUiButtonTest"],
     test_suites: ["device-tests"],
 }
 
