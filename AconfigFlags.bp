@@ -277,6 +277,7 @@ java_aconfig_library {
 java_aconfig_library {
     name: "com.android.input.flags-aconfig-java",
     aconfig_declarations: "com.android.input.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
