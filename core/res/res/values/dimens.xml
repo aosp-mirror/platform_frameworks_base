@@ -408,6 +408,9 @@
     <!-- the padding of the expand icon in the notification header -->
     <dimen name="notification_2025_expand_button_horizontal_icon_padding">6dp</dimen>
 
+    <!-- a smaller padding for the end of the expand button, for use when showing the number -->
+    <dimen name="notification_2025_expand_button_reduced_end_padding">4dp</dimen>
+
     <!-- the size of the notification close button -->
     <dimen name="notification_close_button_size">16dp</dimen>
 
