@@ -32,8 +32,8 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.DockManagerFake
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -191,10 +191,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
 
-        val featureFlags =
-            FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }
-
-        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        val withDeps = KeyguardInteractorFactory.create()
         keyguardInteractor = withDeps.keyguardInteractor
         repository = withDeps.repository
 
@@ -287,7 +284,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
                         activityStarter = activityStarter,
-                        featureFlags = featureFlags,
+                        featureFlags = kosmos.fakeFeatureFlagsClassic,
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                         logger = logger,

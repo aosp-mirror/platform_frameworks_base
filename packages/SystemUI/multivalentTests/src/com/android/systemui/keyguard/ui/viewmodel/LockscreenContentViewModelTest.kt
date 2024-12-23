@@ -26,9 +26,7 @@ import com.android.systemui.biometrics.authController
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.DisableSceneContainer
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.andSceneContainer
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
@@ -77,7 +75,6 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     @Before
     fun setup() {
         with(kosmos) {
-            fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
             shadeRepository.setShadeLayoutWide(false)
             underTest = lockscreenContentViewModel
             underTest.activateIn(testScope)
