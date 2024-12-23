@@ -5820,8 +5820,13 @@ public class RemoteViews implements Parcelable, Filter {
                         mActions.forEach(action -> {
                             if (viewId == action.mViewId
                                     && action instanceof SetOnClickResponse setOnClickResponse) {
-                                setOnClickResponse.mResponse.handleViewInteraction(
-                                        player, params.handler);
+                                final RemoteResponse response = setOnClickResponse.mResponse;
+                                if (response.mFillIntent == null) {
+                                    response.mFillIntent = new Intent();
+                                }
+                                response.mFillIntent.putExtra(
+                                        "remotecompose_metadata", metadata);
+                                response.handleViewInteraction(player, params.handler);
                             }
                         });
                     });
