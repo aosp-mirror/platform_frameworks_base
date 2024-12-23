@@ -45,16 +45,31 @@ public class AmbientVolumeSlider extends LinearLayout {
             new Slider.OnSliderTouchListener() {
                 @Override
                 public void onStartTrackingTouch(@NonNull Slider slider) {
+                    mTrackingTouch = true;
                 }
 
                 @Override
                 public void onStopTrackingTouch(@NonNull Slider slider) {
+                    mTrackingTouch = false;
                     final int value = Math.round(slider.getValue());
                     for (OnChangeListener listener : mChangeListeners) {
                         listener.onValueChange(AmbientVolumeSlider.this, value);
                     }
                 }
             };
+    private final Slider.OnChangeListener mSliderChangeListener = new Slider.OnChangeListener() {
+        @Override
+        public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
+            if (fromUser && !mTrackingTouch) {
+                final int roundedValue = Math.round(value);
+                for (OnChangeListener listener : mChangeListeners) {
+                    listener.onValueChange(AmbientVolumeSlider.this, roundedValue);
+                }
+            }
+        }
+    };
+    private boolean mTrackingTouch = false;
+
     public AmbientVolumeSlider(@Nullable Context context) {
         this(context, /* attrs= */ null);
     }
@@ -76,6 +91,7 @@ public class AmbientVolumeSlider extends LinearLayout {
         mTitle = requireViewById(R.id.ambient_volume_slider_title);
         mSlider = requireViewById(R.id.ambient_volume_slider);
         mSlider.addOnSliderTouchListener(mSliderTouchListener);
+        mSlider.addOnChangeListener(mSliderChangeListener);
     }
 
     /**
