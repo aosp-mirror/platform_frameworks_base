@@ -36,7 +36,7 @@ import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.notification.collection.provider.launchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.notificationVisibilityProvider
-import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notification.notificationTransitionAnimatorControllerProvider
 import com.android.systemui.statusbar.notification.row.onUserInteractionCallback
 import com.android.systemui.statusbar.notificationClickNotifier
@@ -58,7 +58,7 @@ val Kosmos.statusBarNotificationActivityStarter by
             fakeExecutorHandler,
             fakeExecutor,
             notificationVisibilityProvider,
-            headsUpManager,
+            mockHeadsUpManager,
             activityStarter,
             commandQueue,
             notificationClickNotifier,

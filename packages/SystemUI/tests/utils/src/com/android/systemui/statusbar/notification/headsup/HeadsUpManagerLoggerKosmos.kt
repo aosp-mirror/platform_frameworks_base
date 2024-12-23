@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack
+package com.android.systemui.statusbar.notification.headsup
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.log.logcatLogBuffer
+import org.mockito.kotlin.mock
 
-var Kosmos.stackScrollAlgorithmSectionProvider by Fixture {
-    mock<StackScrollAlgorithm.SectionProvider>()
-}
+val Kosmos.mockHeadsUpManagerLogger by Fixture { mock<HeadsUpManagerLogger>() }
 
-var Kosmos.stackScrollAlgorithmBypassController by Fixture {
-    mock<StackScrollAlgorithm.BypassController>()
+val Kosmos.headsUpManagerLogger by Fixture {
+    HeadsUpManagerLogger(logcatLogBuffer("HeadsUpManagerLogger"))
 }

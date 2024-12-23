@@ -24,7 +24,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
-import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.util.kotlin.JavaAdapter
@@ -36,7 +36,7 @@ var Kosmos.shadeTouchableRegionManager by
             applicationContext,
             notificationShadeWindowController,
             configurationController,
-            headsUpManager,
+            mockHeadsUpManager,
             shadeInteractor,
             { sceneInteractor },
             JavaAdapter(testScope.backgroundScope),
