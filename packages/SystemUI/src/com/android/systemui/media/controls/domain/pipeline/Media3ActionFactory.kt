@@ -43,6 +43,7 @@ import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.SessionTokenFactory
 import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.Execution
+import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -71,7 +72,7 @@ constructor(
      *
      * @param packageName Package name for the media app
      * @param controller The framework [MediaController] for the session
-     * @return The media action buttons, or null if the session token is null
+     * @return The media action buttons, or null if cannot be created for this session
      */
     suspend fun createActionsFromSession(
         packageName: String,
@@ -80,6 +81,10 @@ constructor(
         // Get the Media3 controller using the legacy token
         val token = tokenFactory.createTokenFromLegacy(sessionToken)
         val m3controller = controllerFactory.create(token, looper)
+        if (m3controller == null) {
+            logger.logCreateFailed(packageName, "createActionsFromSession")
+            return null
+        }
 
         // Build button info
         val buttons = suspendCancellableCoroutine { continuation ->
@@ -89,13 +94,14 @@ constructor(
                     val result = getMedia3Actions(packageName, m3controller, token)
                     continuation.resumeWith(Result.success(result))
                 } finally {
-                    m3controller.release()
+                    m3controller.tryRelease(packageName, logger)
                 }
             }
             handler.post(runnable)
             continuation.invokeOnCancellation {
                 // Ensure controller is released, even if loading was cancelled partway through
-                handler.post(m3controller::release)
+                val releaseRunnable = Runnable { m3controller.tryRelease(packageName, logger) }
+                handler.post(releaseRunnable)
                 handler.removeCallbacks(runnable)
             }
         }
@@ -127,11 +133,12 @@ constructor(
                     com.android.internal.R.drawable.progress_small_material,
                 )
             } else {
-                getStandardAction(m3controller, token, Player.COMMAND_PLAY_PAUSE)
+                getStandardAction(packageName, m3controller, token, Player.COMMAND_PLAY_PAUSE)
             }
 
         val prevButton =
             getStandardAction(
+                packageName,
                 m3controller,
                 token,
                 Player.COMMAND_SEEK_TO_PREVIOUS,
@@ -139,6 +146,7 @@ constructor(
             )
         val nextButton =
             getStandardAction(
+                packageName,
                 m3controller,
                 token,
                 Player.COMMAND_SEEK_TO_NEXT,
@@ -208,6 +216,7 @@ constructor(
      * @return A [MediaAction] representing the first supported command, or null if not supported
      */
     private fun getStandardAction(
+        packageName: String,
         controller: Media3Controller,
         token: SessionToken,
         vararg commands: @Player.Command Int,
@@ -222,14 +231,14 @@ constructor(
                     if (!controller.isPlaying) {
                         MediaAction(
                             context.getDrawable(R.drawable.ic_media_play),
-                            { executeAction(token, Player.COMMAND_PLAY_PAUSE) },
+                            { executeAction(packageName, token, Player.COMMAND_PLAY_PAUSE) },
                             context.getString(R.string.controls_media_button_play),
                             context.getDrawable(R.drawable.ic_media_play_container),
                         )
                     } else {
                         MediaAction(
                             context.getDrawable(R.drawable.ic_media_pause),
-                            { executeAction(token, Player.COMMAND_PLAY_PAUSE) },
+                            { executeAction(packageName, token, Player.COMMAND_PLAY_PAUSE) },
                             context.getString(R.string.controls_media_button_pause),
                             context.getDrawable(R.drawable.ic_media_pause_container),
                         )
@@ -238,7 +247,7 @@ constructor(
                 else -> {
                     MediaAction(
                         icon = getIconForAction(command),
-                        action = { executeAction(token, command) },
+                        action = { executeAction(packageName, token, command) },
                         contentDescription = getDescriptionForAction(command),
                         background = null,
                     )
@@ -256,7 +265,7 @@ constructor(
     ): MediaAction {
         return MediaAction(
             getIconForAction(customAction, packageName),
-            { executeAction(token, Player.COMMAND_INVALID, customAction) },
+            { executeAction(packageName, token, Player.COMMAND_INVALID, customAction) },
             customAction.displayName,
             null,
         )
@@ -308,12 +317,17 @@ constructor(
     }
 
     private fun executeAction(
+        packageName: String,
         token: SessionToken,
         command: Int,
         customAction: CommandButton? = null,
     ) {
         bgScope.launch {
             val controller = controllerFactory.create(token, looper)
+            if (controller == null) {
+                logger.logCreateFailed(packageName, "executeAction")
+                return@launch
+            }
             handler.post {
                 try {
                     when (command) {
@@ -347,9 +361,17 @@ constructor(
                         else -> logger.logMedia3UnsupportedCommand(command.toString())
                     }
                 } finally {
-                    controller.release()
+                    controller.tryRelease(packageName, logger)
                 }
             }
         }
+    }
+}
+
+private fun Media3Controller.tryRelease(packageName: String, logger: MediaLogger) {
+    try {
+        this.release()
+    } catch (e: ExecutionException) {
+        logger.logReleaseFailed(packageName, e.cause.toString())
     }
 }
