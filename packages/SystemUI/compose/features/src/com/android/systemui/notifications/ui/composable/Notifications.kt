@@ -363,8 +363,9 @@ fun ContentScope.NotificationScrollingStack(
     val shadeScrollState by remember {
         derivedStateOf {
             ShadeScrollState(
-                // we are not scrolled to the top unless the scrim is at its maximum offset.
-                isScrolledToTop = scrimOffset.value >= 0f,
+                // we are not scrolled to the top unless the scroll position is zero,
+                // and the scrim is at its maximum offset
+                isScrolledToTop = scrimOffset.value >= 0f && scrollState.value == 0,
                 scrollPosition = scrollState.value,
                 maxScrollPosition = scrollState.maxValue,
             )
