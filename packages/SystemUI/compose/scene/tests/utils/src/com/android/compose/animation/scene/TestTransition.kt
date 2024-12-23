@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
@@ -63,6 +64,9 @@ interface TransitionTestBuilder {
      * Important: [timestamp] must be a multiple of 16 (the duration of a frame on the JVM/Android).
      * There is no intermediary state between `t` and `t + 16` , so testing transitions outside of
      * `t = 0`, `t = 16`, `t = 32`, etc does not make sense.
+     *
+     * @param builder the builder can run assertions and is passed the CoroutineScope such that the
+     *   test can start transitions at any desired point in time.
      */
     fun at(timestamp: Long, builder: TransitionTestAssertionScope.() -> Unit)
 
@@ -85,7 +89,7 @@ interface TransitionTestBuilder {
 }
 
 @TransitionTestDsl
-interface TransitionTestAssertionScope {
+interface TransitionTestAssertionScope : CoroutineScope {
     /**
      * Assert on [element].
      *
@@ -312,6 +316,20 @@ fun ComposeContentTestRule.testTransition(
     )
 }
 
+fun ComposeContentTestRule.testNestedTransition(
+    states: List<MutableSceneTransitionLayoutState>,
+    changeState: CoroutineScope.(states: List<MutableSceneTransitionLayoutState>) -> Unit,
+    transitionLayout: @Composable (states: List<MutableSceneTransitionLayoutState>) -> Unit,
+    builder: TransitionTestBuilder.() -> Unit,
+) {
+    testTransition(
+        state = states[0],
+        changeState = { changeState(states) },
+        transitionLayout = { transitionLayout(states) },
+        builder = builder,
+    )
+}
+
 /** Test the transition from [state] to [to]. */
 fun ComposeContentTestRule.testTransition(
     state: MutableSceneTransitionLayoutState,
@@ -319,9 +337,15 @@ fun ComposeContentTestRule.testTransition(
     transitionLayout: @Composable (state: MutableSceneTransitionLayoutState) -> Unit,
     builder: TransitionTestBuilder.() -> Unit,
 ) {
-    val test = transitionTest(builder)
+    lateinit var coroutineScope: CoroutineScope
+    setContent {
+        coroutineScope = rememberCoroutineScope()
+        transitionLayout(state)
+    }
+
     val assertionScope =
-        object : AutoTransitionTestAssertionScope {
+        object : AutoTransitionTestAssertionScope, CoroutineScope by coroutineScope {
+
             var progress = 0f
 
             override fun onElement(
@@ -338,6 +362,16 @@ fun ComposeContentTestRule.testTransition(
                     from is Int && to is Int -> lerp(from, to, progress)
                     from is Long && to is Long -> lerp(from, to, progress)
                     from is Dp && to is Dp -> lerp(from, to, progress)
+                    from is Scale && to is Scale ->
+                        Scale(
+                            lerp(from.scaleX, to.scaleX, progress),
+                            lerp(from.scaleY, to.scaleY, progress),
+                            interpolate(from.pivot, to.pivot),
+                        )
+
+                    from is Offset && to is Offset ->
+                        Offset(lerp(from.x, to.x, progress), lerp(from.y, to.y, progress))
+
                     else ->
                         throw UnsupportedOperationException(
                             "Interpolation not supported for this type"
@@ -347,14 +381,9 @@ fun ComposeContentTestRule.testTransition(
             }
         }
 
-    lateinit var coroutineScope: CoroutineScope
-    setContent {
-        coroutineScope = rememberCoroutineScope()
-        transitionLayout(state)
-    }
-
     // Wait for the UI to be idle then test the before state.
     waitForIdle()
+    val test = transitionTest(builder)
     test.before(assertionScope)
 
     // Manually advance the clock to the start of the animation.

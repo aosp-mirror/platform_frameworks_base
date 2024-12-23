@@ -81,8 +81,9 @@ internal fun sharedElementTransformation(
 ): TransformationWithRange<SharedElementTransformation>? {
     val transformationSpec = transition.transformationSpec
     val sharedInFromContent =
-        transformationSpec.transformations(element, transition.fromContent).shared
-    val sharedInToContent = transformationSpec.transformations(element, transition.toContent).shared
+        transformationSpec.transformations(element, transition.fromContent)?.shared
+    val sharedInToContent =
+        transformationSpec.transformations(element, transition.toContent)?.shared
 
     // The sharedElement() transformation must either be null or be the same in both contents.
     if (sharedInFromContent != sharedInToContent) {

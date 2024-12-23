@@ -698,7 +698,7 @@ internal fun SceneTransitionLayoutForTesting(
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     sharedElementMap: MutableMap<ElementKey, Element> = remember { mutableMapOf() },
-    ancestorContentKeys: List<ContentKey> = emptyList(),
+    ancestors: List<Ancestor> = remember { emptyList() },
     lookaheadScope: LookaheadScope? = null,
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
@@ -715,7 +715,7 @@ internal fun SceneTransitionLayoutForTesting(
                 builder = builder,
                 animationScope = animationScope,
                 elements = sharedElementMap,
-                ancestorContentKeys = ancestorContentKeys,
+                ancestors = ancestors,
                 lookaheadScope = lookaheadScope,
             )
             .also { onLayoutImpl?.invoke(it) }
@@ -738,9 +738,9 @@ internal fun SceneTransitionLayoutForTesting(
                     "when creating it, which is not supported"
             )
         }
-        if (layoutImpl.ancestorContentKeys != ancestorContentKeys) {
+        if (layoutImpl.ancestors != ancestors) {
             error(
-                "This SceneTransitionLayout was bound to a different ancestorContents that was " +
+                "This SceneTransitionLayout was bound to a different ancestors that was " +
                     "used when creating it, which is not supported"
             )
         }

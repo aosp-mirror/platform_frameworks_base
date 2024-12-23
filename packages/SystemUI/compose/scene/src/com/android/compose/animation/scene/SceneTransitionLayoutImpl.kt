@@ -57,6 +57,18 @@ import kotlinx.coroutines.launch
 /** The type for the content of movable elements. */
 internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
 
+internal data class Ancestor(
+    val layoutImpl: SceneTransitionLayoutImpl,
+
+    /**
+     * This is the content in which the corresponding descendant of this ancestor appears in.
+     *
+     * Example: When A is the root and has two scenes SA and SB and SB contains a NestedSTL called
+     * B. Then A is the ancestor of B and inContent is SB.
+     */
+    val inContent: ContentKey,
+)
+
 @Stable
 internal class SceneTransitionLayoutImpl(
     internal val state: MutableSceneTransitionLayoutStateImpl,
@@ -83,16 +95,17 @@ internal class SceneTransitionLayoutImpl(
     internal val elements: MutableMap<ElementKey, Element> = mutableMapOf(),
 
     /**
-     * When this STL is a [NestedSceneTransitionLayout], this is a list of [ContentKey]s of where
-     * this STL is composed in within its ancestors.
+     * When this STL is a [NestedSceneTransitionLayout], this is a list of [Ancestor]s which
+     * provides a reference to the ancestor STLs and indicates where this STL is composed in within
+     * its ancestors.
      *
      * The root STL holds an emptyList. With each nesting level the parent is supposed to add
      * exactly one scene to the list, therefore the size of this list is equal to the nesting depth
      * of this STL.
      *
-     * This is used to know in which content of the ancestors a sharedElement appears in.
+     * This is used to enable transformations and shared elements across NestedSTLs.
      */
-    internal val ancestorContentKeys: List<ContentKey> = emptyList(),
+    internal val ancestors: List<Ancestor> = emptyList(),
     lookaheadScope: LookaheadScope? = null,
 ) {
 

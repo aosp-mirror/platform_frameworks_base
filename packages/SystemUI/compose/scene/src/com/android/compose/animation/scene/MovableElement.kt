@@ -163,7 +163,7 @@ private class MovableElementScopeImpl(
             // Important: Like in Modifier.element(), we read the transition states during
             // composition then pass them to Layout to make sure that composition sees new states
             // before layout and drawing.
-            val transitionStates = layoutImpl.state.transitionStates
+            val transitionStates = getAllNestedTransitionStates(layoutImpl)
             Layout { _, _ ->
                 // No need to measure or place anything.
                 val size =
@@ -186,7 +186,7 @@ private fun shouldComposeMovableElement(
     element: MovableElementKey,
 ): Boolean {
     return when (
-        val elementState = movableElementState(element, layoutImpl.state.transitionStates)
+        val elementState = movableElementState(element, getAllNestedTransitionStates(layoutImpl))
     ) {
         null ->
             movableElementContentWhenIdle(layoutImpl, element, layoutImpl.state.transitionState) ==
@@ -221,10 +221,14 @@ private fun shouldComposeMoveableElement(
 
 private fun movableElementState(
     element: MovableElementKey,
-    transitionStates: List<TransitionState>,
+    transitionStates: List<List<TransitionState>>,
 ): TransitionState? {
     val contents = element.contentPicker.contents
-    return elementState(transitionStates, isInContent = { contents.contains(it) })
+    return elementState(
+        transitionStates,
+        elementKey = element,
+        isInContent = { contents.contains(it) },
+    )
 }
 
 private fun movableElementContentWhenIdle(
@@ -245,7 +249,7 @@ private fun placeholderContentSize(
     content: ContentKey,
     element: Element,
     elementKey: MovableElementKey,
-    transitionStates: List<TransitionState>,
+    transitionStates: List<List<TransitionState>>,
 ): IntSize {
     // If the content of the movable element was already composed in this scene before, use that
     // target size.

@@ -61,7 +61,7 @@ class NestedSharedElementTest {
         val NestedNestedSceneB = SceneKey("NestedNestedSceneB")
     }
 
-    private val elementVariant1 = SharedElement(0.dp, 0.dp, 100.dp, 100.dp, Color.Red)
+    private val elementVariant1 = SharedElement(100.dp, 100.dp, 100.dp, 100.dp, Color.Red)
     private val elementVariant2 = SharedElement(40.dp, 80.dp, 60.dp, 20.dp, Color.Blue)
     private val elementVariant3 = SharedElement(80.dp, 40.dp, 140.dp, 180.dp, Color.Yellow)
     private val elementVariant4 = SharedElement(120.dp, 240.dp, 20.dp, 140.dp, Color.Green)
@@ -223,7 +223,8 @@ class NestedSharedElementTest {
                 // In SceneA, Foo leaves to the left edge.
                 translate(TestElements.Foo.inScene(TestScenes.SceneA), Edge.Left, false)
 
-                // We can't reference the element inside the NestedSTL as of today
+                // In NestedSceneA, Foo comes in from the top edge.
+                translate(TestElements.Foo.inScene(Scenes.NestedSceneA), Edge.Top, false)
             },
         ) {
             before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
@@ -234,6 +235,11 @@ class NestedSharedElementTest {
                         elementVariant1.y,
                     )
                     .assertSizeIsEqualTo(elementVariant1.width, elementVariant1.height)
+                onElement(TestElements.Foo, scene = Scenes.NestedSceneA)
+                    .assertPositionInRootIsEqualTo(
+                        elementVariant2.x,
+                        interpolate(0.dp, elementVariant2.y),
+                    )
             }
             after { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
         }

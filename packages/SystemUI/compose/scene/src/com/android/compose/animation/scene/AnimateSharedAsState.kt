@@ -434,7 +434,8 @@ private class AnimatedStateImpl<T, Delta>(
             if (element != null) {
                 layoutImpl.elements[element]?.let { element ->
                     elementState(
-                        layoutImpl.state.transitionStates,
+                        listOf(layoutImpl.state.transitionStates),
+                        elementKey = element.key,
                         isInContent = { it in element.stateByContent },
                     )
                         as? TransitionState.Transition

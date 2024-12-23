@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
+import com.android.compose.animation.scene.Ancestor
 import com.android.compose.animation.scene.AnimatedState
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ContentScope
@@ -181,16 +182,17 @@ internal class ContentScopeImpl(
         modifier: Modifier,
         builder: SceneTransitionLayoutScope.() -> Unit,
     ) {
+        val ancestors =
+            remember(layoutImpl, contentKey, layoutImpl.ancestors) {
+                layoutImpl.ancestors + Ancestor(layoutImpl, contentKey)
+            }
         SceneTransitionLayoutForTesting(
             state,
             modifier,
             onLayoutImpl = null,
             builder = builder,
             sharedElementMap = layoutImpl.elements,
-            ancestorContentKeys =
-                remember(layoutImpl.ancestorContentKeys, contentKey) {
-                    layoutImpl.ancestorContentKeys + contentKey
-                },
+            ancestors = ancestors,
             lookaheadScope = layoutImpl.lookaheadScope,
         )
     }
