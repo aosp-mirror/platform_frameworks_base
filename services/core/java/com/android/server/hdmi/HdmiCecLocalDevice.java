@@ -1345,7 +1345,10 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
             iter.remove();
         }
         if (mPendingActionClearedCallback != null) {
-            mPendingActionClearedCallback.onCleared(this);
+            PendingActionClearedCallback callback = mPendingActionClearedCallback;
+            // To prevent from calling the callback again during handling the callback itself.
+            mPendingActionClearedCallback = null;
+            callback.onCleared(this);
         }
     }
 
