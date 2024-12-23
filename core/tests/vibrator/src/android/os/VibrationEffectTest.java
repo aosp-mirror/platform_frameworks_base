@@ -20,6 +20,8 @@ import static android.os.VibrationEffect.DEFAULT_AMPLITUDE;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -417,6 +419,76 @@ public class VibrationEffectTest {
                 .build();
 
         assertNull(effect.computeCreateWaveformOffOnTimingsOrNull());
+    }
+
+    @Test
+    public void cropToLength_waveform_underLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(5);
+
+        assertThat(result).isEqualTo(effect); // unchanged
+    }
+
+    @Test
+    public void cropToLength_waveform_overLength() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(4);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2, 3},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_waveform_repeating() {
+        // repeating waveforms cannot be truncated
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* repeatIndex= */ 2);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void cropToLength_waveform_withAmplitudes() {
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 1, 2, 3, 4, 5, 6},
+                /* amplitudes= */ new int[]{10, 20, 40, 10, 20, 40, 10},
+                /* repeatIndex= */ -1);
+        VibrationEffect result = effect.cropToLengthOrNull(3);
+
+        assertThat(result).isEqualTo(VibrationEffect.createWaveform(
+                new long[]{0, 1, 2},
+                new int[]{10, 20, 40},
+                -1));
+    }
+
+    @Test
+    public void cropToLength_composed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .compose();
+        VibrationEffect result = effect.cropToLengthOrNull(1);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose());
+    }
+
+    @Test
+    public void cropToLength_composed_repeating() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .repeatEffectIndefinitely(TEST_ONE_SHOT)
+                .compose();
+        assertThat(effect.cropToLengthOrNull(1)).isNull();
     }
 
     @Test
