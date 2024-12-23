@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.app.assist.AssistContent.EXTRA_SESSION_TRANSFER_WEB_URI;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
@@ -1176,7 +1175,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
-    public void webUriLink_webUriLinkUsedWhenWhenAvailable() {
+    public void sessionTransferUri_sessionTransferUriUsedWhenWhenAvailable() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
                 taskInfo, TEST_URI1 /* captured link */, TEST_URI2 /* web uri */,
@@ -1188,7 +1187,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
-    public void webUriLink_webUriLinkUsedWhenSessionTransferUriUnavailable() {
+    public void webUri_webUriUsedWhenSessionTransferUriUnavailable() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
                 taskInfo, TEST_URI1 /* captured link */, TEST_URI2 /* web uri */,
@@ -1200,7 +1199,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
-    public void genericLink_genericLinkUsedWhenCapturedLinkAndWebUriUnavailable() {
+    public void genericLink_genericLinkUsedWhenCapturedLinkAndAssistContentUriUnavailable() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
                 taskInfo, null /* captured link */, null /* web uri */,
@@ -1490,7 +1489,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         taskInfo.capturedLink = capturedLink;
         taskInfo.capturedLinkTimestamp = System.currentTimeMillis();
         mAssistContent.setWebUri(webUri);
-        mAssistContent.getExtras().putObject(EXTRA_SESSION_TRANSFER_WEB_URI, sessionTransferUri);
+        mAssistContent.setSessionTransferUri(sessionTransferUri);
         final String genericLinkString = genericLink == null ? null : genericLink.toString();
         doReturn(genericLinkString).when(mMockGenericLinksParser).getGenericLink(any());
         // Relayout to set captured link
