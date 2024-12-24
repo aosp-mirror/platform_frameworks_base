@@ -63,7 +63,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
         statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
@@ -81,7 +81,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout_invisible() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
         statusBar.setBounds(0, 0, 500, 1000);
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
@@ -93,7 +93,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testPostLayout_frameProvider() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar,
@@ -108,8 +108,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateControlForTarget() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
 
         // We must not have control or control target before we have the insets source window.
@@ -153,8 +153,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateControlForFakeTarget() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateFakeControlTarget(target);
@@ -166,10 +166,10 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testGetLeash() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
-        final WindowState fakeTarget = createWindow(null, TYPE_APPLICATION, "fakeTarget");
-        final WindowState otherTarget = createWindow(null, TYPE_APPLICATION, "otherTarget");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
+        final WindowState fakeTarget = newWindowBuilder("fakeTarget", TYPE_APPLICATION).build();
+        final WindowState otherTarget = newWindowBuilder("otherTarget", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
 
         // We must not have control or control target before we have the insets source window,
@@ -208,7 +208,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateSourceFrame() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
         mProvider.setWindowContainer(statusBar, null, null);
         statusBar.setBounds(0, 0, 500, 1000);
 
@@ -238,7 +238,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateSourceFrameForIme() {
-        final WindowState inputMethod = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
+        final WindowState inputMethod = newWindowBuilder("inputMethod", TYPE_INPUT_METHOD).build();
 
         inputMethod.getFrame().set(new Rect(0, 400, 500, 500));
 
@@ -262,9 +262,9 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testUpdateInsetsControlPosition() {
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
 
-        final WindowState ime1 = createWindow(null, TYPE_INPUT_METHOD, "ime1");
+        final WindowState ime1 = newWindowBuilder("ime1", TYPE_INPUT_METHOD).build();
         ime1.getFrame().set(new Rect(0, 0, 0, 0));
         mImeProvider.setWindowContainer(ime1, null, null);
         mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
@@ -272,7 +272,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         mImeProvider.updateInsetsControlPosition(ime1);
         assertEquals(new Point(0, 400), mImeProvider.getControl(target).getSurfacePosition());
 
-        final WindowState ime2 = createWindow(null, TYPE_INPUT_METHOD, "ime2");
+        final WindowState ime2 = newWindowBuilder("ime2", TYPE_INPUT_METHOD).build();
         ime2.getFrame().set(new Rect(0, 0, 0, 0));
         mImeProvider.setWindowContainer(ime2, null, null);
         mImeProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
@@ -283,8 +283,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testSetRequestedVisibleTypes() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         mProvider.updateControlForTarget(target, false /* force */, null /* statsToken */);
@@ -295,8 +295,8 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testSetRequestedVisibleTypes_noControl() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
+        final WindowState target = newWindowBuilder("target", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
         target.setRequestedVisibleTypes(0, statusBars());
@@ -306,7 +306,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testInsetGeometries() {
-        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_APPLICATION).build();
         statusBar.getFrame().set(0, 0, 500, 100);
         statusBar.mHasSurface = true;
         mProvider.setWindowContainer(statusBar, null, null);
