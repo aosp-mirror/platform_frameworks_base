@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.featurepods.media.domain.interactor
+package com.android.systemui.statusbar.featurepods.media.ui.viewmodel
 
+import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.backgroundScope
-import com.android.systemui.media.controls.data.repository.mediaFilterRepository
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.featurepods.media.domain.interactor.mediaControlChipInteractor
 
-val Kosmos.mediaControlChipInteractor: MediaControlChipInteractor by
+val Kosmos.mediaControlChipViewModel: MediaControlChipViewModel by
     Kosmos.Fixture {
-        MediaControlChipInteractor(
-            backgroundScope = backgroundScope,
-            mediaFilterRepository = mediaFilterRepository,
+        MediaControlChipViewModel(
+            backgroundScope = applicationCoroutineScope,
+            applicationContext = testableContext,
+            mediaControlChipInteractor = mediaControlChipInteractor,
         )
     }

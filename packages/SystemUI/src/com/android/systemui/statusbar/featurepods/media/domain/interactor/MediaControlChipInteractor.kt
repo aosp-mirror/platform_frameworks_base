@@ -41,14 +41,14 @@ import kotlinx.coroutines.flow.stateIn
 class MediaControlChipInteractor
 @Inject
 constructor(
-    @Background private val applicationScope: CoroutineScope,
+    @Background private val backgroundScope: CoroutineScope,
     mediaFilterRepository: MediaFilterRepository,
 ) {
     private val currentMediaControls: StateFlow<List<MediaCommonModel.MediaControl>> =
         mediaFilterRepository.currentMedia
             .map { mediaList -> mediaList.filterIsInstance<MediaCommonModel.MediaControl>() }
             .stateIn(
-                scope = applicationScope,
+                scope = backgroundScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = emptyList(),
             )
@@ -64,7 +64,7 @@ constructor(
                     ?.toMediaControlChipModel()
             }
             .stateIn(
-                scope = applicationScope,
+                scope = backgroundScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = null,
             )
