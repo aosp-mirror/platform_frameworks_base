@@ -31,6 +31,7 @@ import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.bluetooth.HearingAidAudioRoutingConstants.RoutingValue;
 
 import java.util.HashSet;
 import java.util.List;
@@ -277,11 +278,17 @@ public class HearingAidDeviceManager {
 
     void onActiveDeviceChanged(CachedBluetoothDevice device) {
         if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_AUDIO_ROUTING)) {
-            if (device.isActiveDevice(BluetoothProfile.HEARING_AID) || device.isActiveDevice(
-                    BluetoothProfile.LE_AUDIO)) {
+            if (device.isConnectedHearingAidDevice()) {
                 setAudioRoutingConfig(device);
             } else {
                 clearAudioRoutingConfig();
+            }
+        }
+        if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
+            if (device.isConnectedHearingAidDevice()) {
+                setMicrophoneForCalls(device);
+            } else {
+                clearMicrophoneForCalls();
             }
         }
     }
@@ -311,9 +318,25 @@ public class HearingAidDeviceManager {
         HearingDeviceLocalDataManager.clear(mContext, device.getDevice());
     }
 
+    private void setMicrophoneForCalls(CachedBluetoothDevice device) {
+        boolean useRemoteMicrophone = device.getDevice().isMicrophonePreferredForCalls();
+        boolean status = mRoutingHelper.setPreferredInputDeviceForCalls(device,
+                useRemoteMicrophone ? RoutingValue.AUTO : RoutingValue.BUILTIN_DEVICE);
+        if (!status) {
+            Log.d(TAG, "Fail to configure setPreferredInputDeviceForCalls");
+        }
+    }
+
+    private void clearMicrophoneForCalls() {
+        boolean status = mRoutingHelper.clearPreferredInputDeviceForCalls();
+        if (!status) {
+            Log.d(TAG, "Fail to configure clearMicrophoneForCalls");
+        }
+    }
+
     private void setAudioRoutingConfig(CachedBluetoothDevice device) {
         AudioDeviceAttributes hearingDeviceAttributes =
-                mRoutingHelper.getMatchedHearingDeviceAttributes(device);
+                mRoutingHelper.getMatchedHearingDeviceAttributesForOutput(device);
         if (hearingDeviceAttributes == null) {
             Log.w(TAG, "Can not find expected AudioDeviceAttributes for hearing device: "
                     + device.getDevice().getAnonymizedAddress());
@@ -321,17 +344,13 @@ public class HearingAidDeviceManager {
         }
 
         final int callRoutingValue = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.HEARING_AID_CALL_ROUTING,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                Settings.Secure.HEARING_AID_CALL_ROUTING, RoutingValue.AUTO);
         final int mediaRoutingValue = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.HEARING_AID_MEDIA_ROUTING,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                Settings.Secure.HEARING_AID_MEDIA_ROUTING, RoutingValue.AUTO);
         final int ringtoneRoutingValue = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                Settings.Secure.HEARING_AID_RINGTONE_ROUTING, RoutingValue.AUTO);
         final int systemSoundsRoutingValue = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING, RoutingValue.AUTO);
 
         setPreferredDeviceRoutingStrategies(
                 HearingAidAudioRoutingConstants.CALL_ROUTING_ATTRIBUTES,
@@ -351,21 +370,21 @@ public class HearingAidDeviceManager {
         // Don't need to pass hearingDevice when we want to reset it (set to AUTO).
         setPreferredDeviceRoutingStrategies(
                 HearingAidAudioRoutingConstants.CALL_ROUTING_ATTRIBUTES,
-                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                /* hearingDevice = */ null, RoutingValue.AUTO);
         setPreferredDeviceRoutingStrategies(
                 HearingAidAudioRoutingConstants.MEDIA_ROUTING_ATTRIBUTES,
-                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                /* hearingDevice = */ null, RoutingValue.AUTO);
         setPreferredDeviceRoutingStrategies(
                 HearingAidAudioRoutingConstants.RINGTONE_ROUTING_ATTRIBUTES,
-                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                /* hearingDevice = */ null, RoutingValue.AUTO);
         setPreferredDeviceRoutingStrategies(
                 HearingAidAudioRoutingConstants.NOTIFICATION_ROUTING_ATTRIBUTES,
-                /* hearingDevice = */ null, HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                /* hearingDevice = */ null, RoutingValue.AUTO);
     }
 
     private void setPreferredDeviceRoutingStrategies(int[] attributeSdkUsageList,
             AudioDeviceAttributes hearingDevice,
-            @HearingAidAudioRoutingConstants.RoutingValue int routingValue) {
+            @RoutingValue int routingValue) {
         final List<AudioProductStrategy> supportedStrategies =
                 mRoutingHelper.getSupportedStrategies(attributeSdkUsageList);
 
