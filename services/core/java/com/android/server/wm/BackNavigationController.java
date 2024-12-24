@@ -453,7 +453,7 @@ class BackNavigationController {
                 outPrevActivities.add(prevActivity);
                 return true;
             }
-            if (currTF.getAdjacentTaskFragment() == null) {
+            if (!currTF.hasAdjacentTaskFragment()) {
                 final TaskFragment nextTF = findNextTaskFragment(currentTask, currTF);
                 if (isSecondCompanionToFirst(currTF, nextTF)) {
                     // TF is isStacked, search bottom activity from companion TF.
@@ -476,7 +476,21 @@ class BackNavigationController {
                 }
             } else {
                 // If adjacent TF has companion to current TF, those two TF will be closed together.
-                final TaskFragment adjacentTF = currTF.getAdjacentTaskFragment();
+                final TaskFragment adjacentTF;
+                if (Flags.allowMultipleAdjacentTaskFragments()) {
+                    if (currTF.getAdjacentTaskFragments().size() > 2) {
+                        throw new IllegalStateException(
+                                "Not yet support 3+ adjacent for non-Task TFs");
+                    }
+                    final TaskFragment[] tmpAdjacent = new TaskFragment[1];
+                    currTF.forOtherAdjacentTaskFragments(tf -> {
+                        tmpAdjacent[0] = tf;
+                        return true;
+                    });
+                    adjacentTF = tmpAdjacent[0];
+                } else {
+                    adjacentTF = currTF.getAdjacentTaskFragment();
+                }
                 if (isSecondCompanionToFirst(currTF, adjacentTF)) {
                     // The two TFs are adjacent (visually displayed side-by-side), search if any
                     // activity below the lowest one.
@@ -533,29 +547,47 @@ class BackNavigationController {
             return;
         }
 
-        final TaskFragment prevTFAdjacent = prevTF.getAdjacentTaskFragment();
-        if (prevTFAdjacent == null || prevTFAdjacent.asTask() != null) {
+        if (!prevTF.hasAdjacentTaskFragment()) {
             return;
         }
-        final ActivityRecord prevActivityAdjacent =
-                prevTFAdjacent.getTopNonFinishingActivity();
-        if (prevActivityAdjacent != null) {
-            outPrevActivities.add(prevActivityAdjacent);
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final TaskFragment prevTFAdjacent = prevTF.getAdjacentTaskFragment();
+            final ActivityRecord prevActivityAdjacent =
+                    prevTFAdjacent.getTopNonFinishingActivity();
+            if (prevActivityAdjacent != null) {
+                outPrevActivities.add(prevActivityAdjacent);
+            }
+            return;
         }
+        prevTF.forOtherAdjacentTaskFragments(prevTFAdjacent -> {
+            final ActivityRecord prevActivityAdjacent =
+                    prevTFAdjacent.getTopNonFinishingActivity();
+            if (prevActivityAdjacent != null) {
+                outPrevActivities.add(prevActivityAdjacent);
+            }
+        });
     }
 
     private static void findAdjacentActivityIfExist(@NonNull ActivityRecord mainActivity,
             @NonNull ArrayList<ActivityRecord> outList) {
         final TaskFragment mainTF = mainActivity.getTaskFragment();
-        if (mainTF == null || mainTF.getAdjacentTaskFragment() == null) {
+        if (mainTF == null || !mainTF.hasAdjacentTaskFragment()) {
             return;
         }
-        final TaskFragment adjacentTF = mainTF.getAdjacentTaskFragment();
-        final ActivityRecord topActivity = adjacentTF.getTopNonFinishingActivity();
-        if (topActivity == null) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final TaskFragment adjacentTF = mainTF.getAdjacentTaskFragment();
+            final ActivityRecord topActivity = adjacentTF.getTopNonFinishingActivity();
+            if (topActivity != null) {
+                outList.add(topActivity);
+            }
             return;
         }
-        outList.add(topActivity);
+        mainTF.forOtherAdjacentTaskFragments(adjacentTF -> {
+            final ActivityRecord topActivity = adjacentTF.getTopNonFinishingActivity();
+            if (topActivity != null) {
+                outList.add(topActivity);
+            }
+        });
     }
 
     private static boolean hasTranslucentActivity(@NonNull ActivityRecord currentActivity,
