@@ -9150,7 +9150,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // handling the touch-outside event to prevent focus rapid changes back-n-forth.
         final boolean shouldDelayTouchForEmbeddedActivity = activity != null
                 && activity.isEmbedded()
-                && activity.getTaskFragment().getAdjacentTaskFragment() != null;
+                && activity.getTaskFragment().hasAdjacentTaskFragment();
 
         // For cases when there are multiple freeform windows where non-top windows are blocking
         // the gesture zones, delay handling the touch-outside event to prevent refocusing the
@@ -9529,21 +9529,41 @@ public class WindowManagerService extends IWindowManager.Stub
             return focusedActivity;
         }
 
-        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-        final ActivityRecord adjacentTopActivity =
-                adjacentTaskFragment != null ? adjacentTaskFragment.topRunningActivity() : null;
-        if (adjacentTopActivity == null) {
-            // Return if no adjacent activity.
+        if (!taskFragment.hasAdjacentTaskFragment()) {
             return focusedActivity;
         }
 
-        if (adjacentTopActivity.getLastWindowCreateTime()
-                < focusedActivity.getLastWindowCreateTime()) {
-            // Return if the current focus activity has more recently active window.
-            return focusedActivity;
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+            final ActivityRecord adjacentTopActivity = adjacentTaskFragment.topRunningActivity();
+            if (adjacentTopActivity == null) {
+                // Return if no adjacent activity.
+                return focusedActivity;
+            }
+
+            if (adjacentTopActivity.getLastWindowCreateTime()
+                    < focusedActivity.getLastWindowCreateTime()) {
+                // Return if the current focus activity has more recently active window.
+                return focusedActivity;
+            }
+
+            return adjacentTopActivity;
         }
 
-        return adjacentTopActivity;
+        // Find the adjacent activity with more recently active window.
+        final ActivityRecord[] mostRecentActiveActivity = { focusedActivity };
+        final long[] mostRecentActiveTime = { focusedActivity.getLastWindowCreateTime() };
+        taskFragment.forOtherAdjacentTaskFragments(adjacentTaskFragment -> {
+            final ActivityRecord adjacentTopActivity = adjacentTaskFragment.topRunningActivity();
+            if (adjacentTopActivity != null) {
+                final long lastWindowCreateTime = adjacentTopActivity.getLastWindowCreateTime();
+                if (lastWindowCreateTime > mostRecentActiveTime[0]) {
+                    mostRecentActiveTime[0] = lastWindowCreateTime;
+                    mostRecentActiveActivity[0] = adjacentTopActivity;
+                }
+            }
+        });
+        return mostRecentActiveActivity[0];
     }
 
     @NonNull
@@ -9592,13 +9612,27 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
         final TaskFragment fromFragment = fromWin.getTaskFragment();
-        if (fromFragment == null) {
-            return false;
-        }
-        final TaskFragment adjacentFragment = fromFragment.getAdjacentTaskFragment();
-        if (adjacentFragment == null || adjacentFragment.asTask() != null) {
+        if (fromFragment == null || fromFragment.asTask() != null) {
             // Don't move the focus to another task.
             return false;
+        }
+        if (!fromFragment.hasAdjacentTaskFragment()) {
+            // No adjacent window.
+            return false;
+        }
+        final TaskFragment adjacentFragment;
+        if (Flags.allowMultipleAdjacentTaskFragments()) {
+            if (fromFragment.getAdjacentTaskFragments().size() > 2) {
+                throw new IllegalStateException("Not yet support 3+ adjacent for non-Task TFs");
+            }
+            final TaskFragment[] tmpAdjacent = new TaskFragment[1];
+            fromFragment.forOtherAdjacentTaskFragments(adjacentTF -> {
+                tmpAdjacent[0] = adjacentTF;
+                return true;
+            });
+            adjacentFragment = tmpAdjacent[0];
+        } else {
+            adjacentFragment = fromFragment.getAdjacentTaskFragment();
         }
         if (adjacentFragment.isIsolatedNav()) {
             // Don't move the focus if the adjacent TF is isolated navigation.
