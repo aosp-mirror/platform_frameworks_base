@@ -1091,6 +1091,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
@@ -1127,6 +1128,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 openInBrowserCaptor.capture(),
                 any(),
                 any(),
@@ -1152,6 +1154,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 ArgumentCaptor.forClass(Function1.class);
         createHandleMenu(decor);
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -1226,6 +1229,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 any(),
+                any(),
                 closeClickListener.capture(),
                 any(),
                 anyBoolean()
@@ -1248,6 +1252,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         createHandleMenu(decoration);
 
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),

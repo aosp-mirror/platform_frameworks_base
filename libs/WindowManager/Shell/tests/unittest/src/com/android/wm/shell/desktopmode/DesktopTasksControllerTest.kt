@@ -93,6 +93,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.bubbles.BubbleController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
@@ -232,6 +233,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock private lateinit var mockToast: Toast
     private lateinit var mockitoSession: StaticMockitoSession
     @Mock private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
+    @Mock private lateinit var bubbleController: BubbleController
     @Mock private lateinit var desktopWindowDecoration: DesktopModeWindowDecoration
     @Mock private lateinit var resources: Resources
     @Mock
@@ -383,6 +385,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopModeUiEventLogger,
             desktopTilingDecorViewModel,
             desktopWallpaperActivityTokenProvider,
+            Optional.of(bubbleController),
         )
     }
 

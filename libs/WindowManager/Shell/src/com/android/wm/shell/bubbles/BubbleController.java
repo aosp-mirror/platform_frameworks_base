@@ -1449,6 +1449,15 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /**
+     * Expands and selects a bubble created from a running task in a different mode.
+     *
+     * @param taskInfo the task.
+     */
+    public void expandStackAndSelectBubble(ActivityManager.RunningTaskInfo taskInfo) {
+        // TODO(384976265): Not implemented yet
+    }
+
+    /**
      * Expands and selects a bubble based on the provided {@link BubbleEntry}. If no bubble
      * exists for this entry, and it is able to bubble, a new bubble will be created.
      *

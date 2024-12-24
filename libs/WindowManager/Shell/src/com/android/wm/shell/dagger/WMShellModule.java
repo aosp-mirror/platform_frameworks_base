@@ -736,7 +736,8 @@ public abstract class WMShellModule {
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
             DesktopTilingDecorViewModel desktopTilingDecorViewModel,
-            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider) {
+            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider,
+            Optional<BubbleController> bubbleController) {
         return new DesktopTasksController(
                 context,
                 shellInit,
@@ -768,7 +769,8 @@ public abstract class WMShellModule {
                 desktopModeEventLogger,
                 desktopModeUiEventLogger,
                 desktopTilingDecorViewModel,
-                desktopWallpaperActivityTokenProvider);
+                desktopWallpaperActivityTokenProvider,
+                bubbleController);
     }
 
     @WMSingleton

@@ -307,6 +307,7 @@ class HandleMenuTest : ShellTestCase() {
             onToDesktopClickListener = mock(),
             onToFullscreenClickListener = mock(),
             onToSplitScreenClickListener = mock(),
+            onToFloatClickListener = mock(),
             onNewWindowClickListener = mock(),
             onManageWindowsClickListener = mock(),
             onChangeAspectRatioClickListener = mock(),
