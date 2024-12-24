@@ -1887,6 +1887,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         return lastReparentedRootTask;
     }
 
+    // TODO(b/385263090): Remove this method
+    void restart() {
+        mRemoved = false;
+    }
+
     /**
      * Returns the {@link TaskDisplayArea} to which root tasks should be reparented.
      *

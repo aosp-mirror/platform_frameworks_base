@@ -100,6 +100,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_TRANSACTIONS;
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -3286,6 +3287,32 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         w = Math.min(Math.max(w, minSize), maxSize);
         h = Math.min(Math.max(h, minSize), maxSize);
         return new Point(w, h);
+    }
+
+    void onDisplayInfoChangeApplied() {
+        if (!enableDisplayContentModeManagement()) {
+            Slog.e(TAG, "ShouldShowSystemDecors shouldn't be updated when the flag is off.");
+        }
+
+        final boolean shouldShow;
+        if (isDefaultDisplay) {
+            shouldShow = true;
+        } else if (isPrivate()) {
+            shouldShow = false;
+        } else {
+            shouldShow = mDisplay.canHostTasks();
+        }
+
+        if (shouldShow == mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)) {
+            return;
+        }
+        mWmService.mDisplayWindowSettings.setShouldShowSystemDecorsLocked(this, shouldShow);
+
+        if (shouldShow) {
+            mRootWindowContainer.startSystemDecorations(this, "onDisplayInfoChangeApplied");
+        } else {
+            clearAllTasksOnDisplay(null);
+        }
     }
 
     DisplayCutout loadDisplayCutout(int displayWidth, int displayHeight) {
@@ -6522,10 +6549,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mRemoving;
     }
 
-    void remove() {
-        mRemoving = true;
+    private void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback) {
         Task lastReparentedRootTask;
-
         mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {
             lastReparentedRootTask = reduceOnAllTaskDisplayAreas((taskDisplayArea, rootTask) -> {
@@ -6538,10 +6563,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } finally {
             mRootWindowContainer.mTaskSupervisor.endDeferResume();
         }
-        mRemoved = true;
 
-        if (mContentRecorder != null) {
-            mContentRecorder.stopRecording();
+        if (clearTasksCallback != null) {
+            clearTasksCallback.run();
         }
 
         // Only update focus/visibility for the last one because there may be many root tasks are
@@ -6549,6 +6573,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (lastReparentedRootTask != null) {
             lastReparentedRootTask.resumeNextFocusAfterReparent();
         }
+    }
+
+    void remove() {
+        mRemoving = true;
+
+        clearAllTasksOnDisplay(() -> {
+            mRemoved = true;
+
+            if (mContentRecorder != null) {
+                mContentRecorder.stopRecording();
+            }
+        });
+
         releaseSelfIfNeeded();
         mDisplayPolicy.release();
 
