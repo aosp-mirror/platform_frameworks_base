@@ -73,19 +73,22 @@ constructor(
             .filterNotNull()
 
     val state: Flow<VolumeDialogSliderStateModel> =
-        model.flatMapLatest { streamModel ->
-            with(streamModel) {
-                    volumeDialogSliderIconProvider.getStreamIcon(
-                        stream = stream,
-                        level = level,
-                        levelMin = levelMin,
-                        levelMax = levelMax,
-                        isMuted = muted,
-                        isRoutedToBluetooth = routedToBluetooth,
-                    )
-                }
-                .map { icon -> streamModel.toStateModel(icon) }
-        }
+        model
+            .flatMapLatest { streamModel ->
+                with(streamModel) {
+                        volumeDialogSliderIconProvider.getStreamIcon(
+                            stream = stream,
+                            level = level,
+                            levelMin = levelMin,
+                            levelMax = levelMax,
+                            isMuted = muted,
+                            isRoutedToBluetooth = routedToBluetooth,
+                        )
+                    }
+                    .map { icon -> streamModel.toStateModel(icon) }
+            }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 
     init {
         userVolumeUpdates

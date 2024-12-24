@@ -19,6 +19,7 @@ package com.android.systemui.volume.dialog.ui.utils
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.view.ViewPropertyAnimator
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
@@ -69,17 +70,25 @@ suspend fun ViewPropertyAnimator.suspendAnimate(
 @Suppress("UNCHECKED_CAST")
 suspend fun <T> ValueAnimator.suspendAnimate(onValueChanged: (T) -> Unit) {
     suspendCancellableCoroutine { continuation ->
-        addListener(
+        val listener =
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) = continuation.resumeIfCan(Unit)
+                    override fun onAnimationEnd(animation: Animator) =
+                        continuation.resumeIfCan(Unit)
 
-                override fun onAnimationCancel(animation: Animator) = continuation.resumeIfCan(Unit)
-            }
-        )
-        addUpdateListener { onValueChanged(it.animatedValue as T) }
+                    override fun onAnimationCancel(animation: Animator) =
+                        continuation.resumeIfCan(Unit)
+                }
+                .also(::addListener)
+        val updateListener =
+            AnimatorUpdateListener { onValueChanged(it.animatedValue as T) }
+                .also(::addUpdateListener)
 
         start()
-        continuation.invokeOnCancellation { cancel() }
+        continuation.invokeOnCancellation {
+            removeUpdateListener(updateListener)
+            removeListener(listener)
+            cancel()
+        }
     }
 }
 
