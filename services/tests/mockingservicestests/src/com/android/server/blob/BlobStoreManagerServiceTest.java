@@ -33,7 +33,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.LongSparseArray;
 
@@ -72,6 +71,7 @@ public class BlobStoreManagerServiceTest {
     private static final String TEST_PKG2 = "com.example2";
     private static final String TEST_PKG3 = "com.example3";
 
+    private static final int TEST_USER_ID = 0;
     private static final int TEST_UID1 = 10001;
     private static final int TEST_UID2 = 10002;
     private static final int TEST_UID3 = 10003;
@@ -98,7 +98,7 @@ public class BlobStoreManagerServiceTest {
         mService = new BlobStoreManagerService(mContext, new TestInjector());
         mUserSessions = new LongSparseArray<>();
 
-        mService.addUserSessionsForTest(mUserSessions, UserHandle.myUserId());
+        mService.addUserSessionsForTest(mUserSessions, TEST_USER_ID);
     }
 
     @After
@@ -360,6 +360,7 @@ public class BlobStoreManagerServiceTest {
         return createBlobStoreSessionMock(ownerPackageName, ownerUid, sessionId, sessionFile,
                 mock(BlobHandle.class));
     }
+
     private BlobStoreSession createBlobStoreSessionMock(String ownerPackageName, int ownerUid,
             long sessionId, File sessionFile, BlobHandle blobHandle) {
         final BlobStoreSession session = mock(BlobStoreSession.class);
