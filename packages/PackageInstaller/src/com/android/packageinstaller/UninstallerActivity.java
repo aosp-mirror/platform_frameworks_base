@@ -56,8 +56,6 @@ import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
 
-import java.util.List;
-
 /*
  * This activity presents UI to uninstall an application. Usually launched with intent
  * Intent.ACTION_UNINSTALL_PKG_COMMAND and attribute
@@ -162,12 +160,15 @@ public class UninstallerActivity extends Activity {
         if (mDialogInfo.user == null) {
             mDialogInfo.user = Process.myUserHandle();
         } else {
-            List<UserHandle> profiles = userManager.getUserProfiles();
-            if (!profiles.contains(mDialogInfo.user)) {
-                Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
-                        + "for user " + mDialogInfo.user);
-                showUserIsNotAllowed();
-                return;
+            if (!mDialogInfo.user.equals(Process.myUserHandle())) {
+                final boolean isCurrentUserProfileOwner = Process.myUserHandle().equals(
+                        userManager.getProfileParent(mDialogInfo.user));
+                if (!isCurrentUserProfileOwner) {
+                    Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
+                            + "for user " + mDialogInfo.user);
+                    showUserIsNotAllowed();
+                    return;
+                }
             }
         }
 
