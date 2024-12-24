@@ -270,6 +270,11 @@ class BLASTSyncEngine {
                     () -> callback.onCommitted(new SurfaceControl.Transaction()));
             mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
+            if (mWm.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_NEED_APPLY) {
+                // Applies pending transaction before onTransactionReady to ensure the order with
+                // sync transaction. This is unlikely to happen unless animator thread is slow.
+                mWm.mAnimator.applyPendingTransaction();
+            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -352,6 +357,10 @@ class BLASTSyncEngine {
                 Slog.w(TAG, "addToSync: unset SyncGroup " + wc.mSyncGroup.mSyncId
                         + " for non-sync " + wc);
                 wc.mSyncGroup = null;
+            }
+            if (mWm.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_HAS_CHANGES
+                    && wc.mSyncState != WindowContainer.SYNC_STATE_NONE) {
+                mWm.mAnimator.mPendingState = WindowAnimator.PENDING_STATE_NEED_APPLY;
             }
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();

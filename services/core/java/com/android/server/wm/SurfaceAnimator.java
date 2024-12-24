@@ -200,12 +200,21 @@ public class SurfaceAnimator {
             }
             mSnapshot.startAnimation(t, snapshotAnim, type);
         }
+        setAnimatorPendingState(t);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
             @AnimationType int type) {
         startAnimation(t, anim, hidden, type, null /* animationFinishedCallback */,
                 null /* animationCancelledCallback */, null /* snapshotAnim */, null /* freezer */);
+    }
+
+    /** Indicates that there are surface operations in the pending transaction. */
+    private void setAnimatorPendingState(Transaction t) {
+        if (mService.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_NONE
+                && t == mAnimatable.getPendingTransaction()) {
+            mService.mAnimator.mPendingState = WindowAnimator.PENDING_STATE_HAS_CHANGES;
+        }
     }
 
     /** Returns whether it is currently running an animation. */
@@ -357,6 +366,7 @@ public class SurfaceAnimator {
         final boolean scheduleAnim = removeLeash(t, mAnimatable, leash, destroyLeash);
         mAnimationFinished = false;
         if (scheduleAnim) {
+            setAnimatorPendingState(t);
             mService.scheduleAnimationLocked();
         }
     }
