@@ -6819,6 +6819,12 @@ public class Notification implements Parcelable
                     getHeaderLayoutResource());
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
+            if (Flags.notificationsRedesignTemplates()
+                    && (p.mViewType == StandardTemplateParams.VIEW_TYPE_MINIMIZED
+                    || p.mViewType == StandardTemplateParams.VIEW_TYPE_PUBLIC)) {
+                // Center top line vertically in minimized and public header-only views
+                header.setBoolean(R.id.notification_header, "centerTopLine", true);
+            }
             return header;
         }
 

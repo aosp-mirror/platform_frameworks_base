@@ -1158,10 +1158,12 @@ public class NotificationChildrenContainer extends ViewGroup
         return mContainingNotification;
     }
 
+    @Nullable
     public NotificationViewWrapper getNotificationViewWrapper() {
         return mGroupHeaderWrapper;
     }
 
+    @Nullable
     public NotificationViewWrapper getMinimizedGroupHeaderWrapper() {
         return mMinimizedGroupHeaderWrapper;
     }
@@ -1171,10 +1173,12 @@ public class NotificationChildrenContainer extends ViewGroup
         return mCurrentHeader;
     }
 
+    @Nullable
     public NotificationHeaderView getGroupHeader() {
         return mGroupHeader;
     }
 
+    @Nullable
     public NotificationHeaderView getMinimizedNotificationHeader() {
         return mMinimizedGroupHeader;
     }
