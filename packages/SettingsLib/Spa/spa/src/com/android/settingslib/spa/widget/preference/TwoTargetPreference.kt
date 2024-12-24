@@ -28,8 +28,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -104,8 +102,17 @@ internal fun TwoTargetPreference(
 @Composable
 private fun PreferenceDivider() {
     Box(
-        Modifier.padding(horizontal = SettingsDimension.itemPaddingEnd)
-            .size(width = 1.dp, height = SettingsDimension.itemDividerHeight)
-            .background(color = MaterialTheme.colorScheme.divider)
+        if (isSpaExpressiveEnabled) {
+            Modifier.padding(
+                    start = SettingsDimension.paddingSmall,
+                    end = SettingsDimension.paddingExtraSmall6,
+                )
+                .size(width = 1.dp, height = SettingsDimension.itemDividerHeight)
+                .background(color = MaterialTheme.colorScheme.outline)
+        } else {
+            Modifier.padding(horizontal = SettingsDimension.itemPaddingEnd)
+                .size(width = 1.dp, height = SettingsDimension.itemDividerHeight)
+                .background(color = MaterialTheme.colorScheme.divider)
+        }
     )
 }
