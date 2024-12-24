@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
@@ -35,6 +36,7 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
@@ -510,6 +512,14 @@ class ActivityStartInterceptor {
             }
 
             if (mComponentSpecified) {
+                Slog.w(TAG, "Starting home with component specified, uid=" + mCallingUid);
+                if (mService.isCallerRecents(mCallingUid)
+                        || ActivityTaskManagerService.checkPermission(MANAGE_ACTIVITY_TASKS,
+                                mCallingPid, mCallingUid) == PERMISSION_GRANTED) {
+                    // Allow home component specified from trusted callers.
+                    return false;
+                }
+
                 final ComponentName homeComponent = mIntent.getComponent();
                 final Intent homeIntent = mService.getHomeIntent();
                 final ActivityInfo aInfo = mService.mRootWindowContainer.resolveHomeActivity(
