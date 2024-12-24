@@ -673,7 +673,8 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
-        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, mActivity, "window");
+        final WindowState window = newWindowBuilder("window", TYPE_BASE_APPLICATION).setWindowToken(
+                mActivity).build();
 
         assertEquals(window, mActivity.findMainWindow());
 
@@ -3996,8 +3997,8 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(display, 2200, 2280);
         display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Simulate insets, final app bounds are (0, 0, 2200, 2130) - landscape.
-        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent,
-                "navbar");
+        final WindowState navbar = newWindowBuilder("navbar", TYPE_NAVIGATION_BAR).setDisplay(
+                mDisplayContent).build();
         final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
@@ -4030,8 +4031,8 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(display, 2200, 2280);
         display.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Simulate taskbar, final app bounds are (0, 0, 2200, 2130) - landscape
-        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent,
-                "navbar");
+        final WindowState navbar = newWindowBuilder("navbar", TYPE_NAVIGATION_BAR).setDisplay(
+                mDisplayContent).build();
         final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
@@ -4059,8 +4060,8 @@ public class SizeCompatTests extends WindowTestsBase {
         resizeDisplay(dc, 2200, 2280);
         dc.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         // Simulate taskbar, final app bounds are (0, 0, 2200, 2130) - landscape
-        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, mDisplayContent,
-                "navbar");
+        final WindowState navbar = newWindowBuilder("navbar", TYPE_NAVIGATION_BAR).setDisplay(
+                mDisplayContent).build();
         final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())

@@ -73,7 +73,7 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     private static final float MID_REFRESH_RATE = 70;
     private static final float LOW_REFRESH_RATE = 60;
     WindowState createWindow(String name) {
-        WindowState window = createWindow(null, TYPE_APPLICATION, name);
+        WindowState window = newWindowBuilder(name, TYPE_APPLICATION).build();
         when(window.mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType())
                 .thenReturn(DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);
         return window;

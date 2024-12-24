@@ -108,7 +108,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
     }
 
     WindowState createWindow(String name) {
-        WindowState window = createWindow(null, TYPE_BASE_APPLICATION, name);
+        WindowState window = newWindowBuilder(name, TYPE_BASE_APPLICATION).build();
         when(window.getDisplayInfo()).thenReturn(mDisplayInfo);
         when(window.mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType())
                 .thenReturn(DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);

@@ -114,8 +114,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     private WindowState createAppOverlayWindow() {
-        final WindowState win = createWindow(null /* parent */, TYPE_APPLICATION_OVERLAY,
-                "testOverlayWindow");
+        final WindowState win = newWindowBuilder("testOverlayWindow",
+                TYPE_APPLICATION_OVERLAY).build();
         win.mActivityRecord = null;
         win.mHasSurface = true;
         return win;
@@ -123,7 +123,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testForwardsShowBackdrop() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         final WindowState overlayWin = createAppOverlayWindow();
         try {
@@ -156,7 +156,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRun() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         final WindowState overlayWin = createAppOverlayWindow();
         try {
@@ -200,7 +200,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testCancel() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                 win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
@@ -214,7 +214,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testTimeout() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                 win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
@@ -234,8 +234,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     public void testTimeout_scaled() throws Exception {
         try {
             mWm.setAnimationScale(2, 5.0f);
-            final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                    "testWin");
+            final WindowState win = createTestWindow();
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), null, new Rect(50, 100, 150, 150),
                     null, false).mAdapter;
@@ -268,7 +267,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testNotReallyStarted() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mController.createRemoteAnimationRecord(win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -278,8 +277,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testOneNotStarted() throws Exception {
-        final WindowState win1 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin1");
-        final WindowState win2 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin2");
+        final WindowState win1 = newWindowBuilder("testWin1", TYPE_BASE_APPLICATION).build();
+        final WindowState win2 = newWindowBuilder("testWin2", TYPE_BASE_APPLICATION).build();
         mController.createRemoteAnimationRecord(win1.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false);
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
@@ -306,7 +305,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRemovedBeforeStarted() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                 win.mActivityRecord,
                 new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
@@ -322,7 +321,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testOpeningTaskWithTopFinishingActivity() {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "win");
+        final WindowState win = createTestWindow();
         final Task task = win.getTask();
         final ActivityRecord topFinishing = new ActivityBuilder(mAtm).setTask(task).build();
         // Now the task contains:
@@ -348,7 +347,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testChangeToSmallerSize() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mChangingContainers.add(win.mActivityRecord);
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
@@ -402,7 +401,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testChangeTolargerSize() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mChangingContainers.add(win.mActivityRecord);
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
@@ -456,7 +455,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testChangeToDifferentPosition() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mChangingContainers.add(win.mActivityRecord);
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
@@ -515,7 +514,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 true, mDisplayContent, true /* ownerCanManageAppTokens */);
         spyOn(mDisplayContent.mWallpaperController);
         doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         try {
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
@@ -548,7 +547,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 true, mDisplayContent, true /* ownerCanManageAppTokens */);
         spyOn(mDisplayContent.mWallpaperController);
         doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         try {
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
@@ -581,7 +580,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testNonAppIncluded_keygaurdGoingAway() throws Exception {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         // Add overlay window hidden by the keyguard.
         final WindowState overlayWin = createAppOverlayWindow();
@@ -631,7 +630,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                 true, mDisplayContent, true /* ownerCanManageAppTokens */);
         spyOn(mDisplayContent.mWallpaperController);
         doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         // Add overlay window hidden by the keyguard.
         final WindowState overlayWin = createAppOverlayWindow();
@@ -729,9 +728,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     private AnimationAdapter setupForNonAppTargetNavBar(int transit, boolean shouldAttachNavBar) {
-        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final WindowState win = createTestWindow();
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
-        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar");
+        final WindowState navBar = newWindowBuilder("NavigationBar", TYPE_NAVIGATION_BAR).build();
         mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         spyOn(policy);
@@ -750,5 +749,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
         verify(binder, atLeast(0)).asBinder();
         verifyNoMoreInteractions(binder);
+    }
+
+    private WindowState createTestWindow() {
+        return newWindowBuilder("testWin", TYPE_BASE_APPLICATION).build();
     }
 }
