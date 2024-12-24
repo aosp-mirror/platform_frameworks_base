@@ -42,6 +42,8 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsVie
 import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
+import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
+import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
@@ -98,6 +100,9 @@ interface HomeStatusBarViewModel {
 
     /** View model for the carrier name that may show in the status bar based on carrier config */
     val operatorNameViewModel: StatusBarOperatorNameViewModel
+
+    /** The popup chips that should be shown on the right-hand side of the status bar. */
+    val statusBarPopupChips: StateFlow<List<PopupChipModel.Shown>>
 
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
@@ -170,6 +175,7 @@ constructor(
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
+    statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel,
     animations: SystemStatusEventAnimationInteractor,
     @Application coroutineScope: CoroutineScope,
 ) : HomeStatusBarViewModel {
@@ -187,6 +193,8 @@ constructor(
     override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
 
     override val ongoingActivityChips = ongoingActivityChipsViewModel.chips
+
+    override val statusBarPopupChips = statusBarPopupChipsViewModel.shownPopupChips
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(

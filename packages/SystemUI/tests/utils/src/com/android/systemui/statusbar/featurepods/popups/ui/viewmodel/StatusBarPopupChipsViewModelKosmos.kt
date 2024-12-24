@@ -18,6 +18,12 @@ package com.android.systemui.statusbar.featurepods.popups.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.featurepods.media.ui.viewmodel.mediaControlChipViewModel
 
 val Kosmos.statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel by
-    Kosmos.Fixture { StatusBarPopupChipsViewModel(testScope.backgroundScope) }
+    Kosmos.Fixture {
+        StatusBarPopupChipsViewModel(
+            testScope.backgroundScope,
+            mediaControlChipViewModel = mediaControlChipViewModel,
+        )
+    }

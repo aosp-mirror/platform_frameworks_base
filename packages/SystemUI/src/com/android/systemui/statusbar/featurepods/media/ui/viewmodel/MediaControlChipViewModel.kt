@@ -58,18 +58,18 @@ constructor(
             .stateIn(
                 backgroundScope,
                 SharingStarted.WhileSubscribed(),
-                PopupChipModel.Hidden(PopupChipId.MediaControls),
+                PopupChipModel.Hidden(PopupChipId.MediaControl),
             )
 }
 
 private fun toPopupChipModel(model: MediaControlChipModel?, context: Context): PopupChipModel {
     if (model == null || model.songName.isNullOrEmpty()) {
-        return PopupChipModel.Hidden(PopupChipId.MediaControls)
+        return PopupChipModel.Hidden(PopupChipId.MediaControl)
     }
 
     val contentDescription = model.appName?.let { ContentDescription.Loaded(description = it) }
     return PopupChipModel.Shown(
-        chipId = PopupChipId.MediaControls,
+        chipId = PopupChipId.MediaControl,
         icon =
             model.appIcon?.loadDrawable(context)?.let {
                 Icon.Loaded(drawable = it, contentDescription = contentDescription)

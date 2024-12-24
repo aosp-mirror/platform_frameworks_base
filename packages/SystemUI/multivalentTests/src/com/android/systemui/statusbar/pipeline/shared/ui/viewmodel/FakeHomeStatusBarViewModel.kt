@@ -23,6 +23,7 @@ import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
+import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,8 @@ class FakeHomeStatusBarViewModel(
         MutableStateFlow(OngoingActivityChipModel.Hidden())
 
     override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
+
+    override val statusBarPopupChips = MutableStateFlow(emptyList<PopupChipModel.Shown>())
 
     override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
 

@@ -18,13 +18,16 @@ package com.android.systemui.statusbar.featurepods.popups.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.featurepods.media.ui.viewmodel.MediaControlChipViewModel
+import com.android.systemui.statusbar.featurepods.popups.StatusBarPopupChips
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipId
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -33,16 +36,29 @@ import kotlinx.coroutines.flow.stateIn
  * PopupChipModels.
  */
 @SysUISingleton
-class StatusBarPopupChipsViewModel @Inject constructor(@Background scope: CoroutineScope) {
+class StatusBarPopupChipsViewModel
+@Inject
+constructor(
+    @Background scope: CoroutineScope,
+    mediaControlChipViewModel: MediaControlChipViewModel,
+) {
     private data class PopupChipBundle(
-        val media: PopupChipModel = PopupChipModel.Hidden(chipId = PopupChipId.MediaControls)
+        val media: PopupChipModel = PopupChipModel.Hidden(chipId = PopupChipId.MediaControl)
     )
 
-    private val incomingPopupChipBundle: Flow<PopupChipBundle?> =
-        flowOf(null).stateIn(scope, SharingStarted.Lazily, PopupChipBundle())
+    private val incomingPopupChipBundle: StateFlow<PopupChipBundle?> =
+        mediaControlChipViewModel.chip
+            .map { chip -> PopupChipBundle(media = chip) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), PopupChipBundle())
 
-    val popupChips: Flow<List<PopupChipModel>> =
-        incomingPopupChipBundle
-            .map { _ -> listOf(null).filterIsInstance<PopupChipModel.Shown>() }
-            .stateIn(scope, SharingStarted.Lazily, emptyList())
+    val shownPopupChips: StateFlow<List<PopupChipModel.Shown>> =
+        if (StatusBarPopupChips.isEnabled) {
+            incomingPopupChipBundle
+                .map { bundle ->
+                    listOfNotNull(bundle?.media).filterIsInstance<PopupChipModel.Shown>()
+                }
+                .stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
+        } else {
+            MutableStateFlow(emptyList<PopupChipModel.Shown>()).asStateFlow()
+        }
 }
