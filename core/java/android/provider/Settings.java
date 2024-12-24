@@ -9410,6 +9410,13 @@ public final class Settings {
                 "even_dimmer_min_nits";
 
         /**
+         * Setting that holds EM_VALUE (proprietary)
+         *
+         * @hide
+         */
+        public static final String EM_VALUE =
+                "em_value";
+        /**
          * List of the enabled print services.
          *
          * N and beyond uses {@link #DISABLED_PRINT_SERVICES}. But this might be used in an upgrade

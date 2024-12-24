@@ -2186,6 +2186,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.EvenDimmer.EVEN_DIMMER_MIN_NITS);
         p.end(evenDimmerToken);
 
+        dumpSetting(s, p,
+                Settings.Secure.EM_VALUE,
+                SecureSettingsProto.Accessibility.EM_VALUE);
+
         final long gestureToken = p.start(SecureSettingsProto.GESTURE);
         dumpSetting(s, p,
                 Settings.Secure.AWARE_ENABLED,
