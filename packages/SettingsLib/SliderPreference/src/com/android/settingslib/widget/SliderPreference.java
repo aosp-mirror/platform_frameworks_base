@@ -268,7 +268,9 @@ public class SliderPreference extends Preference {
         mSlider.setValueFrom(mMin);
         mSlider.setValueTo(mMax);
         mSlider.setValue(mSliderValue);
+        mSlider.clearOnSliderTouchListeners();
         mSlider.addOnSliderTouchListener(mTouchListener);
+        mSlider.clearOnChangeListeners();
         mSlider.addOnChangeListener(mChangeListener);
         mSlider.setEnabled(isEnabled());
 
@@ -487,7 +489,7 @@ public class SliderPreference extends Preference {
      * set the {@link Slider}'s value to the stored value.
      */
     void syncValueInternal(@NonNull Slider slider) {
-        int sliderValue = mMin + (int) slider.getValue();
+        int sliderValue = (int) slider.getValue();
         if (sliderValue != mSliderValue) {
             if (callChangeListener(sliderValue)) {
                 setValueInternal(sliderValue, false);
