@@ -243,8 +243,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         final WindowState homeWindow = createWallpaperTargetWindow(dc);
 
-        WindowState otherWindow = createWindow(null /* parent */, TYPE_APPLICATION, dc,
-                "otherWindow");
+        WindowState otherWindow = newWindowBuilder("otherWindow", TYPE_APPLICATION).setDisplay(
+                dc).build();
 
         dc.mWallpaperController.adjustWallpaperWindows();
 
@@ -275,7 +275,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testUpdateWallpaperTarget() {
         final DisplayContent dc = mDisplayContent;
         final WindowState homeWin = createWallpaperTargetWindow(dc);
-        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        final WindowState appWin = newWindowBuilder("app", TYPE_BASE_APPLICATION).build();
         appWin.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
         makeWindowVisible(appWin);
 
@@ -290,9 +290,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testShowWhenLockedWallpaperTarget() {
         final WindowState wallpaperWindow = createWallpaperWindow(mDisplayContent);
         wallpaperWindow.mToken.asWallpaperToken().setShowWhenLocked(true);
-        final WindowState behind = createWindow(null, TYPE_BASE_APPLICATION, "behind");
-        final WindowState topTranslucent = createWindow(null, TYPE_BASE_APPLICATION,
-                "topTranslucent");
+        final WindowState behind = newWindowBuilder("behind", TYPE_BASE_APPLICATION).build();
+        final WindowState topTranslucent = newWindowBuilder("topTranslucent",
+                TYPE_BASE_APPLICATION).build();
         behind.mAttrs.width = behind.mAttrs.height = topTranslucent.mAttrs.width =
                 topTranslucent.mAttrs.height = WindowManager.LayoutParams.MATCH_PARENT;
         topTranslucent.mAttrs.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -314,8 +314,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         // Only transient-launch transition will make notification shade as last resort target.
         // This verifies that regular transition won't choose invisible keyguard as the target.
-        final WindowState keyguard = createWindow(null /* parent */,
-                WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE, "keyguard");
+        final WindowState keyguard = newWindowBuilder("keyguard",
+                WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE).build();
         keyguard.mAttrs.flags |= FLAG_SHOW_WALLPAPER;
         registerTestTransitionPlayer();
         final Transition transition = wallpaperWindow.mTransitionController.createTransition(
@@ -568,8 +568,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
     private WindowState createWallpaperWindow(DisplayContent dc) {
         final WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
                 true /* explicit */, dc, true /* ownerCanManageAppTokens */);
-        return createWindow(null /* parent */, TYPE_WALLPAPER, wallpaperWindowToken,
-                "wallpaperWindow");
+        return newWindowBuilder("wallpaperWindow", TYPE_WALLPAPER).setWindowToken(
+                wallpaperWindowToken).build();
     }
 
     private WindowState createWallpaperTargetWindow(DisplayContent dc) {
@@ -578,8 +578,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
                 .build();
         homeActivity.setVisibility(true);
 
-        WindowState appWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                homeActivity, "wallpaperTargetWindow");
+        WindowState appWindow = newWindowBuilder("wallpaperTargetWindow",
+                TYPE_BASE_APPLICATION).setWindowToken(homeActivity).build();
         appWindow.getAttrs().flags |= FLAG_SHOW_WALLPAPER;
         appWindow.mHasSurface = true;
         spyOn(appWindow);
