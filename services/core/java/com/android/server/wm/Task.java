@@ -5255,6 +5255,10 @@ class Task extends TaskFragment {
             return false;
         }
 
+        if (!mTaskSupervisor.readyToResume()) {
+            return false;
+        }
+
         final ActivityRecord topActivity = topRunningActivity(true /* focusableOnly */);
         if (topActivity == null) {
             // There are no activities left in this task, let's look somewhere else.
