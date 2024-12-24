@@ -48,6 +48,9 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism;
+import com.android.systemui.statusbar.notification.shelf.NotificationShelfBackgroundView;
+import com.android.systemui.statusbar.notification.shelf.NotificationShelfIconContainer;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -76,7 +79,11 @@ public class NotificationShelf extends ActivatableNotificationView {
     private static final SourceType BASE_VALUE = SourceType.from("BaseValue");
     private static final SourceType SHELF_SCROLL = SourceType.from("ShelfScroll");
 
-    private NotificationIconContainer mShelfIcons;
+    @VisibleForTesting
+    public NotificationShelfIconContainer mShelfIcons;
+    // This field hides mBackgroundNormal from super class for short-shelf alignment
+    @VisibleForTesting
+    public NotificationShelfBackgroundView mBackgroundNormal;
     private boolean mHideBackground;
     private int mStatusBarHeight;
     private boolean mEnableNotificationClipping;
@@ -115,6 +122,8 @@ public class NotificationShelf extends ActivatableNotificationView {
         mShelfIcons = findViewById(R.id.content);
         mShelfIcons.setClipChildren(false);
         mShelfIcons.setClipToPadding(false);
+
+        mBackgroundNormal = (NotificationShelfBackgroundView) super.mBackgroundNormal;
 
         setClipToActualHeight(false);
         setClipChildren(false);
@@ -268,19 +277,37 @@ public class NotificationShelf extends ActivatableNotificationView {
         }
     }
 
-    private void setActualWidth(float actualWidth) {
+    /**
+     * Set the actual width of the shelf, this will only differ from width for short shelves.
+     */
+    @VisibleForTesting
+    public void setActualWidth(float actualWidth) {
         setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
+            mShelfIcons.setAlignToEnd(isAlignedToEnd());
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
         }
         mActualWidth = actualWidth;
     }
 
     @Override
+    public void setBackgroundWidth(int width) {
+        super.setBackgroundWidth(width);
+        if (!NotificationMinimalism.isEnabled()) {
+            return;
+        }
+        if (mBackgroundNormal != null) {
+            mBackgroundNormal.setAlignToEnd(isAlignedToEnd());
+        }
+    }
+
+    @Override
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         super.getBoundsOnScreen(outRect, clipToParent);
         final int actualWidth = getActualWidth();
-        if (isLayoutRtl()) {
+        final boolean alignedToRight = NotificationMinimalism.isEnabled() ? isAlignedToRight() :
+                isLayoutRtl();
+        if (alignedToRight) {
             outRect.left = outRect.right - actualWidth;
         } else {
             outRect.right = outRect.left + actualWidth;
@@ -326,11 +353,17 @@ public class NotificationShelf extends ActivatableNotificationView {
      */
     @Override
     public boolean pointInView(float localX, float localY, float slop) {
-        final float containerWidth = getWidth();
-        final float shelfWidth = getActualWidth();
+        final float left, right;
 
-        final float left = isLayoutRtl() ? containerWidth - shelfWidth : 0;
-        final float right = isLayoutRtl() ? containerWidth : shelfWidth;
+        if (NotificationMinimalism.isEnabled()) {
+            left = getShelfLeftBound();
+            right = getShelfRightBound();
+        } else {
+            final float containerWidth = getWidth();
+            final float shelfWidth = getActualWidth();
+            left = isLayoutRtl() ? containerWidth - shelfWidth : 0;
+            right = isLayoutRtl() ? containerWidth : shelfWidth;
+        }
 
         final float top = mClipTopAmount;
         final float bottom = getActualHeight();
@@ -339,10 +372,53 @@ public class NotificationShelf extends ActivatableNotificationView {
                 && isYInView(localY, slop, top, bottom);
     }
 
+    /**
+     * @return The left boundary of the shelf.
+     */
+    @VisibleForTesting
+    public float getShelfLeftBound() {
+        if (isAlignedToRight()) {
+            return getWidth() - getActualWidth();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * @return The right boundary of the shelf.
+     */
+    @VisibleForTesting
+    public float getShelfRightBound() {
+        if (isAlignedToRight()) {
+            return getWidth();
+        } else {
+            return getActualWidth();
+        }
+    }
+
+    @VisibleForTesting
+    public boolean isAlignedToRight() {
+        return isAlignedToEnd() ^ isLayoutRtl();
+    }
+
+    /**
+     * When notification minimalism is on, on split shade, we want the notification shelf to align
+     * to the layout end (right for LTR; left for RTL).
+     * @return whether to align with the minimalism split shade style
+     */
+    @VisibleForTesting
+    public boolean isAlignedToEnd() {
+        if (!NotificationMinimalism.isEnabled()) {
+            return false;
+        }
+        return mAmbientState.getUseSplitShade();
+    }
+
     @Override
     public void updateBackgroundColors() {
         super.updateBackgroundColors();
         ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
+
         if (colorUpdateLogger != null) {
             colorUpdateLogger.logEvent("Shelf.updateBackgroundColors()",
                     "normalBgColor=" + hexColorString(getNormalBgColor())

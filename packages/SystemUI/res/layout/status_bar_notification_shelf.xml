@@ -24,11 +24,11 @@
     android:clickable="true"
     >
 
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
+    <com.android.systemui.statusbar.notification.shelf.NotificationShelfBackgroundView
         android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <com.android.systemui.statusbar.phone.NotificationIconContainer
+    <com.android.systemui.statusbar.notification.shelf.NotificationShelfIconContainer
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

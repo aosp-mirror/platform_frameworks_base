@@ -198,7 +198,7 @@ public class NotificationIconContainer extends ViewGroup {
         Paint paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(getActualPaddingStart(), 0, getLayoutEnd(), getHeight(), paint);
+        canvas.drawRect(getActualPaddingStart(), 0, getRightBound(), getHeight(), paint);
 
         if (DEBUG_OVERFLOW) {
             if (mLastVisibleIconState == null) {
@@ -469,11 +469,11 @@ public class NotificationIconContainer extends ViewGroup {
      * If this is not a whole number, the fraction means by how much the icon is appearing.
      */
     public void calculateIconXTranslations() {
-        float translationX = getActualPaddingStart();
+        float translationX = getLeftBound();
         int firstOverflowIndex = -1;
         int childCount = getChildCount();
         int maxVisibleIcons = mMaxIcons;
-        float layoutEnd = getLayoutEnd();
+        float layoutRight = getRightBound();
         mVisualOverflowStart = 0;
         mFirstVisibleIconState = null;
         for (int i = 0; i < childCount; i++) {
@@ -495,7 +495,7 @@ public class NotificationIconContainer extends ViewGroup {
             final boolean forceOverflow = shouldForceOverflow(i, mSpeedBumpIndex,
                     iconState.iconAppearAmount, maxVisibleIcons);
             final boolean isOverflowing = forceOverflow || isOverflowing(
-                    /* isLastChild= */ i == childCount - 1, translationX, layoutEnd, mIconSize);
+                    /* isLastChild= */ i == childCount - 1, translationX, layoutRight, mIconSize);
 
             // First icon to overflow.
             if (firstOverflowIndex == -1 && isOverflowing) {
@@ -536,8 +536,7 @@ public class NotificationIconContainer extends ViewGroup {
             for (int i = 0; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
-                iconState.setXTranslation(
-                        getWidth() - iconState.getXTranslation() - view.getWidth());
+                iconState.setXTranslation(getRtlIconTranslationX(iconState, view));
             }
         }
         if (mIsolatedIcon != null) {
@@ -553,6 +552,11 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }
 
+    /** We need this to keep icons ordered from right to left when RTL. */
+    protected float getRtlIconTranslationX(IconState iconState, View iconView) {
+        return getWidth() - iconState.getXTranslation() - iconView.getWidth();
+    }
+
     private float getDrawingScale(View view) {
         return mUseIncreasedIconScale && view instanceof StatusBarIconView
                 ? ((StatusBarIconView) view).getIconScaleIncreased()
@@ -563,11 +567,21 @@ public class NotificationIconContainer extends ViewGroup {
         mUseIncreasedIconScale = useIncreasedIconScale;
     }
 
-    private float getLayoutEnd() {
+    /**
+     * @return The right boundary (not the RTL compatible end) of the area that icons can be added.
+     */
+    protected float getRightBound() {
         return getActualWidth() - getActualPaddingEnd();
     }
 
-    private float getActualPaddingEnd() {
+    /**
+     * @return The left boundary (not the RTL compatible start) of the area that icons can be added.
+     */
+    protected float getLeftBound() {
+        return getActualPaddingStart();
+    }
+
+    protected float getActualPaddingEnd() {
         if (mActualPaddingEnd == NO_VALUE) {
             return getPaddingEnd();
         }

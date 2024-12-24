@@ -169,12 +169,12 @@ public class NotificationBackgroundView extends View implements Dumpable,
                 && !mExpandAnimationRunning) {
             bottom -= mClipBottomAmount;
         }
-        final boolean isRtl = isLayoutRtl();
+        final boolean alignedToRight = isAlignedToRight();
         final int width = getWidth();
         final int actualWidth = getActualWidth();
 
-        int left = isRtl ? width - actualWidth : 0;
-        int right = isRtl ? width : actualWidth;
+        int left = alignedToRight ? width - actualWidth : 0;
+        int right = alignedToRight ? width : actualWidth;
 
         if (mExpandAnimationRunning) {
             // Horizontally center this background view inside of the container
@@ -183,6 +183,15 @@ public class NotificationBackgroundView extends View implements Dumpable,
         }
 
         return new Rect(left, top, right, bottom);
+    }
+
+    /**
+     * @return Whether the background view should be right-aligned. This only matters if the
+     * actualWidth is different than the full (measured) width. In other words, this is used to
+     * define the short-shelf alignment.
+     */
+    protected boolean isAlignedToRight() {
+        return isLayoutRtl();
     }
 
     private void draw(Canvas canvas, Drawable drawable) {
@@ -196,12 +205,13 @@ public class NotificationBackgroundView extends View implements Dumpable,
                     && !mExpandAnimationRunning) {
                 bottom -= mClipBottomAmount;
             }
-            final boolean isRtl = isLayoutRtl();
+
+            final boolean alignedToRight = isAlignedToRight();
             final int width = getWidth();
             final int actualWidth = getActualWidth();
 
-            int left = isRtl ? width - actualWidth : 0;
-            int right = isRtl ? width : actualWidth;
+            int left = alignedToRight ? width - actualWidth : 0;
+            int right = alignedToRight ? width : actualWidth;
 
             if (mExpandAnimationRunning) {
                 // Horizontally center this background view inside of the container
