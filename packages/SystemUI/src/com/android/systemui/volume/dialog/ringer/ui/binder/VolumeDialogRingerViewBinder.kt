@@ -144,7 +144,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                     ringerState.orientation,
                                 )
                             }
-
                             is RingerDrawerState.Closed -> {
                                 if (
                                     uiModel.selectedButton.ringerMode ==
@@ -189,7 +188,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                     }
                                 }
                             }
-
                             is RingerDrawerState.Open -> {
                                 drawerContainer.animateAndBindDrawerButtons(
                                     viewModel,
@@ -220,7 +218,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                             }
                         }
                     }
-
                     is RingerViewModelState.Unavailable -> {
                         drawerContainer.visibility = View.GONE
                         volumeDialogBackgroundView.setBackgroundResource(
@@ -251,7 +248,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                     .requireViewById<ImageButton>(R.id.volume_drawer_button)
             val previousIndex =
                 uiModel.availableButtons.indexOfFirst {
-                    it?.ringerMode == uiModel.drawerState.previousMode
+                    it.ringerMode == uiModel.drawerState.previousMode
                 }
             val unselectedButton =
                 getChildAt(count - previousIndex)
@@ -306,20 +303,18 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     ) {
         val count = uiModel.availableButtons.size
         uiModel.availableButtons.fastForEachIndexed { index, ringerButton ->
-            ringerButton?.let {
-                val view = getChildAt(count - index)
-                val isOpen = uiModel.drawerState is RingerDrawerState.Open
-                if (index == uiModel.currentButtonIndex) {
-                    view.bindDrawerButton(
-                        if (isOpen) it else uiModel.selectedButton,
-                        viewModel,
-                        isOpen,
-                        isSelected = true,
-                        isAnimated = isAnimated,
-                    )
-                } else {
-                    view.bindDrawerButton(it, viewModel, isOpen, isAnimated = isAnimated)
-                }
+            val view = getChildAt(count - index)
+            val isOpen = uiModel.drawerState is RingerDrawerState.Open
+            if (index == uiModel.currentButtonIndex) {
+                view.bindDrawerButton(
+                    if (isOpen) ringerButton else uiModel.selectedButton,
+                    viewModel,
+                    isOpen,
+                    isSelected = true,
+                    isAnimated = isAnimated,
+                )
+            } else {
+                view.bindDrawerButton(ringerButton, viewModel, isOpen, isAnimated = isAnimated)
             }
         }
         onAnimationEnd?.run()

@@ -27,6 +27,7 @@ import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSlide
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderStateModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.google.android.material.slider.Slider
+import com.google.android.material.slider.Slider.OnSliderTouchListener
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +69,15 @@ constructor(
         sliderView.addOnChangeListener { _, value, fromUser ->
             viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }
+        sliderView.addOnSliderTouchListener(
+            object : OnSliderTouchListener {
+                override fun onStartTrackingTouch(slider: Slider) {}
+
+                override fun onStopTrackingTouch(slider: Slider) {
+                    viewModel.onStreamChangeFinished(slider.value.roundToInt())
+                }
+            }
+        )
 
         viewModel.isDisabledByZenMode.onEach { sliderView.isEnabled = !it }.launchIn(this)
         viewModel.state
