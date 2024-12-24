@@ -418,8 +418,6 @@ constructor(
                 initialValue = 0f,
             )
 
-    val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
-
     /** Whether to animate the next doze mode transition. */
     val animateDozingTransitions: Flow<Boolean> by lazy {
         if (SceneContainerFlag.isEnabled) {
@@ -483,10 +481,6 @@ constructor(
 
     fun setAnimateDozingTransitions(animate: Boolean) {
         repository.setAnimateDozingTransitions(animate)
-    }
-
-    fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
-        repository.setClockShouldBeCentered(shouldBeCentered)
     }
 
     fun setLastRootViewTapPosition(point: Point?) {

@@ -25,6 +25,10 @@ import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
@@ -39,6 +43,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -117,7 +122,43 @@ constructor(
                 }
             }
         } else {
-            keyguardInteractor.clockShouldBeCentered
+            combine(
+                    shadeInteractor.isShadeLayoutWide,
+                    activeNotificationsInteractor.areAnyNotificationsPresent,
+                    keyguardInteractor.dozeTransitionModel,
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep.map { it.to == AOD },
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep.map {
+                        it.to == LOCKSCREEN
+                    },
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep.map {
+                        it.to == DOZING
+                    },
+                    keyguardInteractor.isPulsing,
+                    keyguardTransitionInteractor.startedKeyguardTransitionStep.map { it.to == GONE },
+                ) {
+                    isShadeLayoutWide,
+                    areAnyNotificationsPresent,
+                    dozeTransitionModel,
+                    startedToAod,
+                    startedToLockScreen,
+                    startedToDoze,
+                    isPulsing,
+                    startedToGone ->
+                    when {
+                        !isShadeLayoutWide -> true
+                        // [areAnyNotificationsPresent] also reacts to notification stack in
+                        // homescreen
+                        // it may cause unnecessary `false` emission when there's notification in
+                        // homescreen
+                        // but none in lockscreen when going from GONE to AOD / DOZING
+                        // use null to skip emitting wrong value
+                        startedToGone || startedToDoze -> null
+                        startedToLockScreen -> !areAnyNotificationsPresent
+                        startedToAod -> !isPulsing
+                        else -> true
+                    }
+                }
+                .filterNotNull()
         }
 
     fun setClockSize(size: ClockSize) {
