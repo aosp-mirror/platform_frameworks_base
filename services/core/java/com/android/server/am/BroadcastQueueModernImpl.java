@@ -798,7 +798,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.mOomAdjuster.mCachedAppOptimizer.freezeAppAsyncImmediateLSP(r.callerApp);
             return;
         }
-        if (DEBUG_BROADCAST) logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
+        if (DEBUG_BROADCAST || r.debugLog()) {
+            logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
+        }
 
         final int cookie = traceBegin("enqueueBroadcast");
         r.applySingletonPolicy(mService);
@@ -1019,7 +1021,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0;
 
         long startTimeNs = SystemClock.uptimeNanos();
-        if (DEBUG_BROADCAST) logv("Scheduling " + r + " to cold " + queue);
+        if (DEBUG_BROADCAST || r.debugLog()) {
+            logv("Scheduling " + r + " to cold " + queue);
+        }
         queue.app = mService.startProcessLocked(queue.processName, info, true, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, false);
         if (queue.app == null) {
@@ -1176,7 +1180,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
         }
 
-        if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
+        if (DEBUG_BROADCAST || r.debugLog()) {
+            logv("Scheduling " + r + " to warm " + app);
+        }
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED,
                 "scheduleReceiverWarmLocked");
 
@@ -1562,12 +1568,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // bookkeeping to update for ordered broadcasts
         if (!isDeliveryStateTerminal(oldDeliveryState)
                 && isDeliveryStateTerminal(newDeliveryState)) {
-            if (DEBUG_BROADCAST
-                    && newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED) {
-                logw("Delivery state of " + r + " to " + receiver
+            if ((DEBUG_BROADCAST && newDeliveryState != BroadcastRecord.DELIVERY_DELIVERED)
+                    || r.debugLog()) {
+                final String msg = "Delivery state of " + r + " to " + receiver
                         + " via " + app + " changed from "
                         + deliveryStateToString(oldDeliveryState) + " to "
-                        + deliveryStateToString(newDeliveryState) + " because " + reason);
+                        + deliveryStateToString(newDeliveryState) + " because " + reason;
+                if (newDeliveryState == BroadcastRecord.DELIVERY_DELIVERED) {
+                    logv(msg);
+                } else {
+                    logw(msg);
+                }
             }
 
             notifyFinishReceiver(queue, app, r, index, receiver);

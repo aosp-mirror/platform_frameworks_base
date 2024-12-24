@@ -1285,31 +1285,43 @@ final class BroadcastRecord extends Binder {
     }
 
     @Override
+    @NonNull
     public String toString() {
         if (mCachedToString == null) {
-            String label = intent.getAction();
-            if (label == null) {
-                label = intent.toString();
-            }
             mCachedToString = "BroadcastRecord{" + toShortString() + "}";
         }
         return mCachedToString;
     }
 
+    @NonNull
     public String toShortString() {
         if (mCachedToShortString == null) {
-            String label = intent.getAction();
-            if (label == null) {
-                label = intent.toString();
-            }
+            final String label = intentToString(intent);
             mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
                     + " " + label + "/u" + userId;
         }
         return mCachedToShortString;
     }
 
+    @NonNull
+    public static String intentToString(@NonNull Intent intent) {
+        String label = intent.getAction();
+        if (label == null) {
+            label = intent.toString();
+        }
+        return label;
+    }
+
+    public boolean debugLog() {
+        return debugLog(options);
+    }
+
+    public static boolean debugLog(@Nullable BroadcastOptions options) {
+        return options != null && options.isDebugLogEnabled();
+    }
+
     @NeverCompile
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastRecordProto.USER_ID, userId);
         proto.write(BroadcastRecordProto.INTENT_ACTION, intent.getAction());

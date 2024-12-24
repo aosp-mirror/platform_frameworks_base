@@ -47,6 +47,8 @@ import static com.android.server.am.ActivityManagerService.UPDATE_HTTP_PROXY_MSG
 import static com.android.server.am.ActivityManagerService.UPDATE_TIME_PREFERENCE_MSG;
 import static com.android.server.am.ActivityManagerService.UPDATE_TIME_ZONE;
 import static com.android.server.am.ActivityManagerService.checkComponentPermission;
+import static com.android.server.am.BroadcastRecord.debugLog;
+import static com.android.server.am.BroadcastRecord.intentToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1017,6 +1019,13 @@ class BroadcastController {
                         android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
                         callingPid, callingUid, "recordResponseEventWhileInBackground");
             }
+
+            if (brOptions.isDebugLogEnabled()) {
+                if (!isShellOrRoot(callingUid)
+                        && (callerApp == null || !callerApp.hasActiveInstrumentation())) {
+                    brOptions.setDebugLogEnabled(false);
+                }
+            }
         }
 
         // Verify that protected broadcasts are only being sent by system code,
@@ -1622,6 +1631,10 @@ class BroadcastController {
             }
         }
         while (ir < NR) {
+            // Instant Apps cannot use FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS
+            if (callerInstantApp) {
+                intent.setFlags(intent.getFlags() & ~Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+            }
             if (receivers == null) {
                 receivers = new ArrayList();
             }
@@ -1647,7 +1660,9 @@ class BroadcastController {
                     callerAppProcessState, mService.mPlatformCompat);
             broadcastSentEventRecord.setBroadcastRecord(r);
 
-            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
+            if (DEBUG_BROADCAST || r.debugLog()) {
+                Slog.v(TAG_BROADCAST, "Enqueueing broadcast " + r);
+            }
             queue.enqueueBroadcastLocked(r);
         } else {
             // There was nobody interested in the broadcast, but we still want to record
@@ -1657,9 +1672,17 @@ class BroadcastController {
                 // This was an implicit broadcast... let's record it for posterity.
                 addBroadcastStatLocked(intent.getAction(), callerPackage, 0, 0, 0);
             }
+            if (DEBUG_BROADCAST || debugLog(brOptions)) {
+                Slog.v(TAG_BROADCAST, "Skipping broadcast " + intentToString(intent)
+                        + " due to no receivers");
+            }
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    private boolean isShellOrRoot(int uid) {
+        return uid == SHELL_UID || uid == ROOT_UID;
     }
 
     @GuardedBy("mService")

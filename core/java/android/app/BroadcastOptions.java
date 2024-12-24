@@ -38,6 +38,7 @@ import android.os.BundleMerger;
 import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
+import android.os.Process;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,6 +77,7 @@ public class BroadcastOptions extends ComponentOptions {
             FLAG_IS_ALARM_BROADCAST,
             FLAG_SHARE_IDENTITY,
             FLAG_INTERACTIVE,
+            FLAG_DEBUG_LOG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -86,6 +88,7 @@ public class BroadcastOptions extends ComponentOptions {
     private static final int FLAG_IS_ALARM_BROADCAST = 1 << 3;
     private static final int FLAG_SHARE_IDENTITY = 1 << 4;
     private static final int FLAG_INTERACTIVE = 1 << 5;
+    private static final int FLAG_DEBUG_LOG = 1 << 6;
 
     /**
      * Change ID which is invalid.
@@ -1079,6 +1082,34 @@ public class BroadcastOptions extends ComponentOptions {
     @Override // to narrow down the return type
     public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
         return super.getPendingIntentBackgroundActivityStartMode();
+    }
+
+    /**
+     * If enabled, additional debug messages for broadcast delivery will be logged.
+     *
+     * <p> This will only take effect when used by {@link Process#SHELL_UID}
+     * or {@link Process#ROOT_UID} or by apps under instrumentation.
+     *
+     * @hide
+     */
+    @NonNull
+    public BroadcastOptions setDebugLogEnabled(boolean enabled) {
+        if (enabled) {
+            mFlags |= FLAG_DEBUG_LOG;
+        } else {
+            mFlags &= ~FLAG_DEBUG_LOG;
+        }
+        return this;
+    }
+
+    /**
+     * @return if additional debug messages for broadcast delivery are enabled.
+     *
+     * @see #setDebugLogEnabled(boolean)
+     * @hide
+     */
+    public boolean isDebugLogEnabled() {
+        return (mFlags & FLAG_DEBUG_LOG) != 0;
     }
 
     /**
