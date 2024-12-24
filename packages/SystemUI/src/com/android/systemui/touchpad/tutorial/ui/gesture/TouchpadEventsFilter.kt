@@ -18,33 +18,27 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.InputDevice
 import android.view.MotionEvent
-import java.util.function.Consumer
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.BUTTON_PRIMARY
 
-/**
- * Allows listening to touchpadGesture and calling onDone when gesture was triggered. Can have all
- * motion events passed to [onMotionEvent] and will filter touchpad events accordingly
- */
-class TouchpadGestureHandler(
-    private val gestureRecognizer: Consumer<MotionEvent>,
-    private val easterEggGestureMonitor: EasterEggGestureMonitor,
-) {
+object TouchpadEventsFilter {
 
-    fun onMotionEvent(event: MotionEvent): Boolean {
+    fun isTouchpadAndNonClickEvent(event: MotionEvent): Boolean {
         // events from touchpad have SOURCE_MOUSE and not SOURCE_TOUCHPAD because of legacy reasons
         val isFromTouchpad =
             event.isFromSource(InputDevice.SOURCE_MOUSE) &&
                 event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER
-        val buttonClick =
-            event.actionMasked == MotionEvent.ACTION_DOWN &&
-                event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
-        return if (isFromTouchpad && !buttonClick) {
-            if (isTwoFingerSwipe(event)) {
-                easterEggGestureMonitor.processTouchpadEvent(event)
-            }
-            gestureRecognizer.accept(event)
-            true
-        } else {
-            false
-        }
+        val isButtonClicked =
+            event.actionMasked == ACTION_DOWN && event.isButtonPressed(BUTTON_PRIMARY)
+        return isFromTouchpad && !isButtonClicked
+    }
+}
+
+fun GestureRecognizer.handleTouchpadMotionEvent(event: MotionEvent): Boolean {
+    return if (TouchpadEventsFilter.isTouchpadAndNonClickEvent(event)) {
+        this.accept(event)
+        true
+    } else {
+        false
     }
 }

@@ -17,7 +17,7 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor.Companion.CIRCLES_COUNT_THRESHOLD
+import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureRecognizer.Companion.CIRCLES_COUNT_THRESHOLD
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
@@ -25,10 +25,12 @@ import kotlin.math.sqrt
 
 /**
  * Monitor recognizing easter egg gesture, that is at least [CIRCLES_COUNT_THRESHOLD] circles
- * clockwise within one gesture. It tries to be on the safer side of not triggering gesture if we're
- * not sure if full circle was done.
+ * clockwise within one two-fingers gesture. It tries to be on the safer side of not triggering
+ * gesture if we're not sure if full circle was done.
  */
-class EasterEggGestureMonitor(private val callback: () -> Unit) {
+class EasterEggGestureRecognizer : GestureRecognizer {
+
+    private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 
     private var last: Point = Point(0f, 0f)
     private var cumulativeAngle: Float = 0f
@@ -39,7 +41,16 @@ class EasterEggGestureMonitor(private val callback: () -> Unit) {
 
     private val points = mutableListOf<Point>()
 
-    fun processTouchpadEvent(event: MotionEvent) {
+    override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
+        gestureStateChangedCallback = callback
+    }
+
+    override fun clearGestureStateCallback() {
+        gestureStateChangedCallback = {}
+    }
+
+    override fun accept(event: MotionEvent) {
+        if (!isTwoFingerSwipe(event)) return
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 reset()
@@ -75,7 +86,7 @@ class EasterEggGestureMonitor(private val callback: () -> Unit) {
                 // without checking if gesture is circular we can have gesture doing arches back and
                 // forth that finally reaches full circle angle
                 if (circleCount >= CIRCLES_COUNT_THRESHOLD && wasGestureCircular(points)) {
-                    callback()
+                    gestureStateChangedCallback(GestureState.Finished)
                 }
                 reset()
             }

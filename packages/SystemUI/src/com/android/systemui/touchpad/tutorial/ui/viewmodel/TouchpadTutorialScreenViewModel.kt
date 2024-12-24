@@ -19,15 +19,9 @@ package com.android.systemui.touchpad.tutorial.ui.viewmodel
 import android.view.MotionEvent
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 interface TouchpadTutorialScreenViewModel {
     val gestureUiState: Flow<GestureUiState>
-    val easterEggTriggered: MutableStateFlow<Boolean>
-
-    fun onEasterEggFinished() {
-        easterEggTriggered.value = false
-    }
 
     fun handleEvent(event: MotionEvent): Boolean
 }

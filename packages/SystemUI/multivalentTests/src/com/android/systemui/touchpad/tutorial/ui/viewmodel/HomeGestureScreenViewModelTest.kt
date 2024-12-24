@@ -70,13 +70,6 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun easterEggNotTriggeredAtStart() =
-        kosmos.runTest {
-            val easterEggTriggered by collectLastValue(viewModel.easterEggTriggered)
-            assertThat(easterEggTriggered).isFalse()
-        }
-
-    @Test
     fun emitsProgressStateWithAnimationMarkers() =
         kosmos.runTest {
             assertStateAfterEvents(

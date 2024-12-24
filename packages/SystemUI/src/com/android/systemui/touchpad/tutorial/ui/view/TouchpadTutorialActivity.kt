@@ -39,6 +39,7 @@ import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialS
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
@@ -73,6 +74,7 @@ constructor(
                     backGestureViewModel,
                     homeGestureViewModel,
                     recentAppsGestureViewModel,
+                    EasterEggGestureViewModel(),
                     closeTutorial = ::finishTutorial,
                 )
             }
@@ -105,6 +107,7 @@ fun TouchpadTutorialScreen(
     backGestureViewModel: BackGestureScreenViewModel,
     homeGestureViewModel: HomeGestureScreenViewModel,
     recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
+    easterEggGestureViewModel: EasterEggGestureViewModel,
     closeTutorial: () -> Unit,
 ) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
@@ -130,18 +133,21 @@ fun TouchpadTutorialScreen(
         BACK_GESTURE ->
             BackGestureTutorialScreen(
                 backGestureViewModel,
+                easterEggGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
         HOME_GESTURE ->
             HomeGestureTutorialScreen(
                 homeGestureViewModel,
+                easterEggGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
         RECENT_APPS_GESTURE ->
             RecentAppsGestureTutorialScreen(
                 recentAppsGestureViewModel,
+                easterEggGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

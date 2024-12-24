@@ -16,29 +16,28 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
+import android.graphics.PointF
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
+import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGesture.generateCircularGesturePoints
 import com.google.common.truth.Truth.assertThat
-import kotlin.math.cos
-import kotlin.math.sin
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class EasterEggGestureTest : SysuiTestCase() {
-
-    private data class Point(val x: Float, val y: Float)
+class EasterEggGestureRecognizerTest : SysuiTestCase() {
 
     private var triggered = false
-    private val handler =
-        TouchpadGestureHandler(
-            BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt()),
-            EasterEggGestureMonitor(callback = { triggered = true }),
-        )
+    private val gestureRecognizer = EasterEggGestureRecognizer()
+
+    @Before
+    fun setup() {
+        gestureRecognizer.addGestureStateCallback { triggered = it == GestureState.Finished }
+    }
 
     @Test
     fun easterEggTriggeredAfterThreeCircles() {
@@ -99,56 +98,13 @@ class EasterEggGestureTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, wasTriggered: Boolean) {
-        events.forEach { handler.onMotionEvent(it) }
+        events.forEach { gestureRecognizer.accept(it) }
         assertThat(triggered).isEqualTo(wasTriggered)
     }
 
-    private fun assertStateAfterTwoFingerGesture(gesturePath: List<Point>, wasTriggered: Boolean) {
+    private fun assertStateAfterTwoFingerGesture(gesturePath: List<PointF>, wasTriggered: Boolean) {
         val events =
-            TwoFingerGesture.eventsForFullGesture { gesturePath.forEach { (x, y) -> move(x, y) } }
+            TwoFingerGesture.eventsForFullGesture { gesturePath.forEach { p -> move(p.x, p.y) } }
         assertStateAfterEvents(events = events, wasTriggered = wasTriggered)
-    }
-
-    /**
-     * Generates list of points that would make up clockwise circular motion with given [radius].
-     * [circlesCount] determines how many full circles gesture should perform. [radiusNoiseFraction]
-     * can introduce noise to mimic real-world gesture which is not perfect - shape will be still
-     * circular but radius at any given point can be deviate from given radius by
-     * [radiusNoiseFraction].
-     */
-    private fun generateCircularGesturePoints(
-        circlesCount: Int,
-        radiusNoiseFraction: Double? = null,
-        radius: Float = 100f,
-    ): List<Point> {
-        val pointsPerCircle = 50
-        val angleStep = 360 / pointsPerCircle
-        val angleBuffer = 20 // buffer to make sure we're doing a bit more than 360 degree
-        val totalAngle = circlesCount * (360 + angleBuffer)
-        // Because all gestures in tests should start at (DEFAULT_X, DEFAULT_Y) we need to shift
-        // circle center x coordinate by radius
-        val centerX = -radius
-        val centerY = 0f
-
-        val events = mutableListOf<Point>()
-        val randomNoise: (Double) -> Double =
-            if (radiusNoiseFraction == null) {
-                { 0.0 }
-            } else {
-                { radianAngle -> sin(radianAngle * 2) * radiusNoiseFraction }
-            }
-
-        var currentAngle = 0f
-        // as cos(0) == 1 and sin(0) == 0 we start gesture at position of (radius, 0) and go
-        // clockwise - first Y increases and X decreases
-        while (currentAngle < totalAngle) {
-            val radianAngle = Math.toRadians(currentAngle.toDouble())
-            val radiusWithNoise = radius * (1 + randomNoise(radianAngle).toFloat())
-            val x = centerX + radiusWithNoise * cos(radianAngle).toFloat()
-            val y = centerY + radiusWithNoise * sin(radianAngle).toFloat()
-            events.add(Point(x, y))
-            currentAngle += angleStep
-        }
-        return events
     }
 }

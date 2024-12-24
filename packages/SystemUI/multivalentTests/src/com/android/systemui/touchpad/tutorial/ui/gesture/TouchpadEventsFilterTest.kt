@@ -33,12 +33,11 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class TouchpadGestureHandlerTest : SysuiTestCase() {
+class TouchpadEventsFilterTest : SysuiTestCase() {
 
     private var gestureState: GestureState = GestureState.NotStarted
     private val gestureRecognizer =
         BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
-    private val handler = TouchpadGestureHandler(gestureRecognizer, EasterEggGestureMonitor {})
 
     @Before
     fun before() {
@@ -48,21 +47,21 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     @Test
     fun handlesEventsFromTouchpad() {
         val event = downEvent(source = SOURCE_MOUSE, toolType = TOOL_TYPE_FINGER)
-        val eventHandled = handler.onMotionEvent(event)
+        val eventHandled = gestureRecognizer.handleTouchpadMotionEvent(event)
         assertThat(eventHandled).isTrue()
     }
 
     @Test
     fun ignoresEventsFromMouse() {
         val event = downEvent(source = SOURCE_MOUSE, toolType = TOOL_TYPE_MOUSE)
-        val eventHandled = handler.onMotionEvent(event)
+        val eventHandled = gestureRecognizer.handleTouchpadMotionEvent(event)
         assertThat(eventHandled).isFalse()
     }
 
     @Test
     fun ignoresEventsFromTouch() {
         val event = downEvent(source = SOURCE_TOUCHSCREEN, toolType = TOOL_TYPE_FINGER)
-        val eventHandled = handler.onMotionEvent(event)
+        val eventHandled = gestureRecognizer.handleTouchpadMotionEvent(event)
         assertThat(eventHandled).isFalse()
     }
 
@@ -70,25 +69,10 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
     fun ignoresButtonClicksFromTouchpad() {
         val event = downEvent(source = SOURCE_MOUSE, toolType = TOOL_TYPE_FINGER)
         event.buttonState = MotionEvent.BUTTON_PRIMARY
-        val eventHandled = handler.onMotionEvent(event)
+        val eventHandled = gestureRecognizer.handleTouchpadMotionEvent(event)
         assertThat(eventHandled).isFalse()
     }
 
     private fun downEvent(source: Int, toolType: Int) =
         motionEvent(action = ACTION_DOWN, x = 0f, y = 0f, source = source, toolType = toolType)
-
-    @Test
-    fun triggersGestureDoneForThreeFingerGesture() {
-        backGestureEvents().forEach { handler.onMotionEvent(it) }
-
-        assertThat(gestureState).isEqualTo(GestureState.Finished)
-    }
-
-    private fun backGestureEvents(): List<MotionEvent> {
-        return ThreeFingerGesture.eventsForFullGesture {
-            move(deltaX = SWIPE_DISTANCE / 4)
-            move(deltaX = SWIPE_DISTANCE / 2)
-            move(deltaX = SWIPE_DISTANCE)
-        }
-    }
 }

@@ -23,17 +23,15 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
 import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
+import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -47,10 +45,7 @@ constructor(
     private val velocityTracker: VelocityTracker = VerticalVelocityTracker(),
 ) : TouchpadTutorialScreenViewModel {
 
-    private val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered.value = true }
-    override val easterEggTriggered = MutableStateFlow(false)
-
-    private var handler: TouchpadGestureHandler? = null
+    private var recognizer: RecentAppsGestureRecognizer? = null
 
     private val distanceThreshold: Flow<Int> =
         configurationInteractor.onAnyConfigurationChange
@@ -71,14 +66,13 @@ constructor(
         distanceThreshold
             .combine(velocityThreshold, { distance, velocity -> distance to velocity })
             .flatMapLatest { (distance, velocity) ->
-                val recognizer =
+                recognizer =
                     RecentAppsGestureRecognizer(
                         gestureDistanceThresholdPx = distance,
                         velocityThresholdPxPerMs = velocity,
                         velocityTracker = velocityTracker,
                     )
-                handler = TouchpadGestureHandler(recognizer, easterEggMonitor)
-                GestureFlowAdapter(recognizer).gestureStateAsFlow
+                GestureFlowAdapter(recognizer!!).gestureStateAsFlow
             }
             .map { toGestureUiState(it) }
 
@@ -90,6 +84,6 @@ constructor(
         )
 
     override fun handleEvent(event: MotionEvent): Boolean {
-        return handler?.onMotionEvent(event) ?: false
+        return recognizer?.handleTouchpadMotionEvent(event) ?: false
     }
 }
