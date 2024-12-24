@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.composable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,13 +29,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.keyguard.AlphaOptimizedLinearLayout
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
 import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
+import com.android.systemui.statusbar.featurepods.popups.StatusBarPopupChips
+import com.android.systemui.statusbar.featurepods.popups.ui.compose.StatusBarPopupChipsContainer
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
@@ -171,6 +176,35 @@ fun StatusBarRoot(
                         phoneStatusBarView.requireViewById<NotificationIconContainer>(
                             R.id.notificationIcons
                         )
+
+                    // Add a composable container for `StatusBarPopupChip`s
+                    if (StatusBarPopupChips.isEnabled) {
+                        val endSideContent =
+                            phoneStatusBarView.requireViewById<AlphaOptimizedLinearLayout>(
+                                R.id.status_bar_end_side_content
+                            )
+
+                        val composeView =
+                            ComposeView(context).apply {
+                                layoutParams =
+                                    LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    )
+
+                                setViewCompositionStrategy(
+                                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                                )
+
+                                setContent {
+                                    val chips =
+                                        statusBarViewModel.statusBarPopupChips
+                                            .collectAsStateWithLifecycle()
+                                    StatusBarPopupChipsContainer(chips = chips.value)
+                                }
+                            }
+                        endSideContent.addView(composeView, 0)
+                    }
 
                     scope.launch {
                         notificationIconsBinder.bindWhileAttached(

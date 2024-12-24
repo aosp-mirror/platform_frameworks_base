@@ -22,6 +22,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
+import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
+import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipId
 import com.android.systemui.statusbar.featurepods.popups.StatusBarPopupChips
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -35,12 +39,28 @@ import org.junit.runner.RunWith
 class StatusBarPopupChipsViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val mediaFilterRepository = kosmos.mediaFilterRepository
     private val underTest = kosmos.statusBarPopupChipsViewModel
 
     @Test
-    fun popupChips_allHidden_empty() =
+    fun shownPopupChips_allHidden_empty() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.popupChips)
-            assertThat(latest).isEmpty()
+            val shownPopupChips by collectLastValue(underTest.shownPopupChips)
+            assertThat(shownPopupChips).isEmpty()
+        }
+
+    @Test
+    fun shownPopupChips_activeMedia_restHidden_mediaControlChipShown() =
+        testScope.runTest {
+            val shownPopupChips by collectLastValue(underTest.shownPopupChips)
+
+            val userMedia = MediaData(active = true, song = "test")
+            val instanceId = userMedia.instanceId
+
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(shownPopupChips).hasSize(1)
+            assertThat(shownPopupChips!!.first().chipId).isEqualTo(PopupChipId.MediaControl)
         }
 }

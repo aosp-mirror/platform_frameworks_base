@@ -25,6 +25,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.events.domain.interactor.systemStatusEventAnimationInteractor
+import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.statusBarPopupChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
@@ -48,6 +49,7 @@ var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             sceneContainerOcclusionInteractor,
             shadeInteractor,
             ongoingActivityChipsViewModel,
+            statusBarPopupChipsViewModel,
             systemStatusEventAnimationInteractor,
             applicationCoroutineScope,
         )

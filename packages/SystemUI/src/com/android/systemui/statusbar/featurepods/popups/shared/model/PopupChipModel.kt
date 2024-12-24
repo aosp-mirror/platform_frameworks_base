@@ -23,7 +23,7 @@ import com.android.systemui.common.shared.model.Icon
  * displaying its popup at a time.
  */
 sealed class PopupChipId(val value: String) {
-    data object MediaControls : PopupChipId("MediaControls")
+    data object MediaControl : PopupChipId("MediaControl")
 }
 
 /** Model for individual status bar popup chips. */
