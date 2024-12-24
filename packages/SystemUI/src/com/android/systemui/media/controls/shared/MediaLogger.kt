@@ -144,6 +144,30 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
         buffer.log(TAG, LogLevel.DEBUG, { str1 = command }, { "Unsupported media3 command $str1" })
     }
 
+    fun logCreateFailed(pkg: String, method: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = pkg
+                str2 = method
+            },
+            { "Controller create failed for $str1 ($str2)" },
+        )
+    }
+
+    fun logReleaseFailed(pkg: String, cause: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = pkg
+                str2 = cause
+            },
+            { "Controller release failed for $str1 ($str2)" },
+        )
+    }
+
     companion object {
         private const val TAG = "MediaLog"
     }
