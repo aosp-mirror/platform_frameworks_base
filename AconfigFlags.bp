@@ -65,13 +65,13 @@ aconfig_declarations_group {
         "android.sdk.flags-aconfig-java",
         "android.security.flags-aconfig-java",
         "android.server.app.flags-aconfig-java",
+        "android.service.appprediction.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
         "android.service.chooser.flags-aconfig-java",
         "android.service.compat.flags-aconfig-java",
         "android.service.controls.flags-aconfig-java",
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
-        "android.service.appprediction.flags-aconfig-java",
         "android.service.quickaccesswallet.flags-aconfig-java",
         "android.service.voice.flags-aconfig-java",
         "android.speech.flags-aconfig-java",
@@ -827,8 +827,8 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
-        "com.android.permission",
         "com.android.nfcservices",
+        "com.android.permission",
     ],
 }
 
@@ -1824,6 +1824,12 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.adservices",
+        "com.android.cellbroadcast",
+        "com.android.devicelock",
+        "com.android.extservices",
+        "com.android.healthfitness",
+        "com.android.mediaprovider",
         "com.android.permission",
     ],
 }
