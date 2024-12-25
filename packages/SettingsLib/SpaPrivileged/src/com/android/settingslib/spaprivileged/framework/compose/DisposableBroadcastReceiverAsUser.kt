@@ -21,9 +21,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.UserHandle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import com.android.settingslib.spa.framework.util.collectLatestWithLifecycle
 import com.android.settingslib.spaprivileged.framework.common.broadcastReceiverAsUserFlow
 
 /**
@@ -35,6 +34,8 @@ fun DisposableBroadcastReceiverAsUser(
     userHandle: UserHandle,
     onReceive: (Intent) -> Unit,
 ) {
-    LocalContext.current.broadcastReceiverAsUserFlow(intentFilter, userHandle)
-        .collectLatestWithLifecycle(LocalLifecycleOwner.current, action = onReceive)
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        context.broadcastReceiverAsUserFlow(intentFilter, userHandle).collect(onReceive)
+    }
 }

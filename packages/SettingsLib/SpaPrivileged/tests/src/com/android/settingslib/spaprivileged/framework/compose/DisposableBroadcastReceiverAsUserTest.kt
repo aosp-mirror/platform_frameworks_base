@@ -22,10 +22,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.UserHandle
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -38,34 +39,39 @@ import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 class DisposableBroadcastReceiverAsUserTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     private var registeredBroadcastReceiver: BroadcastReceiver? = null
 
-    private val context = mock<Context> {
-        on {
-            registerReceiverAsUser(
-                any(),
-                eq(USER_HANDLE),
-                eq(INTENT_FILTER),
-                isNull(),
-                isNull(),
-                eq(Context.RECEIVER_NOT_EXPORTED),
-            )
-        } doAnswer {
-            registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
-            null
+    private val context =
+        mock<Context> {
+            on {
+                registerReceiverAsUser(
+                    any(),
+                    eq(USER_HANDLE),
+                    eq(INTENT_FILTER),
+                    isNull(),
+                    isNull(),
+                    eq(Context.RECEIVER_NOT_EXPORTED),
+                )
+            } doAnswer
+                {
+                    registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
+                    null
+                }
+
+            on { unregisterReceiver(any()) } doAnswer
+                {
+                    if (registeredBroadcastReceiver === it.arguments[0]) {
+                        registeredBroadcastReceiver = null
+                    }
+                }
         }
-    }
 
     @Test
     fun broadcastReceiver_registered() {
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalLifecycleOwner provides TestLifecycleOwner(),
-            ) {
+            CompositionLocalProvider(LocalContext provides context) {
                 DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
             }
         }
@@ -77,10 +83,7 @@ class DisposableBroadcastReceiverAsUserTest {
     fun broadcastReceiver_isCalledOnReceive() {
         var onReceiveIsCalled = false
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalLifecycleOwner provides TestLifecycleOwner(),
-            ) {
+            CompositionLocalProvider(LocalContext provides context) {
                 DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {
                     onReceiveIsCalled = true
                 }
@@ -90,6 +93,23 @@ class DisposableBroadcastReceiverAsUserTest {
         registeredBroadcastReceiver!!.onReceive(context, Intent())
 
         composeTestRule.waitUntil { onReceiveIsCalled }
+    }
+
+    @Test
+    fun broadcastReceiver_unregistered() {
+        var isBroadcastReceiverRegistered by mutableStateOf(true)
+        composeTestRule.setContent {
+            if (isBroadcastReceiverRegistered) {
+                CompositionLocalProvider(LocalContext provides context) {
+                    DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
+                }
+            }
+        }
+        composeTestRule.waitUntil { registeredBroadcastReceiver != null }
+
+        isBroadcastReceiverRegistered = false
+
+        composeTestRule.waitUntil { registeredBroadcastReceiver == null }
     }
 
     private companion object {
