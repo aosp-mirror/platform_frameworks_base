@@ -199,7 +199,9 @@ public final class FadeOutManager {
             for (AudioPlaybackConfiguration apc : players) {
                 final VolumeShaper.Configuration volShaper =
                         mFadeConfigurations.getFadeOutVolumeShaperConfig(apc.getAudioAttributes());
-                fa.addFade(apc, /* skipRamp= */ false, volShaper);
+                if (volShaper != null) {
+                    fa.addFade(apc, /* skipRamp= */ false, volShaper);
+                }
             }
         }
     }
@@ -249,7 +251,7 @@ public final class FadeOutManager {
             final VolumeShaper.Configuration volShaper =
                     mFadeConfigurations.getFadeOutVolumeShaperConfig(apc.getAudioAttributes());
             final FadedOutApp fa = mUidToFadedAppsMap.get(apc.getClientUid());
-            if (fa == null) {
+            if (fa == null || volShaper == null) {
                 return;
             }
             fa.addFade(apc, /* skipRamp= */ true, volShaper);

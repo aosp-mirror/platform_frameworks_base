@@ -16,16 +16,17 @@
 
 package android.security.net.config;
 
+import android.util.ArrayMap;
+
 import com.android.org.conscrypt.TrustManagerImpl;
 
-import android.util.ArrayMap;
 import java.io.IOException;
 import java.net.Socket;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,12 +106,25 @@ public class NetworkSecurityTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Hostname aware version of {@link #checkServerTrusted(X509Certificate[], String)}.
-     * This interface is used by conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * This interface is used by Conscrypt and android.net.http.X509TrustManagerExtensions do not
      * modify without modifying those callers.
      */
     public List<X509Certificate> checkServerTrusted(X509Certificate[] certs, String authType,
             String host) throws CertificateException {
         List<X509Certificate> trustedChain = mDelegate.checkServerTrusted(certs, authType, host);
+        checkPins(trustedChain);
+        return trustedChain;
+    }
+
+    /**
+     * This interface is used by Conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * modify without modifying those callers.
+     */
+    public List<X509Certificate> checkServerTrusted(X509Certificate[] certs,
+            byte[] ocspData, byte[] tlsSctData, String authType,
+            String host) throws CertificateException {
+        List<X509Certificate> trustedChain = mDelegate.checkServerTrusted(
+                certs, ocspData, tlsSctData, authType, host);
         checkPins(trustedChain);
         return trustedChain;
     }
