@@ -22,7 +22,6 @@ import android.os.Bundle
 import androidx.annotation.AnyThread
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.fragment.app.Fragment
 
 /**
  * Interface provides preference metadata (title, summary, icon, etc.).
@@ -170,47 +169,3 @@ interface PreferenceMetadata {
 /** Metadata of preference category. */
 @AnyThread
 open class PreferenceCategory(override val key: String, override val title: Int) : PreferenceGroup
-
-/** Metadata of preference screen. */
-@AnyThread
-interface PreferenceScreenMetadata : PreferenceMetadata {
-
-    /**
-     * The screen title resource, which precedes [getScreenTitle] if provided.
-     *
-     * By default, screen title is same with [title].
-     */
-    val screenTitle: Int
-        get() = title
-
-    /** Returns dynamic screen title, use [screenTitle] whenever possible. */
-    fun getScreenTitle(context: Context): CharSequence? = null
-
-    /** Returns the fragment class to show the preference screen. */
-    fun fragmentClass(): Class<out Fragment>?
-
-    /**
-     * Indicates if [getPreferenceHierarchy] returns a complete hierarchy of the preference screen.
-     *
-     * If `true`, the result of [getPreferenceHierarchy] will be used to inflate preference screen.
-     * Otherwise, it is an intermediate state called hybrid mode, preference hierarchy is
-     * represented by other ways (e.g. XML resource) and [PreferenceMetadata]s in
-     * [getPreferenceHierarchy] will only be used to bind UI widgets.
-     */
-    fun hasCompleteHierarchy(): Boolean = true
-
-    /**
-     * Returns the hierarchy of preference screen.
-     *
-     * The implementation MUST include all preferences into the hierarchy regardless of the runtime
-     * conditions. DO NOT check any condition (except compile time flag) before adding a preference.
-     */
-    fun getPreferenceHierarchy(context: Context): PreferenceHierarchy
-
-    /**
-     * Returns the [Intent] to show current preference screen.
-     *
-     * @param metadata the preference to locate when show the screen
-     */
-    fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
-}
