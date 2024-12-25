@@ -263,10 +263,9 @@ public class LockTaskController {
         // should be finish together in the Task.
         if (activity != taskRoot || activity != taskTop) {
             final TaskFragment taskFragment = activity.getTaskFragment();
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
             if (taskFragment.asTask() != null
                     || !taskFragment.isDelayLastActivityRemoval()
-                    || adjacentTaskFragment == null) {
+                    || !taskFragment.hasAdjacentTaskFragment()) {
                 // Don't block activity from finishing if the TaskFragment don't have any adjacent
                 // TaskFragment, or it won't finish together with its adjacent TaskFragment.
                 return false;
@@ -281,7 +280,7 @@ public class LockTaskController {
             }
 
             final boolean hasOtherActivityInTask = task.getActivity(a -> !a.finishing
-                    && a != activity && a.getTaskFragment() != adjacentTaskFragment) != null;
+                    && a != activity && !taskFragment.isAdjacentTo(a.getTaskFragment())) != null;
             if (hasOtherActivityInTask) {
                 // Do not block activity from finishing if there are another running activities
                 // after the current and adjacent TaskFragments are removed. Note that we don't

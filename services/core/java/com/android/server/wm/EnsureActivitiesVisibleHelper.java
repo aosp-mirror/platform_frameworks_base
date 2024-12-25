@@ -23,6 +23,8 @@ import static com.android.server.wm.Task.TAG_VISIBILITY;
 import android.annotation.Nullable;
 import android.util.Slog;
 
+import com.android.window.flags.Flags;
+
 import java.util.ArrayList;
 
 /** Helper class to ensure activities are in the right visible state for a container. */
@@ -110,21 +112,37 @@ class EnsureActivitiesVisibleHelper {
 
                 if (adjacentTaskFragments != null && adjacentTaskFragments.contains(
                         childTaskFragment)) {
-                    if (!childTaskFragment.isTranslucent(starting)
-                            && !childTaskFragment.getAdjacentTaskFragment().isTranslucent(
-                                    starting)) {
+                    final boolean isTranslucent;
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        isTranslucent = childTaskFragment.isTranslucent(starting)
+                                || childTaskFragment.forOtherAdjacentTaskFragments(
+                                        adjacentTaskFragment -> {
+                                            return adjacentTaskFragment.isTranslucent(starting);
+                                        });
+                    } else {
+                        isTranslucent = childTaskFragment.isTranslucent(starting)
+                                || childTaskFragment.getAdjacentTaskFragment()
+                                .isTranslucent(starting);
+                    }
+                    if (!isTranslucent) {
                         // Everything behind two adjacent TaskFragments are occluded.
                         mBehindFullyOccludedContainer = true;
                     }
                     continue;
                 }
 
-                final TaskFragment adjacentTaskFrag = childTaskFragment.getAdjacentTaskFragment();
-                if (adjacentTaskFrag != null) {
+                if (childTaskFragment.hasAdjacentTaskFragment()) {
                     if (adjacentTaskFragments == null) {
                         adjacentTaskFragments = new ArrayList<>();
                     }
-                    adjacentTaskFragments.add(adjacentTaskFrag);
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        final ArrayList<TaskFragment> adjacentTfs = adjacentTaskFragments;
+                        childTaskFragment.forOtherAdjacentTaskFragments(adjacentTf -> {
+                            adjacentTfs.add(adjacentTf);
+                        });
+                    } else {
+                        adjacentTaskFragments.add(childTaskFragment.getAdjacentTaskFragment());
+                    }
                 }
             } else if (child.asActivityRecord() != null) {
                 setActivityVisibilityState(child.asActivityRecord(), starting, resumeTopActivity);
