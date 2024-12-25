@@ -284,6 +284,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
                 | WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
                 | WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
         lp.setTitle("ImmersiveModeConfirmation");
+        lp.accessibilityTitle = mSysUiContext.getString(R.string.immersive_cling_title);
         lp.windowAnimations = com.android.internal.R.style.Animation_ImmersiveModeConfirmation;
         lp.token = getWindowToken();
         return lp;
