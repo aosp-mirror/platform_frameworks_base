@@ -79,6 +79,7 @@ cc_library_static {
         ":lib_oomConnection_native",
         ":lib_anrTimer_native",
         ":lib_lazilyRegisteredServices_native",
+        ":lib_phantomProcessList_native",
     ],
 
     include_dirs: [
@@ -262,5 +263,12 @@ filegroup {
         "com_android_server_app_GameManagerService.cpp",
         "com_android_server_utils_LazyJniRegistrar.cpp",
         "com_android_server_vr_VrManagerService.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_phantomProcessList_native",
+    srcs: [
+        "com_android_server_am_PhantomProcessList.cpp",
     ],
 }
