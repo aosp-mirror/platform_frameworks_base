@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -63,7 +62,6 @@ constructor(
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
-    communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
     clockSection: ClockSection,
     smartspaceSection: SmartspaceSection,
     keyguardSliceViewSection: KeyguardSliceViewSection,
@@ -83,7 +81,6 @@ constructor(
             aodNotificationIconsSection,
             smartspaceSection,
             aodBurnInSection,
-            communalTutorialIndicatorSection,
             clockSection,
             keyguardSliceViewSection,
             defaultDeviceEntrySection,

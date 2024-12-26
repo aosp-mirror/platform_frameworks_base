@@ -40,7 +40,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.TextView
 import android.window.InputTransferToken
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -52,8 +51,6 @@ import com.android.keyguard.ClockEventController
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.communal.ui.binder.CommunalTutorialIndicatorViewBinder
-import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewModel
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -118,7 +115,6 @@ constructor(
     @Assisted bundle: Bundle,
     private val shadeInteractor: ShadeInteractor,
     private val secureSettings: SecureSettings,
-    private val communalTutorialViewModel: CommunalTutorialIndicatorViewModel,
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
 ) {
@@ -369,7 +365,6 @@ constructor(
                     ),
             )
         }
-        setupCommunalTutorialIndicator(keyguardRootView)
     }
 
     private fun setupShortcuts(keyguardRootView: ConstraintLayout) {
@@ -485,17 +480,6 @@ constructor(
         clock.largeClock.events.onFontSettingChanged(
             resources.getDimensionPixelSize(customR.dimen.large_clock_text_size).toFloat()
         )
-    }
-
-    private fun setupCommunalTutorialIndicator(keyguardRootView: ConstraintLayout) {
-        keyguardRootView.findViewById<TextView>(R.id.communal_tutorial_indicator)?.let {
-            indicatorView ->
-            CommunalTutorialIndicatorViewBinder.bind(
-                indicatorView,
-                communalTutorialViewModel,
-                isPreviewMode = true,
-            )
-        }
     }
 
     @Style.Type
