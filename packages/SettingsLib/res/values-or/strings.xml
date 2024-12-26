@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ସକ୍ରିୟ (କେବଳ ବାମ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ସକ୍ରିୟ (କେବଳ ଡାହାଣ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ସକ୍ରିୟ (ବାମ ଏବଂ ଡାହାଣ)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ଟ୍ରାଞ୍ଜିସନ୍‌ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ଆନିମେଟର୍‌ ଅବଧି ସ୍କେଲ୍‌"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ସେକେଣ୍ଡାରୀ ଡିସ୍‌ପ୍ଲେ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ସେଡ ଡିସପ୍ଲେ ସ୍ଥିତି"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ଆପ୍ସ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ୟୁଜର୍ ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>

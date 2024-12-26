@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"యాక్టివ్‌గా ఉంది (కుడి వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు, కుడి వైపు)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"యాక్టివ్ (మీడియా మాత్రమే). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"యాక్టివ్ (మీడియా మాత్రమే). ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> బ్యాటరీ, కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ట్రాన్సిషన్ యానిమేషన్ స్కేల్"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి స్కేల్"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ఇతర డిస్‌ప్లేలను సిమ్యులేట్‌ చేయండి"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"షేడ్ డిస్‌ప్లే స్థానం"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"యాప్‌లు"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"యాక్టివిటీస్‌ను ఉంచవద్దు"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"యూజర్ నిష్క్రమించాక పూర్తి యాక్టివిటీని తొలగించండి"</string>

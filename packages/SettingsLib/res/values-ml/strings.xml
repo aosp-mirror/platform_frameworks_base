@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"സജീവമാണ് (ഇടതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"സജീവമാണ് (വലതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"സജീവമാണ് (ഇടതുഭാഗത്തും വലതുഭാഗത്തും)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"സജീവം (മീഡിയ മാത്രം). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"സജീവം (മീഡിയ മാത്രം). ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"കണക്റ്റ് ചെയ്തു (ഓഡിയോ പങ്കിടൽ പിന്തുണയ്ക്കുന്നു). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ട്രാൻസിഷൻ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ഷെയ്‌ഡ് ഡിസ്പ്ലേ സ്ഥാനം"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ആപ്പുകൾ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"പ്രവർത്തനങ്ങൾ സൂക്ഷിക്കരുത്"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ഉപയോക്താവ് ഉപേക്ഷിക്കുന്നതിനനുസരിച്ച് എല്ലാ പ്രവർത്തനങ്ങളും നശിപ്പിക്കുക"</string>

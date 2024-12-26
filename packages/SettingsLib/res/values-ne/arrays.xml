@@ -288,4 +288,19 @@
     <item msgid="3753634915787796632">"२"</item>
     <item msgid="4779928470672877922">"३"</item>
   </string-array>
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"डिभाइसको डिस्प्ले मात्र (डिफल्ट)"</item>
+    <item msgid="9161645858025071955">"बाह्य डिस्प्ले"</item>
+    <item msgid="114384731934682483">"फोकसमा आधारित"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"यो सेड डिभाइसकै डिस्प्लेमा मात्र देखाउनुहोस्"</item>
+    <item msgid="7795034287069726554">"यो डिभाइस एकल बाह्य डिस्प्लेमा देखाउनुहोस्"</item>
+    <item msgid="5280431949814340475">"यो डिभाइस पछिल्लो पटक फोकस गरिएको डिस्प्लेमा देखाउनुहोस्"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_values">
+    <item msgid="3055776101992426514">"default_display"</item>
+    <item msgid="774789415968826925">"any_external_display"</item>
+    <item msgid="7880769915418638436">"status_bar_latest_touch"</item>
+  </string-array>
 </resources>

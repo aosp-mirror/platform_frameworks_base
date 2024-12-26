@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"अ‍ॅक्टिव्ह आहे (फक्त डावे)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"अ‍ॅक्टिव्ह आहे (फक्त उजवे)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"अ‍ॅक्टिव्ह आहे (डावे आणि उजवे)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"अ‍ॅक्टिव्ह आहे (फक्त मीडिया). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ॲक्टिव्ह आहे (फक्त मीडिया). डावीकडे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बॅटरी, उजवीकडे: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बॅटरी."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"कनेक्ट केले आहे (ऑडिओ शेअरिंगला सपोर्ट करते). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बॅटरी."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांझिशन ॲनिमेशन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ॲनिमेटर कालावधी स्केल"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"दुय्यम डिस्प्ले सिम्युलेट करा"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"शेड डिस्प्लेशी संबंधित स्थिती"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"अ‍ॅप्स"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ॲक्टिव्हिटी ठेवू नका"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"वापरकर्त्याने प्रत्येक ॲक्टिव्हिटी सोडताच ती नष्ट करा"</string>

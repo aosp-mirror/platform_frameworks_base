@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktivno (samo lijevo)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktivno (samo desno)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktivno (lijevo i desno)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktivno (samo za medijski sadržaj). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktivno (samo za medijski sadržaj). L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterije, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterije."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Povezano (podržava dijeljenje zvuka). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala trajanja animatora"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sekundarnih ekrana"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Položaj prikaza sjene"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne čuvaj aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Obustavlja se svaka aktivnost čim je korisnik napusti"</string>

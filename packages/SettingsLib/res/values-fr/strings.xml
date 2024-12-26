@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Actif (gauche uniquement)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Actif (droit uniquement)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Actifs (gauche et droit)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Actif (multimédia uniquement). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batterie."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Actif (multimédia uniquement). Gauche : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batterie, droit : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batterie."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Connecté (compatible avec le partage audio). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batterie."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Échelle d\'animation des transitions"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle de durée d\'animation"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuler des écrans secondaires"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Position d\'affichage du volet"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Applications"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne pas conserver les activités"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Supprimer immédiatement les activités abandonnées"</string>

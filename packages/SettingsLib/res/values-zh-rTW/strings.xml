@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"使用中 (僅左側)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"使用中 (僅右側)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"使用中 (左右兩側)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"已啟用 (僅限媒體)。電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"已啟用 (僅限媒體)。左側電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右側電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"已連線 (支援音訊分享)。電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"動畫影片長度比例"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"模擬次要顯示器"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"通知欄顯示位置"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"應用程式"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"不要保留活動"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"使用者離開活動後立刻刪除所有活動內容"</string>

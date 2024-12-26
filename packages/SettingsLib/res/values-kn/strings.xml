@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ಸಕ್ರಿಯವಾಗಿದೆ (ಎಡಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ಸಕ್ರಿಯವಾಗಿದೆ (ಬಲಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ಸಕ್ರಿಯವಾಗಿವೆ (ಎಡ ಮತ್ತು ಬಲಕಿವಿಯ ಸಾಧನಗಳು)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ). ಎಡ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ಬಲ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
@@ -241,7 +243,7 @@
     <string name="category_clone" msgid="1554511758987195974">"ಕ್ಲೋನ್"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="development_settings_summary" msgid="8718917813868735095">"ಆ್ಯಪ್‌ ಅಭಿವೃದ್ಧಿಗಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"ಆ್ಯಪ್‌ ಅಭಿವೃದ್ಧಿಗಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ಈ ಬಳಕೆದಾರರಿಗೆ ಡೆವಲಪರ್‌ ಆಯ್ಕೆಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ಟೆಥರಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -361,7 +363,7 @@
     <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ಪ್ರಾಯೋಗಿಕ) Android ನಲ್ಲಿ Linux ಟರ್ಮಿನಲ್ ಅನ್ನು ರನ್ ಮಾಡಿ"</string>
     <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ನೀವು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದರೆ, Linux ಟರ್ಮಿನಲ್ ಡೇಟಾ ತೆರವುಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ಪರಿಶೀಲನಾ ನಡವಳಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ಪರಿಶೀಲನಾ ನಡವಳಿಕೆಯನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="debug_app" msgid="8903350241392391766">"ಡೀಬಗ್ ಆ್ಯಪ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"ಯಾವುದೇ ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಹೊಂದಿಸಿಲ್ಲ"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ಪರಿವರ್ತನೆ ಅನಿಮೇಶನ್ ಸ್ಕೇಲ್‌"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ಅನಿಮೇಟರ್ ಅವಧಿಯ ಪ್ರಮಾಣ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ಮಾಧ್ಯಮಿಕ ಡಿಸ್‌ಪ್ಲೇ ಸಿಮ್ಯುಲೇಟ್‌"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ಶೇಡ್ ಡಿಸ್‌ಪ್ಲೇ ಸ್ಥಾನ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ಚಟುವಟಿಕೆಗಳನ್ನು ಇರಿಸಬೇಡಿ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ಬಳಕೆದಾರರು ಹೊರಹೋಗುತ್ತಿದ್ದಂತೆಯೇ ಚಟುವಟಿಕೆ ನಾಶಪಡಿಸು"</string>
@@ -466,7 +469,7 @@
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>
-    <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"ಚಿತ್ರ ಬಣ್ಣದ ಮೋಡ್"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ಬಳಸಿ"</string>

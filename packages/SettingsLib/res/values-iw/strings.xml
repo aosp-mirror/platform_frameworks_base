@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"פעיל (שמאל בלבד)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"פעיל (ימין בלבד)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"פעיל (ימין ושמאל)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"פעיל (מדיה בלבד). סוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"פעיל (מדיה בלבד). סוללה בצד שמאל: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, סוללה בצד ימין: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"מחובר (תמיכה בשיתוף אודיו). סוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"יצירת הדמיה של תצוגות משניות"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"מיקום התצוגה של ההצללה"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"אפליקציות"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ללא שמירת פעילויות"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"השמדת כל פעילות ברגע שהמשתמש עוזב אותה"</string>

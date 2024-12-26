@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"فعال ہے (صرف بایاں)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"فعال ہے (صرف دایاں)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"فعال ہے (بایاں اور دایاں)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"فعال (صرف میڈیا)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"‏فعال (صرف میڈیا)۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"‏منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ٹرانزیشن اینیمیشن اسکیل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"اینیمیٹر دورانیے کا اسکیل"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ثانوی ڈسپلیز کو تحریک دیں"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"شیڈ ڈسپلے کی پوزیشن"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ایپس"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"سرگرمیوں کو نہ رکھیں"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"صارف کی ہر سرگرمی صارف کے چھوڑنے پر حذف کر دیں"</string>

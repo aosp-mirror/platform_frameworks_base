@@ -153,15 +153,15 @@
     <item msgid="1333279807604675720">"Estereoa"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_titles">
-    <item msgid="1241278021345116816">"Audioaren kalitatea areagotzeko optimizatua (990 Kb/s / 909 Kb/s)"</item>
+    <item msgid="1241278021345116816">"Audioaren kalitatea hobetzeko optimizatua (990 Kb/s / 909 Kb/s)"</item>
     <item msgid="3523665555859696539">"Audioaren eta konexioaren kalitate orekatua (660 Kb/s / 606 Kb/s)"</item>
-    <item msgid="886408010459747589">"Konexioaren kalitatea areagotzeko optimizatua (330 Kb/s / 303 Kb/s)"</item>
+    <item msgid="886408010459747589">"Konexioaren kalitatea hobetzeko optimizatua (330 Kb/s / 303 Kb/s)"</item>
     <item msgid="3808414041654351577">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
-    <item msgid="804499336721569838">"Audioaren kalitatea areagotzeko optimizatua"</item>
+    <item msgid="804499336721569838">"Audioaren kalitatea hobetzeko optimizatua"</item>
     <item msgid="7451422070435297462">"Orekatu audioaren eta konexioaren kalitateak"</item>
-    <item msgid="6173114545795428901">"Konexioaren kalitatea areagotzeko optimizatua"</item>
+    <item msgid="6173114545795428901">"Konexioaren kalitatea hobetzeko optimizatua"</item>
     <item msgid="4349908264188040530">"Emaitzarik onenak (bit-abiadura egokitua)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
@@ -287,5 +287,20 @@
     <item msgid="2646486108212979598">"1"</item>
     <item msgid="3753634915787796632">"2"</item>
     <item msgid="4779928470672877922">"3"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"Gailuaren pantailan soilik (lehenetsia)"</item>
+    <item msgid="9161645858025071955">"Kanpoko pantailan"</item>
+    <item msgid="114384731934682483">"Fokuaren arabera"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"Erakutsi itzalak gailuaren pantailan soilik"</item>
+    <item msgid="7795034287069726554">"Erakutsi gailua kanpoko pantaila bakarrean"</item>
+    <item msgid="5280431949814340475">"Erakutsi gailua fokuratutako azken pantailan"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_values">
+    <item msgid="3055776101992426514">"default_display"</item>
+    <item msgid="774789415968826925">"any_external_display"</item>
+    <item msgid="7880769915418638436">"status_bar_latest_touch"</item>
   </string-array>
 </resources>

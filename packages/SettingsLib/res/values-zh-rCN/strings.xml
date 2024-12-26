@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"使用中（仅左耳助听器）"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"使用中（仅右耳助听器）"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"使用中（左右耳助听器）"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"使用中（仅限媒体）。电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"使用中（仅限媒体）。左侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右侧电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"已连接（支持音频分享）。电池电量为 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"过渡动画缩放"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 时长缩放"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"模拟辅助显示设备"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"通知栏显示位置"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"应用"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"不保留 activity"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"用户离开后即销毁每个 activity"</string>

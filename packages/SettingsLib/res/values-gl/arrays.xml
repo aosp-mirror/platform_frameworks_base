@@ -288,4 +288,19 @@
     <item msgid="3753634915787796632">"2"</item>
     <item msgid="4779928470672877922">"3"</item>
   </string-array>
+  <string-array name="shade_display_awareness_entries">
+    <item msgid="816770658383209617">"Só pantalla do dispositivo (opción predeterminada)"</item>
+    <item msgid="9161645858025071955">"Pantalla externa"</item>
+    <item msgid="114384731934682483">"En función do enfoque"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_summaries">
+    <item msgid="2964753205732912921">"Mostrar panel despregable só na pantalla do dispositivo"</item>
+    <item msgid="7795034287069726554">"Mostrar dispositivo nunha única pantalla externa"</item>
+    <item msgid="5280431949814340475">"Mostrar dispositivo na última pantalla enfocada"</item>
+  </string-array>
+  <string-array name="shade_display_awareness_values">
+    <item msgid="3055776101992426514">"pantalla_predeterminada"</item>
+    <item msgid="774789415968826925">"calquera_pantalla_externa"</item>
+    <item msgid="7880769915418638436">"último_toque_barra_estado"</item>
+  </string-array>
 </resources>

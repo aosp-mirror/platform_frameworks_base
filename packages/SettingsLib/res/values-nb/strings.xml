@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (bare venstre)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (bare høyre)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (venstre og høyre)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (bare medieinnhold) <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (bare medieinnhold). V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Tilkoblet (støtter lyddeling). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulering av sekundærskjermer"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Plassering av skyggeskjermen"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apper"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ikke behold aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Fjern hver aktivitet så fort brukeren forlater den"</string>

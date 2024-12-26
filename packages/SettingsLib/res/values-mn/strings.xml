@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Идэвхтэй (зөвхөн зүүн тал)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Идэвхтэй (зөвхөн баруун тал)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Идэвхтэй (зүүн, баруун тал)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Идэвхтэй (зөвхөн медиа). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Идэвхтэй (зөвхөн медиа). З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Холбогдсон (аудио хуваалцахыг дэмждэг). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн анимацийн масштаб"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимацийн хугацааны масштаб"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Хоёр дахь дэлгэцийн симуляци хийх"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Сүүдрийн дэлгэцийн байрлал"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апп"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Үйлдлүүдийг хадгалахгүй"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Үйлдэл бүрийг хэрэглэгч орхимогц нь устгах"</string>

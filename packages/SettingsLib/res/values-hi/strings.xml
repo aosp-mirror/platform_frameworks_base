@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"सिर्फ़ बाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"सिर्फ़ दाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"बाईं और दाईं तरफ़ वाला चालू है"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"चालू है (सिर्फ़ मीडिया के लिए). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"चालू है (सिर्फ़ मीडिया के लिए). बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांज़िशन ऐनिमेशन स्‍केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ऐनिमेटर ड्यूरेशन स्केल"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"कई साइज़ के डिसप्ले बनाएं"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"शेड दिखने की स्थिति"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ऐप्लिकेशन"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"गतिविधियों को न रखें"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"उपयोगकर्ता के छोड़ते ही हर गतिविधि को खत्म करें"</string>

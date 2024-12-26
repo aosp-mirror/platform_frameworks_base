@@ -110,6 +110,8 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ใช้งานอยู่ (เฉพาะข้างซ้าย)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ใช้งานอยู่ (เฉพาะข้างขวา)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ใช้งานอยู่ (ข้างซ้ายและขวา)"</string>
+    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
+    <skip />
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -423,6 +425,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"อัตราการเคลื่อนไหวของการเปลี่ยนภาพ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"อัตราความเร็วตามตัวสร้างภาพเคลื่อนไหว"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"จำลองจอแสดงผลรอง"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ตำแหน่งการแสดงผลของเฉดสี"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"แอปพลิเคชัน"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
