@@ -181,9 +181,9 @@ public class UninstallerActivity extends Activity {
         if (mDialogInfo.user == null) {
             mDialogInfo.user = Process.myUserHandle();
         } else {
-            if (mDialogInfo.user != Process.myUserHandle()) {
-                final boolean isCurrentUserProfileOwner =
-                        (Process.myUserHandle() == userManager.getProfileParent(mDialogInfo.user));
+            if (!mDialogInfo.user.equals(Process.myUserHandle())) {
+                final boolean isCurrentUserProfileOwner = Process.myUserHandle().equals(
+                        userManager.getProfileParent(mDialogInfo.user));
                 if (!isCurrentUserProfileOwner) {
                     Log.e(TAG, "User " + Process.myUserHandle() + " can't request uninstall "
                             + "for user " + mDialogInfo.user);
