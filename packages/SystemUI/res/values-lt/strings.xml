@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Šiuo metu rodomas ekrano įrašymo sesijos pranešimas"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Įrašyti ekraną?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Įrašyti vieną programą"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Įrašyti visą ekraną"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Įrašyti visą ekraną: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kai įrašote visą ekraną, įrašomas visas ekrane rodomas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kai įrašote programą, įrašomas visas toje programoje rodomas ar leidžiamas turinys. Todėl būkite atsargūs naudodami slaptažodžius, išsamią mokėjimo metodo informaciją, pranešimus, nuotraukas ir garso bei vaizdo įrašus."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Įrašyti ekraną"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Išankstinių nustatymų atnaujinti nepavyko"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Išankstiniai nustatymai"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Pasirinkta"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Įrankiai"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Subtitrai realiuoju laiku"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Pastaba"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Rodyti mažo prioriteto pranešimų piktogramas"</string>
     <string name="other" msgid="429768510980739978">"Kita"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"pašalintumėte išklotinės elementą"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"pridėtumėte išklotinės elementą gale"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Perkelti išklotinės elementą"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Pridėti išklotinės elementą"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Perkelkite į <xliff:g id="POSITION">%1$d</xliff:g> poziciją"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Pridėkite <xliff:g id="POSITION">%1$d</xliff:g> pozicijoje"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Padėtis netinkama."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"pasirinktumėte naudotoją"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nėra interneto ryšio"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Atidaryti „<xliff:g id="ID_1">%s</xliff:g>“ nustatymus."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Redaguoti nustatymų tvarką."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Įjungimo meniu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g> psl. iš <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Užrakinimo ekranas"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(atjungta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nepavyko perjungti. Bandykite vėl palietę."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Įrenginio prijungimas"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Jei norite perduoti šį seansą, atidarykite programą."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nežinoma programa"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Sustabdyti perdavimą"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Pasiekiami garso išvesties įrenginiai."</string>

@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Желите да снимите екран?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Сними једну апликацију"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Сними цео екран"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Снимите цео екран: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Када снимате цео екран, снима се све што је на њему. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Када снимате апликацију, снима се сав садржај који се приказује или пушта у њој. Зато пазите на лозинке, информације о плаћању, поруке, слике, аудио и видео садржај."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Сними екран"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ажурирање задатих подешавања није успело"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Унапред одређена подешавања"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Изабрано"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Алатке"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Титл уживо"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Белешка"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Прикажи иконе обавештења ниског приоритета"</string>
     <string name="other" msgid="429768510980739978">"Друго"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"уклонили плочицу"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"додали плочицу на крај"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Преместите плочицу"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додајте плочицу"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Преместите на <xliff:g id="POSITION">%1$d</xliff:g>. позицију"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додајте на <xliff:g id="POSITION">%1$d</xliff:g>. позицију"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Позиција је неважећа."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"одабрали корисника"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Нема интернета"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отвори подешавања за <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Измени редослед подешавања."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Мени дугмета за укључивање"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. страна од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Закључан екран"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(веза је прекинута)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Пребацивање није успело. Пробајте поново."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Повежите уређај"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Да бисте пребацивали ову сесију, отворите апликацију."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Непозната апликација"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Заустави пребацивање"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Доступни уређаји за аудио излаз."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Иди на почетни екран"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прикажи недавно коришћене апликације"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Пробајте поново."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Превуците улево или удесно са три прста на тачпеду"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Супер!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Довршили сте покрет за повратак."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Да бисте се вратили помоћу тачпеда, превуците улево или удесно са три прста"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Иди на почетни екран"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Превуците нагоре са три прста на тачпеду"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Одлично!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Довршили сте покрет за повратак на почетну страницу."</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Да бисте отишли на почетни екран, превуците нагоре са три прста на тачпеду"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прикажи недавно коришћене апликације"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Превуците нагоре и задржите са три прста на тачпеду"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Одлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Довршили сте покрет за приказивање недавно коришћених апликација."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Да бисте прегледали недавне апликације, превуците нагоре и задржите са три прста на тачпеду"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Прикажи све апликације"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Притисните тастер радњи на тастатури"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Одлично!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Довршили сте покрет за приказивање свих апликација."</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Притисните тастер радњи на тастатури да бисте прегледали све апликације"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Анимација водича, кликните да бисте паузирали и наставили репродукцију."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Позадинско осветљење тастатуре"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. ниво од %2$d"</string>

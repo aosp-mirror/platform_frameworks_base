@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ghi màn hình?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Ghi một ứng dụng"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Ghi toàn màn hình"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Ghi toàn bộ màn hình: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Khi bạn ghi toàn màn hình, mọi nội dung trên màn hình của bạn đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Khi bạn ghi một ứng dụng, mọi nội dung xuất hiện hoặc phát trong ứng dụng đó sẽ đều được ghi. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ghi màn hình"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Không cập nhật được giá trị đặt trước"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Chế độ đặt sẵn"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Đã chọn"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Công cụ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Phụ đề trực tiếp"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Ghi chú"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Hiển thị biểu tượng thông báo có mức ưu tiên thấp"</string>
     <string name="other" msgid="429768510980739978">"Khác"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"xóa ô"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"thêm ô vào cuối"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Di chuyển ô"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Thêm ô"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Di chuyển tới <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Thêm vào vị trí <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Vị trí không hợp lệ."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"chọn người dùng"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Không có Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Mở cài đặt <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Chỉnh sửa thứ tự cài đặt."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Trình đơn nguồn"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Màn hình khóa"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(đã ngắt kết nối)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Không thể chuyển đổi. Hãy nhấn để thử lại."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Kết nối thiết bị"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Vui lòng mở ứng dụng để truyền phiên này."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ứng dụng không xác định"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Dừng truyền"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Các thiết bị có sẵn để xuất âm thanh."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Chuyển đến màn hình chính"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Xem các ứng dụng gần đây"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Xong"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Hãy thử lại!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Quay lại"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Dùng 3 ngón tay vuốt sang trái hoặc sang phải trên bàn di chuột"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Tuyệt vời!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Bạn đã thực hiện xong cử chỉ quay lại."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Để quay lại bằng bàn di chuột, hãy dùng 3 ngón tay vuốt sang trái hoặc sang phải"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Chuyển đến màn hình chính"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Dùng 3 ngón tay vuốt lên trên bàn di chuột"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Tuyệt vời!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Bạn đã thực hiện xong cử chỉ chuyển đến màn hình chính"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Dùng 3 ngón tay vuốt lên trên bàn di chuột để chuyển đến màn hình chính"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Xem các ứng dụng gần đây"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Dùng 3 ngón tay vuốt lên và giữ trên bàn di chuột"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Tuyệt vời!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Bạn đã hoàn tất cử chỉ xem ứng dụng gần đây."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Để xem các ứng dụng gần đây, hãy dùng 3 ngón tay vuốt lên và giữ trên bàn di chuột"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Xem tất cả các ứng dụng"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Nhấn phím hành động trên bàn phím"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Rất tốt!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Bạn đã hoàn tất cử chỉ xem tất cả các ứng dụng"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Nhấn phím hành động trên bàn phím để xem mọi ứng dụng của bạn"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Ảnh động trong phần hướng dẫn, nhấp để tạm dừng và tiếp tục phát."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>

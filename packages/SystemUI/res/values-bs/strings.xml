@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Snimati ekran?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Snimaj jednu aplikaciju"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Snimaj cijeli ekran"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Snimi cijeli ekran: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kada snimate cijeli ekran, snimat će se sve što se prikazuje na ekranu. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kada snimate aplikaciju, snimat će se sve što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Snimaj ekran"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ažuriranje zadane postavke nije uspjelo"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Zadana postavka"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Odabrano"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Alati"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Automatski titlovi"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Bilješka"</string>
@@ -960,9 +976,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Prikaži ikone obavještenja niskog prioriteta"</string>
     <string name="other" msgid="429768510980739978">"Ostalo"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"uklanjanje kartice"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"dodavanje kartice na kraj"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"dodavanje kartice na posljednji položaj"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Pomjeranje kartice"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Dodavanje kartice"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Dodajte karticu na željeni položaj"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Pomjeranje u položaj <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodavanje u položaj <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Nevažeći položaj."</string>
@@ -978,7 +994,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"odaberete korisnika"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Nema internetske veze"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otvori postavke za: <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Urediti raspored postavki."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Uredite redoslijed brzih postavki."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni napajanja"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani ekran"</string>
@@ -1209,7 +1225,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(veza je prekinuta)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije moguće prebaciti. Dodirnite da pokušate ponovo."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povežite uređaj"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da emitirate ovu sesiju, otvorite aplikaciju."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupni uređaji za audio izlaz."</string>
@@ -1468,32 +1483,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Odlazak na početni ekran"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Prikaži nedavne aplikacije"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Gotovo"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Pokušajte ponovo!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazad"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Prevucite ulijevo ili udesno s tri prsta na dodirnoj podlozi"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Lijepo!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Savladali ste pokret za vraćanje."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Da se vratite pomoću dodirne podloge, prevucite ulijevo ili udesno s tri prsta"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Odlazak na početni ekran"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Prevucite nagore s tri prsta na dodirnoj podlozi"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Sjajno!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Savladali ste pokret za odlazak na početni ekran"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Prevucite nagore s tri prsta na dodirnoj podlozi da odete na početni ekran"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Prikaz nedavnih aplikacija"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Prevucite nagore i zadržite s tri prsta na dodirnoj podlozi"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Sjajno!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvršili ste pokret za prikaz nedavnih aplikacija."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Da pogledate nedavne aplikacije, prevucite nagore i zadržite s tri prsta na dodirnoj podlozi"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Pogledajte sve aplikacije"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipku radnji na tastaturi"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Odlično!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Izvršili ste pokret za prikaz svih aplikacija"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Pritisnite tipku radnji na tastaturi da pogledate sve aplikacije"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animacija vodiča; pauziranje i nastavak reprodukcije klikom."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tastature"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. nivo od %2$d"</string>

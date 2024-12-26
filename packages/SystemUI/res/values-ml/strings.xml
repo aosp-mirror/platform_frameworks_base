@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ഒരു സ്ക്രീൻ റെക്കോർഡിംഗ് സെഷനായി നിലവിലുള്ള അറിയിപ്പ്"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"നിങ്ങളുടെ സ്ക്രീൻ റെക്കോർഡ് ചെയ്യണോ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ഒരു ആപ്പ് റെക്കോർഡ് ചെയ്യുക"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"സ്ക്രീൻ പൂർണ്ണമായി റെക്കോർഡ് ചെയ്യുക"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"മുഴുവൻ സ്ക്രീനും റെക്കോർഡ് ചെയ്യുക: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"നിങ്ങളുടെ സ്ക്രീൻ പൂർണ്ണമായി റെക്കോർഡ് ചെയ്യുമ്പോൾ, സ്ക്രീനിൽ ദൃശ്യമാകുന്ന എല്ലാം റെക്കോർഡ് ചെയ്യപ്പെടും. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"നിങ്ങളുടെ ആപ്പ് റെക്കോർഡ് ചെയ്യുമ്പോൾ, ആ ആപ്പിൽ കാണിക്കുന്നതോ പ്ലേ ചെയ്യുന്നതോ ആയ എല്ലാ കാര്യങ്ങളും റെക്കോർഡ് ചെയ്യപ്പെടും. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"സ്ക്രീൻ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"പ്രീസെറ്റ് അപ്ഡേറ്റ് ചെയ്യാനായില്ല"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"പ്രീസെറ്റ്"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"തിരഞ്ഞെടുത്തു"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ടൂളുകൾ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"തത്സമയ ക്യാപ്ഷൻ"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"കുറിപ്പ്"</string>
@@ -960,9 +976,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"പ്രാധാന്യം കുറഞ്ഞ അറിയിപ്പ് ചിഹ്‌നങ്ങൾ"</string>
     <string name="other" msgid="429768510980739978">"മറ്റുള്ളവ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ടൈൽ നീക്കം ചെയ്യുക"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ടൈൽ, അവസാന ഭാഗത്ത് ചേർക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"അവസാന ഭാഗത്ത് ടൈൽ ചേർക്കുക"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ടൈൽ നീക്കുക"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ടൈൽ ചേർക്കുക"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"ഇഷ്ടമുള്ള ഭാഗത്ത് ടൈൽ ചേർക്കുക"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> എന്നതിലേക്ക് നീക്കുക"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> എന്ന സ്ഥാനത്തേക്ക് ചേർക്കുക"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"സ്ഥാനം അസാധുവാണ്."</string>
@@ -978,7 +994,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ഉപയോക്താവിനെ തിരഞ്ഞെടുക്കുക"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ഇന്റർനെറ്റ് ഇല്ല"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ക്രമീകരണം തുറക്കുക."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ക്രമീകരണ ക്രമം എഡിറ്റുചെയ്യുക."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"ദ്രുത ക്രമീകരണത്തിന്റെ ക്രമം എഡിറ്റ് ചെയ്യുക."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"പവർ മെനു"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"പേജ് <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ലോക്ക് സ്‌ക്രീൻ"</string>
@@ -1209,7 +1225,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(വിച്ഛേദിച്ചു)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"മാറാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"ഒരു ഉപകരണം കണക്റ്റ് ചെയ്യുക"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ഈ സെഷൻ കാസ്റ്റ് ചെയ്യാൻ, ആപ്പ് തുറക്കുക."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"അജ്ഞാതമായ ആപ്പ്"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"കാസ്റ്റ് ചെയ്യുന്നത് നിർത്തുക"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ഓഡിയോ ഔട്ട്‌പുട്ടിന് ലഭ്യമായ ഉപകരണങ്ങൾ."</string>
@@ -1468,32 +1483,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ഹോമിലേക്ക് പോകുക"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"പൂർത്തിയായി"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"വീണ്ടും ശ്രമിക്കുക!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"മടങ്ങുക"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"ടച്ച്‌പാഡിൽ മൂന്ന് വിരലുകൾ കൊണ്ട് ഇടത്തേക്കോ വലത്തേക്കോ സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"കൊള്ളാം!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"മടങ്ങുക ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"നിങ്ങളുടെ ടച്ച്പാഡ് ഉപയോഗിച്ച് തിരികെ പോകാൻ, മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് ഇടത്തോട്ടോ വലത്തോട്ടോ സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ഹോമിലേക്ക് പോകൂ"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"ടച്ച്‌പാഡിൽ മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"കൊള്ളാം!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ഹോം ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"നിങ്ങളുടെ ഹോം സ്‌ക്രീനിലേക്ക് പോകാൻ ടച്ച്‌പാഡിൽ മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"നിങ്ങളുടെ ടച്ച്പാഡിൽ മൂന്ന് വിരലുകൾ കൊണ്ട് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"കൊള്ളാം!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക എന്ന ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"സമീപകാല ആപ്പുകൾ കാണുന്നതിന്, നിങ്ങളുടെ ടച്ച്പാഡിൽ മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"എല്ലാ ആപ്പുകളും കാണുക"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"നിങ്ങളുടെ കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"അഭിനന്ദനങ്ങൾ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"\'എല്ലാ ആപ്പുകളും കാണുക\' ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"നിങ്ങളുടെ എല്ലാ ആപ്പുകളും കാണുന്നതിന് കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ട്യൂട്ടോറിയൽ ആനിമേഷൻ, താൽക്കാലികമായി നിർത്താനും പ്ലേ പുനരാരംഭിക്കാനും ക്ലിക്ക് ചെയ്യുക."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"കീബോഡ് ബാക്ക്‌ലൈറ്റ്"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-ൽ %1$d-ാമത്തെ ലെവൽ"</string>

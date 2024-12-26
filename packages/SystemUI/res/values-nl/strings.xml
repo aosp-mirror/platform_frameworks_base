@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Je scherm opnemen?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Eén app opnemen"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Hele scherm opnemen"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Hele scherm opnemen: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Als je je hele scherm opneemt, wordt alles opgenomen wat op je scherm wordt getoond. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Als je een app opneemt, wordt alles opgenomen wat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Scherm opnemen"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Kan voorinstelling niet updaten"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Voorinstelling"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Geselecteerd"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tools"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Live ondertiteling"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Notitie"</string>
@@ -960,9 +976,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Iconen voor meldingen met lage prioriteit tonen"</string>
     <string name="other" msgid="429768510980739978">"Overig"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"tegel verwijderen"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"tegel toevoegen aan einde"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"tegel toevoegen op de laatste positie"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Tegel verplaatsen"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tegel toevoegen"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Tegel toevoegen op gewenste positie"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Verplaatsen naar <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Toevoegen aan positie <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Positie ongeldig."</string>
@@ -978,7 +994,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"gebruiker kiezen"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Geen internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Volgorde van instellingen bewerken."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Volgorde van Snelle instellingen bewerken."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Aan/uit-menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelscherm"</string>
@@ -1209,7 +1225,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(verbinding verbroken)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Kan niet schakelen. Tik om het opnieuw te proberen."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Apparaat koppelen"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Als je deze sessie wilt casten, open je de app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Casten stoppen"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Beschikbare apparaten voor audio-uitvoer."</string>
@@ -1468,32 +1483,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Naar startscherm"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Recente apps bekijken"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klaar"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Probeer het nog eens."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Terug"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Swipe met 3 vingers naar links of rechts op de touchpad"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Goed zo!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Je weet nu hoe je het gebaar voor terug maakt."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Als je met de touchpad wilt teruggaan, swipe je met 3 vingers naar links of rechts"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Naar startscherm"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Swipe met 3 vingers omhoog op de touchpad"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Goed gedaan!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Je weet nu hoe je het gebaar Naar startscherm maakt"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Swipe met 3 vingers omhoog op de touchpad om naar het startscherm te gaan"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Recente apps bekijken"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Swipe met 3 vingers omhoog en houd vast op de touchpad"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Goed gedaan!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Je weet nu hoe je het gebaar Recente apps bekijken maakt."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Als je recente apps wilt bekijken, swipe je met 3 vingers omhoog op de touchpad en houd je vast"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Alle apps bekijken"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Druk op de actietoets op het toetsenbord"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Goed gedaan!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Je weet nu hoe je het gebaar Alle apps bekijken maakt"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Druk op de actietoets op je toetsenbord om al je apps te bekijken"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Tutorial-animatie, klik om het afspelen te onderbreken en te hervatten."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Achtergrondverlichting van toetsenbord"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d van %2$d"</string>

@@ -54,7 +54,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"USB डिबग गर्न अनुमति छैन"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"हालैमा यस डिभाइसमा साइन इन भएका प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैनन्। यो सुविधा प्रयोग गर्न कृपया खाताका एड्मिनका रूपमा साइन इन गर्नुहोस्।"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"हाल यस डिभाइसमा साइन इन भएका प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैनन्। यो सुविधा प्रयोग गर्न कृपया खाताका एड्मिनका रूपमा साइन इन गर्नुहोस्।"</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"तपाईं सिस्टमको भाषा बदलेर <xliff:g id="LANGUAGE">%1$s</xliff:g> बनाउन चाहनुहुन्छ?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"अर्को डिभाइसले सिस्टमको भाषा परिवर्तन गर्न अनुरोध गरेको छ"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"भाषा परिवर्तन गर्नुहोस्"</string>
@@ -65,7 +65,7 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिनुहोस्"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"अनुमति दिनुहोस्"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"वायरलेस डिबगिङ सेवालाई अनुमति दिइएको छैन"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"हालैमा यस डिभाइसमा साइन इन भएका प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैनन्। यो सुविधा प्रयोग गर्न कृपया खाताका एड्मिनका रूपमा साइन इन गर्नुहोस्।"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"हाल यस डिभाइसमा साइन इन भएका प्रयोगकर्ताले USB डिबगिङ अन गर्न सक्दैनन्। यो सुविधा प्रयोग गर्न कृपया खाताका एड्मिनका रूपमा साइन इन गर्नुहोस्।"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB पोर्ट असक्षम पारियो"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"तपाईंको यन्त्रलाई तरल पदार्थ वा धुलोबाट जोगाउन यसको USB पोर्ट असक्षम पारिएको छ र यसले कुनै पनि सहायक उपकरणहरू पहिचान गर्ने छैन।\n\nउक्त USB पोर्ट फेरि प्रयोग गर्दा हुन्छ भने तपाईंलाई यसबारे सूचित गरिने छ।"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"चार्जर तथा सामानहरू पत्ता लगाउन सक्षम पारिएको USB पोर्ट"</string>
@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"तपाईंको स्क्रिन रेकर्ड गर्ने हो?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एउटा एप रेकर्ड गर्नुहोस्"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरै स्क्रिन रेकर्ड गर्नुहोस्"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"सम्पूर्ण स्क्रिन रेकर्ड गर्नुहोस्: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"तपाईंले आफ्नो पूरै स्क्रिन रेकर्ड गरिरहेका बेला तपाईंको स्क्रिनमा देखाइने सबै सामग्री रेकर्ड गरिन्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"तपाईंले यो एप रेकर्ड गरिरहेका बेला यो एपमा देखाइने वा प्ले गरिने सबै सामग्री रेकर्ड गरिन्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रिन रेकर्ड गर्नुहोस्"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"प्रिसेट अपडेट गर्न सकिएन"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"पूर्वनिर्धारित"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"चयन गरिएको छ"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"टुल"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"लाइभ क्याप्सन"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"नोट"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
     <string name="other" msgid="429768510980739978">"अन्य"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"टाइल हटाउनुहोस्"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"टाइल अन्त्यमा हाल्नुहोस्"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"टाइल सार्नुहोस्"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"टाइल हाल्नुहोस्"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल सारेर <xliff:g id="POSITION">%1$d</xliff:g> मा लैजानुहोस्"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल यो अवस्था <xliff:g id="POSITION">%1$d</xliff:g> मा हाल्नुहोस्"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"पोजिसन अवैध छ।"</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"प्रयोगकर्ता छान्नुहोस्"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"इन्टरनेट छैन"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सम्बन्धी सेटिङहरूलाई खोल्नुहोस्।"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिङहरूको क्रमलाई सम्पादन गर्नुहोस्।"</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पावर मेनु"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> मध्ये पृष्ठ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लक स्क्रिन"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(डिस्कनेक्ट गरिएको छ)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"बदल्न सकिएन। फेरि प्रयास गर्न ट्याप गर्नुहोस्।"</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"कुनै डिभाइस कनेक्ट गर्नुहोस्"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"यो सत्र कास्ट गर्न चाहनुहुन्छ भने कृपया एप खोल्नुहोस्।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात एप"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट गर्न छाड्नुहोस्"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"अडियो आउटपुटका लागि उपलब्ध डिभाइसहरू।"</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"होम स्क्रिनमा जानुहोस्"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"हालसालै चलाइएका एपहरू हेर्नुहोस्"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"सम्पन्न भयो"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"फेरि प्रयास गर्नुहोस्!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"पछाडि जानुहोस्"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"तीन वटा औँला प्रयोग गरी टचप्याडमा बायाँ वा दायाँतिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"राम्रो!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"तपाईंले जेस्चर प्रयोग गरी पछाडि जाने तरिका सिक्नुभएको छ।"</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"टचप्याड प्रयोग गरी पछाडि जान तीन औँला प्रयोग गरी बायाँ वा दायाँतिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होमपेजमा जानुहोस्"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"टचप्याडमा तीन वटा औँलाले माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"अद्भुत!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"तपाईंले \"होम स्क्रिनमा जानुहोस्\" नामक जेस्चर प्रयोग गर्ने तरिका सिक्नुभयो"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"होम स्क्रिनमा जान टचप्याडमा तीन औँलाले माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"हालसालै चलाइएका एपहरू हेर्नुहोस्"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"तीन वटा औँला प्रयोग गरी टचप्याडमा माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"अद्भुत!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"तपाईंले जेस्चर प्रयोग गरी हालसालै चलाइएका एपहरू हेर्ने तरिका सिक्नुभएको छ।"</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"हालसालैका एपहरू हेर्न तीन औँला प्रयोग गरी टचप्याडमा माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सबै एपहरू हेर्नुहोस्"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"स्याबास!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"तपाईंले जेस्चर प्रयोग गरी सबै एपहरू हेर्ने तरिका सिक्नुभएको छ"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"आफ्ना सबै एपहरू हेर्न आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ट्युटोरियलको एनिमेसन, पज वा सुचारु गर्न क्लिक गर्नुहोस्।"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>

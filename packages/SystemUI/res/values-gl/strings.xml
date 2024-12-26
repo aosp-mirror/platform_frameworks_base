@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación de actividade en curso sobre unha sesión de gravación de pantalla"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Queres gravar a túa pantalla?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Gravar unha aplicación"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Gravar pantalla completa"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Gravar pantalla completa: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Cando gravas a pantalla completa, recóllese todo o que se mostra nela. Recomendámosche que teñas coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cando gravas unha aplicación, recóllese todo o que se mostra ou reproduce nela. Recomendámosche que teñas coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como co contido de audio e de vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Gravar pantalla"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Non se puido actualizar a configuración predeterminada"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Configuración predeterminada"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Elemento seleccionado"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Ferramentas"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Subtítulos instantáneos"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Nota"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar iconas das notificacións que teñan baixa prioridade"</string>
     <string name="other" msgid="429768510980739978">"Outros"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar tarxeta"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"engadir tarxeta ao final"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover tarxeta"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Engadir tarxeta"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Engadir á posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Posición non válida."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"escoller usuario"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Non hai conexión a Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Editar a orde das opcións de configuración."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de acendido"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueo"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(desconectado)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Non se puido realizar o cambio. Toca para tentalo de novo."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Conectar un dispositivo"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para emitir esta sesión, abre a aplicación."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicación descoñecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Deter emisión"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos dispoñibles para a saída de audio."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ir ao inicio"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Consultar aplicacións recentes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Feito"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Téntao de novo."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Volver"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Pasa tres dedos cara á esquerda ou cara á dereita no panel táctil"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Excelente!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaches o titorial do xesto de retroceso."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Para retroceder usando o panel táctil, pasa tres dedos cara á esquerda ou cara á dereita"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir ao inicio"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Pasa tres dedos cara arriba no panel táctil"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Ben feito!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Completaches o titorial do xesto para ir á pantalla de inicio"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Pasa tres dedos cara arriba no panel táctil para ir á pantalla de inicio"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Consultar aplicacións recentes"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Pasa tres dedos cara arriba e mantenos premidos no panel táctil"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Moi ben!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Completaches o titorial do xesto de consultar aplicacións recentes."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Para ver as aplicacións recentes, pasa tres dedos cara arriba e mantenos premidos no panel táctil"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Ver todas as aplicacións"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Preme a tecla de acción do teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Ben feito!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Completaches o titorial do xesto de ver todas as aplicacións"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Preme a tecla de acción do teclado para ver todas as aplicacións"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animación do titorial, fai clic para poñelo en pausa ou retomar a reprodución."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>

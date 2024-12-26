@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"మీ స్క్రీన్‌ను రికార్డ్ చేయాలా?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ఒక యాప్‌ను రికార్డ్ చేయండి"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ఫుల్ స్క్రీన్‌ను రికార్డ్ చేయండి"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"ఫుల్-స్క్రీన్‌ను రికార్డ్ చేయండి: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"మీ ఫుల్ స్క్రీన్‌ను మీరు రికార్డ్ చేసేటప్పుడు, మీ స్క్రీన్‌పై కనిపించేవన్నీ రికార్డ్ అవుతాయి. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"మీరు యాప్‌ను రికార్డ్ చేసేటప్పుడు, సంబంధిత యాప్‌లో కనిపించేవన్నీ లేదా ప్లే అయ్యేవన్నీ రికార్డ్ అవుతాయి. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"స్క్రీన్‌ను రికార్డ్ చేయండి"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ప్రీసెట్‌ను అప్‌డేట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ప్రీసెట్"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ఎంచుకోబడింది"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"టూల్స్"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"లైవ్ క్యాప్షన్"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"గమనిక"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"తక్కువ ప్రాధాన్యత నోటిఫికేషన్ చిహ్నాలను చూపించు"</string>
     <string name="other" msgid="429768510980739978">"ఇతరం"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"టైల్‌ను తీసివేయండి"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ముగించడానికి టైల్‌ను జోడించండి"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"టైల్‌ను తరలించండి"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"టైల్‌ను జోడించండి"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>కు తరలించండి"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> స్థానానికి జోడించండి"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ప్రస్తుత పొజిషన్ చెల్లదు."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని ఎడిట్ చేయండి."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"పవర్ మెనూ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(డిస్కనెక్ట్ అయ్యింది)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"స్విచ్ చేయడం సాధ్యం కాదు. మళ్ళీ ట్రై చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"పరికరాన్ని కనెక్ట్ చేయండి"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ఈ సెషన్‌ను ప్రసారం చేయడానికి, దయచేసి యాప్‌ను తెరవండి."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"తెలియని యాప్"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ఆడియో అవుట్‌పుట్ కోసం అందుబాటులో ఉన్న పరికరాలు."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ఇటీవలి యాప్‌లను చూడండి"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"పూర్తయింది"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"మళ్లీ ట్రై చేయండి!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"వెనుకకు"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి ఎడమ వైపునకు లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"సూపర్!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"తిరిగి వెనుకకు వెళ్ళడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"మీ టచ్‌ప్యాడ్‌ను ఉపయోగించి తిరిగి వెనక్కి వెళ్లడానికి, మూడు వేళ్లను ఉపయోగించి ఎడమ వైపునకు లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"మీ టచ్‌ప్యాడ్‌పై మూడు వేళ్లతో పైకి స్వైప్ చేయండి"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"చక్కగా పూర్తి చేశారు!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"మీరు మొదటి స్క్రీన్‌కు వెళ్లే సంజ్ఞను పూర్తి చేశారు"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"మీ మొదటి స్క్రీన్‌కు వెళ్లడానికి మీ టచ్‌ప్యాడ్‌పై మూడు వేళ్లతో పైకి స్వైప్ చేయండి"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ఇటీవలి యాప్‌లను చూడండి"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"చక్కగా పూర్తి చేశారు!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ఇటీవలి యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ఇటీవలి యాప్‌లను చూడటానికి, మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"అన్ని యాప్‌లను చూడండి"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"చక్కగా చేశారు!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"అన్ని యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"మీ యాప్‌లన్నింటినీ చూడటానికి మీ కీబోర్డ్‌లోని యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ట్యుటోరియల్ యానిమేషన్, పాజ్ చేసి, మళ్లీ ప్లే చేయడానికి క్లిక్ చేయండి."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>

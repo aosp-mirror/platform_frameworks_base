@@ -111,8 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ekranınız kaydedilsin mi?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Bir uygulamayı kaydet"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Tüm ekranı kaydet"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Tüm ekranı kaydet: %s"</string>
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
+    <skip />
+    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
+    <skip />
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Ekranın tamamını kaydederken ekranınızda gösterilen her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Bir uygulamayı kaydettiğinizde o uygulamada gösterilen veya oynatılan her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekranı kaydet"</string>
@@ -415,6 +417,20 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Hazır ayar güncellenemedi"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Hazır Ayar"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Seçili"</string>
+    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
+    <skip />
+    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
+    <skip />
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Araçlar"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Canlı Altyazı"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Not"</string>
@@ -960,9 +976,11 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Düşük öncelikli bildirim simgelerini göster"</string>
     <string name="other" msgid="429768510980739978">"Diğer"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Kutuyu kaldırmak için"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"Sona kutu eklemek için"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kutuyu taşı"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Kutu ekle"</string>
+    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
+    <skip />
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna taşı"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna ekle"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Konum geçersiz."</string>
@@ -978,7 +996,8 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"kullanıcı seç"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"İnternet yok"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ayarlarını aç."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Ayarların sırasını düzenle."</string>
+    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
+    <skip />
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Güç menüsü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kilit ekranı"</string>
@@ -1209,7 +1228,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(bağlantı kesildi)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Geçiş yapılamıyor. Tekrar denemek için dokunun."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Cihaz bağla"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Bu oturumu yayınlamak için lütfen uygulamayı açın."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Bilinmeyen uygulama"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Yayını durdur"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Ses çıkışı için kullanılabilir cihazlar."</string>
@@ -1468,32 +1486,27 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ana sayfaya git"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Son uygulamaları görüntüle"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Bitti"</string>
-    <!-- no translation found for gesture_error_title (469064941635578511) -->
-    <skip />
+    <string name="gesture_error_title" msgid="469064941635578511">"Tekrar deneyin."</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Geri dön"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Dokunmatik alanda üç parmağınızla sola veya sağa kaydırın"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Güzel!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Geri dön hareketini tamamladınız."</string>
-    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
-    <skip />
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Dokunmatik alanı kullanarak geri dönmek için üç parmağınızla sola veya sağa kaydırın"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ana sayfaya gidin"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Dokunmatik alanda üç parmağınızla yukarı kaydırın"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Tebrikler!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Ana ekrana git hareketini tamamladınız"</string>
-    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
-    <skip />
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Ana ekranınıza gitmek için dokunmatik alanda üç parmağınızla yukarı kaydırın"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Son uygulamaları görüntüle"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Dokunmatik alanda üç parmağınızla yukarı doğru kaydırıp basılı tutun"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Tebrikler!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Son uygulamaları görüntüleme hareketini tamamladınız."</string>
-    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
-    <skip />
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Son kullanılan uygulamaları görüntülemek için dokunmatik alanda üç parmağınızla yukarı kaydırıp basılı tutun"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Tüm uygulamaları göster"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Klavyenizde eylem tuşuna basın"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Tebrikler!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Tüm uygulamaları görüntüleme hareketini tamamladınız"</string>
-    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
-    <skip />
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Tüm uygulamalarınızı görüntülemek için klavyenizdeki eylem tuşuna basın"</string>
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Eğitim animasyonu, oynatmayı duraklatmak ve sürdürmek için tıklayın."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klavye aydınlatması"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Seviye %1$d / %2$d"</string>
