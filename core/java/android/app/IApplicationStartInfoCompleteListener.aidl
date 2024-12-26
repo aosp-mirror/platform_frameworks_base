@@ -25,6 +25,6 @@ import android.app.ApplicationStartInfo;
  *
  * @hide
  */
-interface IApplicationStartInfoCompleteListener {
+oneway interface IApplicationStartInfoCompleteListener {
     void onApplicationStartInfoComplete(in ApplicationStartInfo applicationStartInfo);
 }
