@@ -1594,12 +1594,9 @@ public final class HintManagerService extends SystemService {
                 }
                 halParams.tids = params.tids;
             }
-            if (halParams.calculationWindowMillis
-                    == mDefaultCpuHeadroomCalculationWindowMillis) {
-                synchronized (mCpuHeadroomLock) {
-                    final CpuHeadroomResult res = mCpuHeadroomCache.get(halParams);
-                    if (res != null) return res;
-                }
+            synchronized (mCpuHeadroomLock) {
+                final CpuHeadroomResult res = mCpuHeadroomCache.get(halParams);
+                if (res != null) return res;
             }
             final boolean shouldCheckUserModeCpuTime =
                     mEnforceCpuHeadroomUserModeCpuTimeCheck
@@ -1622,11 +1619,8 @@ public final class HintManagerService extends SystemService {
                     Slog.wtf(TAG, "CPU headroom from Power HAL is invalid");
                     return null;
                 }
-                if (halParams.calculationWindowMillis
-                        == mDefaultCpuHeadroomCalculationWindowMillis) {
-                    synchronized (mCpuHeadroomLock) {
-                        mCpuHeadroomCache.add(halParams, result);
-                    }
+                synchronized (mCpuHeadroomLock) {
+                    mCpuHeadroomCache.add(halParams, result);
                 }
                 if (shouldCheckUserModeCpuTime) {
                     synchronized (mCpuHeadroomLock) {
@@ -1737,12 +1731,9 @@ public final class HintManagerService extends SystemService {
             final GpuHeadroomParams halParams = new GpuHeadroomParams();
             halParams.calculationType = params.calculationType;
             halParams.calculationWindowMillis = params.calculationWindowMillis;
-            if (halParams.calculationWindowMillis
-                    == mDefaultGpuHeadroomCalculationWindowMillis) {
-                synchronized (mGpuHeadroomLock) {
-                    final GpuHeadroomResult res = mGpuHeadroomCache.get(halParams);
-                    if (res != null) return res;
-                }
+            synchronized (mGpuHeadroomLock) {
+                final GpuHeadroomResult res = mGpuHeadroomCache.get(halParams);
+                if (res != null) return res;
             }
             // return from HAL directly
             try {
@@ -1751,11 +1742,8 @@ public final class HintManagerService extends SystemService {
                     Slog.wtf(TAG, "GPU headroom from Power HAL is invalid");
                     return null;
                 }
-                if (halParams.calculationWindowMillis
-                        == mDefaultGpuHeadroomCalculationWindowMillis) {
-                    synchronized (mGpuHeadroomLock) {
-                        mGpuHeadroomCache.add(halParams, headroom);
-                    }
+                synchronized (mGpuHeadroomLock) {
+                    mGpuHeadroomCache.add(halParams, headroom);
                 }
                 return headroom;
             } catch (RemoteException e) {
