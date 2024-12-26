@@ -17,7 +17,7 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.settingslib.satellite.SatelliteDialogUtils.TYPE_IS_WIFI;
 import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
-import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+import static com.android.systemui.qs.tiles.dialog.InternetDetailsContentController.MAX_WIFI_ENTRY_COUNT;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -92,7 +92,7 @@ import java.util.concurrent.Executor;
  */
 public class InternetDialogDelegate implements
         SystemUIDialog.Delegate,
-        InternetDialogController.InternetDialogCallback {
+        InternetDetailsContentController.InternetDialogCallback {
     private static final String TAG = "InternetDialog";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -120,7 +120,7 @@ public class InternetDialogDelegate implements
     @Nullable
     private AlertDialog mAlertDialog;
     private final UiEventLogger mUiEventLogger;
-    private final InternetDialogController mInternetDialogController;
+    private final InternetDetailsContentController mInternetDetailsContentController;
     private TextView mInternetDialogTitle;
     private TextView mInternetDialogSubTitle;
     private View mDivider;
@@ -195,7 +195,7 @@ public class InternetDialogDelegate implements
     public InternetDialogDelegate(
             @ShadeDisplayAware Context context,
             InternetDialogManager internetDialogManager,
-            InternetDialogController internetDialogController,
+            InternetDetailsContentController internetDetailsContentController,
             @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigMobileData,
             @Assisted(CAN_CONFIG_WIFI) boolean canConfigWifi,
             @Assisted(ABOVE_STATUS_BAR) boolean aboveStatusBar,
@@ -218,8 +218,8 @@ public class InternetDialogDelegate implements
         mHandler = handler;
         mBackgroundExecutor = executor;
         mInternetDialogManager = internetDialogManager;
-        mInternetDialogController = internetDialogController;
-        mDefaultDataSubId = mInternetDialogController.getDefaultDataSubscriptionId();
+        mInternetDetailsContentController = internetDetailsContentController;
+        mDefaultDataSubId = mInternetDetailsContentController.getDefaultDataSubscriptionId();
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
         mCanChangeWifiState = WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(context);
@@ -227,7 +227,7 @@ public class InternetDialogDelegate implements
         mCoroutineScope = coroutineScope;
         mUiEventLogger = uiEventLogger;
         mDialogTransitionAnimator = dialogTransitionAnimator;
-        mAdapter = new InternetAdapter(mInternetDialogController, coroutineScope);
+        mAdapter = new InternetAdapter(mInternetDetailsContentController, coroutineScope);
     }
 
     @Override
@@ -309,7 +309,8 @@ public class InternetDialogDelegate implements
         setOnClickListener(dialog);
         mTurnWifiOnLayout.setBackground(null);
         mAirplaneModeButton.setVisibility(
-                mInternetDialogController.isAirplaneModeEnabled() ? View.VISIBLE : View.GONE);
+                mInternetDetailsContentController.isAirplaneModeEnabled() ? View.VISIBLE
+                        : View.GONE);
         mWifiRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         mWifiRecyclerView.setAdapter(mAdapter);
 
@@ -324,7 +325,7 @@ public class InternetDialogDelegate implements
 
         mLifecycleRegistry.setCurrentState(Lifecycle.State.RESUMED);
 
-        mInternetDialogController.onStart(this, mCanConfigWifi);
+        mInternetDetailsContentController.onStart(this, mCanConfigWifi);
         if (!mCanConfigWifi) {
             hideWifiViews();
         }
@@ -356,7 +357,7 @@ public class InternetDialogDelegate implements
         mDoneButton.setOnClickListener(null);
         mShareWifiButton.setOnClickListener(null);
         mAirplaneModeButton.setOnClickListener(null);
-        mInternetDialogController.onStop();
+        mInternetDetailsContentController.onStop();
         mInternetDialogManager.destroyDialog();
     }
 
@@ -413,18 +414,20 @@ public class InternetDialogDelegate implements
         internetContent.mInternetDialogSubTitle = getSubtitleText();
         if (shouldUpdateMobileNetwork) {
             internetContent.mActiveNetworkIsCellular =
-                    mInternetDialogController.activeNetworkIsCellular();
+                    mInternetDetailsContentController.activeNetworkIsCellular();
             internetContent.mIsCarrierNetworkActive =
-                    mInternetDialogController.isCarrierNetworkActive();
+                    mInternetDetailsContentController.isCarrierNetworkActive();
         }
-        internetContent.mIsAirplaneModeEnabled = mInternetDialogController.isAirplaneModeEnabled();
-        internetContent.mHasEthernet = mInternetDialogController.hasEthernet();
-        internetContent.mIsWifiEnabled = mInternetDialogController.isWifiEnabled();
-        internetContent.mHasActiveSubIdOnDds = mInternetDialogController.hasActiveSubIdOnDds();
-        internetContent.mIsDeviceLocked = mInternetDialogController.isDeviceLocked();
-        internetContent.mIsWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
+        internetContent.mIsAirplaneModeEnabled =
+                mInternetDetailsContentController.isAirplaneModeEnabled();
+        internetContent.mHasEthernet = mInternetDetailsContentController.hasEthernet();
+        internetContent.mIsWifiEnabled = mInternetDetailsContentController.isWifiEnabled();
+        internetContent.mHasActiveSubIdOnDds =
+                mInternetDetailsContentController.hasActiveSubIdOnDds();
+        internetContent.mIsDeviceLocked = mInternetDetailsContentController.isDeviceLocked();
+        internetContent.mIsWifiScanEnabled = mInternetDetailsContentController.isWifiScanEnabled();
         internetContent.mActiveAutoSwitchNonDdsSubId =
-                mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+                mInternetDetailsContentController.getActiveAutoSwitchNonDdsSubId();
         return internetContent;
     }
 
@@ -432,8 +435,8 @@ public class InternetDialogDelegate implements
         InternetContent internetContent = new InternetContent();
         internetContent.mInternetDialogTitleString = getDialogTitleText();
         internetContent.mInternetDialogSubTitle = getSubtitleText();
-        internetContent.mIsWifiEnabled = mInternetDialogController.isWifiEnabled();
-        internetContent.mIsDeviceLocked = mInternetDialogController.isDeviceLocked();
+        internetContent.mIsWifiEnabled = mInternetDetailsContentController.isWifiEnabled();
+        internetContent.mIsDeviceLocked = mInternetDetailsContentController.isDeviceLocked();
         return internetContent;
     }
 
@@ -447,15 +450,15 @@ public class InternetDialogDelegate implements
             if (autoSwitchNonDdsSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 showTurnOffAutoDataSwitchDialog(dialog, autoSwitchNonDdsSubId);
             }
-            mInternetDialogController.connectCarrierNetwork();
+            mInternetDetailsContentController.connectCarrierNetwork();
         });
         mMobileDataToggle.setOnClickListener(v -> {
             boolean isChecked = mMobileDataToggle.isChecked();
             if (!isChecked && shouldShowMobileDialog()) {
                 mMobileDataToggle.setChecked(true);
                 showTurnOffMobileDialog(dialog);
-            } else if (mInternetDialogController.isMobileDataEnabled() != isChecked) {
-                mInternetDialogController.setMobileDataEnabled(
+            } else if (mInternetDetailsContentController.isMobileDataEnabled() != isChecked) {
+                mInternetDetailsContentController.setMobileDataEnabled(
                         dialog.getContext(), mDefaultDataSubId, isChecked, false);
             }
         });
@@ -466,12 +469,13 @@ public class InternetDialogDelegate implements
         });
         mDoneButton.setOnClickListener(v -> dialog.dismiss());
         mShareWifiButton.setOnClickListener(v -> {
-            if (mInternetDialogController.mayLaunchShareWifiSettings(mConnectedWifiEntry, v)) {
+            if (mInternetDetailsContentController.mayLaunchShareWifiSettings(mConnectedWifiEntry,
+                    v)) {
                 mUiEventLogger.log(InternetDialogEvent.SHARE_WIFI_QS_BUTTON_CLICKED);
             }
         });
         mAirplaneModeButton.setOnClickListener(v -> {
-            mInternetDialogController.setAirplaneModeDisabled();
+            mInternetDetailsContentController.setAirplaneModeDisabled();
         });
     }
 
@@ -495,10 +499,10 @@ public class InternetDialogDelegate implements
     }
 
     private void setWifiEnable(boolean isChecked) {
-        if (mInternetDialogController.isWifiEnabled() == isChecked) {
+        if (mInternetDetailsContentController.isWifiEnabled() == isChecked) {
             return;
         }
-        mInternetDialogController.setWifiEnabled(isChecked);
+        mInternetDetailsContentController.setWifiEnabled(isChecked);
     }
 
     @MainThread
@@ -534,7 +538,7 @@ public class InternetDialogDelegate implements
             }
         } else {
             mMobileNetworkLayout.setVisibility(View.VISIBLE);
-            mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
+            mMobileDataToggle.setChecked(mInternetDetailsContentController.isMobileDataEnabled());
             mMobileTitleText.setText(getMobileNetworkTitle(mDefaultDataSubId));
             String summary = getMobileNetworkSummary(mDefaultDataSubId);
             if (!TextUtils.isEmpty(summary)) {
@@ -679,10 +683,10 @@ public class InternetDialogDelegate implements
         mConnectedWifiTitleText.setText(mConnectedWifiEntry.getTitle());
         mConnectedWifiSummaryText.setText(mConnectedWifiEntry.getSummary(false));
         mConnectedWifiIcon.setImageDrawable(
-                mInternetDialogController.getInternetWifiDrawable(mConnectedWifiEntry));
+                mInternetDetailsContentController.getInternetWifiDrawable(mConnectedWifiEntry));
         mWifiSettingsIcon.setColorFilter(
                 mDialog.getContext().getColor(R.color.connected_network_primary_color));
-        if (mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+        if (mInternetDetailsContentController.getConfiguratorQrCodeGeneratorIntentOrNull(
                 mConnectedWifiEntry) != null) {
             mShareWifiButton.setVisibility(View.VISIBLE);
         } else {
@@ -748,7 +752,7 @@ public class InternetDialogDelegate implements
         if (TextUtils.isEmpty(mWifiScanNotifyText.getText())) {
             final AnnotationLinkSpan.LinkInfo linkInfo = new AnnotationLinkSpan.LinkInfo(
                     AnnotationLinkSpan.LinkInfo.DEFAULT_ANNOTATION,
-                    mInternetDialogController::launchWifiScanningSetting);
+                    mInternetDetailsContentController::launchWifiScanningSetting);
             mWifiScanNotifyText.setText(AnnotationLinkSpan.linkify(
                     mDialog.getContext().getText(R.string.wifi_scan_notify_message), linkInfo));
             mWifiScanNotifyText.setMovementMethod(LinkMovementMethod.getInstance());
@@ -760,37 +764,38 @@ public class InternetDialogDelegate implements
         if (mConnectedWifiEntry == null) {
             return;
         }
-        mInternetDialogController.launchWifiDetailsSetting(mConnectedWifiEntry.getKey(), view);
+        mInternetDetailsContentController.launchWifiDetailsSetting(mConnectedWifiEntry.getKey(),
+                view);
     }
 
     /** For DSDS auto data switch **/
     void onClickConnectedSecondarySub(View view) {
-        mInternetDialogController.launchMobileNetworkSettings(view);
+        mInternetDetailsContentController.launchMobileNetworkSettings(view);
     }
 
     void onClickSeeMoreButton(View view) {
-        mInternetDialogController.launchNetworkSetting(view);
+        mInternetDetailsContentController.launchNetworkSetting(view);
     }
 
     CharSequence getDialogTitleText() {
-        return mInternetDialogController.getDialogTitleText();
+        return mInternetDetailsContentController.getDialogTitleText();
     }
 
     @Nullable
     CharSequence getSubtitleText() {
-        return mInternetDialogController.getSubtitleText(mIsProgressBarVisible);
+        return mInternetDetailsContentController.getSubtitleText(mIsProgressBarVisible);
     }
 
     private Drawable getSignalStrengthDrawable(int subId) {
-        return mInternetDialogController.getSignalStrengthDrawable(subId);
+        return mInternetDetailsContentController.getSignalStrengthDrawable(subId);
     }
 
     CharSequence getMobileNetworkTitle(int subId) {
-        return mInternetDialogController.getMobileNetworkTitle(subId);
+        return mInternetDetailsContentController.getMobileNetworkTitle(subId);
     }
 
     String getMobileNetworkSummary(int subId) {
-        return mInternetDialogController.getMobileNetworkSummary(subId);
+        return mInternetDetailsContentController.getMobileNetworkSummary(subId);
     }
 
     private void setProgressBarVisible(boolean visible) {
@@ -810,7 +815,7 @@ public class InternetDialogDelegate implements
         }
         boolean flag = Prefs.getBoolean(mDialog.getContext(), QS_HAS_TURNED_OFF_MOBILE_DATA,
                 false);
-        if (mInternetDialogController.isMobileDataEnabled() && !flag) {
+        if (mInternetDetailsContentController.isMobileDataEnabled() && !flag) {
             return true;
         }
         return false;
@@ -819,7 +824,8 @@ public class InternetDialogDelegate implements
     private void showTurnOffMobileDialog(SystemUIDialog dialog) {
         Context context = dialog.getContext();
         CharSequence carrierName = getMobileNetworkTitle(mDefaultDataSubId);
-        boolean isInService = mInternetDialogController.isVoiceStateInService(mDefaultDataSubId);
+        boolean isInService = mInternetDetailsContentController.isVoiceStateInService(
+                mDefaultDataSubId);
         if (TextUtils.isEmpty(carrierName) || !isInService) {
             carrierName = context.getString(R.string.mobile_data_disable_message_default_carrier);
         }
@@ -831,7 +837,7 @@ public class InternetDialogDelegate implements
                 .setPositiveButton(
                         com.android.internal.R.string.alert_windows_notification_turn_off_action,
                         (d, w) -> {
-                            mInternetDialogController.setMobileDataEnabled(context,
+                            mInternetDetailsContentController.setMobileDataEnabled(context,
                                     mDefaultDataSubId, false, false);
                             mMobileDataToggle.setChecked(false);
                             Prefs.putBoolean(context, QS_HAS_TURNED_OFF_MOBILE_DATA, true);
@@ -858,7 +864,7 @@ public class InternetDialogDelegate implements
                         })
                 .setPositiveButton(R.string.auto_data_switch_dialog_positive_button,
                         (d, w) -> {
-                            mInternetDialogController
+                            mInternetDetailsContentController
                                     .setAutoDataSwitchMobileDataPolicy(subId, false);
                             if (mSecondaryMobileNetworkLayout != null) {
                                 mSecondaryMobileNetworkLayout.setVisibility(View.GONE);
@@ -938,7 +944,7 @@ public class InternetDialogDelegate implements
             @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries) {
         // Should update the carrier network layout when it is connected under airplane mode ON.
         boolean shouldUpdateCarrierNetwork = mMobileNetworkLayout.getVisibility() == View.VISIBLE
-                && mInternetDialogController.isAirplaneModeEnabled();
+                && mInternetDetailsContentController.isAirplaneModeEnabled();
         mHandler.post(() -> {
             mConnectedWifiEntry = connectedEntry;
             mWifiEntriesCount = wifiEntries == null ? 0 : wifiEntries.size();

@@ -1,6 +1,6 @@
 package com.android.systemui.qs.tiles.dialog;
 
-import static com.android.systemui.qs.tiles.dialog.InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+import static com.android.systemui.qs.tiles.dialog.InternetDetailsContentController.MAX_WIFI_ENTRY_COUNT;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -63,7 +63,7 @@ public class InternetAdapterTest extends SysuiTestCase {
     @Mock
     private WifiEntry mWifiEntry;
     @Mock
-    private InternetDialogController mInternetDialogController;
+    private InternetDetailsContentController mInternetDetailsContentController;
     @Mock
     private Drawable mWifiDrawable;
     @Mock
@@ -86,7 +86,7 @@ public class InternetAdapterTest extends SysuiTestCase {
         when(mWifiEntry.getTitle()).thenReturn(WIFI_TITLE);
         when(mWifiEntry.getSummary(false)).thenReturn(WIFI_SUMMARY);
 
-        mInternetAdapter = new InternetAdapter(mInternetDialogController, mScope);
+        mInternetAdapter = new InternetAdapter(mInternetDetailsContentController, mScope);
         mViewHolder = mInternetAdapter.onCreateViewHolder(new LinearLayout(mContext), 0);
         mInternetAdapter.setWifiEntries(Arrays.asList(mWifiEntry), 1 /* wifiEntriesCount */);
     }
@@ -124,7 +124,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     @Test
     public void onBindViewHolder_getWifiDrawableNull_noCrash() {
-        when(mInternetDialogController.getWifiDrawable(any())).thenReturn(null);
+        when(mInternetDetailsContentController.getWifiDrawable(any())).thenReturn(null);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
@@ -133,7 +133,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
     @Test
     public void onBindViewHolder_getWifiDrawableNotNull_setWifiIconDrawable() {
-        when(mInternetDialogController.getWifiDrawable(any())).thenReturn(mWifiDrawable);
+        when(mInternetDetailsContentController.getWifiDrawable(any())).thenReturn(mWifiDrawable);
 
         mInternetAdapter.onBindViewHolder(mViewHolder, 0);
 
@@ -232,7 +232,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
 
-        verify(mInternetDialogController).startActivityForDialog(any());
+        verify(mInternetDetailsContentController).startActivityForDialog(any());
         verify(mSpyContext, never()).startActivity(any());
     }
 
@@ -242,7 +242,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
 
-        verify(mInternetDialogController).connect(mWifiEntry);
+        verify(mInternetDetailsContentController).connect(mWifiEntry);
     }
 
     @Test
@@ -252,7 +252,7 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
 
-        verify(mInternetDialogController).launchWifiDetailsSetting(anyString(), any());
+        verify(mInternetDetailsContentController).launchWifiDetailsSetting(anyString(), any());
     }
 
     @Test
