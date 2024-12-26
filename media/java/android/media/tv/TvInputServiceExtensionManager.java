@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
-import android.annotation.SystemApi;
 import android.media.tv.flags.Flags;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -45,7 +44,6 @@ import java.util.Set;
  *
  * @hide
  */
-@SystemApi
 @FlaggedApi(Flags.FLAG_TIF_EXTENSION_STANDARDIZATION)
 public final class TvInputServiceExtensionManager {
     private static final String TAG = "TvInputServiceExtensionManager";
@@ -65,7 +63,6 @@ public final class TvInputServiceExtensionManager {
     private static final String ANALOG_PACKAGE = "android.media.tv.extension.analog.";
     private static final String TUNE_PACKAGE = "android.media.tv.extension.tune.";
 
-    /** @hide */
     @IntDef(prefix = {"REGISTER_"}, value = {
             REGISTER_SUCCESS,
             REGISTER_FAIL_NAME_NOT_STANDARDIZED,
@@ -93,7 +90,6 @@ public final class TvInputServiceExtensionManager {
      */
     public static final int REGISTER_FAIL_REMOTE_EXCEPTION = 3;
 
-    /** @hide */
     @StringDef({
             ISCAN_INTERFACE,
             ISCAN_SESSION,
@@ -685,8 +681,6 @@ public final class TvInputServiceExtensionManager {
 
     /**
      * Function to return available extension interface names
-     *
-     * @hide
      */
     public static @NonNull List<String> getStandardExtensionInterfaceNames() {
         return new ArrayList<>(sTisExtensions);
@@ -711,10 +705,7 @@ public final class TvInputServiceExtensionManager {
      *         {@link #REGISTER_FAIL_IMPLEMENTATION_NOT_STANDARDIZED} on failure due to IBinder not
      *              implementing standardized AIDL interface
      *         {@link #REGISTER_FAIL_REMOTE_EXCEPTION} on failure due to remote exception
-     *
-     * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     @RegisterResult
     public int registerExtensionIBinder(@StandardizedExtensionName @NonNull String extensionName,
