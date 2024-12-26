@@ -22,6 +22,7 @@ import static com.android.settingslib.enterprise.ActionDisabledLearnMoreButtonLa
 import static com.android.settingslib.enterprise.ManagedDeviceActionDisabledByAdminController.DEFAULT_FOREGROUND_USER_CHECKER;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.supervision.SupervisionManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -59,12 +60,18 @@ public final class ActionDisabledByAdminControllerFactory {
     }
 
     private static boolean isSupervisedDevice(Context context) {
-        DevicePolicyManager devicePolicyManager =
-                context.getSystemService(DevicePolicyManager.class);
-        ComponentName supervisionComponent =
-                devicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
-                        new UserHandle(UserHandle.myUserId()));
-        return supervisionComponent != null;
+        if (android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()) {
+            SupervisionManager supervisionManager =
+                    context.getSystemService(SupervisionManager.class);
+            return supervisionManager.isSupervisionEnabledForUser(UserHandle.myUserId());
+        } else {
+            DevicePolicyManager devicePolicyManager =
+                    context.getSystemService(DevicePolicyManager.class);
+            ComponentName supervisionComponent =
+                    devicePolicyManager.getProfileOwnerOrDeviceOwnerSupervisionComponent(
+                            new UserHandle(UserHandle.myUserId()));
+            return supervisionComponent != null;
+        }
     }
 
     /**
