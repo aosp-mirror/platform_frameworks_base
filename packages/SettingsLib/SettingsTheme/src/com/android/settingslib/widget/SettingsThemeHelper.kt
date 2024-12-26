@@ -21,6 +21,7 @@ import android.os.Build
 
 object SettingsThemeHelper {
     private const val IS_EXPRESSIVE_DESIGN_ENABLED = "is_expressive_design_enabled"
+    private const val RO_BUILD_CHARACTERISTICS = "ro.build.characteristics"
     private var expressiveThemeState: ExpressiveThemeState = ExpressiveThemeState.UNKNOWN
 
     enum class ExpressiveThemeState {
@@ -39,6 +40,12 @@ object SettingsThemeHelper {
         }
 
         return expressiveThemeState == ExpressiveThemeState.ENABLED
+    }
+
+    @JvmStatic
+    fun isTablet(context: Context): Boolean {
+        val result = getPropString(context, RO_BUILD_CHARACTERISTICS, "").split(',')
+        return result.contains("tablet")
     }
 
     private fun tryInit(context: Context) {
@@ -67,6 +74,21 @@ object SettingsThemeHelper {
 
             val params = arrayOf<Any>(property, def)
             getBoolean.invoke(systemProperties, *params) as Boolean
+        } catch (iae: IllegalArgumentException) {
+            throw iae
+        } catch (exception: Exception) {
+            def
+        }
+    }
+
+    private fun getPropString(context: Context, property: String, def: String): String {
+        return try {
+            val systemProperties = context.classLoader.loadClass("android.os.SystemProperties")
+
+            val paramTypes =
+                arrayOf<Class<*>?>(String::class.java, String::class.java)
+            val get = systemProperties.getMethod("get", *paramTypes)
+            get.invoke(systemProperties, property, def) as String
         } catch (iae: IllegalArgumentException) {
             throw iae
         } catch (exception: Exception) {
