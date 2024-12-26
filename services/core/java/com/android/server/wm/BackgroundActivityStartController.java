@@ -515,7 +515,9 @@ public class BackgroundActivityStartController {
                 return !callerExplicitOptOut();
             }
             return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+                    != MODE_BACKGROUND_ACTIVITY_START_DENIED
+                    && mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
         }
 
         public boolean realCallerExplicitOptInOrAutoOptIn() {
@@ -523,7 +525,9 @@ public class BackgroundActivityStartController {
                 return !realCallerExplicitOptOut();
             }
             return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+                    != MODE_BACKGROUND_ACTIVITY_START_DENIED
+                    && mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
         }
 
         public boolean callerExplicitOptOut() {
