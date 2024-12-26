@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_DOZING_DURATION
@@ -73,7 +72,11 @@ constructor(
         transitionAnimation.sharedFlow(
             duration = TO_DOZING_DURATION,
             onStep = { step ->
-                MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, step)
+                transitionProgressToBlurRadius(
+                    starBlurRadius = blurConfig.maxBlurRadiusPx,
+                    endBlurRadius = blurConfig.minBlurRadiusPx,
+                    transitionProgress = step,
+                )
             },
             onFinish = { blurConfig.minBlurRadiusPx },
         )

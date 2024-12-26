@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.transitions
 
 import android.content.res.Resources
-import com.android.systemui.Flags.notificationShadeBlur
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGlanceableHubT
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.res.R
+import com.android.systemui.window.flag.WindowBlurFlag
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,14 @@ import kotlinx.coroutines.flow.Flow
 interface PrimaryBouncerTransition {
     /** Radius of blur applied to the window's root view. */
     val windowBlurRadius: Flow<Float>
+
+    fun transitionProgressToBlurRadius(
+        starBlurRadius: Float,
+        endBlurRadius: Float,
+        transitionProgress: Float,
+    ): Float {
+        return MathUtils.lerp(starBlurRadius, endBlurRadius, transitionProgress)
+    }
 }
 
 /**
@@ -111,7 +120,7 @@ interface PrimaryBouncerTransitionModule {
         fun provideBlurConfig(@Main resources: Resources): BlurConfig {
             val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
             val maxBlurRadius =
-                if (notificationShadeBlur()) {
+                if (WindowBlurFlag.isEnabled) {
                     resources.getDimensionPixelSize(R.dimen.max_shade_window_blur_radius)
                 } else {
                     resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)

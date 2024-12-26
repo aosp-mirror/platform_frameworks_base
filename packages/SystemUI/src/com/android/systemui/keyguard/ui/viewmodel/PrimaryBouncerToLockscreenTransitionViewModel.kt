@@ -83,7 +83,11 @@ constructor(
                 transitionAnimation.sharedFlow(
                     duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
                     onStep = {
-                        MathUtils.lerp(blurConfig.maxBlurRadiusPx, blurConfig.minBlurRadiusPx, it)
+                        transitionProgressToBlurRadius(
+                            starBlurRadius = blurConfig.maxBlurRadiusPx,
+                            endBlurRadius = blurConfig.minBlurRadiusPx,
+                            transitionProgress = it,
+                        )
                     },
                 ),
         )
