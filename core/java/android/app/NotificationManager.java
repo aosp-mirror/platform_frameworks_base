@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.notification.Flags.notificationClassification;
 
@@ -50,6 +51,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IpcDataCache;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -70,6 +72,8 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1202,12 +1206,20 @@ public class NotificationManager {
      * package (see {@link Context#createPackageContext(String, int)}).</p>
      */
     public NotificationChannel getNotificationChannel(String channelId) {
-        INotificationManager service = service();
-        try {
-            return service.getNotificationChannel(mContext.getOpPackageName(),
-                    mContext.getUserId(), mContext.getPackageName(), channelId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfCacheChannels()) {
+            return getChannelFromList(channelId,
+                    mNotificationChannelListCache.query(new NotificationChannelQuery(
+                            mContext.getOpPackageName(),
+                            mContext.getPackageName(),
+                            mContext.getUserId())));
+        } else {
+            INotificationManager service = service();
+            try {
+                return service.getNotificationChannel(mContext.getOpPackageName(),
+                        mContext.getUserId(), mContext.getPackageName(), channelId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1222,13 +1234,21 @@ public class NotificationManager {
      */
     public @Nullable NotificationChannel getNotificationChannel(@NonNull String channelId,
             @NonNull String conversationId) {
-        INotificationManager service = service();
-        try {
-            return service.getConversationNotificationChannel(mContext.getOpPackageName(),
-                    mContext.getUserId(), mContext.getPackageName(), channelId, true,
-                    conversationId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfCacheChannels()) {
+            return getConversationChannelFromList(channelId, conversationId,
+                    mNotificationChannelListCache.query(new NotificationChannelQuery(
+                            mContext.getOpPackageName(),
+                            mContext.getPackageName(),
+                            mContext.getUserId())));
+        } else {
+            INotificationManager service = service();
+            try {
+                return service.getConversationNotificationChannel(mContext.getOpPackageName(),
+                        mContext.getUserId(), mContext.getPackageName(), channelId, true,
+                        conversationId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1241,13 +1261,60 @@ public class NotificationManager {
      * {@link Context#createPackageContext(String, int)}).</p>
      */
     public List<NotificationChannel> getNotificationChannels() {
-        INotificationManager service = service();
-        try {
-            return service.getNotificationChannels(mContext.getOpPackageName(),
-                    mContext.getPackageName(), mContext.getUserId()).getList();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfCacheChannels()) {
+            return mNotificationChannelListCache.query(new NotificationChannelQuery(
+               mContext.getOpPackageName(),
+               mContext.getPackageName(),
+               mContext.getUserId()));
+        } else {
+            INotificationManager service = service();
+            try {
+                return service.getNotificationChannels(mContext.getOpPackageName(),
+                        mContext.getPackageName(), mContext.getUserId()).getList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
+    }
+
+    // channel list assumed to be associated with the appropriate package & user id already.
+    private static NotificationChannel getChannelFromList(String channelId,
+            List<NotificationChannel> channels) {
+        if (channels == null) {
+            return null;
+        }
+        if (channelId == null) {
+            channelId = DEFAULT_CHANNEL_ID;
+        }
+        for (NotificationChannel channel : channels) {
+            if (channelId.equals(channel.getId())) {
+                return channel;
+            }
+        }
+        return null;
+    }
+
+    private static NotificationChannel getConversationChannelFromList(String channelId,
+            String conversationId, List<NotificationChannel> channels) {
+        if (channels == null) {
+            return null;
+        }
+        if (channelId == null) {
+            channelId = DEFAULT_CHANNEL_ID;
+        }
+        if (conversationId == null) {
+            return getChannelFromList(channelId, channels);
+        }
+        NotificationChannel parent = null;
+        for (NotificationChannel channel : channels) {
+            if (conversationId.equals(channel.getConversationId())
+                    && channelId.equals(channel.getParentChannelId())) {
+                return channel;
+            } else if (channelId.equals(channel.getId())) {
+                parent = channel;
+            }
+        }
+        return parent;
     }
 
     /**
@@ -1326,6 +1393,71 @@ public class NotificationManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private static final String NOTIFICATION_CHANNEL_CACHE_API = "getNotificationChannel";
+    private static final String NOTIFICATION_CHANNEL_LIST_CACHE_NAME = "getNotificationChannels";
+    private static final int NOTIFICATION_CHANNEL_CACHE_SIZE = 10;
+
+    private final IpcDataCache.QueryHandler<NotificationChannelQuery, List<NotificationChannel>>
+            mNotificationChannelListQueryHandler = new IpcDataCache.QueryHandler<>() {
+                @Override
+                public List<NotificationChannel> apply(NotificationChannelQuery query) {
+                    INotificationManager service = service();
+                    try {
+                        return service.getNotificationChannels(query.callingPkg,
+                                query.targetPkg, query.userId).getList();
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+
+                @Override
+                public boolean shouldBypassCache(@NonNull NotificationChannelQuery query) {
+                    // Other locations should also not be querying the cache in the first place if
+                    // the flag is not enabled, but this is an extra precaution.
+                    if (!Flags.nmBinderPerfCacheChannels()) {
+                        Log.wtf(TAG,
+                                "shouldBypassCache called when nm_binder_perf_cache_channels off");
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
+    private final IpcDataCache<NotificationChannelQuery, List<NotificationChannel>>
+            mNotificationChannelListCache =
+            new IpcDataCache<>(NOTIFICATION_CHANNEL_CACHE_SIZE, IpcDataCache.MODULE_SYSTEM,
+                    NOTIFICATION_CHANNEL_CACHE_API, NOTIFICATION_CHANNEL_LIST_CACHE_NAME,
+                    mNotificationChannelListQueryHandler);
+
+    private record NotificationChannelQuery(
+            String callingPkg,
+            String targetPkg,
+            int userId) {}
+
+    /**
+     * @hide
+     */
+    public static void invalidateNotificationChannelCache() {
+        if (Flags.nmBinderPerfCacheChannels()) {
+            IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
+                    NOTIFICATION_CHANNEL_CACHE_API);
+        } else {
+            // if we are here, we have failed to flag something
+            Log.wtf(TAG, "invalidateNotificationChannelCache called without flag");
+        }
+    }
+
+    /**
+     * For testing only: running tests with a cache requires marking the cache's property for
+     * testing, as test APIs otherwise cannot invalidate the cache. This must be called after
+     * calling PropertyInvalidatedCache.setTestMode(true).
+     * @hide
+     */
+    @VisibleForTesting
+    public void setChannelCacheToTestMode() {
+        mNotificationChannelListCache.testPropertyName();
     }
 
     /**
