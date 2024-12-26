@@ -1977,7 +1977,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             // No player registered or it's not enabled, so just finish/apply immediately
             if (!mIsPlayerEnabled) {
-                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Apply and finish immediately because player is disabled "
                                 + "for transition #%d .", mSyncId);
@@ -2078,6 +2078,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             change.setFlags(flags);
             break;
         }
+    }
+
+    // Note that this method is not called in WM lock.
+    @Override
+    public void onTransactionCommitted() {
+        mLogger.mTransactionCommitTimeNs = SystemClock.elapsedRealtimeNanos();
     }
 
     @Override
@@ -3991,7 +3997,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** @return true if all tracked subtrees are ready. */
         boolean allReady() {
             ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
-                    " allReady query: used=%b " + "override=%b defer=%d states=[%s]", mUsed,
+                    " allReady query: used=%b override=%b defer=%d states=[%s]", mUsed,
                     mReadyOverride, mDeferReadyDepth, groupsToString());
             // If the readiness has never been touched, mUsed will be false. We never want to
             // consider a transition ready if nothing has been reported on it.

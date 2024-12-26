@@ -774,7 +774,7 @@ class TransitionController {
                     "Disabling player for transition #%d because display isn't enabled yet",
                     transition.getSyncId());
             transition.mIsPlayerEnabled = false;
-            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
                     transition.getToken(), null));
             return transition;
@@ -1694,6 +1694,7 @@ class TransitionController {
         long mStartTimeNs;
         long mReadyTimeNs;
         long mSendTimeNs;
+        long mTransactionCommitTimeNs;
         long mFinishTimeNs;
         long mAbortTimeNs;
         TransitionRequestInfo mRequest;
@@ -1746,6 +1747,9 @@ class TransitionController {
             sb.append(" started=").append(toMsString(mStartTimeNs - mCreateTimeNs));
             sb.append(" ready=").append(toMsString(mReadyTimeNs - mCreateTimeNs));
             sb.append(" sent=").append(toMsString(mSendTimeNs - mCreateTimeNs));
+            if (mTransactionCommitTimeNs != 0) {
+                sb.append(" commit=").append(toMsString(mTransactionCommitTimeNs - mSendTimeNs));
+            }
             sb.append(" finished=").append(toMsString(mFinishTimeNs - mCreateTimeNs));
             return sb.toString();
         }
