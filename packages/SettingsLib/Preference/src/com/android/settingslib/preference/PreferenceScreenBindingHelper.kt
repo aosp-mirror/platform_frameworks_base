@@ -220,7 +220,7 @@ class PreferenceScreenBindingHelper(
         /** Updates preference screen that has incomplete hierarchy. */
         @JvmStatic
         fun bind(preferenceScreen: PreferenceScreen) {
-            PreferenceScreenRegistry[preferenceScreen.key]?.run {
+            PreferenceScreenRegistry.create(preferenceScreen.context, preferenceScreen.key)?.run {
                 if (!hasCompleteHierarchy()) {
                     val preferenceBindingFactory =
                         (this as? PreferenceScreenCreator)?.preferenceBindingFactory ?: return

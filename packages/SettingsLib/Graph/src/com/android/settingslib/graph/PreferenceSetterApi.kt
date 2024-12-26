@@ -112,7 +112,8 @@ class PreferenceSetterApiHandler(
         request: PreferenceSetterRequest,
     ): Int {
         val screenMetadata =
-            PreferenceScreenRegistry[request.screenKey] ?: return PreferenceSetterResult.UNSUPPORTED
+            PreferenceScreenRegistry.create(application, request.screenKey)
+                ?: return PreferenceSetterResult.UNSUPPORTED
         val key = request.key
         val metadata =
             screenMetadata.getPreferenceHierarchy(application).find(key)

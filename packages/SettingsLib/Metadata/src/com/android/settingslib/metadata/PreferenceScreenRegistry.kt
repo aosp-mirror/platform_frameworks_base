@@ -18,11 +18,6 @@ package com.android.settingslib.metadata
 
 import android.content.Context
 import com.android.settingslib.datastore.KeyValueStore
-import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
-import com.google.common.collect.ImmutableMap
-
-private typealias PreferenceScreenMap = ImmutableMap<String, PreferenceScreenMetadata>
 
 /** Registry of all available preference screens in the app. */
 object PreferenceScreenRegistry : ReadWritePermitProvider {
@@ -30,12 +25,12 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     /** Provider of key-value store. */
     private lateinit var keyValueStoreProvider: KeyValueStoreProvider
 
-    private var preferenceScreensSupplier: Supplier<PreferenceScreenMap> = Supplier {
-        ImmutableMap.of()
-    }
-
-    val preferenceScreens: PreferenceScreenMap
-        get() = preferenceScreensSupplier.get()
+    /**
+     * Creators of all available [PreferenceScreenMetadata]s.
+     *
+     * The map key is preference screen key.
+     */
+    var preferenceScreenMetadataCreators = FixedArrayMap<String, PreferenceScreenMetadataCreator>()
 
     private var readWritePermitProvider: ReadWritePermitProvider =
         object : ReadWritePermitProvider {}
@@ -54,26 +49,9 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     fun getKeyValueStore(context: Context, preference: PreferenceMetadata): KeyValueStore? =
         keyValueStoreProvider.getKeyValueStore(context, preference)
 
-    /** Sets supplier to provide available preference screens. */
-    fun setPreferenceScreensSupplier(supplier: Supplier<List<PreferenceScreenMetadata>>) {
-        preferenceScreensSupplier =
-            Suppliers.memoize {
-                val screensBuilder = ImmutableMap.builder<String, PreferenceScreenMetadata>()
-                for (screen in supplier.get()) screensBuilder.put(screen.key, screen)
-                screensBuilder.buildOrThrow()
-            }
-    }
-
-    /** Sets available preference screens. */
-    fun setPreferenceScreens(vararg screens: PreferenceScreenMetadata) {
-        val screensBuilder = ImmutableMap.builder<String, PreferenceScreenMetadata>()
-        for (screen in screens) screensBuilder.put(screen.key, screen)
-        preferenceScreensSupplier = Suppliers.ofInstance(screensBuilder.buildOrThrow())
-    }
-
-    /** Returns [PreferenceScreenMetadata] of particular key. */
-    operator fun get(key: String?): PreferenceScreenMetadata? =
-        if (key != null) preferenceScreens[key] else null
+    /** Creates [PreferenceScreenMetadata] of particular screen key. */
+    fun create(context: Context, screenKey: String?): PreferenceScreenMetadata? =
+        screenKey?.let { preferenceScreenMetadataCreators[it]?.create(context.applicationContext) }
 
     /**
      * Sets the provider to check read write permit. Read and write requests are denied by default.
