@@ -25,6 +25,7 @@ import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Trace
+import android.view.Choreographer
 import android.view.Display
 import android.view.LayoutInflater
 import android.view.SurfaceControl
@@ -331,6 +332,7 @@ public class ResizeVeil @JvmOverloads constructor(
                 .setPosition(icon, iconPosition.x, iconPosition.y)
                 .setPosition(parentSurface, newBounds.left.toFloat(), newBounds.top.toFloat())
                 .setWindowCrop(parentSurface, newBounds.width(), newBounds.height())
+                .setFrameTimeline(Choreographer.getInstance().vsyncId)
     }
 
     /**
