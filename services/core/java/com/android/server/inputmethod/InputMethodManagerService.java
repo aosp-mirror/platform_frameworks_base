@@ -4129,6 +4129,20 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
     }
 
+    /**
+     * A test API for CTS to check whether the IME Switcher button should be shown when the IME
+     * is shown.
+     */
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
+    public boolean shouldShowImeSwitcherButtonForTest() {
+        final int callingUserId = UserHandle.getCallingUserId();
+        synchronized (ImfLock.class) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
+            return shouldShowImeSwitcherLocked(
+                    InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE, userId);
+        }
+    }
+
     @NonNull
     private static IllegalArgumentException getExceptionForUnknownImeId(
             @Nullable String imeId) {

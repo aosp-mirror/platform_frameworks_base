@@ -159,6 +159,9 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
                 Manifest.permission.WRITE_SECURE_SETTINGS})
         void onImeSwitchButtonClickFromSystem(int displayId);
 
+        @PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
+        boolean shouldShowImeSwitcherButtonForTest();
+
         InputMethodSubtype getCurrentInputMethodSubtype(@UserIdInt int userId);
 
         void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
@@ -378,6 +381,14 @@ final class IInputMethodManagerImpl extends IInputMethodManager.Stub {
         super.onImeSwitchButtonClickFromSystem_enforcePermission();
 
         mCallback.onImeSwitchButtonClickFromSystem(displayId);
+    }
+
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @Override
+    public boolean shouldShowImeSwitcherButtonForTest() {
+        super.shouldShowImeSwitcherButtonForTest_enforcePermission();
+
+        return mCallback.shouldShowImeSwitcherButtonForTest();
     }
 
     @Override
