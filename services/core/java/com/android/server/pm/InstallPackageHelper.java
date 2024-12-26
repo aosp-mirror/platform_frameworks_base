@@ -2983,7 +2983,7 @@ final class InstallPackageHelper {
         }
     }
 
-    public void sendPendingBroadcasts(String reasonForTrace) {
+    public void sendPendingBroadcasts(String reasonForTrace, int callingUidForTrace) {
         String[] packages;
         ArrayList<String>[] components;
         int numBroadcasts = 0, numUsers;
@@ -3028,7 +3028,7 @@ final class InstallPackageHelper {
         for (int i = 0; i < numBroadcasts; i++) {
             mBroadcastHelper.sendPackageChangedBroadcast(snapshot, packages[i],
                     true /* dontKillApp */, components[i], uids[i], null /* reason */,
-                    reasonForTrace);
+                    reasonForTrace, callingUidForTrace);
         }
     }
 

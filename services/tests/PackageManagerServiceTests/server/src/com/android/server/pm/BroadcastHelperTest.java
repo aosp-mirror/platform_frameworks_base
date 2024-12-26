@@ -36,6 +36,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
@@ -233,6 +234,7 @@ public class BroadcastHelperTest {
 
         mBroadcastHelper.sendPackageChangedBroadcast(mMockSnapshot,
                 PACKAGE_CHANGED_TEST_PACKAGE_NAME, true /* dontKillApp */, componentNames,
-                UserHandle.USER_SYSTEM, "test" /* reason */, "test" /* reasonForTrace */);
+                UserHandle.USER_SYSTEM, "test" /* reason */, "test" /* reasonForTrace */,
+                Binder.getCallingUid());
     }
 }

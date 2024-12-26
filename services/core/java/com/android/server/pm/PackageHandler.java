@@ -76,7 +76,7 @@ final class PackageHandler extends Handler {
     void doHandleMessage(Message msg) {
         switch (msg.what) {
             case SEND_PENDING_BROADCAST: {
-                mPm.sendPendingBroadcasts((String) msg.obj);
+                mPm.sendPendingBroadcasts((String) msg.obj, msg.arg1);
                 break;
             }
             case POST_INSTALL: {
