@@ -1869,10 +1869,18 @@ public class UsageStatsService extends SystemService implements
     }
 
     private boolean shouldDeleteObsoleteData(UserHandle userHandle) {
-        final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
-        // If a profile owner is not defined for the given user, obsolete data should be deleted
-        return dpmInternal == null
-                || dpmInternal.getProfileOwnerOrDeviceOwnerSupervisionComponent(userHandle) == null;
+        if (android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()) {
+            final SupervisionManagerInternal smInternal = getSupervisionManagerInternal();
+            // If supervision is not enabled for the given user, obsolete data should be deleted.
+            return smInternal == null
+                    || !smInternal.isSupervisionEnabledForUser(userHandle.getIdentifier());
+        } else {
+            final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
+            // If a profile owner is not defined for the given user, obsolete data should be deleted
+            return dpmInternal == null
+                    || dpmInternal.getProfileOwnerOrDeviceOwnerSupervisionComponent(userHandle)
+                            == null;
+        }
     }
 
     private String buildFullToken(String packageName, String token) {
