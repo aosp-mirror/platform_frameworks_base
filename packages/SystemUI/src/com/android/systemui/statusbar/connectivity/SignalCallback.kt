@@ -22,7 +22,13 @@ import android.telephony.SubscriptionInfo
  * SignalCallback contains all of the connectivity updates from [NetworkController]. Implement this
  * interface to be able to draw iconography for Wi-Fi, mobile data, ethernet, call strength
  * indicators, etc.
+ *
+ * @deprecated
  */
+@Deprecated(
+    "Use Recommended Architecture classes instead: MobileIconsInteractor, WifiInteractor, " +
+        "AirplaneModeInteractor, and EthernetInteractor"
+)
 interface SignalCallback {
     /**
      * Called when the Wi-Fi iconography has been updated. Implement this method to draw Wi-Fi icons
