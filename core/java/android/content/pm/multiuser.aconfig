@@ -211,6 +211,16 @@ flag {
 }
 
 flag {
+    name: "place_add_user_dialog_within_activity"
+    namespace: "multiuser"
+    description: "Display dialog within activity to make it traversable by Accessibility"
+    bug: "383034393"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "property_invalidated_cache_bypass_mismatched_uids"
     namespace: "multiuser"
     description: "Bypass the cache when the process UID does not match the binder UID."
