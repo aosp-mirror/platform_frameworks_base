@@ -433,6 +433,13 @@ flag {
 }
 
 flag {
+    name: "aod_transition"
+    namespace: "windowing_frontend"
+    description: "Support to show lock wallpaper in aod state"
+    bug: "361438779"
+}
+
+flag {
     name: "check_disabled_snapshots_in_task_persister"
     namespace: "windowing_frontend"
     description: "Check for TaskSnapshots disabling in TaskSnapshotPersister."
