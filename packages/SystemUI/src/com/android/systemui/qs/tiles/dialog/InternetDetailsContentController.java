@@ -117,9 +117,9 @@ import javax.inject.Inject;
 /**
  * Controller for Internet Dialog.
  */
-public class InternetDialogController implements AccessPointController.AccessPointCallback {
+public class InternetDetailsContentController implements AccessPointController.AccessPointCallback {
 
-    private static final String TAG = "InternetDialogController";
+    private static final String TAG = "InternetDetailsContentController";
     private static final String ACTION_WIFI_SCANNING_SETTINGS =
             "android.settings.WIFI_SCANNING_SETTINGS";
     /**
@@ -244,7 +244,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     @Inject
-    public InternetDialogController(@ShadeDisplayAware Context context, UiEventLogger uiEventLogger,
+    public InternetDetailsContentController(@ShadeDisplayAware Context context,
+            UiEventLogger uiEventLogger,
             ActivityStarter starter, AccessPointController accessPointController,
             SubscriptionManager subscriptionManager, TelephonyManager telephonyManager,
             @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
@@ -260,7 +261,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             FeatureFlags featureFlags
     ) {
         if (DEBUG) {
-            Log.d(TAG, "Init InternetDialogController");
+            Log.d(TAG, "Init InternetDetailsContentController");
         }
         mHandler = handler;
         mWorkerHandler = workerHandler;
@@ -1108,13 +1109,13 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     static class WifiEntryConnectCallback implements WifiEntry.ConnectCallback {
         final ActivityStarter mActivityStarter;
         final WifiEntry mWifiEntry;
-        final InternetDialogController mInternetDialogController;
+        final InternetDetailsContentController mInternetDetailsContentController;
 
         WifiEntryConnectCallback(ActivityStarter activityStarter, WifiEntry connectWifiEntry,
-                InternetDialogController internetDialogController) {
+                InternetDetailsContentController internetDetailsContentController) {
             mActivityStarter = activityStarter;
             mWifiEntry = connectWifiEntry;
-            mInternetDialogController = internetDialogController;
+            mInternetDetailsContentController = internetDetailsContentController;
         }
 
         @Override
@@ -1129,7 +1130,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startActivity(intent, false /* dismissShade */);
             } else if (status == CONNECT_STATUS_FAILURE_UNKNOWN) {
-                mInternetDialogController.makeOverlayToast(R.string.wifi_failed_connect_message);
+                mInternetDetailsContentController.makeOverlayToast(
+                        R.string.wifi_failed_connect_message);
             } else {
                 if (DEBUG) {
                     Log.d(TAG, "connect failure reason=" + status);
