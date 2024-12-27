@@ -1027,9 +1027,6 @@ public class Activity extends ContextThemeWrapper
     /** The autofill client controller. Always access via {@link #getAutofillClientController()}. */
     private AutofillClientController mAutofillClientController;
 
-    /** @hide */
-    boolean mEnterAnimationComplete;
-
     private boolean mIsInMultiWindowMode;
     /** @hide */
     boolean mIsInPictureInPictureMode;
@@ -2898,7 +2895,6 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
 
         getAutofillClientController().onActivityStopped(mIntent, mChangingConfigurations);
-        mEnterAnimationComplete = false;
 
         notifyVoiceInteractionManagerServiceActivityEvent(
                 VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_STOP);
@@ -8589,8 +8585,6 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     public void dispatchEnterAnimationComplete() {
-        mEnterAnimationComplete = true;
-        mInstrumentation.onEnterAnimationComplete();
         onEnterAnimationComplete();
         if (getWindow() != null && getWindow().getDecorView() != null) {
             View decorView = getWindow().getDecorView();
