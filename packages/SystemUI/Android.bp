@@ -278,7 +278,7 @@ filegroup {
         "tests/src/**/systemui/media/controls/domain/pipeline/LegacyMediaDataManagerImplTest.kt",
         "tests/src/**/systemui/temporarydisplay/chipbar/SwipeChipbarAwayGestureHandlerTest.kt",
         "tests/src/**/systemui/qs/tiles/HotspotTileTest.java",
-        "tests/src/**/systemui/qs/tiles/dialog/InternetDialogDelegateTest.java",
+        "tests/src/**/systemui/qs/tiles/dialog/InternetDialogDelegateLegacyTest.java",
         "tests/src/**/systemui/navigationbar/NavigationBarControllerImplTest.java",
         "tests/src/**/systemui/wmshell/BubblesTest.java",
         "tests/src/**/systemui/statusbar/phone/StatusBarNotificationActivityStarterTest.java",
