@@ -16,8 +16,6 @@
 
 package com.android.systemui.scrim;
 
-import static com.android.systemui.Flags.notificationShadeBlur;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -216,7 +214,7 @@ public class ScrimDrawable extends Drawable {
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
         mPaint.setAlpha(mAlpha);
-        if (notificationShadeBlur() || WindowBlurFlag.isEnabled()) {
+        if (WindowBlurFlag.isEnabled()) {
             // TODO (b/381263600), wire this at ScrimController, move it to PrimaryBouncerTransition
             mPaint.setAlpha((int) (0.5f * mAlpha));
         }
