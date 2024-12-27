@@ -49,7 +49,6 @@ import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
 import com.android.internal.R;
-import com.android.internal.annotations.KeepForWeakReference;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -1468,9 +1467,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     }
 
     public static class Injector {
-        // Ensure the callback is kept to preserve native weak reference lifecycle semantics.
         @SuppressWarnings("unused")
-        @KeepForWeakReference
         private ProxyDisplayEventReceiver mReceiver;
         public void setDisplayEventListenerLocked(Looper looper, DisplayEventListener listener) {
             mReceiver = new ProxyDisplayEventReceiver(looper, listener);
