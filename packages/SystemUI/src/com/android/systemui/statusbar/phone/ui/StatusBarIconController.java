@@ -26,7 +26,6 @@ import androidx.annotation.DrawableRes;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 
 import java.util.List;
 
@@ -85,15 +84,6 @@ public interface StatusBarIconController {
      * {@link com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconBinder}.
      */
     void setNewMobileIconSubIds(List<Integer> subIds);
-    /**
-     * Display the no calling & SMS icons.
-     */
-    void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states);
-
-    /**
-     * Display the no calling & SMS icons.
-     */
-    void setNoCallingIcons(String slot, List<CallIndicatorIconState> states);
 
     /** Sets whether the icon in the given slot should be visible or not. */
     void setIconVisibility(String slot, boolean b);

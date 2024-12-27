@@ -34,9 +34,9 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.airplaneModeInteractor
 import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.tuner.TunerService
-import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
+import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -46,7 +46,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.verifyNoMoreInteractions
-import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -65,7 +64,6 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
     private val tunerService = mock<TunerService>()
     private val statusBarIconController = mock<StatusBarIconController>()
     private val networkController = mock<NetworkController>()
-    private val carrierConfigTracker = mock<CarrierConfigTracker>()
 
     private var slotAirplane: String? = null
 
@@ -75,7 +73,6 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             StatusBarSignalPolicy_Factory.newInstance(
                 mContext,
                 statusBarIconController,
-                carrierConfigTracker,
                 networkController,
                 securityController,
                 tunerService,

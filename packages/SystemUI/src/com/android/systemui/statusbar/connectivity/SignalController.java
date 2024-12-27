@@ -167,10 +167,6 @@ public abstract class SignalController<T extends ConnectivityState, I extends Ic
         }
     }
 
-    protected final void notifyCallStateChange(IconState statusIcon, int subId) {
-        mCallbackHandler.setCallIndicator(statusIcon, subId);
-    }
-
     /**
      * Returns the resource if resId is not 0, and an empty string otherwise.
      */

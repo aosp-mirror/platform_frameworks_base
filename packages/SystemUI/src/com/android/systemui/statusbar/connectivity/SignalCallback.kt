@@ -95,13 +95,6 @@ interface SignalCallback {
         noValidatedNetwork: Boolean,
         noNetworksAvailable: Boolean,
     ) {}
-
-    /**
-     * Callback for listeners to be able to update the call indicator
-     * @param statusIcon the icon for the call indicator
-     * @param subId subscription ID for which to update the UI
-     */
-    fun setCallIndicator(statusIcon: IconState, subId: Int) {}
 }
 
 /** Box type for [SignalCallback.setWifiIndicators] */
