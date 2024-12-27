@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
+import static com.android.systemui.common.shared.model.ContentDescription.loadContentDescription;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 import android.util.ArraySet;
@@ -25,6 +27,7 @@ import android.util.Log;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.common.shared.model.Icon;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.IconState;
@@ -32,6 +35,8 @@ import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor;
+import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor;
+import com.android.systemui.statusbar.pipeline.ethernet.shared.StatusBarSignalPolicyRefactorEthernet;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -62,6 +67,7 @@ public class StatusBarSignalPolicy
     private final TunerService mTunerService;
     private final JavaAdapter mJavaAdapter;
     private final AirplaneModeInteractor mAirplaneModeInteractor;
+    private final EthernetInteractor mEthernetInteractor;
 
     private boolean mHideAirplane;
     private boolean mHideMobile;
@@ -77,7 +83,8 @@ public class StatusBarSignalPolicy
             SecurityController securityController,
             TunerService tunerService,
             JavaAdapter javaAdapter,
-            AirplaneModeInteractor airplaneModeInteractor
+            AirplaneModeInteractor airplaneModeInteractor,
+            EthernetInteractor ethernetInteractor
     ) {
         mContext = context;
 
@@ -87,6 +94,7 @@ public class StatusBarSignalPolicy
         mSecurityController = securityController;
         mTunerService = tunerService;
         mAirplaneModeInteractor = airplaneModeInteractor;
+        mEthernetInteractor = ethernetInteractor;
 
         mSlotAirplane = mContext.getString(com.android.internal.R.string.status_bar_airplane);
         mSlotMobile   = mContext.getString(com.android.internal.R.string.status_bar_mobile);
@@ -106,6 +114,9 @@ public class StatusBarSignalPolicy
 
         mJavaAdapter.alwaysCollectFlow(
                 mAirplaneModeInteractor.isAirplaneMode(), this::updateAirplaneModeIcon);
+        if (StatusBarSignalPolicyRefactorEthernet.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(mEthernetInteractor.getIcon(), this::updateEthernetIcon);
+        }
     }
 
     /** Call to initialize and register this class with the system. */
@@ -122,6 +133,9 @@ public class StatusBarSignalPolicy
             mJavaAdapter.alwaysCollectFlow(
                     mAirplaneModeInteractor.isAirplaneMode(),
                     this::updateAirplaneModeIcon);
+        }
+        if (StatusBarSignalPolicyRefactorEthernet.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(mEthernetInteractor.getIcon(), this::updateEthernetIcon);
         }
     }
 
@@ -185,11 +199,31 @@ public class StatusBarSignalPolicy
 
     @Override
     public void setEthernetIndicators(IconState state) {
+        if (StatusBarSignalPolicyRefactorEthernet.isEnabled()) {
+            return;
+        }
+
         int resId = state.icon;
         String description = state.contentDescription;
 
         if (resId > 0) {
             mIconController.setIcon(mSlotEthernet, resId, description);
+            mIconController.setIconVisibility(mSlotEthernet, true);
+        } else {
+            mIconController.setIconVisibility(mSlotEthernet, false);
+        }
+    }
+
+    private void updateEthernetIcon(@Nullable Icon.Resource ethernetIcon) {
+        if (StatusBarSignalPolicyRefactorEthernet.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        if (ethernetIcon != null) {
+            mIconController.setIcon(
+                    mSlotEthernet,
+                    ethernetIcon.getRes(),
+                    loadContentDescription(ethernetIcon.getContentDescription(), mContext));
             mIconController.setIconVisibility(mSlotEthernet, true);
         } else {
             mIconController.setIconVisibility(mSlotEthernet, false);

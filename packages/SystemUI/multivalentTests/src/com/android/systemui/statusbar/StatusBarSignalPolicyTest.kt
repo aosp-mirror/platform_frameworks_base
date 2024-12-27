@@ -33,6 +33,10 @@ import com.android.systemui.statusbar.connectivity.NetworkController
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.airplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.ethernet.domain.ethernetInteractor
+import com.android.systemui.statusbar.pipeline.ethernet.shared.StatusBarSignalPolicyRefactorEthernet
+import com.android.systemui.statusbar.pipeline.shared.data.repository.connectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.data.repository.fake
 import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.testKosmos
 import com.android.systemui.tuner.tunerService
@@ -65,14 +69,17 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
                 tunerService,
                 javaAdapter,
                 airplaneModeInteractor,
+                ethernetInteractor,
             )
         }
 
     private lateinit var slotAirplane: String
+    private lateinit var slotEthernet: String
 
     @Before
     fun setup() {
         slotAirplane = mContext.getString(R.string.status_bar_airplane)
+        slotEthernet = mContext.getString(R.string.status_bar_ethernet)
     }
 
     @Test
@@ -151,5 +158,93 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // the refactor flag is disabled.
             underTest.start()
             verifyNoMoreInteractions(securityController, networkController, tunerService)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
+    @DisableFlags(StatusBarSignalPolicyRefactorEthernet.FLAG_NAME)
+    fun ethernetIconViaSignalCallback_refactorFlagDisabled_iconUpdated() =
+        kosmos.runTest {
+            underTest.start()
+            clearInvocations(statusBarIconController)
+
+            underTest.setEthernetIndicators(
+                IconState(/* visible= */ true, /* icon= */ 1, /* contentDescription= */ "Ethernet")
+            )
+            verify(statusBarIconController).setIconVisibility(slotEthernet, true)
+
+            underTest.setEthernetIndicators(
+                IconState(
+                    /* visible= */ false,
+                    /* icon= */ 0,
+                    /* contentDescription= */ "No ethernet",
+                )
+            )
+            verify(statusBarIconController).setIconVisibility(slotEthernet, false)
+        }
+
+    @Test
+    @EnableFlags(
+        FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR,
+        StatusBarSignalPolicyRefactorEthernet.FLAG_NAME,
+    )
+    fun ethernetIconViaSignalCallback_refactorFlagEnabled_iconNotUpdated() =
+        kosmos.runTest {
+            underTest.start()
+            clearInvocations(statusBarIconController)
+
+            underTest.setEthernetIndicators(
+                IconState(/* visible= */ true, /* icon= */ 1, /* contentDescription= */ "Ethernet")
+            )
+            verifyNoMoreInteractions(statusBarIconController)
+
+            underTest.setEthernetIndicators(
+                IconState(
+                    /* visible= */ false,
+                    /* icon= */ 0,
+                    /* contentDescription= */ "No ethernet",
+                )
+            )
+            verifyNoMoreInteractions(statusBarIconController)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR)
+    @DisableFlags(StatusBarSignalPolicyRefactorEthernet.FLAG_NAME)
+    fun ethernetIconViaInteractor_refactorFlagDisabled_iconNotUpdated() =
+        kosmos.runTest {
+            underTest.start()
+            clearInvocations(statusBarIconController)
+
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = true)
+            verifyNoMoreInteractions(statusBarIconController)
+
+            connectivityRepository.fake.setEthernetConnected(default = false, validated = false)
+            verifyNoMoreInteractions(statusBarIconController)
+
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = false)
+            verifyNoMoreInteractions(statusBarIconController)
+        }
+
+    @Test
+    @EnableFlags(
+        FLAG_STATUS_BAR_SIGNAL_POLICY_REFACTOR,
+        StatusBarSignalPolicyRefactorEthernet.FLAG_NAME,
+    )
+    fun ethernetIconViaInteractor_refactorFlagEnabled_iconUpdated() =
+        kosmos.runTest {
+            underTest.start()
+            clearInvocations(statusBarIconController)
+
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = true)
+            verify(statusBarIconController).setIconVisibility(slotEthernet, true)
+
+            connectivityRepository.fake.setEthernetConnected(default = false, validated = false)
+            verify(statusBarIconController).setIconVisibility(slotEthernet, false)
+
+            clearInvocations(statusBarIconController)
+
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = false)
+            verify(statusBarIconController).setIconVisibility(slotEthernet, true)
         }
 }

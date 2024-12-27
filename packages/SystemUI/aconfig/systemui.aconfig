@@ -457,6 +457,13 @@ flag {
 }
 
 flag {
+   name: "status_bar_signal_policy_refactor_ethernet"
+   namespace: "systemui"
+   description: "Use recommended architecture for ethernet icon in status bar"
+   bug: "291321279"
+}
+
+flag {
     name: "status_bar_swipe_over_chip"
     namespace: "systemui"
     description: "Allow users to swipe over the status bar chip to open the shade"
