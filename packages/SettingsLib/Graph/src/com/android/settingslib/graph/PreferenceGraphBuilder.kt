@@ -141,7 +141,7 @@ private constructor(
         }
 
     suspend fun addPreferenceScreenFromRegistry(key: String): Boolean {
-        val metadata = PreferenceScreenRegistry[key] ?: return false
+        val metadata = PreferenceScreenRegistry.create(context, key) ?: return false
         return addPreferenceScreenMetadata(metadata)
     }
 

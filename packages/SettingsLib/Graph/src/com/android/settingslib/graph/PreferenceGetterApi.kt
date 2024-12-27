@@ -98,7 +98,7 @@ class PreferenceGetterApiHandler(
         val preferences = mutableMapOf<PreferenceCoordinate, PreferenceProto>()
         val flags = request.flags
         for ((screenKey, coordinates) in request.preferences.groupBy { it.screenKey }) {
-            val screenMetadata = PreferenceScreenRegistry[screenKey]
+            val screenMetadata = PreferenceScreenRegistry.create(application, screenKey)
             if (screenMetadata == null) {
                 for (coordinate in coordinates) {
                     errors[coordinate] = PreferenceGetterErrorCode.NOT_FOUND

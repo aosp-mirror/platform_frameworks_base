@@ -64,3 +64,14 @@ interface PreferenceScreenMetadata : PreferenceMetadata {
      */
     fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
 }
+
+/** Creator of [PreferenceScreenMetadata]. */
+fun interface PreferenceScreenMetadataCreator {
+
+    /**
+     * Creates a new [PreferenceScreenMetadata].
+     *
+     * @param context application context to create the PreferenceScreenMetadata
+     */
+    fun create(context: Context): PreferenceScreenMetadata
+}

@@ -83,7 +83,7 @@ open class PreferenceFragment :
     @XmlRes protected open fun getPreferenceScreenResId(context: Context): Int = 0
 
     protected fun getPreferenceScreenCreator(context: Context): PreferenceScreenCreator? =
-        (PreferenceScreenRegistry[getPreferenceScreenBindingKey(context)]
+        (PreferenceScreenRegistry.create(context, getPreferenceScreenBindingKey(context))
                 as? PreferenceScreenCreator)
             ?.run { if (isFlagEnabled(context)) this else null }
 

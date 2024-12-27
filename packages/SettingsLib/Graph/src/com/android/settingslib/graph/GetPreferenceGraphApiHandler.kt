@@ -44,8 +44,8 @@ abstract class GetPreferenceGraphApiHandler(
     ): PreferenceGraphProto {
         val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
         if (request.screenKeys.isEmpty()) {
-            for (key in PreferenceScreenRegistry.preferenceScreens.keys) {
-                builder.addPreferenceScreenFromRegistry(key)
+            PreferenceScreenRegistry.preferenceScreenMetadataCreators.forEachKeyAsync {
+                builder.addPreferenceScreenFromRegistry(it)
             }
             for (provider in preferenceScreenProviders) {
                 builder.addPreferenceScreenProvider(provider)
