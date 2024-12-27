@@ -181,7 +181,7 @@ public final class PictureProfile implements Parcelable {
      * Gets profile ID.
      *
      * <p>A profile ID is a globally unique ID generated and assigned by the system. For profile
-     * objects retrieved from system (e.g {@link MediaQualityManager#getAvailablePictureProfiles()})
+     * objects retrieved from system (e.g {@link MediaQualityManager#getAvailablePictureProfiles})
      * this profile ID is non-null; For profiles built locally with {@link Builder}, it's
      * {@code null}.
      *
@@ -249,6 +249,8 @@ public final class PictureProfile implements Parcelable {
      *
      * <p>The keys of commonly used parameters can be found in
      * {@link MediaQualityContract.PictureQuality}.
+     *
+     * @return The profile parameters. Empty bundle if parameters are not included in a query.
      */
     @NonNull
     public PersistableBundle getParameters() {

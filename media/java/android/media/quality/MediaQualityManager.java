@@ -25,6 +25,9 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.media.tv.flags.Flags;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
@@ -61,6 +64,12 @@ public final class MediaQualityManager {
     // @GuardedBy("mLock")
     private final List<ActiveProcessingPictureListenerRecord> mApListenerRecords =
             new ArrayList<>();
+
+    /**
+     * A query option to include parameters in the profile. The default value is {@code false}.
+     * @hide
+     */
+    public static final String OPTION_INCLUDE_PARAMETERS = "include_parameters";
 
 
     /**
@@ -219,18 +228,25 @@ public final class MediaQualityManager {
     /**
      * Gets picture profile by given profile type and name.
      *
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link PictureProfile#getParameters()} of the returned profile is an empty bundle.
+     *
      * @param type the type of the profile.
      * @param name the name of the profile.
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * @param options the options of the query. {@code null} if default options are used.
+     *
      * @return the corresponding picture profile if available; {@code null} if the name doesn't
      * exist.
      */
     @Nullable
     public PictureProfile getPictureProfile(
-            @PictureProfile.ProfileType int type, @NonNull String name, boolean includeParams) {
+            @PictureProfile.ProfileType int type,
+            @NonNull String name,
+            @Nullable ProfileQueryParams options) {
         try {
-            return mService.getPictureProfile(type, name, includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getPictureProfile(type, name, optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -240,18 +256,23 @@ public final class MediaQualityManager {
     /**
      * Gets profiles that available to the given package.
      *
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link PictureProfile#getParameters()} of the returned profiles are empty bundles.
+     *
      * @param packageName the package name of the profiles.
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * @param options the options of the query. {@code null} if default options are used.
      * @hide
      */
     @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public List<PictureProfile> getPictureProfilesByPackage(
-            @NonNull String packageName, boolean includeParams) {
+            @NonNull String packageName, @Nullable ProfileQueryParams options) {
         try {
-            return mService.getPictureProfilesByPackage(packageName, includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getPictureProfilesByPackage(
+                    packageName, optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -260,15 +281,19 @@ public final class MediaQualityManager {
     /**
      * Gets profiles that available to the caller.
      *
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link PictureProfile#getParameters()} of the returned profiles are empty bundles.
+     *
+     * @param options the options of the query. {@code null} if default options are used.
      * @return the corresponding picture profile if available; {@code null} if the name doesn't
      * exist.
      */
     @NonNull
-    public List<PictureProfile> getAvailablePictureProfiles(boolean includeParams) {
+    public List<PictureProfile> getAvailablePictureProfiles(@Nullable ProfileQueryParams options) {
         try {
-            return mService.getAvailablePictureProfiles(includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getAvailablePictureProfiles(optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -414,17 +439,24 @@ public final class MediaQualityManager {
     /**
      * Gets sound profile by given profile type and name.
      *
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link SoundProfile#getParameters()} of the returned profile is an empty bundle.
+     *
      * @param type the type of the profile.
      * @param name the name of the profile.
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * @param options the options of the query. {@code null} if default options are used.
+     *
      * @return the corresponding sound profile if available; {@code null} if the name doesn't exist.
      */
     @Nullable
     public SoundProfile getSoundProfile(
-            @SoundProfile.ProfileType int type, @NonNull String name, boolean includeParams) {
+            @SoundProfile.ProfileType int type,
+            @NonNull String name,
+            @Nullable ProfileQueryParams options) {
         try {
-            return mService.getSoundProfile(type, name, includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getSoundProfile(type, name, optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -434,18 +466,23 @@ public final class MediaQualityManager {
     /**
      * Gets profiles that available to the given package.
      *
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link SoundProfile#getParameters()} of the returned profiles are empty bundles.
+     *
      * @param packageName the package name of the profiles.
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * @param options the options of the query. {@code null} if default options are used.
+     *
      * @hide
      */
     @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getSoundProfilesByPackage(
-            @NonNull String packageName, boolean includeParams) {
+            @NonNull String packageName, @Nullable ProfileQueryParams options) {
         try {
-            return mService.getSoundProfilesByPackage(packageName, includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getSoundProfilesByPackage(packageName, optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -454,15 +491,19 @@ public final class MediaQualityManager {
     /**
      * Gets profiles that available to the caller package.
      *
-     * @param includeParams {@code true} to include parameters in the profile; {@code false}
-     *                      otherwise.
+     * <p>If {@link ProfileQueryParams#areParametersIncluded()} is {@code false},
+     * {@link SoundProfile#getParameters()} of the returned profiles are empty bundles.
+     *
+     * @param options the options of the query. {@code null} if default options are used.
      *
      * @return the corresponding sound profile if available; {@code null} if the none available.
      */
     @NonNull
-    public List<SoundProfile> getAvailableSoundProfiles(boolean includeParams) {
+    public List<SoundProfile> getAvailableSoundProfiles(@Nullable ProfileQueryParams options) {
         try {
-            return mService.getAvailableSoundProfiles(includeParams, mUserHandle);
+            Bundle optionsBundle = options == null
+                    ? ProfileQueryParams.DEFAULT.toBundle() : options.toBundle();
+            return mService.getAvailableSoundProfiles(optionsBundle, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1137,6 +1178,92 @@ public final class MediaQualityManager {
 
         public Consumer<List<ActiveProcessingPicture>> getListener() {
             return mListener;
+        }
+    }
+
+    /**
+     * Options for profile queries.
+     */
+    public static final class ProfileQueryParams implements Parcelable {
+
+        private final boolean mParametersIncluded;
+        private static final ProfileQueryParams DEFAULT = new Builder().build();
+
+        private ProfileQueryParams(Parcel in) {
+            mParametersIncluded = in.readBoolean();
+        }
+
+        /** @hide */
+        public ProfileQueryParams(boolean parametersIncluded) {
+            mParametersIncluded = parametersIncluded;
+        }
+
+        @NonNull
+        public static final Creator<ProfileQueryParams> CREATOR =
+                new Creator<ProfileQueryParams>() {
+                    @Override
+                    public ProfileQueryParams createFromParcel(Parcel in) {
+                        return new ProfileQueryParams(in);
+                    }
+
+                    @Override
+                    public ProfileQueryParams[] newArray(int size) {
+                        return new ProfileQueryParams[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeBoolean(mParametersIncluded);
+        }
+
+        /**
+         * Returns {@code true} if the parameters need to be included in query results.
+         * {@code false} otherwise.
+         */
+        public boolean areParametersIncluded() {
+            return mParametersIncluded;
+        }
+
+        private Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(OPTION_INCLUDE_PARAMETERS, mParametersIncluded);
+            return bundle;
+        }
+
+        /**
+         * A builder for {@link ProfileQueryParams}.
+         */
+        public static final class Builder {
+            private boolean mParametersIncluded;
+
+            /**
+             * Sets the query option to include parameters in the profile or not.
+             *
+             * <p>The default value is {@code false}.
+             *
+             * @see ProfileQueryParams#areParametersIncluded()
+             */
+            @SuppressLint("MissingGetterMatchingBuilder")
+            @NonNull
+            public Builder setParametersIncluded(boolean included) {
+                mParametersIncluded = included;
+                return this;
+            }
+
+
+            /**
+             * Builds the instance.
+             */
+            @NonNull
+            public ProfileQueryParams build() {
+                return new ProfileQueryParams(mParametersIncluded);
+            }
         }
     }
 }
