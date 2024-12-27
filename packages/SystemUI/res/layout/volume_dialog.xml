@@ -33,15 +33,25 @@
         app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintTop_toTopOf="@id/volume_ringer_drawer" />
 
+    <View
+        android:id="@+id/volume_ringer_horizontal_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/volume_dialog_background"
+        app:layout_constraintBottom_toTopOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintEnd_toEndOf="@id/volume_ringer_drawer"
+        app:layout_constraintStart_toStartOf="@id/volume_ringer_drawer"
+        app:layout_constraintTop_toTopOf="@id/volume_dialog_background" />
+
     <include
         android:id="@id/volume_ringer_drawer"
         layout="@layout/volume_ringer_drawer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
+        android:layout_marginRight="@dimen/volume_dialog_ringer_drawer_diff_right_margin"
         app:layout_constraintBottom_toTopOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
-        app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1" />
 

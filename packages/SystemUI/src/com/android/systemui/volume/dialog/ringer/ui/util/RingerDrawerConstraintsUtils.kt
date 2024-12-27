@@ -119,6 +119,15 @@ private fun ConstraintSet.adjustOpenConstraintsForDrawer(
         )
         when (lastOrientation) {
             ORIENTATION_LANDSCAPE -> {
+                if (index == 0) {
+                    setMargin(
+                        button.id,
+                        ConstraintSet.LEFT,
+                        motionLayout.context.resources.getDimensionPixelSize(
+                            R.dimen.volume_dialog_ringer_drawer_left_margin
+                        ),
+                    )
+                }
                 setButtonPositionLandscapeConstraints(motionLayout, index, button)
                 if (index != motionLayout.childCount - 1) {
                     setMargin(
@@ -134,6 +143,9 @@ private fun ConstraintSet.adjustOpenConstraintsForDrawer(
                 setMargin(button.id, ConstraintSet.BOTTOM, 0)
             }
             ORIENTATION_PORTRAIT -> {
+                if (index == 0) {
+                    setMargin(button.id, ConstraintSet.LEFT, 0)
+                }
                 setButtonPositionPortraitConstraints(motionLayout, index, button)
                 if (index != motionLayout.childCount - 1) {
                     setMargin(
