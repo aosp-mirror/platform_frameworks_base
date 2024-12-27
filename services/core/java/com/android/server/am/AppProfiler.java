@@ -2477,13 +2477,15 @@ public class AppProfiler {
                             // This is the wildcard mode, where every process brought up for
                             // the target instrumentation should be included.
                             if (aInstr.mTargetInfo.packageName.equals(app.info.packageName)) {
-                                app.setActiveInstrumentation(aInstr);
+                                mService.mProcessStateController.setActiveInstrumentation(app,
+                                        aInstr);
                                 aInstr.mRunningProcesses.add(app);
                             }
                         } else {
                             for (String proc : aInstr.mTargetProcesses) {
                                 if (proc.equals(app.processName)) {
-                                    app.setActiveInstrumentation(aInstr);
+                                    mService.mProcessStateController.setActiveInstrumentation(app,
+                                            aInstr);
                                     aInstr.mRunningProcesses.add(app);
                                     break;
                                 }

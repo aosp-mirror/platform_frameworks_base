@@ -14565,7 +14565,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_INSTRUMENTATION);
                 }
 
-                app.setActiveInstrumentation(activeInstr);
+                mProcessStateController.setActiveInstrumentation(app, activeInstr);
                 activeInstr.mFinished = false;
                 activeInstr.mSourceUid = callingUid;
                 activeInstr.mRunningProcesses.add(app);
@@ -14711,7 +14711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         abiOverride,
                         ZYGOTE_POLICY_FLAG_EMPTY);
 
-                app.setActiveInstrumentation(activeInstr);
+                mProcessStateController.setActiveInstrumentation(app, activeInstr);
                 activeInstr.mFinished = false;
                 activeInstr.mSourceUid = callingUid;
                 activeInstr.mRunningProcesses.add(app);
@@ -14848,7 +14848,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 instr.removeProcess(app);
-                app.setActiveInstrumentation(null);
+                mProcessStateController.setActiveInstrumentation(app, null);
             }
             app.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_INSTRUMENTATION);
 
