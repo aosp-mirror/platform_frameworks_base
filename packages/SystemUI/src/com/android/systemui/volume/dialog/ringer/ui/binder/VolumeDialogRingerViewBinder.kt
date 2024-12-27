@@ -71,6 +71,8 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
 
     fun CoroutineScope.bind(view: View) {
         val volumeDialogBackgroundView = view.requireViewById<View>(R.id.volume_dialog_background)
+        val ringerHBackgroundView =
+            view.requireViewById<View>(R.id.volume_ringer_horizontal_background)
         val drawerContainer = view.requireViewById<MotionLayout>(R.id.volume_ringer_drawer)
         val unselectedButtonUiModel = RingerButtonUiModel.getUnselectedButton(view.context)
         val selectedButtonUiModel = RingerButtonUiModel.getSelectedButton(view.context)
@@ -84,6 +86,11 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
             )
         var backgroundAnimationProgress: Float by
             Delegates.observable(0F) { _, _, progress ->
+                ringerHBackgroundView.applyCorners(
+                    fullRadius = volumeDialogBgFullRadius,
+                    diff = volumeDialogBgFullRadius - volumeDialogBgSmallRadius,
+                    progress,
+                )
                 volumeDialogBackgroundView.applyCorners(
                     fullRadius = volumeDialogBgFullRadius,
                     diff = volumeDialogBgFullRadius - volumeDialogBgSmallRadius,
@@ -95,6 +102,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         }
         drawerContainer.setTransitionListener(ringerDrawerTransitionListener)
         volumeDialogBackgroundView.background = volumeDialogBackgroundView.background.mutate()
+        ringerHBackgroundView.background = ringerHBackgroundView.background.mutate()
 
         viewModel.ringerViewModel
             .mapLatest { ringerState ->
@@ -184,6 +192,8 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                 )
                                 volumeDialogBackgroundView.background =
                                     volumeDialogBackgroundView.background.mutate()
+                                ringerHBackgroundView.background =
+                                    ringerHBackgroundView.background.mutate()
                             }
                         }
                     }
@@ -191,6 +201,9 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                     is RingerViewModelState.Unavailable -> {
                         drawerContainer.visibility = View.GONE
                         volumeDialogBackgroundView.setBackgroundResource(
+                            R.drawable.volume_dialog_background
+                        )
+                        ringerHBackgroundView.setBackgroundResource(
                             R.drawable.volume_dialog_background
                         )
                     }
