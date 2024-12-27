@@ -120,7 +120,9 @@ public class NotificationProgressBarTest {
         List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        int fadedRed = 0x7FFF0000;
+        // Colors with 40% opacity
+        int fadedRed = 0x66FF0000;
+
         List<Part> expected = new ArrayList<>(List.of(new Segment(1f, fadedRed, true)));
 
         assertThat(parts).isEqualTo(expected);
@@ -199,8 +201,8 @@ public class NotificationProgressBarTest {
         List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        // Colors with 50% opacity
-        int fadedGreen = 0x7F00FF00;
+        // Colors with 40% opacity
+        int fadedGreen = 0x6600FF00;
 
         List<Part> expected = new ArrayList<>(List.of(
                 new Segment(0.50f, Color.RED),
@@ -223,9 +225,9 @@ public class NotificationProgressBarTest {
         int progressMax = 100;
         boolean isStyledByProgress = true;
 
-        // Colors with 50% opacity
-        int fadedBlue = 0x7F0000FF;
-        int fadedYellow = 0x7FFFFF00;
+        // Colors with 40% opacity
+        int fadedBlue = 0x660000FF;
+        int fadedYellow = 0x66FFFF00;
 
         List<Part> expected = new ArrayList<>(List.of(
                 new Segment(0.15f, Color.BLUE),
@@ -261,9 +263,9 @@ public class NotificationProgressBarTest {
         List<Part> parts = NotificationProgressBar.processAndConvertToDrawableParts(
                 segments, points, progress, progressMax, isStyledByProgress);
 
-        // Colors with 50% opacity
-        int fadedGreen = 0x7F00FF00;
-        int fadedYellow = 0x7FFFFF00;
+        // Colors with 40% opacity
+        int fadedGreen = 0x6600FF00;
+        int fadedYellow = 0x66FFFF00;
 
         List<Part> expected = new ArrayList<>(List.of(
                 new Segment(0.15f, Color.RED),
