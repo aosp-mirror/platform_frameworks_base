@@ -16,8 +16,44 @@
 
 package com.android.systemui.statusbar.notification.headsup
 
+import android.content.applicationContext
+import android.view.accessibility.accessibilityManagerWrapper
+import com.android.internal.logging.uiEventLoggerFake
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.statusbar.statusBarStateController
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.phone.keyguardBypassController
+import com.android.systemui.statusbar.policy.configurationController
+import com.android.systemui.util.concurrency.mockExecutorHandler
+import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.fakeGlobalSettings
+import com.android.systemui.util.time.fakeSystemClock
 
-var Kosmos.headsUpManager by Fixture { mock<HeadsUpManager>() }
+var Kosmos.mockHeadsUpManager by Fixture { mock<HeadsUpManager>() }
+
+var Kosmos.headsUpManager: HeadsUpManager by Fixture {
+    HeadsUpManagerImpl(
+        applicationContext,
+        headsUpManagerLogger,
+        statusBarStateController,
+        keyguardBypassController,
+        mock<GroupMembershipManager>(),
+        visualStabilityProvider,
+        configurationController,
+        mockExecutorHandler(fakeExecutor),
+        fakeGlobalSettings,
+        fakeSystemClock,
+        fakeExecutor,
+        accessibilityManagerWrapper,
+        uiEventLoggerFake,
+        JavaAdapter(testScope.backgroundScope),
+        shadeInteractor,
+        avalancheController,
+    )
+}

@@ -65,7 +65,7 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
-import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.notificationLockscreenUserManager
@@ -128,7 +128,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
     private val shadeController = kosmos.shadeControllerSceneImpl
     private val notificationLockscreenUserManager = kosmos.notificationLockscreenUserManager
     private val statusBarStateController = kosmos.statusBarStateController
-    private val headsUpManager = kosmos.headsUpManager
+    private val headsUpManager = kosmos.mockHeadsUpManager
     private val activityStarter = kosmos.activityStarter
     private val userManager = kosmos.userManager
     private val activeNotificationsInteractor = kosmos.activeNotificationsInteractor

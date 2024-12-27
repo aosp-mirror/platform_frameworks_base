@@ -48,7 +48,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.SeenNotific
 import com.android.systemui.statusbar.notification.domain.interactor.lockScreenShowOnlyUnseenNotificationsSetting
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
-import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.FakeSettings
@@ -625,7 +625,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
         val keyguardCoordinator =
             OriginalUnseenKeyguardCoordinator(
                 dumpManager = kosmos.dumpManager,
-                headsUpManager = kosmos.headsUpManager,
+                headsUpManager = kosmos.mockHeadsUpManager,
                 keyguardRepository = kosmos.keyguardRepository,
                 keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
                 logger = KeyguardCoordinatorLogger(logcatLogBuffer()),
@@ -663,7 +663,8 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
 
         val onHeadsUpChangedListener: OnHeadsUpChangedListener
             get() =
-                argumentCaptor { verify(kosmos.headsUpManager).addListener(capture()) }.lastValue
+                argumentCaptor { verify(kosmos.mockHeadsUpManager).addListener(capture()) }
+                    .lastValue
     }
 
     companion object {

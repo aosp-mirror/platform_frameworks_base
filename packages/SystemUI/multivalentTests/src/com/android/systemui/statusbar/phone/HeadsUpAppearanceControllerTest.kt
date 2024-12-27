@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
-import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
@@ -75,7 +75,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     private val keyguardStateController = kosmos.keyguardStateController
     private val commandQueue = kosmos.commandQueue
     private val notificationRoundnessManager = mock<NotificationRoundnessManager>()
-    private var headsUpManager = kosmos.headsUpManager
+    private var headsUpManager = kosmos.mockHeadsUpManager
 
     private lateinit var testHelper: NotificationTestHelper
     private lateinit var row: ExpandableNotificationRow
