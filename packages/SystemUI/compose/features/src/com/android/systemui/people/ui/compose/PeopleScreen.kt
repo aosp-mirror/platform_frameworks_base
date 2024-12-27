@@ -19,6 +19,7 @@ package com.android.systemui.people.ui.compose
 import android.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,7 +61,11 @@ import com.android.systemui.res.R
  *   the Activity/Fragment/View hosting this Composable once a result is available.
  */
 @Composable
-fun PeopleScreen(viewModel: PeopleViewModel, onResult: (PeopleViewModel.Result) -> Unit) {
+fun PeopleScreen(
+    viewModel: PeopleViewModel,
+    onResult: (PeopleViewModel.Result) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val priorityTiles by viewModel.priorityTiles.collectAsStateWithLifecycle()
     val recentTiles by viewModel.recentTiles.collectAsStateWithLifecycle()
 
@@ -75,7 +79,7 @@ fun PeopleScreen(viewModel: PeopleViewModel, onResult: (PeopleViewModel.Result) 
         }
     }
 
-    Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+    Surface(color = MaterialTheme.colorScheme.background, modifier = modifier.fillMaxSize()) {
         if (priorityTiles.isNotEmpty() || recentTiles.isNotEmpty()) {
             PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel.onTileClicked)
         } else {
@@ -89,9 +93,10 @@ private fun PeopleScreenWithConversations(
     priorityTiles: List<PeopleTileViewModel>,
     recentTiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        Modifier.fillMaxSize().safeDrawingPadding().sysuiResTag("top_level_with_conversations")
+        modifier.fillMaxSize().safeDrawingPadding().sysuiResTag("top_level_with_conversations")
     ) {
         Column(
             Modifier.fillMaxWidth().padding(PeopleSpacePadding),
@@ -140,16 +145,8 @@ private fun ConversationList(
     @StringRes headerTextResource: Int,
     tiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Text(
-        stringResource(headerTextResource),
-        Modifier.padding(start = 16.dp),
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-    )
-
-    Spacer(Modifier.height(10.dp))
-
     val largeCornerRadius = dimensionResource(R.dimen.people_space_widget_radius)
     val smallCornerRadius = 4.dp
 
@@ -157,18 +154,23 @@ private fun ConversationList(
     fun bottomRadius(i: Int): Dp =
         if (i == tiles.lastIndex) largeCornerRadius else smallCornerRadius
 
-    tiles.forEachIndexed { index, tile ->
-        if (index > 0) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
-        }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            stringResource(headerTextResource),
+            Modifier.padding(start = 16.dp, bottom = 8.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
 
-        key(tile.key.toString()) {
-            Tile(
-                tile,
-                onTileClicked,
-                topCornerRadius = topRadius(index),
-                bottomCornerRadius = bottomRadius(index),
-            )
+        tiles.forEachIndexed { index, tile ->
+            key(tile.key.toString()) {
+                Tile(
+                    tile,
+                    onTileClicked,
+                    topCornerRadius = topRadius(index),
+                    bottomCornerRadius = bottomRadius(index),
+                )
+            }
         }
     }
 }
@@ -179,8 +181,10 @@ private fun Tile(
     onTileClicked: (PeopleTileViewModel) -> Unit,
     topCornerRadius: Dp,
     bottomCornerRadius: Dp,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
+        modifier,
         color = MaterialTheme.colorScheme.secondaryContainer,
         shape =
             RoundedCornerShape(

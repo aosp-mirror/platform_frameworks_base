@@ -44,9 +44,9 @@ import androidx.compose.ui.unit.dp
 import com.android.systemui.res.R
 
 @Composable
-internal fun PeopleScreenEmpty(onGotItClicked: () -> Unit) {
+internal fun PeopleScreenEmpty(onGotItClicked: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        Modifier.fillMaxSize().safeDrawingPadding().padding(PeopleSpacePadding),
+        modifier.fillMaxSize().safeDrawingPadding().padding(PeopleSpacePadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -74,8 +74,9 @@ internal fun PeopleScreenEmpty(onGotItClicked: () -> Unit) {
 }
 
 @Composable
-private fun ExampleTile() {
+private fun ExampleTile(modifier: Modifier = Modifier) {
     Surface(
+        modifier,
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
