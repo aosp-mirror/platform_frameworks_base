@@ -30,9 +30,15 @@ import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialS
 import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureRecognizerProvider
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.GestureRecognizerAdapter
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureRecognizerProvider
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -53,12 +59,44 @@ interface TouchpadTutorialModule {
         fun touchpadScreensProvider(
             backGestureScreenViewModel: BackGestureScreenViewModel,
             homeGestureScreenViewModel: HomeGestureScreenViewModel,
+            easterEggGestureViewModel: EasterEggGestureViewModel,
         ): TouchpadTutorialScreensProvider {
             return ScreensProvider(
                 backGestureScreenViewModel,
                 homeGestureScreenViewModel,
-                EasterEggGestureViewModel(),
+                easterEggGestureViewModel,
             )
+        }
+
+        @Provides
+        fun recentAppsViewModel(
+            recognizerProvider: RecentAppsGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): RecentAppsGestureScreenViewModel {
+            return RecentAppsGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun backViewModel(
+            recognizerProvider: BackGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): BackGestureScreenViewModel {
+            return BackGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun homeViewModel(
+            recognizerProvider: HomeGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): HomeGestureScreenViewModel {
+            return HomeGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun easterEggViewModel(
+            adapterFactory: GestureRecognizerAdapter.Factory
+        ): EasterEggGestureViewModel {
+            return EasterEggGestureViewModel(adapterFactory.create(EasterEggRecognizerProvider()))
         }
 
         @SysUISingleton

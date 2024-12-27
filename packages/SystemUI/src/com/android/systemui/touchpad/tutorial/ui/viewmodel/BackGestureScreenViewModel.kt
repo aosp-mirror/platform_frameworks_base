@@ -17,47 +17,26 @@
 package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import android.view.MotionEvent
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
 import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
-import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import com.android.systemui.util.kotlin.pairwiseBy
-import javax.inject.Inject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 
-class BackGestureScreenViewModel
-@Inject
-constructor(configurationInteractor: ConfigurationInteractor) : TouchpadTutorialScreenViewModel {
+class BackGestureScreenViewModel(val gestureRecognizer: GestureRecognizerAdapter) :
+    TouchpadTutorialScreenViewModel {
 
-    private var recognizer: BackGestureRecognizer? = null
-
-    private val distanceThreshold: Flow<Int> =
-        configurationInteractor
-            .dimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
-            .distinctUntilChanged()
-
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val gestureUiState: Flow<GestureUiState> =
-        distanceThreshold
-            .flatMapLatest {
-                recognizer = BackGestureRecognizer(gestureDistanceThresholdPx = it)
-                GestureFlowAdapter(recognizer!!).gestureStateAsFlow
-            }
-            .pairwiseBy(GestureState.NotStarted) { previous, current ->
-                toGestureUiState(current, previous)
-            }
+        gestureRecognizer.gestureState.pairwiseBy(GestureState.NotStarted) { previous, current ->
+            toGestureUiState(current, previous)
+        }
 
     override fun handleEvent(event: MotionEvent): Boolean {
-        return recognizer?.handleTouchpadMotionEvent(event) ?: false
+        return gestureRecognizer.handleTouchpadMotionEvent(event)
     }
 
     private fun toGestureUiState(current: GestureState, previous: GestureState): GestureUiState {

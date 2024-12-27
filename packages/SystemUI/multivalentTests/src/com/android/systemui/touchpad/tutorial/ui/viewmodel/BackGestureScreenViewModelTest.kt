@@ -16,12 +16,13 @@
 
 package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
+import android.content.res.mockResources
 import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
@@ -34,18 +35,27 @@ import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.Finis
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.android.systemui.touchpad.tutorial.ui.gesture.ThreeFingerGesture
+import com.android.systemui.touchpad.ui.gesture.touchpadGestureResources
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BackGestureScreenViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
+    private val resources = kosmos.mockResources
     private val fakeConfigRepository = kosmos.fakeConfigurationRepository
-    private val viewModel = BackGestureScreenViewModel(kosmos.configurationInteractor)
+    private val viewModel =
+        BackGestureScreenViewModel(
+            GestureRecognizerAdapter(
+                BackGestureRecognizerProvider(kosmos.touchpadGestureResources),
+                kosmos.inputDeviceTutorialLogger,
+            )
+        )
 
     @Before
     fun before() {
@@ -115,10 +125,12 @@ class BackGestureScreenViewModelTest : SysuiTestCase() {
         }
 
     private fun setThresholdResource(threshold: Float) {
-        fakeConfigRepository.setDimensionPixelSize(
-            R.dimen.touchpad_tutorial_gestures_distance_threshold,
-            (threshold).toInt(),
-        )
+        whenever(
+                resources.getDimensionPixelSize(
+                    R.dimen.touchpad_tutorial_gestures_distance_threshold
+                )
+            )
+            .thenReturn(threshold.toInt())
         fakeConfigRepository.onAnyConfigurationChange()
     }
 
