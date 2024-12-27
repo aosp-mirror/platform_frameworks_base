@@ -214,7 +214,7 @@ flag {
     name: "place_add_user_dialog_within_activity"
     namespace: "multiuser"
     description: "Display dialog within activity to make it traversable by Accessibility"
-    bug: "383034393"
+    bug: "376815882"
     metadata {
         purpose: PURPOSE_BUGFIX
   }
