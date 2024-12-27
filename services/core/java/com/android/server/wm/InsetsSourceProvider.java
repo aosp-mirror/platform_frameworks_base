@@ -384,7 +384,7 @@ class InsetsSourceProvider {
         }
         final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
-        if (mControl != null) {
+        if (mControl != null && mControlTarget != null) {
             final boolean positionChanged = updateInsetsControlPosition(windowState);
             if (!(positionChanged || mHasPendingPosition)
                     // The insets hint would be updated while changing the position. Here updates it
