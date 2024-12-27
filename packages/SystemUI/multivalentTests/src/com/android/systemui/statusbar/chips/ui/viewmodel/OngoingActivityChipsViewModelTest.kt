@@ -38,7 +38,6 @@ import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
-import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.demoNotifChipViewModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -97,7 +96,6 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
-        kosmos.demoNotifChipViewModel.start()
         val icon =
             BitmapDrawable(
                 context.resources,

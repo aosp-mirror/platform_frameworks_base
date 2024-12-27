@@ -104,12 +104,6 @@ object OngoingActivityChipBinder {
                 defaultIconView.visibility = View.VISIBLE
                 defaultIconView.tintView(iconTint)
             }
-            is OngoingActivityChipModel.ChipIcon.FullColorAppIcon -> {
-                StatusBarNotifChips.assertInNewMode()
-                IconViewBinder.bind(icon.impl, defaultIconView)
-                defaultIconView.visibility = View.VISIBLE
-                defaultIconView.untintView()
-            }
             is OngoingActivityChipModel.ChipIcon.StatusBarView -> {
                 StatusBarConnectedDisplays.assertInLegacyMode()
                 setStatusBarIconView(defaultIconView, icon.impl, iconTint, backgroundView)
@@ -174,10 +168,6 @@ object OngoingActivityChipBinder {
 
     private fun ImageView.tintView(color: Int) {
         this.imageTintList = ColorStateList.valueOf(color)
-    }
-
-    private fun ImageView.untintView() {
-        this.imageTintList = null
     }
 
     private fun generateCustomIconLayoutParams(iconView: ImageView): FrameLayout.LayoutParams {
