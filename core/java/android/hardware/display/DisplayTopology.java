@@ -27,10 +27,12 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DisplayMetrics;
 import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
@@ -73,6 +75,24 @@ public final class DisplayTopology implements Parcelable {
                     return new DisplayTopology[size];
                 }
             };
+
+    /**
+     * @param px The value in logical pixels
+     * @param dpi The logical density of the display
+     * @return The value in density-independent pixels
+     */
+    public static float pxToDp(float px, int dpi) {
+        return px * DisplayMetrics.DENSITY_DEFAULT / dpi;
+    }
+
+    /**
+     * @param dp The value in density-independent pixels
+     * @param dpi The logical density of the display
+     * @return The value in logical pixels
+     */
+    public static float dpToPx(float dp, int dpi) {
+        return dp * dpi / DisplayMetrics.DENSITY_DEFAULT;
+    }
 
     /**
      * The topology tree
@@ -474,6 +494,22 @@ public final class DisplayTopology implements Parcelable {
         return new DisplayTopology(rootCopy, mPrimaryDisplayId);
     }
 
+    /**
+     * Assign absolute bounds to each display. The top-left corner of the root is at position
+     * (0, 0).
+     * @return Map from logical display ID to the display's absolute bounds
+     */
+    public SparseArray<RectF> getAbsoluteBounds() {
+        Map<TreeNode, RectF> bounds = new HashMap<>();
+        getInfo(bounds, /* depths= */ null, /* parents= */ null, mRoot, /* x= */ 0, /* y= */ 0,
+                /* depth= */ 0);
+        SparseArray<RectF> boundsById = new SparseArray<>();
+        for (Map.Entry<TreeNode, RectF> entry : bounds.entrySet()) {
+            boundsById.append(entry.getKey().mDisplayId, entry.getValue());
+        }
+        return boundsById;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -575,7 +611,7 @@ public final class DisplayTopology implements Parcelable {
     }
 
     @Nullable
-    private static TreeNode findDisplay(int displayId, TreeNode startingNode) {
+    private static TreeNode findDisplay(int displayId, @Nullable TreeNode startingNode) {
         if (startingNode == null) {
             return null;
         }
@@ -592,8 +628,8 @@ public final class DisplayTopology implements Parcelable {
     }
 
     /**
-     * Get information about the topology that will be used for the normalization algorithm.
-     * Assigns origins to each display to compute the bounds.
+     * Get information about the topology.
+     * Assigns positions to each display to compute the bounds. The root is at position (0, 0).
      * @param bounds The map where the bounds of each display will be put
      * @param depths The map where the depths of each display in the tree will be put
      * @param parents The map where the parent of each display will be put
@@ -602,12 +638,22 @@ public final class DisplayTopology implements Parcelable {
      * @param y The starting y position
      * @param depth The starting depth
      */
-    private static void getInfo(Map<TreeNode, RectF> bounds, Map<TreeNode, Integer> depths,
-            Map<TreeNode, TreeNode> parents, TreeNode display, float x, float y, int depth) {
-        bounds.put(display, new RectF(x, y, x + display.mWidth, y + display.mHeight));
-        depths.put(display, depth);
+    private static void getInfo(@Nullable Map<TreeNode, RectF> bounds,
+            @Nullable Map<TreeNode, Integer> depths, @Nullable Map<TreeNode, TreeNode> parents,
+            @Nullable TreeNode display, float x, float y, int depth) {
+        if (display == null) {
+            return;
+        }
+        if (bounds != null) {
+            bounds.put(display, new RectF(x, y, x + display.mWidth, y + display.mHeight));
+        }
+        if (depths != null) {
+            depths.put(display, depth);
+        }
         for (TreeNode child : display.mChildren) {
-            parents.put(child, display);
+            if (parents != null) {
+                parents.put(child, display);
+            }
             if (child.mPosition == POSITION_LEFT) {
                 getInfo(bounds, depths, parents, child, x - child.mWidth, y + child.mOffset,
                         depth + 1);
@@ -662,7 +708,7 @@ public final class DisplayTopology implements Parcelable {
      * Ensure that the offsets of all displays within the given tree are within bounds.
      * @param display The starting node
      */
-    private void clampOffsets(TreeNode display) {
+    private void clampOffsets(@Nullable TreeNode display) {
         if (display == null) {
             return;
         }

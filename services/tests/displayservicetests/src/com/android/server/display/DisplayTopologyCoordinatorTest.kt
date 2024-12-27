@@ -17,7 +17,7 @@
 package com.android.server.display
 
 import android.hardware.display.DisplayTopology
-import android.util.DisplayMetrics
+import android.hardware.display.DisplayTopology.pxToDp
 import android.view.Display
 import android.view.DisplayInfo
 import com.google.common.truth.Truth.assertThat
@@ -62,10 +62,8 @@ class DisplayTopologyCoordinatorTest {
     fun addDisplay() {
         coordinator.onDisplayAdded(displayInfo)
 
-        val widthDp = displayInfo.logicalWidth * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
-                / displayInfo.logicalDensityDpi)
-        val heightDp = displayInfo.logicalHeight * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
-                / displayInfo.logicalDensityDpi)
+        val widthDp = pxToDp(displayInfo.logicalWidth.toFloat(), displayInfo.logicalDensityDpi)
+        val heightDp = pxToDp(displayInfo.logicalHeight.toFloat(), displayInfo.logicalDensityDpi)
         verify(mockTopology).addDisplay(displayInfo.displayId, widthDp, heightDp)
         verify(mockTopologyChangedCallback).invoke(mockTopologyCopy)
     }

@@ -16,8 +16,9 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayTopology.pxToDp;
+
 import android.hardware.display.DisplayTopology;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -140,8 +141,7 @@ class DisplayTopologyCoordinator {
      * @return The width of the display in dp
      */
     private float getWidth(DisplayInfo info) {
-        return info.logicalWidth * (float) DisplayMetrics.DENSITY_DEFAULT
-                / info.logicalDensityDpi;
+        return pxToDp(info.logicalWidth, info.logicalDensityDpi);
     }
 
     /**
@@ -149,8 +149,7 @@ class DisplayTopologyCoordinator {
      * @return The height of the display in dp
      */
     private float getHeight(DisplayInfo info) {
-        return info.logicalHeight * (float) DisplayMetrics.DENSITY_DEFAULT
-                / info.logicalDensityDpi;
+        return pxToDp(info.logicalHeight, info.logicalDensityDpi);
     }
 
     private boolean isDisplayAllowedInTopology(DisplayInfo info) {
