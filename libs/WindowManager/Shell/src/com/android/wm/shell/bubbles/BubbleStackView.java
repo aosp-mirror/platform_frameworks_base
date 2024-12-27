@@ -2235,29 +2235,40 @@ public class BubbleStackView extends FrameLayout
 
         boolean wasExpanded = mIsExpanded;
 
-        hideCurrentInputMethod();
+        // Do the actual expansion/collapse after the IME is hidden if it's currently visible in
+        // order to avoid flickers
+        Runnable onImeHidden = () -> {
+            mSysuiProxyProvider.getSysuiProxy().onStackExpandChanged(shouldExpand);
 
-        mSysuiProxyProvider.getSysuiProxy().onStackExpandChanged(shouldExpand);
+            if (wasExpanded) {
+                stopMonitoringSwipeUpGesture();
+                animateCollapse();
+                showManageMenu(false);
+                logBubbleEvent(mExpandedBubble,
+                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+            } else {
+                animateExpansion();
+                // TODO: move next line to BubbleData
+                logBubbleEvent(mExpandedBubble,
+                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                logBubbleEvent(mExpandedBubble,
+                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
+                mManager.checkNotificationPanelExpandedState(notifPanelExpanded -> {
+                    if (!notifPanelExpanded && mIsExpanded) {
+                        startMonitoringSwipeUpGesture();
+                    }
+                });
+            }
+            notifyExpansionChanged(mExpandedBubble, mIsExpanded);
+            announceExpandForAccessibility(mExpandedBubble, mIsExpanded);
+        };
 
-        if (wasExpanded) {
-            stopMonitoringSwipeUpGesture();
-            animateCollapse();
-            showManageMenu(false);
-            logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+        if (mPositioner.isImeVisible()) {
+            hideCurrentInputMethod(onImeHidden);
         } else {
-            animateExpansion();
-            // TODO: move next line to BubbleData
-            logBubbleEvent(mExpandedBubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-            logBubbleEvent(mExpandedBubble,
-                    FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_EXPANDED);
-            mManager.checkNotificationPanelExpandedState(notifPanelExpanded -> {
-                if (!notifPanelExpanded && mIsExpanded) {
-                    startMonitoringSwipeUpGesture();
-                }
-            });
+            // the IME is already hidden, so run the runnable immediately
+            onImeHidden.run();
         }
-        notifyExpansionChanged(mExpandedBubble, mIsExpanded);
-        announceExpandForAccessibility(mExpandedBubble, mIsExpanded);
     }
 
     /**
@@ -2375,7 +2386,17 @@ public class BubbleStackView extends FrameLayout
      * not.
      */
     void hideCurrentInputMethod() {
-        mManager.hideCurrentInputMethod();
+        mManager.hideCurrentInputMethod(null);
+    }
+
+    /**
+     * Hides the IME similar to {@link #hideCurrentInputMethod()} but also runs {@code onImeHidden}
+     * after after the IME is hidden.
+     *
+     * @see #hideCurrentInputMethod()
+     */
+    void hideCurrentInputMethod(Runnable onImeHidden) {
+        mManager.hideCurrentInputMethod(onImeHidden);
     }
 
     /** Set the stack position to whatever the positioner says. */
