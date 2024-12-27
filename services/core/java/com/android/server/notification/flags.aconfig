@@ -187,3 +187,13 @@ flag {
   description: "Enables sound uri with vibration source in notification channel"
   bug: "351975435"
 }
+
+flag {
+  name: "nm_binder_perf_reduce_zen_broadcasts"
+  namespace: "systemui"
+  description: "Don't send duplicate zen-related (policy changed, etc) broadcasts"
+  bug: "324376849"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
