@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
@@ -81,6 +82,7 @@ class InlineSuggestionSession {
     @Nullable
     private Boolean mPreviousResponseIsEmpty;
 
+    private boolean mAlwaysNotifyAutofill = false;
 
     /**
      * Indicates whether {@link #makeInlineSuggestionRequestUncheck()} has been called or not,
@@ -105,6 +107,7 @@ class InlineSuggestionSession {
         mResponseConsumer = responseConsumer;
         mInlineSuggestionSessionController = inlineSuggestionSessionController;
         mMainThreadHandler = mainThreadHandler;
+        mAlwaysNotifyAutofill = AutofillFeatureFlags.isImproveFillDialogEnabled();
     }
 
     @MainThread
@@ -176,6 +179,9 @@ class InlineSuggestionSession {
         try {
             final InlineSuggestionsRequest request = mRequestSupplier.apply(
                     mRequestInfo.getUiExtras());
+            if (mAlwaysNotifyAutofill) {
+                mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
+            }
             if (request == null) {
                 if (DEBUG) {
                     Log.d(TAG, "onCreateInlineSuggestionsRequest() returned null request");
@@ -184,7 +190,9 @@ class InlineSuggestionSession {
             } else {
                 request.setHostInputToken(mHostInputTokenSupplier.get());
                 request.filterContentTypes();
-                mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
+                if (!mAlwaysNotifyAutofill) {
+                    mResponseCallback = new InlineSuggestionsResponseCallbackImpl(this);
+                }
                 mCallback.onInlineSuggestionsRequest(request, mResponseCallback);
             }
         } catch (RemoteException e) {

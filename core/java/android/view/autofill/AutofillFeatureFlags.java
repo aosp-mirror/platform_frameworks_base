@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.Flags.improveFillDialogAconfig;
+
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.provider.DeviceConfig;
@@ -662,7 +664,7 @@ public class AutofillFeatureFlags {
     public static boolean isImproveFillDialogEnabled() {
         // TODO(b/266379948): Add condition for checking whether device has PCC first
 
-        return DeviceConfig.getBoolean(
+        return improveFillDialogAconfig() && DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IMPROVE_FILL_DIALOG_ENABLED,
                 DEFAULT_IMPROVE_FILL_DIALOG_ENABLED);
