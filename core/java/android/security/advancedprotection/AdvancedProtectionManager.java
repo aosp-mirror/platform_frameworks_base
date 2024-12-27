@@ -24,18 +24,17 @@ import static android.os.UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.UserManager;
 import android.security.Flags;
 import android.util.Log;
 
@@ -60,57 +59,54 @@ public final class AdvancedProtectionManager {
     private static final String TAG = "AdvancedProtectionMgr";
 
     /**
-     * Advanced Protection's identifier for setting policies or restrictions in
-     * {@link DevicePolicyManager}.
+     * Advanced Protection's identifier for setting policies or restrictions in DevicePolicyManager.
      *
      * @hide */
     public static final String ADVANCED_PROTECTION_SYSTEM_ENTITY =
             "android.security.advancedprotection";
 
     /**
-     * Feature identifier for disallowing connections to 2G networks.
+     * Feature identifier for disallowing 2G.
      *
-     * @see UserManager#DISALLOW_CELLULAR_2G
      * @hide */
     @SystemApi
-    public static final int FEATURE_ID_DISALLOW_CELLULAR_2G = 0;
+    public static final String FEATURE_ID_DISALLOW_CELLULAR_2G =
+            "android.security.advancedprotection.feature_disallow_2g";
 
     /**
-     * Feature identifier for disallowing installs of apps from unknown sources.
+     * Feature identifier for disallowing install of unknown sources.
      *
-     * @see UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
      * @hide */
     @SystemApi
-    public static final int FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES = 1;
+    public static final String FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES =
+            "android.security.advancedprotection.feature_disallow_install_unknown_sources";
 
     /**
-     * Feature identifier for disallowing USB connections.
+     * Feature identifier for disallowing USB.
      *
      * @hide */
     @SystemApi
-    public static final int FEATURE_ID_DISALLOW_USB = 2;
+    public static final String FEATURE_ID_DISALLOW_USB =
+            "android.security.advancedprotection.feature_disallow_usb";
 
     /**
-     * Feature identifier for disallowing connections to Wi-Fi Wired Equivalent Privacy (WEP)
-     * networks.
+     * Feature identifier for disallowing WEP.
      *
-     * @see WifiManager#isWepSupported()
      * @hide */
     @SystemApi
-    public static final int FEATURE_ID_DISALLOW_WEP = 3;
+    public static final String FEATURE_ID_DISALLOW_WEP =
+            "android.security.advancedprotection.feature_disallow_wep";
 
     /**
-     * Feature identifier for enabling the Memory Tagging Extension (MTE). MTE is a CPU extension
-     * that allows to protect against certain classes of security problems at a small runtime
-     * performance cost overhead.
+     * Feature identifier for enabling MTE.
      *
-     * @see DevicePolicyManager#setMtePolicy(int)
      * @hide */
     @SystemApi
-    public static final int FEATURE_ID_ENABLE_MTE = 4;
+    public static final String FEATURE_ID_ENABLE_MTE =
+            "android.security.advancedprotection.feature_enable_mte";
 
     /** @hide */
-    @IntDef(prefix = { "FEATURE_ID_" }, value = {
+    @StringDef(prefix = { "FEATURE_ID_" }, value = {
             FEATURE_ID_DISALLOW_CELLULAR_2G,
             FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES,
             FEATURE_ID_DISALLOW_USB,
@@ -120,7 +116,7 @@ public final class AdvancedProtectionManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureId {}
 
-    private static final Set<Integer> ALL_FEATURE_IDS = Set.of(
+    private static final Set<String> ALL_FEATURE_IDS = Set.of(
             FEATURE_ID_DISALLOW_CELLULAR_2G,
             FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES,
             FEATURE_ID_DISALLOW_USB,
@@ -139,6 +135,9 @@ public final class AdvancedProtectionManager {
      * Output: Nothing.
      *
      * @hide */
+    @SystemApi
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
     public static final String ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG =
             "android.security.advancedprotection.action.SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG";
 
@@ -148,6 +147,7 @@ public final class AdvancedProtectionManager {
      *
      * @hide */
     @FeatureId
+    @SystemApi
     public static final String EXTRA_SUPPORT_DIALOG_FEATURE =
             "android.security.advancedprotection.extra.SUPPORT_DIALOG_FEATURE";
 
@@ -157,41 +157,37 @@ public final class AdvancedProtectionManager {
      *
      * @hide */
     @SupportDialogType
+    @SystemApi
     public static final String EXTRA_SUPPORT_DIALOG_TYPE =
             "android.security.advancedprotection.extra.SUPPORT_DIALOG_TYPE";
-
-    /**
-     * Type for {@link #EXTRA_SUPPORT_DIALOG_TYPE} indicating an unknown action was blocked by
-     * advanced protection, hence the support dialog should display a default explanation.
-     *
-     * @hide */
-    public static final int SUPPORT_DIALOG_TYPE_UNKNOWN = 0;
 
     /**
      * Type for {@link #EXTRA_SUPPORT_DIALOG_TYPE} indicating a user performed an action that was
      * blocked by advanced protection.
      *
      * @hide */
-    public static final int SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION = 1;
+    @SystemApi
+    public static final String SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION =
+            "android.security.advancedprotection.type_blocked_interaction";
 
     /**
      * Type for {@link #EXTRA_SUPPORT_DIALOG_TYPE} indicating a user pressed on a setting toggle
      * that was disabled by advanced protection.
      *
      * @hide */
-    public static final int SUPPORT_DIALOG_TYPE_DISABLED_SETTING = 2;
+    @SystemApi
+    public static final String SUPPORT_DIALOG_TYPE_DISABLED_SETTING =
+            "android.security.advancedprotection.type_disabled_setting";
 
     /** @hide */
-    @IntDef(prefix = { "SUPPORT_DIALOG_TYPE_" }, value = {
-            SUPPORT_DIALOG_TYPE_UNKNOWN,
+    @StringDef(prefix = { "SUPPORT_DIALOG_TYPE_" }, value = {
             SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION,
             SUPPORT_DIALOG_TYPE_DISABLED_SETTING,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SupportDialogType {}
 
-    private static final Set<Integer> ALL_SUPPORT_DIALOG_TYPES = Set.of(
-            SUPPORT_DIALOG_TYPE_UNKNOWN,
+    private static final Set<String> ALL_SUPPORT_DIALOG_TYPES = Set.of(
             SUPPORT_DIALOG_TYPE_BLOCKED_INTERACTION,
             SUPPORT_DIALOG_TYPE_DISABLED_SETTING);
 
@@ -328,13 +324,15 @@ public final class AdvancedProtectionManager {
      *                disabled by advanced protection.
      * @hide
      */
-    public static @NonNull Intent createSupportIntent(@FeatureId int featureId,
-            @SupportDialogType int type) {
+    @SystemApi
+    public @NonNull Intent createSupportIntent(@NonNull @FeatureId String featureId,
+            @Nullable @SupportDialogType String type) {
+        Objects.requireNonNull(featureId);
         if (!ALL_FEATURE_IDS.contains(featureId)) {
             throw new IllegalArgumentException(featureId + " is not a valid feature ID. See"
                     + " FEATURE_ID_* APIs.");
         }
-        if (!ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
+        if (type != null && !ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
             throw new IllegalArgumentException(type + " is not a valid type. See"
                     + " SUPPORT_DIALOG_TYPE_* APIs.");
         }
@@ -342,19 +340,21 @@ public final class AdvancedProtectionManager {
         Intent intent = new Intent(ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG);
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_SUPPORT_DIALOG_FEATURE, featureId);
-        intent.putExtra(EXTRA_SUPPORT_DIALOG_TYPE, type);
+        if (type != null) {
+            intent.putExtra(EXTRA_SUPPORT_DIALOG_TYPE, type);
+        }
         return intent;
     }
 
     /** @hide */
-    public static @NonNull Intent createSupportIntentForPolicyIdentifierOrRestriction(
-            @NonNull String identifier, @SupportDialogType int type) {
+    public @NonNull Intent createSupportIntentForPolicyIdentifierOrRestriction(
+            @NonNull String identifier, @Nullable @SupportDialogType String type) {
         Objects.requireNonNull(identifier);
-        if (!ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
+        if (type != null && !ALL_SUPPORT_DIALOG_TYPES.contains(type)) {
             throw new IllegalArgumentException(type + " is not a valid type. See"
                     + " SUPPORT_DIALOG_TYPE_* APIs.");
         }
-        final int featureId;
+        final String featureId;
         if (DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY.equals(identifier)) {
             featureId = FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES;
         } else if (DISALLOW_CELLULAR_2G.equals(identifier)) {

@@ -30,25 +30,26 @@ import android.security.Flags;
 @FlaggedApi(Flags.FLAG_AAPM_API)
 @SystemApi
 public final class AdvancedProtectionFeature implements Parcelable {
-    private final int mId;
+    private final String mId;
 
     /**
      * Create an object identifying an Advanced Protection feature for AdvancedProtectionManager
-     * @param id Feature identifier. It is used by Settings screens to display information about
-     *           this feature.
+     * @param id A unique ID to identify this feature. It is used by Settings screens to display
+     *           information about this feature.
      */
-    public AdvancedProtectionFeature(@AdvancedProtectionManager.FeatureId int id) {
+    public AdvancedProtectionFeature(@NonNull String id) {
         mId = id;
     }
 
     private AdvancedProtectionFeature(Parcel in) {
-        mId = in.readInt();
+        mId = in.readString8();
     }
 
     /**
      * @return the unique ID representing this feature
      */
-    public int getId() {
+    @NonNull
+    public String getId() {
         return mId;
     }
 
@@ -59,7 +60,7 @@ public final class AdvancedProtectionFeature implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mId);
+        dest.writeString8(mId);
     }
 
     @NonNull

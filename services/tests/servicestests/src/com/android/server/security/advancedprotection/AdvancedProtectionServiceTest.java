@@ -31,7 +31,6 @@ import android.os.test.FakePermissionEnforcer;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.security.advancedprotection.AdvancedProtectionFeature;
-import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 
 import androidx.annotation.NonNull;
@@ -55,8 +54,7 @@ public class AdvancedProtectionServiceTest {
     private Context mContext;
     private AdvancedProtectionService.AdvancedProtectionStore mStore;
     private TestLooper mLooper;
-    AdvancedProtectionFeature mTestFeature2g = new AdvancedProtectionFeature(
-            AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
+    AdvancedProtectionFeature mFeature = new AdvancedProtectionFeature("test-id");
 
     @Before
     public void setup() throws Settings.SettingNotFoundException {
@@ -107,7 +105,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mTestFeature2g;
+                        return mFeature;
                     }
 
                     @Override
@@ -137,7 +135,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mTestFeature2g;
+                        return mFeature;
                     }
 
                     @Override
@@ -167,7 +165,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mTestFeature2g;
+                        return mFeature;
                     }
 
                     @Override
@@ -240,10 +238,8 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testGetFeatures() {
-        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature(
-                AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
-        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature(
-                AdvancedProtectionManager.FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
         AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
             @NonNull
             @Override
@@ -272,10 +268,8 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testGetFeatures_featureNotAvailable() {
-        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature(
-                AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
-        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature(
-                AdvancedProtectionManager.FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES);
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
         AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
             @NonNull
             @Override
