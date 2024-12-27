@@ -26,6 +26,22 @@
     {
       "name": "NativeThermalUnitTestCases",
        "file_patterns": ["thermal.cpp"]
+    },
+    {
+       "file_patterns": ["system_health.cpp"],
+       "name": "NativeSystemHealthUnitTestCases",
+       "options": [
+          {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+          {"exclude-annotation": "org.junit.Ignore"}
+        ]
+    },
+    {
+      "file_patterns": ["system_health.cpp"],
+      "name": "CtsSystemHealthTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
     }
   ]
 }
