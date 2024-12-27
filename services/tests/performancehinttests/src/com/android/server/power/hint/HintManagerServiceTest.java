@@ -1411,7 +1411,6 @@ public class HintManagerServiceTest {
         halParams3.tids = tids;
         halParams3.calculationType = CpuHeadroomParams.CalculationType.AVERAGE;
 
-        // this params should not be cached as the window is not default
         CpuHeadroomParamsInternal params4 = new CpuHeadroomParamsInternal();
         params4.calculationWindowMillis = 123;
         CpuHeadroomParams halParams4 = new CpuHeadroomParams();
@@ -1450,11 +1449,7 @@ public class HintManagerServiceTest {
         assertEquals(halRet2, service.getBinderServiceInstance().getCpuHeadroom(params2));
         assertEquals(halRet3, service.getBinderServiceInstance().getCpuHeadroom(params3));
         assertEquals(halRet4, service.getBinderServiceInstance().getCpuHeadroom(params4));
-        verify(mIPowerMock, times(1)).getCpuHeadroom(any());
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams1));
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams2));
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams3));
-        verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams4));
+        verify(mIPowerMock, times(0)).getCpuHeadroom(any());
 
         // after 500ms more it should be served with cache
         Thread.sleep(500);
@@ -1463,11 +1458,7 @@ public class HintManagerServiceTest {
         assertEquals(halRet2, service.getBinderServiceInstance().getCpuHeadroom(params2));
         assertEquals(halRet3, service.getBinderServiceInstance().getCpuHeadroom(params3));
         assertEquals(halRet4, service.getBinderServiceInstance().getCpuHeadroom(params4));
-        verify(mIPowerMock, times(1)).getCpuHeadroom(any());
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams1));
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams2));
-        verify(mIPowerMock, times(0)).getCpuHeadroom(eq(halParams3));
-        verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams4));
+        verify(mIPowerMock, times(0)).getCpuHeadroom(any());
 
         // after 1+ seconds it should be served from HAL as it exceeds 1000 millis interval
         Thread.sleep(600);
@@ -1574,18 +1565,14 @@ public class HintManagerServiceTest {
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getGpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getGpuHeadroom(params2));
-        verify(mIPowerMock, times(1)).getGpuHeadroom(any());
-        verify(mIPowerMock, times(0)).getGpuHeadroom(eq(halParams1));
-        verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams2));
+        verify(mIPowerMock, times(0)).getGpuHeadroom(any());
 
         // after 500ms it should be served with cache
         Thread.sleep(500);
         clearInvocations(mIPowerMock);
         assertEquals(halRet1, service.getBinderServiceInstance().getGpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getGpuHeadroom(params2));
-        verify(mIPowerMock, times(1)).getGpuHeadroom(any());
-        verify(mIPowerMock, times(0)).getGpuHeadroom(eq(halParams1));
-        verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams2));
+        verify(mIPowerMock, times(0)).getGpuHeadroom(any());
 
         // after 1+ seconds it should be served from HAL as it exceeds 1000 millis interval
         Thread.sleep(600);
