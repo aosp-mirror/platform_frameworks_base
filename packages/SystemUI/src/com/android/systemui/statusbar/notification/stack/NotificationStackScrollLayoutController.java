@@ -1207,7 +1207,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return mView.getEmptyShadeViewHeight();
     }
 
-    /** Set the max alpha for keyguard */
+    /**
+     * Controls fading out Notifications during animations over the LockScreen, such opening or
+     * closing the shade. Note that we don't restrict Notification alpha in certain cases,
+     * like when the Shade is opened from a HUN.
+     */
     public void setMaxAlphaForKeyguard(float alpha, String source) {
         mMaxAlphaForKeyguard = alpha;
         mMaxAlphaForKeyguardSource = source;

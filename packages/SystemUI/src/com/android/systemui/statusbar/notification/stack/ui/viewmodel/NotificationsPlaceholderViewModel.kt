@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -40,7 +41,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -89,7 +89,7 @@ constructor(
 
     /** Notifies that the bounds of the notification scrim have changed. */
     fun onScrimBoundsChanged(bounds: ShadeScrimBounds?) {
-        interactor.setShadeScrimBounds(bounds)
+        interactor.setNotificationShadeScrimBounds(bounds)
     }
 
     /** Sets the available space */

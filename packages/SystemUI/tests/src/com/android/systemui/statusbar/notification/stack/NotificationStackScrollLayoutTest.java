@@ -881,7 +881,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @EnableSceneContainer
     public void testIsInsideScrollableRegion_noOffset() {
         mStackScroller.setLeftTopRightBottom(0, 0, 1000, 2000);
-        mStackScroller.setScrimClippingShape(createScrimShape(100, 500, 900, 2000));
+        mStackScroller.setClippingShape(createScrimShape(100, 500, 900, 2000));
 
         MotionEvent event1 = transformEventForView(createMotionEvent(500f, 400f), mStackScroller);
         assertThat(mStackScroller.isInScrollableRegion(event1)).isFalse();
@@ -900,7 +900,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @EnableSceneContainer
     public void testIsInsideScrollableRegion_offset() {
         mStackScroller.setLeftTopRightBottom(1000, 0, 2000, 2000);
-        mStackScroller.setScrimClippingShape(createScrimShape(100, 500, 900, 2000));
+        mStackScroller.setClippingShape(createScrimShape(100, 500, 900, 2000));
 
         MotionEvent event1 = transformEventForView(createMotionEvent(1500f, 400f), mStackScroller);
         assertThat(mStackScroller.isInScrollableRegion(event1)).isFalse();

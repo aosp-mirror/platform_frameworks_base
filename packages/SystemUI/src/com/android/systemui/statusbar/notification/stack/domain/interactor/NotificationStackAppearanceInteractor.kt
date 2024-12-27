@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.stack.data.repository.Notific
 import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -47,8 +48,11 @@ constructor(
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val shadeScrimBounds: StateFlow<ShadeScrimBounds?> =
-        placeholderRepository.shadeScrimBounds.asStateFlow()
+    val notificationShadeScrimBounds: StateFlow<ShadeScrimBounds?> =
+        placeholderRepository.notificationShadeScrimBounds.asStateFlow()
+
+    /** The shape of the QuickSettingsShadeOverlay panel */
+    val qsPanelShape: StateFlow<ShadeScrimShape?> = placeholderRepository.qsPanelShape.asStateFlow()
 
     /**
      * Whether the stack is expanding from GONE-with-HUN to SHADE
@@ -119,9 +123,15 @@ constructor(
     }
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
-        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
-        placeholderRepository.shadeScrimBounds.value = bounds
+    fun setNotificationShadeScrimBounds(bounds: ShadeScrimBounds?) {
+        checkValidBounds(bounds)
+        placeholderRepository.notificationShadeScrimBounds.value = bounds
+    }
+
+    /** Sets the bounds of the QuickSettings overlay panel */
+    fun setQsPanelShape(shape: ShadeScrimShape?) {
+        checkValidBounds(shape?.bounds)
+        placeholderRepository.qsPanelShape.value = shape
     }
 
     /** Updates the current scroll state of the notification shade. */
@@ -155,5 +165,9 @@ constructor(
 
     fun setConstrainedAvailableSpace(height: Int) {
         placeholderRepository.constrainedAvailableSpace.value = height
+    }
+
+    private fun checkValidBounds(bounds: ShadeScrimBounds?) {
+        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
     }
 }
