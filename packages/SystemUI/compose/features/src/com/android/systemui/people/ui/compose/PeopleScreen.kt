@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -149,6 +150,13 @@ private fun ConversationList(
 
     Spacer(Modifier.height(10.dp))
 
+    val largeCornerRadius = dimensionResource(R.dimen.people_space_widget_radius)
+    val smallCornerRadius = 4.dp
+
+    fun topRadius(i: Int): Dp = if (i == 0) largeCornerRadius else smallCornerRadius
+    fun bottomRadius(i: Int): Dp =
+        if (i == tiles.lastIndex) largeCornerRadius else smallCornerRadius
+
     tiles.forEachIndexed { index, tile ->
         if (index > 0) {
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
@@ -158,8 +166,8 @@ private fun ConversationList(
             Tile(
                 tile,
                 onTileClicked,
-                withTopCornerRadius = index == 0,
-                withBottomCornerRadius = index == tiles.lastIndex,
+                topCornerRadius = topRadius(index),
+                bottomCornerRadius = bottomRadius(index),
             )
         }
     }
@@ -169,13 +177,9 @@ private fun ConversationList(
 private fun Tile(
     tile: PeopleTileViewModel,
     onTileClicked: (PeopleTileViewModel) -> Unit,
-    withTopCornerRadius: Boolean,
-    withBottomCornerRadius: Boolean,
+    topCornerRadius: Dp,
+    bottomCornerRadius: Dp,
 ) {
-    val cornerRadius = dimensionResource(R.dimen.people_space_widget_radius)
-    val topCornerRadius = if (withTopCornerRadius) cornerRadius else 0.dp
-    val bottomCornerRadius = if (withBottomCornerRadius) cornerRadius else 0.dp
-
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         shape =
