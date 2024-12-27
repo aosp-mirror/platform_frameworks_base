@@ -492,7 +492,7 @@ flag {
     name: "status_bar_notification_chips"
     namespace: "systemui"
     description: "Show promoted ongoing notifications as chips in the status bar"
-    bug: "361346412"
+    bug: "364653005"
 }
 
 flag {
