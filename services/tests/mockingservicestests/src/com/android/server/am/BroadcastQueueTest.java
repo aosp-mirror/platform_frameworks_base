@@ -602,7 +602,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         mQueue.dumpDebug(new ProtoOutputStream(),
                 ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
-                null, 0, true, true, true, null, false);
+                null, 0, true, true, true, null, null, false);
         mQueue.dumpToDropBoxLocked(TAG);
 
         BroadcastQueue.logv(TAG);
@@ -1019,7 +1019,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
             mQueue.dumpDebug(new ProtoOutputStream(),
                     ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
             mQueue.dumpLocked(FileDescriptor.err, new PrintWriter(Writer.nullWriter()),
-                    null, 0, true, true, true, null, false);
+                    null, 0, true, true, true, null, null, false);
         }
 
         waitForIdle();

@@ -2178,6 +2178,8 @@ class BroadcastController {
         boolean printedAnything = false;
         boolean onlyReceivers = false;
         int filteredUid = Process.INVALID_UID;
+        boolean onlyFilter = false;
+        String dumpIntentAction = null;
 
         if ("history".equals(dumpPackage)) {
             if (opti < args.length && "-s".equals(args[opti])) {
@@ -2185,8 +2187,7 @@ class BroadcastController {
             }
             onlyHistory = true;
             dumpPackage = null;
-        }
-        if ("receivers".equals(dumpPackage)) {
+        } else if ("receivers".equals(dumpPackage)) {
             onlyReceivers = true;
             dumpPackage = null;
             if (opti + 2 <= args.length) {
@@ -2205,7 +2206,23 @@ class BroadcastController {
                     }
                 }
             }
+        } else if ("filter".equals(dumpPackage)) {
+            onlyFilter = true;
+            dumpPackage = null;
+            if (opti + 2 <= args.length) {
+                if ("--action".equals(args[opti++])) {
+                    dumpIntentAction = args[opti++];
+                    if (dumpIntentAction == null) {
+                        pw.printf("Missing argument for --action option\n");
+                        return;
+                    }
+                } else {
+                    pw.printf("Unknown argument: %s\n", args[opti]);
+                    return;
+                }
+            }
         }
+
         if (DEBUG_BROADCAST) {
             Slogf.d(TAG_BROADCAST, "dumpBroadcastsLocked(): dumpPackage=%s, onlyHistory=%b, "
                             + "onlyReceivers=%b, filteredUid=%d", dumpPackage, onlyHistory,
@@ -2213,7 +2230,7 @@ class BroadcastController {
         }
 
         pw.println("ACTIVITY MANAGER BROADCAST STATE (dumpsys activity broadcasts)");
-        if (!onlyHistory && dumpAll) {
+        if (!onlyHistory && !onlyFilter && dumpAll) {
             if (mRegisteredReceivers.size() > 0) {
                 boolean printed = false;
                 Iterator it = mRegisteredReceivers.values().iterator();
@@ -2257,14 +2274,14 @@ class BroadcastController {
 
         if (!onlyReceivers) {
             needSep = mBroadcastQueue.dumpLocked(fd, pw, args, opti,
-                    dumpConstants, dumpHistory, dumpAll, dumpPackage, needSep);
+                    dumpConstants, dumpHistory, dumpAll, dumpPackage, dumpIntentAction, needSep);
             printedAnything |= needSep;
         }
 
         needSep = true;
 
         synchronized (mStickyBroadcasts) {
-            if (!onlyHistory && !onlyReceivers && mStickyBroadcasts != null
+            if (!onlyHistory && !onlyReceivers && !onlyFilter && mStickyBroadcasts != null
                     && dumpPackage == null) {
                 for (int user = 0; user < mStickyBroadcasts.size(); user++) {
                     if (needSep) {
@@ -2312,13 +2329,12 @@ class BroadcastController {
             }
         }
 
-        if (!onlyHistory && !onlyReceivers && dumpAll) {
+        if (!onlyHistory && !onlyReceivers && !onlyFilter && dumpAll) {
             pw.println();
-            pw.println("  Queue " + mBroadcastQueue.toString() + ": "
+            pw.println("  Queue " + mBroadcastQueue + ": "
                     + mBroadcastQueue.describeStateLocked());
             pw.println("  mHandler:");
             mService.mHandler.dump(new PrintWriterPrinter(pw), "    ");
-            needSep = true;
             printedAnything = true;
         }
 

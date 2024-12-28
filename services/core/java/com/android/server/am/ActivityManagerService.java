@@ -10828,8 +10828,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     opti++;
                 }
                 synchronized (this) {
+                    // TODO: b/361161826 - Always pass in the dumpAll and let
+                    // BroadcastController decide how to treat it.
+                    final boolean requestDumpAll = "filter".equals(dumpPackage)
+                            ? dumpAll : true;
                     mBroadcastController.dumpBroadcastsLocked(fd, pw, args, opti,
-                            /* dumpAll= */ true, dumpPackage);
+                            requestDumpAll, dumpPackage);
                 }
             } else if ("broadcast-stats".equals(cmd)) {
                 if (opti < args.length) {
