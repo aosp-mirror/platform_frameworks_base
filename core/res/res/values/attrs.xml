@@ -7572,21 +7572,22 @@
     <!-- NotificationProgressDrawable class -->
     <!-- ================================== -->
 
-    <!-- Drawable used to render a segmented bar, with segments and points. -->
+    <!-- Drawable used to render a notification progress bar, with segments and points. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawable">
-        <!-- Default color for the parts. -->
+        <!-- The gap between two segments. -->
         <attr name="segSegGap" format="dimension" />
+        <!-- The gap between a segment and a point. -->
         <attr name="segPointGap" format="dimension" />
     </declare-styleable>
 
     <!-- Used to config the segments of a NotificationProgressDrawable. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawableSegments">
-        <!-- Height of the solid segments -->
+        <!-- Height of the solid segments. -->
         <attr name="height" />
-        <!-- Height of the faded segments -->
-        <attr name="fadedHeight" format="dimension"/>
+        <!-- Height of the faded segments. -->
+        <attr name="fadedHeight" format="dimension" />
         <!-- Corner radius of the segment rect. -->
         <attr name="cornerRadius" format="dimension" />
         <!-- Default color of the segment. -->
@@ -7601,7 +7602,7 @@
         <!-- Inset of the point icon or rect. -->
         <attr name="inset" />
         <!-- Corner radius of the point rect. -->
-        <attr name="cornerRadius"/>
+        <attr name="cornerRadius" />
         <!-- Default color of the point rect. -->
         <attr name="color" />
     </declare-styleable>
