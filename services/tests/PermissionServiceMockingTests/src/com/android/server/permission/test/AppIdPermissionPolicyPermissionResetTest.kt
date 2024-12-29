@@ -72,7 +72,8 @@ class AppIdPermissionPolicyPermissionResetTest : BasePermissionPolicyTest() {
         } else {
             mockPackageState(
                 APP_ID_1,
-                mockAndroidPackage(PACKAGE_NAME_1, requestedPermissions = setOf(PERMISSION_NAME_0))
+                mockAndroidPackage(PACKAGE_NAME_1, requestedPermissions = setOf(PERMISSION_NAME_0)),
+                true
             )
         }
         setPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0, oldFlags)

@@ -6,5 +6,6 @@ per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file *Network* = file:/services/core/java/com/android/server/net/OWNERS
 per-file BatteryServiceTest.java = file:platform/hardware/interfaces:/health/OWNERS
 per-file GestureLauncherServiceTest.java = file:platform/packages/apps/EmergencyInfo:/OWNERS
+per-file GestureLauncherServiceTest.java = file:/INPUT_OWNERS
 per-file PinnerServiceTest.java = file:/apct-tests/perftests/OWNERS
 per-file SecurityStateTest.java = file:/SECURITY_STATE_OWNERS
