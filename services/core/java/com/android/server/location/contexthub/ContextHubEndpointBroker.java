@@ -336,7 +336,6 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /* package */ void onEndpointSessionOpenRequest(
             int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
         if (!hasEndpointPermissions(initiator)) {
-            // TODO(b/381102453): Post in async thread
             halCloseEndpointSessionNoThrow(sessionId, Reason.PERMISSION_DENIED);
             return;
         }
@@ -344,7 +343,6 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         synchronized (mOpenSessionLock) {
             if (hasSessionId(sessionId)) {
                 Log.e(TAG, "Existing session in onEndpointSessionOpenRequest: id=" + sessionId);
-                // TODO(b/381102453): Post in async thread
                 halCloseEndpointSessionNoThrow(sessionId, Reason.UNSPECIFIED);
                 return;
             }
@@ -403,7 +401,6 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                             + sessionId
                             + ") with message: "
                             + message);
-            // TODO(b/381102453): Post in async thread
             sendMessageDeliveryStatus(
                     sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMANENT_ERROR);
             return;
@@ -414,7 +411,6 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                 mContextHubEndpointCallback.onMessageReceived(sessionId, message);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onMessageReceived", e);
-                // TODO(b/381102453): Post in async thread
                 sendMessageDeliveryStatus(
                         sessionId, message.getMessageSequenceNumber(), ErrorCode.TRANSIENT_ERROR);
             }
