@@ -65,7 +65,6 @@ android_robolectric_test {
     test_options: {
         timeout: 36000,
     },
-    upstream: true,
 
     strict_mode: false,
 }
@@ -100,10 +99,10 @@ java_library {
     plugins: [
         "auto_value_plugin_1.9",
         "auto_value_builder_plugin_1.9",
-        "Robolectric_processor_upstream",
+        "Robolectric_processor",
     ],
     libs: [
-        "Robolectric_all-target_upstream",
+        "Robolectric_all-target",
         "mockito-robolectric-prebuilt",
         "truth",
     ],
