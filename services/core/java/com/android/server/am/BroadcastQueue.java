@@ -264,7 +264,8 @@ public abstract class BroadcastQueue {
     @GuardedBy("mService")
     public abstract boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
-            boolean dumpAll, @Nullable String dumpPackage, boolean needSep);
+            boolean dumpAll, @Nullable String dumpPackage, @Nullable String dumpIntentAction,
+            boolean needSep);
 
     /**
      * Execute {@link #dumpLocked} and store the output into
@@ -276,7 +277,7 @@ public abstract class BroadcastQueue {
                     PrintWriter pw = new PrintWriter(out)) {
                 pw.print("Message: ");
                 pw.println(msg);
-                dumpLocked(fd, pw, null, 0, false, false, false, null, false);
+                dumpLocked(fd, pw, null, 0, false, false, false, null, null, false);
                 pw.flush();
             }
         }, DropBoxManager.IS_TEXT);

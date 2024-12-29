@@ -2428,12 +2428,33 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     public boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
-            boolean dumpAll, @Nullable String dumpPackage, boolean needSep) {
+            boolean dumpAll, @Nullable String dumpPackage, @Nullable String dumpIntentAction,
+            boolean needSep) {
         final long now = SystemClock.uptimeMillis();
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.increaseIndent();
         ipw.println();
 
+        if (dumpIntentAction == null) {
+            dumpProcessQueues(ipw, now);
+            dumpBroadcastsWithIgnoredPolicies(ipw);
+            dumpForegroundUids(ipw);
+
+            if (dumpConstants) {
+                mFgConstants.dump(ipw);
+                mBgConstants.dump(ipw);
+            }
+        }
+
+        if (dumpHistory) {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            needSep = mHistory.dumpLocked(ipw, dumpPackage, dumpIntentAction, mQueueName,
+                    sdf, dumpAll);
+        }
+        return needSep;
+    }
+
+    private void dumpProcessQueues(@NonNull IndentingPrintWriter ipw, @UptimeMillisLong long now) {
         ipw.println("📋 Per-process queues:");
         ipw.increaseIndent();
         for (int i = 0; i < mProcessQueues.size(); i++) {
@@ -2481,28 +2502,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
         ipw.decreaseIndent();
         ipw.println();
+    }
 
+    private void dumpBroadcastsWithIgnoredPolicies(@NonNull IndentingPrintWriter ipw) {
         ipw.println("Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
         ipw.decreaseIndent();
         ipw.println();
+    }
 
+    private void dumpForegroundUids(@NonNull IndentingPrintWriter ipw) {
         ipw.println("Foreground UIDs:");
         ipw.increaseIndent();
         ipw.println(mUidForeground);
         ipw.decreaseIndent();
         ipw.println();
-
-        if (dumpConstants) {
-            mFgConstants.dump(ipw);
-            mBgConstants.dump(ipw);
-        }
-
-        if (dumpHistory) {
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            needSep = mHistory.dumpLocked(ipw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
-        }
-        return needSep;
     }
 }
