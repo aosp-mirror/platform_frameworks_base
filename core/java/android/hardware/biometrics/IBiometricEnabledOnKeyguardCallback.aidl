@@ -20,5 +20,5 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricEnabledOnKeyguardCallback {
-    void onChanged(boolean enabled, int userId);
+    void onChanged(boolean enabled, int userId, int modality);
 }

@@ -230,6 +230,7 @@ java_library_static {
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",
+        "aconfig_settings_flags_lib",
         "am_flags_lib",
         "com_android_server_accessibility_flags_lib",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
