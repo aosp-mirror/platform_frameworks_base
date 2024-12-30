@@ -149,8 +149,10 @@ public class NotificationExpandButton extends FrameLayout {
         setContentDescription(mContext.getText(contentDescriptionId));
         mIconView.setImageDrawable(getContext().getDrawable(drawableId));
 
-        // changing the expanded state can affect the number display
-        updateNumber();
+        if (!notificationsRedesignTemplates()) {
+            // changing the expanded state can affect the number display
+            updateNumber();
+        }
     }
 
     private void updateNumber() {
@@ -189,6 +191,9 @@ public class NotificationExpandButton extends FrameLayout {
     }
 
     private boolean shouldShowNumber() {
+        if (notificationsRedesignTemplates()) {
+            return mNumber > 1;
+        }
         return !mExpanded && mNumber > 1;
     }
 
@@ -230,7 +235,7 @@ public class NotificationExpandButton extends FrameLayout {
 
     /**
      * Sets the number shown inside the expand button.
-     * This only appears when the expand button is collapsed, and when greater than 1.
+     * This only appears when {@link this#shouldShowNumber()} is true.
      */
     @RemotableViewMethod
     public void setNumber(int number) {
