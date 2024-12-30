@@ -276,16 +276,19 @@ public final class MediaQualityManager {
     /**
      * Sets preferred default picture profile.
      *
-     * @param id the ID of the default profile. {@code null} to unset the default profile.
+     * @param pictureProfileId the ID of the default profile. {@code null} to unset the default
+     *                         profile.
      * @return {@code true} if it's set successfully; {@code false} otherwise.
+     *
+     * @see PictureProfile#getProfileId()
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
-    public boolean setDefaultPictureProfile(@Nullable String id) {
+    public boolean setDefaultPictureProfile(@Nullable String pictureProfileId) {
         try {
-            return mService.setDefaultPictureProfile(id, mUserHandle);
+            return mService.setDefaultPictureProfile(pictureProfileId, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -467,16 +470,19 @@ public final class MediaQualityManager {
     /**
      * Sets preferred default sound profile.
      *
-     * @param id the ID of the default profile. {@code null} to unset the default profile.
+     * @param soundProfileId the ID of the default profile. {@code null} to unset the default
+     *                       profile.
      * @return {@code true} if it's set successfully; {@code false} otherwise.
+     *
+     * @see SoundProfile#getProfileId()
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
-    public boolean setDefaultSoundProfile(@Nullable String id) {
+    public boolean setDefaultSoundProfile(@Nullable String soundProfileId) {
         try {
-            return mService.setDefaultSoundProfile(id, mUserHandle);
+            return mService.setDefaultSoundProfile(soundProfileId, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
