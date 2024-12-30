@@ -38,7 +38,13 @@ sealed class PopupChipModel {
 
     data class Shown(
         override val chipId: PopupChipId,
+        /** Default icon displayed on the chip */
         val icon: Icon,
+        /**
+         * Icon to be displayed if the chip is hovered. i.e. the mouse pointer is inside the bounds
+         * of the chip.
+         */
+        val hoverIcon: Icon,
         val chipText: String,
         val isToggled: Boolean = false,
         val onToggle: () -> Unit,
