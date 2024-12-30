@@ -44,6 +44,7 @@
 #include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
 #include <binder/IServiceManager.h>
 #include <com_android_input_flags.h>
+#include <dispatcher/Entry.h>
 #include <include/gestures.h>
 #include <input/Input.h>
 #include <input/PointerController.h>
@@ -66,6 +67,7 @@
 #include <atomic>
 #include <cinttypes>
 #include <map>
+#include <variant>
 #include <vector>
 
 #include "android_hardware_display_DisplayTopology.h"
@@ -415,8 +417,9 @@ public:
     void interceptMotionBeforeQueueing(ui::LogicalDisplayId displayId, uint32_t source,
                                        int32_t action, nsecs_t when,
                                        uint32_t& policyFlags) override;
-    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent& keyEvent,
-                                          uint32_t policyFlags) override;
+    std::variant<nsecs_t, inputdispatcher::KeyEntry::InterceptKeyResult>
+    interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent& keyEvent,
+                                  uint32_t policyFlags) override;
     std::optional<KeyEvent> dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent& keyEvent,
                                                  uint32_t policyFlags) override;
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType,
@@ -1885,9 +1888,9 @@ bool NativeInputManager::isDisplayInteractive(ui::LogicalDisplayId displayId) {
     return true;
 }
 
-nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& token,
-                                                          const KeyEvent& keyEvent,
-                                                          uint32_t policyFlags) {
+std::variant<nsecs_t, inputdispatcher::KeyEntry::InterceptKeyResult>
+NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& token,
+                                                  const KeyEvent& keyEvent, uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
@@ -1915,7 +1918,19 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& tok
     if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching")) {
         return 0;
     }
-    return delayMillis < 0 ? -1 : milliseconds_to_nanoseconds(delayMillis);
+
+    // Negative delay represent states from intercepting the key.
+    // 0 : Continue event.
+    if (delayMillis == 0) {
+        return inputdispatcher::KeyEntry::InterceptKeyResult::CONTINUE;
+    }
+
+    // -1 : Drop and skip the key event.
+    if (delayMillis == -1) {
+        return inputdispatcher::KeyEntry::InterceptKeyResult::SKIP;
+    }
+
+    return milliseconds_to_nanoseconds(delayMillis);
 }
 
 std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
