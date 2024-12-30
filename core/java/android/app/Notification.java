@@ -6453,7 +6453,10 @@ public class Notification implements Parcelable
             big.setColorStateList(R.id.snooze_button, "setImageTintList", actionColor);
             big.setColorStateList(R.id.bubble_button, "setImageTintList", actionColor);
 
-            if (Flags.notificationsRedesignTemplates()) {
+            // Update margins to leave space for the top line (but not for HUNs, which use a
+            // different layout that already accounts for that).
+            if (Flags.notificationsRedesignTemplates()
+                    && p.mViewType != StandardTemplateParams.VIEW_TYPE_HEADS_UP) {
                 int margin = getContentMarginTop(mContext,
                         R.dimen.notification_2025_content_margin_top);
                 big.setViewLayoutMargin(R.id.notification_main_column, RemoteViews.MARGIN_TOP,
