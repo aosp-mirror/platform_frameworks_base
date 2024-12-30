@@ -78,7 +78,13 @@ private fun toPopupChipModel(model: MediaControlChipModel?, context: Context): P
                     res = com.android.internal.R.drawable.ic_audio_media,
                     contentDescription = contentDescription,
                 ),
+        hoverIcon =
+            Icon.Resource(
+                res = com.android.internal.R.drawable.ic_media_pause,
+                contentDescription = null,
+            ),
         chipText = model.songName.toString(),
+        isToggled = false,
         // TODO(b/385202114): Show a popup containing the media carousal when the chip is toggled.
         onToggle = {},
         // TODO(b/385202193): Add support for clicking on the icon on a media chip.

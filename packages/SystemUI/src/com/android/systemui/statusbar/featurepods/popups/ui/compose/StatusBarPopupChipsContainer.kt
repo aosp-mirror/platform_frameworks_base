@@ -18,10 +18,11 @@ package com.android.systemui.statusbar.featurepods.popups.ui.compose
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 
 /** Container view that holds all right hand side chips in the status bar. */
@@ -29,9 +30,11 @@ import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipM
 fun StatusBarPopupChipsContainer(chips: List<PopupChipModel.Shown>, modifier: Modifier = Modifier) {
     //    TODO(b/385353140): Add padding and spacing for this container according to UX specs.
     Box {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // TODO(b/385352859): Show `StatusBarPopupChip` here instead of `Text` once it is ready.
-            chips.forEach { chip -> Text(text = chip.chipText) }
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            chips.forEach { chip -> StatusBarPopupChip(chip) }
         }
     }
 }
