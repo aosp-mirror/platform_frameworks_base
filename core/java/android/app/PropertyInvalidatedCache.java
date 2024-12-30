@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SystemPropertySetter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -155,21 +156,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * The module used for telephony caches.
      */
     public static final String MODULE_TELEPHONY = "telephony";
-
-    /**
-     * Constants that affect retries when the process is unable to write the property.
-     * The first constant is the number of times the process will attempt to set the
-     * property.  The second constant is the delay between attempts.
-     */
-
-    /**
-     * Wait 200ms between retry attempts and the retry limit is 5.  That gives a total possible
-     * delay of 1s, which should be less than ANR timeouts.  The goal is to have the system crash
-     * because the property could not be set (which is a condition that is easily recognized) and
-     * not crash because of an ANR (which can be confusing to debug).
-     */
-    private static final int PROPERTY_FAILURE_RETRY_DELAY_MILLIS = 200;
-    private static final int PROPERTY_FAILURE_RETRY_LIMIT = 5;
 
     /**
      * Construct a system property that matches the rules described above.  The module is
@@ -958,37 +944,8 @@ public class PropertyInvalidatedCache<Query, Result> {
          */
         @Override
         void setNonceInternal(long value) {
-            // Failing to set the nonce is a fatal error.  Failures setting a system property have
-            // been reported; given that the failure is probably transient, this function includes
-            // a retry.
             final String str = Long.toString(value);
-            RuntimeException failure = null;
-            for (int attempt = 0; attempt < PROPERTY_FAILURE_RETRY_LIMIT; attempt++) {
-                try {
-                    SystemProperties.set(mName, str);
-                    if (attempt > 0) {
-                        // This log is not guarded.  Based on known bug reports, it should
-                        // occur once a week or less.  The purpose of the log message is to
-                        // identify the retries as a source of delay that might be otherwise
-                        // be attributed to the cache itself.
-                        Log.w(TAG, "Nonce set after " + attempt + " tries");
-                    }
-                    return;
-                } catch (RuntimeException e) {
-                    if (failure == null) {
-                        failure = e;
-                    }
-                    try {
-                        Thread.sleep(PROPERTY_FAILURE_RETRY_DELAY_MILLIS);
-                    } catch (InterruptedException x) {
-                        // Ignore this exception.  The desired delay is only approximate and
-                        // there is no issue if the sleep sometimes terminates early.
-                    }
-                }
-            }
-            // This point is reached only if SystemProperties.set() fails at least once.
-            // Rethrow the first exception that was received.
-            throw failure;
+            SystemPropertySetter.setWithRetry(mName, str);
         }
     }
 

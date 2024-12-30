@@ -242,6 +242,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SystemPropertySetter;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -11032,7 +11033,7 @@ public class AudioService extends IAudioService.Stub
         @GuardedBy("mLock")
         private void updateLocked() {
             String n = Long.toString(mToken++);
-            SystemProperties.set(PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY, n);
+            SystemPropertySetter.setWithRetry(PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY, n);
         }
 
         private void trigger() {
