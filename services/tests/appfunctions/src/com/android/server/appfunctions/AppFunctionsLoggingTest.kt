@@ -25,11 +25,13 @@ import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback
 import android.app.appsearch.GenericDocument
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.pm.PackageManagerInternal
 import android.os.UserHandle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.server.LocalServices
 import com.google.common.util.concurrent.MoreExecutors
 import org.junit.Before
 import org.junit.Rule
@@ -40,24 +42,25 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-
-/**
- * Tests that AppFunctionsStatsLog logs AppFunctionsRequestReported with the expected values.
- */
+/** Tests that AppFunctionsStatsLog logs AppFunctionsRequestReported with the expected values. */
 @RunWith(AndroidJUnit4::class)
 class AppFunctionsLoggingTest {
     @get:Rule
     val mExtendedMockitoRule: ExtendedMockitoRule =
         ExtendedMockitoRule.Builder(this)
             .mockStatic(AppFunctionsStatsLog::class.java)
+            .mockStatic(LocalServices::class.java)
             .build()
-    private val mContext: Context get() = ApplicationProvider.getApplicationContext()
+    private val mContext: Context
+        get() = ApplicationProvider.getApplicationContext()
+
     private val mMockPackageManager = mock<PackageManager>()
     private val mAppFunctionsLoggerWrapper =
         AppFunctionsLoggerWrapper(
             mMockPackageManager,
             MoreExecutors.directExecutor(),
-            { TEST_CURRENT_TIME_MILLIS })
+            { TEST_CURRENT_TIME_MILLIS },
+        )
     private lateinit var mSafeCallback: SafeOneTimeExecuteAppFunctionCallback
 
     private val mServiceImpl =
@@ -67,25 +70,40 @@ class AppFunctionsLoggingTest {
             mock<CallerValidator>(),
             mock<ServiceHelper>(),
             ServiceConfigImpl(),
-            mAppFunctionsLoggerWrapper)
+            mAppFunctionsLoggerWrapper,
+            mock<PackageManagerInternal>(),
+        )
 
-    private val mRequestInternal = ExecuteAppFunctionAidlRequest(
-        ExecuteAppFunctionRequest.Builder(TEST_TARGET_PACKAGE, TEST_FUNCTION_ID).build(),
-        UserHandle.CURRENT, TEST_CALLING_PKG, TEST_INITIAL_REQUEST_TIME_MILLIS
-    )
+    private val mRequestInternal =
+        ExecuteAppFunctionAidlRequest(
+            ExecuteAppFunctionRequest.Builder(TEST_TARGET_PACKAGE, TEST_FUNCTION_ID).build(),
+            UserHandle.CURRENT,
+            TEST_CALLING_PKG,
+            TEST_INITIAL_REQUEST_TIME_MILLIS,
+        )
 
     @Before
     fun setup() {
-        whenever(mMockPackageManager.getPackageUid(eq(TEST_TARGET_PACKAGE), any<Int>())).thenReturn(TEST_TARGET_UID)
-        mSafeCallback = mServiceImpl.initializeSafeExecuteAppFunctionCallback(mRequestInternal, mock<IExecuteAppFunctionCallback>(), TEST_CALLING_UID)
+        whenever(mMockPackageManager.getPackageUid(eq(TEST_TARGET_PACKAGE), any<Int>()))
+            .thenReturn(TEST_TARGET_UID)
+        mSafeCallback =
+            mServiceImpl.initializeSafeExecuteAppFunctionCallback(
+                mRequestInternal,
+                mock<IExecuteAppFunctionCallback>(),
+                TEST_CALLING_UID,
+            )
         mSafeCallback.setExecutionStartTimeAfterBindMillis(TEST_EXECUTION_TIME_AFTER_BIND_MILLIS)
     }
 
     @Test
     fun testOnSuccess_logsSuccessResponse() {
         val response =
-            ExecuteAppFunctionResponse(GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "")
-                .setPropertyLong("longProperty", 42L).setPropertyString("stringProperty", "text").build())
+            ExecuteAppFunctionResponse(
+                GenericDocument.Builder<GenericDocument.Builder<*>>("", "", "")
+                    .setPropertyLong("longProperty", 42L)
+                    .setPropertyString("stringProperty", "text")
+                    .build()
+            )
 
         mSafeCallback.onResult(response)
 
@@ -98,14 +116,16 @@ class AppFunctionsLoggingTest {
                 /* requestSizeBytes= */ eq<Int>(mRequestInternal.clientRequest.requestDataSize),
                 /* responseSizeBytes= */ eq<Int>(response.responseDataSize),
                 /* requestDurationMs= */ eq<Long>(TEST_EXPECTED_E2E_DURATION_MILLIS),
-                /* requestOverheadMs= */ eq<Long>(TEST_EXPECTED_OVERHEAD_DURATION_MILLIS)
+                /* requestOverheadMs= */ eq<Long>(TEST_EXPECTED_OVERHEAD_DURATION_MILLIS),
             )
         }
     }
 
     @Test
     fun testOnError_logsFailureResponse() {
-        mSafeCallback.onError(AppFunctionException(AppFunctionException.ERROR_DENIED, "Error: permission denied"))
+        mSafeCallback.onError(
+            AppFunctionException(AppFunctionException.ERROR_DENIED, "Error: permission denied")
+        )
 
         ExtendedMockito.verify {
             AppFunctionsStatsLog.write(
@@ -116,7 +136,7 @@ class AppFunctionsLoggingTest {
                 /* requestSizeBytes= */ eq<Int>(mRequestInternal.clientRequest.requestDataSize),
                 /* responseSizeBytes= */ eq<Int>(0),
                 /* requestDurationMs= */ eq<Long>(TEST_EXPECTED_E2E_DURATION_MILLIS),
-                /* requestOverheadMs= */ eq<Long>(TEST_EXPECTED_OVERHEAD_DURATION_MILLIS)
+                /* requestOverheadMs= */ eq<Long>(TEST_EXPECTED_OVERHEAD_DURATION_MILLIS),
             )
         }
     }

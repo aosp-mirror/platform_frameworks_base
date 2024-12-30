@@ -18,28 +18,35 @@ package com.android.server.appfunctions
 
 import android.app.appfunctions.flags.Flags
 import android.content.Context
+import android.content.pm.PackageManagerInternal
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.server.LocalServices
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
 @RequiresFlagsEnabled(Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
 class AppFunctionManagerServiceImplTest {
+    @get:Rule val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     @get:Rule
-    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+    val extendedMockitoRule =
+        ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java).build()
 
     private val context: Context
         get() = ApplicationProvider.getApplicationContext()
 
-    private val serviceImpl = AppFunctionManagerServiceImpl(context)
+    private val serviceImpl = AppFunctionManagerServiceImpl(context, mock<PackageManagerInternal>())
 
     @Test
     fun testGetLockForPackage_samePackage() {
