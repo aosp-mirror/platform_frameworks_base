@@ -470,8 +470,8 @@ private:
         // Pointer speed.
         int32_t pointerSpeed{0};
 
-        // Displays on which its associated mice will have pointer acceleration disabled.
-        std::set<ui::LogicalDisplayId> displaysWithMousePointerAccelerationDisabled{};
+        // Displays on which its associated mice will have all scaling disabled.
+        std::set<ui::LogicalDisplayId> displaysWithMouseScalingDisabled{};
 
         // True if pointer gestures are enabled.
         bool pointerGesturesEnabled{true};
@@ -596,9 +596,8 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
-        dump += StringPrintf(INDENT "Display with Mouse Pointer Acceleration Disabled: %s\n",
-                             dumpSet(mLocked.displaysWithMousePointerAccelerationDisabled,
-                                     streamableToString)
+        dump += StringPrintf(INDENT "Display with Mouse Scaling Disabled: %s\n",
+                             dumpSet(mLocked.displaysWithMouseScalingDisabled, streamableToString)
                                      .c_str());
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
                              toString(mLocked.pointerGesturesEnabled));
@@ -827,13 +826,11 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         std::scoped_lock _l(mLock);
 
         outConfig->mousePointerSpeed = mLocked.pointerSpeed;
-        outConfig->displaysWithMousePointerAccelerationDisabled =
-                mLocked.displaysWithMousePointerAccelerationDisabled;
+        outConfig->displaysWithMouseScalingDisabled = mLocked.displaysWithMouseScalingDisabled;
         outConfig->pointerVelocityControlParameters.scale =
                 exp2f(mLocked.pointerSpeed * POINTER_SPEED_EXPONENT);
         outConfig->pointerVelocityControlParameters.acceleration =
-                mLocked.displaysWithMousePointerAccelerationDisabled.count(
-                        mLocked.pointerDisplayId) == 0
+                mLocked.displaysWithMouseScalingDisabled.count(mLocked.pointerDisplayId) == 0
                 ? android::os::IInputConstants::DEFAULT_POINTER_ACCELERATION
                 : 1;
         outConfig->wheelVelocityControlParameters.acceleration =
@@ -1499,18 +1496,17 @@ void NativeInputManager::setMousePointerAccelerationEnabled(ui::LogicalDisplayId
     { // acquire lock
         std::scoped_lock _l(mLock);
 
-        const bool oldEnabled =
-                mLocked.displaysWithMousePointerAccelerationDisabled.count(displayId) == 0;
+        const bool oldEnabled = mLocked.displaysWithMouseScalingDisabled.count(displayId) == 0;
         if (oldEnabled == enabled) {
             return;
         }
 
-        ALOGI("Setting mouse pointer acceleration to %s on display %s", toString(enabled),
+        ALOGI("Setting mouse pointer scaling to %s on display %s", toString(enabled),
               displayId.toString().c_str());
         if (enabled) {
-            mLocked.displaysWithMousePointerAccelerationDisabled.erase(displayId);
+            mLocked.displaysWithMouseScalingDisabled.erase(displayId);
         } else {
-            mLocked.displaysWithMousePointerAccelerationDisabled.emplace(displayId);
+            mLocked.displaysWithMouseScalingDisabled.emplace(displayId);
         }
     } // release lock
 
