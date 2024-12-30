@@ -142,6 +142,10 @@ public class InsetsSourceControl implements Parcelable {
         return mInsetsHint;
     }
 
+    public boolean isFake() {
+        return mLeash == null && Insets.NONE.equals(mInsetsHint);
+    }
+
     public void setSkipAnimationOnce(boolean skipAnimation) {
         mSkipAnimationOnce = skipAnimation;
     }

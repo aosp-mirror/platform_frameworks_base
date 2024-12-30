@@ -221,13 +221,13 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     @Override
     public boolean setControl(@Nullable InsetsSourceControl control, int[] showTypes,
-            int[] hideTypes, int[] cancelTypes) {
+            int[] hideTypes, int[] cancelTypes, int[] transientTypes) {
         if (Flags.refactorInsetsController()) {
-            return super.setControl(control, showTypes, hideTypes, cancelTypes);
+            return super.setControl(control, showTypes, hideTypes, cancelTypes, transientTypes);
         } else {
             ImeTracing.getInstance().triggerClientDump("ImeInsetsSourceConsumer#setControl",
                     mController.getHost().getInputMethodManager(), null /* icProto */);
-            if (!super.setControl(control, showTypes, hideTypes, cancelTypes)) {
+            if (!super.setControl(control, showTypes, hideTypes, cancelTypes, transientTypes)) {
                 return false;
             }
             if (control == null && !mIsRequestedVisibleAwaitingLeash) {
