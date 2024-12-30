@@ -17,6 +17,7 @@
 package android.media.quality;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.graphics.PixelFormat;
 import android.media.tv.flags.Flags;
@@ -25,16 +26,34 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
  * Metadata of ambient backlight.
  *
  * <p>A metadata instance is sent from ambient backlight hardware in a {@link AmbientBacklightEvent}
- * with {@link AmbientBacklightEvent#AMBIENT_BACKLIGHT_EVENT_METADATA}.
+ * with {@link AmbientBacklightEvent#AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE}.
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightMetadata implements Parcelable {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ALGORITHM_NONE, ALGORITHM_RLE})
+    public @interface CompressionAlgorithm {}
+
+    /**
+     * The compress algorithm is disabled.
+     */
+    public static final int ALGORITHM_NONE = 0;
+
+    /**
+     * The compress algorithm is run length encoding (RLE).
+     */
+    public static final int ALGORITHM_RLE = 1;
+
     @NonNull
     private final String mPackageName;
     private final int mCompressAlgorithm;
@@ -50,7 +69,7 @@ public final class AmbientBacklightMetadata implements Parcelable {
      */
     public AmbientBacklightMetadata(
             @NonNull String packageName,
-            @AmbientBacklightSettings.CompressAlgorithm int compressAlgorithm,
+            @CompressionAlgorithm int compressAlgorithm,
             @AmbientBacklightSettings.Source int source,
             @PixelFormat.Format int colorFormat,
             int horizontalZonesNumber,
@@ -86,8 +105,8 @@ public final class AmbientBacklightMetadata implements Parcelable {
     /**
      * Gets compress algorithm.
      */
-    @AmbientBacklightSettings.CompressAlgorithm
-    public int getCompressAlgorithm() {
+    @CompressionAlgorithm
+    public int getCompressionAlgorithm() {
         return mCompressAlgorithm;
     }
 
@@ -114,7 +133,7 @@ public final class AmbientBacklightMetadata implements Parcelable {
      * larger than 128.
      */
     @IntRange(from = 0, to = 128)
-    public int getHorizontalZonesNumber() {
+    public int getHorizontalZonesCount() {
         return mHorizontalZonesNumber;
     }
 
@@ -125,7 +144,7 @@ public final class AmbientBacklightMetadata implements Parcelable {
      * larger than 80.
      */
     @IntRange(from = 0, to = 80)
-    public int getVerticalZonesNumber() {
+    public int getVerticalZonesCount() {
         return mVerticalZonesNumber;
     }
 
@@ -137,11 +156,11 @@ public final class AmbientBacklightMetadata implements Parcelable {
      * @return an array of color data, in row by row (left-to-right then top-to-bottom) order of the
      * color zones.
      *
-     * @see #getHorizontalZonesNumber()
-     * @see #getVerticalZonesNumber()
+     * @see #getHorizontalZonesCount()
+     * @see #getVerticalZonesCount()
      */
     @NonNull
-    public int[] getZonesColors() {
+    public int[] getZoneColors() {
         return mZonesColors;
     }
 

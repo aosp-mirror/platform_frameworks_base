@@ -60,21 +60,6 @@ public final class AmbientBacklightSettings implements Parcelable {
     public static final int SOURCE_AUDIO_VIDEO = 3;
 
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ALGORITHM_NONE, ALGORITHM_RLE})
-    public @interface CompressAlgorithm {}
-
-    /**
-     * The compress algorithm is disabled.
-     */
-    public static final int ALGORITHM_NONE = 0;
-
-    /**
-     * The compress algorithm is run length encoding (RLE).
-     */
-    public static final int ALGORITHM_RLE = 1;
-
     /**
      * The source of the ambient backlight.
      */
@@ -170,7 +155,7 @@ public final class AmbientBacklightSettings implements Parcelable {
      * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
-    public int getHorizontalZonesNumber() {
+    public int getHorizontalZonesCount() {
         return mHorizontalZonesNumber;
     }
 
@@ -180,7 +165,7 @@ public final class AmbientBacklightSettings implements Parcelable {
      * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
-    public int getVerticalZonesNumber() {
+    public int getVerticalZonesCount() {
         return mVerticalZonesNumber;
     }
 
