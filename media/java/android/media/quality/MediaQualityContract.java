@@ -18,7 +18,11 @@ package android.media.quality;
 
 
 import android.annotation.FlaggedApi;
+import android.annotation.StringDef;
 import android.media.tv.flags.Flags;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The contract between the media quality service and applications. Contains definitions for the
@@ -26,6 +30,48 @@ import android.media.tv.flags.Flags;
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public class MediaQualityContract {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "LEVEL_", value = {
+            LEVEL_LOW,
+            LEVEL_MEDIUM,
+            LEVEL_HIGH,
+            LEVEL_OFF
+    })
+    public @interface Level {}
+
+    /**
+     * Low level option for a parameter.
+     *
+     * <p>This level represents that the corresponding feature is turned on with the low level
+     * option.
+     */
+    public static final String LEVEL_LOW = "level_low";
+
+    /**
+     * Medium level option for a parameter.
+     *
+     * <p>This level represents that the corresponding feature is turned on with the medium level
+     * option.
+     */
+    public static final String LEVEL_MEDIUM = "level_medium";
+
+    /**
+     * High level option for a parameter.
+     *
+     * <p>This level represents that the corresponding feature is turned on with the high level
+     * option.
+     */
+    public static final String LEVEL_HIGH = "level_high";
+
+    /**
+     * Off level for parameters.
+     *
+     * <p>This level represents that the corresponding feature is turned off.
+     */
+    public static final String LEVEL_OFF = "level_off";
+
 
     /**
      * @hide
@@ -46,14 +92,22 @@ public class MediaQualityContract {
         /**
          * The brightness.
          *
-         * <p>Type: INTEGER
+         * <p>Brightness value range are from 0.0 to 1.0 (inclusive), where 0.0 represents the
+         * minimum brightness and 1.0 represents the maximum brightness. The content-unmodified
+         * value is 0.5.
+         *
+         * <p>Type: FLOAT
          */
         public static final String PARAMETER_BRIGHTNESS = "brightness";
 
         /**
          * The contrast.
          *
-         * <p>The ratio between the luminance of the brightest white and the darkest black.
+         * <p>This value represents the image contrast on an arbitrary scale from 0 to 100,
+         * where 0 represents the darkest black (black screen) and 100 represents the brightest
+         * white (brighter).
+         * The default/unmodified value for contrast is 50.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_CONTRAST = "contrast";
@@ -61,7 +115,12 @@ public class MediaQualityContract {
         /**
          * The sharpness.
          *
-         * <p>Sharpness indicates the clarity of detail.
+         * <p>Sharpness value range are from 0 to 100 (inclusive), where 0 represents the minimum
+         * sharpness that makes the image appear softer with less defined edges, 100 represents the
+         * maximum sharpness that makes the image appear halos around objects due to excessive
+         * edges.
+         * The default/unmodified value for sharpness is 50.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_SHARPNESS = "sharpness";
@@ -69,7 +128,11 @@ public class MediaQualityContract {
         /**
          * The saturation.
          *
-         * <p>Saturation indicates the intensity of the color.
+         * <p>Saturation value controls the intensity or purity of colors.
+         * Saturation values are from 0 to 100, where 0 represents grayscale (no color) and 100
+         * represents the most vivid colors.
+         * The default/unmodified value for saturation is 50.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_SATURATION = "saturation";
@@ -77,20 +140,23 @@ public class MediaQualityContract {
         /**
          * The hue.
          *
+         * <p>Hue affects the balance between red, green and blue primary colors on the screen.
+         * Hue values are from -50 to 50, where -50 represents cooler and 50 represents warmer.
+         * The default/unmodified value for hue is 0.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_HUE = "hue";
 
         /**
-         * @hide
-         */
-        public static final String PARAMETER_BACKLIGHT = "backlight";
-
-        /**
          * Adjust brightness in advance color engine. Similar to a "brightness" control on a TV
          * but acts at a lower level.
          *
+         * <p>The range is from 0 to 100 (inclusive), where 0 represents the minimum brightness and
+         * 100 represents the maximum brightness. The default/unmodified value is 50.
+         *
          * <p>Type: INTEGER
+         * @see #PARAMETER_BRIGHTNESS
          */
         public static final String PARAMETER_COLOR_TUNER_BRIGHTNESS = "color_tuner_brightness";
 
@@ -98,7 +164,11 @@ public class MediaQualityContract {
          * Adjust saturation in advance color engine. Similar to a "saturation" control on a TV
          * but acts at a lower level.
          *
+         * <p>The range is from 0 to 100 (inclusive), where 0 being completely desaturated/grayscale
+         * and 100 being the most saturated. The default/unmodified value is 50.
+         *
          * <p>Type: INTEGER
+         * @see #PARAMETER_SATURATION
          */
         public static final String PARAMETER_COLOR_TUNER_SATURATION = "color_tuner_saturation";
 
@@ -106,14 +176,21 @@ public class MediaQualityContract {
          * Adjust hue in advance color engine. Similar to a "hue" control on a TV but acts at a
          * lower level.
          *
+         * <p>The range is from -50 to 50 (inclusive), where -50 represents cooler setting for a
+         * specific color and 50 represents warmer setting for a specific color. The
+         * default/unmodified value is 0.
+         *
          * <p>Type: INTEGER
+         * @see #PARAMETER_HUE
          */
         public static final String PARAMETER_COLOR_TUNER_HUE = "color_tuner_hue";
 
         /**
-         * Advance setting for red offset. Adjust the black level of red color channels, it
-         * controls the minimum intensity of each color, affecting the shadows and
-         * dark areas of the image.
+         * Advance setting for red offset. Adjust the black level of red color channels, it controls
+         * the minimum intensity of each color, affecting the shadows and dark areas of the image.
+         *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes shadows darker and 100 makes
+         * shadows brighter. The default/unmodified value is 50.
          *
          * <p>Type: INTEGER
          */
@@ -121,8 +198,11 @@ public class MediaQualityContract {
 
         /**
          * Advance setting for green offset. Adjust the black level of green color channels, it
-         * controls the minimum intensity of each color, affecting the shadows and dark
-         * areas of the image.
+         * controls the minimum intensity of each color, affecting the shadows and dark areas of the
+         * image.
+         *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes shadows darker and 100 makes
+         * shadows brighter. The default/unmodified value is 50.
          *
          * <p>Type: INTEGER
          */
@@ -130,8 +210,11 @@ public class MediaQualityContract {
 
         /**
          * Advance setting for blue offset. Adjust the black level of blue color channels, it
-         * controls the minimum intensity of each color, affecting the shadows and dark areas
-         * of the image.
+         * controls the minimum intensity of each color, affecting the shadows and dark areas of the
+         * image.
+         *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes shadows darker and 100 makes
+         * shadows brighter. The default/unmodified value is 50.
          *
          * <p>Type: INTEGER
          */
@@ -141,6 +224,9 @@ public class MediaQualityContract {
          * Advance setting for red gain. Adjust the gain or amplification of the red color channels.
          * They control the overall intensity and white balance of red.
          *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes the red dimmer and 100 makes the
+         * red brighter. The default/unmodified value is 50.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_RED_GAIN = "color_tuner_red_gain";
@@ -149,49 +235,67 @@ public class MediaQualityContract {
          * Advance setting for green gain. Adjust the gain or amplification of the green color
          * channels. They control the overall intensity and white balance of green.
          *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes the green dimmer and 100 makes
+         * the green brighter. The default/unmodified value is 50.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_GREEN_GAIN = "color_tuner_green_gain";
 
         /**
          * Advance setting for blue gain. Adjust the gain or amplification of the blue color
-         * channels.They control the overall intensity and white balance of blue.
+         * channels. They control the overall intensity and white balance of blue.
+         *
+         * <p>The range is from 0 to 100 (inclusive), where 0 makes the blue dimmer and 100 makes
+         * the blue brighter. The default/unmodified value is 50.
          *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_BLUE_GAIN = "color_tuner_blue_gain";
 
         /**
-         * @hide
-         */
-        public static final String PARAMETER_AI_PQ = "ai_pq";
-
-        /**
-         * @hide
-         */
-        public static final String PARAMETER_AI_SUPER_RESOLUTION = "ai_super_resolution";
-
-        /** Noise reduction.
-         * (Off, Low, Medium, High)
-         * @see android.hardware.tv.mediaquality.QualityLevel
+         * Noise reduction.
+         *
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
          *
          * <p>Type: STRING
          */
         public static final String PARAMETER_NOISE_REDUCTION = "noise_reduction";
 
         /**
-         *  MPEG (moving picture experts group) noise reduction
-         *  (Off, Low, Medium, High)
-         *  @see android.hardware.tv.mediaquality.QualityLevel
+         * MPEG (moving picture experts group) noise reduction.
          *
-         *  <p>Type: STRING
-         *  */
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
+         *
+         * <p>Type: STRING
+         */
         public static final String PARAMETER_MPEG_NOISE_REDUCTION = "mpeg_noise_reduction";
 
         /**
          * Refine the flesh colors in the pictures without affecting the other colors on the screen.
-         * (Off, Low, Medium, High)
-         * @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
          *
          * <p>Type: STRING
          */
@@ -199,66 +303,75 @@ public class MediaQualityContract {
 
         /**
          * Contour noise reduction.
-         * (Off, Low, Medium, High)
-         * @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
          *
          * <p>Type: STRING
          */
         public static final String PARAMETER_DECONTOUR = "decontour";
 
         /**
-         *  Dynamically change picture luma to enhance contrast.
-         *  (Off, Low, Medium, High)
-         *  @see android.hardware.tv.mediaquality.QualityLevel
+         * Dynamically change picture luma to enhance contrast.
          *
-         *  <p>Type: STRING
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_DYNAMIC_LUMA_CONTROL = "dynamic_luma_control";
 
         /**
-         *  Enable/disable film mode
+         * Enable/disable film mode.
          *
-         *  <p>Type: BOOLEAN
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_FILM_MODE = "film_mode";
 
         /**
-         * @hide
-         */
-        public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
-
-        /**
-         *  Enable/disable blue color auto stretch
+         * Enable/disable blue color auto stretch
          *
-         *  <p>Type: BOOLEAN
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_BLUE_STRETCH = "blue_stretch";
 
         /**
-         *  Enable/disable the overall color tuning feature.
+         * Enable/disable the overall color tuning feature.
          *
-         *  <p>Type: BOOLEAN
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_COLOR_TUNE = "color_tune";
 
         /**
-         *  Adjust color temperature type
+         * Adjust color temperature type
          *
-         *  <p>Type: INTEGER
+         * <p>Type: STRING
          */
         public static final String PARAMETER_COLOR_TEMPERATURE = "color_temperature";
 
         /**
-         *  Enable/disable globe dimming.
+         * Enable/disable globe dimming.
          *
-         *  <p>Type: BOOLEAN
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_GLOBAL_DIMMING = "global_dimming";
 
         /**
-         *  Enable/disable auto adjust picture parameter based on the TV content.
+         * Enable/disable auto adjust picture parameter based on the TV content.
          *
-         *  <p>Type: BOOLEAN
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_AUTO_PICTURE_QUALITY_ENABLED =
                 "auto_picture_quality_enabled";
@@ -283,6 +396,12 @@ public class MediaQualityContract {
         /**
          * The audio volume balance.
          *
+         * <p>This parameter controls the balance between the left and right speakers.
+         * The valid range is -50 to 50 (inclusive), where:
+         *   - Negative values shift the balance towards the left speaker.
+         *   - Positive values shift the balance towards the right speaker.
+         *   - 0 represents a balanced output.
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_BALANCE = "balance";
@@ -290,7 +409,9 @@ public class MediaQualityContract {
         /**
          * The bass.
          *
-         * <p>Bass setting adjust the low sound frequencies.
+         * <p>Bass controls the intensity of low-frequency sounds.
+         * The valid range is 0 - 100 (inclusive).
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_BASS = "bass";
@@ -298,18 +419,17 @@ public class MediaQualityContract {
         /**
          * The treble.
          *
-         * <p>Treble setting adjust the high sound frequencies.
+         * <p>Treble controls the intensity of high-frequency sounds.
+         * The valid range is 0 - 100 (inclusive).
+         *
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_TREBLE = "treble";
 
         /**
-         * @hide
-         */
-        public static final String PARAMETER_SOUND_MODE = "sound_mode";
-
-        /**
-         * @hide
+         * Enable/disable surround sound.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_SURROUND_SOUND = "surround_sound";
 
@@ -319,32 +439,46 @@ public class MediaQualityContract {
         public static final String PARAMETER_EQUALIZER_DETAIL = "equalizer_detail";
 
         /**
-         * @hide
+         * Enable/disable speaker output.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_SPEAKERS = "speakers";
 
         /**
-         * @hide
+         * Speaker delay in milliseconds.
+         *
+         * <p>Type: INTEGER
          */
-        public static final String PARAMETER_SPEAKERS_DELAY = "speakers_delay";
+        public static final String PARAMETER_SPEAKERS_DELAY_MILLIS = "speakers_delay_millis";
 
         /**
-         * @hide
+         * Enable/disable enhanced audio return channel (eARC).
+         *
+         * <p>eARC allows for higher bandwidth audio transmission over HDMI.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_EARC = "earc";
 
         /**
-         * @hide
+         * Enable/disable auto volume control sound effect.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_AUTO_VOLUME_CONTROL = "auto_volume_control";
 
         /**
-         * @hide
+         * Downmix mode.
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_DOWN_MIX_MODE = "down_mix_mode";
 
         /**
-         * @hide
+         * Enable/disable dynamic range compression (DRC) of digital theater system (DTS).
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_DRC = "dts_drc";
 
@@ -354,31 +488,67 @@ public class MediaQualityContract {
         public static final String PARAMETER_DOLBY_AUDIO_PROCESSING = "dolby_audio_processing";
 
         /**
-         * @hide
+         * Sound mode for dolby audio processing.
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SOUND_MODE =
                 "dolby_audio_processing_sound_mode";
 
         /**
-         * @hide
+         * Enable/disable Volume Leveler.
+         *
+         * <p>Volume Leveler helps to maintain a consistent volume level across different
+         * types of content and even within the same program. It minimizes the jarring jumps
+         * between loud commercials or action sequences and quiet dialogue.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_VOLUME_LEVELER =
                 "dolby_audio_processing_volume_leveler";
 
         /**
-         * @hide
+         * Enable/disable Surround Virtualizer.
+         *
+         * <p>Surround Virtualizer creates a virtual surround sound experience from stereo
+         * content, making it seem like the sound is coming from multiple speakers, even if
+         * you only have your TV's built-in speakers. It expands the soundstage and adds
+         * depth to the audio.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SURROUND_VIRTUALIZER =
                 "dolby_audio_processing_surround_virtualizer";
 
         /**
-         * @hide
+         * Enable/disable Dolby Atmos.
+         *
+         * <p>Dolby Atmos creates a more immersive and realistic sound experience by adding
+         * a height dimension to surround sound. It allows sound to be placed and moved
+         * precisely around you, including overhead.
+         *
+         * <p>Note: To experience Dolby Atmos, you need content that has been specifically
+         * mixed in Dolby Atmos and a compatible sound system with upward-firing speakers
+         * or a Dolby Atmos soundbar.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_DOLBY_ATMOS =
                 "dolby_audio_processing_dolby_atmos";
 
         /**
-         * @hide
+         * Dialogue enhancer.
+         *
+         * <p>Possible values:
+         * <ul>
+         *   <li>{@link #LEVEL_LOW}
+         *   <li>{@link #LEVEL_MEDIUM}
+         *   <li>{@link #LEVEL_HIGH}
+         *   <li>{@link #LEVEL_OFF}
+         * </ul>
+         * The default value is {@link #LEVEL_OFF}.
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_DIALOGUE_ENHANCER = "dialogue_enhancer";
 
@@ -388,42 +558,88 @@ public class MediaQualityContract {
         public static final String PARAMETER_DTS_VIRTUAL_X = "dts_virtual_x";
 
         /**
-         * @hide
+         * Enable/disable Total Bass Harmonic Distortion (X).
+         *
+         * <p>TBHDX bass enhancement provides a richer low-frequency experience, simulating deeper
+         * bass.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_TBHDX = "dts_virtual_x_tbhdx";
 
         /**
-         * @hide
+         * Enable/disable audio limiter.
+         *
+         * <p>It prevents excessive volume peaks that could cause distortion or speaker damage.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_LIMITER = "dts_virtual_x_limiter";
 
         /**
-         * @hide
+         * Enable/disable the core DTS Virtual:X surround sound processing.
+         *
+         * <p>It creates an immersive, multi-channel audio experience from the speaker
+         * configuration.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_TRU_SURROUND_X =
                 "dts_virtual_x_tru_surround_x";
 
         /**
-         * @hide
+         * Enable/disable DTS TruVolume HD.
+         *
+         * <p>It reduces the dynamic range of audio, minimizing loudness variations between content
+         * and channels.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_TRU_VOLUME_HD =
                 "dts_virtual_x_tru_volume_hd";
 
         /**
-         * @hide
+         * Enable/disable dialog clarity.
+         *
+         * <p>It enhances the clarity and intelligibility of speech in audio content.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_DIALOG_CLARITY =
                 "dts_virtual_x_dialog_clarity";
 
         /**
-         * @hide
+         * Enable/disable virtual X definition.
+         *
+         * <p>It applies audio processing to improve overall sound definition and clarity.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_DEFINITION = "dts_virtual_x_definition";
 
         /**
-         * @hide
+         * Enable/disable the processing of virtual height channels.
+         *
+         * <p>It creates a more immersive audio experience by simulating sounds from above.
+         *
+         * <p>Type: BOOLEAN
          */
         public static final String PARAMETER_DTS_VIRTUAL_X_HEIGHT = "dts_virtual_x_height";
+
+        /**
+         * Digital output delay in milliseconds.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String PARAMETER_DIGITAL_OUTPUT_DELAY_MILLIS =
+                "digital_output_delay_millis";
+
+        /**
+         * Digital output mode.
+         *
+         * <p>Type: STRING
+         */
+        public static final String PARAMETER_DIGITAL_OUTPUT_MODE = "digital_output_mode";
 
 
         private SoundQuality() {
