@@ -37,10 +37,14 @@ import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -56,6 +60,9 @@ import java.util.List;
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalBluetoothProfileManagerTest {
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final long HISYNCID = 10;
 
     private static final int GROUP_ID = 1;
@@ -303,6 +310,25 @@ public class LocalBluetoothProfileManagerTest {
         mContext.sendBroadcast(mIntent);
 
         verify(mCachedBluetoothDevice).refresh();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void stateChangedHandler_hapProfileStateChanged_notifyHearingDevicesConnectionStatus() {
+        mShadowBluetoothAdapter.setSupportedProfiles(generateList(
+                new int[] {BluetoothProfile.HAP_CLIENT}));
+        mProfileManager.updateLocalProfiles();
+
+        mIntent = new Intent(BluetoothHapClient.ACTION_HAP_CONNECTION_STATE_CHANGED);
+        mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
+        mIntent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, BluetoothProfile.STATE_CONNECTING);
+        mIntent.putExtra(BluetoothProfile.EXTRA_STATE, BluetoothProfile.STATE_CONNECTED);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mDeviceManager).notifyHearingDevicesConnectionStatusChangedIfNeeded(
+                mCachedBluetoothDevice);
     }
 
     private List<Integer> generateList(int[] profiles) {
