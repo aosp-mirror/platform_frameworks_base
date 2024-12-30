@@ -70,6 +70,8 @@ constructor(
 ) {
     fun create(root: ViewGroup, andThen: (ViewGroup) -> Unit): ComposeView {
         val composeView = ComposeView(root.context)
+        val darkIconDispatcher =
+            darkIconDispatcherStore.forDisplay(root.context.displayId) ?: return composeView
         composeView.apply {
             setContent {
                 StatusBarRoot(
@@ -80,7 +82,7 @@ constructor(
                     darkIconManagerFactory = darkIconManagerFactory,
                     iconController = iconController,
                     ongoingCallController = ongoingCallController,
-                    darkIconDispatcher = darkIconDispatcherStore.forDisplay(root.context.displayId),
+                    darkIconDispatcher = darkIconDispatcher,
                     eventAnimationInteractor = eventAnimationInteractor,
                     onViewCreated = andThen,
                 )

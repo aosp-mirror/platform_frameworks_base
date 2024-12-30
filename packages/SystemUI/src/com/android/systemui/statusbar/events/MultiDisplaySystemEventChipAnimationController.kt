@@ -72,5 +72,5 @@ constructor(
     }
 
     private fun controllersForAllDisplays() =
-        displayRepository.displays.value.map { controllerStore.forDisplay(it.displayId) }
+        displayRepository.displays.value.mapNotNull { controllerStore.forDisplay(it.displayId) }
 }

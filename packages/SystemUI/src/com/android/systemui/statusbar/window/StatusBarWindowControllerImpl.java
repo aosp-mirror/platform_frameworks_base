@@ -163,7 +163,18 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
         mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
         Trace.endSection();
 
-        mWindowManager.addView(mStatusBarWindowView, mLp);
+        try {
+            mWindowManager.addView(mStatusBarWindowView, mLp);
+        } catch (WindowManager.InvalidDisplayException e) {
+            // Wrapping this in a try/catch to avoid crashes when a display is instantly removed
+            // after being added, and initialization hasn't finished yet.
+            Log.e(
+                    TAG,
+                    "Unable to add view to WindowManager. Display with id "
+                            + mContext.getDisplayId()
+                            + " doesn't exist anymore.",
+                    e);
+        }
         mLpChanged.copyFrom(mLp);
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
@@ -176,7 +187,15 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
     public void stop() {
         StatusBarConnectedDisplays.assertInNewMode();
 
-        mWindowManager.removeView(mStatusBarWindowView);
+        try {
+            mWindowManager.removeView(mStatusBarWindowView);
+        } catch (IllegalArgumentException e) {
+            // Wrapping this in a try/catch to avoid crashes when a display is instantly removed
+            // after being added, and initialization hasn't finished yet.
+            // When that happens, adding the View to WindowManager fails, and therefore removing
+            // it here will fail too, since it wasn't added in the first place.
+            Log.e(TAG, "Failed to remove View from WindowManager. View was not attached", e);
+        }
 
         if (StatusBarRootModernization.isEnabled()) {
             return;

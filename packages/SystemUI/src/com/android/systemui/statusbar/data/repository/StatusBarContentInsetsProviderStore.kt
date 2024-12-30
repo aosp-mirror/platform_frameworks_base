@@ -59,13 +59,17 @@ constructor(
         displayRepository,
     ) {
 
-    override fun createInstanceForDisplay(displayId: Int): StatusBarContentInsetsProvider {
-        val context = displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR).context
+    override fun createInstanceForDisplay(displayId: Int): StatusBarContentInsetsProvider? {
+        val displayWindowProperties =
+            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR) ?: return null
+        val context = displayWindowProperties.context
+        val configurationController =
+            statusBarConfigurationControllerStore.forDisplay(displayId) ?: return null
         val cameraProtectionLoader = cameraProtectionLoaderFactory.create(context)
         return factory
             .create(
                 context,
-                statusBarConfigurationControllerStore.forDisplay(displayId),
+                configurationController,
                 sysUICutoutProviderFactory.create(context, cameraProtectionLoader),
             )
             .also { it.start() }

@@ -31,8 +31,10 @@ import com.android.systemui.statusbar.core.StatusBarInitializerImpl
 import com.android.systemui.statusbar.core.StatusBarInitializerStore
 import com.android.systemui.statusbar.core.StatusBarOrchestrator
 import com.android.systemui.statusbar.core.StatusBarRootModernization
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
 import com.android.systemui.statusbar.data.repository.PrivacyDotViewControllerStoreModule
 import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStoreModule
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
 import com.android.systemui.statusbar.phone.AutoHideControllerStore
@@ -107,10 +109,14 @@ interface StatusBarPhoneModule {
             implFactory: StatusBarInitializerImpl.Factory,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
             statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
+            statusBarConfigurationControllerStore: StatusBarConfigurationControllerStore,
+            darkIconDispatcherStore: DarkIconDispatcherStore,
         ): StatusBarInitializerImpl {
             return implFactory.create(
                 statusBarWindowControllerStore.defaultDisplay,
                 statusBarModeRepositoryStore.defaultDisplay,
+                statusBarConfigurationControllerStore.defaultDisplay,
+                darkIconDispatcherStore.defaultDisplay,
             )
         }
 

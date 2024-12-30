@@ -80,9 +80,9 @@ class PerDisplayStoreImplTest : SysuiTestCase() {
             assertThat(store.forDisplay(NON_DEFAULT_DISPLAY_ID)).isNotSameInstanceAs(instance)
         }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun forDisplay_nonExistingDisplayId_throws() =
-        testScope.runTest { store.forDisplay(NON_EXISTING_DISPLAY_ID) }
+    @Test
+    fun forDisplay_nonExistingDisplayId_returnsNull() =
+        testScope.runTest { assertThat(store.forDisplay(NON_EXISTING_DISPLAY_ID)).isNull() }
 
     @Test
     fun forDisplay_afterDisplayRemoved_onDisplayRemovalActionInvoked() =

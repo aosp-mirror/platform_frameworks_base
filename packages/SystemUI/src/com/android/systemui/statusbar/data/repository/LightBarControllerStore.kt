@@ -49,13 +49,16 @@ constructor(
     LightBarControllerStore,
     PerDisplayStoreImpl<LightBarController>(backgroundApplicationScope, displayRepository) {
 
-    override fun createInstanceForDisplay(displayId: Int): LightBarController {
+    override fun createInstanceForDisplay(displayId: Int): LightBarController? {
+        val darkIconDispatcher = darkIconDispatcherStore.forDisplay(displayId) ?: return null
+        val statusBarModePerDisplayRepository =
+            statusBarModeRepositoryStore.forDisplay(displayId) ?: return null
         return factory
             .create(
                 displayId,
                 displayScopeRepository.scopeForDisplay(displayId),
-                darkIconDispatcherStore.forDisplay(displayId),
-                statusBarModeRepositoryStore.forDisplay(displayId),
+                darkIconDispatcher,
+                statusBarModePerDisplayRepository,
             )
             .also { it.start() }
     }

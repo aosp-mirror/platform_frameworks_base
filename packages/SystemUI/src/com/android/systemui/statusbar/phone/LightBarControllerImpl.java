@@ -499,9 +499,9 @@ public class LightBarControllerImpl implements
         /** Creates a {@link LightBarControllerImpl}. */
         LightBarControllerImpl create(
                 int displayId,
-                CoroutineScope coroutineScope,
-                DarkIconDispatcher darkIconDispatcher,
-                StatusBarModePerDisplayRepository statusBarModePerDisplayRepository);
+                @NonNull CoroutineScope coroutineScope,
+                @NonNull DarkIconDispatcher darkIconDispatcher,
+                @NonNull StatusBarModePerDisplayRepository statusBarModePerDisplayRepository);
     }
 
     public static class LegacyFactory implements LightBarController.Factory {

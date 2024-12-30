@@ -68,13 +68,14 @@ constructor(
             .distinctUntilChanged()
 
     /** The colors with which to display the notification icons. */
-    fun iconColors(displayId: Int): Flow<NotificationIconColors> =
-        darkIconInteractor
+    fun iconColors(displayId: Int): Flow<NotificationIconColors> {
+        return darkIconInteractor
             .darkState(displayId)
             .map { (areas: Collection<Rect>, tint: Int) -> IconColorsImpl(tint, areas) }
             .flowOn(bgContext)
             .conflate()
             .distinctUntilChanged()
+    }
 
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =

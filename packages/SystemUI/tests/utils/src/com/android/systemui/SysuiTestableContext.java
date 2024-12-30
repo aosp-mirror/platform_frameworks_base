@@ -81,6 +81,14 @@ public class SysuiTestableContext extends TestableContext {
         return super.getDisplay();
     }
 
+    @Override
+    public int getDisplayId() {
+        if (mCustomDisplay != null) {
+            return mCustomDisplay.getDisplayId();
+        }
+        return super.getDisplayId();
+    }
+
     public SysuiTestableContext createDefaultDisplayContext() {
         Display display = getBaseContext().getSystemService(DisplayManager.class).getDisplays()[0];
         return (SysuiTestableContext) createDisplayContext(display);

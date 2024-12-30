@@ -89,21 +89,26 @@ constructor(
     }
 
     private fun createAndStartOrchestratorForDisplay(displayId: Int) {
+        val statusBarModeRepository = statusBarModeRepositoryStore.forDisplay(displayId) ?: return
+        val statusBarInitializer = initializerStore.forDisplay(displayId) ?: return
+        val statusBarWindowController =
+            statusBarWindowControllerStore.forDisplay(displayId) ?: return
+        val autoHideController = autoHideControllerStore.forDisplay(displayId) ?: return
         statusBarOrchestratorFactory
             .create(
                 displayId,
                 displayScopeRepository.scopeForDisplay(displayId),
                 statusBarWindowStateRepositoryStore.forDisplay(displayId),
-                statusBarModeRepositoryStore.forDisplay(displayId),
-                initializerStore.forDisplay(displayId),
-                statusBarWindowControllerStore.forDisplay(displayId),
-                autoHideControllerStore.forDisplay(displayId),
+                statusBarModeRepository,
+                statusBarInitializer,
+                statusBarWindowController,
+                autoHideController,
             )
             .start()
     }
 
     private fun createAndStartInitializerForDisplay(displayId: Int) {
-        statusBarInitializerStore.forDisplay(displayId).start()
+        statusBarInitializerStore.forDisplay(displayId)?.start()
     }
 
     private fun startPrivacyDotForDisplay(displayId: Int) {
@@ -111,6 +116,6 @@ constructor(
             // For the default display, privacy dot is started via ScreenDecorations
             return
         }
-        privacyDotWindowControllerStore.forDisplay(displayId).start()
+        privacyDotWindowControllerStore.forDisplay(displayId)?.start()
     }
 }

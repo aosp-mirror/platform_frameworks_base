@@ -65,8 +65,9 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): SysuiDarkIconDispatcher {
-        val properties = displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR)
+    override fun createInstanceForDisplay(displayId: Int): SysuiDarkIconDispatcher? {
+        val properties =
+            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR) ?: return null
         return factory.create(displayId, properties.context)
     }
 
@@ -103,7 +104,7 @@ constructor(private val store: SysuiDarkIconDispatcherStore) : DarkIconDispatche
     override val defaultDisplay: DarkIconDispatcher
         get() = store.defaultDisplay
 
-    override fun forDisplay(displayId: Int): DarkIconDispatcher = store.forDisplay(displayId)
+    override fun forDisplay(displayId: Int): DarkIconDispatcher? = store.forDisplay(displayId)
 }
 
 @Module

@@ -53,7 +53,7 @@ class MultiDisplayStatusBarWindowControllerStoreTest : SysuiTestCase() {
     @Test
     fun beforeDisplayRemoved_doesNotStopInstances() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             verify(instance, never()).stop()
         }
@@ -61,7 +61,7 @@ class MultiDisplayStatusBarWindowControllerStoreTest : SysuiTestCase() {
     @Test
     fun displayRemoved_stopsInstance() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             fakeDisplayRepository.removeDisplay(DEFAULT_DISPLAY)
 

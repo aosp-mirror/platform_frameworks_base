@@ -16,7 +16,7 @@
 
 package com.android.systemui.display.data.repository
 
-import android.content.testableContext
+import android.content.Context
 import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import android.view.layoutInflater
@@ -24,6 +24,7 @@ import android.view.mockWindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.SysuiTestableContext
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
@@ -36,8 +37,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.doAnswer
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
 @RunWith(AndroidJUnit4::class)
@@ -48,7 +53,8 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     private val fakeDisplayRepository = kosmos.displayRepository
     private val testScope = kosmos.testScope
 
-    private val applicationContext = kosmos.testableContext
+    private val applicationContext = spy(context)
+
     private val applicationWindowManager = kosmos.mockWindowManager
     private val applicationLayoutInflater = kosmos.layoutInflater
 
@@ -64,6 +70,22 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     }
 
     @Before
+    fun setUpContext() {
+        doAnswer { createContextForDisplay(it.arguments[0] as Display) }
+            .whenever(applicationContext)
+            .createWindowContext(any(), any(), any())
+    }
+
+    private fun createContextForDisplay(display: Display): Context {
+        if (display.displayId == BEING_REMOVED_DISPLAY_ID) {
+            // Simulate what happens when a display is being removed.
+            // Return a context with the same display id as the original context.
+            return mContext
+        }
+        return SysuiTestableContext(mContext).also { it.display = display }
+    }
+
+    @Before
     fun start() {
         repo.start()
     }
@@ -72,6 +94,7 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     fun addDisplays() = runBlocking {
         fakeDisplayRepository.addDisplay(createDisplay(DEFAULT_DISPLAY_ID))
         fakeDisplayRepository.addDisplay(createDisplay(NON_DEFAULT_DISPLAY_ID))
+        fakeDisplayRepository.addDisplay(createDisplay(BEING_REMOVED_DISPLAY_ID))
     }
 
     @Test
@@ -94,7 +117,7 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     @Test
     fun get_nonDefaultDisplayId_returnsNewStatusBarContext() =
         testScope.runTest {
-            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)
+            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)!!
 
             assertThat(displayContext.context).isNotSameInstanceAs(applicationContext)
         }
@@ -102,7 +125,7 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     @Test
     fun get_nonDefaultDisplayId_returnsNewWindowManager() =
         testScope.runTest {
-            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)
+            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)!!
 
             assertThat(displayContext.windowManager).isNotSameInstanceAs(applicationWindowManager)
         }
@@ -110,7 +133,7 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
     @Test
     fun get_nonDefaultDisplayId_returnsNewLayoutInflater() =
         testScope.runTest {
-            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)
+            val displayContext = repo.get(NON_DEFAULT_DISPLAY_ID, WINDOW_TYPE_FOO)!!
 
             assertThat(displayContext.layoutInflater).isNotSameInstanceAs(applicationLayoutInflater)
         }
@@ -154,17 +177,26 @@ class DisplayWindowPropertiesRepositoryImplTest : SysuiTestCase() {
                 .isNotSameInstanceAs(displayContext)
         }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun get_nonExistingDisplayId_throws() =
-        testScope.runTest { repo.get(NON_EXISTING_DISPLAY_ID, WINDOW_TYPE_FOO) }
+    @Test
+    fun get_nonExistingDisplayId_returnsNull() =
+        testScope.runTest {
+            assertThat(repo.get(NON_EXISTING_DISPLAY_ID, WINDOW_TYPE_FOO)).isNull()
+        }
+
+    @Test
+    fun get_displayBeingRemoved_returnsNull() =
+        testScope.runTest {
+            assertThat(repo.get(BEING_REMOVED_DISPLAY_ID, WINDOW_TYPE_FOO)).isNull()
+        }
 
     private fun createDisplay(displayId: Int) =
-        mock<Display> { on { getDisplayId() } doReturn displayId }
+        mock<Display> { on { getDisplayId() } doReturn (displayId) }
 
     companion object {
         private const val DEFAULT_DISPLAY_ID = Display.DEFAULT_DISPLAY
         private const val NON_DEFAULT_DISPLAY_ID = DEFAULT_DISPLAY_ID + 1
         private const val NON_EXISTING_DISPLAY_ID = DEFAULT_DISPLAY_ID + 2
+        private const val BEING_REMOVED_DISPLAY_ID = DEFAULT_DISPLAY_ID + 4
         private const val WINDOW_TYPE_FOO = 123
         private const val WINDOW_TYPE_BAR = 321
     }

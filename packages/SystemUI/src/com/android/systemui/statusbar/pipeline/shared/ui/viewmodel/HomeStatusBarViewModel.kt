@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -216,7 +217,7 @@ constructor(
         } else {
             combine(
                     notificationsInteractor.areAnyNotificationsPresent,
-                    lightsOutInteractor.isLowProfile(displayId),
+                    lightsOutInteractor.isLowProfile(displayId) ?: flowOf(false),
                 ) { hasNotifications, isLowProfile ->
                     hasNotifications && isLowProfile
                 }

@@ -77,7 +77,17 @@ constructor(
     private fun getContextOrDefault(displayId: Int): Context {
         return try {
             traceSection({ "Getting dialog context for displayId=$displayId" }) {
-                displayWindowPropertyRepository.get().get(displayId, DIALOG_WINDOW_TYPE).context
+                val displayWindowProperties =
+                    displayWindowPropertyRepository.get().get(displayId, DIALOG_WINDOW_TYPE)
+                if (displayWindowProperties == null) {
+                    Log.e(
+                        TAG,
+                        "DisplayWindowPropertiesRepository returned null for display $displayId. Returning default one",
+                    )
+                    defaultContext
+                } else {
+                    displayWindowProperties.context
+                }
             }
         } catch (e: Exception) {
             // This can happen if the display was disconnected in the meantime.
