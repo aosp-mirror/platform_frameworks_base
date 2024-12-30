@@ -101,20 +101,21 @@ fun VolumeSlider(
     Column(modifier) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             state.icon?.let {
                 Icon(
                     icon = it,
                     tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(40.dp).padding(8.dp),
+                    modifier = Modifier.size(24.dp),
                 )
             }
             Text(
                 text = state.label,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+                modifier = Modifier.weight(1f),
             )
             button?.invoke()
         }
@@ -125,43 +126,47 @@ fun VolumeSlider(
             onValueChangeFinished = onValueChangeFinished,
             enabled = state.isEnabled,
             modifier =
-                Modifier.height(40.dp).sysuiResTag(state.label).clearAndSetSemantics {
-                    if (state.isEnabled) {
-                        contentDescription = state.label
-                        state.a11yClickDescription?.let {
-                            customActions =
-                                listOf(
-                                    CustomAccessibilityAction(it) {
-                                        onIconTapped()
-                                        true
-                                    }
-                                )
-                        }
-
-                        state.a11yStateDescription?.let { stateDescription = it }
-                        progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
-                    } else {
-                        disabled()
-                        contentDescription =
-                            state.disabledMessage?.let { "${state.label}, $it" } ?: state.label
-                    }
-                    setProgress { targetValue ->
-                        val targetDirection =
-                            when {
-                                targetValue > value -> 1
-                                targetValue < value -> -1
-                                else -> 0
+                Modifier.height(40.dp)
+                    .padding(vertical = 8.dp)
+                    .sysuiResTag(state.label)
+                    .clearAndSetSemantics {
+                        if (state.isEnabled) {
+                            contentDescription = state.label
+                            state.a11yClickDescription?.let {
+                                customActions =
+                                    listOf(
+                                        CustomAccessibilityAction(it) {
+                                            onIconTapped()
+                                            true
+                                        }
+                                    )
                             }
 
-                        val newValue =
-                            (value + targetDirection * state.a11yStep).coerceIn(
-                                state.valueRange.start,
-                                state.valueRange.endInclusive,
-                            )
-                        onValueChange(newValue)
-                        true
-                    }
-                },
+                            state.a11yStateDescription?.let { stateDescription = it }
+                            progressBarRangeInfo =
+                                ProgressBarRangeInfo(state.value, state.valueRange)
+                        } else {
+                            disabled()
+                            contentDescription =
+                                state.disabledMessage?.let { "${state.label}, $it" } ?: state.label
+                        }
+                        setProgress { targetValue ->
+                            val targetDirection =
+                                when {
+                                    targetValue > value -> 1
+                                    targetValue < value -> -1
+                                    else -> 0
+                                }
+
+                            val newValue =
+                                (value + targetDirection * state.a11yStep).coerceIn(
+                                    state.valueRange.start,
+                                    state.valueRange.endInclusive,
+                                )
+                            onValueChange(newValue)
+                            true
+                        }
+                    },
         )
     }
 }
