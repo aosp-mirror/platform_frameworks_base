@@ -42,12 +42,15 @@ import kotlinx.coroutines.flow.map
  *
  * [StatusBarNotificationChipsInteractor] will collect all the individual instances of this
  * interactor and send all the necessary information to the UI layer.
+ *
+ * @property creationTime the time when the notification first appeared as promoted.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SingleNotificationChipInteractor
 @AssistedInject
 constructor(
     @Assisted startingModel: ActiveNotificationModel,
+    @Assisted val creationTime: Long,
     private val activityManagerRepository: ActivityManagerRepository,
     @StatusBarChipsLog private val logBuffer: LogBuffer,
 ) {
@@ -142,6 +145,9 @@ constructor(
 
     @AssistedFactory
     fun interface Factory {
-        fun create(startingModel: ActiveNotificationModel): SingleNotificationChipInteractor
+        fun create(
+            startingModel: ActiveNotificationModel,
+            creationTime: Long,
+        ): SingleNotificationChipInteractor
     }
 }

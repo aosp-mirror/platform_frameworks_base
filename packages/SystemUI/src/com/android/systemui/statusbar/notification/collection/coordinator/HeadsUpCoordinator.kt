@@ -141,9 +141,6 @@ constructor(
                 wasAdded = false,
                 wasUpdated = false,
                 // Force-set this notification to show heads-up.
-                // TODO(b/364653005): This means that if you tap on the second notification chip,
-                // then it moves to become the first chip because whatever notification is showing
-                // heads-up is considered to be the top notification.
                 shouldHeadsUpEver = true,
                 shouldHeadsUpAgain = true,
                 isPinnedByUser = true,

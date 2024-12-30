@@ -20,11 +20,13 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.chips.statusBarChipsLogger
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.util.time.fakeSystemClock
 
 val Kosmos.statusBarNotificationChipsInteractor: StatusBarNotificationChipsInteractor by
     Kosmos.Fixture {
         StatusBarNotificationChipsInteractor(
             testScope.backgroundScope,
+            fakeSystemClock,
             activeNotificationsInteractor,
             singleNotificationChipInteractorFactory,
             logBuffer = statusBarChipsLogger,

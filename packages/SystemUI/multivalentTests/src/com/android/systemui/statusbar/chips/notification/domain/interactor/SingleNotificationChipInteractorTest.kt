@@ -52,7 +52,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                     promotedContent = PROMOTED_CONTENT,
                 )
 
-            val underTest = factory.create(startingNotif)
+            val underTest = factory.create(startingNotif, creationTime = 1)
 
             val latest by collectLastValue(underTest.notificationChip)
 
@@ -71,7 +71,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = originalIconView,
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -99,7 +100,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = originalIconView,
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -127,7 +129,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = originalIconView,
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -153,7 +156,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = null,
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -171,7 +175,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = null,
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -189,7 +194,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                     statusBarChipIcon = mock(),
                     promotedContent = PROMOTED_CONTENT,
                 )
-            val underTest = factory.create(startingNotif)
+            val underTest = factory.create(startingNotif, creationTime = 1)
             val latest by collectLastValue(underTest.notificationChip)
             assertThat(latest).isNotNull()
 
@@ -214,7 +219,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                     statusBarChipIcon = mock(),
                     promotedContent = PROMOTED_CONTENT,
                 )
-            val underTest = factory.create(startingNotif)
+            val underTest = factory.create(startingNotif, creationTime = 1)
             val latest by collectLastValue(underTest.notificationChip)
             assertThat(latest).isNotNull()
 
@@ -239,7 +244,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         key = "notif1",
                         statusBarChipIcon = mock(),
                         promotedContent = null,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -259,7 +265,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         uid = UID,
                         statusBarChipIcon = mock(),
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -279,7 +286,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         uid = UID,
                         statusBarChipIcon = mock(),
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -297,7 +305,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         uid = UID,
                         statusBarChipIcon = mock(),
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
@@ -330,7 +339,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                         uid = hiddenUid,
                         statusBarChipIcon = mock(),
                         promotedContent = PROMOTED_CONTENT,
-                    )
+                    ),
+                    creationTime = 1,
                 )
             val latest by collectLastValue(underTest.notificationChip)
             assertThat(latest).isNotNull()

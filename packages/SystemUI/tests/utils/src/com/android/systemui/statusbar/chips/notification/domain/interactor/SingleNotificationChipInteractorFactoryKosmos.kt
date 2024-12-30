@@ -23,9 +23,10 @@ import com.android.systemui.statusbar.chips.statusBarChipsLogger
 
 val Kosmos.singleNotificationChipInteractorFactory: SingleNotificationChipInteractor.Factory by
     Kosmos.Fixture {
-        SingleNotificationChipInteractor.Factory { startingModel ->
+        SingleNotificationChipInteractor.Factory { startingModel, creationTime ->
             SingleNotificationChipInteractor(
                 startingModel,
+                creationTime,
                 activityManagerRepository.fake,
                 logBuffer = statusBarChipsLogger,
             )

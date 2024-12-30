@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.data.repository.activeNotific
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.testKosmos
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -246,6 +247,93 @@ class StatusBarNotificationChipsInteractorTest : SysuiTestCase() {
             )
             assertThat(latest).hasSize(1)
             assertThat(latest!![0].key).isEqualTo("notif")
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun notificationChips_sortedBasedOnFirstAppearanceTime() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.notificationChips)
+
+            val firstIcon = mock<StatusBarIconView>()
+            val secondIcon = mock<StatusBarIconView>()
+
+            // First, add notif1 at t=1000
+            fakeSystemClock.setCurrentTimeMillis(1000)
+            val notif1 =
+                activeNotificationModel(
+                    key = "notif1",
+                    statusBarChipIcon = firstIcon,
+                    promotedContent = PromotedNotificationContentModel.Builder("notif1").build(),
+                )
+            setNotifs(listOf(notif1))
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0].key).isEqualTo("notif1")
+
+            // WHEN we add notif2 at t=2000
+            fakeSystemClock.advanceTime(1000)
+            val notif2 =
+                activeNotificationModel(
+                    key = "notif2",
+                    statusBarChipIcon = secondIcon,
+                    promotedContent = PromotedNotificationContentModel.Builder("notif2").build(),
+                )
+            setNotifs(listOf(notif1, notif2))
+
+            // THEN notif2 is ranked above notif1 because it appeared later
+            assertThat(latest).hasSize(2)
+            assertThat(latest!![0].key).isEqualTo("notif2")
+            assertThat(latest!![1].key).isEqualTo("notif1")
+
+            // WHEN notif1 and notif2 swap places
+            setNotifs(listOf(notif2, notif1))
+
+            // THEN notif2 is still ranked above notif1 to preserve chip ordering
+            assertThat(latest).hasSize(2)
+            assertThat(latest!![0].key).isEqualTo("notif2")
+            assertThat(latest!![1].key).isEqualTo("notif1")
+
+            // WHEN notif1 and notif2 swap places again
+            setNotifs(listOf(notif1, notif2))
+
+            // THEN notif2 is still ranked above notif1 to preserve chip ordering
+            assertThat(latest).hasSize(2)
+            assertThat(latest!![0].key).isEqualTo("notif2")
+            assertThat(latest!![1].key).isEqualTo("notif1")
+
+            // WHEN notif1 gets an update
+            val notif1NewPromotedContent =
+                PromotedNotificationContentModel.Builder("notif1").apply {
+                    this.shortCriticalText = "Arrived"
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif1",
+                        statusBarChipIcon = firstIcon,
+                        promotedContent = notif1NewPromotedContent.build(),
+                    ),
+                    notif2,
+                )
+            )
+
+            // THEN notif2 is still ranked above notif1 to preserve chip ordering
+            assertThat(latest).hasSize(2)
+            assertThat(latest!![0].key).isEqualTo("notif2")
+            assertThat(latest!![1].key).isEqualTo("notif1")
+
+            // WHEN notif1 disappears and then reappears
+            fakeSystemClock.advanceTime(1000)
+            setNotifs(listOf(notif2))
+            assertThat(latest).hasSize(1)
+
+            fakeSystemClock.advanceTime(1000)
+            setNotifs(listOf(notif2, notif1))
+
+            // THEN notif1 is now ranked first
+            assertThat(latest).hasSize(2)
+            assertThat(latest!![0].key).isEqualTo("notif1")
+            assertThat(latest!![1].key).isEqualTo("notif2")
         }
 
     @Test
