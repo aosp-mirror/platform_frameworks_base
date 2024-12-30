@@ -1386,14 +1386,21 @@ public final class MediaRouter2 {
                         "requestCreateSessionByManager | requestId: %d, oldSession: %s, route: %s",
                         managerRequestId, oldSession, route));
         RoutingController controller;
+        String oldSessionId = oldSession.getId();
         if (oldSession.isSystemSession()) {
             controller = getSystemController();
         } else {
             synchronized (mLock) {
-                controller = mNonSystemRoutingControllers.get(oldSession.getId());
+                controller = mNonSystemRoutingControllers.get(oldSessionId);
             }
         }
         if (controller == null) {
+            Log.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring requestCreateSessionByManager (requestId: %d) because no"
+                                + " controller for old session (id: %s) was found.",
+                            managerRequestId, oldSessionId));
             return;
         }
         requestCreateController(controller, route, managerRequestId);
