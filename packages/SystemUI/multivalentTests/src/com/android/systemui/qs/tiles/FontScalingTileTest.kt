@@ -32,11 +32,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -49,8 +48,10 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -68,21 +69,24 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var dialog: SystemUIDialog
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var controller: DialogTransitionAnimator.Controller
+    @Mock private lateinit var settingsPackageRepository: QSSettingsPackageRepository
+
+    @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var systemClock: FakeSystemClock
     private lateinit var backgroundDelayableExecutor: FakeExecutor
     private lateinit var fontScalingTile: FontScalingTile
 
-    @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        `when`(qsHost.getContext()).thenReturn(mContext)
-        `when`(fontScalingDialogDelegate.createDialog()).thenReturn(dialog)
-        `when`(expandable.dialogTransitionController(any())).thenReturn(controller)
+        whenever(qsHost.getContext()).thenReturn(mContext)
+        whenever(fontScalingDialogDelegate.createDialog()).thenReturn(dialog)
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
+        whenever(settingsPackageRepository.getSettingsPackageName())
+            .thenReturn(SETTINGS_PACKAGE_NAME)
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
 
@@ -100,6 +104,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 keyguardStateController,
                 mDialogTransitionAnimator,
                 { fontScalingDialogDelegate },
+                settingsPackageRepository,
             )
         fontScalingTile.initialize()
         testableLooper.processAllMessages()
@@ -120,7 +125,7 @@ class FontScalingTileTest : SysuiTestCase() {
 
     @Test
     fun clickTile_screenUnlocked_showDialogAnimationFromView() {
-        `when`(keyguardStateController.isShowing).thenReturn(false)
+        whenever(keyguardStateController.isShowing).thenReturn(false)
         fontScalingTile.click(expandable)
         testableLooper.processAllMessages()
 
@@ -130,7 +135,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(null),
                 eq(true),
                 eq(true),
-                eq(false)
+                eq(false),
             )
         argumentCaptor.value.run()
         verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
@@ -138,7 +143,7 @@ class FontScalingTileTest : SysuiTestCase() {
 
     @Test
     fun clickTile_onLockScreen_neverShowDialogAnimationFromView() {
-        `when`(keyguardStateController.isShowing).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
         fontScalingTile.click(expandable)
         testableLooper.processAllMessages()
 
@@ -148,7 +153,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 eq(null),
                 eq(true),
                 eq(true),
-                eq(false)
+                eq(false),
             )
         argumentCaptor.value.run()
         verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
@@ -159,5 +164,10 @@ class FontScalingTileTest : SysuiTestCase() {
         val intent: Intent? = fontScalingTile.getLongClickIntent()
 
         assertThat(intent!!.action).isEqualTo(Settings.ACTION_TEXT_READING_SETTINGS)
+        assertThat(intent.getPackage()).isEqualTo(SETTINGS_PACKAGE_NAME)
+    }
+
+    companion object {
+        private const val SETTINGS_PACKAGE_NAME = "com.android.settings"
     }
 }
