@@ -29,6 +29,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
@@ -58,13 +59,15 @@ public class DragToInteractAnimationControllerTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
 
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final SecureSettings mockSecureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mockSecureSettings);
+                mockSecureSettings, mHearingAidDeviceManager);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
         final MenuView stubMenuView = spy(new MenuView(mContext, stubMenuViewModel,

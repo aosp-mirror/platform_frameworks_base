@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.graphics.PointF;
-
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
@@ -40,6 +39,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
@@ -74,6 +74,8 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
 
     @Before
     public void setUp() throws Exception {
@@ -82,7 +84,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
                 stubWindowManager);
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                secureSettings);
+                secureSettings, mHearingAidDeviceManager);
 
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
                 secureSettings));

@@ -37,6 +37,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
@@ -70,6 +71,8 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
 
     private SysuiTestableContext mSpyContext;
 
@@ -90,7 +93,7 @@ public class MenuViewTest extends SysuiTestCase {
 
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                secureSettings);
+                secureSettings, mHearingAidDeviceManager);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         mStubMenuViewAppearance = new MenuViewAppearance(mSpyContext, stubWindowManager);
         mMenuView = spy(new MenuView(mSpyContext, stubMenuViewModel, mStubMenuViewAppearance,

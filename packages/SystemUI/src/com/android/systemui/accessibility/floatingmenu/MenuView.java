@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.modules.expresslog.Counter;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -65,8 +66,11 @@ class MenuView extends FrameLayout implements
     private final Observer<Integer> mSizeTypeObserver = this::onSizeTypeChanged;
     private final Observer<List<AccessibilityTarget>> mTargetFeaturesObserver =
             this::onTargetFeaturesChanged;
+    private final Observer<Integer> mHearingDeviceStatusObserver =
+            this::updateHearingDeviceStatus;
+    private final Observer<Integer> mHearingDeviceTargetIndexObserver =
+            this::updateHearingDeviceTargetIndex;
     private final MenuViewAppearance mMenuViewAppearance;
-
     private boolean mIsMoveToTucked;
 
     private final MenuAnimationController mMenuAnimationController;
@@ -357,6 +361,11 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getTargetFeaturesData().observeForever(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().observeForever(mSizeTypeObserver);
         mMenuViewModel.getMoveToTuckedData().observeForever(mMoveToTuckedObserver);
+        if (com.android.settingslib.flags.Flags.hearingDeviceSetConnectionStatusReport()) {
+            mMenuViewModel.loadHearingDeviceStatus().observeForever(mHearingDeviceStatusObserver);
+            mMenuViewModel.getHearingDeviceTargetIndexData().observeForever(
+                    mHearingDeviceTargetIndexObserver);
+        }
         setVisibility(VISIBLE);
         mMenuViewModel.registerObserversAndCallbacks();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
@@ -371,6 +380,9 @@ class MenuView extends FrameLayout implements
         mMenuViewModel.getTargetFeaturesData().removeObserver(mTargetFeaturesObserver);
         mMenuViewModel.getSizeTypeData().removeObserver(mSizeTypeObserver);
         mMenuViewModel.getMoveToTuckedData().removeObserver(mMoveToTuckedObserver);
+        mMenuViewModel.getHearingDeviceStatusData().removeObserver(mHearingDeviceStatusObserver);
+        mMenuViewModel.getHearingDeviceTargetIndexData().removeObserver(
+                mHearingDeviceTargetIndexObserver);
         mMenuViewModel.unregisterObserversAndCallbacks();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
@@ -419,6 +431,14 @@ class MenuView extends FrameLayout implements
     private void updateSystemGestureExcludeRects() {
         final ViewGroup parentView = (ViewGroup) getParent();
         parentView.setSystemGestureExclusionRects(Collections.singletonList(mBoundsInParent));
+    }
+
+    private void updateHearingDeviceStatus(@HearingAidDeviceManager.ConnectionStatus int status) {
+        // TODO: b/357882387 - To update status drawable according to the status here.
+    }
+
+    private void updateHearingDeviceTargetIndex(int position) {
+        // TODO: b/357882387 - To update status drawable according to the status here.
     }
 
     /**

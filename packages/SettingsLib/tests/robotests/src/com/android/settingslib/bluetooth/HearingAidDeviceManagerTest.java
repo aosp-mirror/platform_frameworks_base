@@ -114,7 +114,10 @@ public class HearingAidDeviceManagerTest {
     private BluetoothDevice mDevice1;
     @Mock
     private BluetoothDevice mDevice2;
-
+    @Mock
+    private HearingAidDeviceManager.ConnectionStatusListener mConnectionStatusListener;
+    @Mock
+    private HearingAidDeviceManager.ConnectionStatusListener mConnectionStatusListener2;
 
     private BluetoothClass createBtClass(int deviceClass) {
         Parcel p = Parcel.obtain();
@@ -912,6 +915,41 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mHearingAidDeviceManager.getDevicesConnectionStatus()).isEqualTo(
                 ConnectionStatus.NO_DEVICE_BONDED);
+    }
+
+    @Test
+    public void notifyDevicesConnectionStatusChanged_noRegisteredListener_noCallback() {
+        when(mCachedDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mCachedDevice1.getProfiles()).thenReturn(List.of(mHapClientProfile, mLeAudioProfile));
+        when(mCachedDevice1.isConnected()).thenReturn(true);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
+        mHearingAidDeviceManager.registerConnectionStatusListener(
+                mConnectionStatusListener, mContext.getMainExecutor());
+        mHearingAidDeviceManager.unregisterConnectionStatusListener(
+                mConnectionStatusListener);
+        mHearingAidDeviceManager.notifyDevicesConnectionStatusChanged();
+
+        verify(mConnectionStatusListener, never()).onDevicesConnectionStatusChanged(anyInt());
+    }
+
+    @Test
+    public void notifyDevicesConnectionStatusChanged_twoRegisteredListener_callbackEachConnected() {
+        when(mCachedDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mCachedDevice1.getProfiles()).thenReturn(List.of(mHapClientProfile, mLeAudioProfile));
+        when(mCachedDevice1.isConnected()).thenReturn(true);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+
+        mHearingAidDeviceManager.registerConnectionStatusListener(
+                mConnectionStatusListener, mContext.getMainExecutor());
+        mHearingAidDeviceManager.registerConnectionStatusListener(
+                mConnectionStatusListener2, mContext.getMainExecutor());
+        mHearingAidDeviceManager.notifyDevicesConnectionStatusChanged();
+
+        verify(mConnectionStatusListener).onDevicesConnectionStatusChanged(
+                ConnectionStatus.CONNECTED);
+        verify(mConnectionStatusListener2).onDevicesConnectionStatusChanged(
+                ConnectionStatus.CONNECTED);
     }
 
     private HearingAidInfo getLeftAshaHearingAidInfo(long hiSyncId) {

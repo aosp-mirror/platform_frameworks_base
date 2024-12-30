@@ -17,6 +17,7 @@ package com.android.settingslib.bluetooth;
 
 import static android.bluetooth.BluetoothDevice.BOND_BONDED;
 
+import android.annotation.CallbackExecutor;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHapClient;
@@ -44,7 +45,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +63,8 @@ public class HearingAidDeviceManager {
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
     private final HearingAidAudioRoutingHelper mRoutingHelper;
+    private static final Map<ConnectionStatusListener, Executor>
+            mConnectionStatusListeners = new ConcurrentHashMap<>();
     @ConnectionStatus
     private int mDevicesConnectionStatus = ConnectionStatus.NO_DEVICE_BONDED;
     private boolean mInitialDevicesConnectionStatusUpdate = false;
@@ -100,14 +106,60 @@ public class HearingAidDeviceManager {
         int CONNECTING_OR_DISCONNECTING = 2;
         int ACTIVE = 3;
     }
+    /**
+     * Interface for connection status listener.
+     */
+    public interface ConnectionStatusListener {
+        /**
+         * Callback when hearing devices connection status change.
+         *
+         * <p>devices here means singular device or binaural device.
+         * E.g. One of hearing device is in CONNECTED status and another is in DISCONNECTED,
+         * it will callback CONNECTED status.
+         *
+         * @param status Updated {@link ConnectionStatus}
+         */
+        void onDevicesConnectionStatusChanged(@ConnectionStatus int status);
+    }
+
+    /**
+     * Registers a listener to be notified of connection status changes.
+     *
+     * @param listener The listener to register.
+     * @param executor The executor on which the listener's callback will be run.
+     */
+    public void registerConnectionStatusListener(
+            @NonNull ConnectionStatusListener listener,
+            @NonNull @CallbackExecutor Executor executor) {
+        mConnectionStatusListeners.put(listener, executor);
+    }
+
+    /**
+     * Unregisters a listener previously registered with
+     * {@link #registerConnectionStatusListener(ConnectionStatusListener, Executor)}.
+     *
+     * @param listener The listener to unregister.
+     */
+    public void unregisterConnectionStatusListener(
+            @NonNull ConnectionStatusListener listener) {
+        mConnectionStatusListeners.remove(listener);
+    }
+
+    private void notifyDevicesConnectionStatusChanged(int status) {
+        mConnectionStatusListeners.forEach((listener, executor) ->
+                executor.execute(() -> listener.onDevicesConnectionStatusChanged(status)));
+    }
 
     /**
      * Updates the connection status of the hearing devices based on the currently bonded
      * hearing aid devices.
      */
     synchronized void notifyDevicesConnectionStatusChanged() {
+        final int prevVal = mDevicesConnectionStatus;
         updateDevicesConnectionStatus();
-        // TODO: b/357882387 - notify connection status changes for the callers
+        if (mDevicesConnectionStatus != prevVal) {
+            notifyDevicesConnectionStatusChanged(mDevicesConnectionStatus);
+        }
     }
 
     private void updateDevicesConnectionStatus() {

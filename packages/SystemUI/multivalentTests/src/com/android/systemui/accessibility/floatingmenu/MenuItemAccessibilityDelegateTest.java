@@ -41,6 +41,7 @@ import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.utils.TestUtils;
@@ -68,6 +69,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
     private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
     private RecyclerView mStubListView;
     private MenuView mMenuView;
@@ -84,7 +87,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mSecureSettings);
+                mSecureSettings, mHearingAidDeviceManager);
 
         final int halfScreenHeight =
                 stubWindowManager.getCurrentWindowMetrics().getBounds().height() / 2;

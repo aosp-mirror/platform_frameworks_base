@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.app.viewcapture.ViewCapture;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -68,6 +69,8 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
 
     @Mock
     private SecureSettings mSecureSettings;
@@ -93,7 +96,7 @@ public class MenuViewLayerControllerTest extends SysuiTestCase {
         when(mWindowMetrics.getWindowInsets()).thenReturn(stubDisplayInsets());
         mMenuViewLayerController = new MenuViewLayerController(mContext, mWindowManager,
                 viewCaptureAwareWm, mAccessibilityManager, mSecureSettings,
-                mock(NavigationModeController.class));
+                mock(NavigationModeController.class), mHearingAidDeviceManager);
     }
 
     @Test
