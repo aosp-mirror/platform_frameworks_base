@@ -26,10 +26,13 @@ import android.content.testableContext
 import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.display.data.repository.displayRepository
+import com.android.systemui.display.data.repository.fake
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -85,6 +88,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Test
@@ -103,6 +107,9 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
     }
+
+    @Before
+    fun addDisplays() = runBlocking { kosmos.displayRepository.fake.addDisplay(DEFAULT_DISPLAY) }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =

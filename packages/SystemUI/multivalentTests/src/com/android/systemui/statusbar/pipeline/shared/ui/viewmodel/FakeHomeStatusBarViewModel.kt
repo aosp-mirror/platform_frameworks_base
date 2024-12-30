@@ -77,6 +77,8 @@ class FakeHomeStatusBarViewModel(
 
     override val iconBlockList: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
 
+    override val contentArea = MutableStateFlow(Rect(0, 0, 1, 1))
+
     val darkRegions = mutableListOf<Rect>()
 
     var darkIconTint = Color.BLACK

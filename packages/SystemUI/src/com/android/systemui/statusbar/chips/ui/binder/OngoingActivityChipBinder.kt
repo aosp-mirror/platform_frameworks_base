@@ -25,6 +25,7 @@ import android.widget.DateTimeView
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.UiThread
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
@@ -38,24 +39,24 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.Notificati
 /** Binder for ongoing activity chip views. */
 object OngoingActivityChipBinder {
     /** Binds the given [chipModel] data to the given [chipView]. */
-    fun bind(chipModel: OngoingActivityChipModel, chipView: View, iconViewStore: IconViewStore?) {
-        val chipContext = chipView.context
-        val chipDefaultIconView: ImageView =
-            chipView.requireViewById(R.id.ongoing_activity_chip_icon)
-        val chipTimeView: ChipChronometer =
-            chipView.requireViewById(R.id.ongoing_activity_chip_time)
-        val chipTextView: TextView = chipView.requireViewById(R.id.ongoing_activity_chip_text)
-        val chipShortTimeDeltaView: DateTimeView =
-            chipView.requireViewById(R.id.ongoing_activity_chip_short_time_delta)
-        val chipBackgroundView: ChipBackgroundContainer =
-            chipView.requireViewById(R.id.ongoing_activity_chip_background)
+    fun bind(
+        chipModel: OngoingActivityChipModel,
+        viewBinding: OngoingActivityChipViewBinding,
+        iconViewStore: IconViewStore?,
+    ) {
+        val chipContext = viewBinding.rootView.context
+        val chipDefaultIconView = viewBinding.defaultIconView
+        val chipTimeView = viewBinding.timeView
+        val chipTextView = viewBinding.textView
+        val chipShortTimeDeltaView = viewBinding.shortTimeDeltaView
+        val chipBackgroundView = viewBinding.backgroundView
 
         when (chipModel) {
             is OngoingActivityChipModel.Shown -> {
                 // Data
                 setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView, iconViewStore)
                 setChipMainContent(chipModel, chipTextView, chipTimeView, chipShortTimeDeltaView)
-                chipView.setOnClickListener(chipModel.onClickListener)
+                viewBinding.rootView.setOnClickListener(chipModel.onClickListener)
                 updateChipPadding(
                     chipModel,
                     chipBackgroundView,
@@ -65,7 +66,7 @@ object OngoingActivityChipBinder {
                 )
 
                 // Accessibility
-                setChipAccessibility(chipModel, chipView, chipBackgroundView)
+                setChipAccessibility(chipModel, viewBinding.rootView, chipBackgroundView)
 
                 // Colors
                 val textColor = chipModel.colors.text(chipContext)
@@ -81,6 +82,85 @@ object OngoingActivityChipBinder {
                 chipTimeView.stop()
             }
         }
+    }
+
+    /** Stores [rootView] and relevant child views in an object for easy reference. */
+    fun createBinding(rootView: View): OngoingActivityChipViewBinding {
+        return OngoingActivityChipViewBinding(
+            rootView = rootView,
+            timeView = rootView.requireViewById(R.id.ongoing_activity_chip_time),
+            textView = rootView.requireViewById(R.id.ongoing_activity_chip_text),
+            shortTimeDeltaView =
+                rootView.requireViewById(R.id.ongoing_activity_chip_short_time_delta),
+            defaultIconView = rootView.requireViewById(R.id.ongoing_activity_chip_icon),
+            backgroundView = rootView.requireViewById(R.id.ongoing_activity_chip_background),
+        )
+    }
+
+    /**
+     * Resets any width restrictions that were placed on the primary chip's contents.
+     *
+     * Should be used when the user's screen bounds changed because there may now be more room in
+     * the status bar to show additional content.
+     */
+    fun resetPrimaryChipWidthRestrictions(
+        primaryChipViewBinding: OngoingActivityChipViewBinding,
+        currentPrimaryChipViewModel: OngoingActivityChipModel,
+    ) {
+        if (currentPrimaryChipViewModel is OngoingActivityChipModel.Hidden) {
+            return
+        }
+        resetChipMainContentWidthRestrictions(
+            primaryChipViewBinding,
+            currentPrimaryChipViewModel as OngoingActivityChipModel.Shown,
+        )
+    }
+
+    /**
+     * Resets any width restrictions that were placed on the secondary chip and its contents.
+     *
+     * Should be used when the user's screen bounds changed because there may now be more room in
+     * the status bar to show additional content.
+     */
+    fun resetSecondaryChipWidthRestrictions(
+        secondaryChipViewBinding: OngoingActivityChipViewBinding,
+        currentSecondaryChipModel: OngoingActivityChipModel,
+    ) {
+        if (currentSecondaryChipModel is OngoingActivityChipModel.Hidden) {
+            return
+        }
+        secondaryChipViewBinding.rootView.resetWidthRestriction()
+        resetChipMainContentWidthRestrictions(
+            secondaryChipViewBinding,
+            currentSecondaryChipModel as OngoingActivityChipModel.Shown,
+        )
+    }
+
+    private fun resetChipMainContentWidthRestrictions(
+        viewBinding: OngoingActivityChipViewBinding,
+        model: OngoingActivityChipModel.Shown,
+    ) {
+        when (model) {
+            is OngoingActivityChipModel.Shown.Text -> viewBinding.textView.resetWidthRestriction()
+            is OngoingActivityChipModel.Shown.Timer -> viewBinding.timeView.resetWidthRestriction()
+            is OngoingActivityChipModel.Shown.ShortTimeDelta ->
+                viewBinding.shortTimeDeltaView.resetWidthRestriction()
+            is OngoingActivityChipModel.Shown.IconOnly,
+            is OngoingActivityChipModel.Shown.Countdown -> {}
+        }
+    }
+
+    /**
+     * Resets any width restrictions that were placed on the given view.
+     *
+     * Should be used when the user's screen bounds changed because there may now be more room in
+     * the status bar to show additional content.
+     */
+    @UiThread
+    fun View.resetWidthRestriction() {
+        // View needs to be visible in order to be re-measured
+        visibility = View.VISIBLE
+        forceLayout()
     }
 
     private fun setChipIcon(

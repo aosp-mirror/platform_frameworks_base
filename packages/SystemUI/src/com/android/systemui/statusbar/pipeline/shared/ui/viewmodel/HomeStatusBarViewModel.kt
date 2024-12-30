@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipsViewModel
+import com.android.systemui.statusbar.layout.ui.viewmodel.StatusBarContentInsetsViewModelStore
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
@@ -130,6 +131,9 @@ interface HomeStatusBarViewModel {
     /** Which icons to block from the home status bar */
     val iconBlockList: Flow<List<String>>
 
+    /** This status bar's current content area for the given rotation in absolute bounds. */
+    val contentArea: Flow<Rect>
+
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
      * status bar and navigation icons dim. In this mode, a notification dot appears where the
@@ -185,6 +189,7 @@ constructor(
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel,
     animations: SystemStatusEventAnimationInteractor,
+    statusBarContentInsetsViewModelStore: StatusBarContentInsetsViewModelStore,
     @Application coroutineScope: CoroutineScope,
 ) : HomeStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
@@ -362,6 +367,10 @@ constructor(
 
     override val iconBlockList: Flow<List<String>> =
         homeStatusBarIconBlockListInteractor.iconBlockList
+
+    override val contentArea: Flow<Rect> =
+        statusBarContentInsetsViewModelStore.forDisplay(thisDisplayId)?.contentArea
+            ?: flowOf(Rect(0, 0, 0, 0))
 
     @View.Visibility
     private fun Boolean.toVisibleOrGone(): Int {
