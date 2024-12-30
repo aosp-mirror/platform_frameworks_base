@@ -3082,16 +3082,42 @@ public class NotificationManagerService extends SystemService {
 
     private void sendRegisteredOnlyBroadcast(Intent baseIntent) {
         int[] userIds = mUmInternal.getProfileIds(mAmi.getCurrentUserId(), true);
-        Intent intent = new Intent(baseIntent).addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        for (int userId : userIds) {
-            getContext().sendBroadcastAsUser(intent, UserHandle.of(userId), null);
-        }
-        // explicitly send the broadcast to all DND packages, even if they aren't currently running
-        for (int userId : userIds) {
-            for (String pkg : mConditionProviders.getAllowedPackages(userId)) {
-                Intent pkgIntent = new Intent(baseIntent).setPackage(pkg).setFlags(
-                        Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                getContext().sendBroadcastAsUser(pkgIntent, UserHandle.of(userId));
+        if (Flags.nmBinderPerfReduceZenBroadcasts()) {
+            for (int userId : userIds) {
+                Context userContext = getContext().createContextAsUser(UserHandle.of(userId), 0);
+                String[] dndPackages = mConditionProviders.getAllowedPackages(userId)
+                        .toArray(new String[0]);
+
+                // We send the broadcast to all DND packages in the second step, so leave them out
+                // of this first broadcast for *running* receivers. That ensures each package only
+                // receives it once.
+                Intent registeredOnlyIntent = new Intent(baseIntent)
+                        .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                userContext.sendBroadcastMultiplePermissions(registeredOnlyIntent,
+                        /* receiverPermissions= */ new String[0],
+                        /* excludedPermissions= */ new String[0],
+                        /* excludedPackages= */ dndPackages);
+
+                for (String pkg : dndPackages) {
+                    Intent pkgIntent = new Intent(baseIntent).setPackage(pkg)
+                            .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    userContext.sendBroadcast(pkgIntent);
+                }
+            }
+        } else {
+            Intent intent = new Intent(baseIntent).addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            for (int userId : userIds) {
+                getContext().sendBroadcastAsUser(intent, UserHandle.of(userId), null);
+            }
+
+            // explicitly send the broadcast to all DND packages, even if they aren't currently
+            // running
+            for (int userId : userIds) {
+                for (String pkg : mConditionProviders.getAllowedPackages(userId)) {
+                    Intent pkgIntent = new Intent(baseIntent).setPackage(pkg).setFlags(
+                            Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    getContext().sendBroadcastAsUser(pkgIntent, UserHandle.of(userId));
+                }
             }
         }
     }

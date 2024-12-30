@@ -644,6 +644,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         doNothing().when(mContext).sendBroadcast(any(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
+        doNothing().when(mContext).sendBroadcastMultiplePermissions(any(), any(), any(), any());
+        doReturn(mContext).when(mContext).createContextAsUser(eq(mUser), anyInt());
+
         TestableContentResolver cr = mock(TestableContentResolver.class);
         when(mContext.getContentResolver()).thenReturn(cr);
         doNothing().when(cr).registerContentObserver(any(), anyBoolean(), any(), anyInt());
@@ -11235,7 +11238,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void onZenModeChanged_sendsBroadcasts() throws Exception {
+    @DisableFlags(Flags.FLAG_NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS)
+    public void onZenModeChanged_sendsBroadcasts_oldBehavior() throws Exception {
         when(mAmi.getCurrentUserId()).thenReturn(100);
         when(mUmInternal.getProfileIds(eq(100), anyBoolean())).thenReturn(new int[]{100, 101, 102});
         when(mConditionProviders.getAllowedPackages(anyInt())).then(new Answer<List<String>>() {
@@ -11285,6 +11289,74 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(new Intent(
                 ACTION_INTERRUPTION_FILTER_CHANGED).setPackage("b").setFlags(
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(102)));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_REDUCE_ZEN_BROADCASTS)
+    public void onZenModeChanged_sendsBroadcasts() throws Exception {
+        when(mAmi.getCurrentUserId()).thenReturn(100);
+        when(mUmInternal.getProfileIds(eq(100), anyBoolean())).thenReturn(new int[]{100, 101, 102});
+        when(mConditionProviders.getAllowedPackages(anyInt())).then(new Answer<List<String>>() {
+            @Override
+            public List<String> answer(InvocationOnMock invocation) {
+                int userId = invocation.getArgument(0);
+                switch (userId) {
+                    case 100:
+                        return Lists.newArrayList("a", "b", "c");
+                    case 101:
+                        return Lists.newArrayList();
+                    case 102:
+                        return Lists.newArrayList("b");
+                    default:
+                        throw new IllegalArgumentException(
+                                "Why would you ask for packages of userId " + userId + "?");
+                }
+            }
+        });
+        Context context100 = mock(Context.class);
+        doReturn(context100).when(mContext).createContextAsUser(eq(UserHandle.of(100)), anyInt());
+        Context context101 = mock(Context.class);
+        doReturn(context101).when(mContext).createContextAsUser(eq(UserHandle.of(101)), anyInt());
+        Context context102 = mock(Context.class);
+        doReturn(context102).when(mContext).createContextAsUser(eq(UserHandle.of(102)), anyInt());
+
+        mService.getBinderService().setZenMode(Settings.Global.ZEN_MODE_NO_INTERRUPTIONS, null,
+                "testing!", false);
+        waitForIdle();
+
+        // Verify broadcasts per user: registered receivers first, then DND packages.
+        InOrder inOrder = inOrder(context100, context101, context102);
+
+        inOrder.verify(context100).sendBroadcastMultiplePermissions(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)),
+                eq(new String[0]), eq(new String[0]), eq(new String[] {"a", "b", "c"}));
+        inOrder.verify(context100).sendBroadcast(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setPackage("a")
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)));
+        inOrder.verify(context100).sendBroadcast(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setPackage("b")
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)));
+        inOrder.verify(context100).sendBroadcast(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setPackage("c")
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)));
+
+        inOrder.verify(context101).sendBroadcastMultiplePermissions(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)),
+                eq(new String[0]), eq(new String[0]), eq(new String[] {}));
+
+        inOrder.verify(context102).sendBroadcastMultiplePermissions(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)),
+                eq(new String[0]), eq(new String[0]), eq(new String[] {"b"}));
+        inOrder.verify(context102).sendBroadcast(
+                eqIntent(new Intent(ACTION_INTERRUPTION_FILTER_CHANGED)
+                        .setPackage("b")
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)));
     }
 
     @Test
