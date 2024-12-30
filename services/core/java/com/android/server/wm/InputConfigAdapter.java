@@ -76,9 +76,6 @@ class InputConfigAdapter {
                     LayoutParams.FLAG_NOT_TOUCHABLE,
                     InputConfig.NOT_TOUCHABLE, false /* inverted */),
             new FlagMapping(
-                    LayoutParams.FLAG_SPLIT_TOUCH,
-                    InputConfig.PREVENT_SPLITTING, true /* inverted */),
-            new FlagMapping(
                     LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                     InputConfig.WATCH_OUTSIDE_TOUCH, false /* inverted */),
             new FlagMapping(
