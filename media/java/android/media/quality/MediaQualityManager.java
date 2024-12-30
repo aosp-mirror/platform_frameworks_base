@@ -108,11 +108,12 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onParamCapabilitiesChanged(String profileId, List<ParamCapability> caps) {
+            public void onParameterCapabilitiesChanged(
+                    String profileId, List<ParameterCapability> caps) {
                 synchronized (mLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
-                        record.postParamCapabilitiesChanged(profileId, caps);
+                        record.postParameterCapabilitiesChanged(profileId, caps);
                     }
                 }
             }
@@ -155,11 +156,12 @@ public final class MediaQualityManager {
                 }
             }
             @Override
-            public void onParamCapabilitiesChanged(String profileId, List<ParamCapability> caps) {
+            public void onParameterCapabilitiesChanged(
+                    String profileId, List<ParameterCapability> caps) {
                 synchronized (mLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
-                        record.postParamCapabilitiesChanged(profileId, caps);
+                        record.postParameterCapabilitiesChanged(profileId, caps);
                     }
                 }
             }
@@ -596,11 +598,17 @@ public final class MediaQualityManager {
 
     /**
      * Gets capability information of the given parameters.
+     *
+     * <p>If a name isn't found, a corresponding {@link ParameterCapability} instance is in the
+     * return list, and {@link ParameterCapability#isSupported()} is {@code false}.
+     *
+     * @param names the parameter names. Commonly used names can be found in
+     * {@link MediaQualityContract}. Vendor-defined names are also permitted.
      */
     @NonNull
-    public List<ParamCapability> getParamCapabilities(@NonNull List<String> names) {
+    public List<ParameterCapability> getParameterCapabilities(@NonNull List<String> names) {
         try {
-            return mService.getParamCapabilities(names, mUserHandle);
+            return mService.getParameterCapabilities(names, mUserHandle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -884,11 +892,12 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postParamCapabilitiesChanged(final String id, List<ParamCapability> caps) {
+        public void postParameterCapabilitiesChanged(
+                final String id, List<ParameterCapability> caps) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onParamCapabilitiesChanged(id, caps);
+                    mCallback.onParameterCapabilitiesChanged(id, caps);
                 }
             });
         }
@@ -944,11 +953,12 @@ public final class MediaQualityManager {
             });
         }
 
-        public void postParamCapabilitiesChanged(final String id, List<ParamCapability> caps) {
+        public void postParameterCapabilitiesChanged(
+                final String id, List<ParameterCapability> caps) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onParamCapabilitiesChanged(id, caps);
+                    mCallback.onParameterCapabilitiesChanged(id, caps);
                 }
             });
         }
@@ -1038,8 +1048,8 @@ public final class MediaQualityManager {
          *                  is no associated profile
          * @param updatedCaps the updated capabilities.
          */
-        public void onParamCapabilitiesChanged(
-                @Nullable String profileId, @NonNull List<ParamCapability> updatedCaps) {
+        public void onParameterCapabilitiesChanged(
+                @Nullable String profileId, @NonNull List<ParameterCapability> updatedCaps) {
         }
     }
 
@@ -1095,8 +1105,8 @@ public final class MediaQualityManager {
          *                  is no associated profile
          * @param updatedCaps the updated capabilities.
          */
-        public void onParamCapabilitiesChanged(
-                @Nullable String profileId, @NonNull List<ParamCapability> updatedCaps) {
+        public void onParameterCapabilitiesChanged(
+                @Nullable String profileId, @NonNull List<ParameterCapability> updatedCaps) {
         }
     }
 

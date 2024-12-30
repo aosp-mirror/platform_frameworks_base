@@ -17,7 +17,7 @@
 
 package android.media.quality;
 
-import android.media.quality.ParamCapability;
+import android.media.quality.ParameterCapability;
 import android.media.quality.PictureProfile;
 
 /**
@@ -28,6 +28,6 @@ oneway interface IPictureProfileCallback {
     void onPictureProfileAdded(in String id, in PictureProfile p);
     void onPictureProfileUpdated(in String id, in PictureProfile p);
     void onPictureProfileRemoved(in String id, in PictureProfile p);
-    void onParamCapabilitiesChanged(in String id, in List<ParamCapability> caps);
+    void onParameterCapabilitiesChanged(in String id, in List<ParameterCapability> caps);
     void onError(in String id, in int err);
 }

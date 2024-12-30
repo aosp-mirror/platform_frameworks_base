@@ -27,7 +27,7 @@ import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.MediaQualityContract.BaseParameters;
 import android.media.quality.MediaQualityManager;
-import android.media.quality.ParamCapability;
+import android.media.quality.ParameterCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
@@ -544,7 +544,8 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<ParamCapability> getParamCapabilities(List<String> names, UserHandle user) {
+        public List<ParameterCapability> getParameterCapabilities(
+                List<String> names, UserHandle user) {
             return new ArrayList<>();
         }
 

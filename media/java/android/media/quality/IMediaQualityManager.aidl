@@ -20,7 +20,7 @@ import android.media.quality.AmbientBacklightSettings;
 import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
-import android.media.quality.ParamCapability;
+import android.media.quality.ParameterCapability;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.PictureProfile;
 import android.media.quality.SoundProfileHandle;
@@ -65,7 +65,7 @@ interface IMediaQualityManager {
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
     void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
 
-    List<ParamCapability> getParamCapabilities(in List<String> names, in UserHandle user);
+    List<ParameterCapability> getParameterCapabilities(in List<String> names, in UserHandle user);
 
     boolean isSupported(in UserHandle user);
     void setAutoPictureQualityEnabled(in boolean enabled, in UserHandle user);
