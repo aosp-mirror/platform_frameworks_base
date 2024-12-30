@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene.effect
+package com.android.compose.gesture.effect
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.AnimationSpec
@@ -34,7 +34,6 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.ProgressConverter
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 
@@ -80,7 +79,7 @@ class OffsetOverscrollEffect(
             )
 
         @VisibleForTesting
-        internal fun computeOffset(density: Density, overscrollDistance: Float): Int {
+        fun computeOffset(density: Density, overscrollDistance: Float): Int {
             val maxDistancePx = with(density) { MaxDistance.toPx() }
             val progress = ProgressConverter.Default.convert(overscrollDistance / maxDistancePx)
             return (progress * maxDistancePx).roundToInt()
@@ -96,5 +95,37 @@ fun rememberOffsetOverscrollEffect(
     val animationScope = rememberCoroutineScope()
     return remember(orientation, animationScope, animationSpec) {
         OffsetOverscrollEffect(orientation, animationScope, animationSpec)
+    }
+}
+
+/** This converter lets you change a linear progress into a function of your choice. */
+fun interface ProgressConverter {
+    fun convert(progress: Float): Float
+
+    companion object {
+        /** Starts linearly with some resistance and slowly approaches to 0.2f */
+        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
+
+        /**
+         * The scroll stays linear, with [factor] you can control how much resistance there is.
+         *
+         * @param factor If you choose a value between 0f and 1f, the progress will grow more
+         *   slowly, like there's resistance. A value of 1f means there's no resistance.
+         */
+        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
+
+        /**
+         * This function starts linear and slowly approaches [maxProgress].
+         *
+         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
+         * function.
+         *
+         * @param maxProgress is the maximum progress value.
+         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
+         *   control how quickly you get to the [maxProgress].
+         */
+        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
+            maxProgress * kotlin.math.tanh(x = it / (maxProgress * tilt))
+        }
     }
 }

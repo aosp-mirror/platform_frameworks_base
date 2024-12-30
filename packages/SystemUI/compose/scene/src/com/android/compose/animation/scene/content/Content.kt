@@ -53,10 +53,10 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedValueAsState
 import com.android.compose.animation.scene.effect.GestureEffect
-import com.android.compose.animation.scene.effect.OffsetOverscrollEffect
 import com.android.compose.animation.scene.effect.VisualEffect
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
+import com.android.compose.gesture.effect.OffsetOverscrollEffect
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.ContainerState
 import com.android.compose.ui.graphics.container

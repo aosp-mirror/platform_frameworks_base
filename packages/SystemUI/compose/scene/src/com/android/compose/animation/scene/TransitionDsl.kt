@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.Transformation
-import kotlin.math.tanh
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -475,36 +474,4 @@ interface PropertyTransformationBuilder {
 
     /** Apply a [transformation] to the element(s) matching [matcher]. */
     fun transformation(matcher: ElementMatcher, transformation: Transformation.Factory)
-}
-
-/** This converter lets you change a linear progress into a function of your choice. */
-fun interface ProgressConverter {
-    fun convert(progress: Float): Float
-
-    companion object {
-        /** Starts linearly with some resistance and slowly approaches to 0.2f */
-        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
-
-        /**
-         * The scroll stays linear, with [factor] you can control how much resistance there is.
-         *
-         * @param factor If you choose a value between 0f and 1f, the progress will grow more
-         *   slowly, like there's resistance. A value of 1f means there's no resistance.
-         */
-        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
-
-        /**
-         * This function starts linear and slowly approaches [maxProgress].
-         *
-         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
-         * function.
-         *
-         * @param maxProgress is the maximum progress value.
-         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
-         *   control how quickly you get to the [maxProgress].
-         */
-        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
-            maxProgress * tanh(x = it / (maxProgress * tilt))
-        }
-    }
 }

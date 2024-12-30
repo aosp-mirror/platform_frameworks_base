@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene.effect
+package com.android.compose.gesture.effect
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -116,58 +116,5 @@ open class BaseContentOverscrollEffect(
                 animatable.animateTo(0f, animationSpec, remaining.toFloat())
             }
         }
-    }
-}
-
-/** An overscroll effect that ensures only a single fling animation is triggered. */
-internal class GestureEffect(private val delegate: ContentOverscrollEffect) :
-    ContentOverscrollEffect by delegate {
-    private var shouldFling = false
-
-    override fun applyToScroll(
-        delta: Offset,
-        source: NestedScrollSource,
-        performScroll: (Offset) -> Offset,
-    ): Offset {
-        shouldFling = true
-        return delegate.applyToScroll(delta, source, performScroll)
-    }
-
-    override suspend fun applyToFling(
-        velocity: Velocity,
-        performFling: suspend (Velocity) -> Velocity,
-    ) {
-        if (!shouldFling) {
-            performFling(velocity)
-            return
-        }
-        shouldFling = false
-        delegate.applyToFling(velocity, performFling)
-    }
-
-    suspend fun ensureApplyToFlingIsCalled() {
-        applyToFling(Velocity.Zero) { Velocity.Zero }
-    }
-}
-
-/**
- * An overscroll effect that only applies visual effects and does not interfere with the actual
- * scrolling or flinging behavior.
- */
-internal class VisualEffect(private val delegate: ContentOverscrollEffect) :
-    ContentOverscrollEffect by delegate {
-    override fun applyToScroll(
-        delta: Offset,
-        source: NestedScrollSource,
-        performScroll: (Offset) -> Offset,
-    ): Offset {
-        return performScroll(delta)
-    }
-
-    override suspend fun applyToFling(
-        velocity: Velocity,
-        performFling: suspend (Velocity) -> Velocity,
-    ) {
-        performFling(velocity)
     }
 }
