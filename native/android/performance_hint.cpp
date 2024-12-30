@@ -1269,9 +1269,6 @@ int APerformanceHint_notifyWorkloadIncrease(APerformanceHintSession* session, bo
                                             const char* debugName) {
     VALIDATE_PTR(session)
     VALIDATE_PTR(debugName)
-    if (!useNewLoadHintBehavior()) {
-        return ENOTSUP;
-    }
     return session->notifyWorkloadIncrease(cpu, gpu, debugName);
 }
 
@@ -1279,9 +1276,6 @@ int APerformanceHint_notifyWorkloadReset(APerformanceHintSession* session, bool 
                                          const char* debugName) {
     VALIDATE_PTR(session)
     VALIDATE_PTR(debugName)
-    if (!useNewLoadHintBehavior()) {
-        return ENOTSUP;
-    }
     return session->notifyWorkloadReset(cpu, gpu, debugName);
 }
 
@@ -1289,9 +1283,6 @@ int APerformanceHint_notifyWorkloadSpike(APerformanceHintSession* session, bool 
                                          const char* debugName) {
     VALIDATE_PTR(session)
     VALIDATE_PTR(debugName)
-    if (!useNewLoadHintBehavior()) {
-        return ENOTSUP;
-    }
     return session->notifyWorkloadSpike(cpu, gpu, debugName);
 }
 
