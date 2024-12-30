@@ -2197,7 +2197,7 @@ class MediaRouter2ServiceImpl {
                 mRouter.notifyRouterRegistered(
                         getVisibleRoutes(currentRoutes), currentSystemSessionInfo);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify router registered. Router probably died.", ex);
+                logRemoteException("notifyRegistered", ex);
             }
         }
 
@@ -2212,7 +2212,7 @@ class MediaRouter2ServiceImpl {
             try {
                 mRouter.notifyRoutesUpdated(getVisibleRoutes(routes));
             } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify routes updated. Router probably died.", ex);
+                logRemoteException("notifyRoutesUpdated", ex);
             }
         }
 
@@ -2221,11 +2221,7 @@ class MediaRouter2ServiceImpl {
                 mRouter.notifySessionCreated(
                         requestId, maybeClearTransferInitiatorIdentity(sessionInfo));
             } catch (RemoteException ex) {
-                Slog.w(
-                        TAG,
-                        "Failed to notify router of the session creation."
-                                + " Router probably died.",
-                        ex);
+                logRemoteException("notifySessionCreated", ex);
             }
         }
 
@@ -2238,11 +2234,7 @@ class MediaRouter2ServiceImpl {
             try {
                 mRouter.notifySessionCreated(requestId, /* sessionInfo= */ null);
             } catch (RemoteException ex) {
-                Slog.w(
-                        TAG,
-                        "Failed to notify router of the session creation failure."
-                                + " Router probably died.",
-                        ex);
+                logRemoteException("notifySessionCreationFailed", ex);
             }
         }
 
@@ -2253,10 +2245,7 @@ class MediaRouter2ServiceImpl {
             try {
                 mRouter.notifySessionReleased(sessionInfo);
             } catch (RemoteException ex) {
-                Slog.w(
-                        TAG,
-                        "Failed to notify router of the session release. Router probably died.",
-                        ex);
+                logRemoteException("notifySessionReleased", ex);
             }
         }
 
@@ -2284,11 +2273,7 @@ class MediaRouter2ServiceImpl {
                 }
                 mRouter.requestCreateSessionByManager(uniqueRequestId, oldSession, route);
             } catch (RemoteException ex) {
-                Slog.w(
-                        TAG,
-                        "getSessionHintsForCreatingSessionOnHandler: "
-                                + "Failed to request. Router probably died.",
-                        ex);
+                logRemoteException("requestCreateSessionByManager", ex);
                 managerRecord.notifyRequestFailed(
                         toOriginalRequestId(uniqueRequestId), REASON_UNKNOWN_ERROR);
             }
@@ -2303,7 +2288,7 @@ class MediaRouter2ServiceImpl {
             try {
                 mRouter.notifySessionInfoChanged(maybeClearTransferInitiatorIdentity(sessionInfo));
             } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify session info changed. Router probably died.", ex);
+                logRemoteException("notifySessionInfoChanged", ex);
             }
         }
 
@@ -2361,6 +2346,22 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return false;
+        }
+
+        /** Logs a {@link RemoteException} occurred during the execution of {@code operation}. */
+        private void logRemoteException(String operation, RemoteException exception) {
+            String message =
+                    TextUtils.formatSimple(
+                            "%s failed for %s due to %s",
+                            operation, getDebugString(), exception.toString());
+            Slog.w(TAG, message);
+        }
+
+        /** Returns a human readable representation of this router record for logging purposes. */
+        private String getDebugString() {
+            return TextUtils.formatSimple(
+                    "Router %s (id=%d,pid=%d,userId=%d,uid=%d)",
+                    mPackageName, mRouterId, mPid, mUserRecord.mUserId, mUid);
         }
     }
 
