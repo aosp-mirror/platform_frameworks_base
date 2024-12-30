@@ -16,6 +16,10 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
+
+import android.content.ComponentName;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +33,10 @@ import androidx.recyclerview.widget.RecyclerView.Adapter;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager.ConnectionStatus;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityTargetAdapter.ViewHolder;
+import com.android.systemui.accessibility.hearingaid.HearingDeviceStatusDrawableInfo;
 import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
@@ -40,9 +47,13 @@ import java.util.List;
  * An adapter which shows the set of accessibility targets that can be performed.
  */
 public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
+    private static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
+
     private int mIconWidthHeight;
     private int mItemPadding;
     private final List<AccessibilityTarget> mTargets;
+
+    private int mHearingDeviceStatus;
 
     @IntDef({
             ItemType.FIRST_ITEM,
@@ -56,7 +67,7 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         int LAST_ITEM = 2;
     }
 
-    public AccessibilityTargetAdapter(List<AccessibilityTarget> targets) {
+    public AccessibilityTargetAdapter(@NonNull List<AccessibilityTarget> targets) {
         mTargets = targets;
     }
 
@@ -95,6 +106,32 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         ViewCompat.replaceAccessibilityAction(holder.itemView,
                 AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
                 clickHint, /* command= */ null);
+
+        if (com.android.settingslib.flags.Flags.hearingDeviceSetConnectionStatusReport()) {
+            if (ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.equals(
+                    ComponentName.unflattenFromString(target.getId()))) {
+                updateHearingDeviceStatusDrawable(holder, mHearingDeviceStatus);
+            }
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position,
+            @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position);
+            return;
+        }
+
+        if (com.android.settingslib.flags.Flags.hearingDeviceSetConnectionStatusReport()) {
+            payloads.forEach(payload -> {
+                if (payload instanceof Integer cmd) {
+                    if (cmd == PAYLOAD_HEARING_STATUS_DRAWABLE) {
+                        updateHearingDeviceStatusDrawable(holder, mHearingDeviceStatus);
+                    }
+                }
+            });
+        }
     }
 
     @ItemType
@@ -124,6 +161,37 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
 
     public void setItemPadding(int itemPadding) {
         mItemPadding = itemPadding;
+    }
+
+    /**
+     * Notifies to update the hearing device status drawable at the given target index.
+     *
+     * @param status the connection status for hearing devices.
+     *               {@link HearingAidDeviceManager.ConnectionStatus}
+     * @param targetIndex The index of the hearing aid device in the target list, or -1 if not
+     *                    exist.
+     */
+    public void onHearingDeviceStatusChanged(@HearingAidDeviceManager.ConnectionStatus int status,
+            int targetIndex) {
+        mHearingDeviceStatus = status;
+
+        if (targetIndex >= 0) {
+            notifyItemChanged(targetIndex, PAYLOAD_HEARING_STATUS_DRAWABLE);
+        }
+    }
+
+    private void updateHearingDeviceStatusDrawable(ViewHolder holder,
+            @ConnectionStatus int status) {
+        final Context context = holder.itemView.getContext();
+        HearingDeviceStatusDrawableInfo.StatusDrawableInfo statusDrawableInfo =
+                HearingDeviceStatusDrawableInfo.get(status);
+        final int baseDrawableId = statusDrawableInfo.baseDrawableId();
+        final int stateDescriptionId = statusDrawableInfo.stateDescriptionId();
+
+        holder.mIconView.setBackground(
+                (baseDrawableId != 0) ? context.getDrawable(baseDrawableId) : null);
+        holder.itemView.setStateDescription(
+                (stateDescriptionId != 0) ? context.getString(stateDescriptionId) : null);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

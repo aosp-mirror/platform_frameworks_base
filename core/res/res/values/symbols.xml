@@ -3821,9 +3821,17 @@
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_generic" />
   <java-symbol type="drawable" name="ic_accessibility_hearing_aid" />
+  <java-symbol type="drawable" name="ic_accessibility_hearing_aid_disconnected" />
+  <java-symbol type="drawable" name="ic_accessibility_hearing_aid_green_dot" />
+  <java-symbol type="drawable" name="ic_accessibility_hearing_aid_blue_dot" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
   <java-symbol type="drawable" name="ic_accessibility_reduce_bright_colors" />
   <java-symbol type="drawable" name="ic_accessibility_one_handed" />
+
+  <java-symbol type="string" name="hearing_device_status_disconnected" />
+  <java-symbol type="string" name="hearing_device_status_connected" />
+  <java-symbol type="string" name="hearing_device_status_active" />
+  <java-symbol type="string" name="hearing_device_status_loading" />
 
   <java-symbol type="string" name="hearing_aids_feature_name" />
   <java-symbol type="string" name="reduce_bright_colors_feature_name" />

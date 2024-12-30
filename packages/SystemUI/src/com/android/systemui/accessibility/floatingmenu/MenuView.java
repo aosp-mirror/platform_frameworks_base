@@ -90,6 +90,7 @@ class MenuView extends FrameLayout implements
         mTargetFeaturesView = new RecyclerView(context);
         mTargetFeaturesView.setAdapter(mAdapter);
         mTargetFeaturesView.setLayoutManager(new LinearLayoutManager(context));
+        mTargetFeaturesView.setClipChildren(false);
         setLayoutParams(new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         // Avoid drawing out of bounds of the parent view
         setClipToOutline(true);
@@ -434,11 +435,21 @@ class MenuView extends FrameLayout implements
     }
 
     private void updateHearingDeviceStatus(@HearingAidDeviceManager.ConnectionStatus int status) {
-        // TODO: b/357882387 - To update status drawable according to the status here.
+        final int haStatus = mMenuViewModel.getHearingDeviceStatusData().getValue();
+        final int haPosition = mMenuViewModel.getHearingDeviceTargetIndexData().getValue();
+        if (haPosition >= 0) {
+            mContext.getMainExecutor().execute(
+                    () -> mAdapter.onHearingDeviceStatusChanged(haStatus, haPosition));
+        }
     }
 
     private void updateHearingDeviceTargetIndex(int position) {
-        // TODO: b/357882387 - To update status drawable according to the status here.
+        final int haStatus = mMenuViewModel.getHearingDeviceStatusData().getValue();
+        final int haPosition = mMenuViewModel.getHearingDeviceTargetIndexData().getValue();
+        if (haPosition >= 0) {
+            mContext.getMainExecutor().execute(
+                    () -> mAdapter.onHearingDeviceStatusChanged(haStatus, haPosition));
+        }
     }
 
     /**

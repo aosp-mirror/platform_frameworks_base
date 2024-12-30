@@ -1,5 +1,5 @@
 <!--
-    Copyright (C) 2022 The Android Open Source Project
+    Copyright (C) 2024 The Android Open Source Project
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
     limitations under the License.
 -->
 
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/accessibility_feature_background" />
-    <foreground>
-        <!-- TODO: b/382377298 - To update correct drawable with same inset
-        @dimen/accessibility_icon_foreground_padding_ratio or remove the inset together. -->
-        <inset
-            android:drawable="@drawable/ic_accessibility_hearing_aid_foreground"
-            android:inset="30%" />
-    </foreground>
-</adaptive-icon>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="14dp"
+    android:height="14dp"
+    android:viewportWidth="14"
+    android:viewportHeight="14">
+    <path
+        android:pathData="M7,7m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"
+        android:strokeWidth="2"
+        android:fillColor="#3998D3"
+        android:strokeColor="#3E373C"/>
+</vector>
