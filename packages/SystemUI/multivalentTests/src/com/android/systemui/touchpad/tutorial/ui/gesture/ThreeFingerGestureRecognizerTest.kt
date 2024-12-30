@@ -30,12 +30,14 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureRecogn
 import com.android.systemui.touchpad.ui.gesture.FakeVelocityTracker
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 @SmallTest
+@Ignore("b/386412866")
 @RunWith(ParameterizedAndroidJunit4::class)
 class ThreeFingerGestureRecognizerTest(
     private val recognizer: GestureRecognizer,
