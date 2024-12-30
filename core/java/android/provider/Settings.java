@@ -6362,6 +6362,16 @@ public final class Settings {
         public static final String MOUSE_SCROLLING_ACCELERATION = "mouse_scrolling_acceleration";
 
         /**
+         * Whether mouse acceleration is enabled.
+         *
+         * When enabled, the mouse cursor will accelerate as the mouse moves faster.
+         *
+         * @hide
+         */
+        public static final String MOUSE_POINTER_ACCELERATION_ENABLED =
+                "mouse_pointer_acceleration_enabled";
+
+        /**
          * Pointer fill style, specified by
          * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
          *
@@ -6610,6 +6620,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
+            PRIVATE_SETTINGS.add(MOUSE_POINTER_ACCELERATION_ENABLED);
             PRIVATE_SETTINGS.add(PREFERRED_REGION);
             PRIVATE_SETTINGS.add(MOUSE_SCROLLING_ACCELERATION);
         }

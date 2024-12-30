@@ -28,6 +28,7 @@ import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.mouseScrollingAcceleration;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
+import static com.android.hardware.input.Flags.pointerAcceleration;
 import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
@@ -418,6 +419,15 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for the pointer acceleration toggle is
+     * enabled.
+     * @hide
+     */
+    public static boolean isPointerAccelerationFeatureFlagEnabled() {
+        return pointerAcceleration();
+    }
+
+    /**
      * Returns true if the touchpad visualizer is allowed to appear.
      *
      * @param context The application context.
@@ -718,6 +728,47 @@ public class InputSettings {
                 Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
+
+    /**
+     * Whether cursor acceleration is enabled or not for connected mice.
+     *
+     * @param context The application context.
+     *
+     * @hide
+     */
+    public static boolean isMousePointerAccelerationEnabled(@NonNull Context context) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED, 1, UserHandle.USER_CURRENT)
+                == 1;
+    }
+
+   /**
+    * Sets whether mouse acceleration is enabled.
+    *
+    * When enabled, the mouse cursor moves farther when it is moved faster.
+    * When disabled, the mouse cursor speed becomes directly proportional to
+    * the speed at which the mouse is moved.
+    *
+    * @param context The application context.
+    * @param enabled Will enable mouse acceleration if true, disable it if
+    *                false.
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseAccelerationEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
 
     /**
      * Whether Accessibility bounce keys feature is enabled.
