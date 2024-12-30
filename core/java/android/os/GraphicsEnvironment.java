@@ -76,6 +76,9 @@ public class GraphicsEnvironment {
     private static final String PROPERTY_GFX_DRIVER_PRERELEASE = "ro.gfx.driver.1";
     private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
 
+    /// System properties related to EGL
+    private static final String PROPERTY_RO_HARDWARE_EGL = "ro.hardware.egl";
+
     // Metadata flags within the <application> tag in the AndroidManifest.xml file.
     private static final String METADATA_DRIVER_BUILD_TIME =
             "com.android.graphics.driver.build_time";
@@ -522,10 +525,12 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Determine whether ANGLE should be used, attempt to set up from apk first, if ANGLE can be
-     * set up from apk, pass ANGLE details down to the C++ GraphicsEnv class via
-     * GraphicsEnv::setAngleInfo(). If apk setup fails, attempt to set up to use system ANGLE.
-     * Return false if both fail.
+     * If ANGLE is not the system driver, determine whether ANGLE should be used, and if so, pass
+     * down the necessary details to the C++ GraphicsEnv class via GraphicsEnv::setAngleInfo().
+     * <p>
+     * If ANGLE is the system driver or the various flags indicate it should be used, attempt to
+     * set up ANGLE from the APK first, so the updatable libraries are used. If APK setup fails,
+     * attempt to set up the system ANGLE. Return false if both fail.
      *
      * @param context - Context of the application.
      * @param bundle - Bundle of the application.
@@ -536,15 +541,26 @@ public class GraphicsEnvironment {
      */
     private boolean setupAngle(Context context, Bundle bundle, PackageManager packageManager,
             String packageName) {
-        final String angleChoice = queryAngleChoice(context, bundle, packageName);
-        if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_DEFAULT)) {
-            return false;
-        }
-        if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
-            nativeSetAngleInfo("", true, packageName, null);
-            return false;
+        final String eglDriverName = SystemProperties.get(PROPERTY_RO_HARDWARE_EGL);
+
+        // The ANGLE choice only makes sense if ANGLE is not the system driver.
+        if (!eglDriverName.equals(ANGLE_DRIVER_NAME)) {
+            final String angleChoice = queryAngleChoice(context, bundle, packageName);
+            if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_DEFAULT)) {
+                return false;
+            }
+            if (angleChoice.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
+                nativeSetAngleInfo("", true, packageName, null);
+                return false;
+            }
         }
 
+        // If we reach here, it means either:
+        // 1. system driver is not ANGLE, but ANGLE is requested.
+        // 2. system driver is ANGLE.
+        // In both cases, setup ANGLE info. We attempt to setup the APK first, so
+        // updated/development libraries are used if the APK is present, falling back to the system
+        // libraries otherwise.
         return setupAngleFromApk(context, bundle, packageManager, packageName)
                 || setupAngleFromSystem(context, bundle, packageName);
     }
