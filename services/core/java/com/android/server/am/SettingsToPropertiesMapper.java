@@ -382,6 +382,12 @@ public class SettingsToPropertiesMapper {
             newSingleThreadScheduledExecutor(),
             (DeviceConfig.Properties properties) -> {
 
+              // send prop stage request to new storage
+              if (enableAconfigStorageDaemon()) {
+                  stageFlagsInNewStorage(properties);
+                  return;
+              }
+
               for (String flagName : properties.getKeyset()) {
                   String flagValue = properties.getString(flagName, null);
                   if (flagName == null || flagValue == null) {
@@ -409,11 +415,6 @@ public class SettingsToPropertiesMapper {
                   setProperty(propertyName, flagValue);
               }
 
-              // send prop stage request to new storage
-              if (enableAconfigStorageDaemon()) {
-                  stageFlagsInNewStorage(properties);
-              }
-
         });
 
         // add prop sync callback for flag local overrides
@@ -423,6 +424,7 @@ public class SettingsToPropertiesMapper {
             (DeviceConfig.Properties properties) -> {
                 if (enableAconfigStorageDaemon()) {
                     setLocalOverridesInNewStorage(properties);
+                    return;
                 }
 
                 if (Flags.supportLocalOverridesSysprops()) {
