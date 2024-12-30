@@ -1009,7 +1009,7 @@ public class TelephonyCallback {
      */
     public interface CellInfoListener {
         /**
-         * Callback invoked when a observed cell info has changed or new cells have been added
+         * Callback invoked when an observed cell info has changed or new cells have been added
          * or removed on the registered subscription.
          * Note, the registration subscription ID s from {@link TelephonyManager} object
          * which registers TelephonyCallback by
