@@ -33,6 +33,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /** A view model for status bar chips for promoted ongoing notifications. */
@@ -50,11 +51,12 @@ constructor(
      */
     val chips: Flow<List<OngoingActivityChipModel.Shown>> =
         combine(
-            notifChipsInteractor.notificationChips,
-            headsUpNotificationInteractor.statusBarHeadsUpState,
-        ) { notifications, headsUpState ->
-            notifications.map { it.toActivityChipModel(headsUpState) }
-        }
+                notifChipsInteractor.notificationChips,
+                headsUpNotificationInteractor.statusBarHeadsUpState,
+            ) { notifications, headsUpState ->
+                notifications.map { it.toActivityChipModel(headsUpState) }
+            }
+            .distinctUntilChanged()
 
     /** Converts the notification to the [OngoingActivityChipModel] object. */
     private fun NotificationChipModel.toActivityChipModel(
