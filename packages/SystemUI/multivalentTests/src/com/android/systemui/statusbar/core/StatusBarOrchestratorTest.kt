@@ -38,9 +38,9 @@ import com.android.systemui.statusbar.data.model.StatusBarMode.LIGHTS_OUT_TRANSP
 import com.android.systemui.statusbar.data.model.StatusBarMode.OPAQUE
 import com.android.systemui.statusbar.data.model.StatusBarMode.TRANSPARENT
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
-import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
 import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStatePerDisplayRepository
 import com.android.systemui.statusbar.window.fakeStatusBarWindowController
+import com.android.systemui.statusbar.window.shared.model.StatusBarWindowState
 import com.android.systemui.testKosmos
 import com.android.wm.shell.bubbles.bubbles
 import com.google.common.truth.Truth.assertThat

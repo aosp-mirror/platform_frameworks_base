@@ -39,8 +39,8 @@ import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.window.StatusBarWindowController
-import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStatePerDisplayRepository
+import com.android.systemui.statusbar.window.shared.model.StatusBarWindowState
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
 import dagger.assisted.Assisted

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.window.data.model
+package com.android.systemui.statusbar.window.shared.model
 
 /**
  * Represents the state of the status bar *window* as a whole (as opposed to individual views within
