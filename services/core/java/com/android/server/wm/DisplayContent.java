@@ -7084,8 +7084,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {
         private final IDisplayWindowInsetsController mRemoteInsetsController;
-        private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         private final boolean mCanShowTransient;
+
+        /** The actual requested visible inset types for this display */
+        private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
+
+        /** The component name of the top focused window on this display */
+        private ComponentName mTopFocusedComponentName = null;
+
+        /**
+         * The inset types that the top focused window is currently requesting to be visible.
+         * This may be different than the actual visible types above depending on the remote
+         * insets controller implementation.
+         */
+        private @InsetsType int mTopFocusedRequestedVisibleTypes =
+                WindowInsets.Type.defaultVisible();
 
         RemoteInsetsControlTarget(IDisplayWindowInsetsController controller) {
             mRemoteInsetsController = controller;
@@ -7096,11 +7109,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /**
          * Notifies the remote insets controller that the top focused window has changed.
          *
-         * @param component The application component that is open in the top focussed window.
+         * @param component The application component that is open in the top focused window.
          * @param requestedVisibleTypes The insets types requested visible by the focused window.
          */
         void topFocusedWindowChanged(ComponentName component,
                 @InsetsType int requestedVisibleTypes) {
+            if (mTopFocusedComponentName != null && mTopFocusedComponentName.equals(component)
+                    && mTopFocusedRequestedVisibleTypes == requestedVisibleTypes) {
+                return;
+            }
+            mTopFocusedComponentName = component;
+            mTopFocusedRequestedVisibleTypes = requestedVisibleTypes;
             try {
                 mRemoteInsetsController.topFocusedWindowChanged(component, requestedVisibleTypes);
             } catch (RemoteException e) {
