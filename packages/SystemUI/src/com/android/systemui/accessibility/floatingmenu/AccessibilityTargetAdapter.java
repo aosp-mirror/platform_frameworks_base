@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,13 +48,16 @@ import java.util.List;
  * An adapter which shows the set of accessibility targets that can be performed.
  */
 public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
-    private static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
+    @VisibleForTesting
+    static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
 
     private int mIconWidthHeight;
+    private int mBadgeWidthHeight;
     private int mItemPadding;
     private final List<AccessibilityTarget> mTargets;
 
     private int mHearingDeviceStatus;
+    private boolean mBadgeOnLeftSide = false;
 
     @IntDef({
             ItemType.FIRST_ITEM,
@@ -93,7 +97,9 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final AccessibilityTarget target = mTargets.get(position);
         holder.mIconView.setBackground(target.getIcon());
-        holder.updateIconWidthHeight(mIconWidthHeight);
+        holder.mRightBadgeView.setBackground(null);
+        holder.mLeftBadgeView.setBackground(null);
+        holder.updateIconSize(mIconWidthHeight);
         holder.updateItemPadding(mItemPadding, getItemCount());
         holder.itemView.setOnClickListener((v) -> target.onSelected());
         holder.itemView.setStateDescription(target.getStateDescription());
@@ -159,8 +165,16 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
         mIconWidthHeight = iconWidthHeight;
     }
 
+    public void setBadgeWidthHeight(int badgeWidthHeight) {
+        mBadgeWidthHeight = badgeWidthHeight;
+    }
+
     public void setItemPadding(int itemPadding) {
         mItemPadding = itemPadding;
+    }
+
+    public void setBadgeOnLeftSide(boolean leftSide) {
+        mBadgeOnLeftSide = leftSide;
     }
 
     /**
@@ -187,22 +201,40 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
                 HearingDeviceStatusDrawableInfo.get(status);
         final int baseDrawableId = statusDrawableInfo.baseDrawableId();
         final int stateDescriptionId = statusDrawableInfo.stateDescriptionId();
+        final int indicatorDrawableId = statusDrawableInfo.indicatorDrawableId();
 
         holder.mIconView.setBackground(
                 (baseDrawableId != 0) ? context.getDrawable(baseDrawableId) : null);
+        holder.mRightBadgeView.setBackground(
+                (indicatorDrawableId != 0) ? context.getDrawable(indicatorDrawableId) : null);
+        holder.mLeftBadgeView.setBackground(
+                (indicatorDrawableId != 0) ? context.getDrawable(indicatorDrawableId) : null);
         holder.itemView.setStateDescription(
                 (stateDescriptionId != 0) ? context.getString(stateDescriptionId) : null);
+        holder.updateBadgeSize(mBadgeWidthHeight);
+
+        if (mBadgeOnLeftSide) {
+            holder.mRightBadgeView.setVisibility(View.INVISIBLE);
+            holder.mLeftBadgeView.setVisibility(View.VISIBLE);
+        } else {
+            holder.mRightBadgeView.setVisibility(View.VISIBLE);
+            holder.mLeftBadgeView.setVisibility(View.INVISIBLE);
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         final View mIconView;
+        final View mRightBadgeView;
+        final View mLeftBadgeView;
 
         ViewHolder(View itemView) {
             super(itemView);
             mIconView = itemView.findViewById(R.id.icon_view);
+            mRightBadgeView = itemView.findViewById(R.id.right_badge_view);
+            mLeftBadgeView = itemView.findViewById(R.id.left_badge_view);
         }
 
-        void updateIconWidthHeight(int newValue) {
+        void updateIconSize(int newValue) {
             final ViewGroup.LayoutParams layoutParams = mIconView.getLayoutParams();
             if (layoutParams.width == newValue) {
                 return;
@@ -210,6 +242,24 @@ public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
             layoutParams.width = newValue;
             layoutParams.height = newValue;
             mIconView.setLayoutParams(layoutParams);
+        }
+
+        void updateBadgeSize(int newValue) {
+            final ViewGroup.LayoutParams rightLayoutParams = mRightBadgeView.getLayoutParams();
+            if (rightLayoutParams.width == newValue) {
+                return;
+            }
+            rightLayoutParams.width = newValue;
+            rightLayoutParams.height = newValue;
+            final ViewGroup.LayoutParams leftLayoutParams = mLeftBadgeView.getLayoutParams();
+            if (leftLayoutParams.width == newValue) {
+                return;
+            }
+            leftLayoutParams.width = newValue;
+            leftLayoutParams.height = newValue;
+
+            mRightBadgeView.setLayoutParams(rightLayoutParams);
+            mLeftBadgeView.setLayoutParams(leftLayoutParams);
         }
 
         void updateItemPadding(int padding, int size) {

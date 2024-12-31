@@ -158,6 +158,14 @@ class MenuView extends FrameLayout implements
     private void onItemSizeChanged() {
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
         mAdapter.setIconWidthHeight(mMenuViewAppearance.getMenuIconSize());
+        mAdapter.setBadgeWidthHeight(mMenuViewAppearance.getBadgeIconSize());
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    void onSideChanged() {
+        // Badge should be on different side of Menu view's side.
+        mAdapter.setBadgeOnLeftSide(!mMenuViewAppearance.isMenuOnLeftSide());
         mAdapter.notifyDataSetChanged();
     }
 
@@ -206,6 +214,7 @@ class MenuView extends FrameLayout implements
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
 
         onPositionChanged();
+        onSideChanged();
     }
 
     void onPositionChanged() {
@@ -247,6 +256,8 @@ class MenuView extends FrameLayout implements
 
         mAdapter.setItemPadding(mMenuViewAppearance.getMenuPadding());
         mAdapter.setIconWidthHeight(mMenuViewAppearance.getMenuIconSize());
+        mAdapter.setBadgeWidthHeight(mMenuViewAppearance.getBadgeIconSize());
+
         mAdapter.notifyDataSetChanged();
 
         onSizeChanged();
@@ -314,6 +325,7 @@ class MenuView extends FrameLayout implements
         mMenuViewAppearance.setPercentagePosition(percentagePosition);
 
         onEdgeChangedIfNeeded();
+        onSideChanged();
     }
 
     boolean isMoveToTucked() {

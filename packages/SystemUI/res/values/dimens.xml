@@ -1683,10 +1683,14 @@
     <dimen name="accessibility_floating_menu_margin">16dp</dimen>
     <dimen name="accessibility_floating_menu_small_padding">6dp</dimen>
     <dimen name="accessibility_floating_menu_small_width_height">36dp</dimen>
+    <dimen name="accessibility_floating_menu_small_badge_width_height">12dp</dimen>
+    <dimen name="accessibility_floating_menu_badge_position">0.67</dimen>
+    <dimen name="accessibility_floating_menu_left_badge_x_position">-0.67</dimen>
     <dimen name="accessibility_floating_menu_small_single_radius">25dp</dimen>
     <dimen name="accessibility_floating_menu_small_multiple_radius">20dp</dimen>
     <dimen name="accessibility_floating_menu_large_padding">8dp</dimen>
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
+    <dimen name="accessibility_floating_menu_large_badge_width_height">18dp</dimen>
     <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_ime_shifting_space">48dp</dimen>
