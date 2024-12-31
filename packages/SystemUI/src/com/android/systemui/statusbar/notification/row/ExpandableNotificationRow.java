@@ -3685,6 +3685,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mIsSummaryWithChildren && (!mIsMinimized || wasExpanded)) {
             nowExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);
         }
+        // Note: nowExpanded is going to be true here on the first expansion of minimized groups,
+        // even though the group itself is not expanded. Use mGroupExpansionManager to get the real
+        // group expansion if needed.
         if (nowExpanded != wasExpanded) {
             updateShelfIconColor();
             if (mLogger != null) {

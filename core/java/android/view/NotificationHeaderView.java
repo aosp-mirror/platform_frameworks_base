@@ -16,6 +16,10 @@
 
 package android.view;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -27,6 +31,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -171,6 +176,33 @@ public class NotificationHeaderView extends RelativeLayout {
     public void setTopLineExtraMarginEndDp(float extraMarginEndDp) {
         setTopLineExtraMarginEnd(
                 (int) (extraMarginEndDp * getResources().getDisplayMetrics().density));
+    }
+
+    /**
+     * Center top line  and expand button vertically.
+     */
+    @RemotableViewMethod
+    public void centerTopLine(boolean center) {
+        if (notificationsRedesignTemplates()) {
+            // The content of the top line view is already center-aligned, but since the height
+            // matches the content by default, it looks top-aligned. If the height matches the
+            // parent instead, the text ends up correctly centered in the parent.
+            ViewGroup.LayoutParams lp = mTopLineView.getLayoutParams();
+            lp.height = center ? MATCH_PARENT : WRAP_CONTENT;
+            mTopLineView.setLayoutParams(lp);
+
+            centerExpandButton(center);
+        }
+    }
+
+    /** Center expand button vertically. */
+    private void centerExpandButton(boolean center) {
+        ViewGroup.LayoutParams lp = mExpandButton.getLayoutParams();
+        lp.height = center ? MATCH_PARENT : WRAP_CONTENT;
+        if (lp instanceof FrameLayout.LayoutParams flp) {
+            flp.gravity = center ? Gravity.CENTER : (Gravity.TOP | Gravity.END);
+        }
+        mExpandButton.setLayoutParams(lp);
     }
 
     /**
