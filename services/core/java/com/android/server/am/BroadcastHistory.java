@@ -164,7 +164,7 @@ public class BroadcastHistory {
 
     @NeverCompile
     public boolean dumpLocked(@NonNull PrintWriter pw, @Nullable String dumpPackage,
-            @Nullable String dumpIntentAction, @NonNull String queueName,
+            @Nullable String dumpIntentAction,
             @NonNull SimpleDateFormat sdf, boolean dumpAll) {
         boolean needSep = true;
         dumpBroadcastList(pw, sdf, mFrozenBroadcasts, dumpIntentAction, dumpAll, "Frozen");
@@ -198,18 +198,18 @@ public class BroadcastHistory {
                     pw.println();
                 }
                 needSep = true;
-                pw.println("  Historical broadcasts [" + queueName + "]:");
+                pw.println("  Historical broadcasts:");
                 printed = true;
             }
             if (dumpIntentAction != null) {
-                pw.print("  Historical Broadcast " + queueName + " #");
+                pw.print("  Historical Broadcast #");
                 pw.print(i); pw.println(":");
                 r.dump(pw, "    ", sdf);
                 if (!dumpAll) {
                     break;
                 }
             } else if (dumpAll) {
-                pw.print("  Historical Broadcast " + queueName + " #");
+                pw.print("  Historical Broadcast #");
                 pw.print(i); pw.println(":");
                 r.dump(pw, "    ", sdf);
             } else {
@@ -256,7 +256,7 @@ public class BroadcastHistory {
                         pw.println();
                     }
                     needSep = true;
-                    pw.println("  Historical broadcasts summary [" + queueName + "]:");
+                    pw.println("  Historical broadcasts summary:");
                     printed = true;
                 }
                 if (!dumpAll && i >= 50) {

@@ -453,7 +453,7 @@ class BroadcastProcessQueue {
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     *         {@link BroadcastQueueImpl#updateRunnableList}
      */
     @CheckResult
     public boolean forEachMatchingBroadcast(@NonNull BroadcastPredicate predicate,
@@ -502,7 +502,7 @@ class BroadcastProcessQueue {
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     *         {@link BroadcastQueueImpl#updateRunnableList}
      */
     @CheckResult
     public boolean setProcessAndUidState(@Nullable ProcessRecord app, boolean uidForeground,
@@ -837,7 +837,7 @@ class BroadcastProcessQueue {
     /**
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     *         {@link BroadcastQueueImpl#updateRunnableList}
      */
     @CheckResult
     boolean forceDelayBroadcastDelivery(long delayedDurationMs) {
@@ -921,7 +921,7 @@ class BroadcastProcessQueue {
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     *         {@link BroadcastQueueImpl#updateRunnableList}
      */
     @CheckResult
     @VisibleForTesting
@@ -945,7 +945,7 @@ class BroadcastProcessQueue {
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
-     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     *         {@link BroadcastQueueImpl#updateRunnableList}
      */
     @CheckResult
     boolean removePrioritizeEarliestRequest() {

@@ -233,7 +233,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }).when(mAms).registerUidObserver(any(), anyInt(),
                 eq(ActivityManager.PROCESS_STATE_TOP), any());
 
-        mQueue = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
+        mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(),
                 mConstants, mConstants, mSkipPolicy, mEmptyHistory);
         mAms.setBroadcastQueueForTest(mQueue);
         mQueue.start(mContext.getContentResolver());
@@ -454,7 +454,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
 
     private void assertHealth() {
         // If this fails, it'll throw a clear reason message
-        ((BroadcastQueueModernImpl) mQueue).assertHealthLocked();
+        ((BroadcastQueueImpl) mQueue).assertHealthLocked();
     }
 
     private static Map<String, Object> asMap(Bundle bundle) {
@@ -1953,7 +1953,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 withPriority(receiverGreenA, 5))));
 
         waitForIdle();
-        // In the modern queue, we don't end up replacing the old broadcast to
+        // In the broadcast queue, we don't end up replacing the old broadcast to
         // avoid creating priority inversion and so the process will receive
         // both the old and new broadcasts.
         verifyScheduleRegisteredReceiver(times(3), receiverGreenApp, airplane);
@@ -2235,7 +2235,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }
         waitForIdle();
 
-        // Modern stack requests once each time we promote a process to
+        // The broadcast queue requests once each time we promote a process to
         // running; we promote "green" twice, and "blue" and "yellow" once
         final int expectedTimes = 4;
         verify(mAms, times(expectedTimes))

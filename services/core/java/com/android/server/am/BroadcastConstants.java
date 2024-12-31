@@ -111,7 +111,7 @@ public class BroadcastConstants {
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum dispatch parallelism
+     * For {@link BroadcastQueueImpl}: Maximum dispatch parallelism
      * that we'll tolerate for ordinary broadcast dispatch.
      */
     public int MAX_RUNNING_PROCESS_QUEUES = DEFAULT_MAX_RUNNING_PROCESS_QUEUES;
@@ -120,7 +120,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 2 : 4;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Additional running process queue parallelism beyond
+     * For {@link BroadcastQueueImpl}: Additional running process queue parallelism beyond
      * {@link #MAX_RUNNING_PROCESS_QUEUES} for dispatch of "urgent" broadcasts.
      */
     public int EXTRA_RUNNING_URGENT_PROCESS_QUEUES = DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES;
@@ -129,7 +129,7 @@ public class BroadcastConstants {
     private static final int DEFAULT_EXTRA_RUNNING_URGENT_PROCESS_QUEUES = 1;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of consecutive urgent
+     * For {@link BroadcastQueueImpl}: Maximum number of consecutive urgent
      * broadcast dispatches allowed before letting broadcasts in lower priority queue
      * to be scheduled in order to avoid starvation.
      */
@@ -139,7 +139,7 @@ public class BroadcastConstants {
     private static final int DEFAULT_MAX_CONSECUTIVE_URGENT_DISPATCHES = 3;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of consecutive normal
+     * For {@link BroadcastQueueImpl}: Maximum number of consecutive normal
      * broadcast dispatches allowed before letting broadcasts in lower priority queue
      * to be scheduled in order to avoid starvation.
      */
@@ -149,7 +149,7 @@ public class BroadcastConstants {
     private static final int DEFAULT_MAX_CONSECUTIVE_NORMAL_DISPATCHES = 10;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of active broadcasts
+     * For {@link BroadcastQueueImpl}: Maximum number of active broadcasts
      * to dispatch to a "running" process queue before we retire them back to
      * being "runnable" to give other processes a chance to run.
      */
@@ -160,7 +160,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of active "blocking" broadcasts
+     * For {@link BroadcastQueueImpl}: Maximum number of active "blocking" broadcasts
      * to dispatch to a "running" System process queue before we retire them back to
      * being "runnable" to give other processes a chance to run. Here "blocking" refers to
      * whether or not we are going to block on the finishReceiver() to be called before moving
@@ -173,7 +173,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of active non-"blocking" broadcasts
+     * For {@link BroadcastQueueImpl}: Maximum number of active non-"blocking" broadcasts
      * to dispatch to a "running" System process queue before we retire them back to
      * being "runnable" to give other processes a chance to run. Here "blocking" refers to
      * whether or not we are going to block on the finishReceiver() to be called before moving
@@ -187,7 +187,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 32 : 64;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of pending
+     * For {@link BroadcastQueueImpl}: Maximum number of pending
      * broadcasts to hold for a process before we ignore any delays that policy
      * might have applied to that process.
      */
@@ -197,7 +197,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 128 : 256;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Delay to apply to normal
+     * For {@link BroadcastQueueImpl}: Delay to apply to normal
      * broadcasts, giving a chance for debouncing of rapidly changing events.
      */
     public long DELAY_NORMAL_MILLIS = DEFAULT_DELAY_NORMAL_MILLIS;
@@ -205,7 +205,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_NORMAL_MILLIS = +500;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts
+     * For {@link BroadcastQueueImpl}: Delay to apply to broadcasts
      * targeting cached applications.
      */
     public long DELAY_CACHED_MILLIS = DEFAULT_DELAY_CACHED_MILLIS;
@@ -213,7 +213,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_CACHED_MILLIS = +120_000;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Delay to apply to urgent
+     * For {@link BroadcastQueueImpl}: Delay to apply to urgent
      * broadcasts, typically a negative value to indicate they should be
      * executed before most other pending broadcasts.
      */
@@ -222,7 +222,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_URGENT_MILLIS = -120_000;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts to
+     * For {@link BroadcastQueueImpl}: Delay to apply to broadcasts to
      * foreground processes, typically a negative value to indicate they should be
      * executed before most other pending broadcasts.
      */
@@ -232,7 +232,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_FOREGROUND_PROC_MILLIS = -120_000;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Delay to apply to broadcasts to
+     * For {@link BroadcastQueueImpl}: Delay to apply to broadcasts to
      * persistent processes, typically a negative value to indicate they should be
      * executed before most other pending broadcasts.
      */
@@ -242,7 +242,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DELAY_PERSISTENT_PROC_MILLIS = -120_000;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of complete
+     * For {@link BroadcastQueueImpl}: Maximum number of complete
      * historical broadcasts to retain for debugging purposes.
      */
     public int MAX_HISTORY_COMPLETE_SIZE = DEFAULT_MAX_HISTORY_COMPLETE_SIZE;
@@ -251,7 +251,7 @@ public class BroadcastConstants {
             ActivityManager.isLowRamDeviceStatic() ? 64 : 256;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of summarized
+     * For {@link BroadcastQueueImpl}: Maximum number of summarized
      * historical broadcasts to retain for debugging purposes.
      */
     public int MAX_HISTORY_SUMMARY_SIZE = DEFAULT_MAX_HISTORY_SUMMARY_SIZE;
@@ -268,7 +268,7 @@ public class BroadcastConstants {
     private static final boolean DEFAULT_CORE_DEFER_UNTIL_ACTIVE = true;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: How frequently we should check for the pending
+     * For {@link BroadcastQueueImpl}: How frequently we should check for the pending
      * cold start validity.
      */
     public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
@@ -278,7 +278,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30_000;
 
     /**
-     * For {@link BroadcastQueueModernImpl}: Maximum number of outgoing broadcasts from a
+     * For {@link BroadcastQueueImpl}: Maximum number of outgoing broadcasts from a
      * freezable process that will be allowed before killing the process.
      */
     public int MAX_FROZEN_OUTGOING_BROADCASTS = DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS;

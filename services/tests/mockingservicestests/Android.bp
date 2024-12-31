@@ -238,7 +238,7 @@ test_module_config {
     include_filters: [
         "com.android.server.am.BroadcastQueueTest",
         "com.android.server.am.BroadcastRecordTest",
-        "com.android.server.am.BroadcastQueueModernImplTest",
+        "com.android.server.am.BroadcastQueueImplTest",
     ],
 }
 
