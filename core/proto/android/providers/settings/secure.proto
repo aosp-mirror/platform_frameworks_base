@@ -645,14 +645,8 @@ message SecureSettingsProto {
     optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    message TrackpadGesture {
-        optional SettingProto trackpad_gesture_back_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_home_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_overview_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_notification_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto trackpad_gesture_quick_switch_enabled = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    }
-    optional TrackpadGesture trackpad_gesture = 94;
+    reserved 94;  // formerly trackpad_gesture
+    reserved "trackpad_gesture";
 
     message Tts {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
