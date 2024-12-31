@@ -3059,6 +3059,8 @@ final class InstallPackageHelper {
         }
 
         if (succeeded) {
+            Slog.i(TAG, "installation completed:" + packageName);
+
             if (Flags.aslInApkAppMetadataSource()
                     && pkgSetting.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
                 if (!extractAppMetadataFromApk(request.getPkg(),
