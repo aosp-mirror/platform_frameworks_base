@@ -54,9 +54,11 @@ inline fun <T> Flow<List<T>>.filterItem(crossinline predicate: (T) -> Boolean): 
 fun <T1, T2> Flow<T1>.waitFirst(otherFlow: Flow<T2>): Flow<T1> =
     combine(otherFlow.take(1)) { value, _ -> value }
 
-
 /**
  * Collects the latest value of given flow with a provided action with [LifecycleOwner].
+ *
+ * This helper function is designed to work with non Compose code. For Compose, please collect the
+ * flow in a `LaunchedEffect` instead to ensure disposable and re-enter safe.
  */
 fun <T> Flow<T>.collectLatestWithLifecycle(
     lifecycleOwner: LifecycleOwner,
