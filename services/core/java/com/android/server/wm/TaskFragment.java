@@ -1339,14 +1339,24 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     mTmpRect.set(getBounds());
                     for (int j = adjacentTaskFragments.size() - 1; j >= 0; --j) {
                         final TaskFragment taskFragment = adjacentTaskFragments.get(j);
-                        final TaskFragment adjacentTaskFragment =
-                                taskFragment.mAdjacentTaskFragment;
-                        if (adjacentTaskFragment == this) {
+                        if (taskFragment.isAdjacentTo(this)) {
                             continue;
                         }
-                        if (mTmpRect.intersect(taskFragment.getBounds())
-                                || mTmpRect.intersect(adjacentTaskFragment.getBounds())) {
-                            return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+                        if (Flags.allowMultipleAdjacentTaskFragments()) {
+                            final boolean isOccluding = mTmpRect.intersect(taskFragment.getBounds())
+                                    || taskFragment.forOtherAdjacentTaskFragments(adjacentTf -> {
+                                        return mTmpRect.intersect(adjacentTf.getBounds());
+                                    });
+                            if (isOccluding) {
+                                return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+                            }
+                        } else {
+                            final TaskFragment adjacentTaskFragment =
+                                    taskFragment.mAdjacentTaskFragment;
+                            if (mTmpRect.intersect(taskFragment.getBounds())
+                                    || mTmpRect.intersect(adjacentTaskFragment.getBounds())) {
+                                return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+                            }
                         }
                     }
                 }
@@ -1374,20 +1384,38 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             }
 
             final TaskFragment otherTaskFrag = other.asTaskFragment();
-            if (otherTaskFrag != null && otherTaskFrag.mAdjacentTaskFragment != null) {
-                if (adjacentTaskFragments.contains(otherTaskFrag.mAdjacentTaskFragment)) {
-                    if (otherTaskFrag.isTranslucent(starting)
-                            || otherTaskFrag.mAdjacentTaskFragment.isTranslucent(starting)) {
-                        // Can be visible behind a translucent adjacent TaskFragments.
-                        gotTranslucentFullscreen = true;
-                        gotTranslucentAdjacent = true;
-                        continue;
+            if (otherTaskFrag != null && otherTaskFrag.hasAdjacentTaskFragment()) {
+                if (Flags.allowMultipleAdjacentTaskFragments()) {
+                    final boolean hasTraversedAdj = otherTaskFrag.forOtherAdjacentTaskFragments(
+                            adjacentTaskFragments::contains);
+                    if (hasTraversedAdj) {
+                        final boolean isTranslucent = otherTaskFrag.isTranslucent(starting)
+                                || otherTaskFrag.forOtherAdjacentTaskFragments(adjacentTf -> {
+                                    return adjacentTf.isTranslucent(starting);
+                                });
+                        if (isTranslucent) {
+                            // Can be visible behind a translucent adjacent TaskFragments.
+                            gotTranslucentFullscreen = true;
+                            gotTranslucentAdjacent = true;
+                            continue;
+                        }
+                        // Can not be visible behind adjacent TaskFragments.
+                        return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
                     }
-                    // Can not be visible behind adjacent TaskFragments.
-                    return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
                 } else {
-                    adjacentTaskFragments.add(otherTaskFrag);
+                    if (adjacentTaskFragments.contains(otherTaskFrag.mAdjacentTaskFragment)) {
+                        if (otherTaskFrag.isTranslucent(starting)
+                                || otherTaskFrag.mAdjacentTaskFragment.isTranslucent(starting)) {
+                            // Can be visible behind a translucent adjacent TaskFragments.
+                            gotTranslucentFullscreen = true;
+                            gotTranslucentAdjacent = true;
+                            continue;
+                        }
+                        // Can not be visible behind adjacent TaskFragments.
+                        return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+                    }
                 }
+                adjacentTaskFragments.add(otherTaskFrag);
             }
 
         }
