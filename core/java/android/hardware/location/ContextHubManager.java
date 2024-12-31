@@ -697,6 +697,7 @@ public final class ContextHubManager {
      *
      * @param endpointId Statically generated ID for an endpoint.
      * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -733,6 +734,7 @@ public final class ContextHubManager {
      *     cannot be null or empty.
      * @return A list of {@link HubDiscoveryInfo} objects that represents the result of discovery.
      * @throws IllegalArgumentException if the serviceDescriptor is empty/null.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
