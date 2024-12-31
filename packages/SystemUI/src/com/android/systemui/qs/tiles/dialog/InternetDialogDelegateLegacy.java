@@ -514,7 +514,7 @@ public class InternetDialogDelegateLegacy implements
     }
 
     private void setMobileDataLayout(InternetContent internetContent) {
-        if (!internetContent.mShouldUpdateMobileNetwork && mDialog == null) {
+        if (!internetContent.mShouldUpdateMobileNetwork || mDialog == null) {
             return;
         }
         setMobileDataLayout(mDialog, internetContent);
