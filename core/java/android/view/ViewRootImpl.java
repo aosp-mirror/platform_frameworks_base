@@ -10527,28 +10527,7 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onInputEvent(InputEvent event) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventForCompatibility");
-            List<InputEvent> processedEvents;
-            try {
-                processedEvents =
-                    mInputCompatProcessor.processInputEventForCompatibility(event);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
-            if (processedEvents != null) {
-                if (processedEvents.isEmpty()) {
-                    // InputEvent consumed by mInputCompatProcessor
-                    finishInputEvent(event, true);
-                } else {
-                    for (int i = 0; i < processedEvents.size(); i++) {
-                        enqueueInputEvent(
-                                processedEvents.get(i), this,
-                                QueuedInputEvent.FLAG_MODIFIED_FOR_COMPATIBILITY, true);
-                    }
-                }
-            } else {
-                enqueueInputEvent(event, this, 0, true);
-            }
+            processRawInputEvent(event);
         }
 
         @Override
@@ -10757,6 +10736,42 @@ public final class ViewRootImpl implements ViewParent,
     }
     final InvalidateOnAnimationRunnable mInvalidateOnAnimationRunnable =
             new InvalidateOnAnimationRunnable();
+
+    /**
+     * Handle the incoming event.
+     *
+     * <p>The event will be first sent to the compatibility processor, which could choose to handle
+     * it. The compat processor could also choose to produce more synthetic events in response to
+     * the incoming one. Events that are not consumed by the compat processor are added to the
+     * {@link ViewRootImpl}'s queue for further processing inside ViewRootImpl.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public void processRawInputEvent(InputEvent event) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventForCompatibility");
+        List<InputEvent> processedEvents;
+        try {
+            processedEvents =
+                    mInputCompatProcessor.processInputEventForCompatibility(event);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+        if (processedEvents != null) {
+            if (processedEvents.isEmpty()) {
+                // InputEvent consumed by mInputCompatProcessor
+                mInputEventReceiver.finishInputEvent(event, true);
+            } else {
+                for (int i = 0; i < processedEvents.size(); i++) {
+                    enqueueInputEvent(
+                            processedEvents.get(i), mInputEventReceiver,
+                            QueuedInputEvent.FLAG_MODIFIED_FOR_COMPATIBILITY, true);
+                }
+            }
+        } else {
+            enqueueInputEvent(event, mInputEventReceiver, 0, true);
+        }
+    }
 
     public void dispatchInvalidateDelayed(View view, long delayMilliseconds) {
         Message msg = mHandler.obtainMessage(MSG_INVALIDATE, view);
