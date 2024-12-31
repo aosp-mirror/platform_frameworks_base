@@ -26,11 +26,11 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     private lateinit var keyValueStoreProvider: KeyValueStoreProvider
 
     /**
-     * Creators of all available [PreferenceScreenMetadata]s.
+     * Factories of all available [PreferenceScreenMetadata]s.
      *
      * The map key is preference screen key.
      */
-    var preferenceScreenMetadataCreators = FixedArrayMap<String, PreferenceScreenMetadataCreator>()
+    var preferenceScreenMetadataFactories = FixedArrayMap<String, PreferenceScreenMetadataFactory>()
 
     private var readWritePermitProvider: ReadWritePermitProvider =
         object : ReadWritePermitProvider {}
@@ -51,7 +51,7 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
 
     /** Creates [PreferenceScreenMetadata] of particular screen key. */
     fun create(context: Context, screenKey: String?): PreferenceScreenMetadata? =
-        screenKey?.let { preferenceScreenMetadataCreators[it]?.create(context.applicationContext) }
+        screenKey?.let { preferenceScreenMetadataFactories[it]?.create(context.applicationContext) }
 
     /**
      * Sets the provider to check read write permit. Read and write requests are denied by default.
