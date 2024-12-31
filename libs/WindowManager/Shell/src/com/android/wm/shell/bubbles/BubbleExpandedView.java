@@ -222,14 +222,8 @@ public class BubbleExpandedView extends LinearLayout {
                     mTaskView.getBoundsOnScreen(launchBounds);
 
                     options.setTaskAlwaysOnTop(true);
-                    options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
-
-                    Intent fillInIntent = new Intent();
-                    // Apply flags to make behaviour match documentLaunchMode=always.
-                    fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
-                    fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
                             || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
@@ -242,7 +236,6 @@ public class BubbleExpandedView extends LinearLayout {
                                 context,
                                 /* requestCode= */ 0,
                                 mBubble.getAppBubbleIntent()
-                                        .addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
                                         .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
                                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT,
                                 /* options= */ null);
@@ -250,13 +243,19 @@ public class BubbleExpandedView extends LinearLayout {
                                 launchBounds);
                     } else if (!mIsOverflow && isShortcutBubble) {
                         ProtoLog.v(WM_SHELL_BUBBLES, "startingShortcutBubble=%s", getBubbleKey());
+                        options.setLaunchedFromBubble(true);
                         options.setApplyActivityFlagsForBubbles(true);
                         mTaskView.startShortcutActivity(mBubble.getShortcutInfo(),
                                 options, launchBounds);
                     } else {
+                        options.setLaunchedFromBubble(true);
                         if (mBubble != null) {
                             mBubble.setIntentActive();
                         }
+                        final Intent fillInIntent = new Intent();
+                        // Apply flags to make behaviour match documentLaunchMode=always.
+                        fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                        fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                         mTaskView.startActivity(mPendingIntent, fillInIntent, options,
                                 launchBounds);
                     }
