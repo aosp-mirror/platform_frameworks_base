@@ -256,7 +256,9 @@ public class ContextHubService extends IContextHubService.Stub {
         public void handleServiceRestart() {
             Log.i(TAG, "Recovering from Context Hub HAL restart...");
             initExistingCallbacks();
-            mHubInfoRegistry.onHalRestart();
+            if (mHubInfoRegistry != null) {
+                mHubInfoRegistry.onHalRestart();
+            }
             resetSettings();
             if (Flags.reconnectHostEndpointsAfterHalRestart()) {
                 mClientManager.forEachClientOfHub(mContextHubId,
