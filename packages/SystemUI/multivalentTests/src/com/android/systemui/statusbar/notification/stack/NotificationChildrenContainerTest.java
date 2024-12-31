@@ -279,7 +279,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
                 notification);
         RemoteViews headerRemoteViews;
         if (lowPriority) {
-            headerRemoteViews = builder.makeLowPriorityContentView(true);
+            headerRemoteViews = builder.makeLowPriorityContentView(true, false);
         } else {
             headerRemoteViews = builder.makeNotificationGroupHeader();
         }

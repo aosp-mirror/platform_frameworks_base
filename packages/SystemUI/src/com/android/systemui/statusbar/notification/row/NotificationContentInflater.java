@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_SENSITIVE_CONTENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
@@ -479,15 +481,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     logger.logAsyncTaskProgress(entryForLogging,
                             "creating low-priority group summary remote view");
                     result.mNewMinimizedGroupHeaderView =
-                            builder.makeLowPriorityContentView(true /* useRegularSubtext */);
+                            builder.makeLowPriorityContentView(/* useRegularSubtext = */ true,
+                                    /* highlightExpander = */ notificationsRedesignTemplates());
                 }
             }
             setNotifsViewsInflaterFactory(result, row, notifLayoutInflaterFactoryProvider);
             result.packageContext = packageContext;
             result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(
-                    false /* showingPublic */);
+                    /* showingPublic = */ false);
             result.headsUpStatusBarTextPublic = builder.getHeadsUpStatusBarText(
-                    true /* showingPublic */);
+                    /* showingPublic = */ true);
 
             return result;
         });
@@ -1136,7 +1139,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private static RemoteViews createContentView(Notification.Builder builder,
             boolean isMinimized, boolean useLarge) {
         if (isMinimized) {
-            return builder.makeLowPriorityContentView(false /* useRegularSubtext */);
+            return builder.makeLowPriorityContentView(/* useRegularSubtext = */ false,
+                    /* highlightExpander = */ false);
         }
         return builder.createContentView(useLarge);
     }

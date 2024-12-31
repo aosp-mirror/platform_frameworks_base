@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.annotation.SuppressLint
+import android.app.Flags.notificationsRedesignTemplates
 import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.content.Context
@@ -887,7 +888,10 @@ constructor(
                             entryForLogging,
                             "creating low-priority group summary remote view",
                         )
-                        builder.makeLowPriorityContentView(true /* useRegularSubtext */)
+                        builder.makeLowPriorityContentView(
+                            /* useRegularSubtext = */ true,
+                            /* highlightExpander = */ notificationsRedesignTemplates(),
+                        )
                     } else null
                 NewRemoteViews(
                         contracted = contracted,
@@ -1657,7 +1661,10 @@ constructor(
             useLarge: Boolean,
         ): RemoteViews {
             return if (isMinimized) {
-                builder.makeLowPriorityContentView(false /* useRegularSubtext */)
+                builder.makeLowPriorityContentView(
+                    /* useRegularSubtext = */ false,
+                    /* highlightExpander = */ false,
+                )
             } else builder.createContentView(useLarge)
         }
 
