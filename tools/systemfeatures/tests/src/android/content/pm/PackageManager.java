@@ -36,6 +36,9 @@ public class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI = "wifi";
 
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NOT_IN_RO_FEATURE_API = "not_in_ro_feature_api";
+
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String FEATURE_INTENT_CATEGORY = "intent_category_with_feature_name_prefix";
 
@@ -46,5 +49,10 @@ public class PackageManager {
     /** @hide */
     public boolean hasSystemFeature(String featureName, int version) {
         return false;
+    }
+
+    /** @hide */
+    public boolean hasSystemFeature(String featureName) {
+        return hasSystemFeature(featureName, 0);
     }
 }
