@@ -843,7 +843,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     void positionTaskBehindHome(Task task) {
         final Task home = getOrCreateRootHomeTask();
-        final WindowContainer homeParent = home.getParent();
+        final WindowContainer homeParent = home != null ? home.getParent() : null;
         final Task homeParentTask = homeParent != null ? homeParent.asTask() : null;
         if (homeParentTask == null) {
             // reparent throws if parent didn't change...
