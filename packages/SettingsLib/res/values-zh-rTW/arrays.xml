@@ -296,7 +296,7 @@
   <string-array name="shade_display_awareness_summaries">
     <item msgid="2964753205732912921">"只在裝置螢幕顯示通知欄"</item>
     <item msgid="7795034287069726554">"在單一外接螢幕顯示通知欄"</item>
-    <item msgid="5280431949814340475">"在上一次使用的螢幕顯示通知欄"</item>
+    <item msgid="5280431949814340475">"在最新使用的螢幕顯示通知欄"</item>
   </string-array>
   <string-array name="shade_display_awareness_values">
     <item msgid="3055776101992426514">"預設螢幕"</item>

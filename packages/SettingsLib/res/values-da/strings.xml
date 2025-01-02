@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiveret (kun venstre)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiveret (kun højre)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiveret (venstre og højre)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Omgivelserne kunne ikke opdateres"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiveret (kun for medier). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiveret (kun for medier), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Forbundet (understøtter lyddeling). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>

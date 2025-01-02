@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Actiu (només l\'esquerre)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Actiu (només el dret)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Actiu (esquerre i dret)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"No s\'ha pogut actualitzar l\'entorn"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Actiu (només contingut multimèdia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Actiu (només contingut multimèdia), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Connectat (admet compartició d\'àudio). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
