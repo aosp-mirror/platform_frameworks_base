@@ -28365,10 +28365,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (android.os.Flags.adpfMeasureDuringInputEventBoost()) {
                     final boolean notifyRenderer = hasExpensiveMeasuresDuringInputEvent();
                     if (notifyRenderer) {
-                        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                                "CPU_LOAD_UP: " + "hasExpensiveMeasuresDuringInputEvent");
-                        getViewRootImpl().notifyRendererOfExpensiveFrame();
-                        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                        getViewRootImpl().notifyRendererOfExpensiveFrame(
+                                "ADPF_SendHint: hasExpensiveMeasuresDuringInputEvent");
                     }
                 }
                 // measure ourselves, this should set the measured dimension flag back
