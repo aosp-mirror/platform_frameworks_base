@@ -469,8 +469,9 @@ class PermissionService(private val service: AccessCheckingService) :
         permissionName: String,
         deviceId: String
     ): Int {
+        val pid = Binder.getCallingPid()
         val uid = Binder.getCallingUid()
-        val result = context.checkPermission(permissionName, Binder.getCallingPid(), uid)
+        val result = context.checkPermission(permissionName, pid, uid)
         if (result == PackageManager.PERMISSION_GRANTED) {
             return Context.PERMISSION_REQUEST_STATE_GRANTED
         }
@@ -478,17 +479,15 @@ class PermissionService(private val service: AccessCheckingService) :
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val packageState =
-                packageManagerLocal.withFilteredSnapshot(uid, userId).use {
-                    it.getPackageState(packageName)
-                } ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
-        val androidPackage = packageState.androidPackage
-                ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+            packageManagerLocal.withFilteredSnapshot(uid, userId).use {
+                it.getPackageState(packageName)
+            } ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        val androidPackage =
+            packageState.androidPackage ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
         if (appId != packageState.appId) {
             return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
         }
-        val permission = service.getState {
-            with(policy) { getPermissions()[permissionName] }
-        }
+        val permission = service.getState { with(policy) { getPermissions()[permissionName] } }
         if (permission == null || !permission.isRuntime) {
             return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
         }
@@ -496,10 +495,37 @@ class PermissionService(private val service: AccessCheckingService) :
             return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
         }
 
-        val permissionFlags = service.getState {
-            getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+        val permissionFlags =
+            service.getState {
+                getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+            }
+        val isUnreqestable = permissionFlags.hasAnyBit(UNREQUESTABLE_MASK)
+        // Special case for READ_MEDIA_IMAGES due to photo picker
+        if ((permissionName == Manifest.permission.READ_MEDIA_IMAGES ||
+                permissionName == Manifest.permission.READ_MEDIA_VIDEO) && isUnreqestable) {
+            val isUserSelectedGranted =
+                context.checkPermission(
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                    pid,
+                    uid,
+                ) == PackageManager.PERMISSION_GRANTED
+            val userSelectedPermissionFlags =
+                service.getState {
+                    getPermissionFlagsWithPolicy(
+                        appId,
+                        userId,
+                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                        deviceId,
+                    )
+                }
+            if (
+                isUserSelectedGranted &&
+                    userSelectedPermissionFlags.hasBits(PermissionFlags.USER_FIXED)
+            ) {
+                return Context.PERMISSION_REQUEST_STATE_REQUESTABLE
+            }
         }
-        return if (permissionFlags.hasAnyBit(UNREQUESTABLE_MASK)) {
+        return if (isUnreqestable) {
             Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
         } else {
             Context.PERMISSION_REQUEST_STATE_REQUESTABLE
