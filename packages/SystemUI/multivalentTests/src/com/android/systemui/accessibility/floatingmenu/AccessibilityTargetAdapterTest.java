@@ -152,8 +152,8 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     @EnableFlags(
             com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
     public void setBadgeOnLeftSide_false_rightBadgeVisibleAndLeftBadgeInvisible() {
-        when(mAccessibilityTarget.getId()).thenReturn(
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        when(mAccessibilityTarget.getId())
+                .thenReturn(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
 
         mAdapter.setBadgeOnLeftSide(false);
         mAdapter.onBindViewHolder(mViewHolder, 0);
@@ -166,8 +166,8 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     @EnableFlags(
             com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
     public void setBadgeOnLeftSide_rightBadgeInvisibleAndLeftBadgeVisible() {
-        when(mAccessibilityTarget.getId()).thenReturn(
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        when(mAccessibilityTarget.getId())
+                .thenReturn(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
 
         mAdapter.setBadgeOnLeftSide(true);
         mAdapter.onBindViewHolder(mViewHolder, 0);
@@ -180,8 +180,8 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     @EnableFlags(
             com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
     public void setBadgeOnLeftSide_bindViewHolderPayloads_rightBadgeInvisibleAndLeftBadgeVisible() {
-        when(mAccessibilityTarget.getId()).thenReturn(
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        when(mAccessibilityTarget.getId())
+                .thenReturn(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
 
         mAdapter.setBadgeOnLeftSide(true);
         mAdapter.onBindViewHolder(mViewHolder, 0, List.of(PAYLOAD_HEARING_STATUS_DRAWABLE));

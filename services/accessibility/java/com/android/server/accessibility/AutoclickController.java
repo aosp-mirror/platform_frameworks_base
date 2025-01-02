@@ -304,7 +304,7 @@ public class AutoclickController extends BaseEventStreamTransformation {
             cacheLastEvent(event, policyFlags, mLastMotionEvent == null || moved /* useAsAnchor */);
 
             if (moved) {
-              rescheduleClick(mDelay);
+                rescheduleClick(mDelay);
             }
         }
 

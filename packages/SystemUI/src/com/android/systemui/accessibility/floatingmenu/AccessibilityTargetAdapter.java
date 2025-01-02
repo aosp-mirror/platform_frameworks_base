@@ -48,8 +48,7 @@ import java.util.List;
  * An adapter which shows the set of accessibility targets that can be performed.
  */
 public class AccessibilityTargetAdapter extends Adapter<ViewHolder> {
-    @VisibleForTesting
-    static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
+    @VisibleForTesting static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
 
     private int mIconWidthHeight;
     private int mBadgeWidthHeight;
