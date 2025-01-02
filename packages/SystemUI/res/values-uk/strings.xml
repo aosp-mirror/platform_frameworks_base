@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Сповіщення про сеанс запису екрана"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Записати відео з екрана?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Записувати один додаток"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Записати цей екран"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Записати екран \"%s\""</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Коли ви записуєте вміст усього екрана, на відео потрапляє все, що на ньому відображається. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Коли ви записуєте додаток, на відео потрапляє все, що відображається або відтворюється в ньому. Тому будьте уважні з паролями, повідомленнями, фотографіями, аудіо, відео, платіжною інформацією тощо."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Записувати вміст екрана"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не вдалось оновити набір налаштувань"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Набір налаштувань"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Вибрано"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Звуки оточення"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Ліворуч"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Праворуч"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Розгорнути в окремі елементи керування ліворуч і праворуч"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Згорнути в єдиний елемент керування"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Вимкнути звуки оточення"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Увімкнути звуки оточення"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Інструменти"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Живі субтитри"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Нотатка"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Показувати значки сповіщень із низьким пріоритетом"</string>
     <string name="other" msgid="429768510980739978">"Інше"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"вилучити опцію"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"додати панель на останню позицію"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Перемістити опцію"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"додати панель на потрібну позицію"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Перемістити на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додати на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Позиція недійсна."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"вибрати користувача"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Немає Інтернету"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Відкрити налаштування <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Змінити порядок швидких налаштувань."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки живлення"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокований екран"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"відкрити пристрій"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Щоб відкрити, використайте відбиток пальця"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Пройдіть автентифікацію. Для цього торкніться сканера відбитків пальців."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Активний телефонний виклик"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобільний трафік"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Підключено"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Тимчасово з’єднано"</string>
@@ -1454,7 +1443,7 @@
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Натисніть клавішу, щоб призначити комбінацію клавіш"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Вашу власну комбінацію клавіш буде видалено назавжди."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Усі ваші власні комбінації клавіш буде видалено назавжди."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Комбінації клавіш для пошуку"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пошук комбінацій клавіш"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нічого не знайдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок згортання"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Значок клавіші дії або метаклавіші"</string>

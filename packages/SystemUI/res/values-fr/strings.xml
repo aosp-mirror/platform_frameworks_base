@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Enregistrer l\'écran ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Enregistrer une appli"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Enregistrer cet écran"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Enregistrer %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Lorsque vous enregistrez l\'intégralité de votre écran, tout ce qui s\'y affiche est enregistré. Faites donc attention aux éléments tels que les mots de passe, les détails de mode de paiement, les messages, les photos, et les contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Lorsque vous enregistrez une appli, tout ce qui est affiché ou lu dans celle-ci est enregistré. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Enregistrer l\'écran"</string>
@@ -180,7 +178,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur code QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Lecteur QR code"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Déverrouillé"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Appareil verrouillé"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Analyse du visage en cours"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Impossible de mettre à jour les préréglages"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Préréglage"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Sélectionné"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Sons environnants"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Gauche"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Droite"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Développer les commandes gauche et droite"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Réduire en une commande unifiée"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Couper le mode Sons environnants"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Réactiver le mode Sons environnants"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Outils"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Sous-titres instantanés"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Note"</string>
@@ -755,7 +746,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Déverrouiller pour utiliser"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Problème de récupération de vos cartes. Réessayez plus tard"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Paramètres de l\'écran de verrouillage"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Lecteur code QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Lecteur QR code"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Mise à jour"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil professionnel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Mode Avion"</string>
@@ -1239,7 +1230,7 @@
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
-    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Pour écouter votre annonce, les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent scanner votre code QR ou utiliser le nom et le mot de passe de votre annonce"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Pour écouter votre annonce, les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent scanner votre QR code ou utiliser le nom et le mot de passe de votre annonce"</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nom de l\'annonce"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Mot de passe"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Enregistrer"</string>
@@ -1298,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accéder à l\'appareil"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilisez votre empreinte pour ouvrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentification requise. Appuyez sur le lecteur d\'empreintes digitales pour vous authentifier."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Appel téléphonique en cours"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Données mobiles"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connecté"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connexion temporaire"</string>

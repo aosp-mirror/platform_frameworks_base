@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ειδοποίηση σε εξέλιξη για μια περίοδο λειτουργίας εγγραφής οθόνης"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Να γίνει εγγραφή της οθόνης σας;"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Εγγραφή μίας εφαρμογής"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Εγγραφή αυτής της οθόνης"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Εγγραφή %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Όταν κάνετε εγγραφή ολόκληρης της οθόνη σας, καταγράφεται οτιδήποτε εμφανίζεται σε αυτήν. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Όταν κάνετε εγγραφή μιας εφαρμογής, καταγράφεται οτιδήποτε εμφανίζεται ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Εγγραφή οθόνης"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Δεν ήταν δυνατή η ενημέρωση της προεπιλογής"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Προεπιλογή"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Έχει επιλεγεί"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Ήχοι περιβάλλοντος"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Αριστερά"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Δεξιά"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Ανάπτυξη σε ξεχωριστά στοιχεία ελέγχου αριστερά και δεξιά"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Σύμπτυξη σε ενοποιημένο στοιχείο ελέγχου"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Σίγαση ήχων περιβάλλοντος"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Κατάργηση σίγασης ήχων περιβάλλοντος"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Εργαλεία"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Ζωντανοί υπότιτλοι"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Σημείωση"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Εμφάνιση εικονιδίων ειδοποιήσεων χαμηλής προτεραιότητας"</string>
     <string name="other" msgid="429768510980739978">"Άλλο"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"κατάργηση πλακιδίου"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"προσθήκη πλακιδίου στην τελευταία θέση"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Μετακίνηση πλακιδίου"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Προσθήκη πλακιδίου στην επιθυμητή θέση"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Μετακίνηση στη θέση <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Προσθήκη στη θέση <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Μη έγκυρη θέση."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"επιλογή χρήστη"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Δεν υπάρχει σύνδεση στο διαδίκτυο"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Άνοιγμα ρυθμίσεων <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Επεξεργασία σειράς Γρήγορων ρυθμίσεων."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Μενού λειτουργίας"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Οθόνη κλειδώματος"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"εισαγωγή συσκευής"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Χρήση δακτυλικού αποτυπώματος για άνοιγμα"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Απαιτείται έλεγχος ταυτότητας. Αγγίξτε τον αισθητήρα δακτυλικών αποτυπωμάτων για έλεγχο ταυτότητας."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Τηλεφωνική κλήση σε εξέλιξη"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Δεδομένα κινητής τηλεφωνίας"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Συνδέθηκε"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Προσωρινή σύνδεση"</string>

@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Stałe powiadomienie o sesji rejestrowania zawartości ekranu"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Nagrywać ekran?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Nagrywaj jedną aplikację"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Nagrywaj ten ekran"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Nagrywaj ekran %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kiedy nagrywasz cały ekran, nagrane zostanie wszystko, co jest na nim widoczne. Dlatego uważaj na hasła, dane do płatności, wiadomości, zdjęcia, nagrania audio czy filmy."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kiedy nagrywasz aplikację, wszystko, co jest w niej wyświetlane lub odtwarzane, zostaje nagrane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Nagrywaj ekran"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Nie udało się zaktualizować gotowego ustawienia"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Gotowe ustawienie"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Wybrano"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Otoczenie"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Po lewej"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Po prawej"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Rozwiń, aby oddzielić elementy sterujące po lewej i po prawej stronie"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Zwiń do ujednoliconego sterowania"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Wycisz otoczenie"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Wyłącz wyciszenie otoczenia"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Narzędzia"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Napisy na żywo"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Notatka"</string>
@@ -886,8 +877,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Przejdź wstecz"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Wyświetl ekran główny"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Wyświetl ostatnie aplikacje"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Przełącz się do przodu między ostatnimi aplikacjami"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Przełącz się wstecz między ostatnimi aplikacjami"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Przełącz się między ostatnio używanymi aplikacjami (do przodu)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Przełącz się między ostatnio używanymi aplikacjami (do tyłu)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otwórz listę aplikacji"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otwórz ustawienia"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otwórz asystenta"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Pokazuj ikony powiadomień o niskim priorytecie"</string>
     <string name="other" msgid="429768510980739978">"Inne"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"usunąć kartę"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"dodaj kafelek do ostatniej pozycji"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Przenieś kartę"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Dodaj kafelek do wybranej pozycji"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Przenieś do pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodaj w pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Nieprawidłowa pozycja."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"wybrać użytkownika"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Brak internetu"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otwórz ustawienia: <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Edytuj kolejność Szybkich ustawień."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu zasilania"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Strona <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ekran blokady"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"otwórz urządzenie"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"By otworzyć, użyj odcisku palca"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Wymagane uwierzytelnienie. Dotknij czytnika liniii papilarnych, by uwierzytelnić."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Aktywne połączenie"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilna transmisja danych"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Połączono"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Tymczasowe połączenie"</string>
@@ -1473,7 +1462,7 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Tak, zresetuj"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Anuluj"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Naciśnij klawisz"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinacja klawiszy jest już używana. Użyj innego klawisza."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Ta kombinacja klawiszy jest już używana. Użyj innego klawisza."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Nie można ustawić skrótu."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Nawiguj za pomocą klawiatury"</string>

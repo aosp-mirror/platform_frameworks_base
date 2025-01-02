@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ဖန်သားပြင်ကို ရိုက်ကူးမလား။"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"အက်ပ်တစ်ခုကို ရိုက်ကူးရန်"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ဤစခရင်ကို ရိုက်ကူးရန်"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s ကို ရိုက်ကူးရန်"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"သင့်ဖန်သားပြင်တစ်ခုလုံး ရိုက်ကူးနေချိန်တွင် ဖန်သားပြင်တွင် ပြထားသည့် အရာအားလုံးကို ရိုက်ကူးသည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"အက်ပ်ကို ရိုက်ကူးနေချိန်တွင် ယင်းအက်ပ်တွင် ပြထားသော (သို့) ဖွင့်ထားသော အရာအားလုံးကို ရိုက်ကူးသည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ဖန်သားပြင်ကို ရိုက်ကူးရန်"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"အသင့်သုံးကို အပ်ဒိတ်လုပ်၍မရပါ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ကြိုတင်သတ်မှတ်ချက်"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ရွေးထားသည်"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"ဝန်းကျင်အသံ"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"ဘယ်"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"ညာ"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"ဘယ်ညာခွဲထားသော ထိန်းချုပ်မှုများအဖြစ် ပိုပြပါ"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"ပေါင်းစည်းထားသော ထိန်းချုပ်မှုအဖြစ် လျှော့ပြပါ"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"ဝန်းကျင်အသံ ပိတ်ရန်"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"ဝန်းကျင်အသံ ပြန်ဖွင့်ရန်"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"တူးလ်များ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"တိုက်ရိုက်စာတန်း"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"မှတ်စု"</string>
@@ -869,7 +860,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"သို့မဟုတ်"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ရှာဖွေစာလုံး ရှင်းထုတ်ရန်"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"လက်ကွက်ဖြတ်လမ်းများ"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းများ ရှာရန်"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ဖြတ်လမ်းလင့်ခ် မတွေ့ပါ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"စနစ်"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"စာရိုက်ခြင်း"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"အရေးမကြီးသော အကြောင်းကြားချက် သင်္ကေတများ ပြရန်"</string>
     <string name="other" msgid="429768510980739978">"အခြား"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"အကွက်ငယ်ကို ဖယ်ရှားရန်"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"နောက်ဆုံးနေရာတွင် အကွက်ငယ် ထည့်ရန်"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"အကွက်ငယ်ကို ရွှေ့ရန်"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"ဆန္ဒရှိရာ နေရာတွင် အကွက်ငယ် ထည့်ရန်"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> သို့ ရွှေ့ရန်"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> အနေအထားသို့ ပေါင်းထည့်ရန်"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"နေရာ မမှန်ပါ။"</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"အသုံးပြုသူရွေးရန်"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"အင်တာနက် မရှိပါ"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ဆက်တင်များကို ဖွင့်ပါ။"</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"‘အမြန်ဆက်တင်များ’ ၏ အစီအစဉ်ကို ပြင်ရန်။"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်မျက်နှာပြင်"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"စက်ပစ္စည်းသို့ ဝင်ရန်"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ဖွင့်ရန် လက်ဗွေကို သုံးပါ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"အထောက်အထားစိစစ်ခြင်း လိုအပ်သည်။ အထောက်အထားစိစစ်ရန် လက်ဗွေ အာရုံခံကိရိယာကို ထိပါ။"</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"လက်ရှိ ဖုန်းခေါ်ဆိုမှု"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"မိုဘိုင်းဒေတာ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ချိတ်ဆက်ထားသည်"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ယာယီချိတ်ဆက်ထားသည်"</string>
@@ -1454,7 +1443,7 @@
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ဖြတ်လမ်းလင့်ခ်သတ်မှတ်ရန် ကီးကို နှိပ်ပါ"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"၎င်းသည် သင့်စိတ်ကြိုက် ဖြတ်လမ်းလင့်ခ်ကို အပြီးဖျက်ပါမည်။"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"၎င်းသည် သင့်စိတ်ကြိုက်ဖြတ်လမ်းလင့်ခ်အားလုံးကို အပြီးဖျက်မည်။"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ဖြတ်လမ်းများ ရှာရန်"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ရှာဖွေမှုရလဒ် မရှိပါ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"လုပ်ဆောင်ချက် (သို့) Meta ကီးသင်္ကေတ"</string>
@@ -1470,7 +1459,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"ကီးဘုတ်ဆက်တင်များ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ဖြတ်လမ်း သတ်မှတ်ရန်"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"ဖယ်ရှားရန်"</string>
-    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ပြန်လည်ပြင်ဆင်သတ်မှတ်မည်"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ပြင်ဆင်ရန်"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"မလုပ်တော့"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ကီးကို နှိပ်ပါ"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"ကီးပေါင်းစပ်ခြင်းကို သုံးနေပြီးဖြစ်သည်။ အခြားကီးကို စမ်းကြည့်ပါ။"</string>

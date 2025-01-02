@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Tekuća obavijest za sesiju snimanja zaslona"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Želite li snimati zaslon?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Snimanje jedne aplikacije"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Snimi ovaj zaslon"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Snimi %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kad snimate cijeli zaslon, snima se sve što se prikazuje na zaslonu. Stoga pazite na stvari kao što su zaporke, podaci o plaćanju, poruke, fotografije te audio i videozapisi."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kad snimate aplikaciju, snima se sve što se prikazuje ili reproducira u toj aplikaciji. Stoga pazite na stvari kao što su zaporke, podaci o plaćanju, poruke, fotografije te audio i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Snimanje zaslona"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ažuriranje unaprijed definiranih postavki nije uspjelo"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Unaprijed definirana postavka"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Odabrano"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Okruženje"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Lijevo"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Desno"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Proširi u zasebne kontrole slijeva i zdesna"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Sažmi u objedinjenu kontrolu"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Isključi zvuk okruženja"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Uključi zvuk okruženja"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Alati"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Automatski titlovi"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Napomena"</string>
@@ -884,7 +875,7 @@
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Snimanje zaslona"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Prikaz prečaca"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Natrag"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Otvaranje početnog zaslona"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Otvori početni zaslon"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaz nedavnih aplikacija"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Listajte nedavne aplikacije (prema naprijed)"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Listajte nedavne aplikacije (unatrag)"</string>
@@ -1298,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pristupili uređaju"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorite pomoću otiska prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Potrebna je autentifikacija. Dodirnite senzor otiska prsta da biste se autentificirali."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Telefonski poziv u tijeku"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilni podaci"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Povezano"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Privremeno povezano"</string>
@@ -1467,10 +1459,10 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Postavke tipkovnice"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Postavite prečac"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Ukloni"</string>
-    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Da, vrati na zadano"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Da, vrati"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Odustani"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pritisnite tipku"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinacija tipki već se upotrebljava. Pokušajte s drugom tipkom."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Ta se kombinacija već koristi. Pokušajte s nekom drugom."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Prečac se ne može postaviti."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Krećite se pomoću tipkovnice"</string>
