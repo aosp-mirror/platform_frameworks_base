@@ -295,11 +295,12 @@ constructor(
     override val shouldShowOperatorNameView: Flow<Boolean> =
         combine(
             shouldHomeStatusBarBeVisible,
-            headsUpNotificationInteractor.statusBarHeadsUpState,
+            headsUpNotificationInteractor.statusBarHeadsUpStatus,
             homeStatusBarInteractor.visibilityViaDisableFlags,
             homeStatusBarInteractor.shouldShowOperatorName,
-        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags, shouldShowOperator ->
-            val hideForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
+        ) { shouldStatusBarBeVisible, headsUpStatus, visibilityViaDisableFlags, shouldShowOperator
+            ->
+            val hideForHeadsUp = headsUpStatus == PinnedStatus.PinnedBySystem
             shouldStatusBarBeVisible &&
                 !hideForHeadsUp &&
                 visibilityViaDisableFlags.isSystemInfoAllowed &&
@@ -309,10 +310,10 @@ constructor(
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
-            headsUpNotificationInteractor.statusBarHeadsUpState,
+            headsUpNotificationInteractor.statusBarHeadsUpStatus,
             homeStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags ->
-            val hideClockForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
+        ) { shouldStatusBarBeVisible, headsUpStatus, visibilityViaDisableFlags ->
+            val hideClockForHeadsUp = headsUpStatus == PinnedStatus.PinnedBySystem
             val showClock =
                 shouldStatusBarBeVisible &&
                     visibilityViaDisableFlags.isClockAllowed &&

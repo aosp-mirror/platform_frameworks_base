@@ -60,7 +60,7 @@ constructor(
 
     private val showingHeadsUpStatusBar: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
-            headsUpNotificationInteractor.statusBarHeadsUpState.map { it.isPinned }
+            headsUpNotificationInteractor.statusBarHeadsUpStatus.map { it.isPinned }
         } else {
             flowOf(false)
         }

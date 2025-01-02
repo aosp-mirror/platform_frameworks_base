@@ -32,6 +32,7 @@ import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
+import com.android.systemui.statusbar.notification.domain.model.TopPinnedState
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
@@ -412,46 +413,53 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
     @Test
     fun statusBarHeadsUpState_pinnedBySystem() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             headsUpRepository.setNotifications(
                 FakeHeadsUpRowRepository(key = "key 0", pinnedStatus = PinnedStatus.PinnedBySystem)
             )
             runCurrent()
 
-            assertThat(statusBarHeadsUpState).isEqualTo(PinnedStatus.PinnedBySystem)
+            assertThat(state).isEqualTo(TopPinnedState.Pinned("key 0", PinnedStatus.PinnedBySystem))
+            assertThat(status).isEqualTo(PinnedStatus.PinnedBySystem)
         }
 
     @Test
     fun statusBarHeadsUpState_pinnedByUser() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             headsUpRepository.setNotifications(
                 FakeHeadsUpRowRepository(key = "key 0", pinnedStatus = PinnedStatus.PinnedByUser)
             )
             runCurrent()
 
-            assertThat(statusBarHeadsUpState).isEqualTo(PinnedStatus.PinnedByUser)
+            assertThat(state).isEqualTo(TopPinnedState.Pinned("key 0", PinnedStatus.PinnedByUser))
+            assertThat(status).isEqualTo(PinnedStatus.PinnedByUser)
         }
 
     @Test
     fun statusBarHeadsUpState_withoutPinnedNotifications_notPinned() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             headsUpRepository.setNotifications(
                 FakeHeadsUpRowRepository(key = "key 0", PinnedStatus.NotPinned)
             )
             runCurrent()
 
-            assertThat(statusBarHeadsUpState).isEqualTo(PinnedStatus.NotPinned)
+            assertThat(state).isEqualTo(TopPinnedState.NothingPinned)
+            assertThat(status).isEqualTo(PinnedStatus.NotPinned)
         }
 
     @Test
     fun statusBarHeadsUpState_whenShadeExpanded_false() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
@@ -463,13 +471,15 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // should emit `false`.
             kosmos.fakeShadeRepository.setLegacyShadeExpansion(1.0f)
 
-            assertThat(statusBarHeadsUpState!!.isPinned).isFalse()
+            assertThat(state).isEqualTo(TopPinnedState.NothingPinned)
+            assertThat(status!!.isPinned).isFalse()
         }
 
     @Test
     fun statusBarHeadsUpState_notificationsAreHidden_false() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
@@ -477,13 +487,15 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // AND the notifications are hidden
             keyguardViewStateRepository.areNotificationsFullyHidden.value = true
 
-            assertThat(statusBarHeadsUpState!!.isPinned).isFalse()
+            assertThat(state).isEqualTo(TopPinnedState.NothingPinned)
+            assertThat(status!!.isPinned).isFalse()
         }
 
     @Test
     fun statusBarHeadsUpState_onLockScreen_false() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
@@ -494,13 +506,15 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
                 testSetup = true,
             )
 
-            assertThat(statusBarHeadsUpState!!.isPinned).isFalse()
+            assertThat(state).isEqualTo(TopPinnedState.NothingPinned)
+            assertThat(status!!.isPinned).isFalse()
         }
 
     @Test
     fun statusBarHeadsUpState_onByPassLockScreen_true() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
@@ -513,13 +527,15 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // AND bypass is enabled
             faceAuthRepository.isBypassEnabled.value = true
 
-            assertThat(statusBarHeadsUpState!!.isPinned).isTrue()
+            assertThat(state).isInstanceOf(TopPinnedState.Pinned::class.java)
+            assertThat(status!!.isPinned).isTrue()
         }
 
     @Test
     fun statusBarHeadsUpState_onByPassLockScreen_withoutNotifications_false() =
         testScope.runTest {
-            val statusBarHeadsUpState by collectLastValue(underTest.statusBarHeadsUpState)
+            val state by collectLastValue(underTest.statusBarHeadsUpState)
+            val status by collectLastValue(underTest.statusBarHeadsUpStatus)
 
             // WHEN no pinned rows
             // AND the lock screen is shown
@@ -530,7 +546,8 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // AND bypass is enabled
             faceAuthRepository.isBypassEnabled.value = true
 
-            assertThat(statusBarHeadsUpState!!.isPinned).isFalse()
+            assertThat(state).isEqualTo(TopPinnedState.NothingPinned)
+            assertThat(status!!.isPinned).isFalse()
         }
 
     private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
