@@ -703,34 +703,29 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void handleMessage(Message msg) {
             BatteryCallback cb = mCallback;
+            if (cb == null) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_REPORT_CPU_UPDATE_NEEDED:
-                    if (cb != null) {
-                        cb.batteryNeedsCpuUpdate();
-                    }
+                    cb.batteryNeedsCpuUpdate();
                     break;
                 case MSG_REPORT_POWER_CHANGE:
-                    if (cb != null) {
-                        cb.batteryPowerChanged(msg.arg1 != 0);
-                    }
+                    cb.batteryPowerChanged(msg.arg1 != 0);
                     break;
                 case MSG_REPORT_CHARGING:
-                    if (cb != null) {
-                        final String action;
-                        synchronized (BatteryStatsImpl.this) {
-                            action = mCharging ? BatteryManager.ACTION_CHARGING
-                                    : BatteryManager.ACTION_DISCHARGING;
-                        }
-                        Intent intent = new Intent(action);
-                        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                        cb.batterySendBroadcast(intent);
+                    final String action;
+                    synchronized (BatteryStatsImpl.this) {
+                        action = mCharging ? BatteryManager.ACTION_CHARGING
+                                : BatteryManager.ACTION_DISCHARGING;
                     }
+                    Intent intent = new Intent(action);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    cb.batterySendBroadcast(intent);
                     break;
                 case MSG_REPORT_RESET_STATS:
-                    if (cb != null) {
-                        cb.batteryStatsReset();
-                    }
-                }
+                    cb.batteryStatsReset();
+            }
         }
     }
 
