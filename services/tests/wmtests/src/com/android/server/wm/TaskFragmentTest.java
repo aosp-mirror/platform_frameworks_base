@@ -132,8 +132,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         final int parentSw = parentConfig.smallestScreenWidthDp;
         final Rect bounds = new Rect(parentBounds);
         bounds.inset(100, 100);
-        mTaskFragment.setBounds(bounds);
         mTaskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        mTaskFragment.setBounds(bounds);
         // Calculate its own sw with smaller bounds in multi-window mode.
         assertNotEquals(parentSw, mTaskFragment.getConfiguration().smallestScreenWidthDp);
 

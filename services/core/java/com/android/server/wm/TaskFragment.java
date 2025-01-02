@@ -2753,7 +2753,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!forceUpdate && width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
             return;
         }
-        t.setWindowCrop(mSurfaceControl, width, height);
+        if (fillsParent()) {
+            // Rely on parent's crop.
+            t.setCrop(mSurfaceControl, null);
+        } else {
+            t.setWindowCrop(mSurfaceControl, width, height);
+        }
         mLastSurfaceSize.set(width, height);
     }
 
