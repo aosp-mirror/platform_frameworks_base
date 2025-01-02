@@ -34,7 +34,6 @@ import android.widget.SearchView;
 
 import com.android.internal.R;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
@@ -273,8 +272,9 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                 || mIsNumberingSystem) {
             if (mListener != null) {
                 mListener.onLocaleSelected(locale);
+            } else {
+                returnToParentFrame();
             }
-            returnToParentFrame();
         } else {
             LocalePickerWithRegion selector;
             if (mayHaveDifferentNumberingSystem) {
