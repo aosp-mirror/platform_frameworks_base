@@ -280,6 +280,7 @@ public class BubbleStackView extends FrameLayout
     private int mCornerRadius;
     @Nullable private BubbleViewProvider mExpandedBubble;
     private boolean mIsExpanded;
+    private boolean mIsImeVisible = false;
 
     /** Whether the stack is currently on the left side of the screen, or animating there. */
     private boolean mStackOnLeftOrWillBe = true;
@@ -2886,6 +2887,10 @@ public class BubbleStackView extends FrameLayout
      * and clip the expanded view.
      */
     public void setImeVisible(boolean visible) {
+        if (mIsImeVisible == visible) {
+            return;
+        }
+        mIsImeVisible = visible;
         if ((mIsExpansionAnimating || mIsBubbleSwitchAnimating) && mIsExpanded) {
             // This will update the animation so the bubbles move to position for the IME
             mExpandedAnimationController.expandFromStack(() -> {
