@@ -69,6 +69,7 @@ android_test {
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "core-tests-support",
+        "cts-input-lib",
         "android-common",
         "frameworks-core-util-lib",
         "mockwebserver",
