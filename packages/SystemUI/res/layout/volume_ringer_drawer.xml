@@ -18,12 +18,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/volume_ringer_drawer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:gravity="center"
     android:layoutDirection="ltr"
     app:layoutDescription="@xml/volume_dialog_ringer_drawer_motion_scene">
+
+    <View
+        android:id="@+id/ringer_buttons_background"
+        android:layout_width="@dimen/volume_dialog_width"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/volume_dialog_background_vertical_margin"
+        android:layout_marginBottom="@dimen/volume_dialog_background_vertical_margin"
+        android:background="@drawable/volume_dialog_ringer_background" />
 
     <!-- add ringer buttons here -->
 

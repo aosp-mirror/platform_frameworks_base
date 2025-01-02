@@ -71,8 +71,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
 
     fun CoroutineScope.bind(view: View) {
         val volumeDialogBackgroundView = view.requireViewById<View>(R.id.volume_dialog_background)
-        val ringerHBackgroundView =
-            view.requireViewById<View>(R.id.volume_ringer_horizontal_background)
+        val ringerBackgroundView = view.requireViewById<View>(R.id.ringer_buttons_background)
         val drawerContainer = view.requireViewById<MotionLayout>(R.id.volume_ringer_drawer)
         val unselectedButtonUiModel = RingerButtonUiModel.getUnselectedButton(view.context)
         val selectedButtonUiModel = RingerButtonUiModel.getSelectedButton(view.context)
@@ -86,15 +85,17 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
             )
         var backgroundAnimationProgress: Float by
             Delegates.observable(0F) { _, _, progress ->
-                ringerHBackgroundView.applyCorners(
+                ringerBackgroundView.applyCorners(
                     fullRadius = volumeDialogBgFullRadius,
                     diff = volumeDialogBgFullRadius - volumeDialogBgSmallRadius,
                     progress,
+                    isBottom = false,
                 )
                 volumeDialogBackgroundView.applyCorners(
                     fullRadius = volumeDialogBgFullRadius,
                     diff = volumeDialogBgFullRadius - volumeDialogBgSmallRadius,
                     progress,
+                    isBottom = true,
                 )
             }
         val ringerDrawerTransitionListener = VolumeDialogRingerDrawerTransitionListener {
@@ -102,7 +103,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         }
         drawerContainer.setTransitionListener(ringerDrawerTransitionListener)
         volumeDialogBackgroundView.background = volumeDialogBackgroundView.background.mutate()
-        ringerHBackgroundView.background = ringerHBackgroundView.background.mutate()
+        ringerBackgroundView.background = ringerBackgroundView.background.mutate()
 
         viewModel.ringerViewModel
             .mapLatest { ringerState ->
@@ -192,8 +193,8 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                 )
                                 volumeDialogBackgroundView.background =
                                     volumeDialogBackgroundView.background.mutate()
-                                ringerHBackgroundView.background =
-                                    ringerHBackgroundView.background.mutate()
+                                ringerBackgroundView.background =
+                                    ringerBackgroundView.background.mutate()
                             }
                         }
                     }
@@ -203,8 +204,8 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                         volumeDialogBackgroundView.setBackgroundResource(
                             R.drawable.volume_dialog_background
                         )
-                        ringerHBackgroundView.setBackgroundResource(
-                            R.drawable.volume_dialog_background
+                        ringerBackgroundView.setBackgroundResource(
+                            R.drawable.volume_dialog_ringer_background
                         )
                     }
                 }
@@ -227,14 +228,14 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         ) {
             val count = uiModel.availableButtons.size
             val selectedButton =
-                getChildAt(count - uiModel.currentButtonIndex - 1)
+                getChildAt(count - uiModel.currentButtonIndex)
                     .requireViewById<ImageButton>(R.id.volume_drawer_button)
             val previousIndex =
                 uiModel.availableButtons.indexOfFirst {
                     it?.ringerMode == uiModel.drawerState.previousMode
                 }
             val unselectedButton =
-                getChildAt(count - previousIndex - 1)
+                getChildAt(count - previousIndex)
                     .requireViewById<ImageButton>(R.id.volume_drawer_button)
             // We only need to execute on roundness animation end and volume dialog background
             // progress update once because these changes should be applied once on volume dialog
@@ -282,7 +283,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         val count = uiModel.availableButtons.size
         uiModel.availableButtons.fastForEachIndexed { index, ringerButton ->
             ringerButton?.let {
-                val view = getChildAt(count - index - 1)
+                val view = getChildAt(count - index)
                 val isOpen = uiModel.drawerState is RingerDrawerState.Open
                 if (index == uiModel.currentButtonIndex) {
                     view.bindDrawerButton(
@@ -335,7 +336,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     }
 
     private fun MotionLayout.ensureChildCount(@LayoutRes viewLayoutId: Int, count: Int) {
-        val childCountDelta = childCount - count
+        val childCountDelta = childCount - count - 1
         when {
             childCountDelta > 0 -> {
                 removeViews(0, childCountDelta)
@@ -395,8 +396,14 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         }
     }
 
-    private fun View.applyCorners(fullRadius: Int, diff: Int, progress: Float) {
-        (background as GradientDrawable).cornerRadius = fullRadius - progress * diff
+    private fun View.applyCorners(fullRadius: Int, diff: Int, progress: Float, isBottom: Boolean) {
+        val radius = fullRadius - progress * diff
+        (background as GradientDrawable).cornerRadii =
+            if (isBottom) {
+                floatArrayOf(0F, 0F, 0F, 0F, radius, radius, radius, radius)
+            } else {
+                FloatArray(8) { radius }
+            }
         background.invalidateSelf()
     }
 }
