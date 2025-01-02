@@ -79,6 +79,13 @@ flag {
 }
 
 flag {
+    name: "enable_autoclick_indicator"
+    namespace: "accessibility"
+    description: "Whether to show autoclick indicator when autoclick feature is enabled."
+    bug: "383901288"
+}
+
+flag {
     name: "enable_a11y_checker_logging"
     namespace: "accessibility"
     description: "Whether to identify and log app a11y issues."
