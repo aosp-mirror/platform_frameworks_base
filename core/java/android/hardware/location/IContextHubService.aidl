@@ -137,7 +137,7 @@ interface IContextHubService {
 
     // Register an endpoint with the context hub
     @EnforcePermission("ACCESS_CONTEXT_HUB")
-    IContextHubEndpoint registerEndpoint(in HubEndpointInfo pendingEndpointInfo, in IContextHubEndpointCallback callback, String packageName);
+    IContextHubEndpoint registerEndpoint(in HubEndpointInfo pendingEndpointInfo, in IContextHubEndpointCallback callback, String packageName, String attributionTag);
 
     // Register an endpoint discovery callback (id)
     @EnforcePermission("ACCESS_CONTEXT_HUB")

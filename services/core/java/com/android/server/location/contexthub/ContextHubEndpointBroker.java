@@ -51,6 +51,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         implements IBinder.DeathRecipient, AppOpsManager.OnOpChangedListener {
     private static final String TAG = "ContextHubEndpointBroker";
 
+    /** Message used by noteOp when this client receives a message from an endpoint. */
+    private static final String RECEIVE_MSG_NOTE = "ContextHubEndpointMessageDelivery";
+
     /** The context of the service. */
     private final Context mContext;
 
@@ -120,6 +123,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /** The package name of the app that created the endpoint */
     private final String mPackageName;
 
+    /** The attribution tag of the module that created the endpoint */
+    private final String mAttributionTag;
+
     /** Transaction manager used for sending reliable messages */
     private final ContextHubTransactionManager mTransactionManager;
 
@@ -135,6 +141,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             EndpointInfo halEndpointInfo,
             IContextHubEndpointCallback callback,
             String packageName,
+            String attributionTag,
             ContextHubTransactionManager transactionManager) {
         mContext = context;
         mHubInterface = hubInterface;
@@ -143,6 +150,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         mHalEndpointInfo = halEndpointInfo;
         mContextHubEndpointCallback = callback;
         mPackageName = packageName;
+        mAttributionTag = attributionTag;
         mTransactionManager = transactionManager;
 
         mPid = Binder.getCallingPid();
@@ -394,15 +402,41 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     /* package */ void onMessageReceived(int sessionId, HubMessage message) {
-        if (!isSessionActive(sessionId)) {
+        HubEndpointInfo remote;
+        synchronized (mOpenSessionLock) {
+            if (!isSessionActive(sessionId)) {
+                Log.e(
+                        TAG,
+                        "Dropping message for inactive session (id="
+                                + sessionId
+                                + ") with message: "
+                                + message);
+                sendMessageDeliveryStatus(
+                        sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMANENT_ERROR);
+                return;
+            }
+            remote = mSessionInfoMap.get(sessionId).getRemoteEndpointInfo();
+        }
+        if (!ContextHubServiceUtil.notePermissions(
+                mAppOpsManager,
+                mUid,
+                mPackageName,
+                mAttributionTag,
+                remote.getRequiredPermissions(),
+                RECEIVE_MSG_NOTE
+                        + "-0x"
+                        + Long.toHexString(remote.getIdentifier().getHub())
+                        + "-0x"
+                        + Long.toHexString(remote.getIdentifier().getEndpoint()))) {
             Log.e(
                     TAG,
-                    "Dropping message for inactive session (id="
-                            + sessionId
-                            + ") with message: "
-                            + message);
+                    "Dropping message from "
+                            + remote
+                            + ". "
+                            + mPackageName
+                            + " doesn't have permission");
             sendMessageDeliveryStatus(
-                    sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMANENT_ERROR);
+                    sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMISSION_DENIED);
             return;
         }
 
