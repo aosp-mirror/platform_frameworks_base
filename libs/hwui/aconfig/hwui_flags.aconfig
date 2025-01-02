@@ -42,6 +42,16 @@ flag {
 }
 
 flag {
+  name: "high_contrast_text_inner_text_color"
+  namespace: "accessibility"
+  description: "Render text color by modifying its brightness instead of defaulting to black and white"
+  bug: "384793956"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "hdr_10bit_plus"
   namespace: "core_graphics"
   description: "Use 10101010 and FP16 formats for HDR-UI when available"
