@@ -26,34 +26,34 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.CommandQueue
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
 
 @SysUISingleton
 class ShortcutHelperCoreStartable
-@Inject constructor(
+@Inject
+constructor(
     private val commandQueue: CommandQueue,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val stateRepository: ShortcutHelperStateRepository,
+    private val activityStarter: ActivityStarter,
     @Background private val backgroundScope: CoroutineScope,
 ) : CoreStartable {
     override fun start() {
         registerBroadcastReceiver(
             action = Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS,
-            onReceive = {
-                backgroundScope.launch { stateRepository.show() }
-            }
+            onReceive = { showShortcutHelper() },
         )
         registerBroadcastReceiver(
             action = Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS,
-            onReceive = { stateRepository.hide() }
+            onReceive = { stateRepository.hide() },
         )
         registerBroadcastReceiver(
             action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
-            onReceive = { stateRepository.hide() }
+            onReceive = { stateRepository.hide() },
         )
         commandQueue.addCallback(
             object : CommandQueue.Callbacks {
@@ -62,7 +62,7 @@ class ShortcutHelperCoreStartable
                 }
 
                 override fun toggleKeyboardShortcutsMenu(deviceId: Int) {
-                    backgroundScope.launch { stateRepository.toggle(deviceId) }
+                    toggleShortcutHelper(deviceId)
                 }
             }
         )
@@ -71,14 +71,33 @@ class ShortcutHelperCoreStartable
     private fun registerBroadcastReceiver(action: String, onReceive: () -> Unit) {
         broadcastDispatcher.registerReceiver(
             receiver =
-            object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    onReceive()
-                }
-            },
+                object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        onReceive()
+                    }
+                },
             filter = IntentFilter(action),
             flags = Context.RECEIVER_EXPORTED or Context.RECEIVER_VISIBLE_TO_INSTANT_APPS,
             user = UserHandle.ALL,
+        )
+    }
+
+    private fun showShortcutHelper() {
+        dismissKeyguardThenPerformShortcutHelperAction { stateRepository.show() }
+    }
+
+    private fun toggleShortcutHelper(deviceId: Int? = null) {
+        dismissKeyguardThenPerformShortcutHelperAction { stateRepository.toggle(deviceId) }
+    }
+
+    private fun dismissKeyguardThenPerformShortcutHelperAction(action: suspend () -> Unit) {
+        activityStarter.dismissKeyguardThenExecute(
+            /* action= */ {
+                backgroundScope.launch { action() }
+                false
+            },
+            /* cancel= */ {},
+            /* afterKeyguardGone= */ true,
         )
     }
 }
