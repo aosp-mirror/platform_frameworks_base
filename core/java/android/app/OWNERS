@@ -28,6 +28,7 @@ per-file ProfilerInfo* = file:/ACTIVITY_MANAGER_OWNERS
 per-file Service* = file:/ACTIVITY_MANAGER_OWNERS
 per-file SystemServiceRegistry.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file *UserSwitchObserver* = file:/ACTIVITY_MANAGER_OWNERS
+per-file UidObserver* = file:/ACTIVITY_MANAGER_OWNERS
 
 # UI Automation
 per-file *UiAutomation* = file:/services/accessibility/OWNERS
