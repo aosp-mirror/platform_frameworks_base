@@ -95,6 +95,13 @@ public final class NotificationProgressDrawable extends Drawable {
     }
 
     /**
+     * Returns the gap between a segment and a point.
+     */
+    public float getSegmentMinWidth() {
+        return mState.mSegmentMinWidth;
+    }
+
+    /**
      * Returns the radius for the points.
      */
     public float getPointRadius() {
@@ -322,6 +329,8 @@ public final class NotificationProgressDrawable extends Drawable {
         // Extract the theme attributes, if any.
         state.mThemeAttrsSegments = a.extractThemeAttrs();
 
+        state.mSegmentMinWidth = a.getDimension(
+                R.styleable.NotificationProgressDrawableSegments_minWidth, state.mSegmentMinWidth);
         state.mSegmentHeight = a.getDimension(
                 R.styleable.NotificationProgressDrawableSegments_height, state.mSegmentHeight);
         state.mFadedSegmentHeight = a.getDimension(
@@ -408,10 +417,12 @@ public final class NotificationProgressDrawable extends Drawable {
      * varying drawing width, or a {@link Point} with zero length and fixed size for drawing.
      */
     public abstract static class Part {
-        /** Start position for drawing (in pixels). */
-        protected final float mStart;
-        /** End position for drawing (in pixels). */
-        protected final float mEnd;
+        // TODO: b/372908709 - maybe rename start/end to left/right, to be consistent with the
+        //  bounds rect.
+        /** Start position for drawing (in pixels) */
+        protected float mStart;
+        /** End position for drawing (in pixels) */
+        protected float mEnd;
         /** Drawing color. */
         @ColorInt protected final int mColor;
 
@@ -425,8 +436,21 @@ public final class NotificationProgressDrawable extends Drawable {
             return this.mStart;
         }
 
+        public void setStart(float start) {
+            mStart = start;
+        }
+
         public float getEnd() {
             return this.mEnd;
+        }
+
+        public void setEnd(float end) {
+            mEnd = end;
+        }
+
+        /** Returns the calculated drawing width of the part */
+        public float getWidth() {
+            return mEnd - mStart;
         }
 
         public int getColor() {
@@ -537,6 +561,7 @@ public final class NotificationProgressDrawable extends Drawable {
         int mChangingConfigurations;
         float mSegSegGap = 0.0f;
         float mSegPointGap = 0.0f;
+        float mSegmentMinWidth = 0.0f;
         float mSegmentHeight;
         float mFadedSegmentHeight;
         float mSegmentCornerRadius;
@@ -558,6 +583,7 @@ public final class NotificationProgressDrawable extends Drawable {
             mChangingConfigurations = orig.mChangingConfigurations;
             mSegSegGap = orig.mSegSegGap;
             mSegPointGap = orig.mSegPointGap;
+            mSegmentMinWidth = orig.mSegmentMinWidth;
             mSegmentHeight = orig.mSegmentHeight;
             mFadedSegmentHeight = orig.mFadedSegmentHeight;
             mSegmentCornerRadius = orig.mSegmentCornerRadius;
@@ -576,6 +602,18 @@ public final class NotificationProgressDrawable extends Drawable {
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
+            if (mSegSegGap > 0) {
+                mSegSegGap = scaleFromDensity(
+                        mSegSegGap, sourceDensity, targetDensity);
+            }
+            if (mSegPointGap > 0) {
+                mSegPointGap = scaleFromDensity(
+                        mSegPointGap, sourceDensity, targetDensity);
+            }
+            if (mSegmentMinWidth > 0) {
+                mSegmentMinWidth = scaleFromDensity(
+                        mSegmentMinWidth, sourceDensity, targetDensity);
+            }
             if (mSegmentHeight > 0) {
                 mSegmentHeight = scaleFromDensity(
                         mSegmentHeight, sourceDensity, targetDensity);

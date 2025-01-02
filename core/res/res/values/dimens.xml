@@ -888,6 +888,8 @@
     <dimen name="notification_progress_segSeg_gap">4dp</dimen>
     <!-- The gap between a segment and a point in the notification progress bar -->
     <dimen name="notification_progress_segPoint_gap">4dp</dimen>
+    <!-- The minimum required drawing width of the notification progress bar segments -->
+    <dimen name="notification_progress_segments_min_width">16dp</dimen>
     <!-- The height of the notification progress bar segments -->
     <dimen name="notification_progress_segments_height">6dp</dimen>
     <!-- The height of the notification progress bar faded segments -->

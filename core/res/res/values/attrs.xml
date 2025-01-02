@@ -7584,6 +7584,13 @@
     <!-- Used to config the segments of a NotificationProgressDrawable. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawableSegments">
+        <!-- TODO: b/372908709 - maybe move this to NotificationProgressBar, because that's the only
+         place this is used actually. Same for NotificationProgressDrawable.segSegGap/segPointGap
+         above. -->
+        <!-- Minimum required drawing width. The drawing width refers to the width after
+         the original segments have been adjusted for the neighboring Points and gaps. This is
+         enforced by stretching the segments that are too short. -->
+        <attr name="minWidth" format="dimension" />
         <!-- Height of the solid segments. -->
         <attr name="height" />
         <!-- Height of the faded segments. -->

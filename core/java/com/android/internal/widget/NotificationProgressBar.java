@@ -32,6 +32,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.RemotableViewMethod;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
@@ -67,6 +68,7 @@ public final class NotificationProgressBar extends ProgressBar implements
     @Nullable
     private List<Part> mParts = null;
 
+    // List of drawable parts before segment splitting by process.
     @Nullable
     private List<NotificationProgressDrawable.Part> mProgressDrawableParts = null;
 
@@ -81,7 +83,13 @@ public final class NotificationProgressBar extends ProgressBar implements
     private final Matrix mMatrix = new Matrix();
     private Matrix mTrackerDrawMatrix = null;
 
-    private float mScale = 0;
+    private float mProgressFraction = 0;
+    /**
+     * The location of progress on the stretched and rescaled progress bar, in fraction. Used for
+     * calculating the tracker position. If stretching and rescaling is not needed, ==
+     * mProgressFraction.
+     */
+    private float mAdjustedProgressFraction = 0;
     /** Indicates whether mTrackerPos needs to be recalculated before the tracker is drawn. */
     private boolean mTrackerPosIsDirty = false;
 
@@ -143,6 +151,10 @@ public final class NotificationProgressBar extends ProgressBar implements
             final int indeterminateColor = mProgressModel.getIndeterminateColor();
             setIndeterminateTintList(ColorStateList.valueOf(indeterminateColor));
         } else {
+            // TODO: b/372908709 - maybe don't rerun the entire calculation every time the
+            //  progress model is updated? For example, if the segments and parts aren't changed,
+            //  there is no need to call `processAndConvertToViewParts` again.
+
             final int progress = mProgressModel.getProgress();
             final int progressMax = mProgressModel.getProgressMax();
 
@@ -342,10 +354,10 @@ public final class NotificationProgressBar extends ProgressBar implements
     }
 
     private void onMaybeVisualProgressChanged() {
-        float scale = getScale();
-        if (mScale == scale) return;
+        float progressFraction = getProgressFraction();
+        if (mProgressFraction == progressFraction) return;
 
-        mScale = scale;
+        mProgressFraction = progressFraction;
         mTrackerPosIsDirty = true;
         invalidate();
     }
@@ -427,12 +439,21 @@ public final class NotificationProgressBar extends ProgressBar implements
                 mNotificationProgressDrawable.getSegSegGap(),
                 mNotificationProgressDrawable.getSegPointGap(),
                 mNotificationProgressDrawable.getPointRadius(),
-                mHasTrackerIcon,
-                getScale() * width,
-                mProgressModel.isStyledByProgress());
+                mHasTrackerIcon
+        );
+        Pair<List<NotificationProgressDrawable.Part>, Float> p = maybeStretchAndRescaleSegments(
+                mParts,
+                mProgressDrawableParts,
+                mNotificationProgressDrawable.getSegmentMinWidth(),
+                mNotificationProgressDrawable.getPointRadius(),
+                getProgressFraction(),
+                width,
+                mProgressModel.isStyledByProgress(),
+                mHasTrackerIcon ? 0F : mNotificationProgressDrawable.getSegSegGap());
 
         Log.d(TAG, "Updating NotificationProgressDrawable parts");
-        mNotificationProgressDrawable.setParts(mProgressDrawableParts);
+        mNotificationProgressDrawable.setParts(p.first);
+        mAdjustedProgressFraction = p.second / width;
     }
 
     private void updateTrackerAndBarPos(int w, int h) {
@@ -465,11 +486,11 @@ public final class NotificationProgressBar extends ProgressBar implements
         }
 
         if (tracker != null) {
-            setTrackerPos(w, tracker, mScale, trackerOffsetY);
+            setTrackerPos(w, tracker, mAdjustedProgressFraction, trackerOffsetY);
         }
     }
 
-    private float getScale() {
+    private float getProgressFraction() {
         int min = getMin();
         int max = getMax();
         int range = max - min;
@@ -481,17 +502,17 @@ public final class NotificationProgressBar extends ProgressBar implements
      *
      * @param w Width of the view, including padding
      * @param tracker Drawable used for the tracker
-     * @param scale Current progress between 0 and 1
+     * @param progressFraction Current progress between 0 and 1
      * @param offsetY Vertical offset for centering. If set to
      *            {@link Integer#MIN_VALUE}, the current offset will be used.
      */
-    private void setTrackerPos(int w, Drawable tracker, float scale, int offsetY) {
+    private void setTrackerPos(int w, Drawable tracker, float progressFraction, int offsetY) {
         int available = w - mPaddingLeft - mPaddingRight;
         final int trackerWidth = tracker.getIntrinsicWidth();
         final int trackerHeight = tracker.getIntrinsicHeight();
         available -= ((mTrackerHeight <= 0) ? trackerWidth : mTrackerWidth);
 
-        final int trackerPos = (int) (scale * available + 0.5f);
+        final int trackerPos = (int) (progressFraction * available + 0.5f);
 
         final int top, bottom;
         if (offsetY == Integer.MIN_VALUE) {
@@ -545,7 +566,7 @@ public final class NotificationProgressBar extends ProgressBar implements
         if (mTracker == null) return;
 
         if (mTrackerPosIsDirty) {
-            setTrackerPos(getWidth(), mTracker, mScale, Integer.MIN_VALUE);
+            setTrackerPos(getWidth(), mTracker, mAdjustedProgressFraction, Integer.MIN_VALUE);
         }
 
         final int saveCount = canvas.save();
@@ -594,7 +615,7 @@ public final class NotificationProgressBar extends ProgressBar implements
 
         final Drawable tracker = mTracker;
         if (tracker != null) {
-            setTrackerPos(getWidth(), tracker, mScale, Integer.MIN_VALUE);
+            setTrackerPos(getWidth(), tracker, mAdjustedProgressFraction, Integer.MIN_VALUE);
 
             // Since we draw translated, the drawable's bounds that it signals
             // for invalidation won't be the actual bounds we want invalidated,
@@ -776,9 +797,7 @@ public final class NotificationProgressBar extends ProgressBar implements
             float segSegGap,
             float segPointGap,
             float pointRadius,
-            boolean hasTrackerIcon,
-            float progressX,
-            boolean isStyledByProgress
+            boolean hasTrackerIcon
     ) {
         List<NotificationProgressDrawable.Part> drawableParts = new ArrayList<>();
 
@@ -826,12 +845,7 @@ public final class NotificationProgressBar extends ProgressBar implements
             }
         }
 
-        return maybeSplitDrawableSegmentsByProgress(
-                isStyledByProgress,
-                parts,
-                drawableParts,
-                progressX,
-                hasTrackerIcon ? 0F : segSegGap);
+        return drawableParts;
     }
 
     private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
@@ -859,32 +873,147 @@ public final class NotificationProgressBar extends ProgressBar implements
         return segPointGap + pointRadius + pointOffset;
     }
 
-    // If isStyledByProgress is true, also split the segment with the progress value in its range.
-    private static List<NotificationProgressDrawable.Part> maybeSplitDrawableSegmentsByProgress(
+    /**
+     * Processes the list of {@code NotificationProgressBar.Part} data and convert to a pair of:
+     *   - list of {@code NotificationProgressDrawable.Part}.
+     *   - location of progress on the stretched and rescaled progress bar.
+     */
+    @VisibleForTesting
+    public static Pair<List<NotificationProgressDrawable.Part>, Float>
+                maybeStretchAndRescaleSegments(
+            List<Part> parts,
+            List<NotificationProgressDrawable.Part> drawableParts,
+            float segmentMinWidth,
+            float pointRadius,
+            float progressFraction,
+            float totalWidth,
             boolean isStyledByProgress,
+            float progressGap
+    ) {
+        final List<NotificationProgressDrawable.Segment> drawableSegments = drawableParts
+                .stream()
+                .filter(NotificationProgressDrawable.Segment.class::isInstance)
+                .map(NotificationProgressDrawable.Segment.class::cast)
+                .toList();
+        float totalExcessWidth = 0;
+        float totalPositiveExcessWidth = 0;
+        for (NotificationProgressDrawable.Segment drawableSegment : drawableSegments) {
+            final float excessWidth = drawableSegment.getWidth() - segmentMinWidth;
+            totalExcessWidth += excessWidth;
+            if (excessWidth > 0) totalPositiveExcessWidth += excessWidth;
+        }
+
+        // All drawable segments are above minimum width. No need to stretch and rescale.
+        if (totalExcessWidth == totalPositiveExcessWidth) {
+            return maybeSplitDrawableSegmentsByProgress(
+                    parts,
+                    drawableParts,
+                    progressFraction,
+                    totalWidth,
+                    isStyledByProgress,
+                    progressGap);
+        }
+
+        if (totalExcessWidth < 0) {
+            // TODO: b/372908709 - throw an error so that the caller can catch and go to fallback
+            //  option. (instead of return.)
+            Log.w(TAG, "Not enough width to satisfy the minimum width for segments.");
+            return maybeSplitDrawableSegmentsByProgress(
+                    parts,
+                    drawableParts,
+                    progressFraction,
+                    totalWidth,
+                    isStyledByProgress,
+                    progressGap);
+        }
+
+        final int nParts = drawableParts.size();
+        float startOffset = 0;
+        for (int iPart = 0; iPart < nParts; iPart++) {
+            final NotificationProgressDrawable.Part drawablePart = drawableParts.get(iPart);
+            if (drawablePart instanceof NotificationProgressDrawable.Segment drawableSegment) {
+                final float origDrawableSegmentWidth = drawableSegment.getWidth();
+
+                float drawableSegmentWidth = segmentMinWidth;
+                // Allocate the totalExcessWidth to the segments above minimum, proportionally to
+                // their initial excessWidth.
+                if (origDrawableSegmentWidth > segmentMinWidth) {
+                    drawableSegmentWidth +=
+                            totalExcessWidth * (origDrawableSegmentWidth - segmentMinWidth)
+                                    / totalPositiveExcessWidth;
+                }
+
+                final float widthDiff = drawableSegmentWidth - drawableSegment.getWidth();
+
+                // Adjust drawable segments to new widths
+                drawableSegment.setStart(drawableSegment.getStart() + startOffset);
+                drawableSegment.setEnd(
+                        drawableSegment.getStart() + origDrawableSegmentWidth + widthDiff);
+
+                // Also adjust view segments to new width. (For view segments, only start is
+                // needed?)
+                // Check that segments and drawableSegments are of the same size?
+                final Segment segment = (Segment) parts.get(iPart);
+                final float origSegmentWidth = segment.getWidth();
+                segment.mStart = segment.mStart + startOffset;
+                segment.mEnd = segment.mStart + origSegmentWidth + widthDiff;
+
+                // Increase startOffset for the subsequent segments.
+                startOffset += widthDiff;
+            } else if (drawablePart instanceof NotificationProgressDrawable.Point drawablePoint) {
+                drawablePoint.setStart(drawablePoint.getStart() + startOffset);
+                drawablePoint.setEnd(drawablePoint.getStart() + 2 * pointRadius);
+            }
+        }
+
+        return maybeSplitDrawableSegmentsByProgress(
+                parts,
+                drawableParts,
+                progressFraction,
+                totalWidth,
+                isStyledByProgress,
+                progressGap);
+    }
+
+    // Find the location of progress on the stretched and rescaled progress bar.
+    // If isStyledByProgress is true, also split the segment with the progress value in its range.
+    private static Pair<List<NotificationProgressDrawable.Part>, Float>
+                maybeSplitDrawableSegmentsByProgress(
             // Needed to get the original segment start and end positions in pixels.
             List<Part> parts,
             List<NotificationProgressDrawable.Part> drawableParts,
-            float progressX,
+            float progressFraction,
+            float totalWidth,
+            boolean isStyledByProgress,
             float progressGap
     ) {
-        if (!isStyledByProgress) return drawableParts;
+        if (progressFraction == 1) return new Pair<>(drawableParts, totalWidth);
 
         int iPartFirstSegmentToStyle = -1;
         int iPartSegmentToSplit = -1;
+        float rescaledProgressX = 0;
+        float startFraction = 0;
         final int nParts = parts.size();
         for (int iPart = 0; iPart < nParts; iPart++) {
             final Part part = parts.get(iPart);
             if (!(part instanceof Segment)) continue;
             final Segment segment = (Segment) part;
-            if (segment.mStart == progressX) {
+            if (startFraction == progressFraction) {
                 iPartFirstSegmentToStyle = iPart;
+                rescaledProgressX = segment.mStart;
                 break;
-            } else if (segment.mStart < progressX && progressX < segment.mEnd) {
+            } else if (startFraction < progressFraction
+                    && progressFraction < startFraction + segment.mFraction) {
                 iPartSegmentToSplit = iPart;
+                rescaledProgressX =
+                        segment.mStart + (progressFraction - startFraction) / segment.mFraction
+                                * segment.getWidth();
                 break;
             }
+            startFraction += segment.mFraction;
         }
+
+        if (!isStyledByProgress) return new Pair<>(drawableParts, rescaledProgressX);
 
         List<NotificationProgressDrawable.Part> splitDrawableParts = new ArrayList<>();
         boolean styleRemainingParts = false;
@@ -899,22 +1028,23 @@ public final class NotificationProgressBar extends ProgressBar implements
             if (iPart == iPartFirstSegmentToStyle) styleRemainingParts = true;
             if (drawablePart instanceof NotificationProgressDrawable.Segment drawableSegment) {
                 if (iPart == iPartSegmentToSplit) {
-                    if (progressX <= drawableSegment.getStart()) {
+                    if (rescaledProgressX <= drawableSegment.getStart()) {
                         styleRemainingParts = true;
                         final int color = maybeGetFadedColor(drawableSegment.getColor(), true);
                         splitDrawableParts.add(
                                 new NotificationProgressDrawable.Segment(drawableSegment.getStart(),
                                         drawableSegment.getEnd(),
                                         color, true));
-                    } else if (drawableSegment.getStart() < progressX
-                            && progressX < drawableSegment.getEnd()) {
+                    } else if (drawableSegment.getStart() < rescaledProgressX
+                            && rescaledProgressX < drawableSegment.getEnd()) {
                         splitDrawableParts.add(
                                 new NotificationProgressDrawable.Segment(drawableSegment.getStart(),
-                                        progressX - progressGap,
+                                        rescaledProgressX - progressGap,
                                         drawableSegment.getColor()));
                         final int color = maybeGetFadedColor(drawableSegment.getColor(), true);
-                        splitDrawableParts.add(new NotificationProgressDrawable.Segment(progressX,
-                                drawableSegment.getEnd(), color, true));
+                        splitDrawableParts.add(
+                                new NotificationProgressDrawable.Segment(rescaledProgressX,
+                                        drawableSegment.getEnd(), color, true));
                         styleRemainingParts = true;
                     } else {
                         splitDrawableParts.add(
@@ -934,7 +1064,7 @@ public final class NotificationProgressBar extends ProgressBar implements
             }
         }
 
-        return splitDrawableParts;
+        return new Pair<>(splitDrawableParts, rescaledProgressX);
     }
 
     /**
@@ -982,6 +1112,11 @@ public final class NotificationProgressBar extends ProgressBar implements
             mFraction = fraction;
             mColor = color;
             mFaded = faded;
+        }
+
+        /** Returns the calculated drawing width of the part */
+        public float getWidth() {
+            return mEnd - mStart;
         }
 
         @Override
