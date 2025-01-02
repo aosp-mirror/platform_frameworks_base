@@ -26,7 +26,7 @@ process that isn't currently running.
 
 ## Per-process queues
 
-The design of `BroadcastQueueModernImpl` is centered around maintaining a
+The design of `BroadcastQueueImpl` is centered around maintaining a
 separate `BroadcastProcessQueue` instance for each potential process on the
 device. At this level, a process refers to the `android:process` attributes
 defined in `AndroidManifest.xml` files, which means it can be defined and
@@ -57,7 +57,7 @@ except for those explicitly provided by "ordered" or "prioritized" broadcasts.
 ## Parallel dispatch
 
 Given a collection of per-process queues with valid _runnable at_ timestamps,
-BroadcastQueueModernImpl is then willing to promote those _runnable_ queues
+BroadcastQueueImpl is then willing to promote those _runnable_ queues
 into a _running_ state. We choose the next per-process queue to promote based
 on the sorted ordering of the _runnable at_ timestamps, selecting the
 longest-waiting process first, which aims to reduce overall broadcast dispatch

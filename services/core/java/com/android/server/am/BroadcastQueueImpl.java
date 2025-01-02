@@ -137,17 +137,17 @@ import java.util.function.Predicate;
  * {@link #finishReceiverLocked}
  * </ol>
  */
-class BroadcastQueueModernImpl extends BroadcastQueue {
-    BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
+class BroadcastQueueImpl extends BroadcastQueue {
+    BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             BroadcastConstants fgConstants, BroadcastConstants bgConstants) {
         this(service, handler, fgConstants, bgConstants, new BroadcastSkipPolicy(service),
                 new BroadcastHistory(fgConstants));
     }
 
-    BroadcastQueueModernImpl(ActivityManagerService service, Handler handler,
+    BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             BroadcastConstants fgConstants, BroadcastConstants bgConstants,
             BroadcastSkipPolicy skipPolicy, BroadcastHistory history) {
-        super(service, handler, "modern", skipPolicy, history);
+        super(service, handler, skipPolicy, history);
 
         // For the moment, read agnostic constants from foreground
         mConstants = Objects.requireNonNull(fgConstants);
@@ -545,8 +545,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 }
             }
 
-            if (DEBUG_BROADCAST) logv("Promoting " + queue
-                    + " from runnable to running; process is " + queue.app);
+            if (DEBUG_BROADCAST) {
+                logv("Promoting " + queue + " from runnable to running; process is " + queue.app);
+            }
             promoteToRunningLocked(queue);
             boolean completed;
             if (processWarm) {
@@ -1198,12 +1199,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
                     thread.scheduleRegisteredReceiver(
-                        ((BroadcastFilter) receiver).receiverList.receiver,
-                        receiverIntent, r.resultCode, r.resultData, r.resultExtras,
-                        r.ordered, r.initialSticky, assumeDelivered, r.userId,
-                        app.mState.getReportedProcState(),
-                        r.shareIdentity ? r.callingUid : Process.INVALID_UID,
-                        r.shareIdentity ? r.callerPackage : null);
+                            ((BroadcastFilter) receiver).receiverList.receiver,
+                            receiverIntent, r.resultCode, r.resultData, r.resultExtras,
+                            r.ordered, r.initialSticky, assumeDelivered, r.userId,
+                            app.mState.getReportedProcState(),
+                            r.shareIdentity ? r.callingUid : Process.INVALID_UID,
+                            r.shareIdentity ? r.callerPackage : null);
                     // TODO: consider making registered receivers of unordered
                     // broadcasts report results to detect ANRs
                     if (assumeDelivered) {
@@ -1922,13 +1923,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return getRunningSize() + " running";
     }
 
-    @GuardedBy("mService")
-    @Override
-    public void backgroundServicesFinishedLocked(int userId) {
-        // Modern queue does not alter the broadcasts delivery behavior based on background
-        // services, so ignore.
-    }
-
     private void checkHealth() {
         synchronized (mService) {
             checkHealthLocked();
@@ -2418,7 +2412,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
         mHistory.dumpDebug(proto);
         proto.end(token);
     }
@@ -2448,7 +2441,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         if (dumpHistory) {
             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            needSep = mHistory.dumpLocked(ipw, dumpPackage, dumpIntentAction, mQueueName,
+            needSep = mHistory.dumpLocked(ipw, dumpPackage, dumpIntentAction,
                     sdf, dumpAll);
         }
         return needSep;

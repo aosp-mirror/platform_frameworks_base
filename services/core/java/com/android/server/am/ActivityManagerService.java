@@ -14374,10 +14374,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastController.unbroadcastIntent(caller, intent, userId);
     }
 
-    void backgroundServicesFinishedLocked(int userId) {
-        mBroadcastQueue.backgroundServicesFinishedLocked(userId);
-    }
-
     public void finishReceiver(IBinder caller, int resultCode, String resultData,
             Bundle resultExtras, boolean resultAbort, int flags) {
         mBroadcastController.finishReceiver(caller, resultCode, resultData, resultExtras,
@@ -18936,7 +18932,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Settings.Global.BROADCAST_BG_CONSTANTS);
             backConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
 
-            return new BroadcastQueueModernImpl(service, service.mHandler,
+            return new BroadcastQueueImpl(service, service.mHandler,
                         foreConstants, backConstants);
         }
 

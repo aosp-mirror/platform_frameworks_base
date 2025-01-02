@@ -96,8 +96,8 @@ import java.util.List;
 import java.util.Objects;
 
 @SmallTest
-public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
-    private static final String TAG = "BroadcastQueueModernImplTest";
+public final class BroadcastQueueImplTest extends BaseBroadcastQueueTest {
+    private static final String TAG = "BroadcastQueueImplTest";
 
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
@@ -109,7 +109,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     @Mock BroadcastProcessQueue mQueue3;
     @Mock BroadcastProcessQueue mQueue4;
 
-    BroadcastQueueModernImpl mImpl;
+    BroadcastQueueImpl mImpl;
 
     BroadcastProcessQueue mHead;
 
@@ -121,7 +121,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         mConstants.DELAY_NORMAL_MILLIS = 10_000;
         mConstants.DELAY_CACHED_MILLIS = 120_000;
 
-        mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
+        mImpl = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(),
                 mConstants, mConstants, mSkipPolicy, mEmptyHistory);
         mAms.setBroadcastQueueForTest(mImpl);
 

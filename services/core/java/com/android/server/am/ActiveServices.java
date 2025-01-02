@@ -757,9 +757,6 @@ public final class ActiveServices {
                 Message msg = obtainMessage(MSG_BG_START_TIMEOUT);
                 sendMessageAtTime(msg, when);
             }
-            if (mStartingBackground.size() < mMaxStartingBackground) {
-                mAm.backgroundServicesFinishedLocked(mUserId);
-            }
         }
     }
 
