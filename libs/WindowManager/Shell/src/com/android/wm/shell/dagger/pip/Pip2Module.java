@@ -81,11 +81,12 @@ public abstract class Pip2Module {
             @NonNull PipScheduler pipScheduler,
             @NonNull PipTransitionState pipStackListenerController,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
-            @NonNull PipUiStateChangeController pipUiStateChangeController) {
+            @NonNull PipUiStateChangeController pipUiStateChangeController,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
                 pipScheduler, pipStackListenerController, pipDisplayLayoutState,
-                pipUiStateChangeController);
+                pipUiStateChangeController, desktopUserRepositoriesOptional);
     }
 
     @WMSingleton
