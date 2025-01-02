@@ -140,7 +140,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     @Override
     protected void onViewDetached() {
         // TODO(b/117344873) Remove below work around after this issue be fixed.
-        if (mDisplayId == mDisplayTracker.getDefaultDisplayId()) {
+        if (mDisplayId == mDisplayTracker.getDefaultDisplayId() && mLiveData != null) {
             mLiveData.removeObserver(mObserver);
         }
         mConfigurationController.removeCallback(mConfigurationListener);
