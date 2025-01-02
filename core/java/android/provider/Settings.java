@@ -1256,12 +1256,12 @@ public final class Settings {
     /**
      * Activity Action: Show numbering system configuration settings.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
      * Input: Nothing.
      * <p>
-     * Output: Nothing.
+     * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
+     * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
+     * the numbering system settings page is suitable to show on the UI. Otherwise, the result is
+     * set to {@link android.app.Activity#RESULT_CANCELED}.
      */
     @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
