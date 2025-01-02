@@ -45,6 +45,7 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
@@ -78,10 +79,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Presubmit
 @RunWith(JUnit4.class)
@@ -885,18 +883,15 @@ public class AppsFilterImplTest {
                         return null;
                     }
 
-                    @NonNull
+                    @Nullable
                     @Override
-                    public Map<String, Set<String>> getTargetToOverlayables(
+                    public Pair<String, String> getTargetToOverlayables(
                             @NonNull AndroidPackage pkg) {
                         if (overlay.getPackageName().equals(pkg.getPackageName())) {
-                            Map<String, Set<String>> map = new ArrayMap<>();
-                            Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetOverlayableName());
-                            map.put(overlay.getOverlayTarget(), set);
-                            return map;
+                            return Pair.create(overlay.getOverlayTarget(),
+                                    overlay.getOverlayTargetOverlayableName());
                         }
-                        return Collections.emptyMap();
+                        return null;
                     }
                 },
                 mMockHandler);
@@ -977,18 +972,15 @@ public class AppsFilterImplTest {
                         return null;
                     }
 
-                    @NonNull
+                    @Nullable
                     @Override
-                    public Map<String, Set<String>> getTargetToOverlayables(
+                    public Pair<String, String> getTargetToOverlayables(
                             @NonNull AndroidPackage pkg) {
                         if (overlay.getPackageName().equals(pkg.getPackageName())) {
-                            Map<String, Set<String>> map = new ArrayMap<>();
-                            Set<String> set = new ArraySet<>();
-                            set.add(overlay.getOverlayTargetOverlayableName());
-                            map.put(overlay.getOverlayTarget(), set);
-                            return map;
+                            return Pair.create(overlay.getOverlayTarget(),
+                                    overlay.getOverlayTargetOverlayableName());
                         }
-                        return Collections.emptyMap();
+                        return null;
                     }
                 },
                 mMockHandler);
