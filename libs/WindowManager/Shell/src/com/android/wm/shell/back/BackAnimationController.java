@@ -28,7 +28,6 @@ import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
-import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.window.flags.Flags.unifyBackNavigationTransition;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
@@ -215,9 +214,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
                         setTriggerBack(false);
                         // Trigger close transition if necessary.
-                        if (Flags.migratePredictiveBackTransition()) {
-                            mBackTransitionHandler.onAnimationFinished();
-                        }
+                        mBackTransitionHandler.onAnimationFinished();
                         resetTouchTracker();
                         // Don't wait for animation start
                         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
@@ -918,23 +915,16 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellExecutor.executeDelayed(mAnimationTimeoutRunnable, MAX_ANIMATION_DURATION);
 
         // The next callback should be {@link #onBackAnimationFinished}.
-        final boolean migrateBackToTransition = migratePredictiveBackTransition();
         if (mCurrentTracker.getTriggerBack()) {
-            if (migrateBackToTransition) {
-                // notify core gesture is commit
-                if (shouldTriggerCloseTransition()) {
-                    mBackTransitionHandler.mCloseTransitionRequested = true;
-                    final IOnBackInvokedCallback callback =
-                            mBackNavigationInfo.getOnBackInvokedCallback();
-                    // invoked client side onBackInvoked
-                    dispatchOnBackInvoked(callback);
-                    mRealCallbackInvoked = true;
-                }
-            } else {
-                // notify gesture finished
-                mBackNavigationInfo.onBackGestureFinished(true);
+            // notify core gesture is commit
+            if (shouldTriggerCloseTransition()) {
+                mBackTransitionHandler.mCloseTransitionRequested = true;
+                final IOnBackInvokedCallback callback =
+                        mBackNavigationInfo.getOnBackInvokedCallback();
+                // invoked client side onBackInvoked
+                dispatchOnBackInvoked(callback);
+                mRealCallbackInvoked = true;
             }
-
             // start post animation
             dispatchOnBackInvoked(mActiveCallback);
         } else {

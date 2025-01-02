@@ -22,10 +22,8 @@ import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APP_PROGRESS_GENERATION_ALLOWED;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_FINISH_AND_REMOVE_TASK;
 import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED;
 
@@ -50,7 +48,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -657,12 +654,6 @@ class BackNavigationController {
                 && displayContent.isFixedRotationLaunchingApp(openActivity);
     }
 
-    private boolean isWaitBackTransition() {
-        // Ignore mWaitTransition while flag is enabled.
-        return mAnimationHandler.mComposed && (Flags.migratePredictiveBackTransition()
-                || mAnimationHandler.mWaitTransition);
-    }
-
     boolean isKeyguardOccluded(WindowState focusWindow) {
         final KeyguardController kc = mWindowManagerService.mAtmService.mKeyguardController;
         final int displayId = focusWindow.getDisplayId();
@@ -700,65 +691,14 @@ class BackNavigationController {
         return false;
     }
 
-    // For legacy transition.
-    /**
-     *  Once we find the transition targets match back animation targets, remove the target from
-     *  list, so that transition won't count them in since the close animation was finished.
-     *
-     *  @return {@code true} if the participants of this transition was animated by back gesture
-     *  animations, and shouldn't join next transition.
-     */
-    boolean removeIfContainsBackAnimationTargets(ArraySet<ActivityRecord> openApps,
-            ArraySet<ActivityRecord> closeApps) {
-        if (!isMonitoringFinishTransition()) {
-            return false;
-        }
-        mTmpCloseApps.addAll(closeApps);
-        final boolean matchAnimationTargets = removeIfWaitForBackTransition(openApps, closeApps);
-        if (!matchAnimationTargets) {
-            mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
-        }
-        mTmpCloseApps.clear();
-        return matchAnimationTargets;
-    }
-
-    boolean removeIfWaitForBackTransition(ArraySet<ActivityRecord> openApps,
-            ArraySet<ActivityRecord> closeApps) {
-        if (!isWaitBackTransition()) {
-            return false;
-        }
-        // Note: TmpOpenApps is empty. Unlike shell transition, the open apps will be removed from
-        // mOpeningApps if there is no visibility change.
-        if (mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps)) {
-            // remove close target from close list, open target from open list;
-            // but the open target can be in close list.
-            for (int i = openApps.size() - 1; i >= 0; --i) {
-                final ActivityRecord ar = openApps.valueAt(i);
-                if (mAnimationHandler.isTarget(ar, true /* open */)) {
-                    openApps.removeAt(i);
-                }
-            }
-            for (int i = closeApps.size() - 1; i >= 0; --i) {
-                final ActivityRecord ar = closeApps.valueAt(i);
-                if (mAnimationHandler.isTarget(ar, false /* open */)) {
-                    closeApps.removeAt(i);
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
     void removePredictiveSurfaceIfNeeded(ActivityRecord openActivity) {
         mAnimationHandler.markWindowHasDrawn(openActivity);
     }
 
     boolean isStartingSurfaceShown(ActivityRecord openActivity) {
-        if (!Flags.migratePredictiveBackTransition()) {
-            return false;
-        }
         return mAnimationHandler.isStartingSurfaceDrawn(openActivity);
     }
+
     @VisibleForTesting
     class NavigationMonitor {
         // The window which triggering the back navigation.
@@ -821,24 +761,6 @@ class BackNavigationController {
             final Bundle result = new Bundle();
             result.putBoolean(BackNavigationInfo.KEY_TOUCH_GESTURE_TRANSFERRED, true);
             mObserver.sendResult(result);
-        }
-
-        /**
-         * Notify an unexpected transition has happened during back navigation.
-         */
-        private void onTransitionReadyWhileNavigate(ArrayList<WindowContainer> opening,
-                ArrayList<WindowContainer> closing) {
-            if (!isMonitorForRemote() && !isMonitorAnimationOrTransition()) {
-                return;
-            }
-            final ArrayList<WindowContainer> all = new ArrayList<>(opening);
-            all.addAll(closing);
-            for (int i = all.size() - 1; i >= 0; --i) {
-                if (all.get(i).hasChild(mNavigatingWindow)) {
-                    cancelBackNavigating("transitionHappens");
-                    break;
-                }
-            }
         }
 
         private boolean atSameDisplay(WindowState newFocus) {
@@ -922,8 +844,7 @@ class BackNavigationController {
         if (targets.isEmpty()) {
             return;
         }
-        final boolean migratePredictToTransition = Flags.migratePredictiveBackTransition();
-        if (migratePredictToTransition && !mAnimationHandler.mComposed) {
+        if (!mAnimationHandler.mComposed) {
             return;
         } else if (!isMonitoringFinishTransition()) {
             return;
@@ -949,63 +870,40 @@ class BackNavigationController {
                 mTmpCloseApps.add(wc);
             }
         }
-        final boolean matchAnimationTargets;
-        if (migratePredictToTransition) {
-            matchAnimationTargets =
-                    mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
-        } else {
-            matchAnimationTargets = isWaitBackTransition()
-                && (transition.mType == TRANSIT_CLOSE || transition.mType == TRANSIT_TO_BACK)
-                && mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
-        }
+        final boolean matchAnimationTargets = mAnimationHandler
+                .containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "onTransactionReady, opening: %s, closing: %s, animating: %s, match: %b",
                 mTmpOpenApps, mTmpCloseApps, mAnimationHandler, matchAnimationTargets);
         // Don't cancel transition, let transition handler to handle it
-        if (!matchAnimationTargets && !migratePredictToTransition) {
-            mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
-        } else {
-            if (mAnimationHandler.mPrepareCloseTransition != null) {
-                Slog.e(TAG, "Gesture animation is applied on another transition?");
-                return;
-            }
-            mAnimationHandler.mPrepareCloseTransition = transition;
-            if (!migratePredictToTransition) {
-                // Because the target will reparent to transition root, so it cannot be controlled
-                // by animation leash. Hide the close target when transition starts.
-                startTransaction.hide(mAnimationHandler.mCloseAdaptor.mTarget.getSurfaceControl());
-            }
-            // Flag target matches and prepare to remove windowless surface.
-            mAnimationHandler.markStartingSurfaceMatch(startTransaction);
-            // release animation leash
-            if (mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction != null) {
-                finishTransaction.merge(mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction);
-                mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction = null;
-            }
+        if (mAnimationHandler.mPrepareCloseTransition != null) {
+            Slog.e(TAG, "Gesture animation is applied on another transition?");
+            return;
+        }
+        mAnimationHandler.mPrepareCloseTransition = transition;
+        // Flag target matches and prepare to remove windowless surface.
+        mAnimationHandler.markStartingSurfaceMatch(startTransaction);
+        // release animation leash
+        if (mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction != null) {
+            finishTransaction.merge(mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction);
+            mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction = null;
         }
         mTmpOpenApps.clear();
         mTmpCloseApps.clear();
     }
 
     boolean isMonitorTransitionTarget(WindowContainer wc) {
-        if (Flags.migratePredictiveBackTransition()) {
-            if (!mAnimationHandler.mComposed) {
-                return false;
-            }
-            if (mAnimationHandler.mSwitchType == AnimationHandler.TASK_SWITCH
-                    && wc.asActivityRecord() != null
-                    || (mAnimationHandler.mSwitchType == AnimationHandler.ACTIVITY_SWITCH
-                    && wc.asTask() != null)) {
-                return false;
-            }
-            return (mAnimationHandler.isTarget(wc, true /* open */)
-                    || mAnimationHandler.isTarget(wc, false /* open */));
-        } else if ((isWaitBackTransition() && mAnimationHandler.mPrepareCloseTransition != null)
-                || (mAnimationHandler.mOpenAnimAdaptor != null
-                && mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition != null)) {
-            return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
+        if (!mAnimationHandler.mComposed) {
+            return false;
         }
-        return false;
+        if (mAnimationHandler.mSwitchType == AnimationHandler.TASK_SWITCH
+                && wc.asActivityRecord() != null
+                || (mAnimationHandler.mSwitchType == AnimationHandler.ACTIVITY_SWITCH
+                && wc.asTask() != null)) {
+            return false;
+        }
+        return (mAnimationHandler.isTarget(wc, true /* open */)
+                || mAnimationHandler.isTarget(wc, false /* open */));
     }
 
     boolean shouldPauseTouch(WindowContainer wc) {
@@ -1163,12 +1061,10 @@ class BackNavigationController {
             WindowContainer[] open = builder.mOpenTargets;
             if (isActivitySwitch(close, open)) {
                 mSwitchType = ACTIVITY_SWITCH;
-                if (Flags.migratePredictiveBackTransition()) {
-                    final Pair<WindowContainer, WindowContainer[]> replaced =
-                            promoteToTFIfNeeded(close, open);
-                    close = replaced.first;
-                    open = replaced.second;
-                }
+                final Pair<WindowContainer, WindowContainer[]> replaced =
+                        promoteToTFIfNeeded(close, open);
+                close = replaced.first;
+                open = replaced.second;
             } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
             } else if (isDialogClose(close)) {
@@ -1988,19 +1884,11 @@ class BackNavigationController {
                                 // animation was canceled
                                 return;
                             }
-                            if (Flags.migratePredictiveBackTransition()) {
-                                if (mOpenAnimAdaptor == null
-                                        || mOpenAnimAdaptor.mPreparedOpenTransition == null) {
-                                    // no open nor close transition, this is window animation
-                                    if (!triggerBack) {
-                                        clearBackAnimateTarget(true /* cancel */);
-                                    }
-                                }
-                            } else {
+                            if (mOpenAnimAdaptor == null
+                                    || mOpenAnimAdaptor.mPreparedOpenTransition == null) {
+                                // no open nor close transition, this is window animation
                                 if (!triggerBack) {
                                     clearBackAnimateTarget(true /* cancel */);
-                                } else {
-                                    mWaitTransition = true;
                                 }
                             }
                         }
@@ -2097,8 +1985,6 @@ class BackNavigationController {
     }
 
     private static Transition setLaunchBehind(@NonNull ActivityRecord[] activities) {
-        final boolean migrateBackTransition = Flags.migratePredictiveBackTransition();
-        final boolean unifyBackNavigationTransition = Flags.unifyBackNavigationTransition();
         final ArrayList<ActivityRecord> affects = new ArrayList<>();
         for (int i = activities.length - 1; i >= 0; --i) {
             final ActivityRecord activity = activities[i];
@@ -2112,23 +1998,11 @@ class BackNavigationController {
         }
 
         final TransitionController tc = activities[0].mTransitionController;
-        final Transition prepareOpen = migrateBackTransition && !unifyBackNavigationTransition
+        final Transition prepareOpen = !Flags.unifyBackNavigationTransition()
                 && !tc.isCollecting() ? tc.createTransition(TRANSIT_PREPARE_BACK_NAVIGATION) : null;
 
-        DisplayContent commonDisplay = null;
         for (int i = affects.size() - 1; i >= 0; --i) {
             final ActivityRecord activity = affects.get(i);
-            if (!migrateBackTransition && !activity.isVisibleRequested()) {
-                // The transition could commit the visibility and in the finishing state, that could
-                // skip commitVisibility call in setVisibility cause the activity won't visible
-                // here.
-                // Call it again to make sure the activity could be visible while handling the
-                // pending animation.
-                // Do not performLayout during prepare animation, because it could cause focus
-                // window change. Let that happen after the BackNavigationInfo has returned to
-                // shell.
-                activity.commitVisibility(true, false /* performLayout */);
-            }
             activity.mTransitionController.mSnapshotController
                     .mActivitySnapshotController.addOnBackPressedActivity(activity);
             activity.mLaunchTaskBehind = true;
@@ -2137,15 +2011,10 @@ class BackNavigationController {
                     "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
             activity.mTaskSupervisor.mStoppingActivities.remove(activity);
 
-            if (!migrateBackTransition) {
-                commonDisplay = activity.getDisplayContent();
-            } else if (activity.shouldBeVisible()) {
+            if (activity.shouldBeVisible()) {
                 activity.ensureActivityConfiguration(true /* ignoreVisibility */);
                 activity.makeVisibleIfNeeded(null /* starting */, true /* notifyToClient */);
             }
-        }
-        if (commonDisplay != null) {
-            commonDisplay.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
         }
         if (prepareOpen != null) {
             if (prepareOpen.hasChanges()) {
@@ -2172,17 +2041,10 @@ class BackNavigationController {
                 "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                 activity);
         if (cancel) {
-            final boolean migrateBackTransition = Flags.migratePredictiveBackTransition();
             // could be visible if transition is canceled due to top activity is finishing.
-            if (migrateBackTransition) {
-                if (finishTransition && !activity.shouldBeVisible()) {
-                    activity.commitVisibility(false /* visible */, false /* performLayout */,
-                            true /* fromTransition */);
-                }
-            } else {
-                // Restore the launch-behind state
-                // TODO b/347168362 Change status directly during collecting for a transition.
-                activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
+            if (finishTransition && !activity.shouldBeVisible()) {
+                activity.commitVisibility(false /* visible */, false /* performLayout */,
+                        true /* fromTransition */);
             }
             // Ignore all change
             activity.mTransitionController.mSnapshotController
@@ -2205,9 +2067,6 @@ class BackNavigationController {
 
     /** If the open transition is playing, wait for transition to clear the animation */
     private boolean canCancelAnimations() {
-        if (!Flags.migratePredictiveBackTransition()) {
-            return true;
-        }
         return mAnimationHandler.mOpenAnimAdaptor == null
                 || mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition == null;
     }
@@ -2246,17 +2105,6 @@ class BackNavigationController {
                 // All animation should be done, clear any un-send animation.
                 mPendingAnimation = null;
                 mPendingAnimationBuilder = null;
-            }
-        }
-        if (result.getBoolean(BackNavigationInfo.KEY_GESTURE_FINISHED)) {
-            synchronized (mWindowManagerService.mGlobalLock) {
-                final AnimationHandler ah = mAnimationHandler;
-                if (!ah.mComposed || ah.mWaitTransition || ah.mOpenActivities == null
-                        || (ah.mSwitchType != AnimationHandler.TASK_SWITCH
-                        && ah.mSwitchType != AnimationHandler.ACTIVITY_SWITCH)) {
-                    return;
-                }
-                setLaunchBehind(mAnimationHandler.mOpenActivities);
             }
         }
     }

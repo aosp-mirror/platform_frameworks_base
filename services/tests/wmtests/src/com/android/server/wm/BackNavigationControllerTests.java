@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -60,8 +58,6 @@ import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.util.ArraySet;
 import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackMotionEvent;
@@ -76,7 +72,6 @@ import android.window.TaskSnapshot;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.server.LocalServices;
-import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -622,43 +617,6 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertThat(backNavigationInfo).isNull();
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
-    public void testTransitionHappensCancelNavigation() {
-        // Create a floating task and a fullscreen task, then navigating on fullscreen task.
-        // The navigation should not been cancelled when transition happens on floating task, and
-        // only be cancelled when transition happens on the navigating task.
-        final Task floatingTask = createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW,
-                ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord baseFloatingActivity = createActivityRecord(floatingTask);
-
-        final Task fullscreenTask = createTopTaskWithActivity();
-        withSystemCallback(fullscreenTask);
-        final ActivityRecord baseFullscreenActivity = fullscreenTask.getTopMostActivity();
-
-        final CountDownLatch navigationObserver = new CountDownLatch(1);
-        startBackNavigation(navigationObserver);
-
-        final ArraySet<ActivityRecord> opening = new ArraySet<>();
-        final ArraySet<ActivityRecord> closing = new ArraySet<>();
-        final ActivityRecord secondFloatingActivity = createActivityRecord(floatingTask);
-        opening.add(secondFloatingActivity);
-        closing.add(baseFloatingActivity);
-        mBackNavigationController.removeIfContainsBackAnimationTargets(opening, closing);
-        assertEquals("Transition happen on an irrelevant task, callback should not been called",
-                1, navigationObserver.getCount());
-
-        // Create a new activity above navigation target, the transition should cancel navigation.
-        final ActivityRecord topFullscreenActivity = createActivityRecord(fullscreenTask);
-        opening.clear();
-        closing.clear();
-        opening.add(topFullscreenActivity);
-        closing.add(baseFullscreenActivity);
-        mBackNavigationController.removeIfContainsBackAnimationTargets(opening, closing);
-        assertEquals("Transition happen on navigation task, callback should have been called",
-                0, navigationObserver.getCount());
     }
 
     @Test
