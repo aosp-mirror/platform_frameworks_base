@@ -2661,10 +2661,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int deleteTaskFragment(@NonNull TaskFragment taskFragment,
             @Nullable Transition transition) {
-        if (transition != null) transition.collectExistenceChange(taskFragment);
+        final boolean isEmpty = taskFragment.getNonFinishingActivityCount() == 0;
+        if (transition != null && (taskFragment.isVisibleRequested()
+                // In case to update existing change type.
+                || transition.mChanges.containsKey(taskFragment))) {
+            transition.collectExistenceChange(taskFragment);
+        }
 
         mLaunchTaskFragments.remove(taskFragment.getFragmentToken());
         taskFragment.remove(true /* withTransition */, "deleteTaskFragment");
+        if (isEmpty) {
+            // The removal of an empty TaskFragment doesn't affect lifecycle.
+            return 0;
+        }
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 

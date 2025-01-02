@@ -638,6 +638,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_enforceHierarchyChange_deleteTaskFragment() {
         doReturn(true).when(mTaskFragment).isAttached();
+        doReturn(1).when(mTaskFragment).getNonFinishingActivityCount();
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
 
         // Throw exception if the transaction is trying to change a window that is not organized by
