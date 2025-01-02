@@ -215,6 +215,8 @@ public class BubbleController implements ConfigurationChangeListener,
     private final BubblePositioner mBubblePositioner;
     private Bubbles.SysuiProxy mSysuiProxy;
 
+    @Nullable private Runnable mOnImeHidden;
+
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
     // Current profiles of the user (e.g. user with a workprofile)
@@ -615,7 +617,8 @@ public class BubbleController implements ConfigurationChangeListener,
     /**
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
-    void hideCurrentInputMethod() {
+    void hideCurrentInputMethod(@Nullable Runnable onImeHidden) {
+        mOnImeHidden = onImeHidden;
         mBubblePositioner.setImeVisible(false /* visible */, 0 /* height */);
         int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
         try {
@@ -2267,7 +2270,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mLayerView != null && mLayerView.isExpanded()) {
             if (mBubblePositioner.isImeVisible()) {
                 // If we're collapsing, hide the IME
-                hideCurrentInputMethod();
+                hideCurrentInputMethod(null);
             }
             mLayerView.collapse();
         }
@@ -2552,6 +2555,10 @@ public class BubbleController implements ConfigurationChangeListener,
             mBubblePositioner.setImeVisible(imeVisible, totalImeHeight);
             if (mStackView != null) {
                 mStackView.setImeVisible(imeVisible);
+                if (!imeVisible && mOnImeHidden != null) {
+                    mOnImeHidden.run();
+                    mOnImeHidden = null;
+                }
             }
         }
 
