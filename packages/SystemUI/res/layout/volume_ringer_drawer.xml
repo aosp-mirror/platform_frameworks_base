@@ -29,6 +29,7 @@
         android:id="@+id/ringer_buttons_background"
         android:layout_width="@dimen/volume_dialog_width"
         android:layout_height="0dp"
+        android:visibility="gone"
         android:layout_marginTop="@dimen/volume_dialog_background_vertical_margin"
         android:layout_marginBottom="@dimen/volume_dialog_background_vertical_margin"
         android:background="@drawable/volume_dialog_ringer_background" />

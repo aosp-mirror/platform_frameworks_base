@@ -83,6 +83,18 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
             view.context.resources.getDimensionPixelSize(
                 R.dimen.volume_dialog_background_corner_radius
             )
+        val bottomDefaultRadius = volumeDialogBgFullRadius.toFloat()
+        val bottomCornerRadii =
+            floatArrayOf(
+                0F,
+                0F,
+                0F,
+                0F,
+                bottomDefaultRadius,
+                bottomDefaultRadius,
+                bottomDefaultRadius,
+                bottomDefaultRadius,
+            )
         var backgroundAnimationProgress: Float by
             Delegates.observable(0F) { _, _, progress ->
                 ringerBackgroundView.applyCorners(
@@ -115,6 +127,8 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                         drawerContainer.visibility = View.VISIBLE
                         when (uiModel.drawerState) {
                             is RingerDrawerState.Initial -> {
+                                (volumeDialogBackgroundView.background as GradientDrawable)
+                                    .cornerRadii = bottomCornerRadii
                                 drawerContainer.animateAndBindDrawerButtons(
                                     viewModel,
                                     uiModel,
@@ -123,6 +137,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                 )
                                 ringerDrawerTransitionListener.setProgressChangeEnabled(true)
                                 drawerContainer.closeDrawer(
+                                    ringerBackgroundView,
                                     uiModel.currentButtonIndex,
                                     ringerState.orientation,
                                 )
@@ -165,6 +180,7 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                             )
                                         }
                                         drawerContainer.closeDrawer(
+                                            ringerBackgroundView,
                                             uiModel.currentButtonIndex,
                                             ringerState.orientation,
                                         )
@@ -187,7 +203,11 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                                 } else {
                                     ringerDrawerTransitionListener.setProgressChangeEnabled(true)
                                 }
-                                updateOpenState(drawerContainer, ringerState.orientation)
+                                updateOpenState(
+                                    drawerContainer,
+                                    ringerState.orientation,
+                                    ringerBackgroundView,
+                                )
                                 drawerContainer.transitionToState(
                                     R.id.volume_dialog_ringer_drawer_open
                                 )
@@ -203,9 +223,6 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                         drawerContainer.visibility = View.GONE
                         volumeDialogBackgroundView.setBackgroundResource(
                             R.drawable.volume_dialog_background
-                        )
-                        ringerBackgroundView.setBackgroundResource(
-                            R.drawable.volume_dialog_ringer_background
                         )
                     }
                 }
@@ -351,9 +368,13 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         }
     }
 
-    private fun MotionLayout.closeDrawer(selectedIndex: Int, orientation: Int) {
+    private fun MotionLayout.closeDrawer(
+        ringerBackground: View,
+        selectedIndex: Int,
+        orientation: Int,
+    ) {
         setTransition(R.id.close_to_open_transition)
-        updateCloseState(this, selectedIndex, orientation)
+        updateCloseState(this, selectedIndex, orientation, ringerBackground)
         transitionToState(R.id.volume_dialog_ringer_drawer_close)
     }
 
