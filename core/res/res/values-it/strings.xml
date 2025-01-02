@@ -72,9 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con le pagine di 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -88,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossibile raggiungere la rete mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova a cambiare la rete preferita. Tocca per cambiare."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chiamate di emergenza non disponibili"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per le chiamate di emergenza è necessaria una rete mobile"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Avvisi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Deviazione chiamate"</string>
@@ -1779,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Protesi uditive"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>

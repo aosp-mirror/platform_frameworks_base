@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"无法连接到移动网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"请尝试更改首选网络。点按即可更改。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"无法使用紧急呼救服务"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"紧急呼叫需要使用移动网络"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"提醒"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"来电转接"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助听装置"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"松开音量键。如要启用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，请再次同时按住两个音量键 3 秒。"</string>

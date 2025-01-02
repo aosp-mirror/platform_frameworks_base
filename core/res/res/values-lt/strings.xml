@@ -89,6 +89,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nepavyko pasiekti mobiliojo ryšio tinklo"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Pabandykite pakeisti pageidaujamą tinklą. Palieskite, kad pakeistumėte."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Skambučių pagalbos numeriu paslauga nepasiekiama"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Kad būtų galima skambinti pagalbos numeriais, būtina naudoti mobiliojo ryšio tinklą"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Įspėjimai"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Skambučio peradresavimas"</string>
@@ -1780,6 +1782,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienos rankos režimas"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Klausos įrenginiai"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ įjungta."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ išjungta."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Atleiskite garsumo klavišus. Kad įjungtumėte „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“, paspauskite ir 3 sekundes palaikykite garsumo klavišus."</string>

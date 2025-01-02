@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्क उपलब्ध नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"प्राधान्य दिलेले नेटवर्क बदलण्याचा प्रयत्न करा. बदलण्यासाठी टॅप करा."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आणीबाणी कॉलिंग अनुपलब्ध"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"आणीबाणी कॉलसाठी मोबाइल नेटवर्क आवश्यक आहे"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"अलर्ट"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कॉल फॉरवर्डिंग"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"श्रवणयंत्रे"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"व्हॉल्यूम की रिलीझ करा. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू करण्यासाठी, दोन्ही व्हॉल्यूम की पुन्हा प्रेस करा आणि तीन सेकंदांसाठी धरून ठेवा."</string>

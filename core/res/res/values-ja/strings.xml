@@ -73,7 +73,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"このアプリは 16 KB アライメントではありません。APK のアライメント チェックが失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
     <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"このアプリは 16 KB アライメントではありません。ELF のアライメント チェックに失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"このアプリは 16 KB アライメントではありません。APK と ELF のアライメント チェックが失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"このアプリは 16 KB アライメントではありません。APK と ELF のアライメント チェックに失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"発信者番号の設定は変更できません。"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"データが <xliff:g id="CARRIERDISPLAY">%s</xliff:g> に切り替わりました"</string>
@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"タップして、優先ネットワークを変更してください。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"緊急通報は利用できません"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"緊急通報にはモバイル ネットワークが必要です"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"電話の転送"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"片手モード"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"さらに輝度を下げる"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"補聴器"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"音量ボタンを離してください。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を有効にするには音量大と音量小の両方のボタンを 3 秒ほど長押ししてください。"</string>

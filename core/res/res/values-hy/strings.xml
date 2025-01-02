@@ -71,9 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Զանգողի ID-ն լռելյայն սահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` Սահմանափակված"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ չափի համար։ APK-ի հետ համատեղելիությունը ձախողվել է։ Այս հավելվածը կաշխատի էջի չափի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ չափն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ չափի համար։ ELF-ի հետ համատեղելիությունը ձախողվել է։ Այս հավելվածը կաշխատի էջի չափի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ չափն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ չափի համար։ APK-ի և ELF-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի չափի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ չափն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ APK-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ ELF-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ APK-ի և ELF-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Ծառայությունը չի տրամադրվում:"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Դուք չեք կարող փոխել զանգողի ID-ի կարգավորումները:"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Օգտագործվում է <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ի բջջային ինտերնետը"</string>
@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Չհաջողվեց միանալ բջջային ցանցին"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Փորձեք այլ ցանցի միանալ: Հպեք՝ նախընտրած ցանցը փոխելու համար:"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Շտապ կանչերը հասանելի չեն"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Շտապ կանչերի համար բջջային ցանց է անհրաժեշտ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Զանգի վերահասցեավորում"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Լսողական սարքեր"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Բաց թողեք ձայնի ուժգնության կոճակները։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացնելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակը։"</string>

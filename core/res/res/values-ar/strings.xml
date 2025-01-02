@@ -76,8 +76,8 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات APK. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات ELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عمليات التأكُّد من محاذاة ملفات APK وELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. تعذَّر إكمال عملية التأكُّد من محاذاة ملفات ELF. سيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. لكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الانتقال إلى الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. تعذَّر إكمال عمليات التأكُّد من محاذاة ملفات APK وELF. سيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. لكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاتنقال إلى الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"تم تبديل البيانات إلى <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -91,6 +91,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"يتعذّر الوصول إلى شبكة الجوّال."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"حاول تغيير الشبكة المفضلة. انقر لتغييرها."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"لا تتوفر إمكانية الاتصال في حالات الطوارئ."</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"يتطلّب إجراء مكالمات الطوارئ الاتصال بشبكة جوّال"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"التنبيهات"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"إعادة توجيه المكالمة"</string>
@@ -1782,6 +1784,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"وضع \"التصفح بيد واحدة\""</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"زيادة تعتيم الشاشة"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"سماعات الأذن الطبية"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم تفعيل <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"تم الضغط مع الاستمرار على مفتاحَي التحكّم في مستوى الصوت. تم إيقاف <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ارفع إصبعَيك عن مفتاحَي مستوى الصوت. لتفعيل خدمة \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"، اضغط مع الاستمرار على كلا مفتاحَي مستوى الصوت مجددًا لمدة 3 ثوانٍ."</string>

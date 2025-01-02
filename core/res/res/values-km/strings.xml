@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​ទូរសព្ទ​ចល័តបានទេ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"សាកល្បង​ប្ដូរ​ទៅបណ្ដាញ​ដែល​ចង់ប្រើ។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"មិន​អាច​ប្រើ​ការ​ហៅ​បន្ទាន់​បានទេ"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់តម្រូវឱ្យមានបណ្ដាញ​ទូរសព្ទ​ចល័ត"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ងងឹតខ្លាំង"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"លែង​គ្រាប់ចុចកម្រិតសំឡេង។ ដើម្បីបើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g> សូមចុច​គ្រាប់ចុចកម្រិតសំឡេងទាំងពីរឱ្យជាប់ម្ដងទៀត​រយៈពេល 3 វិនាទី។"</string>

@@ -87,6 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Can’t reach mobile network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Try changing preferred network. Tap to change."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Emergency calling unavailable"</string>
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Do Not Show Again"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Emergency calls require a mobile network"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerts"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Call forwarding"</string>
@@ -1778,6 +1779,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"One-Handed mode"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extra dim"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hearing devices"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Release the volume keys. To turn on <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds."</string>
