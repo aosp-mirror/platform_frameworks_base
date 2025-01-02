@@ -369,16 +369,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onBootPhase(int phase) {
             super.onBootPhase(phase);
-            if (phase == PHASE_ACTIVITY_MANAGER_READY) {
-                mLockSettingsService.migrateOldDataAfterSystemReady();
-                mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
-            } else if (phase == PHASE_BOOT_COMPLETED) {
-                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
-                // build can no longer occur.  This is the time to destroy any migrated protectors.
-                mLockSettingsService.destroyMigratedProtectors();
-
-                mLockSettingsService.loadEscrowData();
-            }
+            mLockSettingsService.onBootPhase(phase);
         }
 
         @Override
@@ -394,6 +385,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
             mLockSettingsService.onUserStopped(user.getUserIdentifier());
+        }
+    }
+
+    private void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            migrateOldDataAfterSystemReady();
+            deleteRepairModePersistentDataIfNeeded();
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            mHandler.post(() -> {
+                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
+                // build can no longer occur.  This is the time to destroy any migrated protectors.
+                destroyMigratedProtectors();
+
+                loadEscrowData();
+            });
         }
     }
 
