@@ -163,9 +163,15 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
                                             int deviceId) {
         mHandler.post(() -> {
             if (mTouchpadDebugView != null) {
-                mTouchpadDebugView.post(
-                        () -> mTouchpadDebugView.updateHardwareState(touchpadHardwareState,
-                                deviceId));
+                mTouchpadDebugView.post(() -> {
+                    // hideDebugView might have been called since we posted the action (e.g. if the
+                    // developer option toggle is clicked using the same touchpad currently being
+                    // visualized, b/376018148), so we need to check for null again.
+                    if (mTouchpadDebugView != null) {
+                        mTouchpadDebugView.updateHardwareState(touchpadHardwareState,
+                                deviceId);
+                    }
+                });
             }
         });
     }
@@ -177,8 +183,14 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     public void updateTouchpadGestureInfo(int gestureType, int deviceId) {
         mHandler.post(() -> {
             if (mTouchpadDebugView != null) {
-                mTouchpadDebugView.post(
-                        () -> mTouchpadDebugView.updateGestureInfo(gestureType, deviceId));
+                mTouchpadDebugView.post(() -> {
+                    // hideDebugView might have been called since we posted the action (e.g. if the
+                    // developer option toggle is clicked using the same touchpad currently being
+                    // visualized, b/376018148), so we need to check for null again.
+                    if (mTouchpadDebugView != null) {
+                        mTouchpadDebugView.updateGestureInfo(gestureType, deviceId);
+                    }
+                });
             }
         });
     }
