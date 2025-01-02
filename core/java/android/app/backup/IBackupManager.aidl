@@ -93,38 +93,6 @@ interface IBackupManager {
         IBackupObserver observer);
 
     /**
-     * Notifies the Backup Manager Service that an agent has become available.  This
-     * method is only invoked by the Activity Manager.
-     *
-     * If {@code userId} is different from the calling user id, then the caller must hold the
-     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
-     *
-     * @param userId User id for which an agent has become available.
-     */
-    void agentConnectedForUser(int userId, String packageName, IBinder agent);
-
-    /**
-     * {@link android.app.backup.IBackupManager.agentConnected} for the calling user id.
-     */
-    void agentConnected(String packageName, IBinder agent);
-
-    /**
-     * Notify the Backup Manager Service that an agent has unexpectedly gone away.
-     * This method is only invoked by the Activity Manager.
-     *
-     * If {@code userId} is different from the calling user id, then the caller must hold the
-     * android.permission.INTERACT_ACROSS_USERS_FULL permission.
-     *
-     * @param userId User id for which an agent has unexpectedly gone away.
-     */
-    void agentDisconnectedForUser(int userId, String packageName);
-
-    /**
-     * {@link android.app.backup.IBackupManager.agentDisconnected} for the calling user id.
-     */
-    void agentDisconnected(String packageName);
-
-    /**
      * Notify the Backup Manager Service that an application being installed will
      * need a data-restore pass.  This method is only invoked by the Package Manager.
      *

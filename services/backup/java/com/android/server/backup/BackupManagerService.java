@@ -22,9 +22,9 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
+import android.app.backup.BackupManagerInternal;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -60,6 +60,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.backup.utils.RandomAccessFileUtils;
@@ -91,7 +92,7 @@ import java.util.Set;
  * privileged callers (currently {@link DevicePolicyManager}). If called on {@link
  * UserHandle#USER_SYSTEM}, backup is disabled for all users.
  */
-public class BackupManagerService extends IBackupManager.Stub {
+public class BackupManagerService extends IBackupManager.Stub implements BackupManagerInternal {
     public static final String TAG = "BackupManagerService";
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
@@ -191,7 +192,6 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // TODO: Remove this when we implement DI by injecting in the construtor.
     @VisibleForTesting
     Handler getBackupHandler() {
         return mHandler;
@@ -637,51 +637,28 @@ public class BackupManagerService extends IBackupManager.Stub {
     }
 
     @Override
-    public void agentConnectedForUser(int userId, String packageName, IBinder agent)
-            throws RemoteException {
-        if (isUserReadyForBackup(userId)) {
-            agentConnected(userId, packageName, agent);
+    public void agentConnectedForUser(String packageName, @UserIdInt int userId, IBinder agent) {
+        if (!isUserReadyForBackup(userId)) {
+            return;
         }
-    }
 
-    @Override
-    public void agentConnected(String packageName, IBinder agent) throws RemoteException {
-        agentConnectedForUser(binderGetCallingUserId(), packageName, agent);
-    }
-
-    /**
-     * Callback: a requested backup agent has been instantiated. This should only be called from the
-     * {@link ActivityManager}.
-     */
-    public void agentConnected(@UserIdInt int userId, String packageName, IBinder agentBinder) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentConnected()");
+        UserBackupManagerService userBackupManagerService = getServiceForUserIfCallerHasPermission(
+                userId, "agentConnected()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.getBackupAgentConnectionManager().agentConnected(packageName,
-                    agentBinder);
+                    agent);
         }
     }
 
     @Override
-    public void agentDisconnectedForUser(int userId, String packageName) throws RemoteException {
-        if (isUserReadyForBackup(userId)) {
-            agentDisconnected(userId, packageName);
+    public void agentDisconnectedForUser(String packageName, @UserIdInt int userId) {
+        if (!isUserReadyForBackup(userId)) {
+            return;
         }
-    }
 
-    @Override
-    public void agentDisconnected(String packageName) throws RemoteException {
-        agentDisconnectedForUser(binderGetCallingUserId(), packageName);
-    }
-
-    /**
-     * Callback: a backup agent has failed to come up, or has unexpectedly quit. This should only be
-     * called from the {@link ActivityManager}.
-     */
-    public void agentDisconnected(@UserIdInt int userId, String packageName) {
-        UserBackupManagerService userBackupManagerService =
-                getServiceForUserIfCallerHasPermission(userId, "agentDisconnected()");
+        UserBackupManagerService userBackupManagerService = getServiceForUserIfCallerHasPermission(
+                userId, "agentDisconnected()");
 
         if (userBackupManagerService != null) {
             userBackupManagerService.getBackupAgentConnectionManager().agentDisconnected(
@@ -1688,7 +1665,7 @@ public class BackupManagerService extends IBackupManager.Stub {
      * @param userId User id on which the backup operation is being requested.
      * @param message A message to include in the exception if it is thrown.
      */
-    void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
+    private void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
         if (binderGetCallingUserId() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
@@ -1697,6 +1674,8 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     /** Implementation to receive lifecycle event callbacks for system services. */
     public static class Lifecycle extends SystemService {
+        private final BackupManagerService mBackupManagerService;
+
         public Lifecycle(Context context) {
             this(context, new BackupManagerService(context));
         }
@@ -1704,12 +1683,14 @@ public class BackupManagerService extends IBackupManager.Stub {
         @VisibleForTesting
         Lifecycle(Context context, BackupManagerService backupManagerService) {
             super(context);
+            mBackupManagerService = backupManagerService;
             sInstance = backupManagerService;
+            LocalServices.addService(BackupManagerInternal.class, mBackupManagerService);
         }
 
         @Override
         public void onStart() {
-            publishService(Context.BACKUP_SERVICE, BackupManagerService.sInstance);
+            publishService(Context.BACKUP_SERVICE, mBackupManagerService);
         }
 
         @Override
@@ -1717,17 +1698,17 @@ public class BackupManagerService extends IBackupManager.Stub {
             // Starts the backup service for this user if backup is active for this user. Offloads
             // work onto the handler thread {@link #mHandlerThread} to keep unlock time low since
             // backup is not essential for device functioning.
-            sInstance.postToHandler(
+            mBackupManagerService.postToHandler(
                     () -> {
-                        sInstance.updateDefaultBackupUserIdIfNeeded();
-                        sInstance.startServiceForUser(user.getUserIdentifier());
-                        sInstance.mHasFirstUserUnlockedSinceBoot = true;
+                        mBackupManagerService.updateDefaultBackupUserIdIfNeeded();
+                        mBackupManagerService.startServiceForUser(user.getUserIdentifier());
+                        mBackupManagerService.mHasFirstUserUnlockedSinceBoot = true;
                     });
         }
 
         @Override
         public void onUserStopping(@NonNull TargetUser user) {
-            sInstance.onStopUser(user.getUserIdentifier());
+            mBackupManagerService.onStopUser(user.getUserIdentifier());
         }
 
         @VisibleForTesting
