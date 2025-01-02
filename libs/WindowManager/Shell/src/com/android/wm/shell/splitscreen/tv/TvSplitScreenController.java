@@ -53,7 +53,6 @@ public class TvSplitScreenController extends SplitScreenController {
     private final SyncTransactionQueue mSyncQueue;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
-    private final ShellExecutor mBgExecutor;
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -86,20 +85,18 @@ public class TvSplitScreenController extends SplitScreenController {
             SplitState splitState,
             ShellExecutor mainExecutor,
             Handler mainHandler,
-            ShellExecutor bgExecutor,
             SystemWindows systemWindows) {
         super(context, shellInit, shellCommandHandler, shellController, shellTaskOrganizer,
                 syncQueue, rootTDAOrganizer, displayController, displayImeController,
                 displayInsetsController, null, transitions, transactionPool,
                 iconProvider, recentTasks, launchAdjacentController, Optional.empty(),
                 Optional.empty(), null /* stageCoordinator */, multiInstanceHelper, splitState,
-                mainExecutor, mainHandler, bgExecutor);
+                mainExecutor, mainHandler);
+
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
         mMainExecutor = mainExecutor;
-        mMainHandler = mainHandler;
-        mBgExecutor = bgExecutor;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -109,6 +106,8 @@ public class TvSplitScreenController extends SplitScreenController {
         mRecentTasksOptional = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mSplitState = splitState;
+
+        mMainHandler = mainHandler;
         mSystemWindows = systemWindows;
     }
 
@@ -121,7 +120,7 @@ public class TvSplitScreenController extends SplitScreenController {
         return new TvStageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool,
-                mIconProvider, mMainExecutor, mMainHandler, mBgExecutor,
+                mIconProvider, mMainExecutor, mMainHandler,
                 mRecentTasksOptional, mLaunchAdjacentController, mSplitState, mSystemWindows);
     }
 

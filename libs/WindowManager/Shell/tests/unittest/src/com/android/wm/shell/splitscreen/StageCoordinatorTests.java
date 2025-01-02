@@ -119,8 +119,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     private DefaultMixedHandler mDefaultMixedHandler;
     @Mock
     private SplitState mSplitState;
-    @Mock
-    private ShellExecutor mBgExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -143,9 +141,9 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
-                mMainExecutor, mMainHandler, mBgExecutor, Optional.empty(),
-                mLaunchAdjacentController, Optional.empty(), mSplitState,
-                Optional.empty()));
+                mMainExecutor, mMainHandler, Optional.empty(), mLaunchAdjacentController,
+                Optional.empty(), mSplitState, Optional.empty()));
+
         mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 
         when(mSplitLayout.getTopLeftBounds()).thenReturn(mBounds1);
