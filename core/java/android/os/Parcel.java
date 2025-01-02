@@ -3668,6 +3668,7 @@ public final class Parcel {
         int length = readInt();
         if (length >= 0)
         {
+            ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, length);
             array = new CharSequence[length];
 
             for (int i = 0 ; i < length ; i++)
@@ -3689,6 +3690,7 @@ public final class Parcel {
 
         int length = readInt();
         if (length >= 0) {
+            ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, length);
             array = new ArrayList<CharSequence>(length);
 
             for (int i = 0 ; i < length ; i++) {
@@ -3831,6 +3833,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         SparseBooleanArray sa = new SparseBooleanArray(N);
         readSparseBooleanArrayInternal(sa, N);
         return sa;
@@ -3847,6 +3850,7 @@ public final class Parcel {
         if (N < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         SparseIntArray sa = new SparseIntArray(N);
         readSparseIntArrayInternal(sa, N);
         return sa;
@@ -3892,6 +3896,7 @@ public final class Parcel {
     public final <T> void readTypedList(@NonNull List<T> list, @NonNull Parcelable.Creator<T> c) {
         int M = list.size();
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         int i = 0;
         for (; i < M && i < N; i++) {
             list.set(i, readTypedObject(c));
@@ -4050,6 +4055,7 @@ public final class Parcel {
     public final void readStringList(@NonNull List<String> list) {
         int M = list.size();
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         int i = 0;
         for (; i < M && i < N; i++) {
             list.set(i, readString());
@@ -4071,6 +4077,7 @@ public final class Parcel {
     public final void readBinderList(@NonNull List<IBinder> list) {
         int M = list.size();
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         int i = 0;
         for (; i < M && i < N; i++) {
             list.set(i, readStrongBinder());
@@ -4093,6 +4100,7 @@ public final class Parcel {
             @NonNull Function<IBinder, T> asInterface) {
         int M = list.size();
         int N = readInt();
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         int i = 0;
         for (; i < M && i < N; i++) {
             list.set(i, asInterface.apply(readStrongBinder()));
@@ -4159,6 +4167,7 @@ public final class Parcel {
             list.clear();
             return list;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
 
         final int m = list.size();
         int i = 0;
@@ -5540,6 +5549,7 @@ public final class Parcel {
         if (n < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
         HashMap<K, V> map = new HashMap<>(n);
         readMapInternal(map, n, loader, clazzKey, clazzValue);
         return map;
@@ -5555,6 +5565,8 @@ public final class Parcel {
     private <K, V> void readMapInternal(@NonNull Map<? super K, ? super V> outVal, int n,
             @Nullable ClassLoader loader, @Nullable Class<K> clazzKey,
             @Nullable Class<V> clazzValue) {
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
+        // TODO: move all reservation of map size here, not all reserves?
         while (n > 0) {
             K key = readValue(loader, clazzKey);
             V value = readValue(loader, clazzValue);
@@ -5580,6 +5592,7 @@ public final class Parcel {
      */
     void readArrayMap(ArrayMap<? super String, Object> map, int size, boolean sorted,
             boolean lazy, @Nullable ClassLoaderProvider loaderProvider, int[] lazyValueCount) {
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, size);
         while (size > 0) {
             String key = readString();
             Object value = (lazy) ? readLazyValue(loaderProvider) : readValue(
@@ -5625,6 +5638,7 @@ public final class Parcel {
         if (size < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, size);
         ArraySet<Object> result = new ArraySet<>(size);
         for (int i = 0; i < size; i++) {
             Object value = readValue(loader);
@@ -5646,6 +5660,8 @@ public final class Parcel {
      */
     private <T> void readListInternal(@NonNull List<? super T> outVal, int n,
             @Nullable ClassLoader loader, @Nullable Class<T> clazz) {
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
+        // TODO: move all size reservations here, instead of code that calls this. Not all reserves.
         while (n > 0) {
             T value = readValue(loader, clazz);
             //Log.d(TAG, "Unmarshalling value=" + value);
@@ -5665,6 +5681,7 @@ public final class Parcel {
         if (n < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
         ArrayList<T> l = new ArrayList<>(n);
         readListInternal(l, n, loader, clazz);
         return l;
@@ -5707,6 +5724,7 @@ public final class Parcel {
      */
     private void readSparseArrayInternal(@NonNull SparseArray outVal, int N,
             @Nullable ClassLoader loader) {
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         while (N > 0) {
             int key = readInt();
             Object value = readValue(loader);
@@ -5725,6 +5743,7 @@ public final class Parcel {
         if (n < 0) {
             return null;
         }
+        ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, n);
         SparseArray<T> outVal = new SparseArray<>(n);
 
         while (n > 0) {
