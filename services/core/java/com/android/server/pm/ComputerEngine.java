@@ -5386,7 +5386,7 @@ public class ComputerEngine implements Computer {
                     + ", uid:" + callingUid);
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        if (pkg.getUid() != callingUid
+        if (!UserHandle.isSameApp(callingUid, pkg.getUid())
                 && Process.SYSTEM_UID != callingUid) {
             throw new SecurityException("May not access signing KeySet of other apps.");
         }
