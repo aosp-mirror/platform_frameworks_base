@@ -75,6 +75,28 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
         }
 
     @Test
+    @EnableFlags(FLAG_BOUNCER_UI_REVAMP)
+    @BrokenWithSceneContainer(388068805)
+    fun notifications_areFullyVisible_whenShadeIsOpen() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.1f),
+                    step(0.2f),
+                    step(0.3f),
+                    step(1f),
+                ),
+                testScope,
+            )
+
+            values.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
     fun blurRadiusGoesToMaximumWhenShadeIsExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)

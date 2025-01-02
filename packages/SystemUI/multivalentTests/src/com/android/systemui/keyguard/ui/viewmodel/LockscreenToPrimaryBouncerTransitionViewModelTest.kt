@@ -206,6 +206,25 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
             )
         }
 
+    @Test
+    @EnableFlags(FLAG_BOUNCER_UI_REVAMP)
+    @BrokenWithSceneContainer(388068805)
+    fun notifications_areFullyVisible_whenShadeIsExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+            runCurrent()
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
+                startValue = 1.0f,
+                endValue = 1.0f,
+                transitionFactory = ::step,
+                actualValuesProvider = { values },
+                checkInterpolatedValues = false,
+            )
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING,

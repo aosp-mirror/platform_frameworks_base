@@ -73,6 +73,16 @@ constructor(
 
     val lockscreenAlpha: Flow<Float> = shortcutsAlpha
 
+    val notificationAlpha: Flow<Float> =
+        if (Flags.bouncerUiRevamp()) {
+            shadeDependentFlows.transitionFlow(
+                flowWhenShadeIsNotExpanded = lockscreenAlpha,
+                flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(1f),
+            )
+        } else {
+            lockscreenAlpha
+        }
+
     override val notificationBlurRadius: Flow<Float> =
         if (Flags.bouncerUiRevamp()) {
             shadeDependentFlows.transitionFlow(

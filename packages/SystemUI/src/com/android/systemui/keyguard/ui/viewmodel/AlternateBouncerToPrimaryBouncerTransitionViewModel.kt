@@ -75,7 +75,15 @@ constructor(
 
     val lockscreenAlpha: Flow<Float> = if (WindowBlurFlag.isEnabled) alphaFlow else emptyFlow()
 
-    val notificationAlpha: Flow<Float> = alphaFlow
+    val notificationAlpha: Flow<Float> =
+        if (Flags.bouncerUiRevamp()) {
+            shadeDependentFlows.transitionFlow(
+                flowWhenShadeIsNotExpanded = lockscreenAlpha,
+                flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(1f),
+            )
+        } else {
+            alphaFlow
+        }
 
     override val notificationBlurRadius: Flow<Float> =
         if (Flags.bouncerUiRevamp()) {
