@@ -832,6 +832,40 @@ public class InternetDialogDelegateLegacyTest extends SysuiTestCase {
                 });
     }
 
+    @Test
+    public void updateDialog_shouldUpdateMobileNetworkTrue_updateMobileDataLayout() {
+        when(mInternetDetailsContentController.isCarrierNetworkActive()).thenReturn(false);
+        when(mInternetDetailsContentController.isAirplaneModeEnabled()).thenReturn(false);
+        when(mInternetDetailsContentController.hasActiveSubIdOnDds()).thenReturn(true);
+        when(mInternetDetailsContentController.activeNetworkIsCellular()).thenReturn(false);
+        mMobileDataLayout.setVisibility(View.GONE);
+
+        mInternetDialogDelegateLegacy.updateDialog(true);
+        mBgExecutor.runAllReady();
+
+        mInternetDialogDelegateLegacy.mDataInternetContent.observe(
+                mInternetDialogDelegateLegacy.mLifecycleOwner, i -> {
+                    assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.VISIBLE);
+                });
+    }
+
+    @Test
+    public void updateDialog_shouldUpdateMobileNetworkFalse_doNotUpdateMobileDataLayout() {
+        when(mInternetDetailsContentController.isCarrierNetworkActive()).thenReturn(false);
+        when(mInternetDetailsContentController.isAirplaneModeEnabled()).thenReturn(false);
+        when(mInternetDetailsContentController.hasActiveSubIdOnDds()).thenReturn(true);
+        when(mInternetDetailsContentController.activeNetworkIsCellular()).thenReturn(false);
+        mMobileDataLayout.setVisibility(View.GONE);
+
+        mInternetDialogDelegateLegacy.updateDialog(false);
+        mBgExecutor.runAllReady();
+
+        mInternetDialogDelegateLegacy.mDataInternetContent.observe(
+                mInternetDialogDelegateLegacy.mLifecycleOwner, i -> {
+                    assertThat(mMobileDataLayout.getVisibility()).isEqualTo(View.GONE);
+                });
+    }
+
     private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,
             boolean connectedWifiVisible) {
         mEthernet.setVisibility(ethernetVisible ? View.VISIBLE : View.GONE);
