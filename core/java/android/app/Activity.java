@@ -5770,6 +5770,11 @@ public class Activity extends ContextThemeWrapper
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public final void requestPermissions(@NonNull String[] permissions, int requestCode,
             int deviceId) {
+        // Pre M apps shouldn't request permissions, as permissions are granted at install time.
+        if (getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
+            onRequestPermissionsResult(requestCode, new String[0], new int[0], deviceId);
+        }
+
         if (requestCode < 0) {
             throw new IllegalArgumentException("requestCode should be >= 0");
         }
