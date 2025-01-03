@@ -4443,7 +4443,8 @@ public class DevicePolicyManager {
      * disabled through this Config.
      */
     private static final IpcDataCache.Config sDpmCaches =
-            new IpcDataCache.Config(8, IpcDataCache.MODULE_SYSTEM, "DevicePolicyManagerCaches");
+            new IpcDataCache.Config(8, IpcDataCache.MODULE_SYSTEM, "DevicePolicyManagerCaches")
+            .cacheNulls(true);
 
     /** @hide */
     public static void invalidateBinderCaches() {
