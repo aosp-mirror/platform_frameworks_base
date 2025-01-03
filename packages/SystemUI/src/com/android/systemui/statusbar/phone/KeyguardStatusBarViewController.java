@@ -528,6 +528,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             return;
         }
         mDozing = dozing;
+        updateViewState();
     }
 
     /** Animate the keyguard status bar in. */
