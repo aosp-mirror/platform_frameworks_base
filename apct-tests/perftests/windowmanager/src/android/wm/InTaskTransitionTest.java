@@ -34,11 +34,20 @@ import android.view.WindowManagerGlobal;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
 /** Measure the performance of warm launch activity in the same task. */
 public class InTaskTransitionTest extends WindowManagerPerfTestBase
         implements RemoteCallback.OnResultListener {
 
     private static final long TIMEOUT_MS = 5000;
+    private static final String LOG_SEPARATOR = "LOG_SEPARATOR";
 
     @Rule
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
@@ -62,6 +71,7 @@ public class InTaskTransitionTest extends WindowManagerPerfTestBase
 
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         long measuredTimeNs = 0;
+        long firstStartTime = 0;
 
         boolean readerStarted = false;
         while (state.keepRunning(measuredTimeNs)) {
@@ -70,6 +80,10 @@ public class InTaskTransitionTest extends WindowManagerPerfTestBase
                 readerStarted = true;
             }
             final long startTime = SystemClock.elapsedRealtimeNanos();
+            if (readerStarted && firstStartTime == 0) {
+                firstStartTime = startTime;
+                executeShellCommand("log -t " + LOG_SEPARATOR + " " + firstStartTime);
+            }
             activity.startActivity(next);
             synchronized (mMetricsReader) {
                 try {
@@ -89,6 +103,7 @@ public class InTaskTransitionTest extends WindowManagerPerfTestBase
                 state.addExtraResult("windowsDrawnDelayMs", metrics.mWindowsDrawnDelayMs);
             }
         }
+        addExtraTransitionInfo(firstStartTime, state);
     }
 
     @Override
@@ -96,6 +111,46 @@ public class InTaskTransitionTest extends WindowManagerPerfTestBase
         // The test activity is destroyed.
         synchronized (mMetricsReader) {
             mMetricsReader.notifyAll();
+        }
+    }
+
+    private void addExtraTransitionInfo(long startTime, ManualBenchmarkState state) {
+        final ProcessBuilder pb = new ProcessBuilder("sh");
+        final String startLine = String.valueOf(startTime);
+        final String commitTimeStr = " commit=";
+        boolean foundStartLine = false;
+        try {
+            final Process process = pb.start();
+            final InputStream in = process.getInputStream();
+            final PrintWriter out = new PrintWriter(new BufferedWriter(
+                    new OutputStreamWriter(process.getOutputStream())), true /* autoFlush */);
+            out.println("logcat -v brief -d *:S WindowManager:V " + LOG_SEPARATOR + ":I"
+                    + " | grep -e 'Finish Transition' -e " + LOG_SEPARATOR);
+            out.println("exit");
+
+            String line;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                while ((line = reader.readLine()) != null) {
+                    if (!foundStartLine) {
+                        if (line.contains(startLine)) {
+                            foundStartLine = true;
+                        }
+                        continue;
+                    }
+                    final int strPos = line.indexOf(commitTimeStr);
+                    if (strPos < 0) {
+                        continue;
+                    }
+                    final int endPos = line.indexOf("ms", strPos);
+                    if (endPos > strPos) {
+                        final int commitDelayMs = Math.round(Float.parseFloat(
+                                line.substring(strPos + commitTimeStr.length(), endPos)));
+                        state.addExtraResult("commitDelayMs", commitDelayMs);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
