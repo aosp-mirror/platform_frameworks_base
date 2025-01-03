@@ -55,15 +55,15 @@ import com.android.systemui.keyboard.shortcut.shortcutHelperViewModel
 import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.model.sysUiState
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SHORTCUT_HELPER_SHOWING
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -89,8 +89,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     private val mockApplicationInfo: ApplicationInfo = mock()
 
     private val kosmos =
-        Kosmos().also {
-            it.testCase = this
+        testKosmos().useUnconfinedTestDispatcher().also {
             it.testDispatcher = UnconfinedTestDispatcher()
             it.shortcutHelperSystemShortcutsSource = fakeSystemSource
             it.shortcutHelperMultiTaskingShortcutsSource = fakeMultiTaskingSource
@@ -107,7 +106,6 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     private val mockRoleManager = kosmos.mockRoleManager
     private val inputManager = kosmos.fakeInputManager.inputManager
     private val viewModel = kosmos.shortcutHelperViewModel
-
 
     @Before
     fun setUp() {
@@ -432,6 +430,28 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             val activeUiState = uiState as ShortcutsUiState.Active
             assertThat(activeUiState.shouldShowResetButton).isTrue()
         }
+
+    @Test
+    fun shortcutsUiState_searchQuery_isResetAfterHelperIsClosedAndReOpened() =
+        testScope.runTest{
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            openHelperAndSearchForFooString()
+            assertThat((uiState as? ShortcutsUiState.Active)?.searchQuery).isEqualTo("foo")
+
+            closeAndReopenShortcutHelper()
+            assertThat((uiState as? ShortcutsUiState.Active)?.searchQuery).isEqualTo("")
+        }
+
+    private fun openHelperAndSearchForFooString(){
+        testHelper.showFromActivity()
+        viewModel.onSearchQueryChanged("foo")
+    }
+
+    private fun closeAndReopenShortcutHelper() {
+        viewModel.onViewClosed()
+        testHelper.showFromActivity()
+    }
 
     private fun groupWithShortcutLabels(
         vararg shortcutLabels: String,

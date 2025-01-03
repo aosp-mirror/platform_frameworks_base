@@ -53,6 +53,7 @@ import com.android.systemui.kosmos.backgroundScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.phone.systemUIDialogFactory
@@ -67,12 +68,7 @@ var Kosmos.shortcutHelperMultiTaskingShortcutsSource: KeyboardShortcutGroupsSour
     Kosmos.Fixture { MultitaskingShortcutsSource(mainResources, applicationContext) }
 
 val Kosmos.shortcutHelperStateRepository by
-    Kosmos.Fixture {
-        ShortcutHelperStateRepository(
-            fakeInputManager.inputManager,
-            testDispatcher,
-        )
-    }
+    Kosmos.Fixture { ShortcutHelperStateRepository(fakeInputManager.inputManager, testDispatcher) }
 
 var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture {
@@ -151,14 +147,15 @@ val Kosmos.customShortcutCategoriesRepository by
     }
 
 val Kosmos.shortcutHelperCoreStartable by
-        Kosmos.Fixture {
-            ShortcutHelperCoreStartable(
-                fakeCommandQueue,
-                broadcastDispatcher,
-                shortcutHelperStateRepository,
-                testScope,
-            )
-        }
+    Kosmos.Fixture {
+        ShortcutHelperCoreStartable(
+            fakeCommandQueue,
+            broadcastDispatcher,
+            shortcutHelperStateRepository,
+            activityStarter,
+            testScope,
+        )
+    }
 
 val Kosmos.shortcutHelperTestHelper by
     Kosmos.Fixture {
@@ -168,6 +165,7 @@ val Kosmos.shortcutHelperTestHelper by
             broadcastDispatcher,
             fakeCommandQueue,
             fakeInputManager,
+            activityStarter,
             windowManager,
         )
     }
