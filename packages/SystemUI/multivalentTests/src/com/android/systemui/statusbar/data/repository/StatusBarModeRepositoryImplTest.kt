@@ -32,10 +32,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.data.model.StatusBarMode
-import com.android.systemui.statusbar.phone.BoundsPair
-import com.android.systemui.statusbar.phone.LetterboxAppearance
-import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
-import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
+import com.android.systemui.statusbar.layout.BoundsPair
+import com.android.systemui.statusbar.layout.LetterboxAppearance
+import com.android.systemui.statusbar.layout.LetterboxAppearanceCalculator
+import com.android.systemui.statusbar.layout.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
