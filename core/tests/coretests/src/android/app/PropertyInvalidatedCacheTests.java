@@ -194,38 +194,38 @@ public class PropertyInvalidatedCacheTests {
                         new ServerQuery(tester));
 
         // Caches are enabled upon creation.
-        assertEquals(false, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertFalse(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable the cache1 instance.  Only cache1 is disabled
         cache1.disableInstance();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable cache1.  This will disable cache1 and cache2 because they share the
         // same name.  cache3 has a different name and will not be disabled.
         cache1.disableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is disabled.
         cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                 new ServerQuery(tester));
-        assertEquals(true, cache1.getDisabledState());
+        assertTrue(cache1.isDisabled());
 
         // Remove the record of caches being locally disabled.  This is a clean-up step.
         cache1.forgetDisableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is not disabled.
         cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                 new ServerQuery(tester));
-        assertEquals(false, cache1.getDisabledState());
+        assertFalse(cache1.isDisabled());
     }
 
     private static class TestQuery
@@ -280,7 +280,7 @@ public class PropertyInvalidatedCacheTests {
     public void testCacheRecompute() {
         TestCache cache = new TestCache();
         cache.invalidateCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
@@ -383,15 +383,15 @@ public class PropertyInvalidatedCacheTests {
     @Test
     public void testLocalProcessDisable() {
         TestCache cache = new TestCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.invalidateCache();
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.disableLocal();
-        assertEquals(cache.isDisabled(), true);
+        assertTrue(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
