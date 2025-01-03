@@ -40,7 +40,6 @@ import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableLooper;
@@ -610,7 +609,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_registration() {
         /* verify that a predictive back callback is registered when the bouncer becomes visible */
         mBouncerExpansionCallback.onVisibilityChanged(true);
@@ -625,7 +623,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_invocationHidesBouncer() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */
@@ -643,7 +640,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_noBackAnimationForFullScreenBouncer() {
         when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
                 .thenReturn(KeyguardSecurityModel.SecurityMode.SimPin);
@@ -663,7 +659,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_ANIMATE_BOUNCER)
     public void testPredictiveBackCallback_forwardsBackDispatches() {
         mBouncerExpansionCallback.onVisibilityChanged(true);
         /* capture the predictive back callback during registration */

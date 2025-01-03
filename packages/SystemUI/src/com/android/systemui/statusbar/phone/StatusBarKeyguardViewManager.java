@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsets.Type.navigationBars;
 
-import static com.android.systemui.Flags.predictiveBackAnimateBouncer;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
@@ -328,7 +327,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private float mQsExpansion;
 
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
-    private boolean mIsBackAnimationEnabled;
     private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     private final ActivityStarter mActivityStarter;
 
@@ -434,7 +432,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
         mBouncerInteractor = bouncerInteractor;
-        mIsBackAnimationEnabled = predictiveBackAnimateBouncer();
         mUdfpsOverlayInteractor = udfpsOverlayInteractor;
         mActivityStarter = activityStarter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
@@ -630,7 +627,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private boolean shouldPlayBackAnimation() {
         // Suppress back animation when bouncer shouldn't be dismissed on back invocation.
-        return !needsFullscreenBouncer() && mIsBackAnimationEnabled;
+        return !needsFullscreenBouncer();
     }
 
     @Override
