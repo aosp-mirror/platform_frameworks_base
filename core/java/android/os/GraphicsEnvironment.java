@@ -479,9 +479,11 @@ public class GraphicsEnvironment {
 
         final List<ResolveInfo> resolveInfos =
                 pm.queryIntentActivities(intent, PackageManager.MATCH_SYSTEM_ONLY);
-        if (resolveInfos.size() != 1) {
-            Log.v(TAG, "Invalid number of ANGLE packages. Required: 1, Found: "
-                    + resolveInfos.size());
+        if (resolveInfos.isEmpty()) {
+            Log.v(TAG, "No ANGLE packages installed.");
+            return "";
+        } else if (resolveInfos.size() > 1) {
+            Log.v(TAG, "Too many ANGLE packages found: " + resolveInfos.size());
             if (DEBUG) {
                 for (ResolveInfo resolveInfo : resolveInfos) {
                     Log.d(TAG, "Found ANGLE package: " + resolveInfo.activityInfo.packageName);
@@ -491,7 +493,7 @@ public class GraphicsEnvironment {
         }
 
         // Must be exactly 1 ANGLE PKG found to get here.
-        return resolveInfos.get(0).activityInfo.packageName;
+        return resolveInfos.getFirst().activityInfo.packageName;
     }
 
     /**
@@ -580,7 +582,6 @@ public class GraphicsEnvironment {
         if (angleInfo == null) {
             anglePkgName = getAnglePackageName(packageManager);
             if (TextUtils.isEmpty(anglePkgName)) {
-                Log.v(TAG, "Failed to find ANGLE package.");
                 return false;
             }
 
