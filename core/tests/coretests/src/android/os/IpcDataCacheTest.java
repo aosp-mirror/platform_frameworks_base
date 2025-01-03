@@ -19,6 +19,8 @@ package android.os;
 import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.PropertyInvalidatedCache;
@@ -195,9 +197,9 @@ public class IpcDataCacheTest {
 
         try {
             testCache.query(9);
-            assertEquals(false, true);          // The code should not reach this point.
+            fail();          // The code should not reach this point.
         } catch (RuntimeException e) {
-            assertEquals(e.getCause() instanceof RemoteException, true);
+            assertTrue(e.getCause() instanceof RemoteException);
         }
         tester.verify(4);
     }
@@ -256,38 +258,38 @@ public class IpcDataCacheTest {
                         new ServerQuery(tester));
 
         // Caches are enabled upon creation.
-        assertEquals(false, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertFalse(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable the cache1 instance.  Only cache1 is disabled
         cache1.disableInstance();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable cache1.  This will disable cache1 and cache2 because they share the
         // same name.  cache3 has a different name and will not be disabled.
         cache1.disableForCurrentProcess();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is disabled.
         cache1 = new IpcDataCache<>(4, MODULE, API, "cacheA",
                 new ServerQuery(tester));
-        assertEquals(true, cache1.getDisabledState());
+        assertTrue(cache1.isDisabled());
 
         // Remove the record of caches being locally disabled.  This is a clean-up step.
         cache1.forgetDisableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is not disabled.
         cache1 = new IpcDataCache<>(4, MODULE, API, "cacheA",
                 new ServerQuery(tester));
-        assertEquals(false, cache1.getDisabledState());
+        assertFalse(cache1.isDisabled());
     }
 
     private static class TestQuery
@@ -345,7 +347,7 @@ public class IpcDataCacheTest {
     public void testCacheRecompute() {
         TestCache cache = new TestCache();
         cache.invalidateCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
@@ -407,15 +409,15 @@ public class IpcDataCacheTest {
     @Test
     public void testLocalProcessDisable() {
         TestCache cache = new TestCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.invalidateCache();
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.disableForCurrentProcess();
-        assertEquals(cache.isDisabled(), true);
+        assertTrue(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
@@ -434,20 +436,20 @@ public class IpcDataCacheTest {
         TestCache dc = new TestCache(d);
 
         a.disableForCurrentProcess();
-        assertEquals(ac.isDisabled(), true);
-        assertEquals(bc.isDisabled(), false);
-        assertEquals(cc.isDisabled(), false);
-        assertEquals(dc.isDisabled(), false);
+        assertTrue(ac.isDisabled());
+        assertFalse(bc.isDisabled());
+        assertFalse(cc.isDisabled());
+        assertFalse(dc.isDisabled());
 
         a.disableAllForCurrentProcess();
-        assertEquals(ac.isDisabled(), true);
-        assertEquals(bc.isDisabled(), false);
-        assertEquals(cc.isDisabled(), false);
-        assertEquals(dc.isDisabled(), true);
+        assertTrue(ac.isDisabled());
+        assertFalse(bc.isDisabled());
+        assertFalse(cc.isDisabled());
+        assertTrue(dc.isDisabled());
 
         IpcDataCache.Config e = a.child("nameE");
         TestCache ec = new TestCache(e);
-        assertEquals(ec.isDisabled(), true);
+        assertTrue(ec.isDisabled());
     }
 
 
