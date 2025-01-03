@@ -76,10 +76,12 @@ class OverlayReferenceMapperTests {
         val overlay1 = mockOverlay(1)
         mapper = mapper(
                 overlayToTargetToOverlayables = mapOf(
-                        overlay0.packageName to android.util.Pair(target.packageName,
-                            target.overlayables.keys.first()),
-                        overlay1.packageName to android.util.Pair(target.packageName,
-                            target.overlayables.keys.first())
+                        overlay0.packageName to mapOf(
+                                target.packageName to target.overlayables.keys
+                        ),
+                        overlay1.packageName to mapOf(
+                                target.packageName to target.overlayables.keys
+                        )
                 )
         )
         val existing = mapper.addInOrder(overlay0, overlay1) {
@@ -129,6 +131,33 @@ class OverlayReferenceMapperTests {
             assertThat(it).containsExactly(ACTOR_PACKAGE_NAME)
         }
         assertMapping(ACTOR_PACKAGE_NAME to setOf(target))
+    }
+
+    @Test
+    fun overlayWithMultipleTargets() {
+        val target0 = mockTarget(0)
+        val target1 = mockTarget(1)
+        val overlay = mockOverlay()
+        mapper = mapper(
+                overlayToTargetToOverlayables = mapOf(
+                        overlay.packageName to mapOf(
+                                target0.packageName to target0.overlayables.keys,
+                                target1.packageName to target1.overlayables.keys
+                        )
+                )
+        )
+        mapper.addInOrder(target0, target1, overlay) {
+            assertThat(it).containsExactly(ACTOR_PACKAGE_NAME)
+        }
+        assertMapping(ACTOR_PACKAGE_NAME to setOf(target0, target1, overlay))
+        mapper.remove(target0) {
+            assertThat(it).containsExactly(ACTOR_PACKAGE_NAME)
+        }
+        assertMapping(ACTOR_PACKAGE_NAME to setOf(target1, overlay))
+        mapper.remove(target1) {
+            assertThat(it).containsExactly(ACTOR_PACKAGE_NAME)
+        }
+        assertEmpty()
     }
 
     @Test
@@ -190,15 +219,17 @@ class OverlayReferenceMapperTests {
         namedActors: Map<String, Map<String, String>> = Uri.parse(ACTOR_NAME).run {
             mapOf(authority!! to mapOf(pathSegments.first() to ACTOR_PACKAGE_NAME))
         },
-        overlayToTargetToOverlayables: Map<String, android.util.Pair<String, String>> = mapOf(
-                mockOverlay().packageName to mockTarget().run { android.util.Pair(packageName!!,
-                    overlayables.keys.first()) })
+        overlayToTargetToOverlayables: Map<String, Map<String, Set<String>>> = mapOf(
+                mockOverlay().packageName to mapOf(
+                        mockTarget().run { packageName to overlayables.keys }
+                )
+        )
     ) = OverlayReferenceMapper(deferRebuild, object : OverlayReferenceMapper.Provider {
         override fun getActorPkg(actor: String) =
                 OverlayActorEnforcer.getPackageNameForActor(actor, namedActors).first
 
         override fun getTargetToOverlayables(pkg: AndroidPackage) =
-                overlayToTargetToOverlayables[pkg.packageName]
+                overlayToTargetToOverlayables[pkg.packageName] ?: emptyMap()
     })
 
     private fun mockTarget(increment: Int = 0) = mockThrowOnUnmocked<AndroidPackage> {
