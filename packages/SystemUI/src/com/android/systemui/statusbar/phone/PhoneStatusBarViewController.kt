@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.graphics.Point
 import android.util.Log
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
@@ -39,7 +40,6 @@ import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.StatusBarLongPressGestureDetector
-import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
@@ -85,7 +85,6 @@ private constructor(
     private val darkIconDispatcher: DarkIconDispatcher,
     private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
     private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
-    private val shadeDisplaysRepository: ShadeDisplaysRepository,
 ) : ViewController<PhoneStatusBarView>(view) {
 
     private lateinit var battery: BatteryMeterView
@@ -301,12 +300,12 @@ private constructor(
             }
 
             // With the StatusBarConnectedDisplays changes, status bar touches should result in
-            // shade interaction only if ShadeWindowGoesAround.isEnabled or if touch is on the
-            // display which currently hosts the shade.
+            // shade interaction only if ShadeWindowGoesAround.isEnabled or if touch is on default
+            // display.
             return if (
                 !StatusBarConnectedDisplays.isEnabled ||
                     ShadeWindowGoesAround.isEnabled ||
-                    context.displayId == shadeDisplaysRepository.displayId.value
+                    context.displayId == DEFAULT_DISPLAY
             ) {
                 shadeViewController.handleExternalTouch(event)
             } else {
@@ -367,7 +366,6 @@ private constructor(
         @DisplaySpecific private val darkIconDispatcher: DarkIconDispatcher,
         private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
         private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
-        private val shadeDisplaysRepository: ShadeDisplaysRepository,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -396,7 +394,6 @@ private constructor(
                 darkIconDispatcher,
                 statusBarContentInsetsProviderStore.defaultDisplay,
                 lazyStatusBarShadeDisplayPolicy,
-                shadeDisplaysRepository,
             )
         }
     }
