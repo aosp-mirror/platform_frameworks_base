@@ -29,8 +29,8 @@ import com.android.systemui.kairos.internal.util.hashString
  * it is "sampled", a new result may be produced.
  *
  * Because Kairos operates over an "idealized" model of Time that can be passed around as a data
- * type, [Transactional]s are guaranteed to produce the same result if queried multiple times at the
- * same (conceptual) time, in order to preserve _referential transparency_.
+ * type, [Transactionals][Transactional] are guaranteed to produce the same result if queried
+ * multiple times at the same (conceptual) time, in order to preserve _referential transparency_.
  */
 @ExperimentalKairosApi
 class Transactional<out A> internal constructor(internal val impl: State<TransactionalImpl<A>>) {
@@ -50,6 +50,10 @@ fun <A> transactionalOf(value: A): Transactional<A> =
  * queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> DeferredValue<Transactional<A>>.defer() = deferredTransactional { get() }
+ * ```
  */
 @ExperimentalKairosApi
 fun <A> DeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline { unwrapped.value }
@@ -62,6 +66,10 @@ fun <A> DeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline 
  * [value][Lazy.value] will be queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> Lazy<Transactional<A>>.defer() = deferredTransactional { value }
+ * ```
  */
 @ExperimentalKairosApi
 fun <A> Lazy<Transactional<A>>.defer(): Transactional<A> = deferInline { value }
@@ -89,7 +97,13 @@ private inline fun <A> deferInline(
 /**
  * Returns a [Transactional]. The passed [block] will be evaluated on demand at most once per
  * transaction; any subsequent sampling within the same transaction will receive a cached value.
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.sampleTransactional
  */
 @ExperimentalKairosApi
 fun <A> transactionally(block: TransactionScope.() -> A): Transactional<A> =
     Transactional(stateOf(transactionalImpl { block() }))
+
+/** Returns a [Transactional] that, when queried, samples this [State]. */
+fun <A> State<A>.asTransactional(): Transactional<A> =
+    Transactional(map { TransactionalImpl.Const(CompletableLazy(it)) })

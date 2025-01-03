@@ -16,9 +16,9 @@
 
 package com.android.systemui.kairos.util
 
-import com.android.systemui.kairos.util.Either.Left
-import com.android.systemui.kairos.util.Either.Right
-import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Either.First
+import com.android.systemui.kairos.util.Either.Second
+import com.android.systemui.kairos.util.Maybe.Present
 
 /** A "patch" that can be used to batch-update a [Map], via [applyPatch]. */
 typealias MapPatch<K, V> = Map<K, Maybe<V>>
@@ -27,16 +27,16 @@ typealias MapPatch<K, V> = Map<K, Maybe<V>>
  * Returns a new [Map] that has [patch] applied to the original map.
  *
  * For each entry in [patch]:
- * * a [Just] value will be included in the new map, replacing the entry in the original map with
+ * * a [Present] value will be included in the new map, replacing the entry in the original map with
  *   the same key, if present.
- * * a [Maybe.None] value will be omitted from the new map, excluding the entry in the original map
- *   with the same key, if present.
+ * * a [Maybe.Absent] value will be omitted from the new map, excluding the entry in the original
+ *   map with the same key, if present.
  */
 fun <K, V> Map<K, V>.applyPatch(patch: MapPatch<K, V>): Map<K, V> {
     val (adds: List<Pair<K, V>>, removes: List<K>) =
         patch
             .asSequence()
-            .map { (k, v) -> if (v is Just) Left(k to v.value) else Right(k) }
+            .map { (k, v) -> if (v is Present) First(k to v.value) else Second(k) }
             .partitionEithers()
     val removed: Map<K, V> = this - removes.toSet()
     val updated: Map<K, V> = removed + adds
@@ -47,11 +47,11 @@ fun <K, V> Map<K, V>.applyPatch(patch: MapPatch<K, V>): Map<K, V> {
  * Returns a [MapPatch] that, when applied, includes all of the values from the original [Map].
  *
  * Shorthand for:
- * ```kotlin
- * mapValues { just(it.value) }
+ * ``` kotlin
+ *   mapValues { (key, value) -> Maybe.present(value) }
  * ```
  */
-fun <K, V> Map<K, V>.toMapPatch(): MapPatch<K, V> = mapValues { just(it.value) }
+fun <K, V> Map<K, V>.toMapPatch(): MapPatch<K, V> = mapValues { Maybe.present(it.value) }
 
 /**
  * Returns a [MapPatch] that, when applied, includes all of the entries from [new] whose keys are
@@ -67,10 +67,10 @@ fun <K, V> mapPatchFromKeyDiff(old: Map<K, V>, new: Map<K, V>): MapPatch<K, V> {
     val adds = new - old.keys
     return buildMap {
         for (removed in removes) {
-            put(removed, none)
+            put(removed, Maybe.absent)
         }
         for ((newKey, newValue) in adds) {
-            put(newKey, just(newValue))
+            put(newKey, Maybe.present(newValue))
         }
     }
 }
@@ -86,13 +86,16 @@ fun <K, V> mapPatchFromKeyDiff(old: Map<K, V>, new: Map<K, V>): MapPatch<K, V> {
  */
 fun <K, V> mapPatchFromFullDiff(old: Map<K, V>, new: Map<K, V>): MapPatch<K, V> {
     val removes = old.keys - new.keys
-    val adds = new.mapMaybeValues { (k, v) -> if (k in old && v == old[k]) none else just(v) }
+    val adds =
+        new.mapMaybeValues { (k, v) ->
+            if (k in old && v == old[k]) Maybe.absent else Maybe.present(v)
+        }
     return hashMapOf<K, Maybe<V>>().apply {
         for (removed in removes) {
-            put(removed, none)
+            put(removed, Maybe.absent)
         }
         for ((newKey, newValue) in adds) {
-            put(newKey, just(newValue))
+            put(newKey, Maybe.present(newValue))
         }
     }
 }

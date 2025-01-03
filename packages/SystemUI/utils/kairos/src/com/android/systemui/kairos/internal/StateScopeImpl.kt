@@ -36,10 +36,14 @@ import com.android.systemui.kairos.switchEvents
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.map
 
-internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: Events<Any>) :
+internal class StateScopeImpl(val evalScope: EvalScope, val endSignalLazy: Lazy<Events<Any>>) :
     InternalStateScope, EvalScope by evalScope {
 
-    override val endSignalOnce: Events<Any> = endSignal.nextOnlyInternal("StateScope.endSignal")
+    override val endSignal: Events<Any> by endSignalLazy
+
+    override val endSignalOnce: Events<Any> by lazy {
+        endSignal.nextOnlyInternal("StateScope.endSignal")
+    }
 
     override fun <A> deferredStateScope(block: StateScope.() -> A): DeferredValue<A> =
         DeferredValue(deferAsync { block() })
@@ -119,7 +123,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
     }
 
     override fun childStateScope(newEnd: Events<Any>) =
-        StateScopeImpl(evalScope, merge(newEnd, endSignal))
+        StateScopeImpl(evalScope, lazy { merge(newEnd, endSignal) })
 
     private fun <A> Events<A>.truncateToScope(operatorName: String): Events<A> =
         if (endSignalOnce === emptyEvents) {
@@ -165,4 +169,4 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
 }
 
 private fun EvalScope.reenterStateScope(outerScope: StateScopeImpl) =
-    StateScopeImpl(evalScope = this, endSignal = outerScope.endSignal)
+    StateScopeImpl(evalScope = this, endSignalLazy = outerScope.endSignalLazy)

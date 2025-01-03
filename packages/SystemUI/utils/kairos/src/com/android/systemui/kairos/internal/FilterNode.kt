@@ -19,16 +19,14 @@ package com.android.systemui.kairos.internal
 import com.android.systemui.kairos.internal.store.Single
 import com.android.systemui.kairos.internal.store.SingletonMapK
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.none
+import com.android.systemui.kairos.util.Maybe.Present
 
-internal inline fun <A> filterJustImpl(
+internal inline fun <A> filterPresentImpl(
     crossinline getPulse: EvalScope.() -> EventsImpl<Maybe<A>>
 ): EventsImpl<A> =
     DemuxImpl(
             mapImpl(getPulse) { maybeResult, _ ->
-                if (maybeResult is Just) {
+                if (maybeResult is Present) {
                     Single(maybeResult.value)
                 } else {
                     Single<A>()
@@ -43,6 +41,7 @@ internal inline fun <A> filterImpl(
     crossinline getPulse: EvalScope.() -> EventsImpl<A>,
     crossinline f: EvalScope.(A) -> Boolean,
 ): EventsImpl<A> {
-    val mapped = mapImpl(getPulse) { it, _ -> if (f(it)) just(it) else none }.cached()
-    return filterJustImpl { mapped }
+    val mapped =
+        mapImpl(getPulse) { it, _ -> if (f(it)) Maybe.present(it) else Maybe.absent }.cached()
+    return filterPresentImpl { mapped }
 }

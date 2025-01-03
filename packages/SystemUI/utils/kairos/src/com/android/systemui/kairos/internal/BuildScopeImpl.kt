@@ -26,6 +26,7 @@ import com.android.systemui.kairos.EventProducerScope
 import com.android.systemui.kairos.Events
 import com.android.systemui.kairos.EventsInit
 import com.android.systemui.kairos.GroupedEvents
+import com.android.systemui.kairos.KairosCoroutineScope
 import com.android.systemui.kairos.KairosNetwork
 import com.android.systemui.kairos.LocalNetwork
 import com.android.systemui.kairos.MutableEvents
@@ -33,20 +34,23 @@ import com.android.systemui.kairos.TransactionScope
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.internal.util.childScope
+import com.android.systemui.kairos.internal.util.invokeOnCancel
 import com.android.systemui.kairos.internal.util.launchImmediate
 import com.android.systemui.kairos.launchEffect
 import com.android.systemui.kairos.mergeLeft
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.Maybe.None
-import com.android.systemui.kairos.util.just
+import com.android.systemui.kairos.util.Maybe.Absent
+import com.android.systemui.kairos.util.Maybe.Present
 import com.android.systemui.kairos.util.map
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.job
 
@@ -60,12 +64,8 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         LocalNetwork(network, coroutineScope, endSignal)
     }
 
-    override fun <T> events(
-        name: String?,
-        builder: suspend EventProducerScope<T>.() -> Unit,
-    ): Events<T> =
+    override fun <T> events(builder: suspend EventProducerScope<T>.() -> Unit): Events<T> =
         buildEvents(
-            name,
             constructEvents = { inputNode ->
                 val events = MutableEvents(network, inputNode)
                 events to
@@ -123,9 +123,9 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         val childScope = coroutineScope.childScope()
         lateinit var cancelHandle: DisposableHandle
         val handle = DisposableHandle {
-            subRef.getAndSet(None)?.let { output ->
-                cancelHandle.dispose()
-                if (output is Just) {
+            cancelHandle.dispose()
+            subRef.getAndSet(Absent)?.let { output ->
+                if (output is Present) {
                     @Suppress("DeferredResultUnused")
                     network.transaction("observeEffect cancelled") {
                         scheduleDeactivation(output.value)
@@ -139,14 +139,27 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         val outputNode =
             Output<A>(
                 context = coroutineContext,
-                onDeath = { subRef.set(None) },
+                onDeath = { subRef.set(Absent) },
                 onEmit = { output ->
-                    if (subRef.get() is Just) {
+                    if (subRef.get() is Present) {
                         // Not cancelled, safe to emit
                         val scope =
                             object : EffectScope, TransactionScope by this {
-                                override val effectCoroutineScope: CoroutineScope = childScope
-                                override val kairosNetwork: KairosNetwork = localNetwork
+                                override fun <R> async(
+                                    context: CoroutineContext,
+                                    start: CoroutineStart,
+                                    block: suspend KairosCoroutineScope.() -> R,
+                                ): Deferred<R> =
+                                    childScope.async(context, start) {
+                                        object : KairosCoroutineScope, CoroutineScope by this {
+                                                override val kairosNetwork: KairosNetwork
+                                                    get() = localNetwork
+                                            }
+                                            .block()
+                                    }
+
+                                override val kairosNetwork: KairosNetwork
+                                    get() = localNetwork
                             }
                         scope.block(output)
                     }
@@ -162,7 +175,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                 .activate(evalScope = stateScope.evalScope, outputNode.schedulable)
                 ?.let { (conn, needsEval) ->
                     outputNode.upstream = conn
-                    if (!subRef.compareAndSet(null, just(outputNode))) {
+                    if (!subRef.compareAndSet(null, Maybe.present(outputNode))) {
                         // Job's already been cancelled, schedule deactivation
                         scheduleDeactivation(outputNode)
                     } else if (needsEval) {
@@ -289,21 +302,15 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
     }
 
     private fun mutableChildBuildScope(): BuildScopeImpl {
-        val stopEmitter = newStopEmitter("mutableChildBuildScope")
         val childScope = coroutineScope.childScope()
-        childScope.coroutineContext.job.invokeOnCompletion { stopEmitter.emit(Unit) }
-        // Ensure that once this transaction is done, the new child scope enters the completing
-        // state (kept alive so long as there are child jobs).
-        // TODO: need to keep the scope alive if it's used to accumulate state.
-        //  Otherwise, stopEmitter will emit early, due to the call to complete().
-        //        scheduleOutput(
-        //            OneShot {
-        //                // TODO: don't like this cast
-        //                (childScope.coroutineContext.job as CompletableJob).complete()
-        //            }
-        //        )
+        val stopEmitter = lazy {
+            newStopEmitter("mutableChildBuildScope").apply {
+                childScope.invokeOnCancel { emit(Unit) }
+            }
+        }
         return BuildScopeImpl(
-            stateScope = StateScopeImpl(evalScope = stateScope.evalScope, endSignal = stopEmitter),
+            stateScope =
+                StateScopeImpl(evalScope = stateScope.evalScope, endSignalLazy = stopEmitter),
             coroutineScope = childScope,
         )
     }
@@ -314,6 +321,7 @@ private fun EvalScope.reenterBuildScope(
     coroutineScope: CoroutineScope,
 ) =
     BuildScopeImpl(
-        stateScope = StateScopeImpl(evalScope = this, endSignal = outerScope.endSignal),
+        stateScope =
+            StateScopeImpl(evalScope = this, endSignalLazy = outerScope.stateScope.endSignalLazy),
         coroutineScope,
     )

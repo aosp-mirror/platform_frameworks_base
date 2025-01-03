@@ -17,7 +17,6 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.internal.CompletableLazy
-import com.android.systemui.kairos.internal.DerivedMapCheap
 import com.android.systemui.kairos.internal.EventsImpl
 import com.android.systemui.kairos.internal.Init
 import com.android.systemui.kairos.internal.InitScope
@@ -37,20 +36,31 @@ import com.android.systemui.kairos.internal.mapImpl
 import com.android.systemui.kairos.internal.mapStateImpl
 import com.android.systemui.kairos.internal.mapStateImplCheap
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.internal.zipStateMap
-import com.android.systemui.kairos.internal.zipStates
+import com.android.systemui.kairos.util.WithPrev
 import kotlin.reflect.KProperty
 
 /**
- * A time-varying value with discrete changes. Essentially, a combination of a [Transactional] that
- * holds a value, and an [Events] that emits when the value changes.
+ * A time-varying value with discrete changes. Conceptually, a combination of a [Transactional] that
+ * holds a value, and an [Events] that emits when the value [changes].
+ *
+ * [States][State] follow these rules:
+ * 1. In the same transaction that [changes] emits a new value, [sample] will continue to return the
+ *    previous value.
+ * 2. Unless it is [constant][stateOf], [States][State] can only be created via [StateScope]
+ *    operations, or derived from other existing [States][State] via [State.map], [combine], etc.
+ * 3. [States][State] can only be [sampled][TransactionScope.sample] within a [TransactionScope].
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.states
  */
 @ExperimentalKairosApi
 sealed class State<out A> {
     internal abstract val init: Init<StateImpl<A>>
 }
 
-/** A [State] that never changes. */
+/**
+ * Returns a constant [State] that never changes. [changes] is equivalent to [emptyEvents] and
+ * [TransactionScope.sample] will always produce [value].
+ */
 @ExperimentalKairosApi
 fun <A> stateOf(value: A): State<A> {
     val operatorName = "stateOf"
@@ -65,6 +75,10 @@ fun <A> stateOf(value: A): State<A> {
  * will be queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> Lazy<State<A>>.defer() = deferredState { value }
+ * ```
  */
 @ExperimentalKairosApi fun <A> Lazy<State<A>>.defer(): State<A> = deferInline { value }
 
@@ -76,6 +90,10 @@ fun <A> stateOf(value: A): State<A> {
  * and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> DeferredValue<State<A>>.defer() = deferredState { get() }
+ * ```
  */
 @ExperimentalKairosApi
 fun <A> DeferredValue<State<A>>.defer(): State<A> = deferInline { unwrapped.value }
@@ -94,6 +112,8 @@ fun <A> deferredState(block: KairosScope.() -> State<A>): State<A> = deferInline
 /**
  * Returns a [State] containing the results of applying [transform] to the value held by the
  * original [State].
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.mapState
  */
 @ExperimentalKairosApi
 fun <A, B> State<A>.map(transform: KairosScope.(A) -> B): State<B> {
@@ -110,10 +130,12 @@ fun <A, B> State<A>.map(transform: KairosScope.(A) -> B): State<B> {
  * Returns a [State] that transforms the value held inside this [State] by applying it to the
  * [transform].
  *
- * Note that unlike [map], the result is not cached. This means that not only should [transform] be
- * fast and pure, it should be *monomorphic* (1-to-1). Failure to do this means that [changes] for
- * the returned [State] will operate unexpectedly, emitting at rates that do not reflect an
- * observable change to the returned [State].
+ * Note that unlike [State.map], the result is not cached. This means that not only should
+ * [transform] be fast and pure, it should be *monomorphic* (1-to-1). Failure to do this means that
+ * [changes] for the returned [State] will operate unexpectedly, emitting at rates that do not
+ * reflect an observable change to the returned [State].
+ *
+ * @see State.map
  */
 @ExperimentalKairosApi
 fun <A, B> State<A>.mapCheapUnsafe(transform: KairosScope.(A) -> B): State<B> {
@@ -125,213 +147,29 @@ fun <A, B> State<A>.mapCheapUnsafe(transform: KairosScope.(A) -> B): State<B> {
 }
 
 /**
- * Returns a [State] by combining the values held inside the given [State]s by applying them to the
- * given function [transform].
- */
-@ExperimentalKairosApi
-fun <A, B, C> State<A>.combineWith(other: State<B>, transform: KairosScope.(A, B) -> C): State<C> =
-    combine(this, other, transform)
-
-/**
  * Splits a [State] of pairs into a pair of [Events][State], where each returned [State] holds half
  * of the original.
  *
- * Shorthand for:
- * ```kotlin
- * val lefts = map { it.first }
- * val rights = map { it.second }
- * return Pair(lefts, rights)
+ * ``` kotlin
+ *   fun <A, B> State<Pair<A, B>>.unzip(): Pair<State<A>, State<B>> {
+ *       val first = map { it.first }
+ *       val second = map { it.second }
+ *       return first to second
+ *   }
  * ```
  */
 @ExperimentalKairosApi
 fun <A, B> State<Pair<A, B>>.unzip(): Pair<State<A>, State<B>> {
-    val left = map { it.first }
-    val right = map { it.second }
-    return left to right
+    val first = map { it.first }
+    val second = map { it.second }
+    return first to second
 }
 
 /**
- * Returns a [State] by combining the values held inside the given [States][State] into a [List].
+ * Returns a [State] by applying [transform] to the value held by the original [State].
  *
- * @see State.combineWith
+ * @sample com.android.systemui.kairos.KairosSamples.flatMap
  */
-@ExperimentalKairosApi
-fun <A> Iterable<State<A>>.combine(): State<List<A>> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            val states = map { it.init }
-            zipStates(
-                name,
-                operatorName,
-                states.size,
-                states = init(null) { states.map { it.connect(this) } },
-            )
-        }
-    )
-}
-
-/**
- * Returns a [State] by combining the values held inside the given [States][State] into a [Map].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <K, A> Map<K, State<A>>.combine(): State<Map<K, A>> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            zipStateMap(
-                name,
-                operatorName,
-                size,
-                states = init(null) { mapValues { it.value.init.connect(evalScope = this) } },
-            )
-        }
-    )
-}
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B> Iterable<State<A>>.combine(transform: KairosScope.(List<A>) -> B): State<B> =
-    combine().map(transform)
-
-/**
- * Returns a [State] by combining the values held inside the given [State]s into a [List].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A> combine(vararg states: State<A>): State<List<A>> = states.asIterable().combine()
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B> combine(vararg states: State<A>, transform: KairosScope.(List<A>) -> B): State<B> =
-    states.asIterable().combine(transform)
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B, Z> combine(
-    stateA: State<A>,
-    stateB: State<B>,
-    transform: KairosScope.(A, B) -> Z,
-): State<Z> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            zipStates(name, operatorName, stateA.init, stateB.init) { a, b ->
-                NoScope.transform(a, b)
-            }
-        }
-    )
-}
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B, C, Z> combine(
-    stateA: State<A>,
-    stateB: State<B>,
-    stateC: State<C>,
-    transform: KairosScope.(A, B, C) -> Z,
-): State<Z> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            zipStates(name, operatorName, stateA.init, stateB.init, stateC.init) { a, b, c ->
-                NoScope.transform(a, b, c)
-            }
-        }
-    )
-}
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B, C, D, Z> combine(
-    stateA: State<A>,
-    stateB: State<B>,
-    stateC: State<C>,
-    stateD: State<D>,
-    transform: KairosScope.(A, B, C, D) -> Z,
-): State<Z> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            zipStates(name, operatorName, stateA.init, stateB.init, stateC.init, stateD.init) {
-                a,
-                b,
-                c,
-                d ->
-                NoScope.transform(a, b, c, d)
-            }
-        }
-    )
-}
-
-/**
- * Returns a [State] whose value is generated with [transform] by combining the current values of
- * each given [State].
- *
- * @see State.combineWith
- */
-@ExperimentalKairosApi
-fun <A, B, C, D, E, Z> combine(
-    stateA: State<A>,
-    stateB: State<B>,
-    stateC: State<C>,
-    stateD: State<D>,
-    stateE: State<E>,
-    transform: KairosScope.(A, B, C, D, E) -> Z,
-): State<Z> {
-    val operatorName = "combine"
-    val name = operatorName
-    return StateInit(
-        init(name) {
-            zipStates(
-                name,
-                operatorName,
-                stateA.init,
-                stateB.init,
-                stateC.init,
-                stateD.init,
-                stateE.init,
-            ) { a, b, c, d, e ->
-                NoScope.transform(a, b, c, d, e)
-            }
-        }
-    )
-}
-
-/** Returns a [State] by applying [transform] to the value held by the original [State]. */
 @ExperimentalKairosApi
 fun <A, B> State<A>.flatMap(transform: KairosScope.(A) -> State<B>): State<B> {
     val operatorName = "flatMap"
@@ -345,75 +183,16 @@ fun <A, B> State<A>.flatMap(transform: KairosScope.(A) -> State<B>): State<B> {
     )
 }
 
-/** Shorthand for `flatMap { it }` */
+/**
+ * Returns a [State] that behaves like the current value of the original [State].
+ *
+ * ``` kotlin
+ *   fun <A> State<State<A>>.flatten() = flatMap { it }
+ * ```
+ *
+ * @see flatMap
+ */
 @ExperimentalKairosApi fun <A> State<State<A>>.flatten() = flatMap { it }
-
-/**
- * Returns a [StateSelector] that can be used to efficiently check if the input [State] is currently
- * holding a specific value.
- *
- * An example:
- * ```
- *   val intState: State<Int> = ...
- *   val intSelector: StateSelector<Int> = intState.selector()
- *   // Tracks if lInt is holding 1
- *   val isOne: State<Boolean> = intSelector.whenSelected(1)
- * ```
- *
- * This is semantically equivalent to `val isOne = intState.map { i -> i == 1 }`, but is
- * significantly more efficient; specifically, using [State.map] in this way incurs a `O(n)`
- * performance hit, where `n` is the number of different [State.map] operations used to track a
- * specific value. [selector] internally uses a [HashMap] to lookup the appropriate downstream
- * [State] to update, and so operates in `O(1)`.
- *
- * Note that the returned [StateSelector] should be cached and re-used to gain the performance
- * benefit.
- *
- * @see groupByKey
- */
-@ExperimentalKairosApi
-fun <A> State<A>.selector(numDistinctValues: Int? = null): StateSelector<A> =
-    StateSelector(
-        this,
-        changes
-            .map { new -> mapOf(new to true, sampleDeferred().get() to false) }
-            .groupByKey(numDistinctValues),
-    )
-
-/**
- * Tracks the currently selected value of type [A] from an upstream [State].
- *
- * @see selector
- */
-@ExperimentalKairosApi
-class StateSelector<in A>
-internal constructor(
-    private val upstream: State<A>,
-    private val groupedChanges: GroupedEvents<A, Boolean>,
-) {
-    /**
-     * Returns a [State] that tracks whether the upstream [State] is currently holding the given
-     * [value].
-     *
-     * @see selector
-     */
-    fun whenSelected(value: A): State<Boolean> {
-        val operatorName = "StateSelector#whenSelected"
-        val name = "$operatorName[$value]"
-        return StateInit(
-            init(name) {
-                StateImpl(
-                    name,
-                    operatorName,
-                    groupedChanges.impl.eventsForKey(value),
-                    DerivedMapCheap(upstream.init) { it == value },
-                )
-            }
-        )
-    }
-
-    operator fun get(value: A): State<Boolean> = whenSelected(value)
-}
 
 /**
  * A mutable [State] that provides the ability to manually [set its value][setValue].
@@ -441,6 +220,9 @@ class MutableState<T> internal constructor(internal val network: Network, initia
     override val init: Init<StateImpl<T>>
         get() = state.init
 
+    // TODO: not convinced this is totally safe
+    //  - at least for the BuildScope smart-constructor, we can avoid the network.transaction { }
+    //    call since we're already in a transaction
     internal val state = run {
         val changes = input.impl
         val name = null
@@ -491,7 +273,17 @@ class MutableState<T> internal constructor(internal val network: Network, initia
     fun setValueDeferred(value: DeferredValue<T>) = input.emit(value.unwrapped)
 }
 
-/** A forward-reference to a [State], allowing for recursive definitions. */
+/**
+ * A forward-reference to a [State]. Useful for recursive definitions.
+ *
+ * This reference can be used like a standard [State], but will throw an error if its [loopback] is
+ * unset before it is [observed][BuildScope.observe] or [sampled][TransactionScope.sample].
+ *
+ * Note that it is safe to invoke [TransactionScope.sampleDeferred] before [loopback] is set,
+ * provided the returned [DeferredValue] is not [queried][KairosScope.get].
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.stateLoop
+ */
 @ExperimentalKairosApi
 class StateLoop<A> : State<A>() {
 
@@ -502,7 +294,10 @@ class StateLoop<A> : State<A>() {
     override val init: Init<StateImpl<A>> =
         init(name) { deferred.value.init.connect(evalScope = this) }
 
-    /** The [State] this [StateLoop] will forward to. */
+    /**
+     * The [State] this reference is referring to. Must be set before this [StateLoop] is
+     * [observed][BuildScope.observe] or [sampled][TransactionScope.sample].
+     */
     var loopback: State<A>? = null
         set(value) {
             value?.let {
@@ -528,3 +323,24 @@ internal class StateInit<A> internal constructor(override val init: Init<StateIm
 
 private inline fun <A> deferInline(crossinline block: InitScope.() -> State<A>): State<A> =
     StateInit(init(name = null) { block().init.connect(evalScope = this) })
+
+/**
+ * Like [changes] but also includes the old value of this [State].
+ *
+ * Shorthand for:
+ * ``` kotlin
+ *     stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
+ * ```
+ */
+@ExperimentalKairosApi
+val <A> State<A>.transitions: Events<WithPrev<A, A>>
+    get() = changes.map { WithPrev(previousValue = sample(), newValue = it) }
+
+/**
+ * Returns an [Events] that emits the new value of this [State] when it changes.
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.changes
+ */
+@ExperimentalKairosApi
+val <A> State<A>.changes: Events<A>
+    get() = EventsInit(init(name = null) { init.connect(evalScope = this).changes })
