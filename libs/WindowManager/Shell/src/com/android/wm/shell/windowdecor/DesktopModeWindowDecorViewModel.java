@@ -795,6 +795,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         }
         decoration.closeHandleMenu();
         mDesktopTasksController.openNewWindow(decoration.mTaskInfo);
+        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                DesktopUiEventEnum.DESKTOP_WINDOW_MULTI_INSTANCE_NEW_WINDOW_CLICK);
     }
 
     private void onManageWindows(DesktopModeWindowDecoration decoration) {
@@ -811,6 +813,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         decoration.closeManageWindowsMenu();
                         mDesktopTasksController.openInstance(decoration.mTaskInfo,
                                 requestedTaskId);
+                        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                                DesktopUiEventEnum
+                                        .DESKTOP_WINDOW_MULTI_INSTANCE_MANAGE_WINDOWS_ICON_CLICK);
                         return Unit.INSTANCE;
                     }
                 )
