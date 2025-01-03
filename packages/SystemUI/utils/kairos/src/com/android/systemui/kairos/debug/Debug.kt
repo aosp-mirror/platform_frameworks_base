@@ -16,18 +16,18 @@
 
 package com.android.systemui.kairos.debug
 
-import com.android.systemui.kairos.MutableTState
-import com.android.systemui.kairos.TState
-import com.android.systemui.kairos.TStateInit
-import com.android.systemui.kairos.TStateLoop
+import com.android.systemui.kairos.MutableState
+import com.android.systemui.kairos.State
+import com.android.systemui.kairos.StateInit
+import com.android.systemui.kairos.StateLoop
 import com.android.systemui.kairos.internal.DerivedFlatten
 import com.android.systemui.kairos.internal.DerivedMap
 import com.android.systemui.kairos.internal.DerivedMapCheap
 import com.android.systemui.kairos.internal.DerivedZipped
 import com.android.systemui.kairos.internal.Init
-import com.android.systemui.kairos.internal.TStateDerived
-import com.android.systemui.kairos.internal.TStateImpl
-import com.android.systemui.kairos.internal.TStateSource
+import com.android.systemui.kairos.internal.StateDerived
+import com.android.systemui.kairos.internal.StateImpl
+import com.android.systemui.kairos.internal.StateSource
 import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.None
@@ -87,12 +87,12 @@ data class Edge(val upstream: Any, val downstream: Any, val tag: Any? = null)
 
 data class Graph<T>(val nodes: Map<Any, T>, val edges: List<Edge>)
 
-internal fun TState<*>.dump(infoMap: MutableMap<Any, InitInfo>, edges: MutableList<Edge>) {
-    val init: Init<TStateImpl<Any?>> =
+internal fun State<*>.dump(infoMap: MutableMap<Any, InitInfo>, edges: MutableList<Edge>) {
+    val init: Init<StateImpl<Any?>> =
         when (this) {
-            is TStateInit -> init
-            is TStateLoop -> init
-            is MutableTState -> tState.init
+            is StateInit -> init
+            is StateLoop -> init
+            is MutableState -> state.init
         }
     when (val stateMaybe = init.getUnsafe()) {
         None -> {
@@ -104,12 +104,12 @@ internal fun TState<*>.dump(infoMap: MutableMap<Any, InitInfo>, edges: MutableLi
     }
 }
 
-internal fun TStateImpl<*>.dump(infoById: MutableMap<Any, InitInfo>, edges: MutableList<Edge>) {
+internal fun StateImpl<*>.dump(infoById: MutableMap<Any, InitInfo>, edges: MutableList<Edge>) {
     val state = this
     if (state in infoById) return
     val stateInfo =
         when (state) {
-            is TStateDerived -> {
+            is StateDerived -> {
                 val type =
                     when (state) {
                         is DerivedFlatten -> {
@@ -151,7 +151,7 @@ internal fun TStateImpl<*>.dump(infoById: MutableMap<Any, InitInfo>, edges: Muta
                     state.invalidatedEpoch,
                 )
             }
-            is TStateSource ->
+            is StateSource ->
                 Source(
                     state.name ?: state.operatorName,
                     state.getStorageUnsafe(),
@@ -174,30 +174,30 @@ internal fun TStateImpl<*>.dump(infoById: MutableMap<Any, InitInfo>, edges: Muta
     infoById[state] = Initialized(stateInfo)
 }
 
-private fun <A> TStateImpl<A>.getUnsafe(): Maybe<A> =
+private fun <A> StateImpl<A>.getUnsafe(): Maybe<A> =
     when (this) {
-        is TStateDerived -> getCachedUnsafe()
-        is TStateSource -> getStorageUnsafe()
+        is StateDerived -> getCachedUnsafe()
+        is StateSource -> getStorageUnsafe()
         is DerivedMapCheap<*, *> -> none
     }
 
-private fun <A> TStateImpl<A>.getUnsafeWithEpoch(): Maybe<Pair<A, Long>> =
+private fun <A> StateImpl<A>.getUnsafeWithEpoch(): Maybe<Pair<A, Long>> =
     when (this) {
-        is TStateDerived -> getCachedUnsafe().map { it to invalidatedEpoch }
-        is TStateSource -> getStorageUnsafe().map { it to writeEpoch }
+        is StateDerived -> getCachedUnsafe().map { it to invalidatedEpoch }
+        is StateSource -> getStorageUnsafe().map { it to writeEpoch }
         is DerivedMapCheap<*, *> -> none
     }
 
 /**
- * Returns the current value held in this [TState], or [none] if the [TState] has not been
+ * Returns the current value held in this [State], or [none] if the [State] has not been
  * initialized.
  *
  * The returned [Long] is the *epoch* at which the internal cache was last updated. This can be used
  * to identify values which are out-of-date.
  */
-fun <A> TState<A>.sampleUnsafe(): Maybe<Pair<A, Long>> =
+fun <A> State<A>.sampleUnsafe(): Maybe<Pair<A, Long>> =
     when (this) {
-        is MutableTState -> tState.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
-        is TStateInit -> init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
-        is TStateLoop -> this.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
+        is MutableState -> state.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
+        is StateInit -> init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
+        is StateLoop -> this.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
     }

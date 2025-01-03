@@ -16,57 +16,80 @@
 
 package com.android.systemui.kairos
 
+import com.android.systemui.kairos.internal.CompletableLazy
 import com.android.systemui.kairos.internal.InitScope
 import com.android.systemui.kairos.internal.NoScope
 import com.android.systemui.kairos.internal.TransactionalImpl
 import com.android.systemui.kairos.internal.init
 import com.android.systemui.kairos.internal.transactionalImpl
 import com.android.systemui.kairos.internal.util.hashString
-import kotlinx.coroutines.CompletableDeferred
 
 /**
  * A time-varying value. A [Transactional] encapsulates the idea of some continuous state; each time
  * it is "sampled", a new result may be produced.
  *
- * Because FRP operates over an "idealized" model of Time that can be passed around as a data type,
- * [Transactional]s are guaranteed to produce the same result if queried multiple times at the same
- * (conceptual) time, in order to preserve _referential transparency_.
+ * Because Kairos operates over an "idealized" model of Time that can be passed around as a data
+ * type, [Transactional]s are guaranteed to produce the same result if queried multiple times at the
+ * same (conceptual) time, in order to preserve _referential transparency_.
  */
-@ExperimentalFrpApi
-class Transactional<out A> internal constructor(internal val impl: TState<TransactionalImpl<A>>) {
+@ExperimentalKairosApi
+class Transactional<out A> internal constructor(internal val impl: State<TransactionalImpl<A>>) {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 }
 
 /** A constant [Transactional] that produces [value] whenever it is sampled. */
-@ExperimentalFrpApi
+@ExperimentalKairosApi
 fun <A> transactionalOf(value: A): Transactional<A> =
-    Transactional(tStateOf(TransactionalImpl.Const(CompletableDeferred(value))))
+    Transactional(stateOf(TransactionalImpl.Const(CompletableLazy(value))))
 
-/** TODO */
-@ExperimentalFrpApi
-fun <A> FrpDeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline {
-    unwrapped.await()
-}
+/**
+ * Returns a [Transactional] that acts as a deferred-reference to the [Transactional] produced by
+ * this [DeferredValue].
+ *
+ * When the returned [Transactional] is accessed by the Kairos network, the [DeferredValue] will be
+ * queried and used.
+ *
+ * Useful for recursive definitions.
+ */
+@ExperimentalKairosApi
+fun <A> DeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline { unwrapped.value }
 
-/** TODO */
-@ExperimentalFrpApi fun <A> Lazy<Transactional<A>>.defer(): Transactional<A> = deferInline { value }
+/**
+ * Returns a [Transactional] that acts as a deferred-reference to the [Transactional] produced by
+ * this [Lazy].
+ *
+ * When the returned [Transactional] is accessed by the Kairos network, the [Lazy]'s
+ * [value][Lazy.value] will be queried and used.
+ *
+ * Useful for recursive definitions.
+ */
+@ExperimentalKairosApi
+fun <A> Lazy<Transactional<A>>.defer(): Transactional<A> = deferInline { value }
 
-/** TODO */
-@ExperimentalFrpApi
-fun <A> deferTransactional(block: suspend FrpScope.() -> Transactional<A>): Transactional<A> =
+/**
+ * Returns a [Transactional] that acts as a deferred-reference to the [Transactional] produced by
+ * [block].
+ *
+ * When the returned [Transactional] is accessed by the Kairos network, [block] will be invoked and
+ * the returned [Transactional] will be used.
+ *
+ * Useful for recursive definitions.
+ */
+@ExperimentalKairosApi
+fun <A> deferredTransactional(block: KairosScope.() -> Transactional<A>): Transactional<A> =
     deferInline {
-        NoScope.runInFrpScope(block)
+        NoScope.block()
     }
 
 private inline fun <A> deferInline(
-    crossinline block: suspend InitScope.() -> Transactional<A>
+    crossinline block: InitScope.() -> Transactional<A>
 ): Transactional<A> =
-    Transactional(TStateInit(init(name = null) { block().impl.init.connect(evalScope = this) }))
+    Transactional(StateInit(init(name = null) { block().impl.init.connect(evalScope = this) }))
 
 /**
  * Returns a [Transactional]. The passed [block] will be evaluated on demand at most once per
  * transaction; any subsequent sampling within the same transaction will receive a cached value.
  */
-@ExperimentalFrpApi
-fun <A> transactionally(block: suspend FrpTransactionScope.() -> A): Transactional<A> =
-    Transactional(tStateOf(transactionalImpl { runInTransactionScope(block) }))
+@ExperimentalKairosApi
+fun <A> transactionally(block: TransactionScope.() -> A): Transactional<A> =
+    Transactional(stateOf(transactionalImpl { block() }))

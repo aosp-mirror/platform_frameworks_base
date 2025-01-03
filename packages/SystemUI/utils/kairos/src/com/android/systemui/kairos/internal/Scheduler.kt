@@ -14,66 +14,76 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.kairos.internal
 
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.PriorityBlockingQueue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.systemui.kairos.internal.util.LogIndent
+import java.util.PriorityQueue
 
 internal interface Scheduler {
-    fun schedule(depth: Int, node: MuxNode<*, *, *, *>)
+    fun schedule(depth: Int, node: MuxNode<*, *, *>)
 
-    fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *, *>)
+    fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>)
 }
 
-internal class SchedulerImpl : Scheduler {
-    val enqueued = ConcurrentHashMap<MuxNode<*, *, *, *>, Any>()
-    val scheduledQ =
-        PriorityBlockingQueue<Pair<Int, MuxNode<*, *, *, *>>>(16, compareBy { it.first })
+internal class SchedulerImpl(private val enqueue: (MuxNode<*, *, *>) -> Boolean) : Scheduler {
+    private val scheduledQ = PriorityQueue<Pair<Int, MuxNode<*, *, *>>>(compareBy { it.first })
 
-    override fun schedule(depth: Int, node: MuxNode<*, *, *, *>) {
-        if (enqueued.putIfAbsent(node, node) == null) {
+    override fun schedule(depth: Int, node: MuxNode<*, *, *>) {
+        if (enqueue(node)) {
             scheduledQ.add(Pair(depth, node))
         }
     }
 
-    override fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *, *>) {
+    override fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>) {
         schedule(Int.MIN_VALUE + indirectDepth, node)
     }
 
-    internal suspend fun drainEval(network: Network) {
-        drain { runStep ->
-            runStep { muxNode -> network.evalScope { muxNode.visit(this) } }
+    internal fun drainEval(logIndent: Int, network: Network): Int =
+        drain(logIndent) { runStep ->
+            runStep { muxNode ->
+                network.evalScope {
+                    muxNode.markedForEvaluation = false
+                    muxNode.visit(currentLogIndent, this)
+                }
+            }
             // If any visited MuxPromptNodes had their depths increased, eagerly propagate those
             // depth changes now before performing further network evaluation.
-            network.compactor.drainCompact()
+            val numNodes = network.compactor.drainCompact(currentLogIndent)
+            logLn("promptly compacted $numNodes nodes")
         }
-    }
 
-    internal suspend fun drainCompact() {
-        drain { runStep -> runStep { muxNode -> muxNode.visitCompact(scheduler = this) } }
-    }
+    internal fun drainCompact(logIndent: Int): Int =
+        drain(logIndent) { runStep ->
+            runStep { muxNode ->
+                muxNode.markedForCompaction = false
+                muxNode.visitCompact(scheduler = this@SchedulerImpl)
+            }
+        }
 
-    private suspend inline fun drain(
+    private inline fun drain(
+        logIndent: Int,
         crossinline onStep:
-            suspend (
-                runStep: suspend (visit: suspend (MuxNode<*, *, *, *>) -> Unit) -> Unit
-            ) -> Unit
-    ): Unit = coroutineScope {
+            LogIndent.(
+                runStep: LogIndent.(visit: LogIndent.(MuxNode<*, *, *>) -> Unit) -> Unit
+            ) -> Unit,
+    ): Int {
+        var total = 0
         while (scheduledQ.isNotEmpty()) {
             val maxDepth = scheduledQ.peek()?.first ?: error("Unexpected empty scheduler")
-            onStep { visit -> runStep(maxDepth, visit) }
+            LogIndent(logIndent).onStep { visit ->
+                logDuration("step $maxDepth") {
+                    val subtotal = runStep(maxDepth) { visit(it) }
+                    logLn("visited $subtotal nodes")
+                    total += subtotal
+                }
+            }
         }
+        return total
     }
 
-    private suspend inline fun runStep(
-        maxDepth: Int,
-        crossinline visit: suspend (MuxNode<*, *, *, *>) -> Unit,
-    ) = coroutineScope {
+    private inline fun runStep(maxDepth: Int, crossinline visit: (MuxNode<*, *, *>) -> Unit): Int {
+        var total = 0
+        val toVisit = mutableListOf<MuxNode<*, *, *>>()
         while (scheduledQ.peek()?.first?.let { it <= maxDepth } == true) {
             val (d, node) = scheduledQ.remove()
             if (
@@ -82,11 +92,15 @@ internal class SchedulerImpl : Scheduler {
             ) {
                 scheduledQ.add(node.depthTracker.dirty_directDepth to node)
             } else {
-                launch {
-                    enqueued.remove(node)
-                    visit(node)
-                }
+                total++
+                toVisit.add(node)
             }
         }
+
+        for (node in toVisit) {
+            visit(node)
+        }
+
+        return total
     }
 }

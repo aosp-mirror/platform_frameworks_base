@@ -17,8 +17,8 @@
 package com.android.systemui.kairos.internal
 
 /* Initialized TFlow */
-internal fun interface TFlowImpl<out A> {
-    suspend fun activate(evalScope: EvalScope, downstream: Schedulable): ActivationResult<A>?
+internal fun interface EventsImpl<out A> {
+    fun activate(evalScope: EvalScope, downstream: Schedulable): ActivationResult<A>?
 }
 
 internal data class ActivationResult<out A>(
@@ -26,34 +26,33 @@ internal data class ActivationResult<out A>(
     val needsEval: Boolean,
 )
 
-internal inline fun <A> TFlowCheap(crossinline cheap: CheapNodeSubscribe<A>) =
-    TFlowImpl { scope, ds ->
+internal inline fun <A> EventsImplCheap(crossinline cheap: CheapNodeSubscribe<A>) =
+    EventsImpl { scope, ds ->
         scope.cheap(ds)
     }
 
 internal typealias CheapNodeSubscribe<A> =
-    suspend EvalScope.(downstream: Schedulable) -> ActivationResult<A>?
+    EvalScope.(downstream: Schedulable) -> ActivationResult<A>?
 
 internal data class NodeConnection<out A>(
     val directUpstream: PullNode<A>,
     val schedulerUpstream: PushNode<*>,
 )
 
-internal suspend fun <A> NodeConnection<A>.hasCurrentValue(evalScope: EvalScope): Boolean =
-    schedulerUpstream.hasCurrentValue(evalScope)
+internal fun <A> NodeConnection<A>.hasCurrentValue(logIndent: Int, evalScope: EvalScope): Boolean =
+    schedulerUpstream.hasCurrentValue(logIndent, evalScope)
 
-internal suspend fun <A> NodeConnection<A>.removeDownstreamAndDeactivateIfNeeded(
-    downstream: Schedulable
-) = schedulerUpstream.removeDownstreamAndDeactivateIfNeeded(downstream)
+internal fun <A> NodeConnection<A>.removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) =
+    schedulerUpstream.removeDownstreamAndDeactivateIfNeeded(downstream)
 
-internal suspend fun <A> NodeConnection<A>.scheduleDeactivationIfNeeded(evalScope: EvalScope) =
+internal fun <A> NodeConnection<A>.scheduleDeactivationIfNeeded(evalScope: EvalScope) =
     schedulerUpstream.scheduleDeactivationIfNeeded(evalScope)
 
-internal suspend fun <A> NodeConnection<A>.removeDownstream(downstream: Schedulable) =
+internal fun <A> NodeConnection<A>.removeDownstream(downstream: Schedulable) =
     schedulerUpstream.removeDownstream(downstream)
 
-internal suspend fun <A> NodeConnection<A>.getPushEvent(evalScope: EvalScope): A =
-    directUpstream.getPushEvent(evalScope)
+internal fun <A> NodeConnection<A>.getPushEvent(logIndent: Int, evalScope: EvalScope): A =
+    directUpstream.getPushEvent(logIndent, evalScope)
 
 internal val <A> NodeConnection<A>.depthTracker: DepthTracker
     get() = schedulerUpstream.depthTracker
