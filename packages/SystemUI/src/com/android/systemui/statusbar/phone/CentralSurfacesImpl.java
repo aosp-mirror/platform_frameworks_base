@@ -829,10 +829,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightRevealScrim = lightRevealScrim;
 
         mViewCaptureAwareWindowManager = viewCaptureAwareWindowManager;
-
-        if (PredictiveBackSysUiFlag.isEnabled()) {
-            mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
-        }
     }
 
     private void initBubbles(Bubbles bubbles) {
@@ -2993,9 +2989,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         public void onConfigChanged(Configuration newConfig) {
             updateResources();
             updateDisplaySize(); // populates mDisplayMetrics
-            if (PredictiveBackSysUiFlag.isEnabled()) {
-                mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
-            }
 
             if (DEBUG) {
                 Log.v(TAG, "configuration changed: " + mContext.getResources().getConfiguration());

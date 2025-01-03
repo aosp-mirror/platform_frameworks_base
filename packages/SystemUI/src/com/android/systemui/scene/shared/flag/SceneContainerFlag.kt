@@ -24,7 +24,6 @@ import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
-import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
 /** Helper for reading or using the scene container flag state. */
 object SceneContainerFlag {
@@ -36,8 +35,7 @@ object SceneContainerFlag {
         get() =
             sceneContainer() && // mainAconfigFlag
                 KeyguardWmStateRefactor.isEnabled &&
-                NotificationThrottleHun.isEnabled &&
-                PredictiveBackSysUiFlag.isEnabled
+                NotificationThrottleHun.isEnabled
 
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
@@ -49,7 +47,6 @@ object SceneContainerFlag {
         sequenceOf(
             KeyguardWmStateRefactor.token,
             NotificationThrottleHun.token,
-            PredictiveBackSysUiFlag.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
         )
 
