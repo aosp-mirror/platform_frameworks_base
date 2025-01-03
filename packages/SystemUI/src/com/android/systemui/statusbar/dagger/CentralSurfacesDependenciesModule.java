@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.dagger;
 
-import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -28,7 +26,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
-import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -226,8 +223,7 @@ public interface CentralSurfacesDependenciesModule {
             IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
-            InteractionJankMonitor interactionJankMonitor,
-            AnimationFeatureFlags animationFeatureFlags) {
+            InteractionJankMonitor interactionJankMonitor) {
         DialogTransitionAnimator.Callback callback = new DialogTransitionAnimator.Callback() {
             @Override
             public boolean isDreaming() {
@@ -249,19 +245,6 @@ public interface CentralSurfacesDependenciesModule {
                 return alternateBouncerInteractor.get().canShowAlternateBouncerForFingerprint();
             }
         };
-        return new DialogTransitionAnimator(
-                mainExecutor, callback, interactionJankMonitor, animationFeatureFlags);
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    static AnimationFeatureFlags provideAnimationFeatureFlags() {
-        return new AnimationFeatureFlags() {
-            @Override
-            public boolean isPredictiveBackQsDialogAnim() {
-                return predictiveBackAnimateDialogs();
-            }
-        };
+        return new DialogTransitionAnimator(mainExecutor, callback, interactionJankMonitor);
     }
 }

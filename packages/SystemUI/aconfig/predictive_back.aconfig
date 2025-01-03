@@ -7,10 +7,3 @@ flag {
     description: "Enable Shade Animations"
     bug: "327732946"
 }
-
-flag {
-    name: "predictive_back_animate_dialogs"
-    namespace: "systemui"
-    description: "Enable Predictive Back Animation for SysUI dialogs"
-    bug: "327721544"
-}
