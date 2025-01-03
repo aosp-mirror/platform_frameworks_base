@@ -25,14 +25,21 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.res.R
 import com.android.systemui.util.children
 
-fun updateOpenState(ringerDrawer: MotionLayout, orientation: Int) {
+fun updateOpenState(ringerDrawer: MotionLayout, orientation: Int, ringerBackground: View) {
     val openSet = ringerDrawer.cloneConstraintSet(R.id.volume_dialog_ringer_drawer_open)
+    openSet.setVisibility(ringerBackground.id, View.VISIBLE)
     openSet.adjustOpenConstraintsForDrawer(ringerDrawer, orientation)
     ringerDrawer.updateState(R.id.volume_dialog_ringer_drawer_open, openSet)
 }
 
-fun updateCloseState(ringerDrawer: MotionLayout, selectedIndex: Int, orientation: Int) {
+fun updateCloseState(
+    ringerDrawer: MotionLayout,
+    selectedIndex: Int,
+    orientation: Int,
+    ringerBackground: View,
+) {
     val closeSet = ringerDrawer.cloneConstraintSet(R.id.volume_dialog_ringer_drawer_close)
+    closeSet.setVisibility(ringerBackground.id, View.VISIBLE)
     closeSet.adjustClosedConstraintsForDrawer(ringerDrawer, selectedIndex, orientation)
     ringerDrawer.updateState(R.id.volume_dialog_ringer_drawer_close, closeSet)
 }
