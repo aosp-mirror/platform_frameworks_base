@@ -12746,20 +12746,24 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 // Distribute the remaining Tx power appropriately between all apps that transmitted
                 // packets.
-                for (int i = 0; i < txPackets.size(); i++) {
-                    final int uid = txPackets.keyAt(i);
-                    final long myTxTimeMs = (txPackets.valueAt(i) * leftOverTxTimeMs)
-                            / totalTxPackets;
-                    txTimesMs.incrementValue(uid, myTxTimeMs);
+                if (totalTxPackets != 0 && leftOverTxTimeMs != 0) {
+                    for (int i = 0; i < txPackets.size(); i++) {
+                        final int uid = txPackets.keyAt(i);
+                        final long myTxTimeMs = (txPackets.valueAt(i) * leftOverTxTimeMs)
+                                / totalTxPackets;
+                        txTimesMs.incrementValue(uid, myTxTimeMs);
+                    }
                 }
 
                 // Distribute the remaining Rx power appropriately between all apps that received
                 // packets.
-                for (int i = 0; i < rxPackets.size(); i++) {
-                    final int uid = rxPackets.keyAt(i);
-                    final long myRxTimeMs = (rxPackets.valueAt(i) * leftOverRxTimeMs)
-                            / totalRxPackets;
-                    rxTimesMs.incrementValue(uid, myRxTimeMs);
+                if (totalRxPackets != 0 && leftOverRxTimeMs != 0) {
+                    for (int i = 0; i < rxPackets.size(); i++) {
+                        final int uid = rxPackets.keyAt(i);
+                        final long myRxTimeMs = (rxPackets.valueAt(i) * leftOverRxTimeMs)
+                                / totalRxPackets;
+                        rxTimesMs.incrementValue(uid, myRxTimeMs);
+                    }
                 }
 
                 for (int i = 0; i < txTimesMs.size(); i++) {
