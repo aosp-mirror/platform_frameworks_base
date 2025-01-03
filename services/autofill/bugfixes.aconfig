@@ -64,6 +64,16 @@ flag {
 }
 
 flag {
+  name: "fix_get_autofill_component"
+  namespace: "autofill"
+  description: "Fix getAutofillComponent returning null, even when user has selected provider"
+  bug: "319503432"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "test_flag"
   namespace: "autofill"
   description: "Test flag "
