@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.overscroll
@@ -180,10 +181,12 @@ fun ContentScope.SnoozeableHeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
 ) {
+
     val isHeadsUp by viewModel.isHeadsUpOrAnimatingAway.collectAsStateWithLifecycle(false)
 
     var scrollOffset by remember { mutableFloatStateOf(0f) }
-    val minScrollOffset = -(stackScrollView.getHeadsUpInset().toFloat())
+    val headsUpInset = with(LocalDensity.current) { headsUpTopInset().toPx() }
+    val minScrollOffset = -headsUpInset
     val maxScrollOffset = 0f
 
     val scrollableState = rememberScrollableState { delta ->
@@ -240,6 +243,12 @@ fun ContentScope.SnoozeableHeadsUpNotificationSpace(
                 },
     )
 }
+
+/** Y position of the HUNs at rest, when the shade is closed. */
+@Composable
+fun headsUpTopInset(): Dp =
+    WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() +
+        dimensionResource(R.dimen.heads_up_status_bar_padding)
 
 /** Adds the space where notification stack should appear in the scene. */
 @Composable

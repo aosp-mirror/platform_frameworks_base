@@ -2663,12 +2663,6 @@ public class NotificationStackScrollLayout
     }
 
     @Override
-    public int getHeadsUpInset() {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
-        return mHeadsUpInset;
-    }
-
-    @Override
     public int getStackBottomInset() {
         return mPaddingBetweenElements + mShelf.getIntrinsicHeight();
     }
