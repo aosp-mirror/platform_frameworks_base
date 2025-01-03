@@ -3877,11 +3877,12 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
 
         // Draw letterbox.
-        mActivity.setVisible(false);
-        mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
-        mActivity.mDisplayContent.mOpeningApps.add(mActivity);
+        mActivity.ensureActivityConfiguration();
         addWindowToActivity(mActivity);
         mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // Verify mAppCompatDisplayInsets is created after recomputing.
+        assertTrue(mActivity.providesMaxBounds());
     }
 
     private void assertLetterboxSurfacesDrawnBetweenActivityAndParentBounds(Rect parentBounds) {
