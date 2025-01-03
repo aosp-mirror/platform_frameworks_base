@@ -27,9 +27,9 @@ import com.android.systemui.kairos.internal.store.singleOf
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.These
 import com.android.systemui.kairos.util.flatMap
 import com.android.systemui.kairos.util.getMaybe
@@ -282,7 +282,7 @@ internal inline fun <A> switchDeferredImplSingle(
     crossinline getStorage: EvalScope.() -> EventsImpl<A>,
     crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
 ): EventsImpl<A> {
-    val patches = mapImpl(getPatches) { newFlow, _ -> singleOf(just(newFlow)).asIterable() }
+    val patches = mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
     val switchDeferredImpl =
         switchDeferredImpl(
             name = name,
@@ -402,7 +402,7 @@ internal inline fun <A, B> mergeNodes(
 ): EventsImpl<These<A, B>> {
     val storage =
         listOf(
-                mapImpl(getPulse) { it, _ -> These.thiz<A, B>(it) },
+                mapImpl(getPulse) { it, _ -> These.thiz(it) },
                 mapImpl(getOther) { it, _ -> These.that(it) },
             )
             .asIterableWithIndex()

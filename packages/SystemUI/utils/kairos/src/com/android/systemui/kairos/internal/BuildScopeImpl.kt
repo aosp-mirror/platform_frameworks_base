@@ -36,9 +36,9 @@ import com.android.systemui.kairos.internal.util.childScope
 import com.android.systemui.kairos.internal.util.launchImmediate
 import com.android.systemui.kairos.launchEffect
 import com.android.systemui.kairos.mergeLeft
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
 import java.util.concurrent.atomic.AtomicReference

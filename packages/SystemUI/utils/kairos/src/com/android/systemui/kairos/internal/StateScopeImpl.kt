@@ -21,6 +21,8 @@ import com.android.systemui.kairos.Events
 import com.android.systemui.kairos.EventsInit
 import com.android.systemui.kairos.EventsLoop
 import com.android.systemui.kairos.GroupedEvents
+import com.android.systemui.kairos.Incremental
+import com.android.systemui.kairos.IncrementalInit
 import com.android.systemui.kairos.State
 import com.android.systemui.kairos.StateInit
 import com.android.systemui.kairos.StateScope
@@ -28,7 +30,6 @@ import com.android.systemui.kairos.Stateful
 import com.android.systemui.kairos.emptyEvents
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
-import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
 import com.android.systemui.kairos.mapCheap
 import com.android.systemui.kairos.merge
 import com.android.systemui.kairos.switchEvents
@@ -47,69 +48,24 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         val operatorName = "holdStateDeferred"
         // Ensure state is only collected until the end of this scope
         return truncateToScope(operatorName)
-            .toStateInternalDeferred(operatorName, initialValue.unwrapped)
+            .holdStateInternalDeferred(operatorName, initialValue.unwrapped)
     }
 
-    override fun <K, V> Events<Map<K, Maybe<Events<V>>>>.mergeIncrementally(
-        name: String?,
-        initialEvents: DeferredValue<Map<K, Events<V>>>,
-    ): Events<Map<K, V>> {
-        val storage: State<Map<K, Events<V>>> = foldStateMapIncrementally(initialEvents)
-        val patches =
-            mapImpl({ init.connect(this) }) { patch, _ ->
-                patch
-                    .mapValues { (_, m) -> m.map { events -> events.init.connect(this) } }
-                    .asIterable()
-            }
-        return EventsInit(
+    override fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
+        initialValues: DeferredValue<Map<K, V>>
+    ): Incremental<K, V> {
+        val operatorName = "foldStateMapIncrementally"
+        val name = operatorName
+        return IncrementalInit(
             constInit(
-                name,
-                switchDeferredImpl(
-                        name = name,
-                        getStorage = {
-                            storage.init
-                                .connect(this)
-                                .getCurrentWithEpoch(this)
-                                .first
-                                .mapValues { (_, events) -> events.init.connect(this) }
-                                .asIterable()
-                        },
-                        getPatches = { patches },
-                        storeFactory = ConcurrentHashMapK.Factory(),
-                    )
-                    .awaitValues(),
-            )
-        )
-    }
-
-    override fun <K, V> Events<Map<K, Maybe<Events<V>>>>.mergeIncrementallyPromptly(
-        initialEvents: DeferredValue<Map<K, Events<V>>>,
-        name: String?,
-    ): Events<Map<K, V>> {
-        val storage: State<Map<K, Events<V>>> = foldStateMapIncrementally(initialEvents)
-        val patches =
-            mapImpl({ init.connect(this) }) { patch, _ ->
-                patch
-                    .mapValues { (_, m) -> m.map { events -> events.init.connect(this) } }
-                    .asIterable()
-            }
-        return EventsInit(
-            constInit(
-                name,
-                switchPromptImpl(
-                        name = name,
-                        getStorage = {
-                            storage.init
-                                .connect(this)
-                                .getCurrentWithEpoch(this)
-                                .first
-                                .mapValues { (_, events) -> events.init.connect(this) }
-                                .asIterable()
-                        },
-                        getPatches = { patches },
-                        storeFactory = ConcurrentHashMapK.Factory(),
-                    )
-                    .awaitValues(),
+                operatorName,
+                activatedIncremental(
+                    name,
+                    operatorName,
+                    evalScope,
+                    { init.connect(this) },
+                    initialValues.unwrapped,
+                ),
             )
         )
     }
@@ -171,7 +127,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         } else {
             endSignalOnce
                 .mapCheap { emptyEvents }
-                .toStateInternal(operatorName, this)
+                .holdStateInternal(operatorName, this)
                 .switchEvents()
         }
 
@@ -182,19 +138,19 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
             EventsLoop<A>().apply {
                 loopback =
                     mapCheap { emptyEvents }
-                        .toStateInternal(operatorName, this@nextOnlyInternal)
+                        .holdStateInternal(operatorName, this@nextOnlyInternal)
                         .switchEvents()
             }
         }
 
-    private fun <A> Events<A>.toStateInternal(operatorName: String, init: A): State<A> =
-        toStateInternalDeferred(operatorName, CompletableLazy(init))
+    private fun <A> Events<A>.holdStateInternal(operatorName: String, init: A): State<A> =
+        holdStateInternalDeferred(operatorName, CompletableLazy(init))
 
-    private fun <A> Events<A>.toStateInternalDeferred(
+    private fun <A> Events<A>.holdStateInternalDeferred(
         operatorName: String,
         init: Lazy<A>,
     ): State<A> {
-        val changes = this@toStateInternalDeferred
+        val changes = this@holdStateInternalDeferred
         val name = operatorName
         val impl =
             activatedStateSource(

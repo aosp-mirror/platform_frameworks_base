@@ -18,6 +18,9 @@
 
 package com.android.systemui.kairos.util
 
+import com.android.systemui.kairos.util.Either.Left
+import com.android.systemui.kairos.util.Either.Right
+
 /**
  * Contains a value of two possibilities: `Left<A>` or `Right<B>`
  *
@@ -25,13 +28,13 @@ package com.android.systemui.kairos.util
  * [Pair] is effectively an anonymous grouping of two instances, then an [Either] is an anonymous
  * set of two options.
  */
-sealed class Either<out A, out B>
+sealed interface Either<out A, out B> {
+    /** An [Either] that contains a [Left] value. */
+    @JvmInline value class Left<out A>(val value: A) : Either<A, Nothing>
 
-/** An [Either] that contains a [Left] value. */
-data class Left<out A>(val value: A) : Either<A, Nothing>()
-
-/** An [Either] that contains a [Right] value. */
-data class Right<out B>(val value: B) : Either<Nothing, B>()
+    /** An [Either] that contains a [Right] value. */
+    @JvmInline value class Right<out B>(val value: B) : Either<Nothing, B>
+}
 
 /**
  * Returns an [Either] containing the result of applying [transform] to the [Left] value, or the
@@ -57,7 +60,7 @@ inline fun <A, B, C> Either<A, B>.mapRight(transform: (B) -> C): Either<A, C> =
 inline fun <A> Either<A, *>.leftMaybe(): Maybe<A> =
     when (this) {
         is Left -> just(value)
-        else -> None
+        else -> none
     }
 
 /** Returns the [Left] value held by this [Either], or `null` if this is a [Right] value. */
@@ -71,7 +74,7 @@ inline fun <A> Either<A, *>.leftOrNull(): A? =
 inline fun <B> Either<*, B>.rightMaybe(): Maybe<B> =
     when (this) {
         is Right -> just(value)
-        else -> None
+        else -> none
     }
 
 /** Returns the [Right] value held by this [Either], or `null` if this is a [Left] value. */

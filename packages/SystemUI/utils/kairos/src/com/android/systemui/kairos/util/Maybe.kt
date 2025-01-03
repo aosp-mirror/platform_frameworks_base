@@ -18,6 +18,8 @@
 
 package com.android.systemui.kairos.util
 
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -27,13 +29,13 @@ import kotlin.coroutines.startCoroutine
 import kotlin.coroutines.suspendCoroutine
 
 /** Represents a value that may or may not be present. */
-sealed class Maybe<out A>
+sealed interface Maybe<out A> {
+    /** A [Maybe] value that is present. */
+    @JvmInline value class Just<out A> internal constructor(val value: A) : Maybe<A>
 
-/** A [Maybe] value that is present. */
-data class Just<out A> internal constructor(val value: A) : Maybe<A>()
-
-/** A [Maybe] value that is not present. */
-data object None : Maybe<Nothing>()
+    /** A [Maybe] value that is not present. */
+    data object None : Maybe<Nothing>
+}
 
 /** Utilities to query [Maybe] instances from within a [maybe] block. */
 @RestrictsSuspension

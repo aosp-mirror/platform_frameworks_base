@@ -31,11 +31,11 @@ import com.android.systemui.kairos.internal.cached
 import com.android.systemui.kairos.internal.constInit
 import com.android.systemui.kairos.internal.constState
 import com.android.systemui.kairos.internal.filterImpl
-import com.android.systemui.kairos.internal.flatMap
+import com.android.systemui.kairos.internal.flatMapStateImpl
 import com.android.systemui.kairos.internal.init
-import com.android.systemui.kairos.internal.map
-import com.android.systemui.kairos.internal.mapCheap
 import com.android.systemui.kairos.internal.mapImpl
+import com.android.systemui.kairos.internal.mapStateImpl
+import com.android.systemui.kairos.internal.mapStateImplCheap
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.zipStateMap
 import com.android.systemui.kairos.internal.zipStates
@@ -45,7 +45,10 @@ import kotlin.reflect.KProperty
  * A time-varying value with discrete changes. Essentially, a combination of a [Transactional] that
  * holds a value, and an [Events] that emits when the value changes.
  */
-@ExperimentalKairosApi sealed class State<out A>
+@ExperimentalKairosApi
+sealed class State<out A> {
+    internal abstract val init: Init<StateImpl<A>>
+}
 
 /** A [State] that never changes. */
 @ExperimentalKairosApi
@@ -98,7 +101,7 @@ fun <A, B> State<A>.map(transform: KairosScope.(A) -> B): State<B> {
     val name = operatorName
     return StateInit(
         init(name) {
-            init.connect(evalScope = this).map(name, operatorName) { NoScope.transform(it) }
+            mapStateImpl({ init.connect(this) }, name, operatorName) { NoScope.transform(it) }
         }
     )
 }
@@ -117,9 +120,7 @@ fun <A, B> State<A>.mapCheapUnsafe(transform: KairosScope.(A) -> B): State<B> {
     val operatorName = "map"
     val name = operatorName
     return StateInit(
-        init(name) {
-            init.connect(evalScope = this).mapCheap(name, operatorName) { NoScope.transform(it) }
-        }
+        init(name) { mapStateImplCheap(init, name, operatorName) { NoScope.transform(it) } }
     )
 }
 
@@ -160,7 +161,13 @@ fun <A> Iterable<State<A>>.combine(): State<List<A>> {
     val name = operatorName
     return StateInit(
         init(name) {
-            zipStates(name, operatorName, states = map { it.init.connect(evalScope = this) })
+            val states = map { it.init }
+            zipStates(
+                name,
+                operatorName,
+                states.size,
+                states = init(null) { states.map { it.connect(this) } },
+            )
         }
     )
 }
@@ -179,7 +186,8 @@ fun <K, A> Map<K, State<A>>.combine(): State<Map<K, A>> {
             zipStateMap(
                 name,
                 operatorName,
-                states = mapValues { it.value.init.connect(evalScope = this) },
+                size,
+                states = init(null) { mapValues { it.value.init.connect(evalScope = this) } },
             )
         }
     )
@@ -229,9 +237,9 @@ fun <A, B, Z> combine(
     val name = operatorName
     return StateInit(
         init(name) {
-            val dl1 = stateA.init.connect(evalScope = this@init)
-            val dl2 = stateB.init.connect(evalScope = this@init)
-            zipStates(name, operatorName, dl1, dl2) { a, b -> NoScope.transform(a, b) }
+            zipStates(name, operatorName, stateA.init, stateB.init) { a, b ->
+                NoScope.transform(a, b)
+            }
         }
     )
 }
@@ -253,10 +261,9 @@ fun <A, B, C, Z> combine(
     val name = operatorName
     return StateInit(
         init(name) {
-            val dl1 = stateA.init.connect(evalScope = this@init)
-            val dl2 = stateB.init.connect(evalScope = this@init)
-            val dl3 = stateC.init.connect(evalScope = this@init)
-            zipStates(name, operatorName, dl1, dl2, dl3) { a, b, c -> NoScope.transform(a, b, c) }
+            zipStates(name, operatorName, stateA.init, stateB.init, stateC.init) { a, b, c ->
+                NoScope.transform(a, b, c)
+            }
         }
     )
 }
@@ -279,11 +286,11 @@ fun <A, B, C, D, Z> combine(
     val name = operatorName
     return StateInit(
         init(name) {
-            val dl1 = stateA.init.connect(evalScope = this@init)
-            val dl2 = stateB.init.connect(evalScope = this@init)
-            val dl3 = stateC.init.connect(evalScope = this@init)
-            val dl4 = stateD.init.connect(evalScope = this@init)
-            zipStates(name, operatorName, dl1, dl2, dl3, dl4) { a, b, c, d ->
+            zipStates(name, operatorName, stateA.init, stateB.init, stateC.init, stateD.init) {
+                a,
+                b,
+                c,
+                d ->
                 NoScope.transform(a, b, c, d)
             }
         }
@@ -309,12 +316,15 @@ fun <A, B, C, D, E, Z> combine(
     val name = operatorName
     return StateInit(
         init(name) {
-            val dl1 = stateA.init.connect(evalScope = this@init)
-            val dl2 = stateB.init.connect(evalScope = this@init)
-            val dl3 = stateC.init.connect(evalScope = this@init)
-            val dl4 = stateD.init.connect(evalScope = this@init)
-            val dl5 = stateE.init.connect(evalScope = this@init)
-            zipStates(name, operatorName, dl1, dl2, dl3, dl4, dl5) { a, b, c, d, e ->
+            zipStates(
+                name,
+                operatorName,
+                stateA.init,
+                stateB.init,
+                stateC.init,
+                stateD.init,
+                stateE.init,
+            ) { a, b, c, d, e ->
                 NoScope.transform(a, b, c, d, e)
             }
         }
@@ -328,7 +338,7 @@ fun <A, B> State<A>.flatMap(transform: KairosScope.(A) -> State<B>): State<B> {
     val name = operatorName
     return StateInit(
         init(name) {
-            init.connect(this).flatMap(name, operatorName) { a ->
+            flatMapStateImpl({ init.connect(this) }, name, operatorName) { a ->
                 NoScope.transform(a).init.connect(this)
             }
         }
@@ -392,14 +402,12 @@ internal constructor(
         val name = "$operatorName[$value]"
         return StateInit(
             init(name) {
-                DerivedMapCheap(
+                StateImpl(
                     name,
                     operatorName,
-                    upstream = upstream.init.connect(evalScope = this),
-                    changes = groupedChanges.impl.eventsForKey(value),
-                ) {
-                    it == value
-                }
+                    groupedChanges.impl.eventsForKey(value),
+                    DerivedMapCheap(upstream.init) { it == value },
+                )
             }
         )
     }
@@ -430,18 +438,20 @@ class MutableState<T> internal constructor(internal val network: Network, initia
             getInitialValue = { null },
         )
 
+    override val init: Init<StateImpl<T>>
+        get() = state.init
+
     internal val state = run {
         val changes = input.impl
         val name = null
         val operatorName = "MutableState"
-        lateinit var state: StateSource<T>
+        val state: StateSource<T> = StateSource(initialValue)
         val mapImpl = mapImpl(upstream = { changes.activated() }) { it, _ -> it!!.value }
         val calm: EventsImpl<T> =
             filterImpl({ mapImpl }) { new ->
                     new != state.getCurrentWithEpoch(evalScope = this).first
                 }
                 .cached()
-        state = StateSource(name, operatorName, initialValue, calm)
         @Suppress("DeferredResultUnused")
         network.transaction("MutableState.init") {
             calm.activate(evalScope = this, downstream = Schedulable.S(state))?.let {
@@ -452,7 +462,7 @@ class MutableState<T> internal constructor(internal val network: Network, initia
                 }
             }
         }
-        StateInit(constInit(name, state))
+        StateInit(constInit(name, StateImpl(name, operatorName, calm, state)))
     }
 
     /**
@@ -489,7 +499,7 @@ class StateLoop<A> : State<A>() {
 
     private val deferred = CompletableLazy<State<A>>()
 
-    internal val init: Init<StateImpl<A>> =
+    override val init: Init<StateImpl<A>> =
         init(name) { deferred.value.init.connect(evalScope = this) }
 
     /** The [State] this [StateLoop] will forward to. */
@@ -511,18 +521,10 @@ class StateLoop<A> : State<A>() {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 }
 
-internal class StateInit<A> internal constructor(internal val init: Init<StateImpl<A>>) :
+internal class StateInit<A> internal constructor(override val init: Init<StateImpl<A>>) :
     State<A>() {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 }
-
-internal val <A> State<A>.init: Init<StateImpl<A>>
-    get() =
-        when (this) {
-            is StateInit -> init
-            is StateLoop -> init
-            is MutableState -> state.init
-        }
 
 private inline fun <A> deferInline(crossinline block: InitScope.() -> State<A>): State<A> =
     StateInit(init(name = null) { block().init.connect(evalScope = this) })

@@ -17,7 +17,7 @@
 package com.android.systemui.kairos.internal.util
 
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import java.util.concurrent.ConcurrentHashMap
 

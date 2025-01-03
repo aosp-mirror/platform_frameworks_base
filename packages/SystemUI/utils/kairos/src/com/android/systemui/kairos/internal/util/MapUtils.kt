@@ -39,7 +39,7 @@ internal suspend inline fun <K, A, B : Any, M : MutableMap<K, B>> Map<K, A>
             .mapValuesNotNullTo(it) { (_, deferred) -> deferred.await() }
     }
 
-internal inline fun <K, A, B : Any, M : MutableMap<K, B>> Map<K, A>.mapValuesNotNullTo(
+internal inline fun <K, A, B, M : MutableMap<K, B>> Map<K, A>.mapValuesNotNullTo(
     destination: M,
     block: (Map.Entry<K, A>) -> B?,
 ): M =
@@ -48,6 +48,10 @@ internal inline fun <K, A, B : Any, M : MutableMap<K, B>> Map<K, A>.mapValuesNot
             block(entry)?.let { destination.put(entry.key, it) }
         }
     }
+
+internal inline fun <K, A, B> Map<K, A>.mapValuesNotNull(
+    block: (Map.Entry<K, A>) -> B?
+): Map<K, B> = mapValuesNotNullTo(mutableMapOf(), block)
 
 internal suspend fun <A, B> Iterable<A>.mapParallel(transform: suspend (A) -> B): List<B> =
     coroutineScope {

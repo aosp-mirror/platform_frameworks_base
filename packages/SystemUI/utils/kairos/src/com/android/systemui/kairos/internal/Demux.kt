@@ -261,7 +261,7 @@ internal class DemuxImpl<in K, out A>(private val dmux: DemuxLifecycle<K, A>) {
 internal class DemuxLifecycle<K, A>(@Volatile var lifecycleState: DemuxLifecycleState<K, A>) {
     val mutex = Mutex()
 
-    override fun toString(): String = "TFlowDmuxState[$hashString][$lifecycleState][$mutex]"
+    override fun toString(): String = "EventsDmuxState[$hashString][$lifecycleState][$mutex]"
 
     fun activate(evalScope: EvalScope, key: K): Pair<DemuxNode<*, K, A>.BranchNode, Boolean>? =
         when (val state = lifecycleState) {
