@@ -51,14 +51,14 @@ public class TvStageCoordinator extends StageCoordinator
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider, ShellExecutor mainExecutor,
-            Handler mainHandler, ShellExecutor bgExecutor,
+            Handler mainHandler,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             SplitState splitState,
             SystemWindows systemWindows) {
         super(context, displayId, syncQueue, taskOrganizer, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
-                mainExecutor, mainHandler, bgExecutor, recentTasks, launchAdjacentController,
+                mainExecutor, mainHandler, recentTasks, launchAdjacentController,
                 Optional.empty(), splitState, Optional.empty());
 
         mTvSplitMenuController = new TvSplitMenuController(context, this,

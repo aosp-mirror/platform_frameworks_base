@@ -34,7 +34,6 @@ import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.dagger.pip.TvPipModule;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
-import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.tv.TvSplitScreenController;
@@ -94,12 +93,11 @@ public class TvWMShellModule {
             SplitState splitState,
             @ShellMainThread ShellExecutor mainExecutor,
             Handler mainHandler,
-            @ShellBackgroundThread ShellExecutor bgExecutor,
             SystemWindows systemWindows) {
         return new TvSplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTDAOrganizer, displayController,
                 displayImeController, displayInsetsController, transitions, transactionPool,
                 iconProvider, recentTasks, launchAdjacentController, multiInstanceHelper,
-                splitState, mainExecutor, mainHandler, bgExecutor, systemWindows);
+                splitState, mainExecutor, mainHandler, systemWindows);
     }
 }
