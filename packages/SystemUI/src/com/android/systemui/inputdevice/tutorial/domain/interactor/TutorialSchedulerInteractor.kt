@@ -111,9 +111,9 @@ constructor(
             val tutorialType = resolveTutorialType(it)
 
             if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
-                repo.setNotified(KEYBOARD)
+                repo.setNotifiedTime(KEYBOARD, Instant.now())
             if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
-                repo.setNotified(TOUCHPAD)
+                repo.setNotifiedTime(TOUCHPAD, Instant.now())
 
             logger.logTutorialLaunched(tutorialType)
             tutorialType

@@ -19,23 +19,26 @@ package com.android.systemui.inputdevice.tutorial.data.model
 import java.time.Instant
 
 data class DeviceSchedulerInfo(
-    var launchTime: Instant? = null,
+    var launchedTime: Instant? = null,
     var firstConnectionTime: Instant? = null,
-    var isNotified: Boolean = false,
+    var notifiedTime: Instant? = null,
 ) {
     constructor(
         launchTimeSec: Long?,
         firstConnectionTimeSec: Long?,
-        isNotified: Boolean = false,
+        notifyTimeSec: Long?,
     ) : this(
         launchTimeSec?.let { Instant.ofEpochSecond(it) },
         firstConnectionTimeSec?.let { Instant.ofEpochSecond(it) },
-        isNotified,
+        notifyTimeSec?.let { Instant.ofEpochSecond(it) },
     )
 
     val wasEverConnected: Boolean
         get() = firstConnectionTime != null
 
     val isLaunched: Boolean
-        get() = launchTime != null
+        get() = launchedTime != null
+
+    val isNotified: Boolean
+        get() = notifiedTime != null
 }
