@@ -223,6 +223,10 @@ public final class SatelliteSessionStats implements Parcelable {
         return mCountOfUserMessagesInQueueToBeSent;
     }
 
+    public void incrementUserMessagesInQueueToBeSent() {
+        mCountOfUserMessagesInQueueToBeSent++;
+    }
+
     public long getLatencyOfAllSuccessfulUserMessages() {
         return mLatencyOfSuccessfulUserMessages;
     }
@@ -285,6 +289,18 @@ public final class SatelliteSessionStats implements Parcelable {
         } catch (Exception e) {
             Log.e("SatelliteSessionStats",
                     "Error while addCountOfUnsuccessfulUserMessages: " + e.getMessage());
+        }
+    }
+
+    public void updateCountOfUserMessagesInQueueToBeSent(
+            @SatelliteManager.DatagramType int datagramType) {
+        try {
+            datagramStats.putIfAbsent(datagramType, new SatelliteSessionStats.Builder().build());
+            SatelliteSessionStats data = datagramStats.get(datagramType);
+            data.incrementUserMessagesInQueueToBeSent();
+        } catch (Exception e) {
+            Log.e("SatelliteSessionStats",
+                    "Error while addCountOfUserMessagesInQueueToBeSent: " + e.getMessage());
         }
     }
 
