@@ -210,6 +210,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         "skipped_due_to_large_screen";
     private static final String ERROR_DID_NOT_PASS_VALIDATION = "did_not_pass_validation";
     private static final String ERROR_IO_EXCEPTION = "io_exception";
+    private static final String ERROR_FAILED_TO_RESTORE_SOFTAP_CONFIG =
+        "failed_to_restore_softap_config";
 
 
     // Name of the temporary file we use during full backup/restore.  This is
@@ -1338,12 +1340,31 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         mWifiManager.restoreSupplicantBackupData(supplicant_bytes, ipconfig_bytes);
     }
 
-    private byte[] getSoftAPConfiguration() {
-        return mWifiManager.retrieveSoftApBackupData();
+    @VisibleForTesting
+    byte[] getSoftAPConfiguration() {
+        byte[] data = mWifiManager.retrieveSoftApBackupData();
+        if (areAgentMetricsEnabled) {
+            // We're unable to determine how many settings this includes, so we'll just log 1.
+            numberOfSettingsPerKey.put(KEY_SOFTAP_CONFIG, 1);
+        }
+        return data;
     }
 
-    private void restoreSoftApConfiguration(byte[] data) {
-        SoftApConfiguration configInCloud = mWifiManager.restoreSoftApBackupData(data);
+    @VisibleForTesting
+    void restoreSoftApConfiguration(byte[] data) {
+        SoftApConfiguration configInCloud;
+        if (areAgentMetricsEnabled) {
+            try {
+                configInCloud = mWifiManager.restoreSoftApBackupData(data);
+                mBackupRestoreEventLogger.logItemsRestored(KEY_SOFTAP_CONFIG, /* count= */ 1);
+            } catch (Exception e) {
+                configInCloud = null;
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                    KEY_SOFTAP_CONFIG, /* count= */ 1, ERROR_FAILED_TO_RESTORE_SOFTAP_CONFIG);
+            }
+        } else {
+            configInCloud = mWifiManager.restoreSoftApBackupData(data);
+        }
         if (configInCloud != null) {
             if (DEBUG) Log.d(TAG, "Successfully unMarshaled SoftApConfiguration ");
             // Depending on device hardware, we may need to notify the user of a setting change
