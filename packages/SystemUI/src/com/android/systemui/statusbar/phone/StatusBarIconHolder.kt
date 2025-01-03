@@ -16,11 +16,7 @@
 package com.android.systemui.statusbar.phone
 
 import android.annotation.IntDef
-import android.content.Context
-import android.graphics.drawable.Icon
-import android.os.UserHandle
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState
 import com.android.systemui.statusbar.pipeline.icons.shared.model.ModernStatusBarViewCreator
 
 /** Wraps [com.android.internal.statusbar.StatusBarIcon] so we can still have a uniform list */
@@ -134,30 +130,6 @@ open class StatusBarIconHolder private constructor() {
             val holder = StatusBarIconHolder()
             holder.type = TYPE_MOBILE_NEW
             holder.tag = subId
-            return holder
-        }
-
-        /** Creates a new StatusBarIconHolder from a CallIndicatorIconState. */
-        @JvmStatic
-        fun fromCallIndicatorState(
-            context: Context,
-            state: CallIndicatorIconState,
-        ): StatusBarIconHolder {
-            val holder = StatusBarIconHolder()
-            val resId = if (state.isNoCalling) state.noCallingResId else state.callStrengthResId
-            val contentDescription =
-                if (state.isNoCalling) state.noCallingDescription else state.callStrengthDescription
-            holder.icon =
-                StatusBarIcon(
-                    UserHandle.SYSTEM,
-                    context.packageName,
-                    Icon.createWithResource(context, resId),
-                    0,
-                    0,
-                    contentDescription,
-                    StatusBarIcon.Type.SystemIcon,
-                )
-            holder.tag = state.subId
             return holder
         }
     }
