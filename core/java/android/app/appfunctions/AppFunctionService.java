@@ -24,6 +24,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +60,7 @@ public abstract class AppFunctionService extends Service {
      * service must also require the {@link BIND_APP_FUNCTION_SERVICE} permission so that other
      * applications can not abuse it.
      */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     @NonNull
     public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
