@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.window.data.repository
 
 import android.view.Display
-import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
+import com.android.systemui.statusbar.window.shared.model.StatusBarWindowState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
