@@ -17,8 +17,9 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
-import android.os.Trace
 import com.android.app.tracing.TraceStateLogger
+import com.android.app.tracing.coroutines.TrackTracer
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -29,7 +30,6 @@ import com.android.systemui.util.Utils.isDeviceFoldable
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.plus
 
 /**
@@ -45,7 +45,7 @@ constructor(
     @Application applicationScope: CoroutineScope,
     @Background private val coroutineContext: CoroutineContext,
     private val deviceStateRepository: DeviceStateRepository,
-    private val deviceStateManager: DeviceStateManager
+    private val deviceStateManager: DeviceStateManager,
 ) : CoreStartable {
     private val isFoldable: Boolean = isDeviceFoldable(context.resources, deviceStateManager)
 
@@ -61,7 +61,7 @@ constructor(
 
         bgScope.launch {
             foldStateRepository.hingeAngle.collect {
-                Trace.traceCounter(Trace.TRACE_TAG_APP, "hingeAngle", it.toInt())
+                TrackTracer.instantForGroup("unfold", "hingeAngle", it.toInt())
             }
         }
         bgScope.launch {
