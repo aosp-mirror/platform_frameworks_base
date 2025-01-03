@@ -23,66 +23,40 @@ import android.platform.test.annotations.EnableFlags
 import android.service.notification.ZenPolicy
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.uiEventLogger
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
-import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.testKosmos
-import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
-import com.android.systemui.volume.shared.volumePanelLogger
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AudioStreamSliderViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
     private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private lateinit var mediaStream: AudioStreamSliderViewModel
-    private lateinit var alarmsStream: AudioStreamSliderViewModel
-    private lateinit var notificationStream: AudioStreamSliderViewModel
-    private lateinit var otherStream: AudioStreamSliderViewModel
-
-    @Before
-    fun setUp() {
-        mediaStream = audioStreamSliderViewModel(AudioManager.STREAM_MUSIC)
-        alarmsStream = audioStreamSliderViewModel(AudioManager.STREAM_ALARM)
-        notificationStream = audioStreamSliderViewModel(AudioManager.STREAM_NOTIFICATION)
-        otherStream = audioStreamSliderViewModel(AudioManager.STREAM_VOICE_CALL)
-    }
-
-    private fun audioStreamSliderViewModel(stream: Int): AudioStreamSliderViewModel {
-        return AudioStreamSliderViewModel(
+    private fun Kosmos.audioStreamSliderViewModel(stream: Int): AudioStreamSliderViewModel {
+        return audioStreamSliderViewModelFactory.create(
             AudioStreamSliderViewModel.FactoryAudioStreamWrapper(AudioStream(stream)),
-            testScope.backgroundScope,
-            context,
-            kosmos.audioVolumeInteractor,
-            kosmos.zenModeInteractor,
-            kosmos.uiEventLogger,
-            kosmos.volumePanelLogger,
-            kosmos.sliderHapticsViewModelFactory,
+            applicationCoroutineScope,
         )
     }
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
     fun slider_media_hasDisabledByModesText() =
-        testScope.runTest {
-            val mediaSlider by collectLastValue(mediaStream.slider)
+        kosmos.runTest {
+            val mediaSlider by
+                collectLastValue(audioStreamSliderViewModel(AudioManager.STREAM_MUSIC).slider)
 
             zenModeRepository.addMode(
                 TestModeBuilder()
@@ -112,8 +86,9 @@ class AudioStreamSliderViewModelTest : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
     fun slider_alarms_hasDisabledByModesText() =
-        testScope.runTest {
-            val alarmsSlider by collectLastValue(alarmsStream.slider)
+        kosmos.runTest {
+            val alarmsSlider by
+                collectLastValue(audioStreamSliderViewModel(AudioManager.STREAM_ALARM).slider)
 
             zenModeRepository.addMode(
                 TestModeBuilder()
@@ -141,9 +116,10 @@ class AudioStreamSliderViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
-    fun slider_other_hasDisabledByModesText() =
-        testScope.runTest {
-            val otherSlider by collectLastValue(otherStream.slider)
+    fun slider_other_hasDisabledText() =
+        kosmos.runTest {
+            val otherSlider by
+                collectLastValue(audioStreamSliderViewModel(AudioManager.STREAM_VOICE_CALL).slider)
 
             zenModeRepository.addMode(
                 TestModeBuilder()
@@ -154,20 +130,17 @@ class AudioStreamSliderViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(otherSlider!!.disabledMessage)
-                .isEqualTo("Unavailable because Everything blocked is on")
-
-            zenModeRepository.clearModes()
-            runCurrent()
-
             assertThat(otherSlider!!.disabledMessage).isEqualTo("Unavailable")
         }
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS)
     fun slider_notification_hasSpecialDisabledText() =
-        testScope.runTest {
-            val notificationSlider by collectLastValue(notificationStream.slider)
+        kosmos.runTest {
+            val notificationSlider by
+                collectLastValue(
+                    audioStreamSliderViewModel(AudioManager.STREAM_NOTIFICATION).slider
+                )
             runCurrent()
 
             assertThat(notificationSlider!!.disabledMessage)

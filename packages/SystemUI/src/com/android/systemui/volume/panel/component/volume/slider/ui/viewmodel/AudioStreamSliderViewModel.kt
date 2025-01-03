@@ -18,9 +18,6 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.AudioManager
-import android.media.AudioManager.STREAM_ALARM
-import android.media.AudioManager.STREAM_MUSIC
-import android.media.AudioManager.STREAM_NOTIFICATION
 import android.util.Log
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEventLogger
@@ -34,8 +31,6 @@ import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
-import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
-import com.android.systemui.util.kotlin.combine
 import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
@@ -43,12 +38,15 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
@@ -101,48 +99,16 @@ constructor(
         )
 
     override val slider: StateFlow<SliderState> =
-        if (ModesUiIcons.isEnabled) {
-            combine(
-                    audioVolumeInteractor.getAudioStream(audioStream),
-                    audioVolumeInteractor.canChangeVolume(audioStream),
-                    audioVolumeInteractor.ringerMode,
-                    zenModeInteractor.activeModesBlockingEverything,
-                    zenModeInteractor.activeModesBlockingAlarms,
-                    zenModeInteractor.activeModesBlockingMedia,
-                ) {
-                    model,
-                    isEnabled,
-                    ringerMode,
-                    modesBlockingEverything,
-                    modesBlockingAlarms,
-                    modesBlockingMedia ->
-                    volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
-                    model.toState(
-                        isEnabled,
-                        ringerMode,
-                        getStreamDisabledMessage(
-                            modesBlockingEverything,
-                            modesBlockingAlarms,
-                            modesBlockingMedia,
-                        ),
-                    )
-                }
-                .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
-        } else {
-            combine(
-                    audioVolumeInteractor.getAudioStream(audioStream),
-                    audioVolumeInteractor.canChangeVolume(audioStream),
-                    audioVolumeInteractor.ringerMode,
-                ) { model, isEnabled, ringerMode ->
-                    volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
-                    model.toState(
-                        isEnabled,
-                        ringerMode,
-                        getStreamDisabledMessageWithoutModes(audioStream),
-                    )
-                }
-                .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
-        }
+        combine(
+                audioVolumeInteractor.getAudioStream(audioStream),
+                audioVolumeInteractor.canChangeVolume(audioStream),
+                audioVolumeInteractor.ringerMode,
+                streamDisabledMessage(),
+            ) { model, isEnabled, ringerMode, streamDisabledMessage ->
+                volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
+                model.toState(isEnabled, ringerMode, streamDisabledMessage)
+            }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
     init {
         volumeChanges
@@ -229,40 +195,32 @@ constructor(
         )
     }
 
-    private fun getStreamDisabledMessage(
-        blockingEverything: ActiveZenModes,
-        blockingAlarms: ActiveZenModes,
-        blockingMedia: ActiveZenModes,
-    ): String {
-        // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
-        //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
-        return if (audioStream.value == STREAM_NOTIFICATION) {
-            context.getString(R.string.stream_notification_unavailable)
-        } else {
-            val blockingModeName =
-                when {
-                    blockingEverything.mainMode != null -> blockingEverything.mainMode.name
-                    audioStream.value == STREAM_ALARM -> blockingAlarms.mainMode?.name
-                    audioStream.value == STREAM_MUSIC -> blockingMedia.mainMode?.name
-                    else -> null
-                }
-
-            if (blockingModeName != null) {
-                context.getString(R.string.stream_unavailable_by_modes, blockingModeName)
+    // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
+    //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
+    private fun streamDisabledMessage(): Flow<String> {
+        return if (ModesUiIcons.isEnabled) {
+            if (audioStream.value == AudioManager.STREAM_NOTIFICATION) {
+                flowOf(context.getString(R.string.stream_notification_unavailable))
             } else {
-                // Should not actually be visible, but as a catch-all.
-                context.getString(R.string.stream_unavailable_by_unknown)
+                if (zenModeInteractor.canBeBlockedByZenMode(audioStream)) {
+                    zenModeInteractor.activeModesBlockingStream(audioStream).map { blockingZenModes
+                        ->
+                        blockingZenModes.mainMode?.name?.let {
+                            context.getString(R.string.stream_unavailable_by_modes, it)
+                        } ?: context.getString(R.string.stream_unavailable_by_unknown)
+                    }
+                } else {
+                    flowOf(context.getString(R.string.stream_unavailable_by_unknown))
+                }
             }
-        }
-    }
-
-    private fun getStreamDisabledMessageWithoutModes(audioStream: AudioStream): String {
-        // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
-        //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
-        return if (audioStream.value == STREAM_NOTIFICATION) {
-            context.getString(R.string.stream_notification_unavailable)
         } else {
-            context.getString(R.string.stream_alarm_unavailable)
+            flowOf(
+                if (audioStream.value == AudioManager.STREAM_NOTIFICATION) {
+                    context.getString(R.string.stream_notification_unavailable)
+                } else {
+                    context.getString(R.string.stream_alarm_unavailable)
+                }
+            )
         }
     }
 
