@@ -24,6 +24,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
@@ -117,7 +118,7 @@ interface BuildScope : StateScope {
     fun <A> Events<A>.observe(
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         block: EffectScope.(A) -> Unit = {},
-    ): Job
+    ): DisposableHandle
 
     /**
      * Returns an [Events] containing the results of applying each [BuildSpec] emitted from the
@@ -212,7 +213,7 @@ interface BuildScope : StateScope {
      *
      * @see observe
      */
-    fun <A> Events<A>.observeBuild(block: BuildScope.(A) -> Unit = {}): Job =
+    fun <A> Events<A>.observeBuild(block: BuildScope.(A) -> Unit = {}): DisposableHandle =
         mapBuild(block).observe()
 
     /**
@@ -568,7 +569,7 @@ interface BuildScope : StateScope {
     /** Returns a [Deferred] containing the next value to be emitted from this [Events]. */
     fun <R> Events<R>.nextDeferred(): Deferred<R> {
         lateinit var next: CompletableDeferred<R>
-        val job = nextOnly().observe { next.complete(it) }
+        val job = launchScope { nextOnly().observe { next.complete(it) } }
         next = CompletableDeferred<R>(parent = job)
         return next
     }
@@ -618,7 +619,7 @@ interface BuildScope : StateScope {
      * registered [observers][observe] are unregistered, and any pending [side-effects][effect] are
      * cancelled).
      */
-    fun <A> Events<A>.observeLatestBuild(block: BuildScope.(A) -> Unit = {}): Job =
+    fun <A> Events<A>.observeLatestBuild(block: BuildScope.(A) -> Unit = {}): DisposableHandle =
         mapLatestBuild { block(it) }.observe()
 
     /**
@@ -627,7 +628,7 @@ interface BuildScope : StateScope {
      *
      * With each invocation of [block], running effects from the previous invocation are cancelled.
      */
-    fun <A> Events<A>.observeLatest(block: EffectScope.(A) -> Unit = {}): Job {
+    fun <A> Events<A>.observeLatest(block: EffectScope.(A) -> Unit = {}): DisposableHandle {
         var innerJob: Job? = null
         return observeBuild {
             innerJob?.cancel()
@@ -696,7 +697,7 @@ interface BuildScope : StateScope {
      * emitting) then [block] will be invoked for the first time with the new value; otherwise, it
      * will be invoked with the [current][sample] value.
      */
-    fun <A> State<A>.observe(block: EffectScope.(A) -> Unit = {}): Job =
+    fun <A> State<A>.observe(block: EffectScope.(A) -> Unit = {}): DisposableHandle =
         now.map { sample() }.mergeWith(changes) { _, new -> new }.observe { block(it) }
 }
 
@@ -731,14 +732,14 @@ fun <A> BuildScope.asyncEvent(block: suspend () -> A): Events<A> =
  *
  * Shorthand for:
  * ```kotlin
- *   now.observe { block() }
+ *   launchScope { now.observe { block() } }
  * ```
  */
 @ExperimentalKairosApi
 fun BuildScope.effect(
     context: CoroutineContext = EmptyCoroutineContext,
     block: EffectScope.() -> Unit,
-): Job = now.observe(context) { block() }
+): Job = launchScope { now.observe(context) { block() } }
 
 /**
  * Launches [block] in a new coroutine, returning a [Job] bound to the coroutine.
@@ -773,7 +774,7 @@ fun BuildScope.launchEffect(block: suspend CoroutineScope.() -> Unit): Job = asy
 @ExperimentalKairosApi
 fun <R> BuildScope.asyncEffect(block: suspend CoroutineScope.() -> R): Deferred<R> {
     val result = CompletableDeferred<R>()
-    val job = now.observe { effectCoroutineScope.launch { result.complete(coroutineScope(block)) } }
+    val job = effect { effectCoroutineScope.launch { result.complete(coroutineScope(block)) } }
     val handle = job.invokeOnCompletion { result.cancel() }
     result.invokeOnCompletion {
         handle.dispose()

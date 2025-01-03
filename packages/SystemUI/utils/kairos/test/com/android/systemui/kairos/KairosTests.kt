@@ -1083,7 +1083,7 @@ class KairosTests {
     }
 
     @Test
-    fun inpueventsCompleted() = runFrpTest { network ->
+    fun inputEventsCompleted() = runFrpTest { network ->
         val results = mutableListOf<Int>()
         val e = network.mutableEvents<Int>()
         activateSpec(network) { e.nextOnly().observe { results.add(it) } }
@@ -1374,6 +1374,76 @@ class KairosTests {
         println("3")
         input.emit(Unit)
         assertEquals(1, count)
+    }
+
+    @Test
+    fun observeEffect_disposeHandle() = runFrpTest { network ->
+        val input = network.mutableEvents<Unit>()
+        val stopper = network.mutableEvents<Unit>()
+        var runningCount = 0
+        val specJob =
+            activateSpec(network) {
+                val handle =
+                    input.observe {
+                        effectCoroutineScope.launch {
+                            runningCount++
+                            awaitClose { runningCount-- }
+                        }
+                    }
+                stopper.nextOnly().observe { handle.dispose() }
+            }
+        runCurrent()
+        assertEquals(0, runningCount)
+
+        input.emit(Unit)
+        assertEquals(1, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        stopper.emit(Unit)
+        assertEquals(2, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        specJob.cancel()
+        runCurrent()
+        assertEquals(0, runningCount)
+    }
+
+    @Test
+    fun observeEffect_takeUntil() = runFrpTest { network ->
+        val input = network.mutableEvents<Unit>()
+        val stopper = network.mutableEvents<Unit>()
+        var runningCount = 0
+        val specJob =
+            activateSpec(network) {
+                input.takeUntil(stopper).observe {
+                    effectCoroutineScope.launch {
+                        runningCount++
+                        awaitClose { runningCount-- }
+                    }
+                }
+            }
+        runCurrent()
+        assertEquals(0, runningCount)
+
+        input.emit(Unit)
+        assertEquals(1, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        stopper.emit(Unit)
+        assertEquals(2, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        specJob.cancel()
+        runCurrent()
+        assertEquals(0, runningCount)
     }
 
     private fun runFrpTest(
