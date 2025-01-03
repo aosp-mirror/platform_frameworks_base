@@ -71,6 +71,13 @@
                     android:layout_height="wrap_content"
                     android:visibility="gone">
 
+                    <TextView
+                        android:id="@+id/timeout_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:visibility="gone"
+                        style="@style/TimeoutMessage" />
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/device_list"
                         android:layout_width="match_parent"
@@ -87,9 +94,9 @@
                         app:layout_constraintHeight_max="220dp"
                         android:visibility="gone" />
 
-                    <View
-                        android:id="@+id/border_top"
-                        style="@style/DeviceListBorder" />
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        style="@style/HorizontalProgressBar" />
 
                     <View
                         android:id="@+id/border_bottom"
@@ -98,10 +105,6 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ProgressBar
-                    android:id="@+id/spinner_multiple_device"
-                    android:visibility="gone"
-                    style="@style/Spinner"  />
 
             </RelativeLayout>
 
@@ -135,7 +138,8 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="16dp">
 
-                <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests. -->
+                <!-- Do NOT change the IDs of the buttons: they are referenced in CTS tests.
+                     Legacy name before the change that added single-device dialog.-->
                 <LinearLayout
                     android:id="@+id/negative_multiple_devices_layout"
                     android:layout_width="wrap_content"
@@ -158,18 +162,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:importantForAccessibility="noHideDescendants">
-
-            <ProgressBar
-                android:id="@+id/spinner_single_device"
-                android:visibility="gone"
-                style="@style/Spinner" />
-        </RelativeLayout>>
 
     </LinearLayout>
 
