@@ -1095,6 +1095,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             proto.write(WidgetProto.MAX_HEIGHT,
                 widget.options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0));
         }
+        if (widget.views != null) {
+            proto.write(WidgetProto.VIEWS_BITMAP_MEMORY,
+                    widget.views.estimateTotalBitmapMemoryUsage());
+        }
         proto.end(token);
     }
 
@@ -2846,7 +2850,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // For a full update we replace the RemoteViews completely.
                 widget.views = views;
             }
-            int memoryUsage;
+            long memoryUsage;
             if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) &&
                     (widget.views != null) &&
                     ((memoryUsage = widget.views.estimateMemoryUsage()) > mMaxWidgetBitmapMemory)) {
@@ -3503,6 +3507,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         if (widget.views != null) {
             pw.print("    views="); pw.println(widget.views);
+            pw.print("    views_bitmap_memory=");
+            pw.println(widget.views.estimateTotalBitmapMemoryUsage());
         }
     }
 

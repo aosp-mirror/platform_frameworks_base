@@ -39,6 +39,7 @@ message WidgetProto {
     optional int32 maxWidth = 8;
     optional int32 maxHeight = 9;
     optional bool restoreCompleted = 10;
+    optional int32 views_bitmap_memory = 11;
 }
 
 // represents a set of widget previews for a particular provider

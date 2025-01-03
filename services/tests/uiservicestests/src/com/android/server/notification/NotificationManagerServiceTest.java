@@ -11977,7 +11977,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @DisableFlags(android.app.Flags.FLAG_REMOVE_REMOTE_VIEWS)
     public void testRemoveLargeRemoteViews() throws Exception {
-        int removeSize = mContext.getResources().getInteger(
+        // Cast to long to mock RemoteViews.estimateMemoryUsage which returns long.
+        long removeSize = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
 
         RemoteViews rv = mock(RemoteViews.class);

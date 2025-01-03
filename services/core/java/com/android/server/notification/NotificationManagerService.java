@@ -8683,7 +8683,7 @@ public class NotificationManagerService extends SystemService {
         if (contentView == null) {
             return false;
         }
-        final int contentViewSize = contentView.estimateMemoryUsage();
+        final long contentViewSize = contentView.estimateMemoryUsage();
         if (contentViewSize > mWarnRemoteViewsSizeBytes
                 && contentViewSize < mStripRemoteViewsSizeBytes) {
             Slog.w(TAG, "RemoteViews too large on pkg: " + pkg + " tag: " + tag + " id: " + id
