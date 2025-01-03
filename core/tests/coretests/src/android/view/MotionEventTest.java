@@ -49,9 +49,14 @@ public class MotionEventTest {
     private static final int ID_SOURCE_MASK = 0x3 << 30;
 
     private PointerCoords pointerCoords(float x, float y) {
+        return pointerCoords(x, y, 0f /*orientation*/);
+    }
+
+    private PointerCoords pointerCoords(float x, float y, float orientation) {
         final var coords = new PointerCoords();
         coords.x = x;
         coords.y = y;
+        coords.orientation = orientation;
         return coords;
     }
 
@@ -294,5 +299,25 @@ public class MotionEventTest {
         } catch (IllegalArgumentException e) {
             // Expected
         }
+    }
+
+    @Test
+    public void testAxesAreNotAffectedByFlagChanges() {
+        final int pointerCount = 1;
+        final var properties = new PointerProperties[]{fingerProperties(0)};
+        final var coords = new PointerCoords[]{pointerCoords(20, 60, 0.1234f)};
+
+        final MotionEvent event = MotionEvent.obtain(0 /* downTime */,
+                0 /* eventTime */, MotionEvent.ACTION_MOVE, pointerCount, properties, coords,
+                0 /* metaState */, 0 /* buttonState */, 1 /* xPrecision */, 1 /* yPrecision */,
+                0 /* deviceId */, 0 /* edgeFlags */, InputDevice.SOURCE_TOUCHSCREEN,
+                0 /* flags */);
+
+        // Mark the event as tainted to update the MotionEvent flags.
+        event.setTainted(true);
+
+        assertEquals(20f, event.getX(), 0.0001);
+        assertEquals(60f, event.getY(), 0.0001);
+        assertEquals(0.1234f, event.getOrientation(), 0.0001);
     }
 }
