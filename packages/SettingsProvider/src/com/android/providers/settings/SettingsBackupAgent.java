@@ -193,6 +193,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             "power_button_instantly_locks";
     private static final String KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY =
             "pin_enhanced_privacy";
+    private static final int NUM_LOCK_SETTINGS = 5;
 
     // Error messages for logging metrics.
     private static final String ERROR_COULD_NOT_READ_FROM_CURSOR =
@@ -208,6 +209,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String ERROR_SKIPPED_DUE_TO_LARGE_SCREEN =
         "skipped_due_to_large_screen";
     private static final String ERROR_DID_NOT_PASS_VALIDATION = "did_not_pass_validation";
+    private static final String ERROR_IO_EXCEPTION = "io_exception";
 
 
     // Name of the temporary file we use during full backup/restore.  This is
@@ -794,29 +796,44 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
+        int backedUpSettingsCount = 0;
         try {
             out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED);
             out.writeUTF(ownerInfoEnabled ? "1" : "0");
+            backedUpSettingsCount++;
             if (ownerInfo != null) {
                 out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO);
                 out.writeUTF(ownerInfo != null ? ownerInfo : "");
+                backedUpSettingsCount++;
             }
             if (lockPatternUtils.isVisiblePatternEverChosen(userId)) {
                 out.writeUTF(KEY_LOCK_SETTINGS_VISIBLE_PATTERN_ENABLED);
                 out.writeUTF(visiblePatternEnabled ? "1" : "0");
+                backedUpSettingsCount++;
             }
             if (lockPatternUtils.isPowerButtonInstantlyLocksEverChosen(userId)) {
                 out.writeUTF(KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS);
                 out.writeUTF(powerButtonInstantlyLocks ? "1" : "0");
+                backedUpSettingsCount++;
             }
             if (lockPatternUtils.isPinEnhancedPrivacyEverChosen(userId)) {
                 out.writeUTF(KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY);
                 out.writeUTF(lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) ? "1" : "0");
+                backedUpSettingsCount++;
             }
             // End marker
             out.writeUTF("");
             out.flush();
+            if (areAgentMetricsEnabled) {
+                numberOfSettingsPerKey.put(KEY_LOCK_SETTINGS, backedUpSettingsCount);
+            }
         } catch (IOException ioe) {
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger.logItemsBackupFailed(
+                    KEY_LOCK_SETTINGS,
+                    NUM_LOCK_SETTINGS - backedUpSettingsCount,
+                    ERROR_IO_EXCEPTION);
+            }
         }
         return baos.toByteArray();
     }
@@ -1162,6 +1179,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         ByteArrayInputStream bais = new ByteArrayInputStream(buffer, 0, nBytes);
         DataInputStream in = new DataInputStream(bais);
+        int restoredLockSettingsCount = 0;
         try {
             String key;
             // Read until empty string marker
@@ -1187,9 +1205,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         lockPatternUtils.setPinEnhancedPrivacyEnabled("1".equals(value), userId);
                         break;
                 }
+                if (areAgentMetricsEnabled) {
+                    mBackupRestoreEventLogger.logItemsRestored(KEY_LOCK_SETTINGS, /* count= */ 1);
+                    restoredLockSettingsCount++;
+                }
+
             }
             in.close();
         } catch (IOException ioe) {
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                        KEY_LOCK_SETTINGS,
+                        NUM_LOCK_SETTINGS - restoredLockSettingsCount,
+                        ERROR_IO_EXCEPTION);
+            }
         }
     }
 
