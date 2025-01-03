@@ -212,6 +212,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String ERROR_IO_EXCEPTION = "io_exception";
     private static final String ERROR_FAILED_TO_RESTORE_SOFTAP_CONFIG =
         "failed_to_restore_softap_config";
+    private static final String ERROR_FAILED_TO_CONVERT_NETWORK_POLICIES =
+        "failed_to_convert_network_policies";
+    private static final String ERROR_UNKNOWN_BACKUP_SERIALIZATION_VERSION =
+        "unknown_backup_serialization_version";
 
 
     // Name of the temporary file we use during full backup/restore.  This is
@@ -1434,6 +1438,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             try {
                 out.writeInt(NETWORK_POLICIES_BACKUP_VERSION);
                 out.writeInt(policies.length);
+                int numberOfPoliciesBackedUp = 0;
                 for (NetworkPolicy policy : policies) {
                     // We purposefully only backup policies that the user has
                     // defined; any inferred policies might include
@@ -1443,13 +1448,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         out.writeByte(BackupUtils.NOT_NULL);
                         out.writeInt(marshaledPolicy.length);
                         out.write(marshaledPolicy);
+                        if (areAgentMetricsEnabled) {
+                            numberOfPoliciesBackedUp++;
+                        }
                     } else {
                         out.writeByte(BackupUtils.NULL);
                     }
                 }
+                if (areAgentMetricsEnabled) {
+                    numberOfSettingsPerKey.put(KEY_NETWORK_POLICIES, numberOfPoliciesBackedUp);
+                }
             } catch (IOException ioe) {
                 Log.e(TAG, "Failed to convert NetworkPolicies to byte array " + ioe.getMessage());
                 baos.reset();
+                mBackupRestoreEventLogger.logItemsBackupFailed(
+                    KEY_NETWORK_POLICIES,
+                    policies.length,
+                    ERROR_FAILED_TO_CONVERT_NETWORK_POLICIES);
             }
         }
         return baos.toByteArray();
@@ -1483,6 +1498,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             try {
                 int version = in.readInt();
                 if (version < 1 || version > NETWORK_POLICIES_BACKUP_VERSION) {
+                    mBackupRestoreEventLogger.logItemsRestoreFailed(
+                            KEY_NETWORK_POLICIES,
+                            /* count= */ 1,
+                            ERROR_UNKNOWN_BACKUP_SERIALIZATION_VERSION);
                     throw new BackupUtils.BadVersionException(
                             "Unknown Backup Serialization Version");
                 }
@@ -1499,10 +1518,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
                 // Only set the policies if there was no error in the restore operation
                 networkPolicyManager.setNetworkPolicies(policies);
+                mBackupRestoreEventLogger.logItemsRestored(KEY_NETWORK_POLICIES, policies.length);
             } catch (NullPointerException | IOException | BackupUtils.BadVersionException
                     | DateTimeException e) {
                 // NPE can be thrown when trying to instantiate a NetworkPolicy
                 Log.e(TAG, "Failed to convert byte array to NetworkPolicies " + e.getMessage());
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                        KEY_NETWORK_POLICIES,
+                        /* count= */ 1,
+                        ERROR_FAILED_TO_CONVERT_NETWORK_POLICIES);
             }
         }
     }
