@@ -43,6 +43,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.graphics.ColorUtils;
@@ -554,7 +555,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         final ScrimState oldState = mState;
         mState = state;
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "scrim_state", mState.ordinal());
+        TrackTracer.instantForGroup("scrim", "state", mState.ordinal());
 
         if (mCallback != null) {
             mCallback.onCancelled();
@@ -1279,10 +1280,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 tint = getDebugScrimTint(scrimView);
             }
 
-            Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_alpha",
+            TrackTracer.instantForGroup("scrim", getScrimName(scrimView) + "_alpha",
                     (int) (alpha * 255));
-
-            Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_tint",
+            TrackTracer.instantForGroup("scrim", getScrimName(scrimView) + "_tint",
                     Color.alpha(tint));
             scrimView.setTint(tint);
             if (!mIsBouncerToGoneTransitionRunning) {
