@@ -16,7 +16,9 @@
 
 package com.android.systemui.volume.dialog.sliders.domain.interactor
 
+import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.plugins.VolumeDialogController
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
@@ -27,6 +29,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 
@@ -39,8 +43,17 @@ constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val volumeDialogController: VolumeDialogController,
+    zenModeInteractor: ZenModeInteractor,
 ) {
 
+    val isDisabledByZenMode: Flow<Boolean> =
+        if (sliderType is VolumeDialogSliderType.Stream) {
+            zenModeInteractor.activeModesBlockingStream(AudioStream(sliderType.audioStream)).map {
+                it.mainMode != null
+            }
+        } else {
+            flowOf(false)
+        }
     val slider: Flow<VolumeDialogStreamModel> =
         volumeDialogStateInteractor.volumeDialogState
             .mapNotNull {

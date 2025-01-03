@@ -69,6 +69,7 @@ constructor(
             viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }
 
+        viewModel.isDisabledByZenMode.onEach { sliderView.isEnabled = !it }.launchIn(this)
         viewModel.state
             .onEach {
                 sliderView.setModel(it, animation, isInitialUpdate)

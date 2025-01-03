@@ -19,6 +19,7 @@ package com.android.systemui.volume.dialog.sliders.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.plugins.volumeDialogController
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.volume.dialog.domain.interactor.volumeDialogStateInteractor
 import com.android.systemui.volume.dialog.sliders.domain.model.volumeDialogSliderType
 
@@ -29,5 +30,6 @@ val Kosmos.volumeDialogSliderInteractor: VolumeDialogSliderInteractor by
             applicationCoroutineScope,
             volumeDialogStateInteractor,
             volumeDialogController,
+            zenModeInteractor,
         )
     }

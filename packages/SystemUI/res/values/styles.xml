@@ -576,12 +576,12 @@
 
     <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
         <item name="labelStyle">@style/Widget.Material3.Slider.Label</item>
-        <item name="thumbColor">@androidprv:color/materialColorPrimary</item>
-        <item name="tickColorActive">@androidprv:color/materialColorSurfaceContainerHighest</item>
-        <item name="tickColorInactive">@androidprv:color/materialColorPrimary</item>
-        <item name="trackColorActive">@androidprv:color/materialColorPrimary</item>
-        <item name="trackColorInactive">@androidprv:color/materialColorSurfaceContainerHighest</item>
-        <item name="trackIconActiveColor">@androidprv:color/materialColorSurfaceContainerHighest</item>
+        <item name="thumbColor">@color/thumb_color</item>
+        <item name="tickColorActive">@color/on_active_track_color</item>
+        <item name="tickColorInactive">@color/on_inactive_track_color</item>
+        <item name="trackColorActive">@color/active_track_color</item>
+        <item name="trackColorInactive">@color/inactive_track_color</item>
+        <item name="trackIconActiveColor">@color/on_active_track_color</item>
     </style>
 
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
