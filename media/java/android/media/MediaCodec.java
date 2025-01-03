@@ -5878,7 +5878,12 @@ final public class MediaCodec {
          * capture the final metrics for the previous subsession.
          *
          * @param codec The MediaCodec object.
-         * @param metrics The flushed metrics for this codec.
+         * @param metrics The flushed metrics for this codec. This is a
+         *                {@link PersistableBundle} containing the set of
+         *                attributes and values available for the media being
+         *                handled by this instance of MediaCodec. The attributes
+         *                are described in {@link MetricsConstants}. Additional
+         *                vendor-specific fields may also be present.
          */
         @FlaggedApi(FLAG_SUBSESSION_METRICS)
         public void onMetricsFlushed(
