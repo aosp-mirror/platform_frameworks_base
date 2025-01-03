@@ -50,16 +50,16 @@ public class OverlayActorEnforcer {
      */
     static Pair<String, ActorState> getPackageNameForActor(@NonNull String actorUriString,
             @NonNull Map<String, Map<String, String>> namedActors) {
+        if (namedActors.isEmpty()) {
+            return Pair.create(null, ActorState.NO_NAMED_ACTORS);
+        }
+
         Uri actorUri = Uri.parse(actorUriString);
 
         String actorScheme = actorUri.getScheme();
         List<String> actorPathSegments = actorUri.getPathSegments();
         if (!"overlay".equals(actorScheme) || CollectionUtils.size(actorPathSegments) != 1) {
             return Pair.create(null, ActorState.INVALID_OVERLAYABLE_ACTOR_NAME);
-        }
-
-        if (namedActors.isEmpty()) {
-            return Pair.create(null, ActorState.NO_NAMED_ACTORS);
         }
 
         String actorNamespace = actorUri.getAuthority();
