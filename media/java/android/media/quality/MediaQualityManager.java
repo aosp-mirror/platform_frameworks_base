@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Central system API to the overall media quality, which arbitrates interaction between
@@ -1070,24 +1071,11 @@ public final class MediaQualityManager {
     }
 
     /**
-     * Listener used to monitor status of active pictures.
-     */
-    public interface ActiveProcessingPictureListener {
-        /**
-         * Called when active pictures are changed.
-         *
-         * @param activeProcessingPictures contents currently undergoing picture processing.
-         */
-        void onActiveProcessingPicturesChanged(
-                @NonNull List<ActiveProcessingPicture> activeProcessingPictures);
-    }
-
-    /**
      * Adds an active picture listener for the contents owner by the caller.
      */
     public void addActiveProcessingPictureListener(
             @CallbackExecutor @NonNull Executor executor,
-            @NonNull ActiveProcessingPictureListener listener) {
+            @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
         synchronized (mLock) {
@@ -1106,7 +1094,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void addGlobalActiveProcessingPictureListener(
             @NonNull Executor executor,
-            @NonNull ActiveProcessingPictureListener listener) {
+            @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
         synchronized (mLock) {
@@ -1120,7 +1108,7 @@ public final class MediaQualityManager {
      * Removes an active picture listener for the contents.
      */
     public void removeActiveProcessingPictureListener(
-            @NonNull ActiveProcessingPictureListener listener) {
+            @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
         synchronized (mLock) {
             for (Iterator<ActiveProcessingPictureListenerRecord> it = mApListenerRecords.iterator();
@@ -1135,18 +1123,20 @@ public final class MediaQualityManager {
     }
 
     private static final class ActiveProcessingPictureListenerRecord {
-        private final ActiveProcessingPictureListener mListener;
+        private final Consumer<List<ActiveProcessingPicture>> mListener;
         private final Executor mExecutor;
         private final boolean mIsGlobal;
 
         ActiveProcessingPictureListenerRecord(
-                ActiveProcessingPictureListener listener, Executor executor, boolean isGlobal) {
+                Consumer<List<ActiveProcessingPicture>> listener,
+                Executor executor,
+                boolean isGlobal) {
             mListener = listener;
             mExecutor = executor;
             mIsGlobal = isGlobal;
         }
 
-        public ActiveProcessingPictureListener getListener() {
+        public Consumer<List<ActiveProcessingPicture>> getListener() {
             return mListener;
         }
     }
