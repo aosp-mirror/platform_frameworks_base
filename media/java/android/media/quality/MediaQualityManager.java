@@ -1062,12 +1062,11 @@ public final class MediaQualityManager {
     /**
      * Callback used to monitor status of ambient backlight.
      */
-    public abstract static class AmbientBacklightCallback {
+    public interface AmbientBacklightCallback {
         /**
          * Called when new ambient backlight event is emitted.
          */
-        public void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent event) {
-        }
+        void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent event);
     }
 
     /**
