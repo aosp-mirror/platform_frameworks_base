@@ -143,7 +143,7 @@ class MobileConnectionRepositoryImpl(
                     object :
                         TelephonyCallback(),
                         TelephonyCallback.CarrierNetworkListener,
-                        TelephonyCallback.CarrierRoamingNtnModeListener,
+                        TelephonyCallback.CarrierRoamingNtnListener,
                         TelephonyCallback.DataActivityListener,
                         TelephonyCallback.DataConnectionStateListener,
                         TelephonyCallback.DataEnabledListener,

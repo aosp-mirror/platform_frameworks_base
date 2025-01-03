@@ -33,6 +33,7 @@ import java.util.Objects;
  * Longitude is the angular distance, measured in degrees, east or west of the prime longitude line
  * ranging from -180 to 180 degrees
  * Altitude is the distance from the center of the Earth to the satellite, measured in kilometers
+ * Latitude is not added as only geo stationary satellite are handled for now.
  *
  * @hide
  */

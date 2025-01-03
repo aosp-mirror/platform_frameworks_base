@@ -21,7 +21,7 @@ import android.os.OutcomeReceiver
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.telephony.satellite.NtnSignalStrengthCallback
-import android.telephony.satellite.SatelliteCommunicationAllowedStateCallback
+import android.telephony.satellite.SatelliteCommunicationAccessStateCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
@@ -263,9 +263,9 @@ constructor(
 
     private fun isSatelliteAvailableFlow(sm: SupportedSatelliteManager): Flow<Boolean> =
         conflatedCallbackFlow {
-                val callback = SatelliteCommunicationAllowedStateCallback { allowed ->
+                val callback = SatelliteCommunicationAccessStateCallback { allowed ->
                     logBuffer.i({ bool1 = allowed }) {
-                        "onSatelliteCommunicationAllowedStateChanged: $bool1"
+                        "onSatelliteCommunicationAccessAllowedStateChanged: $bool1"
                     }
 
                     trySend(allowed)
@@ -273,20 +273,20 @@ constructor(
 
                 var registered = false
                 try {
-                    logBuffer.i { "registerForCommunicationAllowedStateChanged" }
-                    sm.registerForCommunicationAllowedStateChanged(
+                    logBuffer.i { "registerForCommunicationAccessStateChanged" }
+                    sm.registerForCommunicationAccessStateChanged(
                         bgDispatcher.asExecutor(),
                         callback,
                     )
                     registered = true
                 } catch (e: Exception) {
-                    logBuffer.e("Error calling registerForCommunicationAllowedStateChanged", e)
+                    logBuffer.e("Error calling registerForCommunicationAccessStateChanged", e)
                 }
 
                 awaitClose {
                     if (registered) {
-                        logBuffer.i { "unRegisterForCommunicationAllowedStateChanged" }
-                        sm.unregisterForCommunicationAllowedStateChanged(callback)
+                        logBuffer.i { "unRegisterForCommunicationAccessStateChanged" }
+                        sm.unregisterForCommunicationAccessStateChanged(callback)
                     }
                 }
             }

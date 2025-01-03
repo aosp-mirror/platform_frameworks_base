@@ -47,7 +47,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
     /** apn */
     private String mNiddApn;
-    private int mSubId;
+    private int mSubscriptionId;
 
     /** SubscriberId format is the ICCID. */
     public static final int SUBSCRIBER_ID_TYPE_ICCID = 0;
@@ -75,7 +75,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         this.mSubscriberId = builder.mSubscriberId;
         this.mCarrierId = builder.mCarrierId;
         this.mNiddApn = builder.mNiddApn;
-        this.mSubId = builder.mSubId;
+        this.mSubscriptionId = builder.mSubscriptionId;
         this.mSubscriberIdType = builder.mSubscriberIdType;
     }
 
@@ -87,7 +87,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         private int mCarrierId;
         @NonNull
         private String mNiddApn;
-        private int mSubId;
+        private int mSubscriptionId;
         @SubscriberIdType
         private int mSubscriberIdType;
 
@@ -125,8 +125,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
          * Set the subId and returns the Builder class.
          */
         @NonNull
-        public Builder setSubId(int subId) {
-            mSubId = subId;
+        public Builder setSubscriptionId(int subId) {
+            mSubscriptionId = subId;
             return this;
         }
 
@@ -153,7 +153,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         out.writeString(mSubscriberId);
         out.writeInt(mCarrierId);
         out.writeString(mNiddApn);
-        out.writeInt(mSubId);
+        out.writeInt(mSubscriptionId);
         out.writeInt(mSubscriberIdType);
     }
 
@@ -203,8 +203,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
     /**
      * Return the subscriptionId of the subscription which is used for satellite attachment.
      */
-    public int getSubId() {
-        return mSubId;
+    public int getSubscriptionId() {
+        return mSubscriptionId;
     }
 
     /**
@@ -231,8 +231,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         sb.append(mNiddApn);
         sb.append(",");
 
-        sb.append("SubId:");
-        sb.append(mSubId);
+        sb.append("SubscriptionId:");
+        sb.append(mSubscriptionId);
         sb.append(",");
 
         sb.append("SubscriberIdType:");
@@ -242,7 +242,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSubscriberId, mCarrierId, mNiddApn, mSubId, mSubscriberIdType);
+        return Objects.hash(
+                mSubscriberId, mCarrierId, mNiddApn, mSubscriptionId, mSubscriberIdType);
     }
 
     @Override
@@ -251,7 +252,8 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         if (!(o instanceof SatelliteSubscriberInfo)) return false;
         SatelliteSubscriberInfo that = (SatelliteSubscriberInfo) o;
         return Objects.equals(mSubscriberId, that.mSubscriberId) && mCarrierId == that.mCarrierId
-                && Objects.equals(mNiddApn, that.mNiddApn) && mSubId == that.mSubId
+                && Objects.equals(mNiddApn, that.mNiddApn)
+                && mSubscriptionId == that.mSubscriptionId
                 && mSubscriberIdType == that.mSubscriberIdType;
     }
 
@@ -259,7 +261,7 @@ public final class SatelliteSubscriberInfo implements Parcelable {
         mSubscriberId = in.readString();
         mCarrierId = in.readInt();
         mNiddApn = in.readString();
-        mSubId = in.readInt();
+        mSubscriptionId = in.readInt();
         mSubscriberIdType = in.readInt();
     }
 }

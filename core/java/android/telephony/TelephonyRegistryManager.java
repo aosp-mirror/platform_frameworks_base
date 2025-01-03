@@ -1341,7 +1341,7 @@ public class TelephonyRegistryManager {
                     TelephonyCallback.EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
         }
 
-        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
+        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnListener) {
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED);
             eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED);
