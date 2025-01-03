@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.fakeShadeRepository
@@ -47,7 +48,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
-import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -55,9 +55,8 @@ import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject
 class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository(
-                testScope = testScope,
-            ))
+            this.fakeKeyguardTransitionRepository =
+                spy(FakeKeyguardTransitionRepository(testScope = testScope))
         }
 
     private val testScope = kosmos.testScope
@@ -180,6 +179,12 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
             assertThatRepository(transitionRepository).noTransitionsStarted()
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.DOZING,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
 
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
