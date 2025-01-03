@@ -277,29 +277,7 @@ private class NestedDraggableNode(
                 }
             }
 
-            var drag = awaitTouchSlopOrCancellation(down.id)
-
-            // We try to pick-up the drag gesture in case the touch slop swipe was consumed by a
-            // nested scrollable child that disappeared.
-            // This was copied from http://shortn/_10L8U02IoL.
-            // TODO(b/380838584): Reuse detect(Horizontal|Vertical)DragGestures() instead.
-            while (drag == null && currentEvent.changes.fastAny { it.pressed }) {
-                var event: PointerEvent
-                do {
-                    event = awaitPointerEvent()
-                } while (
-                    event.changes.fastAny { it.isConsumed } && event.changes.fastAny { it.pressed }
-                )
-
-                // An event was not consumed and there's still a pointer in the screen.
-                if (event.changes.fastAny { it.pressed }) {
-                    // Await touch slop again, using the initial down as starting point.
-                    // For most cases this should return immediately since we probably moved
-                    // far enough from the initial down event.
-                    drag = awaitTouchSlopOrCancellation(down.id)
-                }
-            }
-
+            val drag = awaitTouchSlopOrCancellation(down.id)
             if (drag != null) {
                 velocityTracker.resetTracking()
                 val sign = drag.positionChangeIgnoreConsumed().toFloat().sign
