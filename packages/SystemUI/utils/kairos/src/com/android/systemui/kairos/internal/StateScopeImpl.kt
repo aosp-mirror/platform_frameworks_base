@@ -78,7 +78,13 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         val changes = this@toTStateInternalDeferred
         val name = operatorName
         val impl =
-            mkState(name, operatorName, evalScope, { changes.init.connect(evalScope = this) }, init)
+            activatedTStateSource(
+                name,
+                operatorName,
+                evalScope,
+                { changes.init.connect(evalScope = this) },
+                init,
+            )
         return TStateInit(constInit(name, impl))
     }
 
@@ -102,21 +108,22 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
             constInit(
                 name,
                 switchDeferredImpl(
-                    getStorage = {
-                        storage.init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
-                    },
-                    getPatches = {
-                        mapImpl({ init.connect(this) }) { patch ->
-                            patch.mapValuesParallel { (_, m) ->
-                                m.map { flow -> flow.init.connect(this) }
+                        getStorage = {
+                            storage.init
+                                .connect(this)
+                                .getCurrentWithEpoch(this)
+                                .first
+                                .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                        },
+                        getPatches = {
+                            mapImpl({ init.connect(this) }) { patch ->
+                                patch.mapValuesParallel { (_, m) ->
+                                    m.map { flow -> flow.init.connect(this) }
+                                }
                             }
-                        }
-                    },
-                ),
+                        },
+                    )
+                    .awaitValues(),
             )
         )
     }
@@ -129,21 +136,22 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
             constInit(
                 name,
                 switchPromptImpl(
-                    getStorage = {
-                        storage.init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
-                    },
-                    getPatches = {
-                        mapImpl({ init.connect(this) }) { patch ->
-                            patch.mapValuesParallel { (_, m) ->
-                                m.map { flow -> flow.init.connect(this) }
+                        getStorage = {
+                            storage.init
+                                .connect(this)
+                                .getCurrentWithEpoch(this)
+                                .first
+                                .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                        },
+                        getPatches = {
+                            mapImpl({ init.connect(this) }) { patch ->
+                                patch.mapValuesParallel { (_, m) ->
+                                    m.map { flow -> flow.init.connect(this) }
+                                }
                             }
-                        }
-                    },
-                ),
+                        },
+                    )
+                    .awaitValues(),
             )
         )
     }

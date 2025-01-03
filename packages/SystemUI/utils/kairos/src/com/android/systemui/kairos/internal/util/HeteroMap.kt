@@ -37,6 +37,17 @@ internal class HeteroMap {
         store[key] = value ?: NULL
     }
 
+    @Suppress("UNCHECKED_CAST")
+    fun <A : Any> getOrNull(key: Key<A>): A? =
+        store[key]?.let { (if (it === NULL) null else it) as A }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <A> getOrError(key: Key<A>, block: () -> String): A {
+        store[key]?.let {
+            return (if (it === NULL) null else it) as A
+        } ?: error(block())
+    }
+
     operator fun contains(key: Key<*>): Boolean = store.containsKey(key)
 
     fun clear() {

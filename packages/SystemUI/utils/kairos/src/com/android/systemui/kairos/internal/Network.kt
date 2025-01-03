@@ -141,7 +141,10 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         } while (evalScope { evalOutputs(this) })
         // Update states
         evalScope { evalStateWriters(this) }
+        // Invalidate caches
+        // Note: this needs to occur before deferred switches
         transactionStore.clear()
+        epoch++
         // Perform deferred switches
         evalScope { evalMuxMovers(this) }
         // Compact depths
@@ -149,7 +152,6 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         compactor.drainCompact()
         // Deactivate nodes with no downstream
         evalDeactivations()
-        epoch++
     }
 
     /** Invokes all [Output]s that have received data within this transaction. */

@@ -16,8 +16,6 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.util.Maybe
-
 /* Initialized TFlow */
 internal fun interface TFlowImpl<out A> {
     suspend fun activate(evalScope: EvalScope, downstream: Schedulable): ActivationResult<A>?
@@ -41,9 +39,8 @@ internal data class NodeConnection<out A>(
     val schedulerUpstream: PushNode<*>,
 )
 
-internal suspend fun <A> NodeConnection<A>.hasCurrentValue(
-    transactionStore: TransactionStore
-): Boolean = schedulerUpstream.hasCurrentValue(transactionStore)
+internal suspend fun <A> NodeConnection<A>.hasCurrentValue(evalScope: EvalScope): Boolean =
+    schedulerUpstream.hasCurrentValue(evalScope)
 
 internal suspend fun <A> NodeConnection<A>.removeDownstreamAndDeactivateIfNeeded(
     downstream: Schedulable
@@ -55,7 +52,7 @@ internal suspend fun <A> NodeConnection<A>.scheduleDeactivationIfNeeded(evalScop
 internal suspend fun <A> NodeConnection<A>.removeDownstream(downstream: Schedulable) =
     schedulerUpstream.removeDownstream(downstream)
 
-internal suspend fun <A> NodeConnection<A>.getPushEvent(evalScope: EvalScope): Maybe<A> =
+internal suspend fun <A> NodeConnection<A>.getPushEvent(evalScope: EvalScope): A =
     directUpstream.getPushEvent(evalScope)
 
 internal val <A> NodeConnection<A>.depthTracker: DepthTracker

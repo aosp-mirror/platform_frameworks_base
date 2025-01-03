@@ -33,7 +33,7 @@ import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.maybeThat
 import com.android.systemui.kairos.util.maybeThis
 import com.android.systemui.kairos.util.merge
-import com.android.systemui.kairos.util.orElseGet
+import com.android.systemui.kairos.util.orError
 import com.android.systemui.kairos.util.partitionEithers
 import com.android.systemui.kairos.util.these
 import java.util.TreeMap
@@ -42,20 +42,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 
 internal class MuxDeferredNode<K : Any, V>(
-    lifecycle: MuxLifecycle<Map<K, V>>,
-    val spec: MuxActivator<Map<K, V>>,
-) : MuxNode<K, V, Map<K, V>>(lifecycle), Key<Map<K, V>> {
+    lifecycle: MuxLifecycle<Map<K, PullNode<V>>>,
+    val spec: MuxActivator<Map<K, PullNode<V>>>,
+) : MuxNode<K, V, Map<K, PullNode<V>>>(lifecycle), Key<Map<K, PullNode<V>>> {
 
     val schedulable = Schedulable.M(this)
 
     @Volatile var patches: NodeConnection<Map<K, Maybe<TFlowImpl<V>>>>? = null
     @Volatile var patchData: Map<K, Maybe<TFlowImpl<V>>>? = null
-
-    override fun hasCurrentValueLocked(transactionStore: TransactionStore): Boolean =
-        transactionStore.contains(this)
-
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        mutex.withLock { hasCurrentValueLocked(transactionStore) }
 
     override suspend fun visit(evalScope: EvalScope) {
         val result = upstreamData.toMap()
@@ -74,6 +68,7 @@ internal class MuxDeferredNode<K : Any, V>(
                         )
                     }
                     if (scheduleDownstream) {
+                        epoch = evalScope.epoch
                         evalScope.setResult(this@MuxDeferredNode, result)
                         if (!scheduleAll(downstreamSet, evalScope)) {
                             evalScope.scheduleDeactivation(this@MuxDeferredNode)
@@ -84,7 +79,7 @@ internal class MuxDeferredNode<K : Any, V>(
         }
     }
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<Map<K, V>> =
+    override suspend fun getPushEvent(evalScope: EvalScope): Map<K, PullNode<V>> =
         evalScope.getCurrentValue(key = this)
 
     private suspend fun compactIfNeeded(evalScope: EvalScope) {
@@ -282,7 +277,6 @@ internal class MuxDeferredNode<K : Any, V>(
         patchData =
             checkNotNull(patches) { "mux mover scheduled with unset patches upstream node" }
                 .getPushEvent(evalScope)
-                .orElseGet { null }
         evalScope.scheduleMuxMover(this)
     }
 
@@ -299,20 +293,20 @@ internal inline fun <A> switchDeferredImplSingle(
             getPatches = { mapImpl(getPatches) { newFlow -> mapOf(Unit to just(newFlow)) } },
         )
     }) { map ->
-        map.getValue(Unit)
+        map.getValue(Unit).getPushEvent(this)
     }
 
-internal fun <K : Any, A> switchDeferredImpl(
-    getStorage: suspend EvalScope.() -> Map<K, TFlowImpl<A>>,
-    getPatches: suspend EvalScope.() -> TFlowImpl<Map<K, Maybe<TFlowImpl<A>>>>,
-): TFlowImpl<Map<K, A>> =
+internal fun <K : Any, V> switchDeferredImpl(
+    getStorage: suspend EvalScope.() -> Map<K, TFlowImpl<V>>,
+    getPatches: suspend EvalScope.() -> TFlowImpl<Map<K, Maybe<TFlowImpl<V>>>>,
+): TFlowImpl<Map<K, PullNode<V>>> =
     MuxLifecycle(
-        object : MuxActivator<Map<K, A>> {
+        object : MuxActivator<Map<K, PullNode<V>>> {
             override suspend fun activate(
                 evalScope: EvalScope,
-                lifecycle: MuxLifecycle<Map<K, A>>,
-            ): MuxNode<*, *, Map<K, A>>? {
-                val storage: Map<K, TFlowImpl<A>> = getStorage(evalScope)
+                lifecycle: MuxLifecycle<Map<K, PullNode<V>>>,
+            ): MuxNode<*, *, Map<K, PullNode<V>>>? {
+                val storage: Map<K, TFlowImpl<V>> = getStorage(evalScope)
                 // Initialize mux node and switched-in connections.
                 val muxNode =
                     MuxDeferredNode(lifecycle, this).apply {
@@ -324,10 +318,7 @@ internal fun <K : Any, A> switchDeferredImpl(
                                     .apply { upstream = conn }
                                     .also {
                                         if (needsEval) {
-                                            val result = conn.getPushEvent(evalScope)
-                                            if (result is Just) {
-                                                upstreamData[key] = result.value
-                                            }
+                                            upstreamData[key] = conn.directUpstream
                                         }
                                     }
                             }
@@ -398,11 +389,8 @@ internal fun <K : Any, A> switchDeferredImpl(
                     // Schedule mover to process patch emission at the end of this transaction, if
                     // needed.
                     if (needsEval) {
-                        val result = patchesConn.getPushEvent(evalScope)
-                        if (result is Just) {
-                            muxNode.patchData = result.value
-                            evalScope.scheduleMuxMover(muxNode)
-                        }
+                        muxNode.patchData = patchesConn.getPushEvent(evalScope)
+                        evalScope.scheduleMuxMover(muxNode)
                     }
                 }
 
@@ -440,9 +428,9 @@ internal inline fun <A, B> mergeNodes(
     val switchNode = switchDeferredImpl(getStorage = { storage }, getPatches = { neverImpl })
     val merged =
         mapImpl({ switchNode }) { mergeResults ->
-            val first = mergeResults.getMaybe(0).flatMap { it.maybeThis() }
-            val second = mergeResults.getMaybe(1).flatMap { it.maybeThat() }
-            these(first, second).orElseGet { error("unexpected missing merge result") }
+            val first = mergeResults.getMaybe(0).flatMap { it.getPushEvent(this).maybeThis() }
+            val second = mergeResults.getMaybe(1).flatMap { it.getPushEvent(this).maybeThat() }
+            these(first, second).orError { "unexpected missing merge result" }
         }
     return merged.cached()
 }
@@ -455,7 +443,10 @@ internal inline fun <A> mergeNodes(
             getStorage = { getPulses().associateByIndexTo(TreeMap()) },
             getPatches = { neverImpl },
         )
-    val merged = mapImpl({ switchNode }) { mergeResults -> mergeResults.values.toList() }
+    val merged =
+        mapImpl({ switchNode }) { mergeResults ->
+            mergeResults.values.map { it.getPushEvent(this) }
+        }
     return merged.cached()
 }
 
@@ -468,6 +459,8 @@ internal inline fun <A> mergeNodesLeft(
             getPatches = { neverImpl },
         )
     val merged =
-        mapImpl({ switchNode }) { mergeResults: Map<Int, A> -> mergeResults.values.first() }
+        mapImpl({ switchNode }) { mergeResults: Map<Int, PullNode<A>> ->
+            mergeResults.values.first().getPushEvent(this)
+        }
     return merged.cached()
 }

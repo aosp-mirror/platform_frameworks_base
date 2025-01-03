@@ -20,7 +20,6 @@ import com.android.systemui.kairos.internal.util.Key
 import com.android.systemui.kairos.internal.util.associateByIndex
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.mapValuesParallel
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
@@ -106,11 +105,8 @@ internal class TStateSource<A>(
     /** called by network after eval phase has completed */
     suspend fun updateState(evalScope: EvalScope) {
         // write the latch
-        val eventResult = upstreamConnection.getPushEvent(evalScope)
-        if (eventResult is Just) {
-            _current = CompletableDeferred(eventResult.value)
-            writeEpoch = evalScope.epoch
-        }
+        _current = CompletableDeferred(upstreamConnection.getPushEvent(evalScope))
+        writeEpoch = evalScope.epoch
     }
 
     override fun toString(): String = "TStateImpl(changes=$changes, current=$_current)"
@@ -123,7 +119,7 @@ internal class TStateSource<A>(
 internal fun <A> constS(name: String?, operatorName: String, init: A): TStateImpl<A> =
     TStateSource(name, operatorName, init, neverImpl)
 
-internal inline fun <A> mkState(
+internal inline fun <A> activatedTStateSource(
     name: String?,
     operatorName: String,
     evalScope: EvalScope,
@@ -132,8 +128,7 @@ internal inline fun <A> mkState(
 ): TStateImpl<A> {
     lateinit var state: TStateSource<A>
     val calm: TFlowImpl<A> =
-        filterNode(getChanges) { new -> new != state.getCurrentWithEpoch(evalScope = this).first }
-            .cached()
+        filterImpl(getChanges) { new -> new != state.getCurrentWithEpoch(evalScope = this).first }
     return TStateSource(name, operatorName, init, calm).also {
         state = it
         evalScope.scheduleOutput(
@@ -153,7 +148,7 @@ internal inline fun <A> mkState(
 private inline fun <A> TFlowImpl<A>.calm(
     crossinline getState: () -> TStateDerived<A>
 ): TFlowImpl<A> =
-    filterNode({ this@calm }) { new ->
+    filterImpl({ this@calm }) { new ->
             val state = getState()
             val (current, _) = state.getCurrentWithEpoch(evalScope = this)
             if (new != current) {
@@ -237,7 +232,7 @@ internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: Stri
                 getPatches = { mapImpl({ innerChanges }) { new -> mapOf(Unit to just(new)) } },
             )
         }) { map ->
-            map.getValue(Unit)
+            map.getValue(Unit).getPushEvent(this)
         }
     lateinit var state: DerivedFlatten<A>
     state = DerivedFlatten(name, operator, this, switchedChanges.calm { state })
@@ -352,7 +347,7 @@ internal fun <K : Any, A> zipStates(
             states
                 .mapValues { (k, v) ->
                     if (k in patch) {
-                        patch.getValue(k)
+                        patch.getValue(k).getPushEvent(this)
                     } else {
                         v.getCurrentWithEpoch(evalScope = this).first
                     }

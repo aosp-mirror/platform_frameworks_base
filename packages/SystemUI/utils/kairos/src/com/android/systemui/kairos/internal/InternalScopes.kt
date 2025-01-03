@@ -22,7 +22,6 @@ import com.android.systemui.kairos.FrpTransactionScope
 import com.android.systemui.kairos.TFlow
 import com.android.systemui.kairos.internal.util.HeteroMap
 import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.util.Maybe
 
 internal interface InitScope {
     val networkId: Any
@@ -75,6 +74,7 @@ internal fun <A> NetworkScope.setResult(node: Key<A>, result: A) {
     transactionStore[node] = result
 }
 
-internal fun <A> NetworkScope.getCurrentValue(key: Key<A>): Maybe<A> = transactionStore[key]
+internal fun <A> NetworkScope.getCurrentValue(key: Key<A>): A =
+    transactionStore.getOrError(key) { "No value for $key in transaction $epoch" }
 
 internal fun NetworkScope.hasCurrentValue(key: Key<*>): Boolean = transactionStore.contains(key)

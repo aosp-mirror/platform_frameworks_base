@@ -21,14 +21,12 @@ import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 
-internal inline fun <A, B> mapMaybeNode(
-    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline f: suspend EvalScope.(A) -> Maybe<B>,
-): TFlowImpl<B> {
-    return DemuxImpl(
+internal inline fun <A> filterJustImpl(
+    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<Maybe<A>>
+): TFlowImpl<A> =
+    DemuxImpl(
             {
-                mapImpl(getPulse) {
-                    val maybeResult = f(it)
+                mapImpl(getPulse) { maybeResult ->
                     if (maybeResult is Just) {
                         mapOf(Unit to maybeResult.value)
                     } else {
@@ -39,9 +37,8 @@ internal inline fun <A, B> mapMaybeNode(
             numKeys = 1,
         )
         .eventsForKey(Unit)
-}
 
-internal inline fun <A> filterNode(
+internal inline fun <A> filterImpl(
     crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
     crossinline f: suspend EvalScope.(A) -> Boolean,
-): TFlowImpl<A> = mapMaybeNode(getPulse) { if (f(it)) just(it) else none }
+): TFlowImpl<A> = filterJustImpl { mapImpl(getPulse) { if (f(it)) just(it) else none }.cached() }

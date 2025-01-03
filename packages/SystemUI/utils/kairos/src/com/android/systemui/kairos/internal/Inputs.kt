@@ -17,8 +17,6 @@
 package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.just
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
@@ -29,16 +27,18 @@ internal class InputNode<A>(
     private val deactivate: () -> Unit = {},
 ) : PushNode<A>, Key<A> {
 
-    internal val downstreamSet = DownstreamSet()
+    private val downstreamSet = DownstreamSet()
     private val mutex = Mutex()
     private val activated = AtomicBoolean(false)
 
+    @Volatile private var epoch: Long = Long.MIN_VALUE
+
     override val depthTracker: DepthTracker = DepthTracker()
 
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        transactionStore.contains(this)
+    override suspend fun hasCurrentValue(evalScope: EvalScope): Boolean = epoch == evalScope.epoch
 
     suspend fun visit(evalScope: EvalScope, value: A) {
+        epoch = evalScope.epoch
         evalScope.setResult(this, value)
         coroutineScope {
             if (!mutex.withLock { scheduleAll(downstreamSet, evalScope) }) {
@@ -90,8 +90,7 @@ internal class InputNode<A>(
         }
     }
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<A> =
-        evalScope.getCurrentValue(this)
+    override suspend fun getPushEvent(evalScope: EvalScope): A = evalScope.getCurrentValue(this)
 }
 
 internal fun <A> InputNode<A>.activated() = TFlowCheap { downstream ->
@@ -104,7 +103,7 @@ internal data object AlwaysNode : PushNode<Unit> {
 
     override val depthTracker = DepthTracker()
 
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean = true
+    override suspend fun hasCurrentValue(evalScope: EvalScope): Boolean = true
 
     override suspend fun removeDownstream(downstream: Schedulable) {}
 
@@ -116,5 +115,5 @@ internal data object AlwaysNode : PushNode<Unit> {
 
     override suspend fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {}
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<Unit> = just(Unit)
+    override suspend fun getPushEvent(evalScope: EvalScope) = Unit
 }

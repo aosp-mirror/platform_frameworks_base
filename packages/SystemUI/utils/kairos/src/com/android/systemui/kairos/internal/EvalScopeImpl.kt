@@ -57,7 +57,7 @@ internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope)
             TStateInit(
                     constInit(
                         "now",
-                        mkState(
+                        activatedTStateSource(
                             "now",
                             "now",
                             this,

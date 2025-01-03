@@ -20,13 +20,14 @@ package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.util.ConcurrentNullableHashMap
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.util.Just
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** Base class for muxing nodes, which have a potentially dynamic collection of upstream nodes. */
+internal typealias MuxResult<K, V> = Map<K, PullNode<V>>
+
+/** Base class for muxing nodes, which have a (potentially dynamic) collection of upstream nodes. */
 internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Output>) :
     PushNode<Output> {
 
@@ -34,12 +35,21 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
         get() = lifecycle.mutex
 
     // TODO: preserve insertion order?
-    val upstreamData = ConcurrentNullableHashMap<K, V>()
+    val upstreamData = ConcurrentNullableHashMap<K, PullNode<V>>()
     val switchedIn = ConcurrentHashMap<K, MuxBranchNode<K, V>>()
     val downstreamSet: DownstreamSet = DownstreamSet()
 
     // TODO: inline DepthTracker? would need to be added to PushNode signature
     final override val depthTracker = DepthTracker()
+
+    @Volatile
+    var epoch: Long = Long.MIN_VALUE
+        protected set
+
+    inline fun hasCurrentValueLocked(evalScope: EvalScope): Boolean = epoch == evalScope.epoch
+
+    override suspend fun hasCurrentValue(evalScope: EvalScope): Boolean =
+        mutex.withLock { hasCurrentValueLocked(evalScope) }
 
     final override suspend fun addDownstream(downstream: Schedulable) {
         mutex.withLock { addDownstreamLocked(downstream) }
@@ -187,8 +197,6 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
         }
     }
 
-    abstract fun hasCurrentValueLocked(transactionStore: TransactionStore): Boolean
-
     fun schedule(evalScope: EvalScope) {
         // TODO: Potential optimization
         //  Detect if this node is guaranteed to have a single upstream within this transaction,
@@ -207,11 +215,8 @@ internal class MuxBranchNode<K : Any, V>(private val muxNode: MuxNode<K, V, *>, 
     @Volatile lateinit var upstream: NodeConnection<V>
 
     override suspend fun schedule(evalScope: EvalScope) {
-        val upstreamResult = upstream.getPushEvent(evalScope)
-        if (upstreamResult is Just) {
-            muxNode.upstreamData[key] = upstreamResult.value
-            muxNode.schedule(evalScope)
-        }
+        muxNode.upstreamData[key] = upstream.directUpstream
+        muxNode.schedule(evalScope)
     }
 
     override suspend fun adjustDirectUpstream(scheduler: Scheduler, oldDepth: Int, newDepth: Int) {
@@ -288,7 +293,7 @@ internal class MuxLifecycle<A>(@Volatile var lifecycleState: MuxLifecycleState<A
                     state.node.addDownstreamLocked(downstream)
                     ActivationResult(
                         connection = NodeConnection(state.node, state.node),
-                        needsEval = state.node.hasCurrentValueLocked(evalScope.transactionStore),
+                        needsEval = state.node.hasCurrentValueLocked(evalScope),
                     )
                 }
                 is MuxLifecycleState.Inactive -> {
@@ -332,3 +337,6 @@ internal interface MuxActivator<A> {
 
 internal inline fun <A> MuxLifecycle(onSubscribe: MuxActivator<A>): TFlowImpl<A> =
     MuxLifecycle(MuxLifecycleState.Inactive(onSubscribe))
+
+internal fun <K, V> TFlowImpl<MuxResult<K, V>>.awaitValues(): TFlowImpl<Map<K, V>> =
+    mapImpl({ this@awaitValues }) { results -> results.mapValues { it.value.getPushEvent(this) } }
