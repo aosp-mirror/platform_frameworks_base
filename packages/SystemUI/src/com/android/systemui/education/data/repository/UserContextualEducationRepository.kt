@@ -77,6 +77,8 @@ interface ContextualEducationRepository {
         transform: (EduDeviceConnectionTime) -> EduDeviceConnectionTime
     )
 
+    suspend fun clear()
+
     val keyboardShortcutTriggered: Flow<GestureType>
 }
 
@@ -277,5 +279,9 @@ constructor(
         } else {
             preferences.remove(key)
         }
+    }
+
+    override suspend fun clear() {
+        datastore.filterNotNull().first().edit { it.clear() }
     }
 }
