@@ -1,4 +1,6 @@
 # proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+# proto-message: flag_declarations
+# Project link: http://gantry/projects/android_platform_multitasking
 
 package: "com.android.wm.shell"
 container: "system"

@@ -1,7 +1,9 @@
+# proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+# proto-message: flag_declarations
+# Project link: http://gantry/projects/android_platform_windowing_sdk
+
 package: "com.android.window.flags"
 container: "system"
-
-# Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
 
 flag {
     namespace: "windowing_sdk"
