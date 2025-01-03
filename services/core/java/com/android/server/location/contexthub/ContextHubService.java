@@ -338,8 +338,9 @@ public class ContextHubService extends IContextHubService.Stub {
                 mEndpointManager =
                         new ContextHubEndpointManager(
                                 mContext, mContextHubWrapper, registry, mTransactionManager);
+                mEndpointManager.init();
                 Log.i(TAG, "Enabling generic offload API");
-            } catch (UnsupportedOperationException e) {
+            } catch (InstantiationException e) {
                 mEndpointManager = null;
                 registry = null;
                 Log.w(TAG, "Generic offload API not supported, disabling");
@@ -352,7 +353,6 @@ public class ContextHubService extends IContextHubService.Stub {
         }
 
         initDefaultClientMap();
-        initEndpointCallback();
 
         initLocationSettingNotifications();
         initWifiSettingNotifications();
@@ -529,18 +529,6 @@ public class ContextHubService extends IContextHubService.Stub {
             queryNanoAppsInternal(contextHubId);
         }
         mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
-    }
-
-    private void initEndpointCallback() {
-        if (mHubInfoRegistry == null) {
-            return;
-        }
-        try {
-            mContextHubWrapper.registerEndpointCallback(
-                    new ContextHubHalEndpointCallback(mHubInfoRegistry, mEndpointManager));
-        } catch (RemoteException | UnsupportedOperationException e) {
-            Log.e(TAG, "Exception while registering IEndpointCallback", e);
-        }
     }
 
     /**

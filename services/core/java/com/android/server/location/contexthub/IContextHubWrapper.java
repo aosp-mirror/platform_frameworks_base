@@ -18,10 +18,8 @@ package com.android.server.location.contexthub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.chre.flags.Flags;
-import android.hardware.contexthub.EndpointId;
 import android.hardware.contexthub.HostEndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo;
-import android.hardware.contexthub.Message;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -238,39 +236,12 @@ public abstract class IContextHubWrapper {
     }
 
     /** Calls the appropriate registerEndpointCallback function depending on the HAL version. */
-    public void registerEndpointCallback(android.hardware.contexthub.IEndpointCallback cb)
-            throws RemoteException {}
-
-    /** Registers the endpoint with the ContextHub HAL */
-    public void registerEndpoint(android.hardware.contexthub.EndpointInfo info)
-            throws RemoteException {}
-
-    /** Unregisters a previously registered endpoint */
-    public int[] requestSessionIdRange(int size) throws RemoteException {
-        return null;
+    public android.hardware.contexthub.IEndpointCommunication registerEndpointHub(
+            android.hardware.contexthub.IEndpointCallback cb,
+            android.hardware.contexthub.HubInfo hubInfo)
+                    throws RemoteException {
+        throw new UnsupportedOperationException();
     }
-
-    /** Opens an endpoint session between two endpoints */
-    public void openEndpointSession(
-            int sessionId, EndpointId destination, EndpointId initiator, String serviceDescriptor)
-            throws RemoteException {}
-
-    /** Closes a previously opened endpoint */
-    public void closeEndpointSession(int sessionId, byte reason) throws RemoteException {}
-
-    /** Unregisters a previously registered endpoint */
-    public void unregisterEndpoint(android.hardware.contexthub.EndpointInfo info)
-            throws RemoteException {}
-
-    /** Notifies the completion of a session opened by the HAL */
-    public void endpointSessionOpenComplete(int sessionId) throws RemoteException {}
-
-    /** Sends a message to a remote endpoint */
-    public void sendMessageToEndpoint(int sessionId, Message msg) throws RemoteException {}
-
-    /** Sends a message delivery status to a remote endpoint */
-    public void sendMessageDeliveryStatusToEndpoint(int sessionId, MessageDeliveryStatus msgStatus)
-            throws RemoteException {}
 
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
@@ -691,97 +662,19 @@ public abstract class IContextHubWrapper {
         }
 
         @Override
-        public void registerEndpointCallback(android.hardware.contexthub.IEndpointCallback cb)
-                throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-
-            if (DEBUG) {
-                Log.i(TAG, "registerEndpointCallback: cb=" + cb);
-            }
-            hub.registerEndpointCallback(cb);
-        }
-
-        @Override
-        public void registerEndpoint(android.hardware.contexthub.EndpointInfo info)
-                throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.registerEndpoint(info);
-        }
-
-        @Override
-        public int[] requestSessionIdRange(int size) throws RemoteException {
+        public android.hardware.contexthub.IEndpointCommunication registerEndpointHub(
+                android.hardware.contexthub.IEndpointCallback cb,
+                android.hardware.contexthub.HubInfo hubInfo)
+                        throws RemoteException {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return null;
             }
-            return hub.requestSessionIdRange(size);
-        }
 
-        @Override
-        public void openEndpointSession(
-                int sessionId,
-                EndpointId destination,
-                EndpointId initiator,
-                String serviceDescriptor)
-                throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
+            if (DEBUG) {
+                Log.i(TAG, "registerEndpointHub: cb=" + cb);
             }
-            hub.openEndpointSession(sessionId, destination, initiator, serviceDescriptor);
-        }
-
-        @Override
-        public void closeEndpointSession(int sessionId, byte reason) throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.closeEndpointSession(sessionId, reason);
-        }
-
-        @Override
-        public void unregisterEndpoint(android.hardware.contexthub.EndpointInfo info)
-                throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.unregisterEndpoint(info);
-        }
-
-        @Override
-        public void endpointSessionOpenComplete(int sessionId) throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.endpointSessionOpenComplete(sessionId);
-        }
-
-        @Override
-        public void sendMessageToEndpoint(int sessionId, Message msg) throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.sendMessageToEndpoint(sessionId, msg);
-        }
-
-        @Override
-        public void sendMessageDeliveryStatusToEndpoint(
-                int sessionId, MessageDeliveryStatus msgStatus) throws RemoteException {
-            android.hardware.contexthub.IContextHub hub = getHub();
-            if (hub == null) {
-                return;
-            }
-            hub.sendMessageDeliveryStatusToEndpoint(sessionId, msgStatus);
+            return hub.registerEndpointHub(cb, hubInfo);
         }
 
         public boolean supportsLocationSettingNotifications() {

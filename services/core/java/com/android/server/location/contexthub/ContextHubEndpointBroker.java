@@ -23,6 +23,7 @@ import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
+import android.hardware.contexthub.IEndpointCommunication;
 import android.hardware.contexthub.Message;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubTransaction;
@@ -50,8 +51,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /** The context of the service. */
     private final Context mContext;
 
-    /** The proxy to talk to the Context Hub HAL. */
-    private final IContextHubWrapper mContextHubProxy;
+    /** The proxy to talk to the Context Hub HAL for endpoint communication. */
+    private final IEndpointCommunication mHubInterface;
 
     /** The manager that registered this endpoint. */
     private final ContextHubEndpointManager mEndpointManager;
@@ -90,14 +91,14 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ ContextHubEndpointBroker(
             Context context,
-            IContextHubWrapper contextHubProxy,
+            IEndpointCommunication hubInterface,
             ContextHubEndpointManager endpointManager,
             EndpointInfo halEndpointInfo,
             IContextHubEndpointCallback callback,
             String packageName,
             ContextHubTransactionManager transactionManager) {
         mContext = context;
-        mContextHubProxy = contextHubProxy;
+        mHubInterface = hubInterface;
         mEndpointManager = endpointManager;
         mEndpointInfo = new HubEndpointInfo(halEndpointInfo);
         mHalEndpointInfo = halEndpointInfo;
@@ -123,7 +124,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         synchronized (mOpenSessionLock) {
             try {
                 mPendingSessionIds.add(sessionId);
-                mContextHubProxy.openEndpointSession(
+                mHubInterface.openEndpointSession(
                         sessionId,
                         halEndpointInfo.id,
                         mHalEndpointInfo.id,
@@ -145,7 +146,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         super.closeSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         try {
-            mContextHubProxy.closeEndpointSession(
+            mHubInterface.closeEndpointSession(
                     sessionId, ContextHubServiceUtil.toHalReason(reason));
         } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
             Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
@@ -159,7 +160,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         super.unregister_enforcePermission();
         mIsRegistered.set(false);
         try {
-            mContextHubProxy.unregisterEndpoint(mHalEndpointInfo);
+            mHubInterface.unregisterEndpoint(mHalEndpointInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException while calling HAL unregisterEndpoint", e);
         }
@@ -183,7 +184,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         super.openSessionRequestComplete_enforcePermission();
         synchronized (mOpenSessionLock) {
             try {
-                mContextHubProxy.endpointSessionOpenComplete(sessionId);
+                mHubInterface.endpointSessionOpenComplete(sessionId);
                 mActiveRemoteSessionIds.add(sessionId);
             } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
                 Log.e(TAG, "Exception while calling endpointSessionOpenComplete", e);
@@ -208,14 +209,14 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         // TODO(b/381102453): Handle permissions
         if (callback == null) {
             try {
-                mContextHubProxy.sendMessageToEndpoint(sessionId, halMessage);
+                mHubInterface.sendMessageToEndpoint(sessionId, halMessage);
             } catch (RemoteException e) {
                 Log.w(TAG, "Exception while sending message on session " + sessionId, e);
             }
         } else {
             ContextHubServiceTransaction transaction =
                     mTransactionManager.createSessionMessageTransaction(
-                            sessionId, halMessage, mPackageName, callback);
+                            mHubInterface, sessionId, halMessage, mPackageName, callback);
             try {
                 mTransactionManager.addTransaction(transaction);
             } catch (IllegalStateException e) {
@@ -240,7 +241,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         status.messageSequenceNumber = messageSeqNumber;
         status.errorCode = errorCode;
         try {
-            mContextHubProxy.sendMessageDeliveryStatusToEndpoint(sessionId, status);
+            mHubInterface.sendMessageDeliveryStatusToEndpoint(sessionId, status);
         } catch (RemoteException e) {
             Log.w(
                     TAG,

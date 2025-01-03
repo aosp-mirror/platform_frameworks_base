@@ -98,10 +98,16 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
 
     private final Object mCallbackLock = new Object();
 
-    HubInfoRegistry(IContextHubWrapper contextHubWrapper) {
+    HubInfoRegistry(IContextHubWrapper contextHubWrapper) throws InstantiationException {
         mContextHubWrapper = contextHubWrapper;
-        refreshCachedHubs();
-        refreshCachedEndpoints();
+        try {
+            refreshCachedHubs();
+            refreshCachedEndpoints();
+        } catch (UnsupportedOperationException e) {
+            String error = "Failed to update hub and endpoint cache";
+            Log.e(TAG, error, e);
+            throw new InstantiationException(error);
+        }
     }
 
     /** Retrieve the list of hubs available. */
