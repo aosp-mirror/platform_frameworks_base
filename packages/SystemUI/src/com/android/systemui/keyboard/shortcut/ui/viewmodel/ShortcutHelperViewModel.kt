@@ -129,7 +129,7 @@ constructor(
                     val iconDrawable =
                         userContext.packageManager.getApplicationIcon(type.packageName)
                     IconSource(painter = DrawablePainter(drawable = iconDrawable))
-                } catch (e: NameNotFoundException) {
+                } catch (_: NameNotFoundException) {
                     Log.w(
                         "ShortcutHelperViewModel",
                         "Package not found when retrieving icon for ${type.packageName}",
@@ -234,6 +234,7 @@ constructor(
 
     fun onViewClosed() {
         stateInteractor.onViewClosed()
+        resetSearchQuery()
     }
 
     fun onViewOpened() {
@@ -242,5 +243,9 @@ constructor(
 
     fun onSearchQueryChanged(query: String) {
         searchQuery.value = query
+    }
+
+    private fun resetSearchQuery(){
+        searchQuery.value = ""
     }
 }
