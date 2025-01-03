@@ -75,8 +75,9 @@ open class PipAppHelper(
             .waitForAndVerify()
     }
 
-    /** Expand the PIP window back to full screen via intent and wait until the app is visible */
-    fun exitPipToFullScreenViaIntent(wmHelper: WindowManagerStateHelper) = launchViaIntent(wmHelper)
+    /** Expand the PIP window back to original task via intent and wait until the app is visible */
+    open fun exitPipToOriginalTaskViaIntent(wmHelper: WindowManagerStateHelper) =
+        launchViaIntent(wmHelper)
 
     fun changeAspectRatio(wmHelper: WindowManagerStateHelper) {
         val intent = Intent("com.android.wm.shell.flicker.testapp.ASPECT_RATIO")

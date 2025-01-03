@@ -24,8 +24,12 @@ public class BottomHalfPipLaunchingActivity extends SimpleActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         final Intent intent = new Intent(this, BottomHalfPipActivity.class);
+        // Pass extras to BottomHalfPipActivity.
+        final Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            intent.putExtras(extras);
+        }
         startActivity(intent);
     }
 }

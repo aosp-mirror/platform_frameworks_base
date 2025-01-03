@@ -664,10 +664,12 @@ public class PipAnimationController {
                 // TODO(b/375977163): polish the animation to restoring the PIP task back from
                 //  swipe-pip-to-home. Ideally we should send the transitionInfo after reparenting
                 //  the PIP activity back to the original task.
-                if (shouldUseMainWindowFrame) {
+                if (shouldUseMainWindowFrame && isOutPipDirection) {
                     // If we should animate the main window frame, set it to the rotatedRect
                     // instead. The end bounds reported by transitionInfo is the bounds before
                     // rotation, while main window frame is calculated after the rotation.
+                    // Note that we only override main window frame for leaving pip animation as
+                    // the pip activity should match parent.
                     rotatedEndRect.set(mainWindowFrame);
                 } else {
                     // Rotate the end bounds according to the rotation delta because the display
@@ -810,11 +812,19 @@ public class PipAnimationController {
                         }
                     }
                     final Rect sourceBounds = new Rect(initialContainerRect);
+                    Rect relativeEndWindowFrame = null;
+                    if (isOutPipDirection) {
+                        relativeEndWindowFrame = rotatedEndRect;
+                    }
+                    if (relativeEndWindowFrame != null) {
+                        relativeEndWindowFrame.offset(leashOffset.x, leashOffset.y);
+                    }
                     sourceBounds.inset(insets);
                     getSurfaceTransactionHelper()
                             .rotateAndScaleWithCrop(tx, leash, initialContainerRect, bounds,
                                     insets, degree, x, y, isOutPipDirection,
-                                    rotationDelta == ROTATION_270 /* clockwise */)
+                                    rotationDelta == ROTATION_270 /* clockwise */,
+                                    relativeEndWindowFrame)
                             .round(tx, leash, sourceBounds, bounds)
                             .shadow(tx, leash, shouldApplyShadowRadius());
                     if (!handlePipTransaction(leash, tx, bounds, 1f /* alpha */)) {

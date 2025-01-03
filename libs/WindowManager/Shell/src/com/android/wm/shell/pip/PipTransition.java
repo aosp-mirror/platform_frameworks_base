@@ -844,7 +844,8 @@ public class PipTransition extends PipTransitionController {
             }
             mSurfaceTransactionHelper.rotateAndScaleWithCrop(finishTransaction,
                     pipLeash, endBounds, endBounds, new Rect(), degree, x, y,
-                    true /* isExpanding */, rotationDelta == ROTATION_270 /* clockwise */);
+                    true /* isExpanding */, rotationDelta == ROTATION_270 /* clockwise */,
+                    null /* relativeEndWindowFrame */);
         } else {
             rotationDelta = Surface.ROTATION_0;
         }
@@ -868,7 +869,9 @@ public class PipTransition extends PipTransitionController {
         // Get the start bounds in new orientation.
         final Rect startBounds = new Rect(pipChange.getStartAbsBounds());
         rotateBounds(startBounds, displayRotationChange.getStartAbsBounds(), rotateDelta);
-        final Rect endBounds = new Rect(pipChange.getEndAbsBounds());
+        final Rect windowFrame = taskInfo.topActivityMainWindowFrame;
+        final Rect endBounds = new Rect(windowFrame != null
+                ? windowFrame : pipChange.getEndAbsBounds());
         startBounds.offset(-offset.x, -offset.y);
         endBounds.offset(-offset.x, -offset.y);
 
@@ -888,7 +891,7 @@ public class PipTransition extends PipTransitionController {
         }
         mSurfaceTransactionHelper.rotateAndScaleWithCrop(startTransaction, pipChange.getLeash(),
                 endBounds, startBounds, new Rect(), degree, x, y, true /* isExpanding */,
-                pipRotateDelta == ROTATION_270 /* clockwise */);
+                pipRotateDelta == ROTATION_270 /* clockwise */, null /* relativeEndWindowFrame */);
         startTransaction.apply();
         rotator.cleanUp(finishTransaction);
 
