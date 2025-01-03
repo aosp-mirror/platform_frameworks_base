@@ -108,7 +108,6 @@ import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
-import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.annotations.ShellSplashscreenThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -438,29 +437,24 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellController shellController,
             @ShellMainThread ShellExecutor shellExecutor,
-            @ShellBackgroundThread Handler backgroundHandler,
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
             Transitions transitions,
             @ShellMainThread Handler handler
     ) {
-        if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
                             new BackAnimationController(
                                     shellInit,
                                     shellController,
                                     shellExecutor,
-                                    backgroundHandler,
                                     context,
                                     backAnimationBackground,
                                     animations,
                                     shellCommandHandler,
                                     transitions,
                                     handler));
-        }
-        return Optional.empty();
     }
 
     @BindsOptionalOf

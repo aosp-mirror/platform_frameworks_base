@@ -6122,17 +6122,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 220) {
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final Setting enableBackAnimation =
-                            globalSettings.getSettingLocked(Global.ENABLE_BACK_ANIMATION);
-                    if (enableBackAnimation.isNull()) {
-                        final boolean defEnableBackAnimation =
-                                getContext()
-                                        .getResources()
-                                        .getBoolean(R.bool.def_enable_back_animation);
-                        initGlobalSettingsDefaultValLocked(
-                                Settings.Global.ENABLE_BACK_ANIMATION, defEnableBackAnimation);
-                    }
+                    // Version 221: Removed
                     currentVersion = 221;
                 }
 
