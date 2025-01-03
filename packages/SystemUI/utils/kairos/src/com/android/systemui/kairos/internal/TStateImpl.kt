@@ -16,10 +16,13 @@
 
 package com.android.systemui.kairos.internal
 
+import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
+import com.android.systemui.kairos.internal.store.MutableArrayMapK
+import com.android.systemui.kairos.internal.store.MutableMapK
+import com.android.systemui.kairos.internal.store.StoreEntry
 import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.internal.util.associateByIndex
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.internal.util.mapValuesParallel
+import com.android.systemui.kairos.internal.util.launchImmediate
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
@@ -28,6 +31,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 
 internal sealed interface TStateImpl<out A> {
     val name: String?
@@ -224,16 +228,10 @@ internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: Stri
             mergeNodes({ switchEvents }, { newInner.changes }) { _, new -> new }
         }
     val switchedChanges: TFlowImpl<A> =
-        mapImpl({
-            switchPromptImpl(
-                getStorage = {
-                    mapOf(Unit to this@flatten.getCurrentWithEpoch(evalScope = this).first.changes)
-                },
-                getPatches = { mapImpl({ innerChanges }) { new -> mapOf(Unit to just(new)) } },
-            )
-        }) { map ->
-            map.getValue(Unit).getPushEvent(this)
-        }
+        switchPromptImplSingle(
+            getStorage = { this@flatten.getCurrentWithEpoch(evalScope = this).first.changes },
+            getPatches = { innerChanges },
+        )
     lateinit var state: DerivedFlatten<A>
     state = DerivedFlatten(name, operator, this, switchedChanges.calm { state })
     return state
@@ -268,10 +266,8 @@ internal fun <A, B, Z> zipStates(
     l2: TStateImpl<B>,
     transform: suspend EvalScope.(A, B) -> Z,
 ): TStateImpl<Z> =
-    zipStates(null, operatorName, mapOf(0 to l1, 1 to l2)).map(name, operatorName) {
-        val a = it.getValue(0)
-        val b = it.getValue(1)
-        @Suppress("UNCHECKED_CAST") transform(a as A, b as B)
+    zipStateList(null, operatorName, listOf(l1, l2)).map(name, operatorName) {
+        @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B)
     }
 
 internal fun <A, B, C, Z> zipStates(
@@ -282,11 +278,8 @@ internal fun <A, B, C, Z> zipStates(
     l3: TStateImpl<C>,
     transform: suspend EvalScope.(A, B, C) -> Z,
 ): TStateImpl<Z> =
-    zipStates(null, operatorName, mapOf(0 to l1, 1 to l2, 2 to l3)).map(name, operatorName) {
-        val a = it.getValue(0)
-        val b = it.getValue(1)
-        val c = it.getValue(2)
-        @Suppress("UNCHECKED_CAST") transform(a as A, b as B, c as C)
+    zipStateList(null, operatorName, listOf(l1, l2, l3)).map(name, operatorName) {
+        @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C)
     }
 
 internal fun <A, B, C, D, Z> zipStates(
@@ -298,15 +291,8 @@ internal fun <A, B, C, D, Z> zipStates(
     l4: TStateImpl<D>,
     transform: suspend EvalScope.(A, B, C, D) -> Z,
 ): TStateImpl<Z> =
-    zipStates(null, operatorName, mapOf(0 to l1, 1 to l2, 2 to l3, 3 to l4)).map(
-        name,
-        operatorName,
-    ) {
-        val a = it.getValue(0)
-        val b = it.getValue(1)
-        val c = it.getValue(2)
-        val d = it.getValue(3)
-        @Suppress("UNCHECKED_CAST") transform(a as A, b as B, c as C, d as D)
+    zipStateList(null, operatorName, listOf(l1, l2, l3, l4)).map(name, operatorName) {
+        @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C, it[3] as D)
     }
 
 internal fun <A, B, C, D, E, Z> zipStates(
@@ -319,58 +305,122 @@ internal fun <A, B, C, D, E, Z> zipStates(
     l5: TStateImpl<E>,
     transform: suspend EvalScope.(A, B, C, D, E) -> Z,
 ): TStateImpl<Z> =
-    zipStates(null, operatorName, mapOf(0 to l1, 1 to l2, 2 to l3, 3 to l4, 4 to l5)).map(
-        name,
-        operatorName,
-    ) {
-        val a = it.getValue(0)
-        val b = it.getValue(1)
-        val c = it.getValue(2)
-        val d = it.getValue(3)
-        val e = it.getValue(4)
-        @Suppress("UNCHECKED_CAST") transform(a as A, b as B, c as C, d as D, e as E)
+    zipStateList(null, operatorName, listOf(l1, l2, l3, l4, l5)).map(name, operatorName) {
+        @Suppress("UNCHECKED_CAST")
+        transform(it[0] as A, it[1] as B, it[2] as C, it[3] as D, it[4] as E)
     }
 
-internal fun <K : Any, A> zipStates(
+internal fun <K, V> zipStateMap(
     name: String?,
     operatorName: String,
-    states: Map<K, TStateImpl<A>>,
-): TStateImpl<Map<K, A>> {
-    if (states.isEmpty()) return constS(name, operatorName, emptyMap())
-    val stateChanges: Map<K, TFlowImpl<A>> = states.mapValues { it.value.changes }
-    lateinit var state: DerivedZipped<K, A>
+    states: Map<K, TStateImpl<V>>,
+): TStateImpl<Map<K, V>> =
+    zipStates(
+        name = name,
+        operatorName = operatorName,
+        numStates = states.size,
+        states = states.asIterable(),
+        storeFactory = ConcurrentHashMapK.Factory(),
+    )
+
+internal fun <V> zipStateList(
+    name: String?,
+    operatorName: String,
+    states: List<TStateImpl<V>>,
+): TStateImpl<List<V>> {
+    val zipped =
+        zipStates(
+            name = name,
+            operatorName = operatorName,
+            numStates = states.size,
+            states =
+                states
+                    .asSequence()
+                    .mapIndexed { index, tStateImpl -> StoreEntry(index, tStateImpl) }
+                    .asIterable(),
+            storeFactory = MutableArrayMapK.Factory(),
+        )
+    // Like mapCheap, but with caching (or like map, but without the calm changes, as they are not
+    // necessary).
+    return DerivedMap(
+        name = name,
+        operatorName = operatorName,
+        transform = { arrayStore -> arrayStore.values.toList() },
+        upstream = zipped,
+        changes = mapImpl({ zipped.changes }) { arrayStore -> arrayStore.values.toList() },
+    )
+}
+
+internal fun <W, K, A> zipStates(
+    name: String?,
+    operatorName: String,
+    numStates: Int,
+    states: Iterable<Map.Entry<K, TStateImpl<A>>>,
+    storeFactory: MutableMapK.Factory<W, K>,
+): TStateImpl<MutableMapK<W, K, A>> {
+    if (numStates == 0) {
+        return constS(name, operatorName, storeFactory.create(0))
+    }
+    val stateChanges = states.asSequence().map { (k, v) -> StoreEntry(k, v.changes) }.asIterable()
+    lateinit var state: DerivedZipped<W, K, A>
     // No need for calm; invariant ensures that changes will only emit when there's a difference
-    val changes: TFlowImpl<Map<K, A>> =
+    val changes =
         mapImpl({
-            switchDeferredImpl(getStorage = { stateChanges }, getPatches = { neverImpl })
-        }) { patch ->
-            states
-                .mapValues { (k, v) ->
-                    if (k in patch) {
-                        patch.getValue(k).getPushEvent(this)
-                    } else {
-                        v.getCurrentWithEpoch(evalScope = this).first
+                switchDeferredImpl(
+                    getStorage = { stateChanges },
+                    getPatches = { neverImpl },
+                    storeFactory = storeFactory,
+                )
+            }) { patch ->
+                val store = storeFactory.create<A>(numStates)
+                coroutineScope {
+                    states.forEach { (k, state) ->
+                        launchImmediate {
+                            store[k] =
+                                if (patch.contains(k)) {
+                                    patch.getValue(k).getPushEvent(evalScope = this@mapImpl)
+                                } else {
+                                    state.getCurrentWithEpoch(evalScope = this@mapImpl).first
+                                }
+                        }
                     }
                 }
-                .also { state.setCache(it, epoch) }
-        }
-    state = DerivedZipped(name, operatorName, states, changes)
+                store.also { state.setCache(it, epoch) }
+            }
+            .cached()
+    state =
+        DerivedZipped(
+            name = name,
+            operatorName = operatorName,
+            upstreamSize = numStates,
+            upstream = states,
+            changes = changes,
+            storeFactory = storeFactory,
+        )
     return state
 }
 
-internal class DerivedZipped<K : Any, A>(
+internal class DerivedZipped<W, K, A>(
     override val name: String?,
     override val operatorName: String,
-    val upstream: Map<K, TStateImpl<A>>,
-    changes: TFlowImpl<Map<K, A>>,
-) : TStateDerived<Map<K, A>>(changes) {
-    override suspend fun recalc(evalScope: EvalScope): Pair<Map<K, A>, Long> {
+    private val upstreamSize: Int,
+    val upstream: Iterable<Map.Entry<K, TStateImpl<A>>>,
+    changes: TFlowImpl<MutableMapK<W, K, A>>,
+    private val storeFactory: MutableMapK.Factory<W, K>,
+) : TStateDerived<MutableMapK<W, K, A>>(changes) {
+    override suspend fun recalc(evalScope: EvalScope): Pair<MutableMapK<W, K, A>, Long> {
         val newEpoch = AtomicLong()
-        return upstream.mapValuesParallel {
-            val (a, epoch) = it.value.getCurrentWithEpoch(evalScope)
-            newEpoch.accumulateAndGet(epoch, ::maxOf)
-            a
-        } to newEpoch.get()
+        val store = storeFactory.create<A>(upstreamSize)
+        coroutineScope {
+            for ((key, value) in upstream) {
+                launchImmediate {
+                    val (a, epoch) = value.getCurrentWithEpoch(evalScope)
+                    newEpoch.accumulateAndGet(epoch, ::maxOf)
+                    store[key] = a
+                }
+            }
+        }
+        return store to newEpoch.get()
     }
 
     override fun toString(): String = "${this::class.simpleName}@$hashString"
@@ -385,10 +435,5 @@ internal inline fun <A> zipStates(
     if (states.isEmpty()) {
         constS(name, operatorName, emptyList())
     } else {
-        zipStates(null, operatorName, states.asIterable().associateByIndex()).mapCheap(
-            name,
-            operatorName,
-        ) {
-            it.values.toList()
-        }
+        zipStateList(null, operatorName, states)
     }

@@ -24,7 +24,6 @@ import com.android.systemui.kairos.internal.util.childScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.coroutineContext
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -134,19 +133,8 @@ internal class LocalFrpNetwork(
     private val scope: CoroutineScope,
     private val endSignal: TFlow<Any>,
 ) : FrpNetwork {
-    override suspend fun <R> transact(block: suspend FrpTransactionScope.() -> R): R {
-        val result = CompletableDeferred<R>(coroutineContext[Job])
-        @Suppress("DeferredResultUnused")
-        network.transaction("FrpNetwork.transact") {
-            val buildScope =
-                BuildScopeImpl(
-                    stateScope = StateScopeImpl(evalScope = this, endSignal = endSignal),
-                    coroutineScope = scope,
-                )
-            buildScope.runInBuildScope { effect { result.complete(block()) } }
-        }
-        return result.await()
-    }
+    override suspend fun <R> transact(block: suspend FrpTransactionScope.() -> R): R =
+        network.transaction("FrpNetwork.transact") { runInTransactionScope { block() } }.await()
 
     override suspend fun activateSpec(spec: FrpSpec<*>) {
         val job =

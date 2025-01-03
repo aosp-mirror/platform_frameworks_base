@@ -61,7 +61,7 @@ internal interface NetworkScope : InitScope {
 
     fun scheduleOutput(output: Output<*>)
 
-    fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *>)
+    fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *, *>)
 
     fun schedule(state: TStateSource<*>)
 

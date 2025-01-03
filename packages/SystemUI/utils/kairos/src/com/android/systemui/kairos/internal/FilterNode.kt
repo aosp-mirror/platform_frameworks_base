@@ -16,6 +16,8 @@
 
 package com.android.systemui.kairos.internal
 
+import com.android.systemui.kairos.internal.store.Single
+import com.android.systemui.kairos.internal.store.SingletonMapK
 import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
@@ -25,16 +27,15 @@ internal inline fun <A> filterJustImpl(
     crossinline getPulse: suspend EvalScope.() -> TFlowImpl<Maybe<A>>
 ): TFlowImpl<A> =
     DemuxImpl(
-            {
-                mapImpl(getPulse) { maybeResult ->
-                    if (maybeResult is Just) {
-                        mapOf(Unit to maybeResult.value)
-                    } else {
-                        emptyMap()
-                    }
+            mapImpl(getPulse) { maybeResult ->
+                if (maybeResult is Just) {
+                    Single(maybeResult.value)
+                } else {
+                    Single<A>()
                 }
             },
             numKeys = 1,
+            storeFactory = SingletonMapK.Factory(),
         )
         .eventsForKey(Unit)
 

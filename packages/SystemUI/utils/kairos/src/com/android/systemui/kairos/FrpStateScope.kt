@@ -85,7 +85,7 @@ interface FrpStateScope : FrpTransactionScope {
      * @see merge
      */
     @ExperimentalFrpApi
-    fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
+    fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
         initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
     ): TFlow<Map<K, V>>
 
@@ -107,7 +107,7 @@ interface FrpStateScope : FrpTransactionScope {
      * @see merge
      */
     @ExperimentalFrpApi
-    fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
+    fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
         initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
     ): TFlow<Map<K, V>>
 
@@ -131,7 +131,7 @@ interface FrpStateScope : FrpTransactionScope {
      * @see merge
      */
     @ExperimentalFrpApi
-    fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
+    fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
         initialTFlows: Map<K, TFlow<V>> = emptyMap()
     ): TFlow<Map<K, V>> = mergeIncrementally(deferredOf(initialTFlows))
 
@@ -153,7 +153,7 @@ interface FrpStateScope : FrpTransactionScope {
      * @see merge
      */
     @ExperimentalFrpApi
-    fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
+    fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
         initialTFlows: Map<K, TFlow<V>> = emptyMap()
     ): TFlow<Map<K, V>> = mergeIncrementallyPromptly(deferredOf(initialTFlows))
 

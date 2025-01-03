@@ -18,25 +18,32 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.internal.util.ConcurrentNullableHashMap
+import com.android.systemui.kairos.internal.store.MapHolder
+import com.android.systemui.kairos.internal.store.MapK
+import com.android.systemui.kairos.internal.store.MutableMapK
+import com.android.systemui.kairos.internal.store.asMapHolder
+import com.android.systemui.kairos.internal.util.asyncImmediate
 import com.android.systemui.kairos.internal.util.hashString
-import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-internal typealias MuxResult<K, V> = Map<K, PullNode<V>>
+internal typealias MuxResult<W, K, V> = MapK<W, K, PullNode<V>>
 
 /** Base class for muxing nodes, which have a (potentially dynamic) collection of upstream nodes. */
-internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Output>) :
-    PushNode<Output> {
+internal sealed class MuxNode<W, K, V, Output>(
+    val lifecycle: MuxLifecycle<Output>,
+    protected val storeFactory: MutableMapK.Factory<W, K>,
+) : PushNode<Output> {
 
     inline val mutex
         get() = lifecycle.mutex
 
-    // TODO: preserve insertion order?
-    val upstreamData = ConcurrentNullableHashMap<K, PullNode<V>>()
-    val switchedIn = ConcurrentHashMap<K, MuxBranchNode<K, V>>()
+    @Volatile lateinit var upstreamData: MutableMapK<W, K, PullNode<V>>
+    @Volatile lateinit var switchedIn: MutableMapK<W, K, BranchNode>
+
     val downstreamSet: DownstreamSet = DownstreamSet()
 
     // TODO: inline DepthTracker? would need to be added to PushNode signature
@@ -110,7 +117,7 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
     suspend fun moveIndirectUpstreamToDirect(
         scheduler: Scheduler,
         oldIndirectDepth: Int,
-        oldIndirectRoots: Set<MuxDeferredNode<*, *>>,
+        oldIndirectRoots: Set<MuxDeferredNode<*, *, *>>,
         newDepth: Int,
     ) {
         mutex.withLock {
@@ -128,8 +135,8 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
+        removals: Set<MuxDeferredNode<*, *, *>>,
+        additions: Set<MuxDeferredNode<*, *, *>>,
     ) {
         mutex.withLock {
             if (
@@ -137,7 +144,7 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
                     depthTracker.updateIndirectRoots(
                         additions,
                         removals,
-                        butNot = this as? MuxDeferredNode<*, *>,
+                        butNot = this as? MuxDeferredNode<*, *, *>,
                     )
             ) {
                 depthTracker.schedule(scheduler, this)
@@ -149,7 +156,7 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
+        newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         mutex.withLock {
             if (
@@ -157,7 +164,7 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
                     depthTracker.removeDirectUpstream(oldDepth) or
                     depthTracker.updateIndirectRoots(
                         additions = newIndirectSet,
-                        butNot = this as? MuxDeferredNode<*, *>,
+                        butNot = this as? MuxDeferredNode<*, *, *>,
                     )
             ) {
                 depthTracker.schedule(scheduler, this)
@@ -177,7 +184,7 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
     suspend fun removeIndirectUpstream(
         scheduler: Scheduler,
         oldDepth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
+        indirectSet: Set<MuxDeferredNode<*, *, *>>,
         key: K,
     ) {
         mutex.withLock {
@@ -204,77 +211,82 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
         //  MuxNode as a Pull (effectively making it a mapCheap).
         depthTracker.schedule(evalScope.scheduler, this)
     }
+
+    /** An input branch of a mux node, associated with a key. */
+    inner class BranchNode(val key: K) : SchedulableNode {
+
+        val schedulable = Schedulable.N(this)
+
+        @Volatile lateinit var upstream: NodeConnection<V>
+
+        override suspend fun schedule(evalScope: EvalScope) {
+            upstreamData[key] = upstream.directUpstream
+            this@MuxNode.schedule(evalScope)
+        }
+
+        override suspend fun adjustDirectUpstream(
+            scheduler: Scheduler,
+            oldDepth: Int,
+            newDepth: Int,
+        ) {
+            this@MuxNode.adjustDirectUpstream(scheduler, oldDepth, newDepth)
+        }
+
+        override suspend fun moveIndirectUpstreamToDirect(
+            scheduler: Scheduler,
+            oldIndirectDepth: Int,
+            oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
+            newDirectDepth: Int,
+        ) {
+            this@MuxNode.moveIndirectUpstreamToDirect(
+                scheduler,
+                oldIndirectDepth,
+                oldIndirectSet,
+                newDirectDepth,
+            )
+        }
+
+        override suspend fun adjustIndirectUpstream(
+            scheduler: Scheduler,
+            oldDepth: Int,
+            newDepth: Int,
+            removals: Set<MuxDeferredNode<*, *, *>>,
+            additions: Set<MuxDeferredNode<*, *, *>>,
+        ) {
+            this@MuxNode.adjustIndirectUpstream(scheduler, oldDepth, newDepth, removals, additions)
+        }
+
+        override suspend fun moveDirectUpstreamToIndirect(
+            scheduler: Scheduler,
+            oldDirectDepth: Int,
+            newIndirectDepth: Int,
+            newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
+        ) {
+            this@MuxNode.moveDirectUpstreamToIndirect(
+                scheduler,
+                oldDirectDepth,
+                newIndirectDepth,
+                newIndirectSet,
+            )
+        }
+
+        override suspend fun removeDirectUpstream(scheduler: Scheduler, depth: Int) {
+            removeDirectUpstream(scheduler, depth, key)
+        }
+
+        override suspend fun removeIndirectUpstream(
+            scheduler: Scheduler,
+            depth: Int,
+            indirectSet: Set<MuxDeferredNode<*, *, *>>,
+        ) {
+            removeIndirectUpstream(scheduler, depth, indirectSet, key)
+        }
+
+        override fun toString(): String = "MuxBranchNode(key=$key, mux=${this@MuxNode})"
+    }
 }
 
-/** An input branch of a mux node, associated with a key. */
-internal class MuxBranchNode<K : Any, V>(private val muxNode: MuxNode<K, V, *>, val key: K) :
-    SchedulableNode {
-
-    val schedulable = Schedulable.N(this)
-
-    @Volatile lateinit var upstream: NodeConnection<V>
-
-    override suspend fun schedule(evalScope: EvalScope) {
-        muxNode.upstreamData[key] = upstream.directUpstream
-        muxNode.schedule(evalScope)
-    }
-
-    override suspend fun adjustDirectUpstream(scheduler: Scheduler, oldDepth: Int, newDepth: Int) {
-        muxNode.adjustDirectUpstream(scheduler, oldDepth, newDepth)
-    }
-
-    override suspend fun moveIndirectUpstreamToDirect(
-        scheduler: Scheduler,
-        oldIndirectDepth: Int,
-        oldIndirectSet: Set<MuxDeferredNode<*, *>>,
-        newDirectDepth: Int,
-    ) {
-        muxNode.moveIndirectUpstreamToDirect(
-            scheduler,
-            oldIndirectDepth,
-            oldIndirectSet,
-            newDirectDepth,
-        )
-    }
-
-    override suspend fun adjustIndirectUpstream(
-        scheduler: Scheduler,
-        oldDepth: Int,
-        newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
-    ) {
-        muxNode.adjustIndirectUpstream(scheduler, oldDepth, newDepth, removals, additions)
-    }
-
-    override suspend fun moveDirectUpstreamToIndirect(
-        scheduler: Scheduler,
-        oldDirectDepth: Int,
-        newIndirectDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
-    ) {
-        muxNode.moveDirectUpstreamToIndirect(
-            scheduler,
-            oldDirectDepth,
-            newIndirectDepth,
-            newIndirectSet,
-        )
-    }
-
-    override suspend fun removeDirectUpstream(scheduler: Scheduler, depth: Int) {
-        muxNode.removeDirectUpstream(scheduler, depth, key)
-    }
-
-    override suspend fun removeIndirectUpstream(
-        scheduler: Scheduler,
-        depth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
-    ) {
-        muxNode.removeIndirectUpstream(scheduler, depth, indirectSet, key)
-    }
-
-    override fun toString(): String = "MuxBranchNode(key=$key, mux=$muxNode)"
-}
+internal typealias BranchNode<W, K, V> = MuxNode<W, K, V, *>.BranchNode
 
 /** Tracks lifecycle of MuxNode in the network. Essentially a mutable ref for MuxLifecycleState. */
 internal class MuxLifecycle<A>(@Volatile var lifecycleState: MuxLifecycleState<A>) : TFlowImpl<A> {
@@ -324,7 +336,7 @@ internal sealed interface MuxLifecycleState<out A> {
         override fun toString(): String = "Inactive"
     }
 
-    class Active<A>(val node: MuxNode<*, *, A>) : MuxLifecycleState<A> {
+    class Active<A>(val node: MuxNode<*, *, *, A>) : MuxLifecycleState<A> {
         override fun toString(): String = "Active(node=$node)"
     }
 
@@ -332,11 +344,71 @@ internal sealed interface MuxLifecycleState<out A> {
 }
 
 internal interface MuxActivator<A> {
-    suspend fun activate(evalScope: EvalScope, lifecycle: MuxLifecycle<A>): MuxNode<*, *, A>?
+    suspend fun activate(evalScope: EvalScope, lifecycle: MuxLifecycle<A>): MuxNode<*, *, *, A>?
 }
 
 internal inline fun <A> MuxLifecycle(onSubscribe: MuxActivator<A>): TFlowImpl<A> =
     MuxLifecycle(MuxLifecycleState.Inactive(onSubscribe))
 
-internal fun <K, V> TFlowImpl<MuxResult<K, V>>.awaitValues(): TFlowImpl<Map<K, V>> =
-    mapImpl({ this@awaitValues }) { results -> results.mapValues { it.value.getPushEvent(this) } }
+internal fun <K, V> TFlowImpl<MuxResult<MapHolder.W, K, V>>.awaitValues(): TFlowImpl<Map<K, V>> =
+    mapImpl({ this@awaitValues }) { results ->
+        results.asMapHolder().unwrapped.mapValues { it.value.getPushEvent(this) }
+    }
+
+// activation logic
+
+internal suspend fun <W, K, V, O> MuxNode<W, K, V, O>.initializeUpstream(
+    evalScope: EvalScope,
+    getStorage: suspend EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    storeFactory: MutableMapK.Factory<W, K>,
+) {
+    val storage = getStorage(evalScope)
+    coroutineScope {
+        val initUpstream = buildList {
+            storage.forEach { (key, flow) ->
+                val branchNode = BranchNode(key)
+                add(
+                    asyncImmediate(start = CoroutineStart.LAZY) {
+                        flow.activate(evalScope, branchNode.schedulable)?.let { (conn, needsEval) ->
+                            Triple(
+                                key,
+                                branchNode.apply { upstream = conn },
+                                if (needsEval) conn.directUpstream else null,
+                            )
+                        }
+                    }
+                )
+            }
+        }
+        val results = initUpstream.awaitAll()
+        switchedIn = storeFactory.create(initUpstream.size)
+        upstreamData = storeFactory.create(initUpstream.size)
+        for (triple in results) {
+            triple?.let { (key, branch, upstream) ->
+                switchedIn[key] = branch
+                upstream?.let { upstreamData[key] = upstream }
+            }
+        }
+    }
+}
+
+internal fun <W, K, V, O> MuxNode<W, K, V, O>.initializeDepth() {
+    switchedIn.forEach { (_, branch) ->
+        val conn = branch.upstream
+        if (conn.depthTracker.snapshotIsDirect) {
+            depthTracker.addDirectUpstream(
+                oldDepth = null,
+                newDepth = conn.depthTracker.snapshotDirectDepth,
+            )
+        } else {
+            depthTracker.addIndirectUpstream(
+                oldDepth = null,
+                newDepth = conn.depthTracker.snapshotIndirectDepth,
+            )
+            depthTracker.updateIndirectRoots(
+                additions = conn.depthTracker.snapshotIndirectRoots,
+                butNot = null,
+            )
+        }
+    }
+}

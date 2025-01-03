@@ -72,21 +72,21 @@ internal class DepthTracker {
     @Volatile var snapshotIndirectDepth: Int = 0
     @Volatile var snapshotDirectDepth: Int = 0
 
-    private val _snapshotIndirectRoots = HashSet<MuxDeferredNode<*, *>>()
+    private val _snapshotIndirectRoots = HashSet<MuxDeferredNode<*, *, *>>()
     val snapshotIndirectRoots
         get() = _snapshotIndirectRoots.toSet()
 
-    private val indirectAdditions = HashSet<MuxDeferredNode<*, *>>()
-    private val indirectRemovals = HashSet<MuxDeferredNode<*, *>>()
+    private val indirectAdditions = HashSet<MuxDeferredNode<*, *, *>>()
+    private val indirectRemovals = HashSet<MuxDeferredNode<*, *, *>>()
     private val dirty_directUpstreamDepths = TreeMap<Int, Int>()
     private val dirty_indirectUpstreamDepths = TreeMap<Int, Int>()
-    private val dirty_indirectUpstreamRoots = Bag<MuxDeferredNode<*, *>>()
+    private val dirty_indirectUpstreamRoots = Bag<MuxDeferredNode<*, *, *>>()
     @Volatile var dirty_directDepth = 0
     @Volatile private var dirty_indirectDepth = 0
     @Volatile private var dirty_depthIsDirect = true
     @Volatile private var dirty_isIndirectRoot = false
 
-    fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *>) {
+    fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *, *>) {
         if (dirty_depthIsDirect) {
             scheduler.schedule(dirty_directDepth, node)
         } else {
@@ -161,9 +161,9 @@ internal class DepthTracker {
     }
 
     fun updateIndirectRoots(
-        additions: Set<MuxDeferredNode<*, *>>? = null,
-        removals: Set<MuxDeferredNode<*, *>>? = null,
-        butNot: MuxDeferredNode<*, *>? = null,
+        additions: Set<MuxDeferredNode<*, *, *>>? = null,
+        removals: Set<MuxDeferredNode<*, *, *>>? = null,
+        butNot: MuxDeferredNode<*, *, *>? = null,
     ): Boolean {
         val addsChanged =
             additions
@@ -192,7 +192,7 @@ internal class DepthTracker {
         return remainder
     }
 
-    suspend fun propagateChanges(scheduler: Scheduler, muxNode: MuxNode<*, *, *>) {
+    suspend fun propagateChanges(scheduler: Scheduler, muxNode: MuxNode<*, *, *, *>) {
         if (isDirty()) {
             schedule(scheduler, muxNode)
         }
@@ -202,7 +202,7 @@ internal class DepthTracker {
         coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         downstreamSet: DownstreamSet,
-        muxNode: MuxNode<*, *, *>,
+        muxNode: MuxNode<*, *, *, *>,
     ) {
         when {
             dirty_depthIsDirect -> {
@@ -222,7 +222,7 @@ internal class DepthTracker {
                             buildSet {
                                 addAll(snapshotIndirectRoots)
                                 if (snapshotIsIndirectRoot) {
-                                    add(muxNode as MuxDeferredNode<*, *>)
+                                    add(muxNode as MuxDeferredNode<*, *, *>)
                                 }
                             },
                         newDirectDepth = dirty_directDepth,
@@ -241,7 +241,7 @@ internal class DepthTracker {
                             buildSet {
                                 addAll(dirty_indirectUpstreamRoots)
                                 if (dirty_isIndirectRoot) {
-                                    add(muxNode as MuxDeferredNode<*, *>)
+                                    add(muxNode as MuxDeferredNode<*, *, *>)
                                 }
                             },
                     )
@@ -255,14 +255,14 @@ internal class DepthTracker {
                             buildSet {
                                 addAll(indirectRemovals)
                                 if (snapshotIsIndirectRoot && !dirty_isIndirectRoot) {
-                                    add(muxNode as MuxDeferredNode<*, *>)
+                                    add(muxNode as MuxDeferredNode<*, *, *>)
                                 }
                             },
                         additions =
                             buildSet {
                                 addAll(indirectAdditions)
                                 if (!snapshotIsIndirectRoot && dirty_isIndirectRoot) {
-                                    add(muxNode as MuxDeferredNode<*, *>)
+                                    add(muxNode as MuxDeferredNode<*, *, *>)
                                 }
                             },
                     )
@@ -288,7 +288,7 @@ internal class DepthTracker {
                             buildSet {
                                 addAll(snapshotIndirectRoots)
                                 if (snapshotIsIndirectRoot) {
-                                    add(muxNode as MuxDeferredNode<*, *>)
+                                    add(muxNode as MuxDeferredNode<*, *, *>)
                                 }
                             },
                     )
@@ -353,7 +353,7 @@ internal class DownstreamSet {
 
     val outputs = HashSet<Output<*>>()
     val stateWriters = mutableListOf<TStateSource<*>>()
-    val muxMovers = HashSet<MuxDeferredNode<*, *>>()
+    val muxMovers = HashSet<MuxDeferredNode<*, *, *>>()
     val nodes = HashSet<SchedulableNode>()
 
     fun add(schedulable: Schedulable) {
@@ -390,7 +390,7 @@ internal class DownstreamSet {
         coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         oldIndirectDepth: Int,
-        oldIndirectSet: Set<MuxDeferredNode<*, *>>,
+        oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
         newDirectDepth: Int,
     ) =
         coroutineScope.run {
@@ -416,8 +416,8 @@ internal class DownstreamSet {
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
+        removals: Set<MuxDeferredNode<*, *, *>>,
+        additions: Set<MuxDeferredNode<*, *, *>>,
     ) =
         coroutineScope.run {
             for (node in nodes) {
@@ -443,7 +443,7 @@ internal class DownstreamSet {
         scheduler: Scheduler,
         oldDirectDepth: Int,
         newIndirectDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
+        newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) =
         coroutineScope.run {
             for (node in nodes) {
@@ -467,7 +467,7 @@ internal class DownstreamSet {
         coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         depth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
+        indirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) =
         coroutineScope.run {
             for (node in nodes) {
@@ -506,7 +506,7 @@ internal class DownstreamSet {
 internal sealed interface Schedulable {
     data class S constructor(val state: TStateSource<*>) : Schedulable
 
-    data class M constructor(val muxMover: MuxDeferredNode<*, *>) : Schedulable
+    data class M constructor(val muxMover: MuxDeferredNode<*, *, *>) : Schedulable
 
     data class N constructor(val node: SchedulableNode) : Schedulable
 
