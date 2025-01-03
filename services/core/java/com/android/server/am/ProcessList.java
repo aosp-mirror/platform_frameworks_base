@@ -3212,7 +3212,6 @@ public final class ProcessList {
         if ((pid > 0 && pid != ActivityManagerService.MY_PID)
                 || (pid == 0 && app.isPendingStart())) {
             if (pid > 0) {
-                mService.removePidLocked(pid, app);
                 app.setBindMountPending(false);
                 mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
@@ -3230,6 +3229,12 @@ public final class ProcessList {
                 }
             }
             app.killLocked(reason, reasonCode, subReason, true, async);
+            if (pid > 0) {
+                // Remove pid record mapping after killing the process, so there won't be a short
+                // period that the app is still alive but its access to system may be illegal due
+                // to no existing record for its pid.
+                mService.removePidLocked(pid, app);
+            }
             mService.handleAppDiedLocked(app, pid, willRestart, allowRestart,
                     false /* fromBinderDied */);
             if (willRestart) {
