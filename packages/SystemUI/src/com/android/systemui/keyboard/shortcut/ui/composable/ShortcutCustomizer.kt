@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEvent
@@ -269,6 +270,7 @@ private fun SelectedKeyCombinationContainer(
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
                 .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
                 .onKeyEvent { onKeyPress(it) }
+                .focusProperties { canFocus = true } // enables keyboard focus when in touch mode
                 .focusRequester(focusRequester),
         interactionSource = interactionSource,
     ) {
