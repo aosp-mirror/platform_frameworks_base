@@ -29,6 +29,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver.OnDrawListener;
 
 import java.util.ArrayList;
@@ -131,7 +132,6 @@ public class ViewUIComponent implements UIComponent {
         mView.getViewTreeObserver().removeOnDrawListener(mOnDrawListener);
         // Restore view visibility
         mView.setVisibility(mVisibleOverride ? View.VISIBLE : View.INVISIBLE);
-        mView.invalidate();
         // Clean up surfaces.
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.reparent(sc, null)
@@ -142,8 +142,16 @@ public class ViewUIComponent implements UIComponent {
                             sc.release();
                             executor.execute(onDone);
                         });
-        // Apply transaction AFTER the view is drawn.
-        mView.getRootSurfaceControl().applyTransactionOnDraw(t);
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        if (viewRoot == null) {
+            t.apply();
+        } else {
+            // Apply transaction AFTER the view is drawn.
+            viewRoot.applyTransactionOnDraw(t);
+            // Request layout to force redrawing the entire view tree, so that the transaction is
+            // guaranteed to be applied.
+            viewRoot.requestLayout();
+        }
     }
 
     @Override
