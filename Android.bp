@@ -408,7 +408,6 @@ java_defaults {
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
         "com.android.sysprop.view",
-        "configinfra_framework_flags_java_lib",
         "framework-internal-utils",
         "dynamic_instrumentation_manager_aidl-java",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed

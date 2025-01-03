@@ -107,6 +107,7 @@ aconfig_declarations_group {
         "com.android.server.flags.services-aconfig-java",
         "com.android.text.flags-aconfig-java",
         "com.android.window.flags.window-aconfig-java",
+        "configinfra_framework_flags_java_lib",
         "conscrypt_exported_aconfig_flags_lib",
         "device_policy_aconfig_flags_lib",
         "display_flags_lib",
