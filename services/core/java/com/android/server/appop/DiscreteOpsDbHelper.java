@@ -27,8 +27,12 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteRawStatement;
 import android.os.Environment;
+import android.os.SystemClock;
+import android.permission.flags.Flags;
 import android.util.IntArray;
 import android.util.Slog;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -76,6 +80,10 @@ class DiscreteOpsDbHelper extends SQLiteOpenHelper {
         if (opEvents.isEmpty()) {
             return;
         }
+        long startTime = 0;
+        if (Flags.sqliteDiscreteOpEventLoggingEnabled()) {
+            startTime = SystemClock.elapsedRealtime();
+        }
 
         SQLiteDatabase db = getWritableDatabase();
         // TODO (b/383157289) what if database is busy and can't start a transaction? will read
@@ -116,6 +124,11 @@ class DiscreteOpsDbHelper extends SQLiteOpenHelper {
                 Slog.e(LOG_TAG, "Couldn't commit transaction when inserting discrete ops, database"
                         + " file size (bytes) : " + getDatabaseFile().length(), exception);
             }
+        }
+        if (Flags.sqliteDiscreteOpEventLoggingEnabled()) {
+            long timeTaken = SystemClock.elapsedRealtime() - startTime;
+            FrameworkStatsLog.write(FrameworkStatsLog.SQLITE_DISCRETE_OP_EVENT_REPORTED,
+                    -1, timeTaken, getDatabaseFile().length());
         }
     }
 
@@ -181,7 +194,10 @@ class DiscreteOpsDbHelper extends SQLiteOpenHelper {
                 uidFilter, packageNameFilter,
                 attributionTagFilter, opCodesFilter, opFlagsFilter);
         String sql = buildSql(conditions, orderByColumn, limit);
-
+        long startTime = 0;
+        if (Flags.sqliteDiscreteOpEventLoggingEnabled()) {
+            startTime = SystemClock.elapsedRealtime();
+        }
         SQLiteDatabase db = getReadableDatabase();
         List<DiscreteOpsSqlRegistry.DiscreteOp> results = new ArrayList<>();
         db.beginTransactionReadOnly();
@@ -224,6 +240,11 @@ class DiscreteOpsDbHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
+        }
+        if (Flags.sqliteDiscreteOpEventLoggingEnabled()) {
+            long timeTaken = SystemClock.elapsedRealtime() - startTime;
+            FrameworkStatsLog.write(FrameworkStatsLog.SQLITE_DISCRETE_OP_EVENT_REPORTED,
+                    timeTaken, -1, getDatabaseFile().length());
         }
         return results;
     }
