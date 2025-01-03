@@ -347,7 +347,7 @@ class BrightnessThermalModifier implements BrightnessStateModifier,
         @NonNull
         String getUniqueDisplayId();
 
-        @NonNull
+        @Nullable
         String getThermalThrottlingDataId();
 
         @Nullable
