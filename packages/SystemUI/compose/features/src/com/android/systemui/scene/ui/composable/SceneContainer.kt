@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
@@ -43,11 +44,13 @@ import com.android.compose.animation.scene.SceneTransitions
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.systemui.lifecycle.rememberActivated
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.view.SceneJankMonitor
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import javax.inject.Provider
 
@@ -82,16 +85,38 @@ fun SceneContainer(
     sceneTransitions: SceneTransitions,
     dataSourceDelegator: SceneDataSourceDelegator,
     qsSceneAdapter: Provider<QSSceneAdapter>,
+    sceneJankMonitorFactory: SceneJankMonitor.Factory,
     modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val state: MutableSceneTransitionLayoutState = remember {
-        MutableSceneTransitionLayoutState(
-            initialScene = initialSceneKey,
-            canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
-            transitions = sceneTransitions,
-        )
-    }
+
+    val view = LocalView.current
+    val sceneJankMonitor =
+        rememberActivated(traceName = "sceneJankMonitor") { sceneJankMonitorFactory.create() }
+
+    val state: MutableSceneTransitionLayoutState =
+        remember(view, sceneJankMonitor) {
+            MutableSceneTransitionLayoutState(
+                initialScene = initialSceneKey,
+                canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
+                transitions = sceneTransitions,
+                onTransitionStart = { transition ->
+                    sceneJankMonitor.onTransitionStart(
+                        view = view,
+                        from = transition.fromContent,
+                        to = transition.toContent,
+                        cuj = transition.cuj,
+                    )
+                },
+                onTransitionEnd = { transition ->
+                    sceneJankMonitor.onTransitionEnd(
+                        from = transition.fromContent,
+                        to = transition.toContent,
+                        cuj = transition.cuj,
+                    )
+                },
+            )
+        }
 
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)

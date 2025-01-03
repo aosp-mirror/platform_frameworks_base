@@ -74,6 +74,7 @@ object SceneWindowRootViewBinder {
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> =
@@ -133,6 +134,7 @@ object SceneWindowRootViewBinder {
                                 dataSourceDelegator = dataSourceDelegator,
                                 qsSceneAdapter = qsSceneAdapter,
                                 containerConfig = containerConfig,
+                                sceneJankMonitorFactory = sceneJankMonitorFactory,
                             )
                             .also { it.id = R.id.scene_container_root_composable }
                     )
@@ -169,6 +171,7 @@ object SceneWindowRootViewBinder {
         dataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
         containerConfig: SceneContainerConfig,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ): View {
         return ComposeView(context).apply {
             setContent {
@@ -185,6 +188,7 @@ object SceneWindowRootViewBinder {
                             sceneTransitions = containerConfig.transitions,
                             dataSourceDelegator = dataSourceDelegator,
                             qsSceneAdapter = qsSceneAdapter,
+                            sceneJankMonitorFactory = sceneJankMonitorFactory,
                         )
                     }
                 }

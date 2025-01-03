@@ -34,6 +34,7 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
+        sceneJankMonitorFactory: SceneJankMonitor.Factory,
     ) {
         setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
@@ -52,6 +53,7 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
             },
             dataSourceDelegator = sceneDataSourceDelegator,
             qsSceneAdapter = qsSceneAdapter,
+            sceneJankMonitorFactory = sceneJankMonitorFactory,
         )
     }
 

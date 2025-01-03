@@ -69,6 +69,7 @@ import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.composable.SceneContainerTransitions
+import com.android.systemui.scene.ui.view.sceneJankMonitorFactory
 import com.android.systemui.testKosmos
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.awaitCancellation
@@ -193,6 +194,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                 overlayByKey = emptyMap(),
                                 dataSourceDelegator = kosmos.sceneDataSourceDelegator,
                                 qsSceneAdapter = { kosmos.fakeQsSceneAdapter },
+                                sceneJankMonitorFactory = kosmos.sceneJankMonitorFactory,
                             )
                         }
                     },
