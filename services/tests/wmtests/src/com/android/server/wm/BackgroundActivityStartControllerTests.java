@@ -572,7 +572,6 @@ public class BackgroundActivityStartControllerTests {
                         + "inVisibleTask: false; "
                         + "balAllowedByPiCreator: BSP.ALLOW_BAL; "
                         + "balAllowedByPiCreatorWithHardening: BSP.ALLOW_BAL; "
-                        + "resultIfPiCreatorAllowsBal: null; "
                         + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
@@ -589,7 +588,6 @@ public class BackgroundActivityStartControllerTests {
                         + "originatingPendingIntent: null; "
                         + "realCallerApp: null; "
                         + "balAllowedByPiSender: BSP.ALLOW_BAL; "
-                        + "resultIfPiSenderAllowsBal: null; "
                         + "realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "balRequireOptInByPendingIntentCreator: true; "
                         + "balDontBringExistingBackgroundTaskStackToFg: true]");
@@ -677,7 +675,6 @@ public class BackgroundActivityStartControllerTests {
                         + "inVisibleTask: false; "
                         + "balAllowedByPiCreator: BSP.NONE; "
                         + "balAllowedByPiCreatorWithHardening: BSP.NONE; "
-                        + "resultIfPiCreatorAllowsBal: null; "
                         + "callerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "hasRealCaller: true; "
                         + "isCallForResult: false; "
@@ -694,7 +691,6 @@ public class BackgroundActivityStartControllerTests {
                         + "originatingPendingIntent: PendingIntentRecord; "
                         + "realCallerApp: null; "
                         + "balAllowedByPiSender: BSP.ALLOW_FGS; "
-                        + "resultIfPiSenderAllowsBal: null; "
                         + "realCallerStartMode: MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED; "
                         + "balRequireOptInByPendingIntentCreator: true; "
                         + "balDontBringExistingBackgroundTaskStackToFg: true]");

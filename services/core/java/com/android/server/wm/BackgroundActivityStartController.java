@@ -578,7 +578,10 @@ public class BackgroundActivityStartController {
             sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
             sb.append("; balAllowedByPiCreatorWithHardening: ")
                     .append(mBalAllowedByPiCreatorWithHardening);
-            sb.append("; resultIfPiCreatorAllowsBal: ").append(mResultForCaller);
+            if (mResultForCaller != null) {
+                sb.append("; resultIfPiCreatorAllowsBal: ")
+                        .append(balCodeToString(mResultForCaller.mCode));
+            }
             sb.append("; callerStartMode: ").append(balStartModeToString(
                     mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()));
             sb.append("; hasRealCaller: ").append(hasRealCaller());
@@ -607,7 +610,10 @@ public class BackgroundActivityStartController {
                             .append(mRealCallerApp.hasActivityInVisibleTask());
                 }
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
-                sb.append("; resultIfPiSenderAllowsBal: ").append(mResultForRealCaller);
+                if (mResultForRealCaller != null) {
+                    sb.append("; resultIfPiSenderAllowsBal: ")
+                            .append(balCodeToString(mResultForRealCaller.mCode));
+                }
                 sb.append("; realCallerStartMode: ").append(balStartModeToString(
                         mCheckedOptions.getPendingIntentBackgroundActivityStartMode()));
             }
