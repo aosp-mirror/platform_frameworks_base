@@ -34,7 +34,7 @@ interface BubbleStackViewManager {
     fun checkNotificationPanelExpandedState(callback: Consumer<Boolean>)
 
     /** Requests to hide the current input method. */
-    fun hideCurrentInputMethod()
+    fun hideCurrentInputMethod(onImeHidden: Runnable?)
 
     companion object {
 
@@ -52,8 +52,8 @@ interface BubbleStackViewManager {
                 controller.isNotificationPanelExpanded(callback)
             }
 
-            override fun hideCurrentInputMethod() {
-                controller.hideCurrentInputMethod()
+            override fun hideCurrentInputMethod(onImeHidden: Runnable?) {
+                controller.hideCurrentInputMethod(onImeHidden)
             }
         }
     }
