@@ -97,6 +97,14 @@ class BLASTSyncEngine {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
         default void onTransactionCommitTimeout() {}
         default void onReadyTimeout() {}
+
+        default void onReadyTraceStart(String name, int id) {
+            Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, name, id);
+        }
+
+        default void onReadyTraceEnd(String name, int id) {
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, name, id);
+        }
     }
 
     /**
@@ -149,8 +157,8 @@ class BLASTSyncEngine {
                 }
             };
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                mTraceName = name + "SyncGroupReady";
-                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, mTraceName, id);
+                mTraceName = name + "-SyncReady#" + id;
+                listener.onReadyTraceStart(mTraceName, id);
             }
         }
 
@@ -209,7 +217,7 @@ class BLASTSyncEngine {
 
         private void finishNow() {
             if (mTraceName != null) {
-                Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, mTraceName, mSyncId);
+                mListener.onReadyTraceEnd(mTraceName, mSyncId);
             }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
@@ -225,9 +233,7 @@ class BLASTSyncEngine {
                 wc.waitForSyncTransactionCommit(wcAwaitingCommit);
             }
 
-            final int syncId = mSyncId;
             final long mergedTxId = merged.getId();
-            final String syncName = mSyncName;
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
@@ -254,7 +260,7 @@ class BLASTSyncEngine {
                     // a trace. Since these kind of ANRs can trigger such an issue,
                     // try and ensure we will have some visibility in both cases.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
-                    Slog.e(TAG, "WM sent Transaction (#" + syncId + ", " + syncName + ", tx="
+                    Slog.e(TAG, "WM sent Transaction (#" + mSyncId + ", " + mSyncName + ", tx="
                             + mergedTxId + ") to organizer, but never received commit callback."
                             + " Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);

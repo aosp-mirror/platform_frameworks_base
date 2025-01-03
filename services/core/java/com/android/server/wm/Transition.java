@@ -137,9 +137,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
     private static final String TRACE_NAME_PLAY_TRANSITION = "playing";
 
-    /** The default package for resources */
-    private static final String DEFAULT_PACKAGE = "android";
-
     /** The transition has been created but isn't collecting yet. */
     private static final int STATE_PENDING = -1;
 
@@ -3403,6 +3400,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     static void asyncTraceEnd(int cookie) {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, cookie);
+    }
+
+    @Override
+    public void onReadyTraceStart(String name, int id) {
+        asyncTraceBegin(name, id);
+    }
+
+    @Override
+    public void onReadyTraceEnd(String name, int id) {
+        asyncTraceEnd(id);
     }
 
     boolean hasChanged(WindowContainer wc) {
