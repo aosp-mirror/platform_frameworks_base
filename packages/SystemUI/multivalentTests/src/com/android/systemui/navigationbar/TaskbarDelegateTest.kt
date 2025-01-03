@@ -1,6 +1,7 @@
 package com.android.systemui.navigationbar
 
 import android.app.ActivityManager
+import android.os.Handler
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -61,6 +62,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
     @Mock lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock lateinit var mStatusBarStateController: StatusBarStateController
     @Mock lateinit var mDisplayTracker: DisplayTracker
+    @Mock lateinit var mHandler: Handler
 
     @Before
     fun setup() {
@@ -69,6 +71,11 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mLightBarControllerFactory.create(any())).thenReturn(mLightBarTransitionController)
         `when`(mNavBarHelper.currentSysuiState).thenReturn(mCurrentSysUiState)
         `when`(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState)
+        `when`(mHandler.post(any())).thenAnswer {
+            (it.arguments[0] as Runnable).run()
+            true
+        }
+
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
         mTaskbarDelegate =
             TaskbarDelegate(
@@ -76,6 +83,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
                 mLightBarControllerFactory,
                 mStatusBarKeyguardViewManager,
                 mStatusBarStateController,
+                mHandler,
             )
         mTaskbarDelegate.setDependencies(
             mCommandQueue,
