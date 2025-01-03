@@ -153,8 +153,5 @@ sealed class OngoingActivityChipModel {
          * UI created internally.
          */
         data class SingleColorIcon(val impl: Icon) : ChipIcon
-
-        /** This icon is an app icon in full color (so it should not get tinted in any way). */
-        data class FullColorAppIcon(val impl: Icon) : ChipIcon
     }
 }

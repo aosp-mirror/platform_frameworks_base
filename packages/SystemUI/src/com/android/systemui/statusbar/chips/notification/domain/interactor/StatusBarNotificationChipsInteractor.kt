@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.chips.notification.domain.model.Notificati
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.util.kotlin.pairwise
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +49,7 @@ class StatusBarNotificationChipsInteractor
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
+    private val systemClock: SystemClock,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val singleNotificationChipInteractorFactory: SingleNotificationChipInteractor.Factory,
     @StatusBarChipsLog private val logBuffer: LogBuffer,
@@ -95,21 +97,26 @@ constructor(
             activeNotificationsInteractor.promotedOngoingNotifications
                 .pairwise(initialValue = emptyList())
                 .collect { (oldNotifs, currentNotifs) ->
-                    val removedNotifs = oldNotifs.minus(currentNotifs.toSet())
-                    removedNotifs.forEach { removedNotif ->
-                        val wasRemoved = promotedNotificationInteractorMap.remove(removedNotif.key)
+                    val removedNotifKeys =
+                        oldNotifs.map { it.key }.minus(currentNotifs.map { it.key }.toSet())
+                    removedNotifKeys.forEach { removedNotifKey ->
+                        val wasRemoved = promotedNotificationInteractorMap.remove(removedNotifKey)
                         if (wasRemoved == null) {
                             logger.w({
                                 "Attempted to remove $str1 from interactor map but it wasn't present"
                             }) {
-                                str1 = removedNotif.key
+                                str1 = removedNotifKey
                             }
                         }
                     }
+
                     currentNotifs.forEach { notif ->
                         val interactor =
                             promotedNotificationInteractorMap.computeIfAbsent(notif.key) {
-                                singleNotificationChipInteractorFactory.create(notif)
+                                singleNotificationChipInteractorFactory.create(
+                                    notif,
+                                    creationTime = systemClock.currentTimeMillis(),
+                                )
                             }
                         interactor.setNotification(notif)
                     }
@@ -130,7 +137,15 @@ constructor(
     val notificationChips: Flow<List<NotificationChipModel>> =
         if (StatusBarNotifChips.isEnabled) {
             // For all our current interactors...
-            promotedNotificationInteractors.flatMapLatest { interactors ->
+            promotedNotificationInteractors.flatMapLatest { intrs ->
+                // Stable-sort the promoted notifications by when they first appeared so that:
+                // 1) The chips don't switch places if the older chip gets a notification update.
+                // 2) The chips don't switch places when the second chip is tapped. (Whichever
+                // notification is showing heads-up is considered to be the top notification, which
+                // means tapping the second chip would move it to be the first chip if we didn't
+                // sort by appearance time here.)
+                // 3) Older chips get hidden if there's not enough room for all chips.
+                val interactors = intrs.sortedByDescending { it.creationTime }
                 if (interactors.isNotEmpty()) {
                     // Combine each interactor's [notificationChip] flow...
                     val allNotificationChips: List<Flow<NotificationChipModel?>> =

@@ -79,7 +79,7 @@
              the chip. -->
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center_vertical|start</item>
-        <item name="android:layout_marginStart">5dp</item>
+        <item name="android:layout_marginStart">@dimen/ongoing_activity_chip_margin_start</item>
     </style>
 
     <style name="StatusBar.Chip.Text">
