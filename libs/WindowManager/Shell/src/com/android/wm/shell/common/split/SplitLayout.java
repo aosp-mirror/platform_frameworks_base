@@ -18,19 +18,14 @@ package com.android.wm.shell.common.split;
 
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_WIDTH_DP_UNDEFINED;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
-import static com.android.wm.shell.shared.animation.Interpolators.DIM_INTERPOLATOR;
 import static com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED;
 import static com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.wm.shell.shared.animation.Interpolators.LINEAR;
-import static com.android.wm.shell.shared.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_10_90;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_90_10;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_3_10_45_45;
@@ -52,7 +47,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.Log;
@@ -103,9 +97,17 @@ import java.util.function.Consumer;
  */
 public final class SplitLayout implements DisplayInsetsController.OnInsetsChangedListener {
     private static final String TAG = "SplitLayout";
+    /** No parallax effect when the user is dragging the divider */
     public static final int PARALLAX_NONE = 0;
     public static final int PARALLAX_DISMISSING = 1;
+    /** Parallax effect (center-aligned) when the user is dragging the divider */
     public static final int PARALLAX_ALIGN_CENTER = 2;
+    /**
+     * A custom parallax effect for flexible split. When an app is being pushed/pulled offscreen,
+     * we use a specific parallax to give the impression that it is stuck to the divider.
+     * Otherwise, we fall back to PARALLAX_ALIGN_CENTER behavior.
+     */
+    public static final int PARALLAX_FLEX = 3;
 
     public static final int FLING_RESIZE_DURATION = 250;
     private static final int FLING_ENTER_DURATION = 450;
@@ -146,6 +148,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private int mDividerSize;
 
     private final Rect mTempRect = new Rect();
+    private final Rect mTempRect2 = new Rect();
     private final Rect mRootBounds = new Rect();
     private final Rect mDividerBounds = new Rect();
     /**
@@ -219,7 +222,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 parentContainerCallbacks);
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
-        mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType);
+        mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType, this);
         mSplitState = splitState;
 
         final Resources res = mContext.getResources();
@@ -580,7 +583,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         DockedDividerUtils.sanitizeStackBounds(bounds1, true /** topLeft */);
         DockedDividerUtils.sanitizeStackBounds(bounds2, false /** topLeft */);
         if (setEffectBounds) {
-            mSurfaceEffectPolicy.applyDividerPosition(position, mIsLeftRightSplit);
+            mSurfaceEffectPolicy.applyDividerPosition(
+                    position, mIsLeftRightSplit, mDividerSnapAlgorithm);
         }
     }
 
@@ -710,8 +714,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      */
     void updateDividerBounds(int position, boolean shouldUseParallaxEffect) {
         updateBounds(position);
-        mSplitLayoutHandler.onLayoutSizeChanging(this, mSurfaceEffectPolicy.mParallaxOffset.x,
-                mSurfaceEffectPolicy.mParallaxOffset.y, shouldUseParallaxEffect);
+        mSplitLayoutHandler.onLayoutSizeChanging(this,
+                mSurfaceEffectPolicy.mRetreatingSideParallax.x,
+                mSurfaceEffectPolicy.mRetreatingSideParallax.y, shouldUseParallaxEffect);
     }
 
     void setDividerPosition(int position, boolean applyLayoutChange) {
@@ -1359,169 +1364,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         /** Returns split position of the token. */
         @SplitPosition
         int getSplitItemPosition(WindowContainerToken token);
-    }
-
-    /**
-     * Calculates and applies proper dismissing parallax offset and dimming value to hint users
-     * dismissing gesture.
-     */
-    private class ResizingEffectPolicy {
-        /** Indicates whether to offset splitting bounds to hint dismissing progress or not. */
-        private final int mParallaxType;
-
-        int mShrinkSide = DOCKED_INVALID;
-
-        // The current dismissing side.
-        int mDismissingSide = DOCKED_INVALID;
-
-        // The parallax offset to hint the dismissing side and progress.
-        final Point mParallaxOffset = new Point();
-
-        // The dimming value to hint the dismissing side and progress.
-        float mDismissingDimValue = 0.0f;
-        final Rect mContentBounds = new Rect();
-        final Rect mSurfaceBounds = new Rect();
-
-        ResizingEffectPolicy(int parallaxType) {
-            mParallaxType = parallaxType;
-        }
-
-        /**
-         * Applies a parallax to the task to hint dismissing progress.
-         *
-         * @param position    the split position to apply dismissing parallax effect
-         * @param isLeftRightSplit indicates whether it's splitting horizontally or vertically
-         */
-        void applyDividerPosition(int position, boolean isLeftRightSplit) {
-            mDismissingSide = DOCKED_INVALID;
-            mParallaxOffset.set(0, 0);
-            mDismissingDimValue = 0;
-
-            int totalDismissingDistance = 0;
-            if (position < mDividerSnapAlgorithm.getFirstSplitTarget().position) {
-                mDismissingSide = isLeftRightSplit ? DOCKED_LEFT : DOCKED_TOP;
-                totalDismissingDistance = mDividerSnapAlgorithm.getDismissStartTarget().position
-                        - mDividerSnapAlgorithm.getFirstSplitTarget().position;
-            } else if (position > mDividerSnapAlgorithm.getLastSplitTarget().position) {
-                mDismissingSide = isLeftRightSplit ? DOCKED_RIGHT : DOCKED_BOTTOM;
-                totalDismissingDistance = mDividerSnapAlgorithm.getLastSplitTarget().position
-                        - mDividerSnapAlgorithm.getDismissEndTarget().position;
-            }
-
-            final boolean topLeftShrink = isLeftRightSplit
-                    ? position < getTopLeftContentBounds().right
-                    : position < getTopLeftContentBounds().bottom;
-            if (topLeftShrink) {
-                mShrinkSide = isLeftRightSplit ? DOCKED_LEFT : DOCKED_TOP;
-                mContentBounds.set(getTopLeftContentBounds());
-                mSurfaceBounds.set(getTopLeftBounds());
-            } else {
-                mShrinkSide = isLeftRightSplit ? DOCKED_RIGHT : DOCKED_BOTTOM;
-                mContentBounds.set(getBottomRightContentBounds());
-                mSurfaceBounds.set(getBottomRightBounds());
-            }
-
-            if (mDismissingSide != DOCKED_INVALID) {
-                float fraction = Math.max(0,
-                        Math.min(mDividerSnapAlgorithm.calculateDismissingFraction(position), 1f));
-                mDismissingDimValue = DIM_INTERPOLATOR.getInterpolation(fraction);
-                if (mParallaxType == PARALLAX_DISMISSING) {
-                    fraction = calculateParallaxDismissingFraction(fraction, mDismissingSide);
-                    if (isLeftRightSplit) {
-                        mParallaxOffset.x = (int) (fraction * totalDismissingDistance);
-                    } else {
-                        mParallaxOffset.y = (int) (fraction * totalDismissingDistance);
-                    }
-                }
-            }
-
-            if (mParallaxType == PARALLAX_ALIGN_CENTER) {
-                if (isLeftRightSplit) {
-                    mParallaxOffset.x =
-                            (mSurfaceBounds.width() - mContentBounds.width()) / 2;
-                } else {
-                    mParallaxOffset.y =
-                            (mSurfaceBounds.height() - mContentBounds.height()) / 2;
-                }
-            }
-        }
-
-        /**
-         * @return for a specified {@code fraction}, this returns an adjusted value that simulates a
-         * slowing down parallax effect
-         */
-        private float calculateParallaxDismissingFraction(float fraction, int dockSide) {
-            float result = SLOWDOWN_INTERPOLATOR.getInterpolation(fraction) / 3.5f;
-
-            // Less parallax at the top, just because.
-            if (dockSide == WindowManager.DOCKED_TOP) {
-                result /= 2f;
-            }
-            return result;
-        }
-
-        /** Applies parallax offset and dimming value to the root surface at the dismissing side. */
-        void adjustRootSurface(SurfaceControl.Transaction t,
-                SurfaceControl leash1, SurfaceControl leash2) {
-            SurfaceControl targetLeash = null;
-
-            if (mParallaxType == PARALLAX_DISMISSING) {
-                switch (mDismissingSide) {
-                    case DOCKED_TOP:
-                    case DOCKED_LEFT:
-                        targetLeash = leash1;
-                        mTempRect.set(getTopLeftBounds());
-                        break;
-                    case DOCKED_BOTTOM:
-                    case DOCKED_RIGHT:
-                        targetLeash = leash2;
-                        mTempRect.set(getBottomRightBounds());
-                        break;
-                }
-            } else if (mParallaxType == PARALLAX_ALIGN_CENTER) {
-                switch (mShrinkSide) {
-                    case DOCKED_TOP:
-                    case DOCKED_LEFT:
-                        targetLeash = leash1;
-                        mTempRect.set(getTopLeftBounds());
-                        break;
-                    case DOCKED_BOTTOM:
-                    case DOCKED_RIGHT:
-                        targetLeash = leash2;
-                        mTempRect.set(getBottomRightBounds());
-                        break;
-                }
-            }
-            if (mParallaxType != PARALLAX_NONE && targetLeash != null) {
-                t.setPosition(targetLeash,
-                        mTempRect.left + mParallaxOffset.x, mTempRect.top + mParallaxOffset.y);
-                // Transform the screen-based split bounds to surface-based crop bounds.
-                mTempRect.offsetTo(-mParallaxOffset.x, -mParallaxOffset.y);
-                t.setWindowCrop(targetLeash, mTempRect);
-            }
-        }
-
-        void adjustDimSurface(SurfaceControl.Transaction t,
-                SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
-            SurfaceControl targetDimLayer;
-            switch (mDismissingSide) {
-                case DOCKED_TOP:
-                case DOCKED_LEFT:
-                    targetDimLayer = dimLayer1;
-                    break;
-                case DOCKED_BOTTOM:
-                case DOCKED_RIGHT:
-                    targetDimLayer = dimLayer2;
-                    break;
-                case DOCKED_INVALID:
-                default:
-                    t.setAlpha(dimLayer1, 0).hide(dimLayer1);
-                    t.setAlpha(dimLayer2, 0).hide(dimLayer2);
-                    return;
-            }
-            t.setAlpha(targetDimLayer, mDismissingDimValue)
-                    .setVisibility(targetDimLayer, mDismissingDimValue > 0.001f);
-        }
     }
 
     /** Records IME top offset changes and updates SplitLayout correspondingly. */

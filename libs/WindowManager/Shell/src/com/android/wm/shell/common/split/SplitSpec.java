@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class SplitSpec {
     private static final String TAG = "SplitSpec";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /** A split ratio used on larger screens, where we can fit both apps onscreen. */
     public static final float ONSCREEN_ONLY_ASYMMETRIC_RATIO = 0.33f;
