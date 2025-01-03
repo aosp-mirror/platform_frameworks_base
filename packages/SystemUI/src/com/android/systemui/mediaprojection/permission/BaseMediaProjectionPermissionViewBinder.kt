@@ -17,9 +17,15 @@
 package com.android.systemui.mediaprojection.permission
 
 import android.app.AlertDialog
+import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewStub
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
@@ -35,6 +41,7 @@ open class BaseMediaProjectionPermissionViewBinder(
 ) : AdapterView.OnItemSelectedListener {
     private lateinit var warning: TextView
     private lateinit var startButton: TextView
+    private lateinit var screenShareModeSpinner: Spinner
     var selectedScreenShareOption: ScreenShareOption =
         screenShareOptions.first { it.mode == defaultSelectedMode }
     private var shouldLogCancel: Boolean = true
@@ -57,12 +64,35 @@ open class BaseMediaProjectionPermissionViewBinder(
     private fun initScreenShareOptions() {
         selectedScreenShareOption = screenShareOptions.first { it.mode == defaultSelectedMode }
         setOptionSpecificFields()
+        initScreenShareSpinner()
     }
 
     /** Sets fields on the dialog that change based on which option is selected. */
     private fun setOptionSpecificFields() {
         warning.text = warningText
         startButton.text = startButtonText
+    }
+
+    private fun initScreenShareSpinner() {
+        val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
+        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_options)
+        screenShareModeSpinner.adapter = adapter
+        screenShareModeSpinner.onItemSelectedListener = this
+
+        // disable redundant Touch & Hold accessibility action for Switch Access
+        screenShareModeSpinner.accessibilityDelegate =
+            object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo,
+                ) {
+                    info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                }
+            }
+        screenShareModeSpinner.isLongClickable = false
+        val defaultModePosition = screenShareOptions.indexOfFirst { it.mode == defaultSelectedMode }
+        screenShareModeSpinner.setSelection(defaultModePosition, /* animate= */ false)
     }
 
     override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
@@ -94,5 +124,34 @@ open class BaseMediaProjectionPermissionViewBinder(
         val stub = dialog.requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
+    }
+}
+
+private class OptionsAdapter(context: Context, private val options: List<ScreenShareOption>) :
+    ArrayAdapter<String>(
+        context,
+        R.layout.screen_share_dialog_spinner_text,
+        options.map { context.getString(it.spinnerText, it.displayName) },
+    ) {
+
+    override fun isEnabled(position: Int): Boolean {
+        return options[position].spinnerDisabledText == null
+    }
+
+    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.screen_share_dialog_spinner_item_text, parent, false)
+        val titleTextView = view.requireViewById<TextView>(android.R.id.text1)
+        val errorTextView = view.requireViewById<TextView>(android.R.id.text2)
+        titleTextView.text = getItem(position)
+        errorTextView.text = options[position].spinnerDisabledText
+        if (isEnabled(position)) {
+            errorTextView.visibility = View.GONE
+            titleTextView.isEnabled = true
+        } else {
+            errorTextView.visibility = View.VISIBLE
+            titleTextView.isEnabled = false
+        }
+        return view
     }
 }
