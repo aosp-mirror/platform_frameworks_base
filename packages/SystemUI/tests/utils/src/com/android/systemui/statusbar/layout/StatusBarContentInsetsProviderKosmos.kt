@@ -16,13 +16,28 @@
 
 package com.android.systemui.statusbar.layout
 
+import android.content.applicationContext
+import com.android.systemui.SysUICutoutProvider
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.statusbar.policy.configurationController
+import com.android.systemui.statusbar.policy.fake
 import org.mockito.kotlin.mock
 
 val Kosmos.mockStatusBarContentInsetsProvider by
     Kosmos.Fixture { mock<StatusBarContentInsetsProvider>() }
 
-var Kosmos.statusBarContentInsetsProvider by Kosmos.Fixture { mockStatusBarContentInsetsProvider }
+val Kosmos.statusBarContentInsetsProvider by
+    Kosmos.Fixture {
+        StatusBarContentInsetsProviderImpl(
+            applicationContext,
+            configurationController.fake,
+            dumpManager,
+            commandRegistry,
+            mock<SysUICutoutProvider>(),
+        )
+    }
 
 val Kosmos.fakeStatusBarContentInsetsProviderFactory by
     Kosmos.Fixture { FakeStatusBarContentInsetsProviderFactory() }
