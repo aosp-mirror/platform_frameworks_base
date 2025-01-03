@@ -1,5 +1,6 @@
 package com.android.systemui.kosmos
 
+import androidx.compose.runtime.snapshots.Snapshot
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
@@ -56,6 +57,23 @@ var Kosmos.brightnessWarningToast: BrightnessWarningToast by
  */
 fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
     testScope.runTest testBody@{ this@runTest.testBody() }
+
+/**
+ * Runs the given [Kosmos]-scoped test [block] in an environment where compose snapshot state is
+ * settled eagerly. This is the compose equivalent to using an [UnconfinedTestDispatcher] or using
+ * [runCurrent] a lot.
+ *
+ * Note that this shouldn't be needed or used in a compose test environment.
+ */
+fun Kosmos.runTestWithSnapshots(block: suspend Kosmos.() -> Unit) {
+    val handle = Snapshot.registerGlobalWriteObserver { Snapshot.sendApplyNotifications() }
+
+    try {
+        testScope.runTest { block() }
+    } finally {
+        handle.dispose()
+    }
+}
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
 
