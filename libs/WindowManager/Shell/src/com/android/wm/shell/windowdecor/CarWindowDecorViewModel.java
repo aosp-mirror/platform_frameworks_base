@@ -110,9 +110,6 @@ public abstract class CarWindowDecorViewModel
             SurfaceControl taskSurface,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
-        if (!shouldShowWindowDecor(taskInfo)) {
-            return false;
-        }
         createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         return true;
     }
@@ -125,12 +122,9 @@ public abstract class CarWindowDecorViewModel
             return;
         }
 
-        if (!shouldShowWindowDecor(taskInfo)) {
-            destroyWindowDecoration(taskInfo);
-            return;
-        }
-
-        decoration.relayout(taskInfo, decoration.mHasGlobalFocus, decoration.mExclusionRegion);
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        decoration.relayout(taskInfo, t, t,
+                /* isCaptionVisible= */ shouldShowWindowDecor(taskInfo));
     }
 
     @Override
@@ -221,7 +215,8 @@ public abstract class CarWindowDecorViewModel
                         mWindowDecorViewHostSupplier,
                         new ButtonClickListener(taskInfo));
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
-        windowDecoration.relayout(taskInfo, startT, finishT);
+        windowDecoration.relayout(taskInfo, startT, finishT,
+                /* isCaptionVisible= */ shouldShowWindowDecor(taskInfo));
     }
 
     private class ButtonClickListener implements View.OnClickListener {

@@ -20,14 +20,17 @@ import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.WindowInsets;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -44,6 +47,7 @@ public class CarWindowDecoration extends WindowDecoration<WindowDecorLinearLayou
     private WindowDecorLinearLayout mRootView;
     private @ShellBackgroundThread final ShellExecutor mBgExecutor;
     private final View.OnClickListener mClickListener;
+    private final RelayoutResult<WindowDecorLinearLayout> mResult = new RelayoutResult<>();
 
     CarWindowDecoration(
             Context context,
@@ -71,26 +75,32 @@ public class CarWindowDecoration extends WindowDecoration<WindowDecorLinearLayou
     @SuppressLint("MissingPermission")
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
+        relayout(taskInfo, startT, finishT, /* isCaptionVisible= */ true);
+    }
+
+    @SuppressLint("MissingPermission")
+    void relayout(ActivityManager.RunningTaskInfo taskInfo,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            boolean isCaptionVisible) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         RelayoutParams relayoutParams = new RelayoutParams();
-        RelayoutResult<WindowDecorLinearLayout> outResult = new RelayoutResult<>();
 
         updateRelayoutParams(relayoutParams, taskInfo,
-                mDisplayController.getInsetsState(taskInfo.displayId));
+                mDisplayController.getInsetsState(taskInfo.displayId), isCaptionVisible);
 
-        relayout(relayoutParams, startT, finishT, wct, mRootView, outResult);
+        relayout(relayoutParams, startT, finishT, wct, mRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
         mBgExecutor.execute(() -> mTaskOrganizer.applyTransaction(wct));
 
-        if (outResult.mRootView == null) {
+        if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
             return;
         }
-        if (mRootView != outResult.mRootView) {
-            mRootView = outResult.mRootView;
-            setupRootView(outResult.mRootView, mClickListener);
+        if (mRootView != mResult.mRootView) {
+            mRootView = mResult.mRootView;
+            setupRootView(mResult.mRootView, mClickListener);
         }
     }
 
@@ -108,16 +118,29 @@ public class CarWindowDecoration extends WindowDecoration<WindowDecorLinearLayou
     private void updateRelayoutParams(
             RelayoutParams relayoutParams,
             ActivityManager.RunningTaskInfo taskInfo,
-            InsetsState displayInsetsState) {
+            @Nullable InsetsState displayInsetsState,
+            boolean isCaptionVisible) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         // todo(b/382071404): update to car specific UI
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
         relayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
-        relayoutParams.mIsCaptionVisible = mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded;
-        relayoutParams.mCaptionTopPadding = 0;
+        relayoutParams.mIsCaptionVisible =
+                isCaptionVisible && mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded;
+        if (displayInsetsState != null) {
+            relayoutParams.mCaptionTopPadding = getTopPadding(
+                    taskInfo.getConfiguration().windowConfiguration.getBounds(),
+                    displayInsetsState);
+        }
         relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
         relayoutParams.mApplyStartTransactionOnDraw = true;
+    }
+
+    private static int getTopPadding(Rect taskBounds, @NonNull InsetsState insetsState) {
+        Insets systemDecor = insetsState.calculateInsets(taskBounds,
+                WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
+                false /* ignoreVisibility */);
+        return systemDecor.top;
     }
 
     /**
