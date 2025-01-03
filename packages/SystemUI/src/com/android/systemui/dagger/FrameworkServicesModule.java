@@ -430,6 +430,12 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static UserScopedService<KeyguardManager> provideKeyguardManagerUserScoped(Context context) {
+        return new UserScopedServiceImpl<>(context, KeyguardManager.class);
+    }
+
+    @Provides
+    @Singleton
     static LatencyTracker provideLatencyTracker(Context context) {
         return LatencyTracker.getInstance(context);
     }
