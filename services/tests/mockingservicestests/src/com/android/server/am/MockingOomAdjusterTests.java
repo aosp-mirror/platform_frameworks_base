@@ -258,7 +258,6 @@ public class MockingOomAdjusterTests {
         mService.mOomAdjuster = mService.mProcessStateController.getOomAdjuster();
         mService.mOomAdjuster.mAdjSeq = 10000;
         mService.mWakefulness = new AtomicInteger(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        mSetFlagsRule.enableFlags(Flags.FLAG_NEW_FGS_RESTRICTION_LOGIC);
 
         mUiTierSize = mService.mConstants.TIERED_CACHED_ADJ_UI_TIER_SIZE;
         mFirstNonUiCachedAdj = sFirstUiCachedAdj + mUiTierSize;

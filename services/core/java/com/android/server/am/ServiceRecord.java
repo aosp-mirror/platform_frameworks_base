@@ -278,24 +278,21 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * Whether to use the new "while-in-use permission" logic for FGS start
      */
     private boolean useNewWiuLogic_forStart() {
-        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
-                && CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_START, appInfo.uid);
+        return CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_START, appInfo.uid);
     }
 
     /**
      * Whether to use the new "while-in-use permission" logic for capabilities
      */
     private boolean useNewWiuLogic_forCapabilities() {
-        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
-                && CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_CAPABILITIES, appInfo.uid);
+        return CompatChanges.isChangeEnabled(USE_NEW_WIU_LOGIC_FOR_CAPABILITIES, appInfo.uid);
     }
 
     /**
      * Whether to use the new "FGS BG start exemption" logic.
      */
     private boolean useNewBfslLogic() {
-        return Flags.newFgsRestrictionLogic() // This flag should only be set on V+
-                && CompatChanges.isChangeEnabled(USE_NEW_BFSL_LOGIC, appInfo.uid);
+        return CompatChanges.isChangeEnabled(USE_NEW_BFSL_LOGIC, appInfo.uid);
     }
 
 
