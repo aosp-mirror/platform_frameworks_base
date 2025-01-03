@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.view
 
-import android.os.Trace
 import android.service.notification.NotificationListenerService
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.TrackTracer
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.statusbar.NotificationVisibility
 import com.android.systemui.dagger.SysUISingleton
@@ -183,8 +183,8 @@ constructor(
 
             maybeLogVisibilityChanges(newlyVisible, noLongerVisible, activeNotifCount)
             updateExpansionStates(newlyVisible, noLongerVisible)
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "Notifications [Active]", activeNotifCount)
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "Notifications [Visible]", newVisibilities.size)
+            TrackTracer.instantForGroup("Notifications", "Active", activeNotifCount)
+            TrackTracer.instantForGroup("Notifications", "Visible", newVisibilities.size)
 
             lastLoggedVisibilities.clear()
             lastLoggedVisibilities.putAll(newVisibilities)
