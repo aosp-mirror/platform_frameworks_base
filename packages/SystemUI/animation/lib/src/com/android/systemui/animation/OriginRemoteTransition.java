@@ -107,7 +107,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
             IBinder mergeTarget,
             IRemoteTransitionFinishedCallback finishCallback) {
         logD("mergeAnimation - " + info);
-        mHandler.post(this::cancel);
+        cancel();
     }
 
     @Override
@@ -129,7 +129,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
     @Override
     public void onTransitionConsumed(IBinder transition, boolean aborted) {
         logD("onTransitionConsumed - aborted: " + aborted);
-        mHandler.post(this::cancel);
+        cancel();
     }
 
     private void startAnimationInternal(
@@ -342,11 +342,14 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         mFinishCallback = null;
     }
 
-    private void cancel() {
+    public void cancel() {
         logD("cancel()");
-        if (mAnimator != null) {
-            mAnimator.cancel();
-        }
+        mHandler.post(
+                () -> {
+                    if (mAnimator != null) {
+                        mAnimator.cancel();
+                    }
+                });
     }
 
     private static void logD(String msg) {
