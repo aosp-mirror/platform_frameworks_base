@@ -451,6 +451,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * @param profileUserId  profile user Id
      * @param profileUserPassword  profile original password (when it has separated lock).
      */
+    @GuardedBy("mSpManager")
     private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
         // Only for profiles that shares credential with parent
@@ -909,14 +910,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
-                } else {
-                    if (isCredentialSharableWithParent(userId)) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
+                synchronized (mSpManager) {
+                    tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
                 }
             }
         });
@@ -1380,11 +1375,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage.removeChildProfileLock(userId);
                 removeKeystoreProfileKey(userId);
             } else {
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, profileUserPassword);
-                    }
-                } else {
+                synchronized (mSpManager) {
                     tieProfileLockIfNecessary(userId, profileUserPassword);
                 }
             }
