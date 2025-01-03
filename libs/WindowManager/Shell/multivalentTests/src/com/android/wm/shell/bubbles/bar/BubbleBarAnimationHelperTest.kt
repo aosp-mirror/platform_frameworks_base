@@ -232,11 +232,16 @@ class BubbleBarAnimationHelperTest {
         val taskController = mock<TaskViewTaskController>()
         val bubble = createBubble("key", taskController).initialize(container)
 
+        val semaphore = Semaphore(0)
+        val after = Runnable { semaphore.release() }
+
         activityScenario.onActivity {
-            animationHelper.animateExpansion(bubble) {}
+            animationHelper.animateExpansion(bubble, after)
             animatorTestRule.advanceTimeBy(1000)
         }
         getInstrumentation().waitForIdleSync()
+        assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
+
         getInstrumentation().runOnMainSync {
             animationHelper.animateToRestPosition()
             animatorTestRule.advanceTimeBy(100)
