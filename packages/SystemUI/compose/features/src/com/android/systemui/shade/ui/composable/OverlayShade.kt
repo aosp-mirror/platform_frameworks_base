@@ -24,6 +24,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -65,9 +66,11 @@ import com.android.systemui.res.R
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
 fun ContentScope.OverlayShade(
+    isShadeLayoutWide: Boolean,
     panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
     // TODO(b/384653288) This should be removed when b/378470603 is done.
@@ -90,12 +93,18 @@ fun ContentScope.OverlayShade(
 
         Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
             Panel(
+                isShadeLayoutWide = isShadeLayoutWide,
                 modifier =
                     Modifier.element(OverlayShade.Elements.Panel)
                         .overscroll(verticalOverscrollEffect)
                         .panelSize(),
+                header = header,
                 content = content,
             )
+        }
+
+        if (isShadeLayoutWide) {
+            header()
         }
     }
 }
@@ -113,7 +122,12 @@ private fun ContentScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modif
 }
 
 @Composable
-private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun ContentScope.Panel(
+    isShadeLayoutWide: Boolean,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
+    content: @Composable () -> Unit,
+) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
@@ -125,9 +139,15 @@ private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composab
                     )
         )
 
-        // This content is intentionally rendered as a separate element from the background in order
-        // to allow for more flexibility when defining transitions.
-        content()
+        Column {
+            if (!isShadeLayoutWide) {
+                header()
+            }
+
+            // This content is intentionally rendered as a separate element from the background in
+            // order to allow for more flexibility when defining transitions.
+            content()
+        }
     }
 }
 

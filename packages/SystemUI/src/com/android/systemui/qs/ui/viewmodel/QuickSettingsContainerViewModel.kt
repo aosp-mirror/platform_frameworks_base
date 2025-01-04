@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import androidx.compose.runtime.getValue
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
@@ -23,6 +24,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.ToolbarViewModel
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -35,6 +37,7 @@ class QuickSettingsContainerViewModel
 constructor(
     brightnessSliderViewModelFactory: BrightnessSliderViewModel.Factory,
     quickQuickSettingsViewModelFactory: QuickQuickSettingsViewModel.Factory,
+    shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     @Assisted supportsBrightnessMirroring: Boolean,
     val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
@@ -47,10 +50,13 @@ constructor(
 
     val quickQuickSettingsViewModel = quickQuickSettingsViewModelFactory.create()
 
+    val shadeHeaderViewModel = shadeHeaderViewModelFactory.create()
+
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { brightnessSliderViewModel.activate() }
             launch { quickQuickSettingsViewModel.activate() }
+            launch { shadeHeaderViewModel.activate() }
             awaitCancellation()
         }
     }

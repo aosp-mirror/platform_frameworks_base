@@ -23,6 +23,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModelFactory
 import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toolbar.toolbarViewModelFactory
+import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 
 val Kosmos.quickSettingsContainerViewModelFactory by
     Kosmos.Fixture {
@@ -33,6 +34,7 @@ val Kosmos.quickSettingsContainerViewModelFactory by
                 return QuickSettingsContainerViewModel(
                     brightnessSliderViewModelFactory,
                     quickQuickSettingsViewModelFactory,
+                    shadeHeaderViewModelFactory,
                     supportsBrightnessMirroring,
                     tileGridViewModel,
                     editModeViewModel,

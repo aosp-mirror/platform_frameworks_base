@@ -102,12 +102,12 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(DualShade.FLAG_NAME)
-    fun onSystemIconContainerClicked_locked_collapsesShadeToLockscreen() =
+    fun onSystemIconChipClicked_locked_collapsesShadeToLockscreen() =
         testScope.runTest {
             setDeviceEntered(false)
             setScene(Scenes.Shade)
 
-            underTest.onSystemIconContainerClicked()
+            underTest.onSystemIconChipClicked()
             runCurrent()
 
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Lockscreen)
@@ -115,7 +115,25 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(DualShade.FLAG_NAME)
-    fun onSystemIconContainerClicked_lockedOnDualShade_collapsesShadeToLockscreen() =
+    fun onSystemIconChipClicked_lockedOnQsShade_collapsesShadeToLockscreen() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(false)
+            setScene(Scenes.Lockscreen)
+            setOverlay(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onSystemIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onSystemIconChipClicked_lockedOnNotifShade_expandsQsShade() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
@@ -124,21 +142,22 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
             setOverlay(Overlays.NotificationsShade)
             assertThat(currentOverlays).isNotEmpty()
 
-            underTest.onSystemIconContainerClicked()
+            underTest.onSystemIconChipClicked()
             runCurrent()
 
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
-            assertThat(currentOverlays).isEmpty()
+            assertThat(currentOverlays).contains(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).doesNotContain(Overlays.NotificationsShade)
         }
 
     @Test
     @DisableFlags(DualShade.FLAG_NAME)
-    fun onSystemIconContainerClicked_unlocked_collapsesShadeToGone() =
+    fun onSystemIconChipClicked_unlocked_collapsesShadeToGone() =
         testScope.runTest {
             setDeviceEntered(true)
             setScene(Scenes.Shade)
 
-            underTest.onSystemIconContainerClicked()
+            underTest.onSystemIconChipClicked()
             runCurrent()
 
             assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
@@ -146,7 +165,25 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(DualShade.FLAG_NAME)
-    fun onSystemIconContainerClicked_unlockedOnDualShade_collapsesShadeToGone() =
+    fun onSystemIconChipClicked_unlockedOnQsShade_collapsesShadeToGone() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(true)
+            setScene(Scenes.Gone)
+            setOverlay(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onSystemIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onSystemIconChipClicked_unlockedOnNotifShade_expandsQsShade() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
@@ -155,11 +192,86 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
             setOverlay(Overlays.NotificationsShade)
             assertThat(currentOverlays).isNotEmpty()
 
-            underTest.onSystemIconContainerClicked()
+            underTest.onSystemIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(currentOverlays).contains(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).doesNotContain(Overlays.NotificationsShade)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onNotificationIconChipClicked_lockedOnNotifShade_collapsesShadeToLockscreen() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(false)
+            setScene(Scenes.Lockscreen)
+            setOverlay(Overlays.NotificationsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onNotificationIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onNotificationIconChipClicked_lockedOnQsShade_expandsNotifShade() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(false)
+            setScene(Scenes.Lockscreen)
+            setOverlay(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onNotificationIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(currentOverlays).contains(Overlays.NotificationsShade)
+            assertThat(currentOverlays).doesNotContain(Overlays.QuickSettingsShade)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onNotificationIconChipClicked_unlockedOnNotifShade_collapsesShadeToGone() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(true)
+            setScene(Scenes.Gone)
+            setOverlay(Overlays.NotificationsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onNotificationIconChipClicked()
             runCurrent()
 
             assertThat(currentScene).isEqualTo(Scenes.Gone)
             assertThat(currentOverlays).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun onNotificationIconChipClicked_unlockedOnQsShade_expandsNotifShade() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            setDeviceEntered(true)
+            setScene(Scenes.Gone)
+            setOverlay(Overlays.QuickSettingsShade)
+            assertThat(currentOverlays).isNotEmpty()
+
+            underTest.onNotificationIconChipClicked()
+            runCurrent()
+
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            assertThat(currentOverlays).contains(Overlays.NotificationsShade)
+            assertThat(currentOverlays).doesNotContain(Overlays.QuickSettingsShade)
         }
 
     companion object {

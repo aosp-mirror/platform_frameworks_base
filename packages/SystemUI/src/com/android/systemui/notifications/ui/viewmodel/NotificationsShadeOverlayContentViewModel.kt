@@ -52,6 +52,13 @@ constructor(
 
     private val hydrator = Hydrator("NotificationsShadeOverlayContentViewModel.hydrator")
 
+    val isShadeLayoutWide: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "isShadeLayoutWide",
+            initialValue = shadeInteractor.isShadeLayoutWide.value,
+            source = shadeInteractor.isShadeLayoutWide,
+        )
+
     val showHeader: Boolean by
         hydrator.hydratedStateOf(
             traceName = "showHeader",

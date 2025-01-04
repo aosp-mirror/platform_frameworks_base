@@ -6,16 +6,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.systemui.shade.ui.composable.ShadeHeader.Colors.shadeHeaderText
+import com.android.compose.theme.colorAttr
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 
 @Composable
-fun VariableDayDate(
-    viewModel: ShadeHeaderViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun VariableDayDate(viewModel: ShadeHeaderViewModel, modifier: Modifier = Modifier) {
     val longerText = viewModel.longerDateText.collectAsStateWithLifecycle()
     val shorterText = viewModel.shorterDateText.collectAsStateWithLifecycle()
+
+    val textColor =
+        if (viewModel.highlightNotificationIcons) colorAttr(android.R.attr.textColorPrimaryInverse)
+        else colorAttr(android.R.attr.textColorPrimary)
 
     Layout(
         contents =
@@ -24,7 +25,7 @@ fun VariableDayDate(
                     Text(
                         text = longerText.value,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.shadeHeaderText,
+                        color = textColor,
                         maxLines = 1,
                     )
                 },
@@ -32,7 +33,7 @@ fun VariableDayDate(
                     Text(
                         text = shorterText.value,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.shadeHeaderText,
+                        color = textColor,
                         maxLines = 1,
                     )
                 },

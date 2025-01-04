@@ -41,9 +41,10 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
+import com.android.systemui.shade.ui.composable.OverlayShadeHeader
 import com.android.systemui.shade.ui.composable.SingleShadeMeasurePolicy
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
@@ -60,6 +61,8 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
+    private val notificationIconContainerStatusBarViewBinder:
+        NotificationIconContainerStatusBarViewBinder,
     private val shadeSession: SaveableSession,
     private val stackScrollView: Lazy<NotificationScrollView>,
     private val clockSection: DefaultClockSection,
@@ -79,7 +82,6 @@ constructor(
 
     @Composable
     override fun ContentScope.Content(modifier: Modifier) {
-
         val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
 
         val viewModel =
@@ -92,25 +94,28 @@ constructor(
             }
 
         OverlayShade(
+            isShadeLayoutWide = viewModel.isShadeLayoutWide,
             panelAlignment = Alignment.TopStart,
             modifier = modifier,
             onScrimClicked = viewModel::onScrimClicked,
+            header = {
+                OverlayShadeHeader(
+                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                    createTintedIconManager = tintedIconManagerFactory::create,
+                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
+                    statusBarIconController = statusBarIconController,
+                    notificationIconContainerStatusBarViewBinder =
+                        notificationIconContainerStatusBarViewBinder,
+                    modifier =
+                        Modifier.element(NotificationsShade.Elements.StatusBar)
+                            .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
+                )
+            },
         ) {
             Box {
                 Column {
                     if (viewModel.showHeader) {
                         val burnIn = rememberBurnIn(clockInteractor)
-
-                        CollapsedShadeHeader(
-                            viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                            createTintedIconManager = tintedIconManagerFactory::create,
-                            createBatteryMeterViewController =
-                                batteryMeterViewControllerFactory::create,
-                            statusBarIconController = statusBarIconController,
-                            modifier =
-                                Modifier.element(NotificationsShade.Elements.StatusBar)
-                                    .layoutId(SingleShadeMeasurePolicy.LayoutId.ShadeHeader),
-                        )
 
                         with(clockSection) {
                             SmallClock(
@@ -126,16 +131,17 @@ constructor(
                         stackScrollView = stackScrollView.get(),
                         viewModel = placeholderViewModel,
                         maxScrimTop = { 0f },
+                        shouldPunchHoleBehindScrim = false,
                         stackTopPadding = notificationStackPadding,
                         stackBottomPadding = notificationStackPadding,
-                        shouldPunchHoleBehindScrim = false,
                         shouldFillMaxSize = false,
                         shouldShowScrim = false,
                         supportNestedScrolling = false,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                // Communicates the bottom position of the drawable area within the shade to NSSL.
+                // Communicates the bottom position of the drawable area within the shade to
+                // NSSL.
                 NotificationStackCutoffGuideline(
                     stackScrollView = stackScrollView.get(),
                     viewModel = placeholderViewModel,

@@ -52,6 +52,13 @@ constructor(
 
     private val hydrator = Hydrator("QuickSettingsContainerViewModel.hydrator")
 
+    val isShadeLayoutWide: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "isShadeLayoutWide",
+            initialValue = shadeInteractor.isShadeLayoutWide.value,
+            source = shadeInteractor.isShadeLayoutWide,
+        )
+
     val showHeader: Boolean by
         hydrator.hydratedStateOf(
             traceName = "showHeader",
@@ -60,6 +67,13 @@ constructor(
         )
 
     val quickSettingsContainerViewModel = quickSettingsContainerViewModelFactory.create(false)
+
+    val showQuickSettingsOverlayHeader: Boolean by
+        hydrator.hydratedStateOf(
+            traceName = "showQuickSettingsOverlayHeader",
+            initialValue = shadeInteractor.isShadeLayoutWide.value,
+            source = shadeInteractor.isShadeLayoutWide,
+        )
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
