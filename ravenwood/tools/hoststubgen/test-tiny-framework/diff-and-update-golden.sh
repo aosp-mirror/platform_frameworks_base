@@ -34,10 +34,11 @@ source "${0%/*}"/../common.sh
 
 SCRIPT_NAME="${0##*/}"
 
-GOLDEN_DIR=golden-output
+GOLDEN_DIR=${GOLDEN_DIR:-golden-output}
 mkdir -p $GOLDEN_DIR
 
-DIFF_CMD=${DIFF:-diff -u --ignore-blank-lines --ignore-space-change}
+# TODO(b/388562869) We shouldn't need `--ignore-matching-lines`, but the golden files may not have the "Constant pool:" lines.
+DIFF_CMD=${DIFF_CMD:-diff -u --ignore-blank-lines --ignore-space-change --ignore-matching-lines='^\(Constant.pool:\|{\)$'}
 
 update=0
 three_way=0
@@ -62,7 +63,7 @@ done
 shift $(($OPTIND - 1))
 
 # Build the dump files, which are the input of this test.
-run m  dump-jar tiny-framework-dump-test
+run ${BUILD_CMD:=m} dump-jar tiny-framework-dump-test
 
 
 # Get the path to the generate text files. (not the golden files.)
