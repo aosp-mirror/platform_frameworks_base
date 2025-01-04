@@ -601,7 +601,7 @@ import java.util.List;
             int uid,
             String packageName,
             String attributionTag,
-            List<String> permissions,
+            Collection<String> permissions,
             String noteMessage) {
         for (String permission : permissions) {
             int opCode = AppOpsManager.permissionToOpCode(permission);

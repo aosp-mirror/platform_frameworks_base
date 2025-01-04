@@ -191,7 +191,8 @@ import java.util.concurrent.ConcurrentHashMap;
     /* package */ IContextHubEndpoint registerEndpoint(
             HubEndpointInfo pendingEndpointInfo,
             IContextHubEndpointCallback callback,
-            String packageName)
+            String packageName,
+            String attributionTag)
             throws RemoteException {
         if (!mSessionIdsValid) {
             throw new IllegalStateException("ContextHubEndpointManager failed to initialize");
@@ -215,6 +216,7 @@ import java.util.concurrent.ConcurrentHashMap;
                         halEndpointInfo,
                         callback,
                         packageName,
+                        attributionTag,
                         mTransactionManager);
         mEndpointMap.put(endpointId, broker);
 

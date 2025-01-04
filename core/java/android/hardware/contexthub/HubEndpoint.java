@@ -358,6 +358,7 @@ public class HubEndpoint {
                     service.registerEndpoint(
                             mPendingHubEndpointInfo,
                             mServiceCallback,
+                            mPendingHubEndpointInfo.getName(),
                             mPendingHubEndpointInfo.getTag());
             mAssignedHubEndpointInfo = serviceToken.getAssignedHubEndpointInfo();
             mServiceToken = serviceToken;
@@ -514,6 +515,7 @@ public class HubEndpoint {
         /** Create a builder for {@link HubEndpoint} */
         public Builder(@NonNull Context context) {
             mPackageName = context.getPackageName();
+            mTag = context.getAttributionTag();
             mVersion = (int) context.getApplicationInfo().longVersionCode;
             mMainExecutor = context.getMainExecutor();
         }
@@ -532,6 +534,7 @@ public class HubEndpoint {
         /**
          * Set a tag string. The tag can be used to further identify the creator of the endpoint.
          * Endpoints created by the same package share the same name but should have different tags.
+         * The default value of the tag is retrieved from {@link Context#getAttributionTag()}.
          */
         @NonNull
         public Builder setTag(@NonNull String tag) {

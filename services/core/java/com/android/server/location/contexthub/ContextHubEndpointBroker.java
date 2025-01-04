@@ -16,6 +16,7 @@
 
 package com.android.server.location.contexthub;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.hardware.contexthub.EndpointInfo;
 import android.hardware.contexthub.ErrorCode;
@@ -26,16 +27,18 @@ import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.contexthub.IEndpointCommunication;
 import android.hardware.contexthub.Message;
 import android.hardware.contexthub.MessageDeliveryStatus;
+import android.hardware.contexthub.Reason;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -45,8 +48,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
-        implements IBinder.DeathRecipient {
+        implements IBinder.DeathRecipient, AppOpsManager.OnOpChangedListener {
     private static final String TAG = "ContextHubEndpointBroker";
+
+    /** Message used by noteOp when this client receives a message from an endpoint. */
+    private static final String RECEIVE_MSG_NOTE = "ContextHubEndpointMessageDelivery";
 
     /** The context of the service. */
     private final Context mContext;
@@ -56,6 +62,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /** The manager that registered this endpoint. */
     private final ContextHubEndpointManager mEndpointManager;
+
+    /** Manager used for noting permissions usage of this broker. */
+    private final AppOpsManager mAppOpsManager;
 
     /** Metadata about this endpoint (app-facing container). */
     private final HubEndpointInfo mEndpointInfo;
@@ -71,23 +80,59 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     private final Object mOpenSessionLock = new Object();
 
-    /** The set of session IDs that are pending remote acceptance */
-    @GuardedBy("mOpenSessionLock")
-    private final Set<Integer> mPendingSessionIds = new HashSet<>();
+    static class SessionInfo {
+        enum SessionState {
+            /* The session is pending acceptance from the remote endpoint. */
+            PENDING,
+            /* The session is active and can transport messages. */
+            ACTIVE,
+        };
 
-    /** The set of session IDs that are actively enabled by this endpoint */
-    @GuardedBy("mOpenSessionLock")
-    private final Set<Integer> mActiveSessionIds = new HashSet<>();
+        private final HubEndpointInfo mRemoteEndpointInfo;
 
-    /** The set of session IDs that are actively enabled by the remote endpoint */
+        private SessionState mSessionState = SessionState.PENDING;
+
+        private final boolean mRemoteInitiated;
+
+        SessionInfo(HubEndpointInfo remoteEndpointInfo, boolean remoteInitiated) {
+            mRemoteEndpointInfo = remoteEndpointInfo;
+            mRemoteInitiated = remoteInitiated;
+        }
+
+        public boolean isRemoteInitiated() {
+            return mRemoteInitiated;
+        }
+
+        public HubEndpointInfo getRemoteEndpointInfo() {
+            return mRemoteEndpointInfo;
+        }
+
+        public void setSessionState(SessionState state) {
+            mSessionState = state;
+        }
+
+        public boolean isActive() {
+            return mSessionState == SessionState.ACTIVE;
+        }
+    }
+
+    /** A map between a session ID which maps to its current state. */
     @GuardedBy("mOpenSessionLock")
-    private final Set<Integer> mActiveRemoteSessionIds = new HashSet<>();
+    private final SparseArray<SessionInfo> mSessionInfoMap = new SparseArray<>();
 
     /** The package name of the app that created the endpoint */
     private final String mPackageName;
 
-    /* Transaction manager used for sending reliable messages */
+    /** The attribution tag of the module that created the endpoint */
+    private final String mAttributionTag;
+
+    /** Transaction manager used for sending reliable messages */
     private final ContextHubTransactionManager mTransactionManager;
+
+    /** The PID/UID of the endpoint package providing IContextHubEndpointCallback */
+    private final int mPid;
+
+    private final int mUid;
 
     /* package */ ContextHubEndpointBroker(
             Context context,
@@ -96,6 +141,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             EndpointInfo halEndpointInfo,
             IContextHubEndpointCallback callback,
             String packageName,
+            String attributionTag,
             ContextHubTransactionManager transactionManager) {
         mContext = context;
         mHubInterface = hubInterface;
@@ -104,7 +150,14 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         mHalEndpointInfo = halEndpointInfo;
         mContextHubEndpointCallback = callback;
         mPackageName = packageName;
+        mAttributionTag = attributionTag;
         mTransactionManager = transactionManager;
+
+        mPid = Binder.getCallingPid();
+        mUid = Binder.getCallingUid();
+
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
+        mAppOpsManager.startWatchingMode(AppOpsManager.OP_NONE, mPackageName, this);
     }
 
     @Override
@@ -118,12 +171,17 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             throws RemoteException {
         super.openSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
+        if (!hasEndpointPermissions(destination)) {
+            throw new SecurityException(
+                    "Insufficient permission to open a session with endpoint: " + destination);
+        }
+
         int sessionId = mEndpointManager.reserveSessionId();
         EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
 
         synchronized (mOpenSessionLock) {
             try {
-                mPendingSessionIds.add(sessionId);
+                mSessionInfoMap.put(sessionId, new SessionInfo(destination, false));
                 mHubInterface.openEndpointSession(
                         sessionId,
                         halEndpointInfo.id,
@@ -131,8 +189,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                         serviceDescriptor);
             } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
                 Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
-                mPendingSessionIds.remove(sessionId);
-                mEndpointManager.returnSessionId(sessionId);
+                cleanupSessionResources(sessionId);
                 throw e;
             }
 
@@ -145,13 +202,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     public void closeSession(int sessionId, int reason) throws RemoteException {
         super.closeSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
-        try {
-            mHubInterface.closeEndpointSession(
-                    sessionId, ContextHubServiceUtil.toHalReason(reason));
-        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
-            Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
-            throw e;
+        if (!cleanupSessionResources(sessionId)) {
+            throw new IllegalArgumentException(
+                    "Unknown session ID in closeSession: id=" + sessionId);
         }
+        halCloseEndpointSession(sessionId, ContextHubServiceUtil.toHalReason(reason));
     }
 
     @Override
@@ -165,15 +220,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             Log.e(TAG, "RemoteException while calling HAL unregisterEndpoint", e);
         }
         synchronized (mOpenSessionLock) {
-            for (int id : mPendingSessionIds) {
-                mEndpointManager.returnSessionId(id);
+            // Iterate in reverse since cleanupSessionResources will remove the entry
+            for (int i = mSessionInfoMap.size() - 1; i >= 0; i--) {
+                int id = mSessionInfoMap.keyAt(i);
+                cleanupSessionResources(id);
             }
-            for (int id : mActiveSessionIds) {
-                mEndpointManager.returnSessionId(id);
-            }
-            mPendingSessionIds.clear();
-            mActiveSessionIds.clear();
-            mActiveRemoteSessionIds.clear();
         }
         mEndpointManager.unregisterEndpoint(mEndpointInfo.getIdentifier().getEndpoint());
     }
@@ -183,9 +234,14 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     public void openSessionRequestComplete(int sessionId) {
         super.openSessionRequestComplete_enforcePermission();
         synchronized (mOpenSessionLock) {
+            SessionInfo info = mSessionInfoMap.get(sessionId);
+            if (info == null) {
+                throw new IllegalArgumentException(
+                        "openSessionRequestComplete for invalid session id=" + sessionId);
+            }
             try {
                 mHubInterface.endpointSessionOpenComplete(sessionId);
-                mActiveRemoteSessionIds.add(sessionId);
+                info.setSessionState(SessionInfo.SessionState.ACTIVE);
             } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
                 Log.e(TAG, "Exception while calling endpointSessionOpenComplete", e);
             }
@@ -198,15 +254,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             int sessionId, HubMessage message, IContextHubTransactionCallback callback) {
         super.sendMessage_enforcePermission();
         Message halMessage = ContextHubServiceUtil.createHalMessage(message);
-        synchronized (mOpenSessionLock) {
-            if (!mActiveSessionIds.contains(sessionId)
-                    && !mActiveRemoteSessionIds.contains(sessionId)) {
-                throw new SecurityException(
-                        "sendMessage called on inactive session (id= " + sessionId + ")");
-            }
+        if (!isSessionActive(sessionId)) {
+            throw new SecurityException(
+                    "sendMessage called on inactive session (id= " + sessionId + ")");
         }
 
-        // TODO(b/381102453): Handle permissions
         if (callback == null) {
             try {
                 mHubInterface.sendMessageToEndpoint(sessionId, halMessage);
@@ -258,6 +310,31 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         }
     }
 
+    @Override
+    public void onOpChanged(String op, String packageName) {
+        if (!packageName.equals(mPackageName)) {
+            Log.w(
+                    TAG,
+                    "onOpChanged called with invalid package "
+                            + packageName
+                            + " expected "
+                            + mPackageName);
+        } else {
+            synchronized (mOpenSessionLock) {
+                // Iterate in reverse since cleanupSessionResources will remove the entry
+                for (int i = mSessionInfoMap.size() - 1; i >= 0; i--) {
+                    int id = mSessionInfoMap.keyAt(i);
+                    HubEndpointInfo target = mSessionInfoMap.get(id).getRemoteEndpointInfo();
+                    if (!hasEndpointPermissions(target)) {
+                        halCloseEndpointSessionNoThrow(id, Reason.PERMISSION_DENIED);
+                        onCloseEndpointSession(id, Reason.PERMISSION_DENIED);
+                        // Resource cleanup is done in onCloseEndpointSession
+                    }
+                }
+            }
+        }
+    }
+
     /* package */ void attachDeathRecipient() throws RemoteException {
         if (mContextHubEndpointCallback != null) {
             mContextHubEndpointCallback.asBinder().linkToDeath(this, 0 /* flags */);
@@ -266,21 +343,36 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ void onEndpointSessionOpenRequest(
             int sessionId, HubEndpointInfo initiator, String serviceDescriptor) {
+        if (!hasEndpointPermissions(initiator)) {
+            halCloseEndpointSessionNoThrow(sessionId, Reason.PERMISSION_DENIED);
+            return;
+        }
+
+        synchronized (mOpenSessionLock) {
+            if (hasSessionId(sessionId)) {
+                Log.e(TAG, "Existing session in onEndpointSessionOpenRequest: id=" + sessionId);
+                halCloseEndpointSessionNoThrow(sessionId, Reason.UNSPECIFIED);
+                return;
+            }
+            mSessionInfoMap.put(sessionId, new SessionInfo(initiator, true));
+        }
+
         if (mContextHubEndpointCallback != null) {
             try {
                 mContextHubEndpointCallback.onSessionOpenRequest(
                         sessionId, initiator, serviceDescriptor);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onSessionOpenRequest", e);
+                cleanupSessionResources(sessionId);
+                return;
             }
         }
     }
 
     /* package */ void onCloseEndpointSession(int sessionId, byte reason) {
-        synchronized (mOpenSessionLock) {
-            mPendingSessionIds.remove(sessionId);
-            mActiveSessionIds.remove(sessionId);
-            mActiveRemoteSessionIds.remove(sessionId);
+        if (!cleanupSessionResources(sessionId)) {
+            Log.w(TAG, "Unknown session ID in onCloseEndpointSession: id=" + sessionId);
+            return;
         }
         if (mContextHubEndpointCallback != null) {
             try {
@@ -294,8 +386,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ void onEndpointSessionOpenComplete(int sessionId) {
         synchronized (mOpenSessionLock) {
-            mPendingSessionIds.remove(sessionId);
-            mActiveSessionIds.add(sessionId);
+            if (!hasSessionId(sessionId)) {
+                Log.w(TAG, "Unknown session ID in onEndpointSessionOpenComplete: id=" + sessionId);
+                return;
+            }
+            mSessionInfoMap.get(sessionId).setSessionState(SessionInfo.SessionState.ACTIVE);
         }
         if (mContextHubEndpointCallback != null) {
             try {
@@ -307,11 +402,51 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     /* package */ void onMessageReceived(int sessionId, HubMessage message) {
+        HubEndpointInfo remote;
+        synchronized (mOpenSessionLock) {
+            if (!isSessionActive(sessionId)) {
+                Log.e(
+                        TAG,
+                        "Dropping message for inactive session (id="
+                                + sessionId
+                                + ") with message: "
+                                + message);
+                sendMessageDeliveryStatus(
+                        sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMANENT_ERROR);
+                return;
+            }
+            remote = mSessionInfoMap.get(sessionId).getRemoteEndpointInfo();
+        }
+        if (!ContextHubServiceUtil.notePermissions(
+                mAppOpsManager,
+                mUid,
+                mPackageName,
+                mAttributionTag,
+                remote.getRequiredPermissions(),
+                RECEIVE_MSG_NOTE
+                        + "-0x"
+                        + Long.toHexString(remote.getIdentifier().getHub())
+                        + "-0x"
+                        + Long.toHexString(remote.getIdentifier().getEndpoint()))) {
+            Log.e(
+                    TAG,
+                    "Dropping message from "
+                            + remote
+                            + ". "
+                            + mPackageName
+                            + " doesn't have permission");
+            sendMessageDeliveryStatus(
+                    sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMISSION_DENIED);
+            return;
+        }
+
         if (mContextHubEndpointCallback != null) {
             try {
                 mContextHubEndpointCallback.onMessageReceived(sessionId, message);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onMessageReceived", e);
+                sendMessageDeliveryStatus(
+                        sessionId, message.getMessageSequenceNumber(), ErrorCode.TRANSIENT_ERROR);
             }
         }
     }
@@ -323,9 +458,66 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /* package */ boolean hasSessionId(int sessionId) {
         synchronized (mOpenSessionLock) {
-            return mPendingSessionIds.contains(sessionId)
-                    || mActiveSessionIds.contains(sessionId)
-                    || mActiveRemoteSessionIds.contains(sessionId);
+            return mSessionInfoMap.contains(sessionId);
         }
+    }
+
+    /**
+     * Calls the HAL closeEndpointSession API.
+     *
+     * @param sessionId The session ID to close
+     * @param halReason The HAL reason
+     */
+    private void halCloseEndpointSession(int sessionId, byte halReason) throws RemoteException {
+        try {
+            mHubInterface.closeEndpointSession(sessionId, halReason);
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            throw e;
+        }
+    }
+
+    /** Same as halCloseEndpointSession but does not throw the exception */
+    private void halCloseEndpointSessionNoThrow(int sessionId, byte halReason) {
+        try {
+            halCloseEndpointSession(sessionId, halReason);
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
+        }
+    }
+
+    /**
+     * Cleans up resources related to a session with the provided ID.
+     *
+     * @param sessionId The session ID to clean up resources for
+     * @return false if the session ID was invalid
+     */
+    private boolean cleanupSessionResources(int sessionId) {
+        synchronized (mOpenSessionLock) {
+            SessionInfo info = mSessionInfoMap.get(sessionId);
+            if (info != null && !info.isRemoteInitiated()) {
+                mEndpointManager.returnSessionId(sessionId);
+                mSessionInfoMap.remove(sessionId);
+            }
+            return info != null;
+        }
+    }
+
+    /**
+     * @param sessionId The ID of the session to check
+     * @return true if the session with the given ID is currently active
+     */
+    private boolean isSessionActive(int sessionId) {
+        synchronized (mOpenSessionLock) {
+            return hasSessionId(sessionId) && mSessionInfoMap.get(sessionId).isActive();
+        }
+    }
+
+    /**
+     * @param targetEndpointInfo The target endpoint to check permissions for
+     * @return true if this endpoint has sufficient permission to the provided target endpoint
+     */
+    private boolean hasEndpointPermissions(HubEndpointInfo targetEndpointInfo) {
+        Collection<String> requiredPermissions = targetEndpointInfo.getRequiredPermissions();
+        return ContextHubServiceUtil.hasPermissions(mContext, mPid, mUid, requiredPermissions);
     }
 }
