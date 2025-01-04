@@ -185,6 +185,13 @@ flag {
 }
 
 flag {
+    name: "enable_voice_access_key_gestures"
+    namespace: "input"
+    description: "Adds key gestures for voice access"
+    bug: "383734125"
+}
+
+flag {
     name: "can_window_override_power_gesture_api"
     namespace: "wallet_integration"
     description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
