@@ -6895,7 +6895,9 @@ public abstract class BatteryStats {
                                 || wakelockTag.poolIdx == HistoryTag.HISTORY_TAG_POOL_OVERFLOW) {
                             UserHandle.formatUid(sb, wakelockTag.uid);
                             sb.append(":\"");
-                            sb.append(wakelockTag.string.replace("\"", "\"\""));
+                            if (wakelockTag.string != null) {
+                                sb.append(wakelockTag.string.replace("\"", "\"\""));
+                            }
                             sb.append("\"");
                         } else {
                             sb.append(wakelockTag.poolIdx);
