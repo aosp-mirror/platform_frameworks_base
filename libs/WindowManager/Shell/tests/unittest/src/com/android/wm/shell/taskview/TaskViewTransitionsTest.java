@@ -44,7 +44,9 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.Flags;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -56,6 +58,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
@@ -82,6 +85,12 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     ActivityManager.RunningTaskInfo mTaskInfo;
     @Mock
     WindowContainerToken mToken;
+    @Mock
+    ShellTaskOrganizer mOrganizer;
+    @Mock
+    SyncTransactionQueue mSyncQueue;
+
+    Executor mExecutor = command -> command.run();
 
     TaskViewRepository mTaskViewRepository;
     TaskViewTransitions mTaskViewTransitions;
@@ -104,9 +113,12 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         mTaskInfo.taskDescription = mock(ActivityManager.TaskDescription.class);
 
         mTaskViewRepository = new TaskViewRepository();
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
+        when(mOrganizer.getExecutor()).thenReturn(mExecutor);
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository,
+                mOrganizer, mSyncQueue));
         mTaskViewTransitions.addTaskView(mTaskViewTaskController);
         when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
+        when(mTaskViewTaskController.getTaskToken()).thenReturn(mToken);
     }
 
     @Test

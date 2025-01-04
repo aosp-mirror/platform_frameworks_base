@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.taskview;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -25,7 +26,14 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -38,6 +46,8 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.Flags;
+import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
 
@@ -45,9 +55,24 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Handles Shell Transitions that involve TaskView tasks.
+ *
+ * <ul>
+ *     <li>To start an activity based task view, use {@link TaskViewTransitions#startActivity}</li>
+ *
+ *     <li>To start an activity (represented by {@link ShortcutInfo}) based task view, use
+ *     {@link TaskViewTransitions#startShortcutActivity}
+ *     </li>
+ *
+ *     <li>To start a root-task based task view, use {@link TaskViewTransitions#startRootTask}.
+ *     This method is special as it doesn't create a root task and instead expects that the
+ *     launch root task is already created and started. This method just attaches the taskInfo to
+ *     the TaskView.
+ *     </li>
+ * </ul>
  */
 public class TaskViewTransitions implements Transitions.TransitionHandler {
     static final String TAG = "TaskViewTransitions";
@@ -65,6 +90,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
     private final boolean[] mRegistered = new boolean[]{false};
+    private final ShellTaskOrganizer mTaskOrganizer;
+    private final Executor mShellExecutor;
+    private final SyncTransactionQueue mSyncQueue;
+
+    /** A temp transaction used for quick things. */
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     /**
      * TaskView makes heavy use of startTransition. Only one shell-initiated transition can be
@@ -96,8 +127,12 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    public TaskViewTransitions(Transitions transitions, TaskViewRepository repository) {
+    public TaskViewTransitions(Transitions transitions, TaskViewRepository repository,
+            ShellTaskOrganizer taskOrganizer, SyncTransactionQueue syncQueue) {
         mTransitions = transitions;
+        mTaskOrganizer = taskOrganizer;
+        mShellExecutor = taskOrganizer.getExecutor();
+        mSyncQueue = syncQueue;
         if (useRepo()) {
             mTaskViews = null;
         } else if (Flags.enableTaskViewControllerCleanup()) {
@@ -111,7 +146,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // TODO(210041388): register here once we have an explicit ordering mechanism.
     }
 
-    static boolean useRepo() {
+    /** @return whether the shared taskview repository is being used. */
+    public static boolean useRepo() {
         return Flags.taskViewRepository() || Flags.enableBubbleAnything();
     }
 
@@ -142,24 +178,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
 
-    boolean isEnabled() {
+    public boolean isUsingShellTransitions() {
         return mTransitions.isRegistered();
-    }
-
-    /**
-     * Looks through the pending transitions for a closing transaction that matches the provided
-     * `taskView`.
-     *
-     * @param taskView the pending transition should be for this.
-     */
-    private PendingTransition findPendingCloseTransition(TaskViewTaskController taskView) {
-        for (int i = mPending.size() - 1; i >= 0; --i) {
-            if (mPending.get(i).mTaskView != taskView) continue;
-            if (TransitionUtil.isClosingType(mPending.get(i).mType)) {
-                return mPending.get(i);
-            }
-        }
-        return null;
     }
 
     /**
@@ -264,6 +284,112 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return findTaskView(taskInfo) != null;
     }
 
+    private void prepareActivityOptions(ActivityOptions options, Rect launchBounds,
+            @NonNull TaskViewTaskController destination) {
+        final Binder launchCookie = new Binder();
+        mShellExecutor.execute(() -> {
+            mTaskOrganizer.setPendingLaunchCookieListener(launchCookie, destination);
+        });
+        options.setLaunchBounds(launchBounds);
+        options.setLaunchCookie(launchCookie);
+        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        options.setRemoveWithTaskOrganizer(true);
+    }
+
+    /**
+     * Launch an activity represented by {@link ShortcutInfo}.
+     * <p>The owner of this container must be allowed to access the shortcut information,
+     * as defined in {@link LauncherApps#hasShortcutHostPermission()} to use this method.
+     *
+     * @param destination  the TaskView to start the shortcut into.
+     * @param shortcut     the shortcut used to launch the activity.
+     * @param options      options for the activity.
+     * @param launchBounds the bounds (window size and position) that the activity should be
+     *                     launched in, in pixels and in screen coordinates.
+     */
+    public void startShortcutActivity(@NonNull TaskViewTaskController destination,
+            @NonNull ShortcutInfo shortcut, @NonNull ActivityOptions options,
+            @Nullable Rect launchBounds) {
+        prepareActivityOptions(options, launchBounds, destination);
+        final Context context = destination.getContext();
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.startShortcut(context.getPackageName(), shortcut, options.toBundle());
+                startTaskView(wct, destination, options.getLaunchCookie());
+            });
+            return;
+        }
+        try {
+            LauncherApps service = context.getSystemService(LauncherApps.class);
+            service.startShortcut(shortcut, null /* sourceBounds */, options.toBundle());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Launch a new activity into a TaskView
+     *
+     * @param destination   The TaskView to start the activity into.
+     * @param pendingIntent Intent used to launch an activity.
+     * @param fillInIntent  Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
+     * @param options       options for the activity.
+     * @param launchBounds  the bounds (window size and position) that the activity should be
+     *                      launched in, in pixels and in screen coordinates.
+     */
+    public void startActivity(@NonNull TaskViewTaskController destination,
+            @NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
+            @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
+        prepareActivityOptions(options, launchBounds, destination);
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.sendPendingIntent(pendingIntent, fillInIntent, options.toBundle());
+                startTaskView(wct, destination, options.getLaunchCookie());
+            });
+            return;
+        }
+        try {
+            pendingIntent.send(destination.getContext(), 0 /* code */, fillInIntent,
+                    null /* onFinished */, null /* handler */, null /* requiredPermission */,
+                    options.toBundle());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Attaches the given root task {@code taskInfo} in the task view.
+     *
+     * <p> Since {@link ShellTaskOrganizer#createRootTask(int, int,
+     * ShellTaskOrganizer.TaskListener)} does not use the shell transitions flow, this method is
+     * used as an entry point for an already-created root-task in the task view.
+     *
+     * @param destination The TaskView to put the root-task into.
+     * @param taskInfo    the task info of the root task.
+     * @param leash       the {@link android.content.pm.ShortcutInfo.Surface} of the root task
+     * @param wct         The Window container work that should happen as part of this set up.
+     */
+    public void startRootTask(@NonNull TaskViewTaskController destination,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            @Nullable WindowContainerTransaction wct) {
+        if (wct == null) {
+            wct = new WindowContainerTransaction();
+        }
+        // This method skips the regular flow where an activity task is launched as part of a new
+        // transition in taskview and then transition is intercepted using the launchcookie.
+        // The task here is already created and running, it just needs to be reparented, resized
+        // and tracked correctly inside taskview. Which is done by calling
+        // prepareOpenAnimationInternal() and then manually enqueuing the resulting window container
+        // transaction.
+        destination.prepareOpenAnimation(true /* newTask */, mTransaction /* startTransaction */,
+                null /* finishTransaction */, taskInfo, leash, wct);
+        mTransaction.apply();
+        mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
+    }
+
+    @VisibleForTesting
     void startTaskView(@NonNull WindowContainerTransaction wct,
             @NonNull TaskViewTaskController taskView, @NonNull IBinder launchCookie) {
         updateVisibilityState(taskView, true /* visible */);
@@ -359,7 +485,31 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         state.mVisible = visible;
     }
 
-    void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+    /**
+     * Sets the task bounds to {@code boundsOnScreen}.
+     * Usually called when the taskview's position or size has changed.
+     *
+     * @param boundsOnScreen the on screen bounds of the surface view.
+     */
+    public void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
+        if (taskView.getTaskToken() == null) {
+            return;
+        }
+
+        if (isUsingShellTransitions()) {
+            mShellExecutor.execute(() -> {
+                // Sync Transactions can't operate simultaneously with shell transition collection.
+                setTaskBoundsInTransition(taskView, boundsOnScreen);
+            });
+            return;
+        }
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(taskView.getTaskToken(), boundsOnScreen);
+        mSyncQueue.queue(wct);
+    }
+
+    private void setTaskBoundsInTransition(TaskViewTaskController taskView, Rect boundsOnScreen) {
         final TaskViewRepository.TaskViewState state = useRepo()
                 ? mTaskViewRepo.byTaskView(taskView)
                 : mTaskViews.get(taskView);

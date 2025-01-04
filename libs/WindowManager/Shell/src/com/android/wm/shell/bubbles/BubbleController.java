@@ -117,6 +117,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewRepository;
 import com.android.wm.shell.taskview.TaskViewTaskController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -309,6 +310,7 @@ public class BubbleController implements ConfigurationChangeListener,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
+            TaskViewRepository taskViewRepository,
             TaskViewTransitions taskViewTransitions,
             Transitions transitions,
             SyncTransactionQueue syncQueue,
@@ -347,7 +349,12 @@ public class BubbleController implements ConfigurationChangeListener,
                 context.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
-        mTaskViewTransitions = taskViewTransitions;
+        if (TaskViewTransitions.useRepo()) {
+            mTaskViewTransitions = new TaskViewTransitions(transitions, taskViewRepository,
+                    organizer, syncQueue);
+        } else {
+            mTaskViewTransitions = taskViewTransitions;
+        }
         mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
@@ -359,8 +366,9 @@ public class BubbleController implements ConfigurationChangeListener,
             @Override
             public BubbleTaskView create() {
                 TaskViewTaskController taskViewTaskController = new TaskViewTaskController(
-                        context, organizer, taskViewTransitions, syncQueue);
-                TaskView taskView = new TaskView(context, taskViewTaskController);
+                        context, organizer, mTaskViewTransitions, syncQueue);
+                TaskView taskView = new TaskView(context, mTaskViewTransitions,
+                        taskViewTaskController);
                 return new BubbleTaskView(taskView, mainExecutor);
             }
         };
@@ -841,14 +849,6 @@ public class BubbleController implements ConfigurationChangeListener,
     /** The task listener for events in bubble tasks. */
     public ShellTaskOrganizer getTaskOrganizer() {
         return mTaskOrganizer;
-    }
-
-    SyncTransactionQueue getSyncTransactionQueue() {
-        return mSyncQueue;
-    }
-
-    TaskViewTransitions getTaskViewTransitions() {
-        return mTaskViewTransitions;
     }
 
     /** Contains information to help position things on the screen. */

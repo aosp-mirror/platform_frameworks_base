@@ -165,10 +165,11 @@ public class TaskViewTest extends ShellTestCase {
             doReturn(true).when(mTransitions).isRegistered();
         }
         mTaskViewRepository = new TaskViewRepository();
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository,
+                mOrganizer, mSyncQueue));
         mTaskViewTaskController = new TaskViewTaskController(mContext, mOrganizer,
                 mTaskViewTransitions, mSyncQueue);
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView = new TaskView(mContext, mTaskViewTransitions, mTaskViewTaskController);
         mTaskView.setHandler(mViewHandler);
         mTaskView.setListener(mExecutor, mViewListener);
     }
@@ -182,7 +183,7 @@ public class TaskViewTest extends ShellTestCase {
 
     @Test
     public void testSetPendingListener_throwsException() {
-        TaskView taskView = new TaskView(mContext,
+        TaskView taskView = new TaskView(mContext, mTaskViewTransitions,
                 new TaskViewTaskController(mContext, mOrganizer, mTaskViewTransitions, mSyncQueue));
         taskView.setListener(mExecutor, mViewListener);
         try {
@@ -524,7 +525,7 @@ public class TaskViewTest extends ShellTestCase {
 
         // Make the task available
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
-        mTaskViewTaskController.startRootTask(mTaskInfo, mLeash, wct);
+        mTaskViewTransitions.startRootTask(mTaskViewTaskController, mTaskInfo, mLeash, wct);
 
         // Bounds got set
         verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
@@ -706,7 +707,7 @@ public class TaskViewTest extends ShellTestCase {
     public void testReleaseInOnTaskRemoval_noNPE() {
         mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
                 mTaskViewTransitions, mSyncQueue));
-        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView = new TaskView(mContext, mTaskViewTransitions, mTaskViewTaskController);
         mTaskView.setListener(mExecutor, new TaskView.Listener() {
             @Override
             public void onTaskRemovalStarted(int taskId) {

@@ -358,6 +358,8 @@ public class BubblesTest extends SysuiTestCase {
     private Display mDefaultDisplay;
     @Mock
     private Lazy<ViewCapture> mLazyViewCapture;
+    @Mock
+    private SyncTransactionQueue mSyncQueue;
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private ShadeInteractor mShadeInteractor;
@@ -400,8 +402,6 @@ public class BubblesTest extends SysuiTestCase {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
         }
-        mTaskViewRepository = new TaskViewRepository();
-        mTaskViewTransitions = new TaskViewTransitions(mTransitions, mTaskViewRepository);
 
         mTestableLooper = TestableLooper.get(this);
 
@@ -518,6 +518,9 @@ public class BubblesTest extends SysuiTestCase {
                 Optional.empty(),
                 Optional.empty(),
                 syncExecutor);
+        mTaskViewRepository = new TaskViewRepository();
+        mTaskViewTransitions = new TaskViewTransitions(mTransitions, mTaskViewRepository,
+                mShellTaskOrganizer, mSyncQueue);
         mBubbleProperties = new FakeBubbleProperties();
         mBubbleController = new TestableBubbleController(
                 mContext,
@@ -542,6 +545,7 @@ public class BubblesTest extends SysuiTestCase {
                 mock(DragAndDropController.class),
                 syncExecutor,
                 mock(Handler.class),
+                mTaskViewRepository,
                 mTaskViewTransitions,
                 mTransitions,
                 mock(SyncTransactionQueue.class),
