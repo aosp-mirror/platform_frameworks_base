@@ -2105,6 +2105,8 @@
 
     <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_background_vertical_margin">-10dp</dimen>
+    <!-- top margin covers half the ringer button + components spacing -->
+    <dimen name="volume_dialog_background_top_margin">-28dp</dimen>
 
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
