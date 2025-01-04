@@ -252,6 +252,13 @@ public final class SatelliteSessionStats implements Parcelable {
         }
     }
 
+    public void resetCountOfUserMessagesInQueueToBeSent() {
+        for (Map.Entry<Integer, SatelliteSessionStats> entry : datagramStats.entrySet()) {
+            SatelliteSessionStats statsPerDatagramType = entry.getValue();
+            statsPerDatagramType.mCountOfUserMessagesInQueueToBeSent = 0;
+        }
+    }
+
     public int getCountOfSuccessfulOutgoingDatagram(
             @SatelliteManager.DatagramType int datagramType) {
         SatelliteSessionStats data = datagramStats.getOrDefault(datagramType,
