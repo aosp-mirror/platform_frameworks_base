@@ -18,7 +18,10 @@ package com.android.systemui.mediaprojection.permission
 
 import android.app.AlertDialog
 import android.view.View
+import android.view.ViewStub
+import android.widget.AdapterView
 import android.widget.TextView
+import androidx.annotation.LayoutRes
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.res.R
 
@@ -29,7 +32,7 @@ open class BaseMediaProjectionPermissionViewBinder(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @ScreenShareMode val defaultSelectedMode: Int = screenShareOptions.first().mode,
     private val dialog: AlertDialog,
-) {
+) : AdapterView.OnItemSelectedListener {
     private lateinit var warning: TextView
     private lateinit var startButton: TextView
     var selectedScreenShareOption: ScreenShareOption =
@@ -48,6 +51,7 @@ open class BaseMediaProjectionPermissionViewBinder(
         warning = dialog.requireViewById(R.id.text_warning)
         startButton = dialog.requireViewById(android.R.id.button1)
         initScreenShareOptions()
+        createOptionsView(getOptionsViewLayoutId())
     }
 
     private fun initScreenShareOptions() {
@@ -61,10 +65,12 @@ open class BaseMediaProjectionPermissionViewBinder(
         startButton.text = startButtonText
     }
 
-    open fun onItemSelected(pos: Int) {
+    override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
         selectedScreenShareOption = screenShareOptions[pos]
         setOptionSpecificFields()
     }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     private val warningText: String
         get() = dialog.context.getString(selectedScreenShareOption.warningText, appName)
@@ -77,5 +83,16 @@ open class BaseMediaProjectionPermissionViewBinder(
             shouldLogCancel = false
             listener?.onClick(view)
         }
+    }
+
+    // Create additional options that is shown under the share mode spinner
+    // Eg. the audio and tap toggles in SysUI Recorder
+    @LayoutRes protected open fun getOptionsViewLayoutId(): Int? = null
+
+    private fun createOptionsView(@LayoutRes layoutId: Int?) {
+        if (layoutId == null) return
+        val stub = dialog.requireViewById<View>(R.id.options_stub) as ViewStub
+        stub.layoutResource = layoutId
+        stub.inflate()
     }
 }

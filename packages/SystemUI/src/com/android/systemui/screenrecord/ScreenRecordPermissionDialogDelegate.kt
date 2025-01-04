@@ -15,34 +15,15 @@
  */
 package com.android.systemui.screenrecord
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.hardware.display.DisplayManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.ResultReceiver
 import android.os.UserHandle
-import android.view.Display
-import android.view.MotionEvent.ACTION_MOVE
-import android.view.View
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Switch
-import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
-import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.BaseMediaProjectionPermissionDialogDelegate
 import com.android.systemui.mediaprojection.permission.BaseMediaProjectionPermissionViewBinder
-import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
 import com.android.systemui.mediaprojection.permission.ScreenShareMode
 import com.android.systemui.plugins.ActivityStarter
@@ -115,17 +96,18 @@ class ScreenRecordPermissionDialogDelegate(
         ): ScreenRecordPermissionDialogDelegate
     }
 
-    private lateinit var tapsSwitch: Switch
-    private lateinit var audioSwitch: Switch
-    private lateinit var options: Spinner
-
     override fun createViewBinder(): BaseMediaProjectionPermissionViewBinder {
         return ScreenRecordPermissionViewBinder(
+            hostUserHandle,
             hostUid,
             mediaProjectionMetricsLogger,
             defaultSelectedMode,
             displayManager,
             dialog,
+            controller,
+            activityStarter,
+            userContextProvider,
+            onStartRecordingClicked,
         )
     }
 
@@ -137,143 +119,6 @@ class ScreenRecordPermissionDialogDelegate(
         super<BaseMediaProjectionPermissionDialogDelegate>.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
         dialog.setTitle(R.string.screenrecord_title)
-        setStartButtonOnClickListener { v: View? ->
-            onStartRecordingClicked?.run()
-            val selectedScreenShareOption = getSelectedScreenShareOption()
-            if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
-                requestScreenCapture(/* captureTarget= */ null, selectedScreenShareOption.displayId)
-            }
-            if (selectedScreenShareOption.mode == SINGLE_APP) {
-                val intent = Intent(dialog.context, MediaProjectionAppSelectorActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                // We can't start activity for result here so we use result receiver to get
-                // the selected target to capture
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
-                    CaptureTargetResultReceiver(),
-                )
-
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
-                    hostUserHandle,
-                )
-                intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
-                    MediaProjectionAppSelectorActivity.ScreenShareType.ScreenRecord.name,
-                )
-                activityStarter.startActivity(intent, /* dismissShade= */ true)
-            }
-            dialog.dismiss()
-        }
         setCancelButtonOnClickListener { dialog.dismiss() }
-        initRecordOptionsView()
-    }
-
-    @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun initRecordOptionsView() {
-        // TODO(b/378514312): Move this function to ScreenRecordPermissionViewBinder
-        audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
-        tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
-
-        // Add these listeners so that the switch only responds to movement
-        // within its target region, to meet accessibility requirements
-        audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
-        tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
-
-        options = dialog.requireViewById(R.id.screen_recording_options)
-        val a: ArrayAdapter<*> =
-            ScreenRecordingAdapter(
-                dialog.context,
-                android.R.layout.simple_spinner_dropdown_item,
-                MODES,
-            )
-        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        options.adapter = a
-        options.setOnItemClickListenerInt { _: AdapterView<*>?, _: View?, _: Int, _: Long ->
-            audioSwitch.isChecked = true
-        }
-
-        // disable redundant Touch & Hold accessibility action for Switch Access
-        options.accessibilityDelegate =
-            object : View.AccessibilityDelegate() {
-                override fun onInitializeAccessibilityNodeInfo(
-                    host: View,
-                    info: AccessibilityNodeInfo,
-                ) {
-                    info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)
-                    super.onInitializeAccessibilityNodeInfo(host, info)
-                }
-            }
-        options.isLongClickable = false
-    }
-
-    /**
-     * Starts screen capture after some countdown
-     *
-     * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     *   screen
-     */
-    private fun requestScreenCapture(
-        captureTarget: MediaProjectionCaptureTarget?,
-        displayId: Int = Display.DEFAULT_DISPLAY,
-    ) {
-        val userContext = userContextProvider.userContext
-        val showTaps = getSelectedScreenShareOption().mode != SINGLE_APP && tapsSwitch.isChecked
-        val audioMode =
-            if (audioSwitch.isChecked) options.selectedItem as ScreenRecordingAudioSource
-            else ScreenRecordingAudioSource.NONE
-        val startIntent =
-            PendingIntent.getForegroundService(
-                userContext,
-                RecordingService.REQUEST_CODE,
-                RecordingService.getStartIntent(
-                    userContext,
-                    Activity.RESULT_OK,
-                    audioMode.ordinal,
-                    showTaps,
-                    displayId,
-                    captureTarget,
-                ),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        val stopIntent =
-            PendingIntent.getService(
-                userContext,
-                RecordingService.REQUEST_CODE,
-                RecordingService.getStopIntent(userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        controller.startCountdown(DELAY_MS, INTERVAL_MS, startIntent, stopIntent)
-    }
-
-    private inner class CaptureTargetResultReceiver :
-        ResultReceiver(Handler(Looper.getMainLooper())) {
-        override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
-            if (resultCode == Activity.RESULT_OK) {
-                val captureTarget =
-                    resultData.getParcelable(
-                        MediaProjectionAppSelectorActivity.KEY_CAPTURE_TARGET,
-                        MediaProjectionCaptureTarget::class.java,
-                    )
-
-                // Start recording of the selected target
-                requestScreenCapture(captureTarget)
-            }
-        }
-    }
-
-    companion object {
-        private val MODES =
-            listOf(
-                ScreenRecordingAudioSource.INTERNAL,
-                ScreenRecordingAudioSource.MIC,
-                ScreenRecordingAudioSource.MIC_AND_INTERNAL,
-            )
-        private const val DELAY_MS: Long = 3000
-        private const val INTERVAL_MS: Long = 1000
     }
 }
