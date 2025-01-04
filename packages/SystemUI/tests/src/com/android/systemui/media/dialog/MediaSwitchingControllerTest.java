@@ -39,7 +39,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioDeviceAttributes;
@@ -1283,13 +1282,6 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
 
         assertThat(mMediaSwitchingController.getDeviceIconCompat(mMediaDevice1))
                 .isInstanceOf(IconCompat.class);
-    }
-
-    @Test
-    public void setColorFilter_setColorFilterToDrawable() {
-        mMediaSwitchingController.setColorFilter(mDrawable, true);
-
-        verify(mDrawable).setColorFilter(any(PorterDuffColorFilter.class));
     }
 
     @Test
