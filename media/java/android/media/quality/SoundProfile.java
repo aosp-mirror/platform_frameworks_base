@@ -50,6 +50,7 @@ public final class SoundProfile implements Parcelable {
     private final PersistableBundle mParams;
     private final SoundProfileHandle mHandle;
 
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = false, prefix = "TYPE_", value = {
@@ -180,7 +181,7 @@ public final class SoundProfile implements Parcelable {
      * Gets profile ID.
      *
      * <p>A profile ID is a globally unique ID generated and assigned by the system. For profile
-     * objects retrieved from system (e.g {@link MediaQualityManager#getAvailableSoundProfiles()})
+     * objects retrieved from system (e.g {@link MediaQualityManager#getAvailableSoundProfiles})
      * this profile ID is non-null; For profiles built locally with {@link Builder}, it's
      * {@code null}.
      *
@@ -248,6 +249,8 @@ public final class SoundProfile implements Parcelable {
      *
      * <p>The keys of commonly used parameters can be found in
      * {@link MediaQualityContract.SoundQuality}.
+     *
+     * @return The profile parameters. Empty bundle if parameters are not included in a query.
      */
     @NonNull
     public PersistableBundle getParameters() {

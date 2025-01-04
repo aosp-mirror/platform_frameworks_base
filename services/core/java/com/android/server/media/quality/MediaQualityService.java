@@ -26,12 +26,14 @@ import android.media.quality.IMediaQualityManager;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.MediaQualityContract.BaseParameters;
+import android.media.quality.MediaQualityManager;
 import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
 import android.media.quality.SoundProfileHandle;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.util.Log;
@@ -130,8 +132,10 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public PictureProfile getPictureProfile(int type, String name, boolean includeParams,
+        public PictureProfile getPictureProfile(int type, String name, Bundle options,
                 UserHandle user) {
+            boolean includeParams =
+                    options.getBoolean(MediaQualityManager.OPTION_INCLUDE_PARAMETERS, false);
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
                     + BaseParameters.PARAMETER_NAME + " = ?";
             String[] selectionArguments = {Integer.toString(type), name};
@@ -158,7 +162,9 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public List<PictureProfile> getPictureProfilesByPackage(
-                String packageName, boolean includeParams, UserHandle user) {
+                String packageName, Bundle options, UserHandle user) {
+            boolean includeParams =
+                    options.getBoolean(MediaQualityManager.OPTION_INCLUDE_PARAMETERS, false);
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getPictureProfilesBasedOnConditions(getMediaProfileColumns(includeParams),
@@ -166,12 +172,11 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfile> getAvailablePictureProfiles(
-                boolean includeParams, UserHandle user) {
+        public List<PictureProfile> getAvailablePictureProfiles(Bundle options, UserHandle user) {
             String[] packageNames = mContext.getPackageManager().getPackagesForUid(
                     Binder.getCallingUid());
             if (packageNames != null && packageNames.length == 1 && !packageNames[0].isEmpty()) {
-                return getPictureProfilesByPackage(packageNames[0], includeParams, user);
+                return getPictureProfilesByPackage(packageNames[0], options, user);
             }
             return new ArrayList<>();
         }
@@ -251,8 +256,10 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public SoundProfile getSoundProfile(int type, String id, boolean includeParams,
+        public SoundProfile getSoundProfile(int type, String id, Bundle options,
                 UserHandle user) {
+            boolean includeParams =
+                    options.getBoolean(MediaQualityManager.OPTION_INCLUDE_PARAMETERS, false);
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
                     + BaseParameters.PARAMETER_ID + " = ?";
             String[] selectionArguments = {String.valueOf(type), id};
@@ -279,7 +286,9 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public List<SoundProfile> getSoundProfilesByPackage(
-                String packageName, boolean includeParams, UserHandle user) {
+                String packageName, Bundle options, UserHandle user) {
+            boolean includeParams =
+                    options.getBoolean(MediaQualityManager.OPTION_INCLUDE_PARAMETERS, false);
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getSoundProfilesBasedOnConditions(getMediaProfileColumns(includeParams),
@@ -288,11 +297,11 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public List<SoundProfile> getAvailableSoundProfiles(
-                boolean includeParams, UserHandle user) {
+                Bundle options, UserHandle user) {
             String[] packageNames = mContext.getPackageManager().getPackagesForUid(
                     Binder.getCallingUid());
             if (packageNames != null && packageNames.length == 1 && !packageNames[0].isEmpty()) {
-                return getSoundProfilesByPackage(packageNames[0], includeParams, user);
+                return getSoundProfilesByPackage(packageNames[0], options, user);
             }
             return new ArrayList<>();
         }
