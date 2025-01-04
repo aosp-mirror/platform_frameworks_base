@@ -16,6 +16,10 @@
 
 package com.android.server.texttospeech;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_FOREGROUND_SERVICE;
+import static android.content.Context.BIND_SCHEDULE_LIKE_TOP_APP;
+
 import static com.android.internal.infra.AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS;
 
 import android.annotation.NonNull;
@@ -95,7 +99,7 @@ final class TextToSpeechManagerPerUserService extends
                 ITextToSpeechSessionCallback callback) {
             super(context,
                     new Intent(TextToSpeech.Engine.INTENT_ACTION_TTS_SERVICE).setPackage(engine),
-                    Context.BIND_AUTO_CREATE | Context.BIND_SCHEDULE_LIKE_TOP_APP,
+                    BIND_AUTO_CREATE | BIND_SCHEDULE_LIKE_TOP_APP | BIND_FOREGROUND_SERVICE,
                     userId,
                     ITextToSpeechService.Stub::asInterface);
             mEngine = engine;
