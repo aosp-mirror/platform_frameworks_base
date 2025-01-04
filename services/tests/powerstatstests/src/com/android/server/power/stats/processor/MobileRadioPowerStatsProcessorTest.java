@@ -56,6 +56,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MobileRadioPowerStatsCollector;
+import com.android.server.power.stats.NetworkStatsTestUtils;
 import com.android.server.power.stats.PowerStatsCollector;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
@@ -151,6 +152,11 @@ public class MobileRadioPowerStatsProcessorTest {
                 @Override
                 public LongSupplier getPhoneSignalScanDurationSupplier() {
                     return mScanDurationSupplier;
+                }
+
+                @Override
+                public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+                    return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
                 }
             };
 

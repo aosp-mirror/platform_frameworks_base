@@ -283,6 +283,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     protected void updateBatteryPropertiesLocked() {
     }
 
+    @Override
+    protected NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+        return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
+    }
+
     public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 
