@@ -18,6 +18,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_ACTIVE;
+import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP;
+import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_VIA_SYSUI_CALLBACKS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
@@ -364,6 +366,15 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.onCameraLaunchGestureDetected(1);
         waitForIdleSync();
         verify(mCallbacks).onCameraLaunchGestureDetected(eq(1));
+    }
+
+    @Test
+    @EnableFlags({FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP,
+            FLAG_LAUNCH_WALLET_VIA_SYSUI_CALLBACKS})
+    public void testWalletLaunchGesture() {
+        mCommandQueue.onWalletLaunchGestureDetected();
+        waitForIdleSync();
+        verify(mCallbacks).onWalletLaunchGestureDetected();
     }
 
     @Test

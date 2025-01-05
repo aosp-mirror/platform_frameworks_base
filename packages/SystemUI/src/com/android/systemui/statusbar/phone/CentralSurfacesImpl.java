@@ -27,6 +27,9 @@ import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
 
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
+import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
+import static android.service.quickaccesswallet.Flags.launchWalletViaSysuiCallbacks;
+
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
 import static com.android.systemui.Flags.lightRevealMigration;
@@ -35,7 +38,6 @@ import static com.android.systemui.Flags.statusBarSignalPolicyRefactor;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.flags.Flags.SHORTCUT_LIST_SEARCH_LAYOUT;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
@@ -230,6 +232,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.volume.VolumeComponent;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -326,6 +329,20 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void setLaunchCameraOnFinishedWaking(boolean launch) {
         mLaunchCameraWhenFinishedWaking = launch;
+    }
+
+    @Override
+    public void setLaunchWalletOnFinishedGoingToSleep(boolean launch) {
+        if (launchWalletOptionOnPowerDoubleTap() && launchWalletViaSysuiCallbacks()) {
+            mLaunchWalletOnFinishedGoingToSleep = launch;
+        }
+    }
+
+    @Override
+    public void setLaunchWalletOnFinishedWaking(boolean launch) {
+        if (launchWalletOptionOnPowerDoubleTap() && launchWalletViaSysuiCallbacks()) {
+            mLaunchWalletWhenFinishedWaking = launch;
+        }
     }
 
     @Override
@@ -512,6 +529,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private Runnable mLaunchTransitionCancelRunnable;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
+    private boolean mLaunchWalletWhenFinishedWaking;
+    private boolean mLaunchWalletOnFinishedGoingToSleep;
     private boolean mLaunchEmergencyActionWhenFinishedWaking;
     private boolean mLaunchEmergencyActionOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
@@ -577,6 +596,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
     private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
+    private final QuickAccessWalletController mWalletController;
 
     /**
      * Public constructor for CentralSurfaces.
@@ -691,7 +711,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
             GlanceableHubContainerController glanceableHubContainerController,
             EmergencyGestureIntentFactory emergencyGestureIntentFactory,
-            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            QuickAccessWalletController walletController
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -790,6 +811,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mGlanceableHubContainerController = null;
         }
         mEmergencyGestureIntentFactory = emergencyGestureIntentFactory;
+        mWalletController = walletController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -2509,6 +2531,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mCameraLauncherLazy.get().setLaunchingAffordance(false);
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
+            mLaunchWalletWhenFinishedWaking = false;
             mDeviceInteractive = false;
 
             updateNotificationPanelTouchState();
@@ -2520,6 +2543,15 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // is correct.
                 mMainExecutor.execute(() -> mCommandQueueCallbacks.onCameraLaunchGestureDetected(
                         mLastCameraLaunchSource));
+            }
+
+            if (mLaunchWalletOnFinishedGoingToSleep && launchWalletOptionOnPowerDoubleTap()
+                    && launchWalletViaSysuiCallbacks()) {
+                mLaunchWalletOnFinishedGoingToSleep = false;
+
+                // This gets executed before we will show Keyguard, so post it in order that the
+                // state is correct.
+                mMainExecutor.execute(() -> mCommandQueueCallbacks.onWalletLaunchGestureDetected());
             }
 
             if (mLaunchEmergencyActionOnFinishedGoingToSleep) {
@@ -2626,6 +2658,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mCameraLauncherLazy.get().launchCamera(mLastCameraLaunchSource,
                         mShadeSurface.isFullyCollapsed());
                 mLaunchCameraWhenFinishedWaking = false;
+            }
+            if (mLaunchWalletWhenFinishedWaking && launchWalletOptionOnPowerDoubleTap()
+                && launchWalletViaSysuiCallbacks()) {
+                mLaunchWalletWhenFinishedWaking = false;
+                mWalletController.startGestureUiIntent(mActivityStarter,
+                        /*animationController=*/ null);
             }
             if (mLaunchEmergencyActionWhenFinishedWaking) {
                 mLaunchEmergencyActionWhenFinishedWaking = false;

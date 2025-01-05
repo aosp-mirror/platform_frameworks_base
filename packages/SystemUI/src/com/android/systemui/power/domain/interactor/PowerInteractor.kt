@@ -224,6 +224,10 @@ constructor(
         }
     }
 
+    fun onWalletLaunchGestureDetected() {
+        repository.updateWakefulness(powerButtonLaunchGestureTriggered = true)
+    }
+
     companion object {
         private const val FSI_WAKE_WHY = "full_screen_intent"
 

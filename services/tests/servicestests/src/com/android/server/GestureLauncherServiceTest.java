@@ -17,7 +17,9 @@
 package com.android.server;
 
 import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP;
+import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_VIA_SYSUI_CALLBACKS;
 import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
+import static android.service.quickaccesswallet.Flags.launchWalletViaSysuiCallbacks;
 
 import static com.android.server.GestureLauncherService.LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER;
 import static com.android.server.GestureLauncherService.LAUNCH_WALLET_ON_DOUBLE_TAP_POWER;
@@ -45,6 +47,7 @@ import android.content.res.Resources;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -653,7 +656,11 @@ public class GestureLauncherServiceTest {
         eventTime += interval;
         sendPowerKeyDownToGestureLauncherServiceAndAssertValues(eventTime, true, true);
 
-        assertTrue(receiver.waitUntilShown());
+        if (launchWalletViaSysuiCallbacks()) {
+            verify(mStatusBarManagerInternal).onWalletLaunchGestureDetected();
+        } else {
+            assertTrue(receiver.waitUntilShown());
+        }
 
         // Presses 3 and 4 should not trigger any gesture
         for (int i = 0; i < 2; i++) {
@@ -683,11 +690,17 @@ public class GestureLauncherServiceTest {
         final long interval = POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
         eventTime += interval;
         sendPowerKeyDownToGestureLauncherServiceAndAssertValues(eventTime, true, true);
-        assertTrue(receiver.waitUntilShown());
+
+        if (launchWalletViaSysuiCallbacks()) {
+            verify(mStatusBarManagerInternal).onWalletLaunchGestureDetected();
+        } else {
+            assertTrue(receiver.waitUntilShown());
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    @RequiresFlagsDisabled(FLAG_LAUNCH_WALLET_VIA_SYSUI_CALLBACKS)
     public void testInterceptPowerKeyDown_walletGestureOn_quickAccessWalletServiceUnavailable() {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(false);
         WalletLaunchedReceiver receiver = registerWalletLaunchedReceiver(LAUNCH_TEST_WALLET_ACTION);
@@ -720,11 +733,16 @@ public class GestureLauncherServiceTest {
         eventTime += interval;
         sendPowerKeyDownToGestureLauncherServiceAndAssertValues(eventTime, false, false);
 
-        assertFalse(receiver.waitUntilShown());
+        if (launchWalletViaSysuiCallbacks()) {
+            verify(mStatusBarManagerInternal, never()).onWalletLaunchGestureDetected();
+        } else {
+            assertFalse(receiver.waitUntilShown());
+        }
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    @RequiresFlagsDisabled(FLAG_LAUNCH_WALLET_VIA_SYSUI_CALLBACKS)
     public void testInterceptPowerKeyDown_walletPowerGesture_nullPendingIntent() {
         WalletLaunchedReceiver gestureReceiver =
                 registerWalletLaunchedReceiver(LAUNCH_TEST_WALLET_ACTION);
@@ -767,8 +785,12 @@ public class GestureLauncherServiceTest {
         eventTime += interval;
         sendPowerKeyDownToGestureLauncherServiceAndAssertValues(eventTime, false, false);
 
-        assertFalse(gestureReceiver.waitUntilShown());
-        assertFalse(fallbackReceiver.waitUntilShown());
+        if (launchWalletViaSysuiCallbacks()) {
+            verify(mStatusBarManagerInternal, never()).onWalletLaunchGestureDetected();
+        } else {
+            assertFalse(gestureReceiver.waitUntilShown());
+            assertFalse(fallbackReceiver.waitUntilShown());
+        }
     }
 
     @Test
