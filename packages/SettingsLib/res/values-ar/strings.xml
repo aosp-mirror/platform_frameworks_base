@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"سماعة الأذن الطبية نشطة (اليسرى فقط)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"سماعة الأذن الطبية نشطة (اليمنى فقط)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"سماعتا الأذن الطبيتان نشطتان (اليسرى واليمنى)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"تعذَّر تعديل حالة الأصوات المحيطة"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"‏البلوتوث نشِط (للوسائط فقط). مستوى شحن البطارية: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"‏البلوتوث نشِط (للوسائط فقط)، مستوى الشحن في سماعة الرأس اليسرى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، مستوى الشحن في سماعة الرأس اليمنى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"‏البلوتوث متصل (ميزة \"مشاركة الصوت\" متاحة). مستوى شحن البطارية: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>

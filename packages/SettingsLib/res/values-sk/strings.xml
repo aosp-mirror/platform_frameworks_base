@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktívne (iba ľavé)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktívne (iba pravé)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktívne (ľavé aj pravé)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Okolie sa nepodarilo aktualizovať"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktívne (iba médiá). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktívne (iba médiá). Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Pripojené (podporuje zdieľanie zvuku). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>

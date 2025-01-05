@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"സജീവമാണ് (ഇടതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"സജീവമാണ് (വലതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"സജീവമാണ് (ഇടതുഭാഗത്തും വലതുഭാഗത്തും)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"സറൗണ്ടിംഗ്‌സ് അപ്ഡേറ്റ് ചെയ്യാനായില്ല"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"സജീവം (മീഡിയ മാത്രം). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"സജീവം (മീഡിയ മാത്രം). ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"കണക്റ്റ് ചെയ്തു (ഓഡിയോ പങ്കിടൽ പിന്തുണയ്ക്കുന്നു). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>

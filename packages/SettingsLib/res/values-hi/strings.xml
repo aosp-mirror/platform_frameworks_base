@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"सिर्फ़ बाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"सिर्फ़ दाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"बाईं और दाईं तरफ़ वाला चालू है"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"वॉल्यूम को मैनेज करने की सेटिंग नहीं बदली जा सकी"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"चालू है (सिर्फ़ मीडिया के लिए). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"चालू है (सिर्फ़ मीडिया के लिए). बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी."</string>

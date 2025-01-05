@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ਕਿਰਿਆਸ਼ੀਲ (ਸਿਰਫ਼ ਖੱਬਾ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ਕਿਰਿਆਸ਼ੀਲ (ਸਿਰਫ਼ ਸੱਜਾ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ਕਿਰਿਆਸ਼ੀਲ (ਖੱਬਾ ਅਤੇ ਸੱਜਾ)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"ਆਲੇ-ਦੁਆਲੇ ਨੂੰ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ਕਿਰਿਆਸ਼ੀਲ (ਸਿਰਫ਼ ਮੀਡੀਆ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ਕਿਰਿਆਸ਼ੀਲ (ਸਿਰਫ਼ ਮੀਡੀਆ)। ਖੱਬੇ ਪਾਸੇ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ਸੱਜੇ ਪਾਸੇ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ਬੈਟਰੀ।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"ਕਨੈਕਟ ਕੀਤਾ (ਆਡੀਓ ਸਾਂਝਾਕਰਨ ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ।"</string>

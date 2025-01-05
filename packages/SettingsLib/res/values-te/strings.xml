@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"యాక్టివ్‌గా ఉంది (కుడి వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు, కుడి వైపు)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"పరిసరాలను అప్‌డేట్ చేయడం సాధ్యం కాలేదు"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"యాక్టివ్ (మీడియా మాత్రమే). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"యాక్టివ్ (మీడియా మాత్రమే). ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> బ్యాటరీ, కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>

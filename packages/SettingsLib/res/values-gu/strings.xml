@@ -110,8 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ચાલુ છે (માત્ર ડાબી બાજુ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ચાલુ છે (માત્ર જમણી બાજુ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ચાલુ છે (ડાબી અને જમણી બાજુ)"</string>
-    <!-- no translation found for bluetooth_hearing_device_ambient_error (6035857289108813878) -->
-    <skip />
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"આસપાસના અવાજો અપડેટ કરી શક્યા નથી"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"સક્રિય (માત્ર મીડિયા માટે). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"સક્રિય (માત્ર મીડિયા માટે). ડાબી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, જમણી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> બૅટરી."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"કનેક્ટેડ (ઑડિયો શેરિંગને સપોર્ટ કરે છે). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી."</string>
