@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اعلان درحال انجام برای جلسه ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"صفحه‌نمایش ضبط شود؟"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ضبط یک برنامه"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ضبط کردن این صفحه"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"‏ضبط کردن %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"وقتی کل صفحه‌نمایش را ضبط می‌کنید، هر چیزی که در صفحه‌نمایش نشان داده شود ضبط خواهد شد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"وقتی برنامه‌ای را ضبط می‌کنید، هر چیزی که در آن برنامه نشان داده شود یا پخش شود ضبط خواهد شد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ضبط صفحه‌نمایش"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"پیش‌تنظیم به‌روزرسانی نشد"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"پیش‌تنظیم"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"انتخاب‌شده"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"پیرامون"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"چپ"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"راست"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"ازهم بازکردن برای کنترل‌های جداگانه چپ و راست"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"جمع کردن برای کنترل یکپارچه"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"بی‌صدا کردن پیرامون"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"صدادار کردن پیرامون"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ابزارها"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"زیرنویس زنده ناشنوایان"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"یادداشت"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"نمایش نمادهای اعلان کم‌اهمیت"</string>
     <string name="other" msgid="429768510980739978">"موارد دیگر"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"برداشتن کاشی"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"افزودن کاشی به آخرین جایگاه"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"انتقال کاشی"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"افزودن کاشی به جایگاه دلخواه"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"انتقال به <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"افزودن به موقعیت <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"موقعیت نامعتبر است."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"انتخاب کاربر"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"عدم اتصال به اینترنت"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"ویرایش ترتیب «تنظیمات فوری»."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"منوی روشن/خاموش"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"صفحه قفل"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"وارد شدن به دستگاه"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"از اثر انگشت برای باز کردن قفل استفاده کنید"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"اصالت‌سنجی لازم است. برای اصالت‌سنجی، حسگر اثر انگشت را لمس کنید."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"تماس تلفنی درحال انجام"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"داده تلفن همراه"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصل است"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"موقتاً متصل است"</string>

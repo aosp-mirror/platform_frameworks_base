@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Kas salvestada ekraanikuvast video?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Ühe rakenduse salvestamine"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Ekraanikuva jäädvustamine"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Kuva %s jäädvustamine"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kui salvestate kogu ekraani, salvestatakse kõik ekraanil kuvatud andmed. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kui salvestate rakendust, salvestatakse kõik, mida selles rakenduses näidatakse või esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Salvesta ekraanikuva"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Eelseadistust ei saanud värskendada"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Eelseadistus"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Valitud"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Ümbritsevad helid"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Vasakule"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Paremale"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Vasaku ja parema poole eraldi juhtimine"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Mõlema poole ühtne juhtimine"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Ümbritsevate helide vaigistamine"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Ümbritsevate helide vaigistuse tühistamine"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tööriistad"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Reaalajas subtiitrid"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Märkus"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Kuva madala prioriteediga märguande ikoonid"</string>
     <string name="other" msgid="429768510980739978">"Muu"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"paani eemaldamiseks"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"lisage paan viimasesse asukohta"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Teisalda paan"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Lisage paan soovitud asukohta"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Teisaldamine asendisse <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Lisamine asendisse <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Sobimatu asukoht."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"valige kasutaja"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Interneti-ühendus puudub"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Ava teenuse <xliff:g id="ID_1">%s</xliff:g> seaded."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Muutke kiirseadete järjekorda"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Toitemenüü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Leht <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukustuskuva"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"seadmesse sisenemiseks"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Kasutage avamiseks sõrmejälge"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Vajalik on autentimine. Puudutage autentimiseks sõrmejäljeandurit."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Käimasolev telefonikõne"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiilne andmeside"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ühendatud"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Ajutiselt ühendatud"</string>
@@ -1459,7 +1448,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ahendamisikoon"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Toiming või metaklahv"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Pluss-ikoon"</string>
-    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Kohandamine"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Kohanda"</string>
     <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Lähtesta"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Valmis"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laiendamisikoon"</string>
@@ -1468,12 +1457,12 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"kaldkriips"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Lohistamispide"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Klaviatuuri seaded"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Määrake otsetee"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Määra otsetee"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Eemalda"</string>
-    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Jah, lähtesta"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Lähtesta"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Tühista"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Vajutage klahvi"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Klahvikombinatsioon on juba kasutusel. Proovige mõnda muud klahvi."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinatsioon on juba kasutusel. Proovige mõnda muud klahvi."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Otseteed ei saa seadistada."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigeerige klaviatuuri abil"</string>

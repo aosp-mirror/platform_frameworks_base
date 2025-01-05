@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ഒരു സ്ക്രീൻ റെക്കോർഡിംഗ് സെഷനായി നിലവിലുള്ള അറിയിപ്പ്"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"നിങ്ങളുടെ സ്ക്രീൻ റെക്കോർഡ് ചെയ്യണോ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ഒരു ആപ്പ് റെക്കോർഡ് ചെയ്യുക"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ഈ സ്ക്രീൻ റെക്കോർഡ് ചെയ്യുക"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"നിങ്ങളുടെ സ്ക്രീൻ പൂർണ്ണമായി റെക്കോർഡ് ചെയ്യുമ്പോൾ, സ്ക്രീനിൽ ദൃശ്യമാകുന്ന എല്ലാം റെക്കോർഡ് ചെയ്യപ്പെടും. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"നിങ്ങളുടെ ആപ്പ് റെക്കോർഡ് ചെയ്യുമ്പോൾ, ആ ആപ്പിൽ കാണിക്കുന്നതോ പ്ലേ ചെയ്യുന്നതോ ആയ എല്ലാ കാര്യങ്ങളും റെക്കോർഡ് ചെയ്യപ്പെടും. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"സ്ക്രീൻ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"പ്രീസെറ്റ് അപ്ഡേറ്റ് ചെയ്യാനായില്ല"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"പ്രീസെറ്റ്"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"തിരഞ്ഞെടുത്തു"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"സറൗണ്ടിംഗ്‌സ്"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"ഇടത്"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"വലത്"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"വേർതിരിച്ച ഇടത്, വലത് നിയന്ത്രണങ്ങളിലേക്ക് വികസിപ്പിക്കുക"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"ഏകീകൃത നിയന്ത്രണത്തിലേക്ക് ചുരുക്കുക"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"സറൗണ്ടിംഗ്‌സ് മ്യൂട്ട് ചെയ്യുക"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"സറൗണ്ടിംഗ്‌സ് അൺമ്യൂട്ട് ചെയ്യുക"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ടൂളുകൾ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"തത്സമയ ക്യാപ്ഷൻ"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"കുറിപ്പ്"</string>
@@ -1298,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ഉപകരണം നൽകുക"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"തുറക്കുന്നതിന് നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കുക"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. പരിശോധിച്ചുറപ്പിക്കാൻ, വിരലടയാള സെൻസറിൽ സ്‌പർശിക്കുക."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"സജീവമായ ഫോൺ കോൾ"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"താൽക്കാലികമായി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>

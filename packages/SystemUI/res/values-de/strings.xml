@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Bildschirm aufnehmen?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Einzelne App aufnehmen"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Diesen Bildschirm aufnehmen"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s aufnehmen"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Wenn du den gesamten Bildschirm aufnimmst, ist in der Aufnahme alles zu sehen, was auf dem Bildschirm angezeigt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Wenn du eine App aufnimmst, ist in der Aufnahme alles zu sehen, was in dieser App angezeigt oder abgespielt wird. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Bildschirm aufnehmen"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Voreinstellung konnte nicht aktualisiert werden"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Voreinstellung"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Ausgewählt"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Umgebungsgeräusche"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Links"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Rechts"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"In ein linkes und ein rechtes Steuerfeld maximieren"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Zu einem einzigen Steuerfeld minimieren"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Umgebungsgeräusche stummschalten"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Stummschaltung der Umgebungsgeräusche aufheben"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tools"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Automatische Untertitel"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Notiz"</string>
@@ -839,7 +830,7 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Taste <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Pos1"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Zurück"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulator­taste"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Leer­taste"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Eingabetaste"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Rücktaste"</string>
@@ -885,7 +876,7 @@
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Tasten­kürzel anzeigen"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Zurück"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Zum Startbildschirm wechseln"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Letzte Apps aufrufen"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Zuletzt verwendete Apps aufrufen"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Zuletzt verwendete Apps vorwärts durchgehen"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Zuletzt verwendete Apps rückwärts durchgehen"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Liste der Apps öffnen"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Symbole für Benachrichtigungen mit einer niedrigen Priorität anzeigen"</string>
     <string name="other" msgid="429768510980739978">"Sonstiges"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Entfernen der Kachel"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"Kachel an letzter Position hinzufügen"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kachel verschieben"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Kachel an gewünschter Position hinzufügen"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Auf Position <xliff:g id="POSITION">%1$d</xliff:g> verschieben"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Zur Position <xliff:g id="POSITION">%1$d</xliff:g> hinzufügen"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Position ist ungültig."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"Auswählen des Nutzers"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Kein Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Einstellungen für <xliff:g id="ID_1">%s</xliff:g> öffnen."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Reihenfolge der Schnelleinstellungen bearbeiten"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ein-/Aus-Menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Sperrbildschirm"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"Eingeben des Geräts"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentifizierung erforderlich. Tippe dazu einfach auf den Fingerabdrucksensor."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Aktiver Anruf"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile Daten"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Verbunden"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vorübergehend verbunden"</string>
@@ -1444,16 +1433,16 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Splitscreen"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Eingabe"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-Verknüp­fungen"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Tastaturkürzel für Apps"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuelle App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Bedienungshilfen"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tastenkürzel"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tastenkombinationen anpassen"</string>
-    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Tastenkombination entfernen?"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tastenkürzel anpassen"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Tastaturkürzel entfernen?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Auf Standardeinstellung zurücksetzen?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Drücke eine Taste, um eine Tastenkombination festzulegen"</string>
-    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Dadurch wird die benutzerdefinierte Tastenkombination endgültig gelöscht."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Dadurch werden alle deine benutzerdefinierten Tastenkombinationen endgültig gelöscht."</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Drücke eine Taste, um das Tastaturkürzel einzurichten"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Das benutzerdefinierte Tastenkürzel wird endgültig gelöscht."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Alle deine benutzerdefinierten Tastenkürzel werden endgültig gelöscht."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Tastenkürzel suchen"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Keine Suchergebnisse"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Symbol „Minimieren“"</string>
@@ -1468,7 +1457,7 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"Schrägstrich"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Ziehpunkt"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Tastatureinstellungen"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Tastenkombination festlegen"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Speichern"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Entfernen"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Ja, zurücksetzen"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Abbrechen"</string>

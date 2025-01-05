@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ekranınız kaydedilsin mi?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Bir uygulamayı kaydet"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Bu ekranı kaydet"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s ekranını kaydet"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Ekranın tamamını kaydederken ekranınızda gösterilen her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Bir uygulamayı kaydettiğinizde o uygulamada gösterilen veya oynatılan her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekranı kaydet"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Hazır ayar güncellenemedi"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Hazır Ayar"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Seçili"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Çevredeki sesler"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Sol"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Sağ"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Sol ve sağ kontrolleri ayırarak genişlet"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Kontrolleri birleştirerek daralt"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Çevredeki sesleri kapat"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Çevredeki sesleri aç"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Araçlar"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Canlı Altyazı"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Not"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Düşük öncelikli bildirim simgelerini göster"</string>
     <string name="other" msgid="429768510980739978">"Diğer"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"Kutuyu kaldırmak için"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"kutuyu son konuma ekleyin"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Kutuyu taşı"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"kutuyu istediğiniz konuma ekleyin"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna taşı"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> konumuna ekle"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Konum geçersiz."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"kullanıcı seç"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"İnternet yok"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ayarlarını aç."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Hızlı Ayarlar\'ın sırasını düzenleyin."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Güç menüsü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kilit ekranı"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"cihaz girin"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Açmak için parmak izi kullanın"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kimlik doğrulaması gerekiyor. Kimlik doğrulaması için parmak izi sensörüne dokunun."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Devam eden telefon görüşmesi"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil veri"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Bağlı"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Geçici olarak bağlandı"</string>
@@ -1468,9 +1457,9 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"eğik çizgi"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Sürükleme tutamacı"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Klavye Ayarları"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Kısayol ayarla"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ayarla"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Kaldır"</string>
-    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Evet, sıfırlansın"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Sıfırla"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"İptal"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Tuşa basın"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tuş kombinasyonu zaten kullanılıyor. Başka bir tuş deneyin."</string>

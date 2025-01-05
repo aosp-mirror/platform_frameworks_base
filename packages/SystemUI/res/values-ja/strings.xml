@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"画面を録画しますか？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"1 つのアプリを録画"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"この画面の録画"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s の録画"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"画面全体を録画すると、画面に表示されるものがすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"アプリを録画すると、そのアプリで表示または再生される内容がすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"画面を録画"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"プリセットを更新できませんでした"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"プリセット"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"選択中"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"周囲の音"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"左"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"右"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"開く - 左右それぞれで制御する"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"閉じる - まとめて制御する"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"周囲の音をミュート"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"周囲の音のミュートを解除"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ツール"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"自動字幕起こし"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"注"</string>
@@ -1298,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"デバイスを入力"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"指紋を使って開いてください"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"認証が必要です。指紋認証センサーをタッチして認証してください。"</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"モバイルデータ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"接続済み"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"一時的に接続されています"</string>
@@ -1445,13 +1437,13 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"現在のアプリ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ユーザー補助"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"キーボード ショートカット"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"キーボード ショートカットをカスタマイズする"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"キーボード ショートカットのカスタマイズ"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ショートカットを削除しますか？"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"デフォルトにリセットしますか？"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ショートカットを割り当てるキーを押してください"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"この操作を行うと、カスタム ショートカットが完全に削除されます。"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"この操作を行うと、すべてのカスタム ショートカットが完全に削除されます。"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"検索ショートカット"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ショートカットの検索"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"検索結果がありません"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"アクションキーまたはメタキーのアイコン"</string>
@@ -1467,7 +1459,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"キーボードの設定"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ショートカットの設定"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"削除"</string>
-    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"リセットする"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"リセット"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"キャンセル"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"キーを押してください"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"このキーの組み合わせはすでに使用されています。別のキーを試してください。"</string>

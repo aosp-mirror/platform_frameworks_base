@@ -1289,7 +1289,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"enter device"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Use fingerprint to open"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentication required. Touch the fingerprint sensor to authenticate."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Ongoing phone call"</string>
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Ongoing call"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile data"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connected"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Temporarily connected"</string>

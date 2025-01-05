@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"¿Quieres grabar la pantalla?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Grabar una app"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Grabar esta pantalla"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Grabar %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Cuando grabes toda la pantalla, se grabará todo lo que se muestre en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cuando grabes una app, se grabará todo lo que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grabar pantalla"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"No se pudo actualizar el ajuste predeterminado"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Ajuste predeterminado"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Seleccionado"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Sonido envolvente"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Izquierda"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Derecha"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Expandir los controles separados a la izquierda y a la derecha"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Contraer al control unificado"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Silenciar el sonido envolvente"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Activar el sonido envolvente"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Herramientas"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Subtitulado instantáneo"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Nota"</string>
@@ -886,8 +877,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Atrás"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ir a la pantalla principal"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ver apps recientes"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplazar por las apps recientes (adelante)"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplazar por las apps recientes (atrás)"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Desplazarse por las apps recientes (adelante)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Desplazarse por las apps recientes (atrás)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Abrir lista de apps"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Abrir configuración"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Abrir Asistente"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostrar íconos de notificaciones con prioridad baja"</string>
     <string name="other" msgid="429768510980739978">"Otros"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"quitar tarjeta"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"agregar tarjeta a la última posición"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover la tarjeta"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Agregar tarjeta a la posición deseada"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover a <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Agregar a la posición <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Posición no válida"</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"elegir usuario"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Sin Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Editar el orden de la Configuración rápida."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de encendido"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueo"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ingresar al dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Usa la huella dactilar para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Se requiere de una autenticación. Toca el sensor de huellas dactilares para autenticarte."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Llamada en curso"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Datos móviles"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conexión establecida"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Conectado temporalmente"</string>
@@ -1449,11 +1438,11 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accesibilidad"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Combinaciones de teclas"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personaliza las combinaciones de teclas"</string>
-    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"¿Quieres quitar el acceso directo?"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"¿Quieres quitar la combinación?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"¿Quieres restablecer la configuración predeterminada?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Presiona la tecla para asignar el acceso directo"</string>
-    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Esta acción borrará tu acceso directo personalizado de forma permanente."</string>
-    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Esta acción borrará todos tus accesos directos personalizados de forma permanente."</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Presiona una tecla para asignar la combinación"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Esta acción borrará tu combinación personalizada de forma permanente."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Esta acción borrará todas tus combinaciones personalizadas de forma permanente."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Buscar combinaciones de teclas"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"La búsqueda no arrojó resultados"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícono de contraer"</string>
@@ -1468,7 +1457,7 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"barra diagonal"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Controlador de arrastre"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Configuración del teclado"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer combinación de teclas"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Quitar"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Sí, restablecer"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>

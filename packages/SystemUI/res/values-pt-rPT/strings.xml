@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Gravar o ecrã?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Gravar uma app"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Gravar este ecrã"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Gravar %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quando está a gravar o ecrã inteiro, tudo o que é apresentado no ecrã é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Quando está a gravar uma app, tudo o que é apresentado ou reproduzido nessa app é gravado. Por isso, tenha cuidado com, por exemplo, palavras-passe, detalhes de pagamento, mensagens, fotos, áudio e vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Gravar ecrã"</string>
@@ -1291,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"entrar no dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilize a impressão digital para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticação necessária. Toque no sensor de impressões digitais para autenticar."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Chamada telefónica em curso"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dados móveis"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ligado"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Ligado temporariamente"</string>

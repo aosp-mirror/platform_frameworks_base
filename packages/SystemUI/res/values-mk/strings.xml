@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Да се снима екранот?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Снимање на една апликација"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Снимај го екранов"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Снимај го екранот %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Додека го снимате целиот екран, сѐ што е прикажано на екранот се снима. Затоа, бидете внимателни со лозинките, деталите за плаќање, пораките, фотографиите и аудиото и видеото."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Додека снимате апликација, може да се сними сѐ што се прикажува или пушта во таа апликација. Затоа, бидете внимателни со лозинките, деталите за плаќање, пораките, фотографиите и аудиото и видеото."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Снимај го екранот"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не можеше да се ажурира зададената вредност"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Зададени вредности"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Избрано"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Опкружување"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Лево"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Десно"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Прошири на одвоените контроли одлево и оддесно"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Собери на унифицирана контрола"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Исклучи го звукот на опкружувањето"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Вклучи го звукот на опкружувањето"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Алатки"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Автоматски титлови"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Белешка"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Прикажувај икони за известувања со низок приоритет"</string>
     <string name="other" msgid="429768510980739978">"Друго"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"отстранување на плочката"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"додајте плочка на последната позиција"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Преместување на плочката"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Додајте плочка на саканата позиција"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Преместување на <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додавање на позиција <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Позицијата е погрешна."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"изберете корисник"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Нема интернет"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отворете ги поставките на <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Изменете го редот на „Брзи поставки“"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Мени на копчето за вклучување"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заклучен екран"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"внесете уред"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Користете отпечаток за да се отвори"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Потребна е проверка. Допрете го сензорот за отпечаток за да автентицирате."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Тековен телефонски повик"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилен интернет"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Поврзано"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Привремено поврзано"</string>
@@ -1451,7 +1440,7 @@
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Приспособете ги кратенките од тастатурата"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Да се отстрани кратенката?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Да се ресетира на стандардните поставки?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Притиснете го копчето за да доделите кратенка"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Притиснете копче за да доделите кратенка"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Ова ќе ја избрише вашата приспособена кратенка трајно."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Ова ќе ги избрише трајно сите ваши приспособени кратенки."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пребарувајте кратенки"</string>
@@ -1468,11 +1457,11 @@
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"коса црта"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Рачка за влечење"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Поставки за тастатурата"</string>
-    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Поставете кратенка"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Постави"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Отстрани"</string>
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Да, ресетирај"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Откажи"</string>
-    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Притиснете го копчето"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Притиснете копче"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Комбинацијата на копчиња веќе се користи. Обидете се со друго копче."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Кратенката не може да се постави."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>

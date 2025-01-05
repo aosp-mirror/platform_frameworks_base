@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Vols gravar la pantalla?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Grava una aplicació"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Grava aquesta pantalla"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Grava %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Quan graves tota la pantalla, es grava tot el que es mostra en pantalla. Per aquest motiu, ves amb compte amb elements com les contrasenyes, les dades de pagament, els missatges, les fotos, i l\'àudio i el vídeo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Quan graves una aplicació, es grava tot el que es mostra o es reprodueix en aquesta aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos, i l\'àudio i el vídeo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grava la pantalla"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"No s\'ha pogut actualitzar el valor predefinit"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Valors predefinits"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Seleccionat"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Entorn"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Esquerra"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Dreta"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Desplega els controls separats d\'esquerra i dreta"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Replega per unificar el control"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Silencia l\'entorn"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Deixa de silenciar l\'entorn"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Eines"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Subtítols instantanis"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"Nota"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Mostra les icones de notificació amb prioritat baixa"</string>
     <string name="other" msgid="429768510980739978">"Altres"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"suprimir el mosaic"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"afegir una icona a la darrera posició"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mou el mosaic"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Afegeix una icona a la posició que vulguis"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mou a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Afegeix a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"La posició no és vàlida."</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"triar un usuari"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Sense connexió a Internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Obre la configuració per a <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Edita l\'ordre de la configuració ràpida."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú d\'engegada"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueig"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accedir al dispositiu"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Utilitza l\'empremta digital per obrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticació necessària. Toca el sensor d\'empremtes digitals per autenticar-te."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Trucada en curs"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dades mòbils"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Connectat"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Connexió temporal"</string>

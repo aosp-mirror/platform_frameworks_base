@@ -111,10 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ਕੀ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨਾ ਹੈ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ਇੱਕ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (4882406311415082016) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (4169494703993148253) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s ਨੂੰ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"ਜਦੋਂ ਤੁਸੀਂ ਆਪਣੀ ਪੂਰੀ ਸਕ੍ਰੀਨ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਨਾਲ ਹੀ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਉਸ ਐਪ ਵਿੱਚ ਦਿਖਾਈ ਜਾਂ ਚਲਾਈ ਜਾ ਰਹੀ ਹਰ ਚੀਜ਼ ਨੂੰ ਰਿਕਾਰਡ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਸ ਲਈ ਪਾਸਵਰਡਾਂ, ਭੁਗਤਾਨ ਵੇਰਵਿਆਂ, ਸੁਨੇਹਿਆਂ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਆਡੀਓ ਅਤੇ ਵੀਡੀਓ ਵਰਗੀਆਂ ਚੀਜ਼ਾਂ ਵਾਸਤੇ ਸਾਵਧਾਨ ਰਹੋ।"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਕਰੋ"</string>
@@ -417,20 +415,13 @@
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ਪ੍ਰੀਸੈੱਟ ਨੂੰ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ਪ੍ਰੀਸੈੱਟ"</string>
     <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ਚੁਣਿਆ ਗਿਆ"</string>
-    <!-- no translation found for hearing_devices_ambient_label (629440938614895797) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_left (3586965448230412600) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_control_right (6192137602448918383) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_expand_controls (2131816068187709200) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_collapse_controls (2261097656446201581) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_mute (1836882837647429416) -->
-    <skip />
-    <!-- no translation found for hearing_devices_ambient_unmute (2187938085943876814) -->
-    <skip />
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"ਆਲੇ-ਦੁਆਲੇ"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"ਖੱਬੇ"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"ਸੱਜੇ"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"ਖੱਬੇ ਅਤੇ ਸੱਜੇ ਪਾਸੇ ਦੇ ਸ਼ੋਰ ਨੂੰ ਵੱਖ-ਵੱਖ ਕੰਟਰੋਲ ਕਰਨ ਲਈ ਵਿਸਤਾਰ ਕਰੋ"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"ਏਕੀਕ੍ਰਿਤ ਕੰਟਰੋਲ \'ਤੇ ਜਾਣ ਲਈ ਸਮੇਟੋ"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"ਆਲੇ-ਦੁਆਲੇ ਦੇ ਸ਼ੋਰ ਨੂੰ ਮਿਊਟ ਕਰੋ"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"ਆਲੇ-ਦੁਆਲੇ ਦੇ ਸ਼ੋਰ ਨੂੰ ਅਣਮਿਊਟ ਕਰੋ"</string>
     <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ਟੂਲ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"ਲਾਈਵ ਸੁਰਖੀਆਂ"</string>
     <string name="quick_settings_notes_label" msgid="1028004078001002623">"ਨੋਟ-ਕਥਨ"</string>
@@ -466,7 +457,7 @@
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"ਹੋ ਗਿਆ"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ਚਾਲੂ"</string>
-    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • \'ਤੇ"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ਚਾਲੂ • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ਬੰਦ"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"ਸੈੱਟ ਨਹੀਂ ਹੈ"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
@@ -976,11 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੇ ਸੂਚਨਾ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਦਿਖਾਓ"</string>
     <string name="other" msgid="429768510980739978">"ਹੋਰ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ਟਾਇਲ ਹਟਾਓ"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_add_action (8311378984458545661) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"ਪਿਛਲੀ ਸਥਿਤੀ \'ਤੇ ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ਟਾਇਲ ਨੂੰ ਲਿਜਾਓ"</string>
-    <!-- no translation found for accessibility_qs_edit_tile_start_add (8141710006899065161) -->
-    <skip />
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"ਮਨਪਸੰਦ ਸਥਿਤੀ \'ਤੇ ਟਾਇਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> ਸਥਾਨ \'ਤੇ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ਮੌਜੂਦਾ ਥਾਂ ਅਵੈਧ ਹੈ।"</string>
@@ -996,8 +985,7 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ਵਰਤੋਂਕਾਰ ਚੁਣੋ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ।"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ।"</string>
-    <!-- no translation found for accessibility_quick_settings_edit (6544873823850165) -->
-    <skip />
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਦੇ ਕ੍ਰਮ ਦਾ ਸੰਪਾਦਨ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ਪਾਵਰ ਮੀਨੂ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ਦਾ <xliff:g id="ID_1">%1$d</xliff:g> ਪੰਨਾ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">" ਲਾਕ  ਸਕ੍ਰੀਨ"</string>
@@ -1301,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ਡੀਵਾਈਸ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ਖੋਲ੍ਹਣ ਲਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਵਰਤੋ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ਪ੍ਰਮਾਣੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ। ਪ੍ਰਮਾਣਿਤ ਕਰਨ ਲਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪਰਸ਼ ਕਰੋ।"</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ਜਾਰੀ ਫ਼ੋਨ ਕਾਲ"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ਕਨੈਕਟ ਹੈ"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"ਕੁਝ ਸਮੇਂ ਲਈ ਕਨੈਕਟ ਹੈ"</string>
