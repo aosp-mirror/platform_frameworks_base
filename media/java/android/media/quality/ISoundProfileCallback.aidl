@@ -17,7 +17,7 @@
 
 package android.media.quality;
 
-import android.media.quality.ParamCapability;
+import android.media.quality.ParameterCapability;
 import android.media.quality.SoundProfile;
 
 /**
@@ -28,6 +28,6 @@ oneway interface ISoundProfileCallback {
     void onSoundProfileAdded(in String id, in SoundProfile p);
     void onSoundProfileUpdated(in String id, in SoundProfile p);
     void onSoundProfileRemoved(in String id, in SoundProfile p);
-    void onParamCapabilitiesChanged(in String id, in List<ParamCapability> caps);
+    void onParameterCapabilitiesChanged(in String id, in List<ParameterCapability> caps);
     void onError(in String id, in int err);
 }

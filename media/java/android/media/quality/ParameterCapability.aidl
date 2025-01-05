@@ -16,4 +16,4 @@
 
 package android.media.quality;
 
-parcelable ParamCapability;
+parcelable ParameterCapability;

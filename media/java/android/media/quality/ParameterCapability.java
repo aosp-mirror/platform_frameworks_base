@@ -33,17 +33,23 @@ import java.lang.annotation.RetentionPolicy;
  * Capability info of media quality parameters
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
-public final class ParamCapability implements Parcelable {
+public final class ParameterCapability implements Parcelable {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            TYPE_NONE,
             TYPE_INT,
             TYPE_LONG,
             TYPE_DOUBLE,
             TYPE_STRING,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ParamType {}
+    public @interface ParameterType {}
+
+    /**
+     * None parameter type. It's used when a parameter is not supported.
+     */
+    public static final int TYPE_NONE = 0;
 
     /**
      * Integer parameter type
@@ -98,13 +104,13 @@ public final class ParamCapability implements Parcelable {
     @NonNull
     private final String mName;
     private final boolean mIsSupported;
-    @ParamType
+    @ParameterType
     private final int mType;
     @NonNull
     private final Bundle mCaps;
 
     /** @hide */
-    protected ParamCapability(Parcel in) {
+    protected ParameterCapability(Parcel in) {
         mName = in.readString();
         mIsSupported = in.readBoolean();
         mType = in.readInt();
@@ -125,25 +131,25 @@ public final class ParamCapability implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<ParamCapability> CREATOR = new Creator<ParamCapability>() {
+    public static final Creator<ParameterCapability> CREATOR = new Creator<ParameterCapability>() {
         @Override
-        public ParamCapability createFromParcel(Parcel in) {
-            return new ParamCapability(in);
+        public ParameterCapability createFromParcel(Parcel in) {
+            return new ParameterCapability(in);
         }
 
         @Override
-        public ParamCapability[] newArray(int size) {
-            return new ParamCapability[size];
+        public ParameterCapability[] newArray(int size) {
+            return new ParameterCapability[size];
         }
     };
 
 
     /**
-     * Creates a new ParamCapability.
+     * Creates a new ParameterCapability.
      *
      * @hide
      */
-    public ParamCapability(
+    public ParameterCapability(
             @NonNull String name,
             boolean isSupported,
             int type,
@@ -158,7 +164,7 @@ public final class ParamCapability implements Parcelable {
      * Gets parameter name.
      */
     @NonNull
-    public String getParamName() {
+    public String getParameterName() {
         return mName;
     }
 
@@ -171,9 +177,11 @@ public final class ParamCapability implements Parcelable {
 
     /**
      * Gets parameter type.
+     *
+     * <p>It's {@link #TYPE_NONE} if {@link #isSupported()} is {@code false}.
      */
-    @ParamType
-    public int getParamType() {
+    @ParameterType
+    public int getParameterType() {
         return mType;
     }
 
