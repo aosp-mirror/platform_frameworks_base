@@ -28,17 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.node.LayoutModifierNode
-import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.constrain
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.statusbar.chips.ui.compose.modifiers.neverDecreaseWidth
 import kotlinx.coroutines.delay
 
 /** Platform-optimized interface for getting current time */
@@ -96,36 +90,4 @@ fun ChronometerText(
         color = color,
         modifier = modifier.neverDecreaseWidth(),
     )
-}
-
-/** A modifier that ensures the width of the content only increases and never decreases. */
-private fun Modifier.neverDecreaseWidth(): Modifier {
-    return this.then(neverDecreaseWidthElement)
-}
-
-private data object neverDecreaseWidthElement : ModifierNodeElement<NeverDecreaseWidthNode>() {
-    override fun create(): NeverDecreaseWidthNode {
-        return NeverDecreaseWidthNode()
-    }
-
-    override fun update(node: NeverDecreaseWidthNode) {
-        error("This should never be called")
-    }
-}
-
-private class NeverDecreaseWidthNode : Modifier.Node(), LayoutModifierNode {
-    private var minWidth = 0
-
-    override fun MeasureScope.measure(
-        measurable: Measurable,
-        constraints: Constraints,
-    ): MeasureResult {
-        val placeable = measurable.measure(Constraints(minWidth = minWidth).constrain(constraints))
-        val width = placeable.width
-        val height = placeable.height
-
-        minWidth = maxOf(minWidth, width)
-
-        return layout(width, height) { placeable.place(0, 0) }
-    }
 }
