@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * A class that manages registration/unregistration of clients and manages messages to/from clients.
@@ -312,15 +313,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onCloseEndpointSession(int sessionId, byte reason) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onCloseEndpointSession(sessionId, reason);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onCloseEndpointSession(sessionId, reason));
         if (!callbackInvoked) {
             Log.w(TAG, "onCloseEndpointSession: unknown session ID " + sessionId);
         }
@@ -328,15 +323,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onEndpointSessionOpenComplete(int sessionId) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onEndpointSessionOpenComplete(sessionId);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onEndpointSessionOpenComplete(sessionId));
         if (!callbackInvoked) {
             Log.w(TAG, "onEndpointSessionOpenComplete: unknown session ID " + sessionId);
         }
@@ -344,15 +333,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onMessageReceived(int sessionId, HubMessage message) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onMessageReceived(sessionId, message);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId, (broker) -> broker.onMessageReceived(sessionId, message));
         if (!callbackInvoked) {
             Log.w(TAG, "onMessageReceived: unknown session ID " + sessionId);
         }
@@ -360,18 +343,36 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void onMessageDeliveryStatusReceived(int sessionId, int sequenceNumber, byte errorCode) {
-        boolean callbackInvoked = false;
-        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
-            if (broker.hasSessionId(sessionId)) {
-                broker.onMessageDeliveryStatusReceived(sessionId, sequenceNumber, errorCode);
-                callbackInvoked = true;
-                break;
-            }
-        }
-
+        boolean callbackInvoked =
+                invokeCallbackForMatchingSession(
+                        sessionId,
+                        (broker) ->
+                                broker.onMessageDeliveryStatusReceived(
+                                        sessionId, sequenceNumber, errorCode));
         if (!callbackInvoked) {
             Log.w(TAG, "onMessageDeliveryStatusReceived: unknown session ID " + sessionId);
         }
+    }
+
+    /**
+     * Invokes a callback for a session with matching ID.
+     *
+     * @param callback The callback to execute
+     * @return true if a callback was executed
+     */
+    private boolean invokeCallbackForMatchingSession(
+            int sessionId, Consumer<ContextHubEndpointBroker> callback) {
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                try {
+                    callback.accept(broker);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Exception while invoking callback", e);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Unregister the hub (called during init() failure). Silence errors. */
