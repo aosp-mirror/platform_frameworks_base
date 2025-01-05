@@ -88,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Não é possível estabelecer ligação à rede móvel."</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Experimente alterar a rede preferida. Toque para alterar."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chamadas de emergência indisponíveis"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"As chamadas de emergência requerem uma rede móvel"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Reencaminhamento de chamadas"</string>
@@ -1779,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solte as teclas de volume. Para ativar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, prima sem soltar ambas as teclas de volume novamente durante 3 segundos."</string>

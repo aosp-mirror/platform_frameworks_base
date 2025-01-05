@@ -88,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible de joindre le réseau cellulaire"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer de réseau préféré. Touchez l\'écran pour changer."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Le service d\'appel d\'urgence n\'est pas accessible"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Les appels d\'urgence nécessitent un réseau cellulaire"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
@@ -1779,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode Une main"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Très sombre"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Appareils auditifs"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Relâchez les touches de volume. Pour activer <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, maintenez les deux touches de volume enfoncées pendant 3 secondes."</string>

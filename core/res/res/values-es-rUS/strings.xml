@@ -73,8 +73,8 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: no restringido"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Esta app no es compatible con 16 KB. No se pudo verificar la alineación del APK. Esta app se ejecutará con el modo de compatibilidad de tamaño de página. Para obtener mejores resultados, vuelve a compilar la aplicación con la compatibilidad de 16 KB. Para obtener más información, consulta el siguiente vínculo: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Esta app no es compatible con 16 KB. No se pudo verificar la alineación de ELF. Esta app se ejecutará con el modo de compatibilidad de tamaño de página. Para obtener mejores resultados, vuelve a compilar la aplicación con la compatibilidad de 16 KB. Para obtener más información, consulta el siguiente vínculo: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Esta app no es compatible con 16 KB. No se pudieron verificar las alineaciones de APK y ELF. Esta app se ejecutará con el modo de compatibilidad de tamaño de página. Para obtener mejores resultados, vuelve a compilar la aplicación con la compatibilidad de 16 KB. Para obtener más información, consulta el siguiente vínculo: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Esta app no es compatible con 16 KB. No se pudo verificar la alineación de ELF. La app se ejecutará con el modo de compatibilidad de tamaño de página. Para obtener mejores resultados, vuelve a compilar la aplicación con la compatibilidad de 16 KB. Si necesitas más información, consulta el siguiente vínculo: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Esta app no es compatible con 16 KB. No se pudieron verificar las alineaciones de APK y ELF. La app se ejecutará con el modo de compatibilidad de tamaño de página. Para obtener mejores resultados, vuelve a compilar la aplicación con la compatibilidad de 16 KB. Si necesitas más información, consulta el siguiente vínculo: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servicio no suministrado."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"No puedes cambiar la configuración del identificador de llamadas."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Se cambiaron los datos a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -88,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"No se puede acceder a la red móvil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Presiona para cambiar la red preferida."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Servicio de llamadas de emergencia no disponible"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Las llamadas de emergencia requieren una red móvil"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de llamada"</string>
@@ -1779,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo de una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Como mantuviste presionadas las teclas de volumen, se activó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Se presionaron las teclas de volumen. Se desactivó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Suelta las teclas de volumen. Para activar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, vuelve a mantener presionadas las teclas de volumen durante 3 segundos."</string>

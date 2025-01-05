@@ -72,8 +72,8 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK နှင့် ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ဤအက်ပ်ကို ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်ကို တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ဤအက်ပ်ကို ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK နှင့် ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်ကို တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ဒေတာကို <xliff:g id="CARRIERDISPLAY">%s</xliff:g> သို့ ပြောင်းထားသည်"</string>
@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"အရေးပေါ်ဖုန်းခေါ်ရန် မိုဘိုင်းကွန်ရက် လိုအပ်သည်"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"နားကြားကိရိယာ"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"အသံထိန်းခလုတ်များကို လွှတ်လိုက်ပါ။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်ရန် အသံထိန်းခလုတ်နှစ်ခုစလုံးကို ၃ စက္ကန့်ကြာအောင် ထပ်နှိပ်ပါ။"</string>

@@ -71,9 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
-    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫ELF الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK اور ELF الائنمنٹ چیکس ناکام ہو گئے۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ مرتب کریں۔ مزید معلومات کے لیے، ‎&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;‎ دیکھیں"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫ELF الائنمنٹ چیک ناکام ہو گیا۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏یہ ایپ ‎16 KB کے موافق نہیں ہے۔ ‫APK اور ELF الائنمنٹ چیکس ناکام ہو گئے۔ یہ ایپ صفحہ کے سائز کے ساتھ موافقت رکھنے والے موڈ کے ساتھ چلائی جائے گی۔ بہترین موافقت کے لیے، براہ کرم ‎16 KB کے سپورٹ کے ساتھ ایپلیکیشن کو دوبارہ کمپائل کریں۔ مزید معلومات کے لیے &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; دیکھیں"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ڈیٹا <xliff:g id="CARRIERDISPLAY">%s</xliff:g> پر سوئچ کیا گیا"</string>
@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ہنگامی کالز کو موبائل نیٹ ورک کی ضرورت ہے"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ایک ہاتھ کی وضع"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی مدھم"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"سماعتی آلات"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"والیوم کی کلیدوں کو ریلیز کریں <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کرنے کے لیے، والیوم کی دونوں کلیدوں کو دوبارہ 3 سیکنڈ تک چھوئیں اور دبائے رکھیں۔"</string>

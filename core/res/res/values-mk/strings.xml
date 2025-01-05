@@ -71,9 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Стандардно, ID на повикувач е скриен. Следен повик: не е скриен"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Стандардно, ID на повикувач не е скриен. Следен повик: скриен"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандардно, ID на повикувач не е скриен. Следен повик: не е скриен"</string>
-    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на АПК не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на APK не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Апликацијава не е компатибилна со 16 KB. Проверката за усогласување на ELF не успеа. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
-    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Апликацијава не е компатибилна со 16 KB. Проверките за усогласување на АПК и ELF се неуспешни. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Апликацијава не е компатибилна со 16 KB. Проверките за усогласување на APK и ELF се неуспешни. Апликацијава ќе се извршува со режим компатибилен со големината на страницата. За најдобра компатибилност, рекомпилирајте ја апликацијата со поддршка за 16 KB. За повеќе информации, одете на &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобилниот интернет се префрли на <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -87,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобилната мрежа е недостапна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сменете ја претпочитаната мрежа. Допрете за промена."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Итните повици се недостапни"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"За итните повици е потребна мобилна мрежа"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Предупредувања"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Проследување повик"</string>
@@ -1778,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим со една рака"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнително затемнување"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слушни помагала"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е вклучена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ги задржавте копчињата за јачина на звук. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> е исклучена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Ослободете ги копчињата за јачина на звукот. Притиснете ги и задржете ги двете копчиња за јачина на звукот во траење од 3 секунди за да вклучите <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
