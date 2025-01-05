@@ -421,6 +421,18 @@ public final class NotificationProgressDrawable extends Drawable {
             mColor = color;
         }
 
+        public float getStart() {
+            return this.mStart;
+        }
+
+        public float getEnd() {
+            return this.mEnd;
+        }
+
+        public int getColor() {
+            return this.mColor;
+        }
+
         // Needed for unit tests
         @Override
         public boolean equals(@Nullable Object other) {
