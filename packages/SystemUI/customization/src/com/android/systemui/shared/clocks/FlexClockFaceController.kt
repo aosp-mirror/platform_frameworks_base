@@ -35,17 +35,14 @@ import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
-import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
+import com.android.systemui.shared.clocks.view.HorizontalAlignment
 import java.util.Locale
 import java.util.TimeZone
 import kotlin.math.max
 
 // TODO(b/364680879): Merge w/ ComposedDigitalLayerController
-class FlexClockFaceController(
-    clockCtx: ClockContext,
-    face: ClockFace,
-    private val isLargeClock: Boolean,
-) : ClockFaceController {
+class FlexClockFaceController(clockCtx: ClockContext, private val isLargeClock: Boolean) :
+    ClockFaceController {
     override val view: View
         get() = layerController.view
 
@@ -59,19 +56,12 @@ class FlexClockFaceController(
     val timespecHandler = DigitalTimespecHandler(DigitalTimespec.TIME_FULL_FORMAT, "hh:mm")
 
     init {
-        val lp = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        lp.gravity = Gravity.CENTER
-
-        val layer = face.layers[0]
-
         layerController =
-            if (isLargeClock) {
-                ComposedDigitalLayerController(clockCtx, layer as ComposedDigitalHandLayer)
-            } else {
-                val childView = SimpleDigitalClockTextView(clockCtx)
-                SimpleDigitalHandLayerController(clockCtx, layer as DigitalHandLayer, childView)
-            }
-        layerController.view.layoutParams = lp
+            if (isLargeClock) ComposedDigitalLayerController(clockCtx)
+            else SimpleDigitalHandLayerController(clockCtx, SMALL_LAYER_CONFIG)
+
+        layerController.view.layoutParams =
+            FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT).apply { gravity = Gravity.CENTER }
     }
 
     /** See documentation at [FlexClockView.offsetGlyphsForStepClockAnimation]. */
@@ -227,10 +217,6 @@ class FlexClockFaceController(
             }
 
             override fun onPickerCarouselSwiping(swipingFraction: Float) {
-                face.pickerScale?.let {
-                    view.scaleX = swipingFraction * (1 - it.scaleX) + it.scaleX
-                    view.scaleY = swipingFraction * (1 - it.scaleY) + it.scaleY
-                }
                 if (isLargeClock && !(view as FlexClockView).isAlignedWithScreen()) {
                     view.translationY = keyguardLargeClockTopMargin / 2F * swipingFraction
                 }
@@ -248,4 +234,15 @@ class FlexClockFaceController(
                 // TODO(b/378128811) port stepping animation
             }
         }
+
+    companion object {
+        val SMALL_LAYER_CONFIG =
+            LayerConfig(
+                timespec = DigitalTimespec.TIME_FULL_FORMAT,
+                style = FontTextStyle(fontSizeScale = 0.98f),
+                aodStyle = FontTextStyle(),
+                alignment = DigitalAlignment(HorizontalAlignment.LEFT, null),
+                dateTimeFormat = "h:mm",
+            )
+    }
 }

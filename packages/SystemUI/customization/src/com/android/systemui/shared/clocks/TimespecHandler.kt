@@ -25,9 +25,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
-open class TimespecHandler(
-    val cal: Calendar,
-) {
+open class TimespecHandler(val cal: Calendar) {
     var timeZone: TimeZone
         get() = cal.timeZone
         set(value) {
@@ -82,10 +80,7 @@ class DigitalTimespecHandler(
     }
 
     private fun updateSimpleDateFormat(locale: Locale): DateFormat {
-        if (
-            locale.language.equals(Locale.ENGLISH.language) ||
-                timespec != DigitalTimespec.DATE_FORMAT
-        ) {
+        if (locale.language.equals(Locale.ENGLISH.language)) {
             // force date format in English, and time format to use format defined in json
             return SimpleDateFormat(timeFormat, timeFormat, ULocale.forLocale(locale))
         } else {
@@ -97,24 +92,18 @@ class DigitalTimespecHandler(
         return when (timespec) {
             DigitalTimespec.TIME_FULL_FORMAT ->
                 SimpleDateFormat.getInstanceForSkeleton("hh:mm", locale)
-            DigitalTimespec.DATE_FORMAT ->
-                SimpleDateFormat.getInstanceForSkeleton("EEEE MMMM d", locale)
-            else -> {
-                null
-            }
+            else -> null
         }
     }
 
     private fun applyPattern() {
         val timeFormat24Hour = timeFormat.replace("hh", "h").replace("h", "HH")
         val format = if (is24Hr) timeFormat24Hour else timeFormat
-        if (timespec != DigitalTimespec.DATE_FORMAT) {
-            (dateFormat as SimpleDateFormat).applyPattern(format)
-            (contentDescriptionFormat as? SimpleDateFormat)?.applyPattern(
-                if (is24Hr) CONTENT_DESCRIPTION_TIME_FORMAT_24_HOUR
-                else CONTENT_DESCRIPTION_TIME_FORMAT_12_HOUR
-            )
-        }
+        (dateFormat as SimpleDateFormat).applyPattern(format)
+        (contentDescriptionFormat as? SimpleDateFormat)?.applyPattern(
+            if (is24Hr) CONTENT_DESCRIPTION_TIME_FORMAT_24_HOUR
+            else CONTENT_DESCRIPTION_TIME_FORMAT_12_HOUR
+        )
     }
 
     private fun getSingleDigit(): String {
@@ -122,7 +111,7 @@ class DigitalTimespecHandler(
         val text = dateFormat.format(cal.time).toString()
         return text.substring(
             if (isFirstDigit) 0 else text.length - 1,
-            if (isFirstDigit) text.length - 1 else text.length
+            if (isFirstDigit) text.length - 1 else text.length,
         )
     }
 
@@ -130,27 +119,16 @@ class DigitalTimespecHandler(
         return when (timespec) {
             DigitalTimespec.FIRST_DIGIT,
             DigitalTimespec.SECOND_DIGIT -> getSingleDigit()
-            DigitalTimespec.DIGIT_PAIR -> {
-                dateFormat.format(cal.time).toString()
-            }
-            DigitalTimespec.TIME_FULL_FORMAT -> {
-                dateFormat.format(cal.time).toString()
-            }
-            DigitalTimespec.DATE_FORMAT -> {
-                dateFormat.format(cal.time).toString().uppercase()
-            }
+            DigitalTimespec.TIME_FULL_FORMAT -> dateFormat.format(cal.time).toString()
         }
     }
 
     fun getContentDescription(): String? {
         return when (timespec) {
-            DigitalTimespec.TIME_FULL_FORMAT,
-            DigitalTimespec.DATE_FORMAT -> {
+            DigitalTimespec.TIME_FULL_FORMAT -> {
                 contentDescriptionFormat?.format(cal.time).toString()
             }
-            else -> {
-                return null
-            }
+            else -> return null
         }
     }
 

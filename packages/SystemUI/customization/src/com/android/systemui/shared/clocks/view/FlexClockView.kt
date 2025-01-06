@@ -22,11 +22,16 @@ import android.icu.text.NumberFormat
 import android.util.MathUtils.constrainedMap
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.systemui.customization.R
+import com.android.systemui.log.core.Logger
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
+import com.android.systemui.shared.clocks.LogUtil
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -34,13 +39,37 @@ import kotlin.math.min
 
 fun clamp(value: Float, minVal: Float, maxVal: Float): Float = max(min(value, maxVal), minVal)
 
-class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
-    override var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
+class FlexClockView(clockCtx: ClockContext) : FrameLayout(clockCtx.context) {
+    protected val logger = Logger(clockCtx.messageBuffer, this::class.simpleName!!)
+        get() = field ?: LogUtil.FALLBACK_INIT_LOGGER
+
+    @VisibleForTesting
+    var isAnimationEnabled = true
+        set(value) {
+            field = value
+            digitalClockTextViewMap.forEach { _, view -> view.isAnimationEnabled = value }
+        }
+
+    var dozeFraction: Float = 0F
+        set(value) {
+            field = value
+            digitalClockTextViewMap.forEach { _, view -> view.dozeFraction = field }
+        }
+
+    var isReactiveTouchInteractionEnabled = false
+        set(value) {
+            field = value
+        }
+
+    var digitalClockTextViewMap = mutableMapOf<Int, SimpleDigitalClockTextView>()
     private val digitLeftTopMap = mutableMapOf<Int, Point>()
 
     private var maxSingleDigitSize = Point(-1, -1)
     private val lockscreenTranslate = Point(0, 0)
     private var aodTranslate = Point(0, 0)
+
+    private var onAnimateDoze: (() -> Unit)? = null
+    private var isDozeReadyToAnimate = false
 
     // Does the current language have mono vertical size when displaying numerals
     private var isMonoVerticalNumericLineSpacing = true
@@ -57,13 +86,7 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
 
     private val digitOffsets = mutableMapOf<Int, Float>()
 
-    override fun addView(child: View?) {
-        super.addView(child)
-        (child as SimpleDigitalClockTextView).digitTranslateAnimator =
-            DigitTranslateAnimator(::invalidate)
-    }
-
-    protected override fun calculateSize(widthMeasureSpec: Int, heightMeasureSpec: Int): Point {
+    protected fun calculateSize(widthMeasureSpec: Int, heightMeasureSpec: Int): Point? {
         maxSingleDigitSize = Point(-1, -1)
         val bottomLocation: (textView: SimpleDigitalClockTextView) -> Int = { textView ->
             if (isMonoVerticalNumericLineSpacing) {
@@ -85,7 +108,7 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
         )
     }
 
-    protected override fun calculateLeftTopPosition() {
+    protected fun calculateLeftTopPosition() {
         digitLeftTopMap[R.id.HOUR_FIRST_DIGIT] = Point(0, 0)
         digitLeftTopMap[R.id.HOUR_SECOND_DIGIT] = Point(maxSingleDigitSize.x, 0)
         digitLeftTopMap[R.id.MINUTE_FIRST_DIGIT] = Point(0, maxSingleDigitSize.y)
@@ -96,13 +119,57 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
         }
     }
 
-    override fun refreshTime() {
-        super.refreshTime()
+    override fun addView(child: View?) {
+        if (child == null) return
+        logger.d({ "addView($str1 @$int1)" }) {
+            str1 = child::class.simpleName!!
+            int1 = child.id
+        }
+
+        super.addView(child)
+        (child as? SimpleDigitalClockTextView)?.let {
+            it.digitTranslateAnimator = DigitTranslateAnimator(::invalidate)
+            digitalClockTextViewMap[child.id] = child
+        }
+        child.setWillNotDraw(true)
+    }
+
+    fun refreshTime() {
+        logger.d("refreshTime()")
         digitalClockTextViewMap.forEach { (_, textView) -> textView.refreshText() }
     }
 
+    override fun invalidate() {
+        logger.d("invalidate()")
+        super.invalidate()
+    }
+
+    override fun requestLayout() {
+        logger.d("requestLayout()")
+        super.requestLayout()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        logger.d("onMeasure()")
+        calculateSize(widthMeasureSpec, heightMeasureSpec)?.let { size ->
+            setMeasuredDimension(size.x, size.y)
+        } ?: run { super.onMeasure(widthMeasureSpec, heightMeasureSpec) }
+        calculateLeftTopPosition()
+
+        isDozeReadyToAnimate = true
+        onAnimateDoze?.invoke()
+        onAnimateDoze = null
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        logger.d("onLayout()")
+        super.onLayout(changed, left, top, right, bottom)
+    }
+
     override fun onDraw(canvas: Canvas) {
+        logger.d("onDraw()")
         super.onDraw(canvas)
+
         digitalClockTextViewMap.forEach { (id, textView) ->
             // save canvas location in anticipation of restoration later
             canvas.save()
@@ -117,14 +184,30 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
         }
     }
 
-    override fun onLocaleChanged(locale: Locale) {
+    fun isAlignedWithScreen(): Boolean = false
+
+    fun onLocaleChanged(locale: Locale) {
         updateLocale(locale)
         requestLayout()
     }
 
-    override fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
-        dozeControlState.animateDoze = {
-            super.animateDoze(isDozing, isAnimated)
+    fun updateColor(color: Int) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateColor(color) }
+        invalidate()
+    }
+
+    fun updateAxes(axes: List<ClockFontAxisSetting>) {
+        digitalClockTextViewMap.forEach { _, view -> view.updateAxes(axes) }
+        requestLayout()
+    }
+
+    fun onFontSettingChanged(fontSizePx: Float) {
+        digitalClockTextViewMap.forEach { _, view -> view.applyTextSize(fontSizePx) }
+    }
+
+    fun animateDoze(isDozing: Boolean, isAnimated: Boolean) {
+        fun executeDozeAnimation() {
+            digitalClockTextViewMap.forEach { _, view -> view.animateDoze(isDozing, isAnimated) }
             if (maxSingleDigitSize.x < 0 || maxSingleDigitSize.y < 0) {
                 measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
             }
@@ -150,10 +233,13 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
                 }
             }
         }
+
+        if (isDozeReadyToAnimate) executeDozeAnimation()
+        else onAnimateDoze = { executeDozeAnimation() }
     }
 
-    override fun animateCharge() {
-        super.animateCharge()
+    fun animateCharge() {
+        digitalClockTextViewMap.forEach { _, view -> view.animateCharge() }
         digitalClockTextViewMap.forEach { (id, textView) ->
             textView.digitTranslateAnimator?.let {
                 it.animatePosition(
@@ -301,7 +387,7 @@ class FlexClockView(clockCtx: ClockContext) : DigitalClockFaceView(clockCtx) {
         // Add language tags below that do not have vertically mono spaced numerals
         private val NON_MONO_VERTICAL_NUMERIC_LINE_SPACING_LANGUAGES =
             setOf(
-                "my", // Burmese
+                "my" // Burmese
             )
 
         // Use the sign of targetTranslation to control the direction of digit translation
