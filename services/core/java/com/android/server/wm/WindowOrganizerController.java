@@ -595,7 +595,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 final ActionChain chain = mService.mChainTracker.start("tfTransact", transition);
                 final int effects = applyTransaction(wct, -1 /* syncId */, chain, caller, deferred);
-                if (effects == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
+                if (effects == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()
+                        // Always send the remote transition even if it is no-op because the remote
+                        // handler may still want to handle it.
+                        && remoteTransition == null) {
                     transition.abort();
                     return;
                 }
