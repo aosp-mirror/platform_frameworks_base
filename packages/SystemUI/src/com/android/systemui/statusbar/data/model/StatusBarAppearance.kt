@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.data.model
 
 import com.android.internal.view.AppearanceRegion
-import com.android.systemui.statusbar.phone.BoundsPair
+import com.android.systemui.statusbar.layout.BoundsPair
 
 /** Keeps track of various parameters coordinating the appearance of the status bar. */
 data class StatusBarAppearance(
