@@ -48,9 +48,12 @@ constructor(
      *
      * This is called exclusively by sources that can authoritatively say we should be unlocked,
      * including KeyguardSecurityContainerController and WindowManager.
+     *
+     * Returns [false] if the transition was not started, because we're already GONE or we don't
+     * know how to dismiss keyguard from the current state.
      */
-    fun startDismissKeyguardTransition(reason: String = "") {
-        if (SceneContainerFlag.isEnabled) return
+    fun startDismissKeyguardTransition(reason: String = ""): Boolean {
+        if (SceneContainerFlag.isEnabled) return false
         Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
         val startedState =
             if (transitionRaceCondition()) {
@@ -65,13 +68,20 @@ constructor(
             AOD -> fromAodTransitionInteractor.dismissAod()
             DOZING -> fromDozingTransitionInteractor.dismissFromDozing()
             KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.dismissFromOccluded()
-            KeyguardState.GONE ->
+            KeyguardState.GONE -> {
                 Log.i(
                     TAG,
                     "Already transitioning to GONE; ignoring startDismissKeyguardTransition.",
                 )
-            else -> Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
+                return false
+            }
+            else -> {
+                Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
+                return false
+            }
         }
+
+        return true
     }
 
     companion object {

@@ -21,6 +21,7 @@ import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
+import android.view.IRemoteAnimationFinishedCallback
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -38,10 +39,13 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -221,5 +225,23 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setSurfaceBehindVisibility(true)
         underTest.setSurfaceBehindVisibility(false)
         verify(keyguardTransitions).startKeyguardTransition(eq(true), any())
+    }
+
+    @Test
+    fun remoteAnimationInstantlyFinished_ifDismissTransitionNotStarted() {
+        val mockedCallback = mock<IRemoteAnimationFinishedCallback>()
+        whenever(keyguardDismissTransitionInteractor.startDismissKeyguardTransition(any()))
+            .thenReturn(false)
+
+        underTest.onKeyguardGoingAwayRemoteAnimationStart(
+            transit = 0,
+            apps = emptyArray(),
+            wallpapers = emptyArray(),
+            nonApps = emptyArray(),
+            finishedCallback = mockedCallback,
+        )
+
+        verify(mockedCallback).onAnimationFinished()
+        verifyNoMoreInteractions(mockedCallback)
     }
 }
