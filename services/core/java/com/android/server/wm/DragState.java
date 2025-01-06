@@ -253,7 +253,8 @@ class DragState {
                     }
                 }
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED, inWindowX,
-                        inWindowY, mThumbOffsetX, mThumbOffsetY, mFlags, null, null, null,
+                        inWindowY, mThumbOffsetX, mThumbOffsetY,
+                        mCurrentDisplayContent.getDisplayId(), mFlags, null, null, null,
                         dragSurface, null, mDragResult);
                 try {
                     if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DRAG_ENDED to " + ws);
@@ -791,10 +792,10 @@ class DragState {
             ClipData data, boolean includeDragSurface, boolean includeDragFlags,
             IDragAndDropPermissions dragAndDropPermissions) {
         return DragEvent.obtain(action, x, y, mThumbOffsetX, mThumbOffsetY,
-                includeDragFlags ? mFlags : 0,
+                mCurrentDisplayContent.getDisplayId(), includeDragFlags ? mFlags : 0,
                 null  /* localState */, description, data,
-                includeDragSurface ? mSurfaceControl : null,
-                dragAndDropPermissions, false /* result */);
+                includeDragSurface ? mSurfaceControl : null, dragAndDropPermissions,
+                false /* result */);
     }
 
     private ValueAnimator createReturnAnimationLocked() {

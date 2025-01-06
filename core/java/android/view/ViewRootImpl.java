@@ -10561,13 +10561,13 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onDragEvent(boolean isExiting, float x, float y) {
+        public void onDragEvent(boolean isExiting, float x, float y, int displayId) {
             // force DRAG_EXITED_EVENT if appropriate
             DragEvent event = DragEvent.obtain(
-                    isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION,
-                    x, y, 0 /* offsetX */, 0 /* offsetY */, 0 /* flags */, null/* localState */,
-                    null/* description */, null /* data */, null /* dragSurface */,
-                    null /* dragAndDropPermissions */, false /* result */);
+                    isExiting ? DragEvent.ACTION_DRAG_EXITED : DragEvent.ACTION_DRAG_LOCATION, x, y,
+                    0 /* offsetX */, 0 /* offsetY */, displayId, 0 /* flags */,
+                    null/* localState */, null/* description */, null /* data */,
+                    null /* dragSurface */, null /* dragAndDropPermissions */, false /* result */);
             dispatchDragEvent(event);
         }
 
