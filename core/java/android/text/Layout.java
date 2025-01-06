@@ -1071,6 +1071,12 @@ public abstract class Layout {
                         var hasBgColorChanged = newBackground != bgPaint.getColor();
 
                         if (lineNum != mLastLineNum || hasBgColorChanged) {
+                            // Skip processing if the character is a space or a tap to avoid
+                            // rendering an abrupt, empty rectangle.
+                            if (Character.isWhitespace(mText.charAt(index))) {
+                                return;
+                            }
+
                             // Draw what we have so far, then reset the rect and update its color
                             drawRect();
                             mLineBackground.set(left, top, right, bottom);
