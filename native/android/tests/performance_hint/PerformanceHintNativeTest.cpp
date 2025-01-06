@@ -161,6 +161,9 @@ public:
                          clientDataIn,
                  ::aidl::android::os::IHintManager::HintManagerClientData* _aidl_return),
                 (override));
+    MOCK_METHOD(ScopedAStatus, getClientData,
+                (::aidl::android::os::IHintManager::HintManagerClientData * _aidl_return),
+                (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };

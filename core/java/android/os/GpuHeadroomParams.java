@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.os.health.SystemHealthManager;
 
 import java.lang.annotation.Retention;
@@ -26,15 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Headroom request params used by {@link SystemHealthManager#getGpuHeadroom(GpuHeadroomParams)}.
+ *
+ * <p>This class is immutable and one should use the {@link Builder} to build a new instance.
  */
 @FlaggedApi(Flags.FLAG_CPU_GPU_HEADROOMS)
 public final class GpuHeadroomParams {
-    final GpuHeadroomParamsInternal mInternal;
-
-    public GpuHeadroomParams() {
-        mInternal = new GpuHeadroomParamsInternal();
-    }
-
     /** @hide */
     @IntDef(flag = false, prefix = {"GPU_HEADROOM_CALCULATION_TYPE_"}, value = {
             GPU_HEADROOM_CALCULATION_TYPE_MIN, // 0
@@ -45,66 +42,124 @@ public final class GpuHeadroomParams {
     }
 
     /**
-     * Calculates the headroom based on minimum value over a device-defined window.
+     * The headroom calculation type bases on minimum value over a specified window.
      */
     public static final int GPU_HEADROOM_CALCULATION_TYPE_MIN = 0;
 
     /**
-     * Calculates the headroom based on average value over a device-defined window.
+     * The headroom calculation type bases on average value over a specified window.
      */
     public static final int GPU_HEADROOM_CALCULATION_TYPE_AVERAGE = 1;
 
-    private static final int CALCULATION_WINDOW_MILLIS_MIN = 50;
-    private static final int CALCULATION_WINDOW_MILLIS_MAX = 10000;
+    /**
+     * The minimum size of the window to compute the headroom over.
+     */
+    public static final int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN = 50;
 
     /**
-     * Sets the headroom calculation type.
-     * <p>
-     *
-     * @throws IllegalArgumentException if the type is invalid.
+     * The maximum size of the window to compute the headroom over.
      */
-    public void setCalculationType(@GpuHeadroomCalculationType int calculationType) {
-        switch (calculationType) {
-            case GPU_HEADROOM_CALCULATION_TYPE_MIN:
-            case GPU_HEADROOM_CALCULATION_TYPE_AVERAGE:
-                mInternal.calculationType = (byte) calculationType;
-                return;
+    public static final int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX = 10000;
+
+    /**
+     * @hide
+     */
+    public final GpuHeadroomParamsInternal mInternal;
+
+    /**
+     * @hide
+     */
+    private GpuHeadroomParams() {
+        mInternal = new GpuHeadroomParamsInternal();
+    }
+
+    public static final class Builder {
+        private int mCalculationType = -1;
+        private int mCalculationWindowMillis = -1;
+
+        public Builder() {
         }
-        throw new IllegalArgumentException("Invalid calculation type: " + calculationType);
+
+        /**
+         * Returns a new builder with the same values as this object.
+         */
+        public Builder(@NonNull GpuHeadroomParams params) {
+            if (params.mInternal.calculationType >= 0) {
+                mCalculationType = params.mInternal.calculationType;
+            }
+            if (params.mInternal.calculationWindowMillis >= 0) {
+                mCalculationWindowMillis = params.mInternal.calculationWindowMillis;
+            }
+        }
+
+        /**
+         * Sets the headroom calculation type.
+         * <p>
+         *
+         * @throws IllegalArgumentException if the type is invalid.
+         */
+        @NonNull
+        public Builder setCalculationType(
+                @GpuHeadroomCalculationType int calculationType) {
+            switch (calculationType) {
+                case GPU_HEADROOM_CALCULATION_TYPE_MIN:
+                case GPU_HEADROOM_CALCULATION_TYPE_AVERAGE: {
+                    mCalculationType = calculationType;
+                    return this;
+                }
+            }
+            throw new IllegalArgumentException("Invalid calculation type: " + calculationType);
+        }
+
+        /**
+         * Sets the headroom calculation window size in milliseconds.
+         * <p>
+         *
+         * @param windowMillis the window size in milliseconds ranges from
+         *                     {@link SystemHealthManager#getGpuHeadroomCalculationWindowRange()}.
+         *                     The smaller the window size, the larger fluctuation in the headroom
+         *                     value should be expected. The default value can be retrieved from
+         *                     the {@link GpuHeadroomParams#getCalculationWindowMillis}. The device
+         *                     will try to use the closest feasible window size to this param.
+         * @throws IllegalArgumentException if the window is invalid.
+         */
+        @NonNull
+        public Builder setCalculationWindowMillis(@IntRange(from = 1) int windowMillis) {
+            if (windowMillis <= 0) {
+                throw new IllegalArgumentException("Invalid calculation window: " + windowMillis);
+            }
+            mCalculationWindowMillis = windowMillis;
+            return this;
+        }
+
+        /**
+         * Builds the {@link GpuHeadroomParams} object.
+         */
+        @NonNull
+        public GpuHeadroomParams build() {
+            GpuHeadroomParams params = new GpuHeadroomParams();
+            if (mCalculationType >= 0) {
+                params.mInternal.calculationType = (byte) mCalculationType;
+            }
+            if (mCalculationWindowMillis >= 0) {
+                params.mInternal.calculationWindowMillis = mCalculationWindowMillis;
+            }
+            return params;
+        }
     }
 
     /**
      * Gets the headroom calculation type.
-     * Default to {@link #GPU_HEADROOM_CALCULATION_TYPE_MIN} if the params is not set.
+     * <p>
+     * This will return the default value chosen by the device if not set.
      */
     public @GpuHeadroomCalculationType int getCalculationType() {
         @GpuHeadroomCalculationType int validatedType = switch ((int) mInternal.calculationType) {
-            case GPU_HEADROOM_CALCULATION_TYPE_MIN, GPU_HEADROOM_CALCULATION_TYPE_AVERAGE ->
-                    mInternal.calculationType;
+            case GPU_HEADROOM_CALCULATION_TYPE_MIN,
+                 GPU_HEADROOM_CALCULATION_TYPE_AVERAGE -> mInternal.calculationType;
             default -> GPU_HEADROOM_CALCULATION_TYPE_MIN;
         };
         return validatedType;
-    }
-
-    /**
-     * Sets the headroom calculation window size in milliseconds.
-     * <p>
-     *
-     * @param windowMillis the window size in milliseconds ranges from [50, 10000]. The smaller the
-     *                     window size, the larger fluctuation in the headroom value should be
-     *                     expected. The default value can be retrieved from the
-     *                     {@link #getCalculationWindowMillis}. The device will try to use the
-     *                     closest feasible window size to this param.
-     * @throws IllegalArgumentException if the window is invalid.
-     */
-    public void setCalculationWindowMillis(
-            @IntRange(from = CALCULATION_WINDOW_MILLIS_MIN, to =
-                    CALCULATION_WINDOW_MILLIS_MAX) int windowMillis) {
-        if (windowMillis < CALCULATION_WINDOW_MILLIS_MIN
-                || windowMillis > CALCULATION_WINDOW_MILLIS_MAX) {
-            throw new IllegalArgumentException("Invalid calculation window: " + windowMillis);
-        }
-        mInternal.calculationWindowMillis = windowMillis;
     }
 
     /**
@@ -112,15 +167,28 @@ public final class GpuHeadroomParams {
      * <p>
      * This will return the default value chosen by the device if not set.
      */
-    public @IntRange(from = CALCULATION_WINDOW_MILLIS_MIN, to =
-            CALCULATION_WINDOW_MILLIS_MAX) int getCalculationWindowMillis() {
+    public int getCalculationWindowMillis() {
         return mInternal.calculationWindowMillis;
     }
 
-    /**
-     * @hide
-     */
-    public GpuHeadroomParamsInternal getInternal() {
-        return mInternal;
+    @Override
+    public String toString() {
+        return "GpuHeadroomParams{"
+                + "calculationType=" + mInternal.calculationType
+                + ", calculationWindowMillis=" + mInternal.calculationWindowMillis
+                + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GpuHeadroomParams that = (GpuHeadroomParams) o;
+        return mInternal.equals(that.mInternal);
+    }
+
+    @Override
+    public int hashCode() {
+        return mInternal.hashCode();
     }
 }

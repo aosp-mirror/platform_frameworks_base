@@ -320,6 +320,9 @@ LIBANDROID {
     ASystemFontIterator_open; # introduced=29
     ASystemFontIterator_close; # introduced=29
     ASystemFontIterator_next; # introduced=29
+    ASystemHealth_getMaxCpuHeadroomTidsSize; # introduced=36
+    ASystemHealth_getCpuHeadroomCalculationWindowRange; # introduced=36
+    ASystemHealth_getGpuHeadroomCalculationWindowRange; # introduced=36
     ASystemHealth_getCpuHeadroom; # introduced=36
     ASystemHealth_getGpuHeadroom; # introduced=36
     ASystemHealth_getCpuHeadroomMinIntervalMillis; # introduced=36

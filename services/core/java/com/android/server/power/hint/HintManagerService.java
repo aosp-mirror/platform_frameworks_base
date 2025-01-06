@@ -121,6 +121,8 @@ public final class HintManagerService extends SystemService {
     @VisibleForTesting final long mHintSessionPreferredRate;
 
     @VisibleForTesting static final int MAX_GRAPHICS_PIPELINE_THREADS_COUNT = 5;
+    private static final int DEFAULT_MAX_CPU_HEADROOM_THREADS_COUNT = 5;
+    private static final int DEFAULT_CHECK_HEADROOM_PROC_STAT_MIN_MILLIS = 50;
 
     // Multi-level map storing all active AppHintSessions.
     // First level is keyed by the UID of the client process creating the session.
@@ -206,12 +208,17 @@ public final class HintManagerService extends SystemService {
             "persist.hms.check_headroom_affinity";
     private static final String PROPERTY_CHECK_HEADROOM_PROC_STAT_MIN_MILLIS =
             "persist.hms.check_headroom_proc_stat_min_millis";
+    private static final String PROPERTY_CPU_HEADROOM_TID_MAX_CNT =
+            "persist.hms.cpu_headroom_tid_max_cnt";
     private Boolean mFMQUsesIntegratedEventFlag = false;
 
     private final Object mCpuHeadroomLock = new Object();
     @VisibleForTesting
     final float mJiffyMillis;
+    private final boolean mCheckHeadroomTid;
+    private final boolean mCheckHeadroomAffinity;
     private final int mCheckHeadroomProcStatMinMillis;
+    private final int mCpuHeadroomMaxTidCnt;
     @GuardedBy("mCpuHeadroomLock")
     private long mLastCpuUserModeTimeCheckedMillis = 0;
     @GuardedBy("mCpuHeadroomLock")
@@ -339,13 +346,23 @@ public final class HintManagerService extends SystemService {
             mUidToLastUserModeJiffies = new ArrayMap<>();
             long jiffyHz = Os.sysconf(OsConstants._SC_CLK_TCK);
             mJiffyMillis = 1000.0f / jiffyHz;
+            mCheckHeadroomTid = SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_TID, true);
+            mCheckHeadroomAffinity = SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_AFFINITY,
+                    true);
             mCheckHeadroomProcStatMinMillis = SystemProperties.getInt(
-                    PROPERTY_CHECK_HEADROOM_PROC_STAT_MIN_MILLIS, 50);
+                    PROPERTY_CHECK_HEADROOM_PROC_STAT_MIN_MILLIS,
+                    DEFAULT_CHECK_HEADROOM_PROC_STAT_MIN_MILLIS);
+            mCpuHeadroomMaxTidCnt = Math.min(SystemProperties.getInt(
+                    PROPERTY_CPU_HEADROOM_TID_MAX_CNT, DEFAULT_MAX_CPU_HEADROOM_THREADS_COUNT),
+                    mSupportInfo.headroom.cpuMaxTidCount);
         } else {
             mCpuHeadroomCache = null;
             mUidToLastUserModeJiffies = null;
             mJiffyMillis = 0.0f;
+            mCheckHeadroomTid = true;
+            mCheckHeadroomAffinity = true;
             mCheckHeadroomProcStatMinMillis = 0;
+            mCpuHeadroomMaxTidCnt = 0;
         }
         if (mSupportInfo.headroom.isGpuSupported) {
             mGpuHeadroomCache = new HeadroomCache<>(2, mSupportInfo.headroom.gpuMinIntervalMillis);
@@ -1577,8 +1594,7 @@ public final class HintManagerService extends SystemService {
             if (params.usesDeviceHeadroom) {
                 halParams.tids = new int[]{};
             } else if (params.tids != null && params.tids.length > 0) {
-                if (UserHandle.getAppId(uid) != Process.SYSTEM_UID && SystemProperties.getBoolean(
-                        PROPERTY_CHECK_HEADROOM_TID, true)) {
+                if (UserHandle.getAppId(uid) != Process.SYSTEM_UID && mCheckHeadroomTid) {
                     final int tgid = Process.getThreadGroupLeader(Binder.getCallingPid());
                     for (int tid : params.tids) {
                         if (Process.getThreadGroupLeader(tid) != tgid) {
@@ -1588,8 +1604,8 @@ public final class HintManagerService extends SystemService {
                         }
                     }
                 }
-                if (cpuHeadroomAffinityCheck() && params.tids.length > 1
-                        && SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_AFFINITY, true)) {
+                if (cpuHeadroomAffinityCheck() && mCheckHeadroomAffinity
+                        && params.tids.length > 1) {
                     checkThreadAffinityForTids(params.tids);
                 }
                 halParams.tids = params.tids;
@@ -1709,15 +1725,22 @@ public final class HintManagerService extends SystemService {
                 throw new IllegalArgumentException(
                         "Unknown CPU headroom calculation type " + (int) params.calculationType);
             }
-            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+            if (params.calculationWindowMillis < mSupportInfo.headroom.cpuMinCalculationWindowMillis
+                    || params.calculationWindowMillis
+                    > mSupportInfo.headroom.cpuMaxCalculationWindowMillis) {
                 throw new IllegalArgumentException(
-                        "Invalid CPU headroom calculation window, expected [50, 10000] but got "
+                        "Invalid CPU headroom calculation window, expected ["
+                                + mSupportInfo.headroom.cpuMinCalculationWindowMillis
+                                + ", "
+                                + mSupportInfo.headroom.cpuMaxCalculationWindowMillis
+                                + "] but got "
                                 + params.calculationWindowMillis);
             }
             if (!params.usesDeviceHeadroom) {
-                if (params.tids != null && params.tids.length > 5) {
+                if (params.tids != null && params.tids.length > mCpuHeadroomMaxTidCnt) {
                     throw new IllegalArgumentException(
-                            "More than 5 TIDs requested: " + params.tids.length);
+                            "More than " + mCpuHeadroomMaxTidCnt + " TIDs requested: "
+                                    + params.tids.length);
                 }
             }
         }
@@ -1772,9 +1795,13 @@ public final class HintManagerService extends SystemService {
                 throw new IllegalArgumentException(
                         "Unknown GPU headroom calculation type " + (int) params.calculationType);
             }
-            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+            if (params.calculationWindowMillis < mSupportInfo.headroom.gpuMinCalculationWindowMillis
+                    || params.calculationWindowMillis
+                    > mSupportInfo.headroom.gpuMaxCalculationWindowMillis) {
                 throw new IllegalArgumentException(
-                        "Invalid GPU headroom calculation window, expected [50, 10000] but got "
+                        "Invalid GPU headroom calculation window, expected ["
+                                + mSupportInfo.headroom.gpuMinCalculationWindowMillis + ", "
+                                + mSupportInfo.headroom.gpuMaxCalculationWindowMillis + "] but got "
                                 + params.calculationWindowMillis);
             }
         }
@@ -1807,9 +1834,15 @@ public final class HintManagerService extends SystemService {
         @Override
         public IHintManager.HintManagerClientData
                 registerClient(@NonNull IHintManager.IHintManagerClient clientBinder) {
+            return getClientData();
+        }
+
+        @Override
+        public IHintManager.HintManagerClientData getClientData() {
             IHintManager.HintManagerClientData out = new IHintManager.HintManagerClientData();
             out.preferredRateNanos = mHintSessionPreferredRate;
             out.maxGraphicsPipelineThreads = getMaxGraphicsPipelineThreadsCount();
+            out.maxCpuHeadroomThreads = DEFAULT_MAX_CPU_HEADROOM_THREADS_COUNT;
             out.powerHalVersion = mPowerHalVersion;
             out.supportInfo = mSupportInfo;
             return out;
@@ -1838,23 +1871,40 @@ public final class HintManagerService extends SystemService {
                     }
                 }
             }
-            pw.println("CPU Headroom Interval: " + mSupportInfo.headroom.cpuMinIntervalMillis);
-            pw.println("GPU Headroom Interval: " + mSupportInfo.headroom.gpuMinIntervalMillis);
-            try {
-                CpuHeadroomParamsInternal params = new CpuHeadroomParamsInternal();
-                params.usesDeviceHeadroom = true;
-                CpuHeadroomResult ret = getCpuHeadroom(params);
-                pw.println("CPU headroom: " + (ret == null ? "N/A" : ret.getGlobalHeadroom()));
-            } catch (Exception e) {
-                Slog.d(TAG, "Failed to dump CPU headroom", e);
-                pw.println("CPU headroom: N/A");
+            pw.println("CPU Headroom Supported: " + mSupportInfo.headroom.isCpuSupported);
+            if (mSupportInfo.headroom.isCpuSupported) {
+                pw.println("CPU Headroom Interval: " + mSupportInfo.headroom.cpuMinIntervalMillis);
+                pw.println("CPU Headroom TID Max Count: " + mCpuHeadroomMaxTidCnt);
+                pw.println("CPU Headroom TID Max Count From HAL: "
+                        + mSupportInfo.headroom.cpuMaxTidCount);
+                pw.println("CPU Headroom Calculation Window Range: ["
+                        + mSupportInfo.headroom.cpuMinCalculationWindowMillis + ", "
+                        + mSupportInfo.headroom.cpuMaxCalculationWindowMillis + "]");
+                try {
+                    CpuHeadroomParamsInternal params = new CpuHeadroomParamsInternal();
+                    params.usesDeviceHeadroom = true;
+                    CpuHeadroomResult ret = getCpuHeadroom(params);
+                    pw.println("CPU headroom: " + (ret == null ? "N/A" : ret.getGlobalHeadroom()));
+                } catch (Exception e) {
+                    Slog.d(TAG, "Failed to dump CPU headroom", e);
+                    pw.println("CPU headroom: N/A");
+                }
             }
-            try {
-                GpuHeadroomResult ret = getGpuHeadroom(new GpuHeadroomParamsInternal());
-                pw.println("GPU headroom: " + (ret == null ? "N/A" : ret.getGlobalHeadroom()));
-            } catch (Exception e) {
-                Slog.d(TAG, "Failed to dump GPU headroom", e);
-                pw.println("GPU headroom: N/A");
+            pw.println("GPU Headroom Supported: " + mSupportInfo.headroom.isGpuSupported);
+            if (mSupportInfo.headroom.isGpuSupported) {
+                pw.println("GPU Headroom Interval: " + mSupportInfo.headroom.gpuMinIntervalMillis);
+                pw.println("GPU Headroom Calculation Window Range: ["
+                        + mSupportInfo.headroom.gpuMinCalculationWindowMillis + ", "
+                        + mSupportInfo.headroom.gpuMaxCalculationWindowMillis + "]");
+                try {
+                    GpuHeadroomParamsInternal params = new GpuHeadroomParamsInternal();
+                    params.calculationWindowMillis = mDefaultGpuHeadroomCalculationWindowMillis;
+                    GpuHeadroomResult ret = getGpuHeadroom(params);
+                    pw.println("GPU headroom: " + (ret == null ? "N/A" : ret.getGlobalHeadroom()));
+                } catch (Exception e) {
+                    Slog.d(TAG, "Failed to dump GPU headroom", e);
+                    pw.println("GPU headroom: N/A");
+                }
             }
         }
 
