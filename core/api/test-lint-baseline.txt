@@ -2057,6 +2057,10 @@ UnflaggedApi: android.media.AudioManager#getFocusFadeOutDurationForTest():
     New API must be flagged with @FlaggedApi: method android.media.AudioManager.getFocusFadeOutDurationForTest()
 UnflaggedApi: android.media.AudioManager#getFocusUnmuteDelayAfterFadeOutForTest():
     New API must be flagged with @FlaggedApi: method android.media.AudioManager.getFocusUnmuteDelayAfterFadeOutForTest()
+UnflaggedApi: android.media.MediaMuxer.OutputFormat#MUXER_OUTPUT_FIRST:
+    New API must be flagged with @FlaggedApi: field android.media.MediaMuxer.OutputFormat.MUXER_OUTPUT_FIRST
+UnflaggedApi: android.media.MediaMuxer.OutputFormat#MUXER_OUTPUT_LAST:
+    New API must be flagged with @FlaggedApi: field android.media.MediaMuxer.OutputFormat.MUXER_OUTPUT_LAST
 UnflaggedApi: android.media.RingtoneSelection:
     New API must be flagged with @FlaggedApi: class android.media.RingtoneSelection
 UnflaggedApi: android.media.RingtoneSelection#DEFAULT_SELECTION_URI_STRING:

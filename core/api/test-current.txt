@@ -2113,6 +2113,11 @@ package android.media {
     method public boolean isAidlHal();
   }
 
+  public static final class MediaMuxer.OutputFormat {
+    field public static final int MUXER_OUTPUT_FIRST = 0; // 0x0
+    field public static final int MUXER_OUTPUT_LAST = 4; // 0x4
+  }
+
   public final class MediaRoute2Info implements android.os.Parcelable {
     method @NonNull public String getOriginalId();
   }
