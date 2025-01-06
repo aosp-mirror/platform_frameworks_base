@@ -196,6 +196,8 @@ class OverlayActorEnforcerTests {
                 },
                 ActorState.INVALID_OVERLAYABLE_ACTOR_NAME withCases {
                     fun TestState.mockActor(actorUri: String) {
+                        namedActorsMap = mapOf(VALID_NAMESPACE to
+                                mapOf(VALID_ACTOR_NAME to VALID_ACTOR_PKG))
                         targetOverlayableInfo = OverlayableInfo(OVERLAYABLE_NAME, actorUri)
                     }
                     failure("wrongScheme") {
