@@ -89,7 +89,7 @@
                 >
 
                 <!--
-                NOTE: The notification_top_line_views layout contains the app_name_text.
+                NOTE: The notification_2025_top_line_views layout contains the app_name_text.
                 In order to include the title view at the beginning, the Notification.Builder
                 has logic to hide that view whenever this title view is to be visible.
                 -->
@@ -106,7 +106,7 @@
                     android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
                     />
 
-                <include layout="@layout/notification_top_line_views" />
+                <include layout="@layout/notification_2025_top_line_views" />
 
             </NotificationTopLineView>
 

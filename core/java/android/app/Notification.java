@@ -5855,7 +5855,9 @@ public class Notification implements Parcelable
                 return null;
             }
             final int size = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_badge_size);
+                    Flags.notificationsRedesignTemplates()
+                            ? R.dimen.notification_2025_badge_size
+                            : R.dimen.notification_badge_size);
             Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
             badge.setBounds(0, 0, size, size);

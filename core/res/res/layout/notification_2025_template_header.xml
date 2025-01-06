@@ -68,7 +68,7 @@
         android:theme="@style/Theme.DeviceDefault.Notification"
         >
 
-        <include layout="@layout/notification_top_line_views" />
+        <include layout="@layout/notification_2025_top_line_views" />
 
     </NotificationTopLineView>
 
