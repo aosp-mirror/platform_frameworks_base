@@ -1371,6 +1371,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         if (!tr.isAttached() || !tr.isVisibleRequested()
                                 || !tr.inPinnedWindowingMode()) return;
                         final ActivityRecord currTop = tr.getTopNonFinishingActivity();
+                        if (currTop == null) return;
                         if (currTop.inPinnedWindowingMode()) return;
                         Slog.e(TAG, "Enter-PIP was started but not completed, this is a Shell/SysUI"
                                 + " bug. This state breaks gesture-nav, so attempting clean-up.");
