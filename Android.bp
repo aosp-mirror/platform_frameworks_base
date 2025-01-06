@@ -537,45 +537,6 @@ java_library {
     }),
 }
 
-// This is identical to "framework-minus-apex" but with "jarjar_shards" hardcodd.
-// (also "stem" is commented out to avoid a conflict with the "framework-minus-apex")
-// TODO(b/383559945) This module is just for local testing / verification. It's not used
-// by anything. Remove it once we roll out RELEASE_USE_SHARDED_JARJAR_ON_FRAMEWORK_MINUS_APEX.
-java_library {
-    name: "framework-minus-apex_jarjar-sharded",
-    defaults: [
-        "framework-minus-apex-with-libs-defaults",
-        "framework-non-updatable-lint-defaults",
-    ],
-    installable: true,
-    // For backwards compatibility.
-    // stem: "framework",
-    apex_available: ["//apex_available:platform"],
-    visibility: [
-        "//frameworks/base",
-        "//frameworks/base/location",
-        // TODO(b/147128803) remove the below lines
-        "//frameworks/base/apex/blobstore/framework",
-        "//frameworks/base/apex/jobscheduler/framework",
-        "//frameworks/base/packages/Tethering/tests/unit",
-        "//packages/modules/Connectivity/Tethering/tests/unit",
-    ],
-    errorprone: {
-        javacflags: [
-            "-Xep:AndroidFrameworkCompatChange:ERROR",
-            "-Xep:AndroidFrameworkUid:ERROR",
-        ],
-    },
-    lint: {
-        baseline_filename: "lint-baseline.xml",
-        warning_checks: [
-            "FlaggedApi",
-        ],
-    },
-    jarjar_prefix: "com.android.internal.hidden_from_bootclasspath",
-    jarjar_shards: "10",
-}
-
 java_library {
     name: "framework-minus-apex-intdefs",
     defaults: ["framework-minus-apex-with-libs-defaults"],
