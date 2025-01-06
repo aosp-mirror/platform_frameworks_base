@@ -413,13 +413,13 @@ public class ZenModeHelper {
     }
 
     // TODO: b/310620812 - Make private (or inline) when MODES_API is inlined.
-    public List<ZenRule> getZenRules(UserHandle user) {
+    public List<ZenRule> getZenRules(UserHandle user, int callingUid) {
         List<ZenRule> rules = new ArrayList<>();
         synchronized (mConfigLock) {
             ZenModeConfig config = getConfigLocked(user);
             if (config == null) return rules;
             for (ZenRule rule : config.automaticRules.values()) {
-                if (canManageAutomaticZenRule(rule)) {
+                if (canManageAutomaticZenRule(rule, callingUid)) {
                     rules.add(rule);
                 }
             }
@@ -432,8 +432,8 @@ public class ZenModeHelper {
      * (which means the owned rules for a regular app, and every rule for system callers) together
      * with their ids.
      */
-    Map<String, AutomaticZenRule> getAutomaticZenRules(UserHandle user) {
-        List<ZenRule> ruleList = getZenRules(user);
+    Map<String, AutomaticZenRule> getAutomaticZenRules(UserHandle user, int callingUid) {
+        List<ZenRule> ruleList = getZenRules(user, callingUid);
         HashMap<String, AutomaticZenRule> rules = new HashMap<>(ruleList.size());
         for (ZenRule rule : ruleList) {
             rules.put(rule.id, zenRuleToAutomaticZenRule(rule));
@@ -441,7 +441,7 @@ public class ZenModeHelper {
         return rules;
     }
 
-    public AutomaticZenRule getAutomaticZenRule(UserHandle user, String id) {
+    public AutomaticZenRule getAutomaticZenRule(UserHandle user, String id, int callingUid) {
         ZenRule rule;
         synchronized (mConfigLock) {
             ZenModeConfig config = getConfigLocked(user);
@@ -449,7 +449,7 @@ public class ZenModeHelper {
             rule = config.automaticRules.get(id);
         }
         if (rule == null) return null;
-        if (canManageAutomaticZenRule(rule)) {
+        if (canManageAutomaticZenRule(rule, callingUid)) {
             return zenRuleToAutomaticZenRule(rule);
         }
         return null;
@@ -591,7 +591,7 @@ public class ZenModeHelper {
                         + " reason=" + reason);
             }
             ZenModeConfig.ZenRule oldRule = config.automaticRules.get(ruleId);
-            if (oldRule == null || !canManageAutomaticZenRule(oldRule)) {
+            if (oldRule == null || !canManageAutomaticZenRule(oldRule, callingUid)) {
                 throw new SecurityException(
                         "Cannot update rules not owned by your condition provider");
             }
@@ -859,7 +859,7 @@ public class ZenModeHelper {
             newConfig = config.copy();
             ZenRule ruleToRemove = newConfig.automaticRules.get(id);
             if (ruleToRemove == null) return false;
-            if (canManageAutomaticZenRule(ruleToRemove)) {
+            if (canManageAutomaticZenRule(ruleToRemove, callingUid)) {
                 newConfig.automaticRules.remove(id);
                 maybePreserveRemovedRule(newConfig, ruleToRemove, origin);
                 if (ruleToRemove.getPkg() != null
@@ -893,7 +893,8 @@ public class ZenModeHelper {
             newConfig = config.copy();
             for (int i = newConfig.automaticRules.size() - 1; i >= 0; i--) {
                 ZenRule rule = newConfig.automaticRules.get(newConfig.automaticRules.keyAt(i));
-                if (Objects.equals(rule.getPkg(), packageName) && canManageAutomaticZenRule(rule)) {
+                if (Objects.equals(rule.getPkg(), packageName)
+                        && canManageAutomaticZenRule(rule, callingUid)) {
                     newConfig.automaticRules.removeAt(i);
                     maybePreserveRemovedRule(newConfig, rule, origin);
                 }
@@ -938,14 +939,14 @@ public class ZenModeHelper {
     }
 
     @Condition.State
-    int getAutomaticZenRuleState(UserHandle user, String id) {
+    int getAutomaticZenRuleState(UserHandle user, String id, int callingUid) {
         synchronized (mConfigLock) {
             ZenModeConfig config = getConfigLocked(user);
             if (config == null) {
                 return Condition.STATE_UNKNOWN;
             }
             ZenRule rule = config.automaticRules.get(id);
-            if (rule == null || !canManageAutomaticZenRule(rule)) {
+            if (rule == null || !canManageAutomaticZenRule(rule, callingUid)) {
                 return Condition.STATE_UNKNOWN;
             }
             if (Flags.modesApi() && Flags.modesUi()) {
@@ -968,7 +969,7 @@ public class ZenModeHelper {
             newConfig = config.copy();
             ZenRule rule = newConfig.automaticRules.get(id);
             if (Flags.modesApi()) {
-                if (rule != null && canManageAutomaticZenRule(rule)) {
+                if (rule != null && canManageAutomaticZenRule(rule, callingUid)) {
                     setAutomaticZenRuleStateLocked(newConfig, Collections.singletonList(rule),
                             condition, origin, callingUid);
                 }
@@ -980,8 +981,8 @@ public class ZenModeHelper {
         }
     }
 
-    void setAutomaticZenRuleState(UserHandle user, Uri ruleDefinition, Condition condition,
-            @ConfigOrigin int origin, int callingUid) {
+    void setAutomaticZenRuleStateFromConditionProvider(UserHandle user, Uri ruleDefinition,
+            Condition condition, @ConfigOrigin int origin, int callingUid) {
         checkSetRuleStateOrigin("setAutomaticZenRuleState(Uri ruleDefinition)", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
@@ -992,7 +993,7 @@ public class ZenModeHelper {
             List<ZenRule> matchingRules = findMatchingRules(newConfig, ruleDefinition, condition);
             if (Flags.modesApi()) {
                 for (int i = matchingRules.size() - 1; i >= 0; i--) {
-                    if (!canManageAutomaticZenRule(matchingRules.get(i))) {
+                    if (!canManageAutomaticZenRule(matchingRules.get(i), callingUid)) {
                         matchingRules.remove(i);
                     }
                 }
@@ -1125,15 +1126,21 @@ public class ZenModeHelper {
         return count;
     }
 
-    public boolean canManageAutomaticZenRule(ZenRule rule) {
-        final int callingUid = Binder.getCallingUid();
+    public boolean canManageAutomaticZenRule(ZenRule rule, int callingUid) {
+        if (!com.android.server.notification.Flags.fixCallingUidFromCps()) {
+            // Old behavior: ignore supplied callingUid and instead obtain it here. Will be
+            // incorrect if not currently handling a Binder call.
+            callingUid = Binder.getCallingUid();
+        }
+
         if (callingUid == 0 || callingUid == Process.SYSTEM_UID) {
+            // Checked specifically, because checkCallingPermission() will fail.
             return true;
         } else if (mContext.checkCallingPermission(android.Manifest.permission.MANAGE_NOTIFICATIONS)
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         } else {
-            String[] packages = mPm.getPackagesForUid(Binder.getCallingUid());
+            String[] packages = mPm.getPackagesForUid(callingUid);
             if (packages != null) {
                 final int packageCount = packages.length;
                 for (int i = 0; i < packageCount; i++) {
@@ -2902,8 +2909,8 @@ public class ZenModeHelper {
     }
 
     /**
-     * Checks that the {@code origin} supplied to {@link #setAutomaticZenRuleState} overloads makes
-     * sense.
+     * Checks that the {@code origin} supplied to {@link #setAutomaticZenRuleState} or
+     * {@link #setAutomaticZenRuleStateFromConditionProvider} makes sense.
      */
     private static void checkSetRuleStateOrigin(String method, @ConfigOrigin int origin) {
         if (!Flags.modesApi()) {

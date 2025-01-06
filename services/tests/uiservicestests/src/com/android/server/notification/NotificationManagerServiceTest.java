@@ -11213,7 +11213,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Representative used to verify getCallingZenUser().
         mBinderService.getAutomaticZenRules();
 
-        verify(zenModeHelper).getAutomaticZenRules(eq(UserHandle.CURRENT));
+        verify(zenModeHelper).getAutomaticZenRules(eq(UserHandle.CURRENT), anyInt());
     }
 
     @Test
@@ -11225,7 +11225,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Representative used to verify getCallingZenUser().
         mBinderService.getAutomaticZenRules();
 
-        verify(zenModeHelper).getAutomaticZenRules(eq(Binder.getCallingUserHandle()));
+        verify(zenModeHelper).getAutomaticZenRules(eq(Binder.getCallingUserHandle()), anyInt());
     }
 
     /** Prepares for a zen-related test that uses a mocked {@link ZenModeHelper}. */

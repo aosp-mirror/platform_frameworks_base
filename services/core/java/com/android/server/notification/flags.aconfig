@@ -197,3 +197,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "fix_calling_uid_from_cps"
+  namespace: "systemui"
+  description: "Correctly checks zen rule ownership when a CPS notifies with a Condition"
+  bug: "379722187"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
