@@ -106,9 +106,6 @@ interface NotificationScrollView {
     /** Sets whether the view is displayed in pulsing mode. */
     fun setPulsing(pulsing: Boolean, animated: Boolean)
 
-    /** Gets the inset for HUNs when they are not visible */
-    fun getHeadsUpInset(): Int
-
     /**
      * Signals that any open Notification guts should be closed, as scene container is handling
      * touch events.

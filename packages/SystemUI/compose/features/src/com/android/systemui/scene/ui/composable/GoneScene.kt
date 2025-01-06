@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
@@ -34,6 +35,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
+import com.android.systemui.notifications.ui.composable.headsUpTopInset
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.Default
@@ -78,6 +80,8 @@ constructor(
             }
         }
 
+        val headsUpInset = with(LocalDensity.current) { headsUpTopInset().toPx() }
+
         LaunchedEffect(isIdleAndNotOccluded) {
             // Wait for being Idle on this Scene, otherwise LaunchedEffect would fire too soon,
             // and another transition could override the NSSL stack bounds.
@@ -86,7 +90,7 @@ constructor(
                 // and not to confuse the StackScrollAlgorithm when it displays a HUN over GONE.
                 notificationStackScrolLView.get().apply {
                     // use -headsUpInset to allow HUN translation outside bounds for snoozing
-                    setStackTop(-getHeadsUpInset().toFloat())
+                    setStackTop(-headsUpInset)
                     setStackCutoff(0f)
                 }
             }
