@@ -232,7 +232,7 @@ public class LocationFudgerTest {
 
         mFudger.createCoarse(createLocation("test", mRandom));
 
-        verify(cache).fetchDefaultCoarseningLevelIfNeeded();
+        verify(cache).onDefaultCoarseningLevelNotSet();
     }
 
     @Test

@@ -203,7 +203,7 @@ public class LocationFudger {
             } else {
                 // Try to fetch the default value. The answer won't come in time, but will be used
                 // for the next location to coarsen.
-                cacheCopy.fetchDefaultCoarseningLevelIfNeeded();
+                cacheCopy.onDefaultCoarseningLevelNotSet();
                 // Previous algorithm that snaps to a grid of width mAccuracyM.
                 coarsened = snapToGrid(latitude, longitude);
             }

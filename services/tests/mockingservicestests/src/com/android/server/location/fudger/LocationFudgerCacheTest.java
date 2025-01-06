@@ -281,7 +281,7 @@ public class LocationFudgerCacheTest {
     }
 
     @Test
-    public void fetchDefaultCoarseningLevelIfNeeded_withDefaultValue_doesNotQueryProvider()
+    public void onDefaultCoarseningLevelNotSet_withDefaultValue_doesNotQueryProvider()
             throws RemoteException {
         // Arrange.
         ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
@@ -297,14 +297,14 @@ public class LocationFudgerCacheTest {
         assertThat(cache.hasDefaultValue()).isTrue();
 
         // Act.
-        cache.fetchDefaultCoarseningLevelIfNeeded();
+        cache.onDefaultCoarseningLevelNotSet();
 
         // Assert. The method is not called again.
         verify(provider, times(1)).getDefaultCoarseningLevel(any());
     }
 
     @Test
-    public void fetchDefaultCoarseningLevelIfNeeded_withoutDefaultValue_doesQueryProvider()
+    public void onDefaultCoarseningLevelNotSet_withoutDefaultValue_doesQueryProvider()
             throws RemoteException {
         // Arrange.
         ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
@@ -320,7 +320,7 @@ public class LocationFudgerCacheTest {
         assertThat(cache.hasDefaultValue()).isFalse();
 
         // Act.
-        cache.fetchDefaultCoarseningLevelIfNeeded();
+        cache.onDefaultCoarseningLevelNotSet();
 
         // Assert. The method is called again.
         verify(provider, times(2)).getDefaultCoarseningLevel(any());
@@ -383,4 +383,56 @@ public class LocationFudgerCacheTest {
         assertThat(cache.getCoarseningLevel(latlngs[size - 1][0], latlngs[size - 1][1]))
                 .isEqualTo(0);
     }
+
+    @Test
+    public void logDensityBasedLocsUsed_rateLimitsTheSecondCall() {
+        // To avoid having to mock the logger, logDensityBasedLocsUsed returns a boolean indicating
+        // if the log was successful or rate-limited.
+
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+        boolean skippedNoDefault = false;
+        boolean isCacheHit = false;
+        int defaultCoarseningLevel = 3;
+        long time1 = 0;
+        // 7 min later. Can be any value < time1 + LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS
+        long time2 = time1 + 7 * 60 * 1000;
+
+        boolean success1 = cache.logDensityBasedLocsUsed(time1, skippedNoDefault, isCacheHit,
+                defaultCoarseningLevel);
+        boolean success2 = cache.logDensityBasedLocsUsed(time2, skippedNoDefault, isCacheHit,
+                defaultCoarseningLevel);
+
+        assertThat(success1).isTrue();  // log OK
+        assertThat(success2).isFalse();  // dropped
+    }
+
+    @Test
+    public void logDensityBasedLocsUsed_rateLimitOf3rdCall_isNotAffectedByDropped2ndCall() {
+        // To avoid having to mock the logger, logDensityBasedLocsUsed returns a boolean indicating
+        // if the log was successful or rate-limited.
+
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+        boolean skippedNoDefault = false;
+        boolean isCacheHit = false;
+        int defaultCoarseningLevel = 3;
+        long time1 = 0;
+        // 7 min later. Can be any value < time1 + LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS
+        long time2 = time1 + 7 * 60 * 1000;
+        // 11 min later. Can be any value >= time1 + LOG_DENSITY_BASED_LOCS_USED_RATE_LIMIT_MS
+        long time3 = time1 + 11 * 60 * 1000;
+
+        boolean success1 = cache.logDensityBasedLocsUsed(time1, skippedNoDefault, isCacheHit,
+                defaultCoarseningLevel);
+        boolean success2 = cache.logDensityBasedLocsUsed(time2, skippedNoDefault, isCacheHit,
+                defaultCoarseningLevel);
+        boolean success3 = cache.logDensityBasedLocsUsed(time3, skippedNoDefault, isCacheHit,
+                defaultCoarseningLevel);
+
+        assertThat(success1).isTrue();  // log OK
+        assertThat(success2).isFalse();  // dropped
+        assertThat(success3).isTrue();  // log OK
+    }
+
 }
