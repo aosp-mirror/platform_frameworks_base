@@ -56,6 +56,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerProfile;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.MockBatteryStatsImpl;
+import com.android.server.power.stats.NetworkStatsTestUtils;
 import com.android.server.power.stats.PowerStatsCollector;
 import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.WifiPowerStatsCollector;
@@ -177,6 +178,11 @@ public class WifiPowerStatsProcessorTest {
                 @Override
                 public WifiStatsRetriever getWifiStatsRetriever() {
                     return mWifiStatsRetriever;
+                }
+
+                @Override
+                public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+                    return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
                 }
             };
 

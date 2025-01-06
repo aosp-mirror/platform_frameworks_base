@@ -158,6 +158,11 @@ public class MobileRadioPowerStatsCollectorTest {
         public LongSupplier getPhoneSignalScanDurationSupplier() {
             return mScanDurationSupplier;
         }
+
+        @Override
+        public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+            return NetworkStatsTestUtils.networkStatsDelta(stats, oldStats);
+        }
     };
 
     @Before

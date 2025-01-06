@@ -2205,6 +2205,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 getWakelockDurationRetriever() {
             return mWakelockDurationRetriever;
         }
+
+        @Override
+        public NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats) {
+            return BatteryStatsImpl.this.networkStatsDelta(stats, oldStats);
+        }
     }
 
     private final PowerStatsCollectorInjector mPowerStatsCollectorInjector =
@@ -12392,83 +12397,13 @@ public class BatteryStatsImpl extends BatteryStats {
         return networkStatsManager.getWifiUidStats();
     }
 
-    static class NetworkStatsDelta {
-        int mUid;
-        int mSet;
-        long mRxBytes;
-        long mRxPackets;
-        long mTxBytes;
-        long mTxPackets;
-
-        public int getUid() {
-            return mUid;
+    @VisibleForTesting
+    protected NetworkStats networkStatsDelta(@NonNull NetworkStats stats,
+            @Nullable NetworkStats oldStats) {
+        if (oldStats == null) {
+            return stats;
         }
-
-
-        public int getSet() {
-            return mSet;
-        }
-
-        public long getRxBytes() {
-            return mRxBytes;
-        }
-
-        public long getRxPackets() {
-            return mRxPackets;
-        }
-
-        public long getTxBytes() {
-            return mTxBytes;
-        }
-
-        public long getTxPackets() {
-            return mTxPackets;
-        }
-
-        @Override
-        public String toString() {
-            return "NetworkStatsDelta{mUid=" + mUid + ", mSet=" + mSet + ", mRxBytes=" + mRxBytes
-                    + ", mRxPackets=" + mRxPackets + ", mTxBytes=" + mTxBytes + ", mTxPackets="
-                    + mTxPackets + '}';
-        }
-    }
-
-    static List<NetworkStatsDelta> computeDelta(NetworkStats currentStats,
-            NetworkStats lastStats) {
-        List<NetworkStatsDelta> deltaList = new ArrayList<>();
-        for (NetworkStats.Entry entry : currentStats) {
-            NetworkStatsDelta delta = new NetworkStatsDelta();
-            delta.mUid = entry.getUid();
-            delta.mSet = entry.getSet();
-            NetworkStats.Entry lastEntry = null;
-            if (lastStats != null) {
-                for (NetworkStats.Entry e : lastStats) {
-                    if (e.getUid() == entry.getUid() && e.getSet() == entry.getSet()
-                            && e.getTag() == entry.getTag()
-                            && e.getMetered() == entry.getMetered()
-                            && e.getRoaming() == entry.getRoaming()
-                            && e.getDefaultNetwork() == entry.getDefaultNetwork()
-                            /*&& Objects.equals(e.getIface(), entry.getIface())*/) {
-                        lastEntry = e;
-                        break;
-                    }
-                }
-            }
-            if (lastEntry != null) {
-                delta.mRxBytes = Math.max(0, entry.getRxBytes() - lastEntry.getRxBytes());
-                delta.mRxPackets = Math.max(0, entry.getRxPackets() - lastEntry.getRxPackets());
-                delta.mTxBytes = Math.max(0, entry.getTxBytes() - lastEntry.getTxBytes());
-                delta.mTxPackets = Math.max(0, entry.getTxPackets() - lastEntry.getTxPackets());
-            } else {
-                delta.mRxBytes = entry.getRxBytes();
-                delta.mRxPackets = entry.getRxPackets();
-                delta.mTxBytes = entry.getTxBytes();
-                delta.mTxPackets = entry.getTxPackets();
-            }
-            deltaList.add(delta);
-        }
-
-        return deltaList;
+        return stats.subtract(oldStats);
     }
 
     /**
@@ -12486,12 +12421,12 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        NetworkStats delta;
         // Grab a separate lock to acquire the network stats, which may do I/O.
-        List<NetworkStatsDelta> delta;
         synchronized (mWifiNetworkLock) {
             final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = computeDelta(latestStats, mLastWifiNetworkStats);
+                delta = networkStatsDelta(latestStats, mLastWifiNetworkStats);
                 mLastWifiNetworkStats = latestStats;
             } else {
                 delta = null;
@@ -12501,15 +12436,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void onWifiPowerStatsRetrieved(WifiActivityEnergyInfo wifiActivityEnergyInfo,
-            List<NetworkStatsDelta> networkStatsDeltas, long elapsedRealtimeMs, long uptimeMs) {
+            NetworkStats networkStatsDelta, long elapsedRealtimeMs, long uptimeMs) {
         // Do not populate consumed energy, because energy attribution is done by
         // WifiPowerStatsProcessor.
-        updateWifiBatteryStats(wifiActivityEnergyInfo, networkStatsDeltas, POWER_DATA_UNAVAILABLE,
+        updateWifiBatteryStats(wifiActivityEnergyInfo, networkStatsDelta, POWER_DATA_UNAVAILABLE,
                 elapsedRealtimeMs, uptimeMs);
     }
 
     private void updateWifiBatteryStats(WifiActivityEnergyInfo info,
-            List<NetworkStatsDelta> delta, long consumedChargeUC, long elapsedRealtimeMs,
+            NetworkStats delta, long consumedChargeUC, long elapsedRealtimeMs,
             long uptimeMs) {
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
@@ -12535,7 +12470,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalTxPackets = 0;
             long totalRxPackets = 0;
             if (delta != null) {
-                for (NetworkStatsDelta entry : delta) {
+                for (NetworkStats.Entry entry : delta) {
                     if (DEBUG_ENERGY) {
                         Slog.d(TAG, "Wifi uid " + entry.getUid()
                                 + ": delta rx=" + entry.getRxBytes()
@@ -12879,11 +12814,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastModemActivityInfo = activityInfo;
 
         // Grab a separate lock to acquire the network stats, which may do I/O.
-        List<NetworkStatsDelta> delta = null;
+        NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
             final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = computeDelta(latestStats, mLastModemNetworkStats);
+                delta = networkStatsDelta(latestStats, mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
@@ -12892,15 +12827,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void onMobileRadioPowerStatsRetrieved(ModemActivityInfo modemActivityInfo,
-            List<NetworkStatsDelta> networkStatsDeltas, long elapsedRealtimeMs, long uptimeMs) {
+            NetworkStats networkStatsDelta, long elapsedRealtimeMs, long uptimeMs) {
         // Do not populate consumed energy, because energy attribution is done by
         // MobileRadioPowerStatsProcessor.
-        updateCellularBatteryStats(modemActivityInfo, networkStatsDeltas, POWER_DATA_UNAVAILABLE,
+        updateCellularBatteryStats(modemActivityInfo, networkStatsDelta, POWER_DATA_UNAVAILABLE,
                 elapsedRealtimeMs, uptimeMs);
     }
 
     private void updateCellularBatteryStats(@Nullable ModemActivityInfo deltaInfo,
-            @Nullable List<NetworkStatsDelta> delta, long consumedChargeUC, long elapsedRealtimeMs,
+            @Nullable NetworkStats delta, long consumedChargeUC, long elapsedRealtimeMs,
             long uptimeMs) {
         // Add modem tx power to history.
         addModemTxPowerToHistory(deltaInfo, elapsedRealtimeMs, uptimeMs);
@@ -13003,7 +12938,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalRxPackets = 0;
             long totalTxPackets = 0;
             if (delta != null) {
-                for (NetworkStatsDelta entry : delta) {
+                for (NetworkStats.Entry entry : delta) {
                     if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                         continue;
                     }
@@ -13044,7 +12979,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 // Now distribute proportional blame to the apps that did networking.
                 long totalPackets = totalRxPackets + totalTxPackets;
                 if (totalPackets > 0) {
-                    for (NetworkStatsDelta entry : delta) {
+                    for (NetworkStats.Entry entry : delta) {
                         if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                             continue;
                         }

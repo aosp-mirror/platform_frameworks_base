@@ -38,7 +38,6 @@ import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.MobileRadioPowerStatsLayout;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
@@ -71,7 +70,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     interface Observer {
         void onMobileRadioPowerStatsRetrieved(
                 @Nullable ModemActivityInfo modemActivityDelta,
-                @Nullable List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas,
+                @Nullable NetworkStats networkStatsDeltas,
                 long elapsedRealtimeMs, long uptimeMs);
     }
 
@@ -86,6 +85,8 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         TelephonyManager getTelephonyManager();
         LongSupplier getCallDurationSupplier();
         LongSupplier getPhoneSignalScanDurationSupplier();
+
+        NetworkStats networkStatsDelta(NetworkStats stats, NetworkStats oldStats);
     }
 
     private final Injector mInjector;
@@ -190,7 +191,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         mPowerStats.uidStats.clear();
 
         ModemActivityInfo modemActivityDelta = collectModemActivityInfo();
-        List<BatteryStatsImpl.NetworkStatsDelta> networkStatsDeltas = collectNetworkStats();
+        NetworkStats networkStatsDeltas = collectNetworkStats();
 
         mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
@@ -288,17 +289,15 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         return deltaInfo;
     }
 
-    private List<BatteryStatsImpl.NetworkStatsDelta> collectNetworkStats() {
+    private NetworkStats collectNetworkStats() {
         NetworkStats networkStats = mNetworkStatsSupplier.get();
         if (networkStats == null) {
             return null;
         }
 
-        List<BatteryStatsImpl.NetworkStatsDelta> delta =
-                BatteryStatsImpl.computeDelta(networkStats, mLastNetworkStats);
+        NetworkStats delta = mInjector.networkStatsDelta(networkStats, mLastNetworkStats);
         mLastNetworkStats = networkStats;
-        for (int i = delta.size() - 1; i >= 0; i--) {
-            BatteryStatsImpl.NetworkStatsDelta uidDelta = delta.get(i);
+        for (NetworkStats.Entry uidDelta : delta) {
             long rxBytes = uidDelta.getRxBytes();
             long txBytes = uidDelta.getTxBytes();
             long rxPackets = uidDelta.getRxPackets();
