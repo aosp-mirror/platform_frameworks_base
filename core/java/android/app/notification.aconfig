@@ -174,16 +174,6 @@ flag {
 }
 
 flag {
-  name: "update_ranking_time"
-  namespace: "systemui"
-  description: "Updates notification sorting criteria to highlight new content while maintaining stability"
-  bug: "326016985"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "sort_section_by_time"
   namespace: "systemui"
   description: "Changes notification sort order to be by time within a section"
