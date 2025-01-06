@@ -17,7 +17,6 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.internal.CompletableLazy
-import com.android.systemui.kairos.internal.DemuxImpl
 import com.android.systemui.kairos.internal.EventsImpl
 import com.android.systemui.kairos.internal.Init
 import com.android.systemui.kairos.internal.InitScope
@@ -27,22 +26,11 @@ import com.android.systemui.kairos.internal.NoScope
 import com.android.systemui.kairos.internal.activated
 import com.android.systemui.kairos.internal.cached
 import com.android.systemui.kairos.internal.constInit
-import com.android.systemui.kairos.internal.demuxMap
-import com.android.systemui.kairos.internal.filterImpl
-import com.android.systemui.kairos.internal.filterJustImpl
 import com.android.systemui.kairos.internal.init
 import com.android.systemui.kairos.internal.mapImpl
-import com.android.systemui.kairos.internal.mergeNodes
-import com.android.systemui.kairos.internal.mergeNodesLeft
 import com.android.systemui.kairos.internal.neverImpl
-import com.android.systemui.kairos.internal.switchDeferredImplSingle
-import com.android.systemui.kairos.internal.switchPromptImplSingle
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.util.Either
-import com.android.systemui.kairos.util.Either.Left
-import com.android.systemui.kairos.util.Either.Right
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.toMaybe
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KProperty
@@ -51,7 +39,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
-/** A series of values of type [A] available at discrete points in time. */
+/**
+ * A series of values of type [A] available at discrete points in time.
+ *
+ * [Events] follow these rules:
+ * 1. Within a single Kairos network transaction, an [Events] instance will only emit *once*.
+ * 2. The order that different [Events] instances emit values within a transaction is undefined, and
+ *    are conceptually *simultaneous*.
+ * 3. [Events] emissions are *ephemeral* and do not last beyond the transaction they are emitted,
+ *    unless explicitly [observed][BuildScope.observe] or [held][StateScope.holdState] as a [State].
+ */
 @ExperimentalKairosApi
 sealed class Events<out A> {
     companion object {
@@ -67,7 +64,9 @@ sealed class Events<out A> {
  * A forward-reference to an [Events]. Useful for recursive definitions.
  *
  * This reference can be used like a standard [Events], but will throw an error if its [loopback] is
- * unset before the end of the first transaction which accesses it.
+ * unset before it is [observed][BuildScope.observe].
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.eventsLoop
  */
 @ExperimentalKairosApi
 class EventsLoop<A> : Events<A>() {
@@ -76,7 +75,10 @@ class EventsLoop<A> : Events<A>() {
     internal val init: Init<EventsImpl<A>> =
         init(name = null) { deferred.value.init.connect(evalScope = this) }
 
-    /** The [Events] this reference is referring to. */
+    /**
+     * The [Events] this reference is referring to. Must be set before this [EventsLoop] is
+     * [observed][BuildScope.observe].
+     */
     var loopback: Events<A>? = null
         set(value) {
             value?.let {
@@ -102,6 +104,12 @@ class EventsLoop<A> : Events<A>() {
  * will be queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> Lazy<Events<A>>.defer() = deferredEvents { value }
+ * ```
+ *
+ * @see deferredEvents
  */
 @ExperimentalKairosApi fun <A> Lazy<Events<A>>.defer(): Events<A> = deferInline { value }
 
@@ -113,6 +121,12 @@ class EventsLoop<A> : Events<A>() {
  * and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> DeferredValue<Events<A>>.defer() = deferredEvents { get() }
+ * ```
+ *
+ * @see deferredEvents
  */
 @ExperimentalKairosApi
 fun <A> DeferredValue<Events<A>>.defer(): Events<A> = deferInline { unwrapped.value }
@@ -130,24 +144,26 @@ fun <A> deferredEvents(block: KairosScope.() -> Events<A>): Events<A> = deferInl
     NoScope.block()
 }
 
-/** Returns an [Events] that emits the new value of this [State] when it changes. */
-@ExperimentalKairosApi
-val <A> State<A>.changes: Events<A>
-    get() = EventsInit(init(name = null) { init.connect(evalScope = this).changes })
-
 /**
- * Returns an [Events] that contains only the [just] results of applying [transform] to each value
- * of the original [Events].
+ * Returns an [Events] that contains only the
+ * [present][com.android.systemui.kairos.util.Maybe.present] results of applying [transform] to each
+ * value of the original [Events].
  *
+ * @sample com.android.systemui.kairos.KairosSamples.mapMaybe
  * @see mapNotNull
  */
 @ExperimentalKairosApi
 fun <A, B> Events<A>.mapMaybe(transform: TransactionScope.(A) -> Maybe<B>): Events<B> =
-    map(transform).filterJust()
+    map(transform).filterPresent()
 
 /**
  * Returns an [Events] that contains only the non-null results of applying [transform] to each value
  * of the original [Events].
+ *
+ * ``` kotlin
+ *  fun <A> Events<A>.mapNotNull(transform: TransactionScope.(A) -> B?): Events<B> =
+ *      mapMaybe { if (it == null) absent else present(it) }
+ * ```
  *
  * @see mapMaybe
  */
@@ -156,23 +172,11 @@ fun <A, B> Events<A>.mapNotNull(transform: TransactionScope.(A) -> B?): Events<B
     transform(it).toMaybe()
 }
 
-/** Returns an [Events] containing only values of the original [Events] that are not null. */
-@ExperimentalKairosApi
-fun <A> Events<A?>.filterNotNull(): Events<A> = mapCheap { it.toMaybe() }.filterJust()
-
-/** Shorthand for `mapNotNull { it as? A }`. */
-@ExperimentalKairosApi
-inline fun <reified A> Events<*>.filterIsInstance(): Events<A> =
-    mapCheap { it as? A }.filterNotNull()
-
-/** Shorthand for `mapMaybe { it }`. */
-@ExperimentalKairosApi
-fun <A> Events<Maybe<A>>.filterJust(): Events<A> =
-    EventsInit(constInit(name = null, filterJustImpl { init.connect(evalScope = this) }))
-
 /**
  * Returns an [Events] containing the results of applying [transform] to each value of the original
  * [Events].
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.mapEvents
  */
 @ExperimentalKairosApi
 fun <A, B> Events<A>.map(transform: TransactionScope.(A) -> B): Events<B> {
@@ -184,6 +188,7 @@ fun <A, B> Events<A>.map(transform: TransactionScope.(A) -> B): Events<B> {
  * Like [map], but the emission is not cached during the transaction. Use only if [transform] is
  * fast and pure.
  *
+ * @sample com.android.systemui.kairos.KairosSamples.mapCheap
  * @see map
  */
 @ExperimentalKairosApi
@@ -196,8 +201,9 @@ fun <A, B> Events<A>.mapCheap(transform: TransactionScope.(A) -> B): Events<B> =
  * Returns an [Events] that invokes [action] before each value of the original [Events] is emitted.
  * Useful for logging and debugging.
  *
- * ```
- *   pulse.onEach { foo(it) } == pulse.map { foo(it); it }
+ * ``` kotlin
+ *   fun <A> Events<A>.onEach(action: TransactionScope.(A) -> Unit): Events<A> =
+ *       map { it.also { action(it) } }
  * ```
  *
  * Note that the side effects performed in [onEach] are only performed while the resulting [Events]
@@ -207,29 +213,19 @@ fun <A, B> Events<A>.mapCheap(transform: TransactionScope.(A) -> B): Events<B> =
  */
 @ExperimentalKairosApi
 fun <A> Events<A>.onEach(action: TransactionScope.(A) -> Unit): Events<A> = map {
-    action(it)
-    it
-}
-
-/**
- * Returns an [Events] containing only values of the original [Events] that satisfy the given
- * [predicate].
- */
-@ExperimentalKairosApi
-fun <A> Events<A>.filter(predicate: TransactionScope.(A) -> Boolean): Events<A> {
-    val pulse = filterImpl({ init.connect(evalScope = this) }) { predicate(it) }
-    return EventsInit(constInit(name = null, pulse))
+    it.also { action(it) }
 }
 
 /**
  * Splits an [Events] of pairs into a pair of [Events], where each returned [Events] emits half of
  * the original.
  *
- * Shorthand for:
- * ```kotlin
- * val lefts = map { it.first }
- * val rights = map { it.second }
- * return Pair(lefts, rights)
+ * ``` kotlin
+ *   fun <A, B> Events<Pair<A, B>>.unzip(): Pair<Events<A>, Events<B>> {
+ *       val lefts = map { it.first }
+ *       val rights = map { it.second }
+ *       return lefts to rights
+ *   }
  * ```
  */
 @ExperimentalKairosApi
@@ -237,246 +233,6 @@ fun <A, B> Events<Pair<A, B>>.unzip(): Pair<Events<A>, Events<B>> {
     val lefts = map { it.first }
     val rights = map { it.second }
     return lefts to rights
-}
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from both.
- *
- * Because [Events] can only emit one value per transaction, the provided [transformCoincidence]
- * function is used to combine coincident emissions to produce the result value to be emitted by the
- * merged [Events].
- */
-@ExperimentalKairosApi
-fun <A> Events<A>.mergeWith(
-    other: Events<A>,
-    name: String? = null,
-    transformCoincidence: TransactionScope.(A, A) -> A = { a, _ -> a },
-): Events<A> {
-    val node =
-        mergeNodes(
-            name = name,
-            getPulse = { init.connect(evalScope = this) },
-            getOther = { other.init.connect(evalScope = this) },
-        ) { a, b ->
-            transformCoincidence(a, b)
-        }
-    return EventsInit(constInit(name = null, node))
-}
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from all. All coincident
- * emissions are collected into the emitted [List], preserving the input ordering.
- *
- * @see mergeWith
- * @see mergeLeft
- */
-@ExperimentalKairosApi
-fun <A> merge(vararg events: Events<A>): Events<List<A>> = events.asIterable().merge()
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from all. In the case of
- * coincident emissions, the emission from the left-most [Events] is emitted.
- *
- * @see merge
- */
-@ExperimentalKairosApi
-fun <A> mergeLeft(vararg events: Events<A>): Events<A> = events.asIterable().mergeLeft()
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from all.
- *
- * Because [Events] can only emit one value per transaction, the provided [transformCoincidence]
- * function is used to combine coincident emissions to produce the result value to be emitted by the
- * merged [Events].
- */
-// TODO: can be optimized to avoid creating the intermediate list
-fun <A> merge(vararg events: Events<A>, transformCoincidence: (A, A) -> A): Events<A> =
-    merge(*events).map { l -> l.reduce(transformCoincidence) }
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from all. All coincident
- * emissions are collected into the emitted [List], preserving the input ordering.
- *
- * @see mergeWith
- * @see mergeLeft
- */
-@ExperimentalKairosApi
-fun <A> Iterable<Events<A>>.merge(): Events<List<A>> =
-    EventsInit(constInit(name = null, mergeNodes { map { it.init.connect(evalScope = this) } }))
-
-/**
- * Merges the given [Events] into a single [Events] that emits events from all. In the case of
- * coincident emissions, the emission from the left-most [Events] is emitted.
- *
- * @see merge
- */
-@ExperimentalKairosApi
-fun <A> Iterable<Events<A>>.mergeLeft(): Events<A> =
-    EventsInit(constInit(name = null, mergeNodesLeft { map { it.init.connect(evalScope = this) } }))
-
-/**
- * Creates a new [Events] that emits events from all given [Events]. All simultaneous emissions are
- * collected into the emitted [List], preserving the input ordering.
- *
- * @see mergeWith
- */
-@ExperimentalKairosApi fun <A> Sequence<Events<A>>.merge(): Events<List<A>> = asIterable().merge()
-
-/**
- * Creates a new [Events] that emits events from all given [Events]. All simultaneous emissions are
- * collected into the emitted [Map], and are given the same key of the associated [Events] in the
- * input [Map].
- *
- * @see mergeWith
- */
-@ExperimentalKairosApi
-fun <K, A> Map<K, Events<A>>.merge(): Events<Map<K, A>> =
-    asSequence()
-        .map { (k, events) -> events.map { a -> k to a } }
-        .toList()
-        .merge()
-        .map { it.toMap() }
-
-/**
- * Returns a [GroupedEvents] that can be used to efficiently split a single [Events] into multiple
- * downstream [Events].
- *
- * The input [Events] emits [Map] instances that specify which downstream [Events] the associated
- * value will be emitted from. These downstream [Events] can be obtained via
- * [GroupedEvents.eventsForKey].
- *
- * An example:
- * ```
- *   val fooEvents: Events<Map<String, Foo>> = ...
- *   val fooById: GroupedEvents<String, Foo> = fooEvents.groupByKey()
- *   val fooBar: Events<Foo> = fooById["bar"]
- * ```
- *
- * This is semantically equivalent to `val fooBar = fooEvents.mapNotNull { map -> map["bar"] }` but
- * is significantly more efficient; specifically, using [mapNotNull] in this way incurs a `O(n)`
- * performance hit, where `n` is the number of different [mapNotNull] operations used to filter on a
- * specific key's presence in the emitted [Map]. [groupByKey] internally uses a [HashMap] to lookup
- * the appropriate downstream [Events], and so operates in `O(1)`.
- *
- * Note that the returned [GroupedEvents] should be cached and re-used to gain the performance
- * benefit.
- *
- * @see selector
- */
-@ExperimentalKairosApi
-fun <K, A> Events<Map<K, A>>.groupByKey(numKeys: Int? = null): GroupedEvents<K, A> =
-    GroupedEvents(demuxMap({ init.connect(this) }, numKeys))
-
-/**
- * Shorthand for `map { mapOf(extractKey(it) to it) }.groupByKey()`
- *
- * @see groupByKey
- */
-@ExperimentalKairosApi
-fun <K, A> Events<A>.groupBy(
-    numKeys: Int? = null,
-    extractKey: TransactionScope.(A) -> K,
-): GroupedEvents<K, A> = map { mapOf(extractKey(it) to it) }.groupByKey(numKeys)
-
-/**
- * Returns two new [Events] that contain elements from this [Events] that satisfy or don't satisfy
- * [predicate].
- *
- * Using this is equivalent to `upstream.filter(predicate) to upstream.filter { !predicate(it) }`
- * but is more efficient; specifically, [partition] will only invoke [predicate] once per element.
- */
-@ExperimentalKairosApi
-fun <A> Events<A>.partition(
-    predicate: TransactionScope.(A) -> Boolean
-): Pair<Events<A>, Events<A>> {
-    val grouped: GroupedEvents<Boolean, A> = groupBy(numKeys = 2, extractKey = predicate)
-    return Pair(grouped.eventsForKey(true), grouped.eventsForKey(false))
-}
-
-/**
- * Returns two new [Events] that contain elements from this [Events]; [Pair.first] will contain
- * [Left] values, and [Pair.second] will contain [Right] values.
- *
- * Using this is equivalent to using [filterIsInstance] in conjunction with [map] twice, once for
- * [Left]s and once for [Right]s, but is slightly more efficient; specifically, the
- * [filterIsInstance] check is only performed once per element.
- */
-@ExperimentalKairosApi
-fun <A, B> Events<Either<A, B>>.partitionEither(): Pair<Events<A>, Events<B>> {
-    val (left, right) = partition { it is Left }
-    return Pair(left.mapCheap { (it as Left).value }, right.mapCheap { (it as Right).value })
-}
-
-/**
- * A mapping from keys of type [K] to [Events] emitting values of type [A].
- *
- * @see groupByKey
- */
-@ExperimentalKairosApi
-class GroupedEvents<in K, out A> internal constructor(internal val impl: DemuxImpl<K, A>) {
-    /**
-     * Returns an [Events] that emits values of type [A] that correspond to the given [key].
-     *
-     * @see groupByKey
-     */
-    fun eventsForKey(key: K): Events<A> = EventsInit(constInit(name = null, impl.eventsForKey(key)))
-
-    /**
-     * Returns an [Events] that emits values of type [A] that correspond to the given [key].
-     *
-     * @see groupByKey
-     */
-    operator fun get(key: K): Events<A> = eventsForKey(key)
-}
-
-/**
- * Returns an [Events] that switches to the [Events] contained within this [State] whenever it
- * changes.
- *
- * This switch does take effect until the *next* transaction after [State] changes. For a switch
- * that takes effect immediately, see [switchEventsPromptly].
- */
-@ExperimentalKairosApi
-fun <A> State<Events<A>>.switchEvents(name: String? = null): Events<A> {
-    val patches =
-        mapImpl({ init.connect(this).changes }) { newEvents, _ -> newEvents.init.connect(this) }
-    return EventsInit(
-        constInit(
-            name = null,
-            switchDeferredImplSingle(
-                name = name,
-                getStorage = {
-                    init.connect(this).getCurrentWithEpoch(this).first.init.connect(this)
-                },
-                getPatches = { patches },
-            ),
-        )
-    )
-}
-
-/**
- * Returns an [Events] that switches to the [Events] contained within this [State] whenever it
- * changes.
- *
- * This switch takes effect immediately within the same transaction that [State] changes. In
- * general, you should prefer [switchEvents] over this method. It is both safer and more performant.
- */
-// TODO: parameter to handle coincidental emission from both old and new
-@ExperimentalKairosApi
-fun <A> State<Events<A>>.switchEventsPromptly(): Events<A> {
-    val patches =
-        mapImpl({ init.connect(this).changes }) { newEvents, _ -> newEvents.init.connect(this) }
-    return EventsInit(
-        constInit(
-            name = null,
-            switchPromptImplSingle(
-                getStorage = {
-                    init.connect(this).getCurrentWithEpoch(this).first.init.connect(this)
-                },
-                getPatches = { patches },
-            ),
-        )
-    )
 }
 
 /**
@@ -494,7 +250,7 @@ internal constructor(
     private val getInitialValue: () -> Out,
     internal val impl: InputNode<Out> = InputNode(),
 ) : Events<Out>() {
-    internal val storage = AtomicReference(false to lazy { getInitialValue() })
+    private val storage = AtomicReference(false to lazy { getInitialValue() })
 
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 

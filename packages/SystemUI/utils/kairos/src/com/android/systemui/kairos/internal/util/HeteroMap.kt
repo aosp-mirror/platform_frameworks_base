@@ -17,8 +17,7 @@
 package com.android.systemui.kairos.internal.util
 
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.None
-import com.android.systemui.kairos.util.just
+import com.android.systemui.kairos.util.Maybe.Absent
 import java.util.concurrent.ConcurrentHashMap
 
 private object NULL
@@ -32,7 +31,7 @@ internal class HeteroMap private constructor(private val store: ConcurrentHashMa
 
     @Suppress("UNCHECKED_CAST")
     operator fun <A> get(key: Key<A>): Maybe<A> =
-        store[key]?.let { just((if (it === NULL) null else it) as A) } ?: None
+        store[key]?.let { Maybe.present((if (it === NULL) null else it) as A) } ?: Absent
 
     operator fun <A> set(key: Key<A>, value: A) {
         store[key] = value ?: NULL
@@ -57,7 +56,7 @@ internal class HeteroMap private constructor(private val store: ConcurrentHashMa
 
     @Suppress("UNCHECKED_CAST")
     fun <A> remove(key: Key<A>): Maybe<A> =
-        store.remove(key)?.let { just((if (it === NULL) null else it) as A) } ?: None
+        store.remove(key)?.let { Maybe.present((if (it === NULL) null else it) as A) } ?: Absent
 
     @Suppress("UNCHECKED_CAST")
     fun <A> getOrPut(key: Key<A>, defaultValue: () -> A): A =

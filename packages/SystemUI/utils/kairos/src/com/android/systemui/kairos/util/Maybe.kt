@@ -18,8 +18,8 @@
 
 package com.android.systemui.kairos.util
 
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.Maybe.None
+import com.android.systemui.kairos.util.Maybe.Absent
+import com.android.systemui.kairos.util.Maybe.Present
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -31,17 +31,28 @@ import kotlin.coroutines.suspendCoroutine
 /** Represents a value that may or may not be present. */
 sealed interface Maybe<out A> {
     /** A [Maybe] value that is present. */
-    @JvmInline value class Just<out A> internal constructor(val value: A) : Maybe<A>
+    @JvmInline value class Present<out A> internal constructor(val value: A) : Maybe<A>
 
     /** A [Maybe] value that is not present. */
-    data object None : Maybe<Nothing>
+    data object Absent : Maybe<Nothing>
+
+    companion object {
+        /** Returns a [Maybe] containing [value]. */
+        fun <A> present(value: A): Maybe<A> = Present(value)
+
+        /** A [Maybe] that is not present. */
+        val absent: Maybe<Nothing> = Absent
+
+        /** A [Maybe] that is not present. */
+        inline fun <A> absent(): Maybe<A> = Absent
+    }
 }
 
 /** Utilities to query [Maybe] instances from within a [maybe] block. */
 @RestrictsSuspension
 object MaybeScope {
     suspend operator fun <A> Maybe<A>.not(): A = suspendCoroutine { k ->
-        if (this is Just) k.resume(value)
+        if (this is Present) k.resume(value)
     }
 
     suspend inline fun guard(crossinline block: () -> Boolean): Unit = suspendCoroutine { k ->
@@ -53,7 +64,8 @@ object MaybeScope {
  * Returns a [Maybe] value produced by evaluating [block].
  *
  * [block] can use its [MaybeScope] receiver to query other [Maybe] values, automatically cancelling
- * execution of [block] and producing [None] when attempting to query a [Maybe] that is not present.
+ * execution of [block] and producing [Absent] when attempting to query a [Maybe] that is not
+ * present.
  *
  * This can be used instead of Kotlin's built-in nullability (`?.` and `?:`) operators when dealing
  * with complex combinations of nullables:
@@ -68,33 +80,30 @@ object MaybeScope {
  * ```
  */
 fun <A> maybe(block: suspend MaybeScope.() -> A): Maybe<A> {
-    var maybeResult: Maybe<A> = None
+    var maybeResult: Maybe<A> = Absent
     val k =
         object : Continuation<A> {
             override val context: CoroutineContext = EmptyCoroutineContext
 
             override fun resumeWith(result: Result<A>) {
-                maybeResult = result.getOrNull()?.let { just(it) } ?: None
+                maybeResult = result.getOrNull()?.let { Maybe.present(it) } ?: Absent
             }
         }
     block.startCoroutine(MaybeScope, k)
     return maybeResult
 }
 
-/** Returns a [Just] containing this value, or [None] if `null`. */
+/** Returns a [Maybe] containing this value if it is not `null`. */
 inline fun <A> (A?).toMaybe(): Maybe<A> = maybe(this)
 
-/** Returns a [Just] containing a non-null [value], or [None] if `null`. */
-inline fun <A> maybe(value: A?): Maybe<A> = value?.let(::just) ?: None
+/** Returns a [Maybe] containing [value] if it is not `null`. */
+inline fun <A> maybe(value: A?): Maybe<A> = value?.let { Maybe.present(it) } ?: Absent
 
-/** Returns a [Just] containing [value]. */
-fun <A> just(value: A): Maybe<A> = Just(value)
+/** Returns a [Maybe] that is absent. */
+fun <A> maybeOf(): Maybe<A> = Absent
 
-/** A [Maybe] that is not present. */
-val none: Maybe<Nothing> = None
-
-/** A [Maybe] that is not present. */
-inline fun <A> none(): Maybe<A> = None
+/** Returns a [Maybe] containing [value]. */
+fun <A> maybeOf(value: A): Maybe<A> = Present(value)
 
 /** Returns the value present in this [Maybe], or `null` if not present. */
 inline fun <A> Maybe<A>.orNull(): A? = orElse(null)
@@ -105,22 +114,22 @@ inline fun <A> Maybe<A>.orNull(): A? = orElse(null)
  */
 inline fun <A, B> Maybe<A>.map(transform: (A) -> B): Maybe<B> =
     when (this) {
-        is Just -> just(transform(value))
-        is None -> None
+        is Present -> Maybe.present(transform(value))
+        is Absent -> Absent
     }
 
 /** Returns the result of applying [transform] to the value in the original [Maybe]. */
 inline fun <A, B> Maybe<A>.flatMap(transform: (A) -> Maybe<B>): Maybe<B> =
     when (this) {
-        is Just -> transform(value)
-        is None -> None
+        is Present -> transform(value)
+        is Absent -> Absent
     }
 
 /** Returns the value present in this [Maybe], or the result of [defaultValue] if not present. */
 inline fun <A> Maybe<A>.orElseGet(defaultValue: () -> A): A =
     when (this) {
-        is Just -> value
-        is None -> defaultValue()
+        is Present -> value
+        is Absent -> defaultValue()
     }
 
 /**
@@ -132,8 +141,8 @@ inline fun <A> Maybe<A>.orError(getMessage: () -> Any): A = orElseGet { error(ge
 /** Returns the value present in this [Maybe], or [defaultValue] if not present. */
 inline fun <A> Maybe<A>.orElse(defaultValue: A): A =
     when (this) {
-        is Just -> value
-        is None -> defaultValue
+        is Present -> value
+        is Absent -> defaultValue
     }
 
 /**
@@ -142,15 +151,16 @@ inline fun <A> Maybe<A>.orElse(defaultValue: A): A =
  */
 inline fun <A> Maybe<A>.filter(predicate: (A) -> Boolean): Maybe<A> =
     when (this) {
-        is Just -> if (predicate(value)) this else None
+        is Present -> if (predicate(value)) this else Absent
         else -> this
     }
 
 /** Returns a [List] containing all values that are present in this [Iterable]. */
-fun <A> Iterable<Maybe<A>>.filterJust(): List<A> = asSequence().filterJust().toList()
+fun <A> Iterable<Maybe<A>>.filterPresent(): List<A> = asSequence().filterPresent().toList()
 
 /** Returns a [List] containing all values that are present in this [Sequence]. */
-fun <A> Sequence<Maybe<A>>.filterJust(): Sequence<A> = filterIsInstance<Just<A>>().map { it.value }
+fun <A> Sequence<Maybe<A>>.filterPresent(): Sequence<A> =
+    filterIsInstance<Present<A>>().map { it.value }
 
 // Align
 
@@ -160,23 +170,25 @@ fun <A> Sequence<Maybe<A>>.filterJust(): Sequence<A> = filterIsInstance<Just<A>>
  */
 inline fun <A, B, C> Maybe<A>.alignWith(other: Maybe<B>, transform: (These<A, B>) -> C): Maybe<C> =
     when (this) {
-        is Just -> {
+        is Present -> {
             val a = value
             when (other) {
-                is Just -> {
+                is Present -> {
                     val b = other.value
-                    just(transform(These.both(a, b)))
+                    Maybe.present(transform(These.both(a, b)))
                 }
-                None -> just(transform(These.thiz(a)))
+
+                Absent -> Maybe.present(transform(These.first(a)))
             }
         }
-        None ->
+        Absent ->
             when (other) {
-                is Just -> {
+                is Present -> {
                     val b = other.value
-                    just(transform(These.that(b)))
+                    Maybe.present(transform(These.second(b)))
                 }
-                None -> none
+
+                Absent -> Maybe.absent
             }
     }
 
@@ -190,7 +202,7 @@ infix fun <A> Maybe<A>.orElseMaybe(other: Maybe<A>): Maybe<A> = orElseGetMaybe {
  */
 inline fun <A> Maybe<A>.orElseGetMaybe(other: () -> Maybe<A>): Maybe<A> =
     when (this) {
-        is Just -> this
+        is Present -> this
         else -> other()
     }
 
@@ -235,7 +247,7 @@ fun <A> Maybe<A>.mergeWith(other: Maybe<A>, transform: (A, A) -> A): Maybe<A> =
 inline fun <A, B> Iterable<A>.mapMaybe(transform: (A) -> Maybe<B>): List<B> = buildList {
     for (a in this@mapMaybe) {
         val result = transform(a)
-        if (result is Just) {
+        if (result is Present) {
             add(result.value)
         }
     }
@@ -246,7 +258,7 @@ inline fun <A, B> Iterable<A>.mapMaybe(transform: (A) -> Maybe<B>): List<B> = bu
  * the original sequence.
  */
 fun <A, B> Sequence<A>.mapMaybe(transform: (A) -> Maybe<B>): Sequence<B> =
-    map(transform).filterIsInstance<Just<B>>().map { it.value }
+    map(transform).filterIsInstance<Present<B>>().map { it.value }
 
 /**
  * Returns a map with values of only the present results of applying [transform] to each entry in
@@ -256,14 +268,14 @@ inline fun <K, A, B> Map<K, A>.mapMaybeValues(transform: (Map.Entry<K, A>) -> Ma
     buildMap {
         for (entry in this@mapMaybeValues) {
             val result = transform(entry)
-            if (result is Just) {
+            if (result is Present) {
                 put(entry.key, result.value)
             }
         }
     }
 
 /** Returns a map with all non-present values filtered out. */
-fun <K, A> Map<K, Maybe<A>>.filterJustValues(): Map<K, A> =
+fun <K, A> Map<K, Maybe<A>>.filterPresentValues(): Map<K, A> =
     asSequence().mapMaybe { (key, mValue) -> mValue.map { key to it } }.toMap()
 
 /**
@@ -277,9 +289,9 @@ fun <A, B> Maybe<Pair<A, B>>.splitPair(): Pair<Maybe<A>, Maybe<B>> =
 fun <K, V> Map<K, V>.getMaybe(key: K): Maybe<V> {
     val value = get(key)
     if (value == null && !containsKey(key)) {
-        return none
+        return Maybe.absent
     } else {
         @Suppress("UNCHECKED_CAST")
-        return just(value as V)
+        return Maybe.present(value as V)
     }
 }

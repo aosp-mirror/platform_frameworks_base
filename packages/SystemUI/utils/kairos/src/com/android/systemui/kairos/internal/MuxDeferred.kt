@@ -28,14 +28,13 @@ import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Maybe.Just
-import com.android.systemui.kairos.util.Maybe.None
+import com.android.systemui.kairos.util.Maybe.Absent
+import com.android.systemui.kairos.util.Maybe.Present
 import com.android.systemui.kairos.util.These
 import com.android.systemui.kairos.util.flatMap
 import com.android.systemui.kairos.util.getMaybe
-import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.maybeThat
-import com.android.systemui.kairos.util.maybeThis
+import com.android.systemui.kairos.util.maybeFirst
+import com.android.systemui.kairos.util.maybeSecond
 import com.android.systemui.kairos.util.merge
 import com.android.systemui.kairos.util.orError
 import com.android.systemui.kairos.util.these
@@ -133,8 +132,8 @@ internal class MuxDeferredNode<W, K, V>(
         val removes = mutableListOf<K>()
         patch.forEach { (k, newUpstream) ->
             when (newUpstream) {
-                is Just -> adds.add(k to newUpstream.value)
-                None -> removes.add(k)
+                is Present -> adds.add(k to newUpstream.value)
+                Absent -> removes.add(k)
             }
         }
 
@@ -282,7 +281,8 @@ internal inline fun <A> switchDeferredImplSingle(
     crossinline getStorage: EvalScope.() -> EventsImpl<A>,
     crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
 ): EventsImpl<A> {
-    val patches = mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
+    val patches =
+        mapImpl(getPatches) { newEvents, _ -> singleOf(Maybe.present(newEvents)).asIterable() }
     val switchDeferredImpl =
         switchDeferredImpl(
             name = name,
@@ -402,8 +402,8 @@ internal inline fun <A, B> mergeNodes(
 ): EventsImpl<These<A, B>> {
     val storage =
         listOf(
-                mapImpl(getPulse) { it, _ -> These.thiz(it) },
-                mapImpl(getOther) { it, _ -> These.that(it) },
+                mapImpl(getPulse) { it, _ -> These.first(it) },
+                mapImpl(getOther) { it, _ -> These.second(it) },
             )
             .asIterableWithIndex()
     val switchNode =
@@ -417,9 +417,9 @@ internal inline fun <A, B> mergeNodes(
         mapImpl({ switchNode }) { it, logIndent ->
             val mergeResults = it.asArrayHolder()
             val first =
-                mergeResults.getMaybe(0).flatMap { it.getPushEvent(logIndent, this).maybeThis() }
+                mergeResults.getMaybe(0).flatMap { it.getPushEvent(logIndent, this).maybeFirst() }
             val second =
-                mergeResults.getMaybe(1).flatMap { it.getPushEvent(logIndent, this).maybeThat() }
+                mergeResults.getMaybe(1).flatMap { it.getPushEvent(logIndent, this).maybeSecond() }
             these(first, second).orError { "unexpected missing merge result" }
         }
     return merged.cached()

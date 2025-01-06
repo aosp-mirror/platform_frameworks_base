@@ -22,8 +22,6 @@ import com.android.systemui.kairos.internal.store.MutableMapK
 import com.android.systemui.kairos.internal.store.StoreEntry
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.none
 
 internal open class StateImpl<out A>(
     val name: String?,
@@ -73,7 +71,7 @@ internal sealed class StateDerived<A> : StateStore<A>() {
 
     fun getCachedUnsafe(): Maybe<A> {
         @Suppress("UNCHECKED_CAST")
-        return if (cache == EmptyCache) none else just(cache as A)
+        return if (cache == EmptyCache) Maybe.absent else Maybe.present(cache as A)
     }
 
     protected abstract fun recalc(evalScope: EvalScope): Pair<A, Long>?
@@ -117,7 +115,8 @@ internal class StateSource<S>(init: Lazy<S>) : StateStore<S>() {
 
     override fun toString(): String = "StateImpl(current=$_current, writeEpoch=$writeEpoch)"
 
-    fun getStorageUnsafe(): Maybe<S> = if (_current.isInitialized()) just(_current.value) else none
+    fun getStorageUnsafe(): Maybe<S> =
+        if (_current.isInitialized()) Maybe.present(_current.value) else Maybe.absent
 }
 
 internal fun <A> constState(name: String?, operatorName: String, init: A): StateImpl<A> =

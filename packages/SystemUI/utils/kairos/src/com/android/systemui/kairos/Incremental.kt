@@ -21,27 +21,31 @@ import com.android.systemui.kairos.internal.IncrementalImpl
 import com.android.systemui.kairos.internal.Init
 import com.android.systemui.kairos.internal.InitScope
 import com.android.systemui.kairos.internal.NoScope
-import com.android.systemui.kairos.internal.awaitValues
 import com.android.systemui.kairos.internal.constIncremental
 import com.android.systemui.kairos.internal.constInit
 import com.android.systemui.kairos.internal.init
-import com.android.systemui.kairos.internal.mapImpl
 import com.android.systemui.kairos.internal.mapValuesImpl
-import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
-import com.android.systemui.kairos.internal.switchDeferredImpl
-import com.android.systemui.kairos.internal.switchPromptImpl
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.util.MapPatch
-import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.mapPatchFromFullDiff
 import kotlin.reflect.KProperty
 
-/** A [State] tracking a [Map] that receives incremental updates. */
+/**
+ * A [State] tracking a [Map] that receives incremental updates.
+ *
+ * [Incremental] allows one to react to the [subset of changes][updates] to the held map, without
+ * having to perform a manual diff of the map to determine what changed.
+ *
+ * @sample com.android.systemui.kairos.KairosSamples.incrementals
+ */
 sealed class Incremental<K, out V> : State<Map<K, V>>() {
     abstract override val init: Init<IncrementalImpl<K, V>>
 }
 
-/** An [Incremental] that never changes. */
+/**
+ * Returns a constant [Incremental] that never changes. [changes] and [updates] are both equivalent
+ * to [emptyEvents], and [TransactionScope.sample] will always produce [value].
+ */
 @ExperimentalKairosApi
 fun <K, V> incrementalOf(value: Map<K, V>): Incremental<K, V> {
     val operatorName = "stateOf"
@@ -57,6 +61,10 @@ fun <K, V> incrementalOf(value: Map<K, V>): Incremental<K, V> {
  * [value][Lazy.value] will be queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> Lazy<Incremental<K, V>>.defer() = deferredIncremental { value }
+ * ```
  */
 @ExperimentalKairosApi
 fun <K, V> Lazy<Incremental<K, V>>.defer(): Incremental<K, V> = deferInline { value }
@@ -69,6 +77,10 @@ fun <K, V> Lazy<Incremental<K, V>>.defer(): Incremental<K, V> = deferInline { va
  * queried and used.
  *
  * Useful for recursive definitions.
+ *
+ * ``` kotlin
+ *   fun <A> DeferredValue<Incremental<K, V>>.defer() = deferredIncremental { get() }
+ * ```
  */
 @ExperimentalKairosApi
 fun <K, V> DeferredValue<Incremental<K, V>>.defer(): Incremental<K, V> = deferInline {
@@ -119,94 +131,14 @@ fun <K, V, U> Incremental<K, V>.mapValues(
 }
 
 /**
- * Returns an [Events] that emits from a merged, incrementally-accumulated collection of [Events]
- * emitted from this, following the same "patch" rules as outlined in
- * [StateScope.foldStateMapIncrementally].
+ * A forward-reference to an [Incremental]. Useful for recursive definitions.
  *
- * Conceptually this is equivalent to:
- * ```kotlin
- *   fun <K, V> State<Map<K, V>>.mergeEventsIncrementally(): Events<Map<K, V>> =
- *     map { it.merge() }.switchEvents()
- * ```
- *
- * While the behavior is equivalent to the conceptual definition above, the implementation is
- * significantly more efficient.
- *
- * @see merge
+ * This reference can be used like a standard [Incremental], but will throw an error if its
+ * [loopback] is unset before it is [observed][BuildScope.observe] or
+ * [sampled][TransactionScope.sample]. Note that it is safe to invoke
+ * [TransactionScope.sampleDeferred] before [loopback] is set, provided the [DeferredValue] is not
+ * [queried][KairosScope.get].
  */
-fun <K, V> Incremental<K, Events<V>>.mergeEventsIncrementally(): Events<Map<K, V>> {
-    val operatorName = "mergeEventsIncrementally"
-    val name = operatorName
-    val patches =
-        mapImpl({ init.connect(this).patches }) { patch, _ ->
-            patch.mapValues { (_, m) -> m.map { events -> events.init.connect(this) } }.asIterable()
-        }
-    return EventsInit(
-        constInit(
-            name,
-            switchDeferredImpl(
-                    name = name,
-                    getStorage = {
-                        init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValues { (_, events) -> events.init.connect(this) }
-                            .asIterable()
-                    },
-                    getPatches = { patches },
-                    storeFactory = ConcurrentHashMapK.Factory(),
-                )
-                .awaitValues(),
-        )
-    )
-}
-
-/**
- * Returns an [Events] that emits from a merged, incrementally-accumulated collection of [Events]
- * emitted from this, following the same "patch" rules as outlined in
- * [StateScope.foldStateMapIncrementally].
- *
- * Conceptually this is equivalent to:
- * ```kotlin
- *   fun <K, V> State<Map<K, V>>.mergeEventsIncrementallyPromptly(): Events<Map<K, V>> =
- *     map { it.merge() }.switchEventsPromptly()
- * ```
- *
- * While the behavior is equivalent to the conceptual definition above, the implementation is
- * significantly more efficient.
- *
- * @see merge
- */
-fun <K, V> Incremental<K, Events<V>>.mergeEventsIncrementallyPromptly(): Events<Map<K, V>> {
-    val operatorName = "mergeEventsIncrementally"
-    val name = operatorName
-    val patches =
-        mapImpl({ init.connect(this).patches }) { patch, _ ->
-            patch.mapValues { (_, m) -> m.map { events -> events.init.connect(this) } }.asIterable()
-        }
-    return EventsInit(
-        constInit(
-            name,
-            switchPromptImpl(
-                    name = name,
-                    getStorage = {
-                        init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValues { (_, events) -> events.init.connect(this) }
-                            .asIterable()
-                    },
-                    getPatches = { patches },
-                    storeFactory = ConcurrentHashMapK.Factory(),
-                )
-                .awaitValues(),
-        )
-    )
-}
-
-/** A forward-reference to an [Incremental], allowing for recursive definitions. */
 @ExperimentalKairosApi
 class IncrementalLoop<K, V>(private val name: String? = null) : Incremental<K, V>() {
 
@@ -215,7 +147,10 @@ class IncrementalLoop<K, V>(private val name: String? = null) : Incremental<K, V
     override val init: Init<IncrementalImpl<K, V>> =
         init(name) { deferred.value.init.connect(evalScope = this) }
 
-    /** The [Incremental] this [IncrementalLoop] will forward to. */
+    /**
+     * The [Incremental] this reference is referring to. Must be set before this [IncrementalLoop]
+     * is [observed][BuildScope.observe].
+     */
     var loopback: Incremental<K, V>? = null
         set(value) {
             value?.let {
@@ -237,8 +172,8 @@ class IncrementalLoop<K, V>(private val name: String? = null) : Incremental<K, V
 }
 
 /**
- * Returns an [Incremental] whose [updates] are calculated by diffing the given [State]'s
- * [transitions].
+ * Returns an [Incremental] whose [updates] are calculated by [diffing][mapPatchFromFullDiff] the
+ * given [State]'s [transitions].
  */
 fun <K, V> State<Map<K, V>>.asIncremental(): Incremental<K, V> {
     if (this is Incremental<K, V>) return this
@@ -258,34 +193,6 @@ fun <K, V> State<Map<K, V>>.asIncremental(): Incremental<K, V> {
                 upstream.operatorName,
                 upstream.changes,
                 patches.init.connect(this),
-                upstream.store,
-            )
-        }
-    )
-}
-
-/** Returns an [Incremental] that acts like the current value of the given [State]. */
-fun <K, V> State<Incremental<K, V>>.switchIncremental(): Incremental<K, V> {
-    val stateChangePatches =
-        transitions.mapNotNull { (old, new) ->
-            mapPatchFromFullDiff(old.sample(), new.sample()).takeIf { it.isNotEmpty() }
-        }
-    val innerChanges =
-        map { inner ->
-                merge(stateChangePatches, inner.updates) { switchPatch, upcomingPatch ->
-                    switchPatch + upcomingPatch
-                }
-            }
-            .switchEventsPromptly()
-    val flattened = flatten()
-    return IncrementalInit(
-        init("switchIncremental") {
-            val upstream = flattened.init.connect(this)
-            IncrementalImpl(
-                "switchIncremental",
-                "switchIncremental",
-                upstream.changes,
-                innerChanges.init.connect(this),
                 upstream.store,
             )
         }

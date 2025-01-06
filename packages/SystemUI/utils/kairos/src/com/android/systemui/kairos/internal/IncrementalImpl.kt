@@ -17,11 +17,10 @@
 package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.store.StoreEntry
+import com.android.systemui.kairos.util.MapPatch
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.applyPatch
-import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
-import com.android.systemui.kairos.util.none
+import com.android.systemui.kairos.util.toMaybe
 
 internal class IncrementalImpl<K, out V>(
     name: String?,
@@ -48,12 +47,11 @@ internal inline fun <K, V> activatedIncremental(
     val store = StateSource(init)
     val maybeChanges =
         mapImpl(getPatches) { patch, _ ->
-                val (old, _) = store.getCurrentWithEpoch(evalScope = this)
-                val new = old.applyPatch(patch)
-                if (new != old) just(patch to new) else none
+                val (current, _) = store.getCurrentWithEpoch(evalScope = this)
+                current.applyPatchCalm(patch).toMaybe()
             }
             .cached()
-    val calm = filterJustImpl { maybeChanges }
+    val calm = filterPresentImpl { maybeChanges }
     val changes = mapImpl({ calm }) { (_, change), _ -> change }
     val patches = mapImpl({ calm }) { (patch, _), _ -> patch }
     evalScope.scheduleOutput(
@@ -70,22 +68,44 @@ internal inline fun <K, V> activatedIncremental(
     return IncrementalImpl(name, operatorName, changes, patches, store)
 }
 
+private fun <K, V> Map<K, V>.applyPatchCalm(
+    patch: MapPatch<K, V>
+): Pair<MapPatch<K, V>, Map<K, V>>? {
+    val current = this
+    val filteredPatch = mutableMapOf<K, Maybe<V>>()
+    val new = current.toMutableMap()
+    for ((key, change) in patch) {
+        when (change) {
+            is Maybe.Present -> {
+                if (key !in current || current.getValue(key) != change.value) {
+                    filteredPatch[key] = change
+                    new[key] = change.value
+                }
+            }
+            Maybe.Absent -> {
+                if (key in current) {
+                    filteredPatch[key] = change
+                    new.remove(key)
+                }
+            }
+        }
+    }
+    return if (filteredPatch.isNotEmpty()) filteredPatch to new else null
+}
+
 internal inline fun <K, V> EventsImpl<Map<K, Maybe<V>>>.calmUpdates(
     state: StateDerived<Map<K, V>>
 ): Pair<EventsImpl<Map<K, Maybe<V>>>, EventsImpl<Map<K, V>>> {
     val maybeUpdate =
         mapImpl({ this@calmUpdates }) { patch, _ ->
                 val (current, _) = state.getCurrentWithEpoch(evalScope = this)
-                val new = current.applyPatch(patch)
-                if (new != current) {
-                    state.setCacheFromPush(new, epoch)
-                    just(patch to new)
-                } else {
-                    none
-                }
+                current
+                    .applyPatchCalm(patch)
+                    ?.also { (_, newMap) -> state.setCacheFromPush(newMap, epoch) }
+                    .toMaybe()
             }
             .cached()
-    val calm = filterJustImpl { maybeUpdate }
+    val calm = filterPresentImpl { maybeUpdate }
     val patches = mapImpl({ calm }) { (p, _), _ -> p }
     val changes = mapImpl({ calm }) { (_, s), _ -> s }
     return patches to changes
