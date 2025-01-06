@@ -1977,6 +1977,8 @@ Todo: android.window.WindowContainerTransaction#setActivityWindowingMode(android
     Documentation mentions 'TODO'
 
 
+UnflaggedApi: android.Manifest.permission#ACCESSIBILITY_MOTION_EVENT_OBSERVING:
+    New API must be flagged with @FlaggedApi: field android.Manifest.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING
 UnflaggedApi: android.Manifest.permission#MANAGE_REMOTE_AUTH:
     New API must be flagged with @FlaggedApi: field android.Manifest.permission.MANAGE_REMOTE_AUTH
 UnflaggedApi: android.Manifest.permission#RESERVED_FOR_TESTING_SIGNATURE:
