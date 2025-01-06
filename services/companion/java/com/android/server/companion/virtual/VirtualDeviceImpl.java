@@ -1518,7 +1518,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
-            mInputController.setMousePointerAccelerationEnabled(false, displayId);
+            mInputController.setMouseScalingEnabled(false, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
             if (isTrustedDisplay) {

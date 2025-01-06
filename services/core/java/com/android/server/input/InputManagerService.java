@@ -1382,9 +1382,9 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setPointerSpeed(speed);
     }
 
-    private void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
+    private void setMouseScalingEnabled(boolean enabled, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
-                properties -> properties.mousePointerAccelerationEnabled = enabled);
+                properties -> properties.mouseScalingEnabled = enabled);
     }
 
     private void setPointerIconVisible(boolean visible, int displayId) {
@@ -2232,8 +2232,8 @@ public class InputManagerService extends IInputManager.Stub
                     pw.println("displayId: " + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
-                    pw.println("mousePointerAccelerationEnabled: "
-                            + properties.mousePointerAccelerationEnabled);
+                    pw.println("mouseScalingEnabled: "
+                            + properties.mouseScalingEnabled);
                     pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
             } finally {
@@ -3575,8 +3575,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public void setMousePointerAccelerationEnabled(boolean enabled, int displayId) {
-            InputManagerService.this.setMousePointerAccelerationEnabled(enabled, displayId);
+        public void setMouseScalingEnabled(boolean enabled, int displayId) {
+            InputManagerService.this.setMouseScalingEnabled(enabled, displayId);
         }
 
         @Override
@@ -3716,15 +3716,15 @@ public class InputManagerService extends IInputManager.Stub
     private static class AdditionalDisplayInputProperties {
 
         static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
-        static final boolean DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED = true;
+        static final boolean DEFAULT_MOUSE_SCALING_ENABLED = true;
 
         /**
-         * Whether to enable mouse pointer acceleration on this display. Note that this only affects
+         * Whether to enable mouse pointer scaling on this display. Note that this only affects
          * pointer movements from mice (that is, pointing devices which send relative motions,
          * including trackballs and pointing sticks), not from other pointer devices such as
          * touchpads and styluses.
          */
-        public boolean mousePointerAccelerationEnabled;
+        public boolean mouseScalingEnabled;
 
         // Whether the pointer icon should be visible or hidden on this display.
         public boolean pointerIconVisible;
@@ -3734,12 +3734,12 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         public boolean allDefaults() {
-            return mousePointerAccelerationEnabled == DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED
+            return mouseScalingEnabled == DEFAULT_MOUSE_SCALING_ENABLED
                     && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
         }
 
         public void reset() {
-            mousePointerAccelerationEnabled = DEFAULT_MOUSE_POINTER_ACCELERATION_ENABLED;
+            mouseScalingEnabled = DEFAULT_MOUSE_SCALING_ENABLED;
             pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
         }
     }
@@ -3754,14 +3754,14 @@ public class InputManagerService extends IInputManager.Stub
                 mAdditionalDisplayInputProperties.put(displayId, properties);
             }
             final boolean oldPointerIconVisible = properties.pointerIconVisible;
-            final boolean oldMouseAccelerationEnabled = properties.mousePointerAccelerationEnabled;
+            final boolean oldMouseScalingEnabled = properties.mouseScalingEnabled;
             updater.accept(properties);
             if (oldPointerIconVisible != properties.pointerIconVisible) {
                 mNative.setPointerIconVisibility(displayId, properties.pointerIconVisible);
             }
-            if (oldMouseAccelerationEnabled != properties.mousePointerAccelerationEnabled) {
-                mNative.setMousePointerAccelerationEnabled(displayId,
-                        properties.mousePointerAccelerationEnabled);
+            if (oldMouseScalingEnabled != properties.mouseScalingEnabled) {
+                mNative.setMouseScalingEnabled(displayId,
+                        properties.mouseScalingEnabled);
             }
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);

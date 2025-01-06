@@ -341,7 +341,7 @@ public:
     void setPointerDisplayId(ui::LogicalDisplayId displayId);
     int32_t getMousePointerSpeed();
     void setPointerSpeed(int32_t speed);
-    void setMousePointerAccelerationEnabled(ui::LogicalDisplayId displayId, bool enabled);
+    void setMouseScalingEnabled(ui::LogicalDisplayId displayId, bool enabled);
     void setMouseReverseVerticalScrollingEnabled(bool enabled);
     void setMouseScrollingAccelerationEnabled(bool enabled);
     void setMouseSwapPrimaryButtonEnabled(bool enabled);
@@ -1491,8 +1491,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
             InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
-void NativeInputManager::setMousePointerAccelerationEnabled(ui::LogicalDisplayId displayId,
-                                                            bool enabled) {
+void NativeInputManager::setMouseScalingEnabled(ui::LogicalDisplayId displayId, bool enabled) {
     { // acquire lock
         std::scoped_lock _l(mLock);
 
@@ -2548,11 +2547,11 @@ static void nativeSetPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed
     im->setPointerSpeed(speed);
 }
 
-static void nativeSetMousePointerAccelerationEnabled(JNIEnv* env, jobject nativeImplObj,
-                                                     jint displayId, jboolean enabled) {
+static void nativeSetMouseScalingEnabled(JNIEnv* env, jobject nativeImplObj, jint displayId,
+                                         jboolean enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    im->setMousePointerAccelerationEnabled(ui::LogicalDisplayId{displayId}, enabled);
+    im->setMouseScalingEnabled(ui::LogicalDisplayId{displayId}, enabled);
 }
 
 static void nativeSetTouchpadPointerSpeed(JNIEnv* env, jobject nativeImplObj, jint speed) {
@@ -3294,8 +3293,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"transferTouch", "(Landroid/os/IBinder;I)Z", (void*)nativeTransferTouchOnDisplay},
         {"getMousePointerSpeed", "()I", (void*)nativeGetMousePointerSpeed},
         {"setPointerSpeed", "(I)V", (void*)nativeSetPointerSpeed},
-        {"setMousePointerAccelerationEnabled", "(IZ)V",
-         (void*)nativeSetMousePointerAccelerationEnabled},
+        {"setMouseScalingEnabled", "(IZ)V", (void*)nativeSetMouseScalingEnabled},
         {"setMouseReverseVerticalScrollingEnabled", "(Z)V",
          (void*)nativeSetMouseReverseVerticalScrollingEnabled},
         {"setMouseScrollingAccelerationEnabled", "(Z)V",
