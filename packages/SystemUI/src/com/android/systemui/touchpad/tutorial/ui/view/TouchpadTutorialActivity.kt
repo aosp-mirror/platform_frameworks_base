@@ -58,6 +58,7 @@ constructor(
     private val backGestureViewModel: BackGestureScreenViewModel,
     private val homeGestureViewModel: HomeGestureScreenViewModel,
     private val recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
+    private val easterEggGestureViewModel: EasterEggGestureViewModel,
 ) : ComponentActivity() {
 
     private val tutorialViewModel by
@@ -74,7 +75,7 @@ constructor(
                     backGestureViewModel,
                     homeGestureViewModel,
                     recentAppsGestureViewModel,
-                    EasterEggGestureViewModel(),
+                    easterEggGestureViewModel,
                     closeTutorial = ::finishTutorial,
                 )
             }

@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.touchpad.tutorial.ui.gesture
+package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
-import kotlinx.coroutines.channels.awaitClose
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import kotlinx.coroutines.flow.Flow
 
-class GestureFlowAdapter(gestureRecognizer: GestureRecognizer) {
-
-    val gestureStateAsFlow: Flow<GestureState> = conflatedCallbackFlow {
-        val callback: (GestureState) -> Unit = { trySend(it) }
-        gestureRecognizer.addGestureStateCallback(callback)
-        awaitClose { gestureRecognizer.clearGestureStateCallback() }
-    }
+/** Observes state of the system and provides always up-to-date [GestureRecognizer] */
+interface GestureRecognizerProvider {
+    val recognizer: Flow<GestureRecognizer>
 }

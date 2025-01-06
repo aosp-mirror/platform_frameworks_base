@@ -20,6 +20,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.BUTTON_PRIMARY
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.GestureRecognizerAdapter
 
 object TouchpadEventsFilter {
 
@@ -35,6 +36,15 @@ object TouchpadEventsFilter {
 }
 
 fun GestureRecognizer.handleTouchpadMotionEvent(event: MotionEvent): Boolean {
+    return if (TouchpadEventsFilter.isTouchpadAndNonClickEvent(event)) {
+        this.accept(event)
+        true
+    } else {
+        false
+    }
+}
+
+fun GestureRecognizerAdapter.handleTouchpadMotionEvent(event: MotionEvent): Boolean {
     return if (TouchpadEventsFilter.isTouchpadAndNonClickEvent(event)) {
         this.accept(event)
         true

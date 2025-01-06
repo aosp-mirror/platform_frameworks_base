@@ -22,7 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
@@ -37,6 +37,7 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Comp
 import com.android.systemui.touchpad.tutorial.ui.gesture.ThreeFingerGesture
 import com.android.systemui.touchpad.tutorial.ui.gesture.Velocity
 import com.android.systemui.touchpad.ui.gesture.fakeVelocityTracker
+import com.android.systemui.touchpad.ui.gesture.touchpadGestureResources
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -59,7 +60,12 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
     private val resources = kosmos.mockResources
 
     private val viewModel =
-        HomeGestureScreenViewModel(kosmos.configurationInteractor, resources, fakeVelocityTracker)
+        HomeGestureScreenViewModel(
+            GestureRecognizerAdapter(
+                HomeGestureRecognizerProvider(kosmos.touchpadGestureResources, fakeVelocityTracker),
+                kosmos.inputDeviceTutorialLogger,
+            )
+        )
 
     @Before
     fun before() {
@@ -126,10 +132,12 @@ class HomeGestureScreenViewModelTest : SysuiTestCase() {
         }
 
     private fun setDistanceThreshold(threshold: Float) {
-        fakeConfigRepository.setDimensionPixelSize(
-            R.dimen.touchpad_tutorial_gestures_distance_threshold,
-            (threshold).toInt(),
-        )
+        whenever(
+                resources.getDimensionPixelSize(
+                    R.dimen.touchpad_tutorial_gestures_distance_threshold
+                )
+            )
+            .thenReturn(threshold.toInt())
         fakeConfigRepository.onAnyConfigurationChange()
     }
 

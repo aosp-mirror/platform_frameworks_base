@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
@@ -36,7 +37,13 @@ import org.junit.runner.RunWith
 class EasterEggGestureViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val viewModel = EasterEggGestureViewModel()
+    private val viewModel =
+        EasterEggGestureViewModel(
+            GestureRecognizerAdapter(
+                EasterEggRecognizerProvider(),
+                kosmos.inputDeviceTutorialLogger,
+            )
+        )
 
     @Before
     fun before() {
