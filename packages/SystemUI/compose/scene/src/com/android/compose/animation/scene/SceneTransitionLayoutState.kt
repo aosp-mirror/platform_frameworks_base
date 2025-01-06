@@ -232,6 +232,8 @@ fun MutableSceneTransitionLayoutState(
     canShowOverlay: (OverlayKey) -> Boolean = { true },
     canHideOverlay: (OverlayKey) -> Boolean = { true },
     canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    onTransitionEnd: (TransitionState.Transition) -> Unit = {},
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
@@ -241,6 +243,8 @@ fun MutableSceneTransitionLayoutState(
         canShowOverlay,
         canHideOverlay,
         canReplaceOverlay,
+        onTransitionStart,
+        onTransitionEnd,
     )
 }
 
@@ -252,7 +256,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
     internal val canChangeScene: (SceneKey) -> Boolean = { true },
     internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
     internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
+        true
+    },
+    private val onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    private val onTransitionEnd: (TransitionState.Transition) -> Unit = {},
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
@@ -367,9 +375,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
             startTransitionInternal(transition, chain)
 
             // Run the transition until it is finished.
+            onTransitionStart(transition)
             transition.runInternal()
         } finally {
             finishTransition(transition)
+            onTransitionEnd(transition)
         }
     }
 
@@ -384,14 +394,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
         val toContent = transition.toContent
 
         // Update the transition specs.
-        transition.transformationSpec =
-            transitions
-                .transitionSpec(fromContent, toContent, key = transition.key)
-                .transformationSpec(transition)
-        transition.previewTransformationSpec =
-            transitions
-                .transitionSpec(fromContent, toContent, key = transition.key)
-                .previewTransformationSpec(transition)
+        val spec = transitions.transitionSpec(fromContent, toContent, key = transition.key)
+        transition._cuj = spec.cuj
+        transition.transformationSpec = spec.transformationSpec(transition)
+        transition.previewTransformationSpec = spec.previewTransformationSpec(transition)
     }
 
     private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
