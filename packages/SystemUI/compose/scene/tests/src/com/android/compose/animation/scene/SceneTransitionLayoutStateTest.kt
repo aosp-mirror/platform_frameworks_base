@@ -198,23 +198,30 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.currentTransitions).containsExactly(aToB, bToC).inOrder()
 
         // C => A. This should automatically call freezeAndAnimateToCurrentState() on bToC.
-        state.startTransitionImmediately(animationScope = backgroundScope, cToA)
+        val cToAJob = state.startTransitionImmediately(animationScope = backgroundScope, cToA)
         assertThat(frozenTransitions).containsExactly(aToB, bToC)
         assertThat(state.finishedTransitions).isEmpty()
         assertThat(state.currentTransitions).containsExactly(aToB, bToC, cToA).inOrder()
 
-        // Mark bToC as finished. The list of current transitions does not change because aToB is
-        // still not marked as finished.
-        bToC.finish()
-        bToCJob.join()
-        assertThat(state.finishedTransitions).containsExactly(bToC)
-        assertThat(state.currentTransitions).containsExactly(aToB, bToC, cToA).inOrder()
-
-        // Mark aToB as finished. This will remove both aToB and bToC from the list of transitions.
+        // Mark aToB and bToC as finished. The list of current transitions does not change because
+        // cToA is still running.
         aToB.finish()
         aToBJob.join()
+        assertThat(state.finishedTransitions).containsExactly(aToB)
+        assertThat(state.currentTransitions).containsExactly(aToB, bToC, cToA).inOrder()
+
+        bToC.finish()
+        bToCJob.join()
+        assertThat(state.finishedTransitions).containsExactly(aToB, bToC)
+        assertThat(state.currentTransitions).containsExactly(aToB, bToC, cToA).inOrder()
+
+        // Mark cToA as finished. This should clear all transitions and settle to idle.
+        cToA.finish()
+        cToAJob.join()
         assertThat(state.finishedTransitions).isEmpty()
-        assertThat(state.currentTransitions).containsExactly(cToA).inOrder()
+        assertThat(state.currentTransitions).isEmpty()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
     }
 
     @Test
@@ -472,5 +479,16 @@ class SceneTransitionLayoutStateTest {
                 "Found multiple transition specs for transition SceneKey(debugName=SceneA) => " +
                     "SceneKey(debugName=SceneB)"
             )
+    }
+
+    @Test
+    fun snapToScene_multipleTransitions() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+        state.startTransitionImmediately(this, transition(SceneA, SceneB))
+        state.startTransitionImmediately(this, transition(SceneB, SceneC))
+        state.snapToScene(SceneC)
+
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneC)
     }
 }

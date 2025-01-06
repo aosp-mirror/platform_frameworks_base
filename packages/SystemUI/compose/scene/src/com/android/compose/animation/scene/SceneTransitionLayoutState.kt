@@ -411,9 +411,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     if (tooManyTransitions) logTooManyTransitions()
 
                     // Force finish all transitions.
-                    while (currentTransitions.isNotEmpty()) {
-                        finishTransition(transitionStates[0] as TransitionState.Transition)
-                    }
+                    currentTransitions.fastForEach { finishTransition(it) }
 
                     // We finished all transitions, so we are now idle. We remove this state so that
                     // we end up only with the new transition after appending it.
@@ -475,46 +473,36 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Mark this transition as finished.
         finishedTransitions.add(transition)
 
-        // Keep a reference to the last transition, in case we remove all transitions and should
-        // settle to Idle.
+        if (finishedTransitions.size != transitionStates.size) {
+            // Some transitions were not finished, so we won't settle to idle.
+            return
+        }
+
+        // Keep a reference to the last transition, in case all transitions are finished and we
+        // should settle to Idle.
         val lastTransition = transitionStates.last()
 
-        // Remove all first n finished transitions.
-        var i = 0
-        val nStates = transitionStates.size
-        while (i < nStates) {
-            val t = transitionStates[i]
-            if (!finishedTransitions.contains(t)) {
-                // Stop here.
-                break
+        transitionStates.fastForEach { state ->
+            if (!finishedTransitions.contains(state)) {
+                // Some transitions were not finished, so we won't settle to idle.
+                return
             }
-
-            // Remove the transition from the set of finished transitions.
-            finishedTransitions.remove(t)
-            i++
         }
 
-        // If all transitions are finished, we are idle.
-        if (i == nStates) {
-            check(finishedTransitions.isEmpty())
-            val idle =
-                TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
-            Log.i(TAG, "all transitions finished. idle=$idle")
-            this.transitionStates = listOf(idle)
-        } else if (i > 0) {
-            this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
-        }
+        val idle = TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
+        Log.i(TAG, "all transitions finished. idle=$idle")
+        finishedTransitions.clear()
+        this.transitionStates = listOf(idle)
     }
 
     override fun snapToScene(scene: SceneKey, currentOverlays: Set<OverlayKey>) {
         checkThread()
 
         // Force finish all transitions.
-        while (currentTransitions.isNotEmpty()) {
-            finishTransition(transitionStates[0] as TransitionState.Transition)
-        }
+        currentTransitions.fastForEach { finishTransition(it) }
 
         check(transitionStates.size == 1)
+        check(currentTransitions.isEmpty())
         transitionStates = listOf(TransitionState.Idle(scene, currentOverlays))
     }
 
