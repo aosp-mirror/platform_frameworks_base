@@ -17,12 +17,12 @@
 package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
-import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureDirection
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import com.android.systemui.util.kotlin.pairwiseBy
 import kotlinx.coroutines.flow.Flow
@@ -30,21 +30,26 @@ import kotlinx.coroutines.flow.Flow
 class BackGestureScreenViewModel(val gestureRecognizer: GestureRecognizerAdapter) :
     TouchpadTutorialScreenViewModel {
 
-    override val gestureUiState: Flow<GestureUiState> =
-        gestureRecognizer.gestureState.pairwiseBy(GestureState.NotStarted) { previous, current ->
-            toGestureUiState(current, previous)
-        }
+    override val tutorialState: Flow<TutorialActionState> =
+        gestureRecognizer.gestureState
+            .pairwiseBy(NotStarted) { previous, current ->
+                current to toAnimationProperties(current, previous)
+            }
+            .mapToTutorialState()
 
     override fun handleEvent(event: MotionEvent): Boolean {
         return gestureRecognizer.handleTouchpadMotionEvent(event)
     }
 
-    private fun toGestureUiState(current: GestureState, previous: GestureState): GestureUiState {
+    private fun toAnimationProperties(
+        current: GestureState,
+        previous: GestureState,
+    ): TutorialAnimationProperties {
         val (startMarker, endMarker) =
             if (current is InProgress && current.direction == GestureDirection.LEFT) {
                 "gesture to L" to "end progress L"
             } else "gesture to R" to "end progress R"
-        return current.toGestureUiState(
+        return TutorialAnimationProperties(
             progressStartMarker = startMarker,
             progressEndMarker = endMarker,
             successAnimation = successAnimation(previous),
