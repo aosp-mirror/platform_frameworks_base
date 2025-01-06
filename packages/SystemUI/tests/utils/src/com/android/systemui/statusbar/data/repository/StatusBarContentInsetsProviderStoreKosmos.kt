@@ -21,7 +21,7 @@ import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.display.data.repository.displayWindowPropertiesRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.layout.statusBarContentInsetsProviderFactory
+import com.android.systemui.statusbar.phone.statusBarContentInsetsProviderFactory
 import com.android.systemui.sysUICutoutProviderFactory
 
 val Kosmos.fakeStatusBarContentInsetsProviderStore by

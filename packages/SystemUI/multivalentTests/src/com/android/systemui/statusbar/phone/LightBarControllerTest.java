@@ -51,7 +51,6 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.data.model.StatusBarAppearance;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModePerDisplayRepository;
-import com.android.systemui.statusbar.layout.BoundsPair;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import kotlinx.coroutines.test.TestScope;

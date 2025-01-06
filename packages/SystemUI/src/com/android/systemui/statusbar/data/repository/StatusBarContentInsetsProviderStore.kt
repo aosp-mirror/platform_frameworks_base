@@ -28,8 +28,8 @@ import com.android.systemui.display.data.repository.PerDisplayStore
 import com.android.systemui.display.data.repository.PerDisplayStoreImpl
 import com.android.systemui.display.data.repository.SingleDisplayStore
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsProviderImpl
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides

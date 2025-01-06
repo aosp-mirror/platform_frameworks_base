@@ -36,8 +36,8 @@ import com.android.systemui.dagger.qualifiers.Default
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsChangedListener
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames

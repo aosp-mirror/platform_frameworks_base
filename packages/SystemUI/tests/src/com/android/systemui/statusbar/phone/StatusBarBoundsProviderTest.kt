@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.layout
+package com.android.systemui.statusbar.phone
 
 import android.graphics.Rect
 import android.testing.TestableLooper.RunWithLooper
@@ -23,6 +23,7 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider.BoundsChangeListener
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -46,7 +47,7 @@ class StatusBarBoundsProviderTest : SysuiTestCase() {
         private val END_SIDE_BOUNDS = Rect(250, 300, 350, 400)
     }
 
-    @Mock private lateinit var boundsChangeListener: StatusBarBoundsProvider.BoundsChangeListener
+    @Mock private lateinit var boundsChangeListener: BoundsChangeListener
 
     private lateinit var boundsProvider: StatusBarBoundsProvider
 
