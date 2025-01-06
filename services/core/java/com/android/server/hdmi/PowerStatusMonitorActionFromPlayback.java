@@ -68,6 +68,8 @@ public class PowerStatusMonitorActionFromPlayback extends HdmiCecFeatureAction {
 
     private boolean handleReportPowerStatusFromTv(HdmiCecMessage cmd) {
         int powerStatus = cmd.getParams()[0] & 0xFF;
+        mState = STATE_WAIT_FOR_NEXT_MONITORING;
+        addTimer(mState, MONITORING_INTERVAL_MS);
         if (powerStatus == POWER_STATUS_STANDBY) {
             Slog.d(TAG, "TV reported it turned off, going to sleep.");
             source().getService().standby();
