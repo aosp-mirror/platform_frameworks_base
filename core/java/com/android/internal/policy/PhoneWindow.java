@@ -184,14 +184,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private static final long ENFORCE_EDGE_TO_EDGE = 309578419;
 
     /**
-     * Disable opting out the edge-to-edge enforcement.
-     * {@link Build.VERSION_CODES#BAKLAVA} or above.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
-    private static final long DISABLE_OPT_OUT_EDGE_TO_EDGE = 377864165;
-
-    /**
      * Override the layout in display cutout mode behavior. This will only apply if the edge to edge
      * is not enforced.
      */
@@ -458,33 +450,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     public static boolean isEdgeToEdgeEnforced(ApplicationInfo info, boolean local,
             TypedArray windowStyle) {
-        return !isOptingOutEdgeToEdgeEnforcement(info, local, windowStyle)
+        return !windowStyle.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false)
                 && (info.targetSdkVersion >= ENFORCE_EDGE_TO_EDGE_SDK_VERSION
                         || (Flags.enforceEdgeToEdge() && (local
                                 // Calling this doesn't require a permission.
                                 ? CompatChanges.isChangeEnabled(ENFORCE_EDGE_TO_EDGE)
                                 // Calling this requires permissions.
                                 : info.isChangeEnabled(ENFORCE_EDGE_TO_EDGE))));
-    }
-
-    /**
-     * Returns whether the given application is opting out edge-to-edge enforcement.
-     *
-     * @param info The application to query.
-     * @param local Whether this is called from the process of the given application.
-     * @param windowStyle The style of the window.
-     * @return {@code true} if the edge-to-edge enforcement is opting out. Otherwise, {@code false}.
-     */
-    public static boolean isOptingOutEdgeToEdgeEnforcement(ApplicationInfo info, boolean local,
-            TypedArray windowStyle) {
-        final boolean disabled = (Flags.disableOptOutEdgeToEdge() && (local
-                // Calling this doesn't require a permission.
-                ? CompatChanges.isChangeEnabled(DISABLE_OPT_OUT_EDGE_TO_EDGE)
-                // Calling this requires permissions.
-                : info.isChangeEnabled(DISABLE_OPT_OUT_EDGE_TO_EDGE)));
-        return !disabled && windowStyle.getBoolean(
-                R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false /* default */);
-
     }
 
     @Override
@@ -2514,7 +2486,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         TypedArray a = getWindowStyle();
         WindowManager.LayoutParams params = getAttributes();
-        ApplicationInfo appInfo = getContext().getApplicationInfo();
 
         if (false) {
             System.out.println("From style:");
@@ -2526,7 +2497,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             System.out.println(s);
         }
 
-        mEdgeToEdgeEnforced = isEdgeToEdgeEnforced(appInfo, true /* local */, a);
+        mEdgeToEdgeEnforced = isEdgeToEdgeEnforced(
+                getContext().getApplicationInfo(), true /* local */, a);
         if (mEdgeToEdgeEnforced) {
             getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
@@ -2535,7 +2507,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // mNavigationBarColor is not reset here because it might be used to draw the scrim.
         }
         if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
-                && !isOptingOutEdgeToEdgeEnforcement(appInfo, true /* local */, a)) {
+                && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,
+                false /* defValue */)) {
             getAttributes().privateFlags |= PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
         }
 
