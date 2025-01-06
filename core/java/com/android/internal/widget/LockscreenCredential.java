@@ -246,7 +246,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public void zeroize() {
         if (mCredential != null) {
-            Arrays.fill(mCredential, (byte) 0);
+            LockPatternUtils.zeroize(mCredential);
             mCredential = null;
         }
     }
@@ -346,7 +346,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             byte[] sha1 = MessageDigest.getInstance("SHA-1").digest(saltedPassword);
             byte[] md5 = MessageDigest.getInstance("MD5").digest(saltedPassword);
 
-            Arrays.fill(saltedPassword, (byte) 0);
+            LockPatternUtils.zeroize(saltedPassword);
             return HexEncoding.encodeToString(ArrayUtils.concat(sha1, md5));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
