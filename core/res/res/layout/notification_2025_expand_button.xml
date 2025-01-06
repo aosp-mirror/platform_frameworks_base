@@ -22,6 +22,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="top|end"
     android:contentDescription="@string/expand_button_content_description_collapsed"
+    android:padding="@dimen/notification_2025_margin"
     >
 
     <LinearLayout
