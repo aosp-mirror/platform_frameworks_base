@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.data.repository.LightBarControllerStore
 import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.layout.StatusBarContentInsetsProviderImpl
+import com.android.systemui.statusbar.layout.ui.viewmodel.StatusBarContentInsetsViewModel
 import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.AutoHideControllerImpl
 import com.android.systemui.statusbar.phone.LightBarController
@@ -39,6 +40,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.domain.interactor.OngoingCallInteractor
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.ui.StatusBarUiLayerModule
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
 import com.android.systemui.statusbar.window.MultiDisplayStatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.SingleDisplayStatusBarWindowControllerStore
@@ -60,7 +62,14 @@ import dagger.multibindings.IntoMap
  *   ([com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule],
  *   [com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule], etc.).
  */
-@Module(includes = [StatusBarDataLayerModule::class, SystemBarUtilsProxyImpl.Module::class])
+@Module(
+    includes =
+        [
+            StatusBarDataLayerModule::class,
+            StatusBarUiLayerModule::class,
+            SystemBarUtilsProxyImpl.Module::class,
+        ]
+)
 interface StatusBarModule {
 
     @Binds
@@ -168,6 +177,14 @@ interface StatusBarModule {
             sysUICutoutProvider: SysUICutoutProvider,
         ): StatusBarContentInsetsProvider {
             return factory.create(context, configurationController, sysUICutoutProvider)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun contentInsetsViewModel(
+            insetsProvider: StatusBarContentInsetsProvider
+        ): StatusBarContentInsetsViewModel {
+            return StatusBarContentInsetsViewModel(insetsProvider)
         }
     }
 }
