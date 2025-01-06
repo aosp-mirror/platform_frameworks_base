@@ -30,6 +30,7 @@ import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -83,7 +84,8 @@ class StatusBarNotificationChipsInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun notificationChips_notifMissingStatusBarChipIconView_empty() =
+    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChips_notifMissingStatusBarChipIconView_cdFlagOff_empty() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.notificationChips)
 
@@ -98,6 +100,25 @@ class StatusBarNotificationChipsInteractorTest : SysuiTestCase() {
             )
 
             assertThat(latest).isEmpty()
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME, StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChips_notifMissingStatusBarChipIconView_cdFlagOn_notEmpty() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.notificationChips)
+
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = null,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
+
+            assertThat(latest).isNotEmpty()
         }
 
     @Test
