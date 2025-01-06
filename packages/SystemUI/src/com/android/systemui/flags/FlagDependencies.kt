@@ -23,13 +23,7 @@ import com.android.server.notification.Flags.crossAppPoliteNotifications
 import com.android.server.notification.Flags.politeNotifications
 import com.android.server.notification.Flags.vibrateWhileUnlocked
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
-import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
-import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
-import com.android.systemui.Flags.FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP
 import com.android.systemui.Flags.communalHub
-import com.android.systemui.Flags.statusBarCallChipNotificationIcon
-import com.android.systemui.Flags.statusBarScreenSharingChips
-import com.android.systemui.Flags.statusBarUseReposForCallChip
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
@@ -63,10 +57,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // DualShade dependencies
         DualShade.token dependsOn SceneContainerFlag.getMainAconfigFlag()
-
-        // Status bar chip dependencies
-        statusBarCallChipNotificationIconToken dependsOn statusBarUseReposForCallChipToken
-        statusBarCallChipNotificationIconToken dependsOn statusBarScreenSharingChipsToken
     }
 
     private inline val politeNotifications
@@ -86,17 +76,4 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
     private inline val communalHub
         get() = FlagToken(FLAG_COMMUNAL_HUB, communalHub())
-
-    private inline val statusBarCallChipNotificationIconToken
-        get() =
-            FlagToken(
-                FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON,
-                statusBarCallChipNotificationIcon(),
-            )
-
-    private inline val statusBarScreenSharingChipsToken
-        get() = FlagToken(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, statusBarScreenSharingChips())
-
-    private inline val statusBarUseReposForCallChipToken
-        get() = FlagToken(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP, statusBarUseReposForCallChip())
 }

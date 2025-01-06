@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.phone.ongoingcall
 
 import android.app.ActivityManager
 import android.app.IActivityManager
-import android.app.Notification
-import android.app.Notification.CallStyle.CALL_TYPE_ONGOING
 import android.app.PendingIntent
 import android.app.UidObserver
 import android.content.Context
@@ -44,9 +42,6 @@ import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.view.ChipChronometer
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.CallType
@@ -60,7 +55,9 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
-/** A controller to handle the ongoing call chip in the collapsed status bar.
+/**
+ * A controller to handle the ongoing call chip in the collapsed status bar.
+ *
  * @deprecated Use [OngoingCallInteractor] instead, which follows recommended architecture patterns
  */
 @Deprecated("Use OngoingCallInteractor instead")
@@ -71,7 +68,6 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val context: Context,
     private val ongoingCallRepository: OngoingCallRepository,
-    private val notifCollection: CommonNotifCollection,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val systemClock: SystemClock,
     private val activityStarter: ActivityStarter,
@@ -90,105 +86,24 @@ constructor(
 
     private val mListeners: MutableList<OngoingCallListener> = mutableListOf()
     private val uidObserver = CallAppUidObserver()
-    private val notifListener =
-        object : NotifCollectionListener {
-            // Temporary workaround for b/178406514 for testing purposes.
-            //
-            // b/178406514 means that posting an incoming call notif then updating it to an ongoing
-            // call notif does not work (SysUI never receives the update). This workaround allows us
-            // to trigger the ongoing call chip when an ongoing call notif is *added* rather than
-            // *updated*, allowing us to test the chip.
-            //
-            // TODO(b/183229367): Remove this function override when b/178406514 is fixed.
-            override fun onEntryAdded(entry: NotificationEntry) {
-                onEntryUpdated(entry, true)
-            }
-
-            override fun onEntryUpdated(entry: NotificationEntry) {
-                StatusBarUseReposForCallChip.assertInLegacyMode()
-                // We have a new call notification or our existing call notification has been
-                // updated.
-                // TODO(b/183229367): This likely won't work if you take a call from one app then
-                //  switch to a call from another app.
-                if (
-                    callNotificationInfo == null && isCallNotification(entry) ||
-                        (entry.sbn.key == callNotificationInfo?.key)
-                ) {
-                    val newOngoingCallInfo =
-                        CallNotificationInfo(
-                            entry.sbn.key,
-                            entry.sbn.notification.getWhen(),
-                            // In this old listener pattern, we don't have access to the
-                            // notification icon.
-                            notificationIconView = null,
-                            entry.sbn.notification.contentIntent,
-                            entry.sbn.uid,
-                            entry.sbn.notification.extras.getInt(
-                                Notification.EXTRA_CALL_TYPE,
-                                -1,
-                            ) == CALL_TYPE_ONGOING,
-                            statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
-                        )
-                    if (newOngoingCallInfo == callNotificationInfo) {
-                        return
-                    }
-
-                    callNotificationInfo = newOngoingCallInfo
-                    if (newOngoingCallInfo.isOngoing) {
-                        logger.log(
-                            TAG,
-                            LogLevel.DEBUG,
-                            { str1 = newOngoingCallInfo.key },
-                            { "Call notif *is* ongoing -> showing chip. key=$str1" },
-                        )
-                        updateChip()
-                    } else {
-                        logger.log(
-                            TAG,
-                            LogLevel.DEBUG,
-                            { str1 = newOngoingCallInfo.key },
-                            { "Call notif not ongoing -> hiding chip. key=$str1" },
-                        )
-                        removeChip()
-                    }
-                }
-            }
-
-            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                if (entry.sbn.key == callNotificationInfo?.key) {
-                    logger.log(
-                        TAG,
-                        LogLevel.DEBUG,
-                        { str1 = entry.sbn.key },
-                        { "Call notif removed -> hiding chip. key=$str1" },
-                    )
-                    removeChip()
-                }
-            }
-        }
 
     override fun start() {
-        if (StatusBarChipsModernization.isEnabled)
-            return
+        if (StatusBarChipsModernization.isEnabled) return
 
         dumpManager.registerDumpable(this)
 
-        if (Flags.statusBarUseReposForCallChip()) {
-            scope.launch {
-                // Listening to [ActiveNotificationsInteractor] instead of using
-                // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
-                // 1. ActiveNotificationsInteractor automatically filters the notification list to
-                // just notifications for the current user, which ensures we don't show a call chip
-                // for User 1's call while User 2 is active (see b/328584859).
-                // 2. ActiveNotificationsInteractor only emits notifications that are currently
-                // present in the shade, which means we know we've already inflated the icon that we
-                // might use for the call chip (see b/354930838).
-                activeNotificationsInteractor.ongoingCallNotification.collect {
-                    updateInfoFromNotifModel(it)
-                }
+        scope.launch {
+            // Listening to [ActiveNotificationsInteractor] instead of using
+            // [NotifCollectionListener#onEntryUpdated] is better for two reasons:
+            // 1. ActiveNotificationsInteractor automatically filters the notification list to
+            // just notifications for the current user, which ensures we don't show a call chip
+            // for User 1's call while User 2 is active (see b/328584859).
+            // 2. ActiveNotificationsInteractor only emits notifications that are currently
+            // present in the shade, which means we know we've already inflated the icon that we
+            // might use for the call chip (see b/354930838).
+            activeNotificationsInteractor.ongoingCallNotification.collect {
+                updateInfoFromNotifModel(it)
             }
-        } else {
-            notifCollection.addCollectionListener(notifListener)
         }
 
         scope.launch {
@@ -595,10 +510,6 @@ constructor(
             }
         }
     }
-}
-
-private fun isCallNotification(entry: NotificationEntry): Boolean {
-    return entry.sbn.notification.isStyle(Notification.CallStyle::class.java)
 }
 
 private const val TAG = OngoingCallRepository.TAG

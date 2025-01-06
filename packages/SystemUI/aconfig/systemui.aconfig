@@ -424,17 +424,6 @@ flag {
 }
 
 flag {
-    name: "status_bar_use_repos_for_call_chip"
-    namespace: "systemui"
-    description: "Use repositories as the source of truth for call notifications shown as a chip in"
-        "the status bar"
-    bug: "328584859"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "status_bar_call_chip_notification_icon"
     namespace: "systemui"
     description: "Use the small icon set on the notification for the status bar call chip"
