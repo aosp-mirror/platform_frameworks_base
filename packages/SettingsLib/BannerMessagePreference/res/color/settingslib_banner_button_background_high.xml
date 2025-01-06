@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright (C) 2021 The Android Open Source Project
+  Copyright (C) 2025 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
   limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@android:color/white" />
-    <corners android:radius="28dp"/>
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+        android:alpha="@dimen/material_emphasis_disabled_background" android:color="@color/settingslib_colorBackgroundLevel_high"/>
+    <item android:state_checked="true" android:color="?attr/colorContainerChecked"/>
+    <item android:state_checkable="true" android:color="?attr/colorContainerUnchecked"/>
+    <item android:color="@color/settingslib_colorBackgroundLevel_high" />
+</selector>
