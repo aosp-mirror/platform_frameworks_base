@@ -21,6 +21,8 @@ import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,8 +39,8 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     override val udfpsTransitionToFullShadeProgress =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
 
-    private val _currentFling: MutableStateFlow<FlingInfo?> = MutableStateFlow(null)
-    override val currentFling: StateFlow<FlingInfo?> = _currentFling.asStateFlow()
+    override val currentFling: MutableSharedFlow<FlingInfo?> =
+        MutableSharedFlow(replay = 2, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     private val _lockscreenShadeExpansion = MutableStateFlow(0f)
     override val lockscreenShadeExpansion = _lockscreenShadeExpansion.asStateFlow()
@@ -139,7 +141,7 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     }
 
     override fun setCurrentFling(info: FlingInfo?) {
-        _currentFling.value = info
+        currentFling.tryEmit(info)
     }
 
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
