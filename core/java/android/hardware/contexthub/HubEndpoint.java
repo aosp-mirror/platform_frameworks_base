@@ -137,6 +137,8 @@ public class HubEndpoint {
                                                 serviceDescriptor,
                                                 mLifecycleCallback.onSessionOpenRequest(
                                                         initiator, serviceDescriptor)));
+                    } else {
+                        invokeCallbackFinished();
                     }
                 }
 
@@ -163,6 +165,8 @@ public class HubEndpoint {
                                         + result.getReason());
                         rejectSession(sessionId);
                     }
+
+                    invokeCallbackFinished();
                 }
 
                 private void acceptSession(
@@ -249,7 +253,12 @@ public class HubEndpoint {
                     activeSession.setOpened();
                     if (mLifecycleCallback != null) {
                         mLifecycleCallbackExecutor.execute(
-                                () -> mLifecycleCallback.onSessionOpened(activeSession));
+                                () -> {
+                                    mLifecycleCallback.onSessionOpened(activeSession);
+                                    invokeCallbackFinished();
+                                });
+                    } else {
+                        invokeCallbackFinished();
                     }
                 }
 
@@ -278,7 +287,10 @@ public class HubEndpoint {
                                     synchronized (mLock) {
                                         mActiveSessions.remove(sessionId);
                                     }
+                                    invokeCallbackFinished();
                                 });
+                    } else {
+                        invokeCallbackFinished();
                     }
                 }
 
@@ -323,7 +335,16 @@ public class HubEndpoint {
                                         e.rethrowFromSystemServer();
                                     }
                                 }
+                                invokeCallbackFinished();
                             });
+                }
+
+                private void invokeCallbackFinished() {
+                    try {
+                        mServiceToken.onCallbackFinished();
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
                 }
             };
 

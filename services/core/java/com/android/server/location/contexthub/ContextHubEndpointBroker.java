@@ -32,7 +32,10 @@ import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -53,6 +56,16 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     /** Message used by noteOp when this client receives a message from an endpoint. */
     private static final String RECEIVE_MSG_NOTE = "ContextHubEndpointMessageDelivery";
+
+    /** The duration of wakelocks acquired during HAL callbacks */
+    private static final long WAKELOCK_TIMEOUT_MILLIS = 5 * 1000;
+
+    /*
+     * Internal interface used to invoke client callbacks.
+     */
+    interface CallbackConsumer {
+        void accept(IContextHubEndpointCallback callback) throws RemoteException;
+    }
 
     /** The context of the service. */
     private final Context mContext;
@@ -134,6 +147,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
     private final int mUid;
 
+    /** Wakelock held while nanoapp message are in flight to the client */
+    private final WakeLock mWakeLock;
+
     /* package */ ContextHubEndpointBroker(
             Context context,
             IEndpointCommunication hubInterface,
@@ -158,6 +174,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
 
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
         mAppOpsManager.startWatchingMode(AppOpsManager.OP_NONE, mPackageName, this);
+
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.setWorkSource(new WorkSource(mUid, mPackageName));
+        mWakeLock.setReferenceCounted(true);
     }
 
     @Override
@@ -302,6 +323,13 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         }
     }
 
+    @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    public void onCallbackFinished() {
+        super.onCallbackFinished_enforcePermission();
+        releaseWakeLock();
+    }
+
     /** Invoked when the underlying binder of this broker has died at the client process. */
     @Override
     public void binderDied() {
@@ -357,15 +385,13 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             mSessionInfoMap.put(sessionId, new SessionInfo(initiator, true));
         }
 
-        if (mContextHubEndpointCallback != null) {
-            try {
-                mContextHubEndpointCallback.onSessionOpenRequest(
-                        sessionId, initiator, serviceDescriptor);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onSessionOpenRequest", e);
-                cleanupSessionResources(sessionId);
-                return;
-            }
+        boolean success =
+                invokeCallback(
+                        (consumer) ->
+                                consumer.onSessionOpenRequest(
+                                        sessionId, initiator, serviceDescriptor));
+        if (!success) {
+            cleanupSessionResources(sessionId);
         }
     }
 
@@ -374,14 +400,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             Log.w(TAG, "Unknown session ID in onCloseEndpointSession: id=" + sessionId);
             return;
         }
-        if (mContextHubEndpointCallback != null) {
-            try {
-                mContextHubEndpointCallback.onSessionClosed(
-                        sessionId, ContextHubServiceUtil.toAppHubEndpointReason(reason));
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onSessionClosed", e);
-            }
-        }
+
+        invokeCallback(
+                (consumer) ->
+                        consumer.onSessionClosed(
+                                sessionId, ContextHubServiceUtil.toAppHubEndpointReason(reason)));
     }
 
     /* package */ void onEndpointSessionOpenComplete(int sessionId) {
@@ -392,13 +415,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             }
             mSessionInfoMap.get(sessionId).setSessionState(SessionInfo.SessionState.ACTIVE);
         }
-        if (mContextHubEndpointCallback != null) {
-            try {
-                mContextHubEndpointCallback.onSessionOpenComplete(sessionId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onSessionClosed", e);
-            }
-        }
+
+        invokeCallback((consumer) -> consumer.onSessionOpenComplete(sessionId));
     }
 
     /* package */ void onMessageReceived(int sessionId, HubMessage message) {
@@ -440,14 +458,11 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             return;
         }
 
-        if (mContextHubEndpointCallback != null) {
-            try {
-                mContextHubEndpointCallback.onMessageReceived(sessionId, message);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onMessageReceived", e);
-                sendMessageDeliveryStatus(
-                        sessionId, message.getMessageSequenceNumber(), ErrorCode.TRANSIENT_ERROR);
-            }
+        boolean success =
+                invokeCallback((consumer) -> consumer.onMessageReceived(sessionId, message));
+        if (!success) {
+            sendMessageDeliveryStatus(
+                    sessionId, message.getMessageSequenceNumber(), ErrorCode.TRANSIENT_ERROR);
         }
     }
 
@@ -519,5 +534,47 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     private boolean hasEndpointPermissions(HubEndpointInfo targetEndpointInfo) {
         Collection<String> requiredPermissions = targetEndpointInfo.getRequiredPermissions();
         return ContextHubServiceUtil.hasPermissions(mContext, mPid, mUid, requiredPermissions);
+    }
+
+    private void acquireWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    if (mIsRegistered.get()) {
+                        mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
+                    }
+                });
+    }
+
+    private void releaseWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    if (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Releasing the wakelock fails - ", e);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Invokes a callback and acquires a wakelock.
+     *
+     * @param consumer The callback invoke
+     * @return false if the callback threw a RemoteException
+     */
+    private boolean invokeCallback(CallbackConsumer consumer) {
+        if (mContextHubEndpointCallback != null) {
+            acquireWakeLock();
+            try {
+                consumer.accept(mContextHubEndpointCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling endpoint callback", e);
+                releaseWakeLock();
+                return false;
+            }
+        }
+        return true;
     }
 }
