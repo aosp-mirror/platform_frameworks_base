@@ -605,6 +605,15 @@ TEST_F(PerformanceHintTest, TestASessionCreationConfig) {
     ASSERT_NE(config, nullptr);
 }
 
+TEST_F(PerformanceHintTest, TestSessionCreationWithNullLayers) {
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _)).Times(1);
+    auto&& config = configFromCreator(
+            {.tids = mTids, .nativeWindows = {nullptr}, .surfaceControls = {nullptr}});
+    APerformanceHintManager* manager = createManager();
+    auto&& session = createSessionUsingConfig(manager, config);
+    ASSERT_TRUE(session);
+}
+
 TEST_F(PerformanceHintTest, TestSupportObject) {
     // Disable GPU and Power Efficiency support to test partial enabling
     mClientData.supportInfo.sessionModes &= ~(1 << (int)hal::SessionMode::AUTO_GPU);
