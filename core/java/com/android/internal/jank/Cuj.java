@@ -246,8 +246,19 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW = 119;
 
+    /**
+     * Track moving overview task to desktop interaction from overview menu.
+     *
+     * <p> Tracking starts when the overview task is moved to desktop via the overview menu.
+     * Tracking finishes when successfully made a call to `IDesktopMode.moveToDesktop`,
+     * without waiting for transition completion.
+     * </p>
+     * TODO(b/387471509): Update the CUJ to wait for transition completion.
+     */
+    public static final int CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU = 120;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
 
     /** @hide */
     @IntDef({
@@ -358,7 +369,8 @@ public class Cuj {
             CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE,
             CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
             CUJ_DESKTOP_MODE_SNAP_RESIZE,
-            CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW
+            CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW,
+            CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -480,6 +492,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_SNAP_RESIZE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_SNAP_RESIZE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_UNMAXIMIZE_WINDOW;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
     }
 
     private Cuj() {
@@ -714,6 +727,8 @@ public class Cuj {
                 return "DESKTOP_MODE_SNAP_RESIZE";
             case CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW:
                 return "DESKTOP_MODE_UNMAXIMIZE_WINDOW";
+            case CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU:
+                return "DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU";
         }
         return "UNKNOWN";
     }
