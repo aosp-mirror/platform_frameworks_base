@@ -74,6 +74,9 @@ public class BluetoothUtils {
             ImmutableSet.of(
                     BluetoothProfile.A2DP, BluetoothProfile.LE_AUDIO, BluetoothProfile.HEARING_AID);
 
+    private static final String TEMP_BOND_TYPE = "TEMP_BOND_TYPE";
+    private static final String TEMP_BOND_DEVICE_METADATA_VALUE = "le_audio_sharing";
+
     private static ErrorListener sErrorListener;
 
     public static int getConnectionStateSummary(int connectionState) {
@@ -1137,5 +1140,16 @@ public class BluetoothUtils {
             }
         }
         return saDevice;
+    }
+
+    /**
+     * Verifies if the device is temporary bond in audio sharing.
+     *
+     * @param bluetoothDevice the BluetoothDevice to verify
+     * @return if the device is temporary bond
+     */
+    public static boolean isTemporaryBondDevice(@Nullable BluetoothDevice bluetoothDevice) {
+        String metadataValue = getFastPairCustomizedField(bluetoothDevice, TEMP_BOND_TYPE);
+        return Objects.equals(metadataValue, TEMP_BOND_DEVICE_METADATA_VALUE);
     }
 }

@@ -96,6 +96,7 @@ public class BluetoothUtilsTest {
     private Context mContext;
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private static final String STRING_METADATA = "string_metadata";
+    private static final String LE_AUDIO_SHARING_METADATA = "le_audio_sharing";
     private static final String BOOL_METADATA = "true";
     private static final String INT_METADATA = "25";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
@@ -104,6 +105,8 @@ public class BluetoothUtilsTest {
             "<HEARABLE_CONTROL_SLICE_WITH_WIDTH>"
                     + STRING_METADATA
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
+    private static final String TEMP_BOND_METADATA =
+            "<TEMP_BOND_TYPE>" + LE_AUDIO_SHARING_METADATA + "</TEMP_BOND_TYPE>";
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
     private static final int TEST_BROADCAST_ID = 25;
@@ -1302,5 +1305,13 @@ public class BluetoothUtilsTest {
         mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
 
         assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isTrue();
+    }
+
+    @Test
+    public void isTemporaryBondDevice_hasMetadata_returnsTrue() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                .thenReturn(TEMP_BOND_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.isTemporaryBondDevice(mBluetoothDevice)).isTrue();
     }
 }
