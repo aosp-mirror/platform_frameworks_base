@@ -51,6 +51,8 @@ import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 
+import static com.android.cts.input.inputeventmatchers.InputEventMatchersKt.withKeyCode;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -91,8 +93,10 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.ShellIdentityUtils;
+import com.android.cts.input.BlockingQueueEventVerifier;
 import com.android.window.flags.Flags;
 
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -101,7 +105,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -121,7 +127,6 @@ public class ViewRootImplTest {
 
     private ViewRootImpl mViewRootImpl;
     private View mView;
-    private volatile boolean mKeyReceived = false;
 
     private static Context sContext;
     private static Instrumentation sInstrumentation = InstrumentationRegistry.getInstrumentation();
@@ -1679,15 +1684,27 @@ public class ViewRootImplTest {
         }
     }
 
-    class KeyView extends View {
-        KeyView(Context context) {
+    static class InputView extends View {
+        private final BlockingQueue<InputEvent> mEvents = new LinkedBlockingQueue<>();
+        private final BlockingQueueEventVerifier mVerifier =
+                new BlockingQueueEventVerifier(mEvents);
+
+        InputView(Context context) {
             super(context);
         }
 
         @Override
         public boolean dispatchKeyEventPreIme(KeyEvent event) {
-            mKeyReceived = true;
+            mEvents.add(event.copy());
             return true /*handled*/;
+        }
+
+        public void assertReceivedKey(Matcher<KeyEvent> matcher) {
+            mVerifier.assertReceivedKey(matcher);
+        }
+
+        public void assertNoEvents() {
+            mVerifier.assertNoEvents();
         }
     }
 
@@ -1697,7 +1714,7 @@ public class ViewRootImplTest {
      * Next, inject an event into this view, and check whether it is received.
      */
     private void checkKeyEvent(Runnable setup, boolean shouldReceiveKey) {
-        final KeyView view = new KeyView(sContext);
+        final InputView view = new InputView(sContext);
         mView = view;
 
         attachViewToWindow(view);
@@ -1712,7 +1729,11 @@ public class ViewRootImplTest {
             mViewRootImpl.dispatchInputEvent(event);
         });
         sInstrumentation.waitForIdleSync();
-        assertEquals(shouldReceiveKey, mKeyReceived);
+        if (shouldReceiveKey) {
+            view.assertReceivedKey(withKeyCode(KeyEvent.KEYCODE_A));
+        } else {
+            view.assertNoEvents();
+        }
     }
 
     private void attachViewToWindow(View view) {
