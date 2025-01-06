@@ -285,6 +285,7 @@ filegroup {
         "tests/src/**/systemui/statusbar/phone/KeyguardClockPositionAlgorithmTest.java",
         "tests/src/**/systemui/shared/system/RemoteTransitionTest.java",
         "tests/src/**/systemui/qs/tiles/dialog/InternetDetailsContentControllerTest.java",
+        "tests/src/**/systemui/qs/tiles/dialog/InternetDetailsContentManagerTest.kt",
         "tests/src/**/systemui/qs/external/TileLifecycleManagerTest.java",
         "tests/src/**/systemui/ScreenDecorationsTest.java",
         "tests/src/**/systemui/statusbar/policy/BatteryControllerStartableTest.java",

@@ -70,6 +70,7 @@ import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.qs.flags.QsDetailedView;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor;
@@ -207,7 +208,8 @@ public class InternetDialogDelegateLegacy implements
             KeyguardStateController keyguardStateController,
             SystemUIDialog.Factory systemUIDialogFactory,
             ShadeDialogContextInteractor shadeDialogContextInteractor) {
-        // TODO: b/377388104 QsDetailedView.assertInLegacyMode();
+        // If `QsDetailedView` is enabled, it should show the details view.
+        QsDetailedView.assertInLegacyMode();
 
         mAboveStatusBar = aboveStatusBar;
         mSystemUIDialogFactory = systemUIDialogFactory;
