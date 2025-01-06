@@ -43,6 +43,7 @@ import java.util.function.Supplier;
 /**
  * A session object that holds origin transition states for starting an activity from an on-screen
  * UI component and smoothly transitioning back from the activity to the same UI component.
+ *
  * @hide
  */
 public class OriginTransitionSession {
@@ -143,6 +144,12 @@ public class OriginTransitionSession {
                 logE("Unable to cancel origin transition!", e);
             }
         }
+        if (mEntryTransition instanceof OriginRemoteTransition) {
+            ((OriginRemoteTransition) mEntryTransition).cancel();
+        }
+        if (mExitTransition instanceof OriginRemoteTransition) {
+            ((OriginRemoteTransition) mExitTransition).cancel();
+        }
     }
 
     private boolean hasEntryTransition() {
@@ -182,6 +189,7 @@ public class OriginTransitionSession {
 
     /**
      * A builder to build a {@link OriginTransitionSession}.
+     *
      * @hide
      */
     public static class Builder {
