@@ -1459,8 +1459,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         }
                         moveToTop = change.hasFlags(FLAG_MOVED_TO_TOP);
                         info.getChanges().remove(j);
-                    } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))
-                            || !change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)) {
+                    } else if ((openShowWallpaper && change.hasFlags(FLAG_IS_WALLPAPER))) {
                         info.getChanges().remove(j);
                     } else if (!mergePredictive && TransitionUtil.isClosingMode(change.getMode())) {
                         mergePredictive = true;
@@ -1483,6 +1482,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                             if (moveToTop) {
                                 change.setFlags(change.getFlags() | FLAG_MOVED_TO_TOP);
                             }
+                        } else if (Flags.unifyBackNavigationTransition()
+                                && change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)
+                                && change.getMode() == TRANSIT_CHANGE
+                                && isCloseChangeExist(info, change)) {
+                            // This is the original top target, don't add it into current transition
+                            // if it is closing.
+                            continue;
                         }
                         info.getChanges().add(i, change);
                     }
@@ -1812,6 +1818,17 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private static boolean canBeTransitionTarget(TransitionInfo.Change change) {
         return findComponentName(change) != null || findTaskId(change) != INVALID_TASK_ID;
+    }
+
+    private static boolean isCloseChangeExist(TransitionInfo info, TransitionInfo.Change change) {
+        for (int j = info.getChanges().size() - 1; j >= 0; --j) {
+            final TransitionInfo.Change current = info.getChanges().get(j);
+            if (TransitionUtil.isClosingMode(current.getMode())
+                    && change.getLeash().isSameSurface(current.getLeash())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Record the latest back gesture happen on which task.
