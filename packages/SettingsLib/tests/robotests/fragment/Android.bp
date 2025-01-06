@@ -28,13 +28,13 @@ java_library {
         //"-J-verbose",
     ],
     libs: [
-        "Robolectric_all-target_upstream",
+        "Robolectric_all-target",
         "androidx.fragment_fragment",
     ],
     plugins: [
         "auto_value_plugin_1.9",
         "auto_value_builder_plugin_1.9",
-        "Robolectric_processor_upstream",
+        "Robolectric_processor",
     ],
 
 }
