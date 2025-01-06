@@ -878,8 +878,10 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .build();
         final ActivityRecord activity0 = tf0.getTopMostActivity();
         final ActivityRecord activity1 = tf1.getTopMostActivity();
-        final WindowState win0 = createWindow(null, TYPE_BASE_APPLICATION, activity0, "win0");
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity1, "win1");
+        final WindowState win0 = newWindowBuilder("win0", TYPE_BASE_APPLICATION).setWindowToken(
+                activity0).build();
+        final WindowState win1 = newWindowBuilder("win1", TYPE_BASE_APPLICATION).setWindowToken(
+                activity1).build();
         doReturn(false).when(mDisplayContent).shouldImeAttachedToApp();
 
         mDisplayContent.setImeInputTarget(win0);
@@ -1174,8 +1176,8 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, app, name,
-                0 /* ownerId */, false /* ownerCanAddInternalSystemWindow */, new TestIWindow());
+        final WindowState win = newWindowBuilder(name, TYPE_BASE_APPLICATION).setWindowToken(
+                app).setClientWindow(new TestIWindow()).build();
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
         return win;
     }

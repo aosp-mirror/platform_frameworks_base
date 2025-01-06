@@ -63,7 +63,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testAppRemoved() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onAppRemoved(window.mActivityRecord);
@@ -72,7 +72,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testAppDied() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onAppDied(window.mActivityRecord);
@@ -81,7 +81,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testTaskRemoved() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onIdRemoved(window.getTask().mTaskId);
@@ -90,7 +90,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testReduced_notCached() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
@@ -105,7 +105,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testRestoreFromDisk() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
@@ -117,7 +117,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     @Test
     public void testClearCache() {
-        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        final WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).build();
         mCache.putSnapshot(window.getTask(), mSnapshot);
         assertEquals(mSnapshot, mCache.getSnapshot(window.getTask().mTaskId,
                 false /* isLowResolution */));

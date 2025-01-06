@@ -379,13 +379,11 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
         assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
 
-        final WindowState firstActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
-                        "firstActivityWin");
+        final WindowState firstActivityWin = newWindowBuilder("firstActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mFirstActivity).build();
         spyOn(firstActivityWin);
-        final WindowState secondActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mSecondActivity,
-                        "firstActivityWin");
+        final WindowState secondActivityWin = newWindowBuilder("secondActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mSecondActivity).build();
         spyOn(secondActivityWin);
 
         // firstActivityWin should be the target
@@ -424,13 +422,11 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         setupImeWindow();
         final DisplayArea.Tokens imeContainer = mDisplay.getImeContainer();
         final WindowToken imeToken = tokenOfType(TYPE_INPUT_METHOD);
-        final WindowState firstActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
-                        "firstActivityWin");
+        final WindowState firstActivityWin = newWindowBuilder("firstActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mFirstActivity).build();
         spyOn(firstActivityWin);
-        final WindowState secondActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mSecondActivity,
-                        "secondActivityWin");
+        final WindowState secondActivityWin = newWindowBuilder("secondActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mSecondActivity).build();
         spyOn(secondActivityWin);
 
         // firstActivityWin should be the target
@@ -464,9 +460,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
         assertThat(mDisplay.findAreaForTokenInLayer(imeToken)).isEqualTo(imeContainer);
 
-        final WindowState firstActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
-                        "firstActivityWin");
+        final WindowState firstActivityWin = newWindowBuilder("firstActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mFirstActivity).build();
         spyOn(firstActivityWin);
         // firstActivityWin should be the target
         doReturn(true).when(firstActivityWin).canBeImeTarget();
@@ -499,9 +494,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mDisplay);
 
         // firstActivityWin should be the target
-        final WindowState firstActivityWin =
-                createWindow(null /* parent */, TYPE_APPLICATION_STARTING, mFirstActivity,
-                        "firstActivityWin");
+        final WindowState firstActivityWin = newWindowBuilder("firstActivityWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(mFirstActivity).build();
         spyOn(firstActivityWin);
         doReturn(true).when(firstActivityWin).canBeImeTarget();
         WindowState imeTarget = mDisplay.computeImeTarget(true /* updateImeTarget */);
@@ -560,8 +554,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
     }
 
     private void setupImeWindow() {
-        final WindowState imeWindow = createWindow(null /* parent */,
-                TYPE_INPUT_METHOD, mDisplay, "mImeWindow");
+        final WindowState imeWindow = newWindowBuilder("mImeWindow", TYPE_INPUT_METHOD).setDisplay(
+                mDisplay).build();
         imeWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         mDisplay.mInputMethodWindow = imeWindow;
     }
