@@ -82,7 +82,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -270,6 +269,15 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
+    }
+
+    void onBootPhaseAppsCanStart() {
+        // IpcDataCaches must be invalidated once data becomes available, as queries will only
+        // begin to be cached after the first invalidation signal. At this point, we know about all
+        // notification channels.
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
+        }
     }
 
     public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
@@ -531,12 +539,14 @@ public class PreferencesHelper implements RankingConfig {
     private PackagePreferences getOrCreatePackagePreferencesLocked(String pkg,
             @UserIdInt int userId, int uid, int importance, int priority, int visibility,
             boolean showBadge, int bubblePreference, long creationTime) {
+        boolean created = false;
         final String key = packagePreferencesKey(pkg, uid);
         PackagePreferences
                 r = (uid == UNKNOWN_UID)
                 ? mRestoredWithoutUids.get(unrestoredPackageKey(pkg, userId))
                 : mPackagePreferences.get(key);
         if (r == null) {
+            created = true;
             r = new PackagePreferences();
             r.pkg = pkg;
             r.uid = uid;
@@ -571,6 +581,9 @@ public class PreferencesHelper implements RankingConfig {
                     && PREF_GRACE_PERIOD_MS < (mClock.millis() - r.creationTime)) {
                 mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, userId));
             }
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels() && created) {
+            invalidateNotificationChannelCache();
         }
         return r;
     }
@@ -664,6 +677,9 @@ public class PreferencesHelper implements RankingConfig {
         }
         NotificationChannel channel = new NotificationChannel(channelId, label, IMPORTANCE_LOW);
         p.channels.put(channelId, channel);
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
+        }
         return channel;
     }
 
@@ -1208,6 +1224,10 @@ public class PreferencesHelper implements RankingConfig {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
 
+        if (android.app.Flags.nmBinderPerfCacheChannels() && needsPolicyFileChange) {
+            invalidateNotificationChannelCache();
+        }
+
         return needsPolicyFileChange;
     }
 
@@ -1228,6 +1248,9 @@ public class PreferencesHelper implements RankingConfig {
                 throw new IllegalArgumentException("Channel does not exist");
             }
             channel.unlockFields(USER_LOCKED_IMPORTANCE);
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
         }
     }
 
@@ -1301,6 +1324,9 @@ public class PreferencesHelper implements RankingConfig {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         if (changed) {
+            if (android.app.Flags.nmBinderPerfCacheChannels()) {
+                invalidateNotificationChannelCache();
+            }
             updateConfig();
         }
     }
@@ -1537,6 +1563,10 @@ public class PreferencesHelper implements RankingConfig {
         if (channelBypassedDnd) {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
+
+        if (android.app.Flags.nmBinderPerfCacheChannels() && deletedChannel) {
+            invalidateNotificationChannelCache();
+        }
         return deletedChannel;
     }
 
@@ -1566,6 +1596,9 @@ public class PreferencesHelper implements RankingConfig {
             }
             r.channels.remove(channelId);
         }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
+        }
     }
 
     @Override
@@ -1576,12 +1609,17 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 return;
             }
+            boolean deleted = false;
             int N = r.channels.size() - 1;
             for (int i = N; i >= 0; i--) {
                 String key = r.channels.keyAt(i);
                 if (!DEFAULT_CHANNEL_ID.equals(key)) {
                     r.channels.remove(key);
+                    deleted = true;
                 }
+            }
+            if (android.app.Flags.nmBinderPerfCacheChannels() && deleted) {
+                invalidateNotificationChannelCache();
             }
         }
     }
@@ -1613,6 +1651,9 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
+        }
     }
 
     public void updateDefaultApps(int userId, ArraySet<String> toRemove,
@@ -1641,6 +1682,9 @@ public class PreferencesHelper implements RankingConfig {
                     }
                 }
             }
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
         }
     }
 
@@ -1756,6 +1800,9 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (groupBypassedDnd) {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels() && deletedChannels.size() > 0) {
+            invalidateNotificationChannelCache();
         }
         return deletedChannels;
     }
@@ -1902,8 +1949,13 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
-        if (!deletedChannelIds.isEmpty() && mCurrentUserHasChannelsBypassingDnd) {
-            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+        if (!deletedChannelIds.isEmpty()) {
+            if (mCurrentUserHasChannelsBypassingDnd) {
+                updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            }
+            if (android.app.Flags.nmBinderPerfCacheChannels()) {
+                invalidateNotificationChannelCache();
+            }
         }
         return deletedChannelIds;
     }
@@ -2196,6 +2248,11 @@ public class PreferencesHelper implements RankingConfig {
             PackagePreferences prefs = getOrCreatePackagePreferencesLocked(sourcePkg, sourceUid);
             prefs.delegate = new Delegate(delegatePkg, delegateUid, true);
         }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            // If package delegates change, then which packages can get what channel information
+            // also changes, so we need to clear the cache.
+            invalidateNotificationChannelCache();
+        }
     }
 
     /**
@@ -2207,6 +2264,9 @@ public class PreferencesHelper implements RankingConfig {
             if (prefs != null && prefs.delegate != null) {
                 prefs.delegate.mEnabled = false;
             }
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
         }
     }
 
@@ -2811,18 +2871,24 @@ public class PreferencesHelper implements RankingConfig {
 
     public void onUserRemoved(int userId) {
         synchronized (mLock) {
+            boolean removed = false;
             int N = mPackagePreferences.size();
             for (int i = N - 1; i >= 0; i--) {
                 PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
                 if (UserHandle.getUserId(PackagePreferences.uid) == userId) {
                     mPackagePreferences.removeAt(i);
+                    removed = true;
                 }
+            }
+            if (android.app.Flags.nmBinderPerfCacheChannels() && removed) {
+                invalidateNotificationChannelCache();
             }
         }
     }
 
     protected void onLocaleChanged(Context context, int userId) {
         synchronized (mLock) {
+            boolean updated = false;
             int N = mPackagePreferences.size();
             for (int i = 0; i < N; i++) {
                 PackagePreferences PackagePreferences = mPackagePreferences.valueAt(i);
@@ -2833,9 +2899,13 @@ public class PreferencesHelper implements RankingConfig {
                                 DEFAULT_CHANNEL_ID).setName(
                                 context.getResources().getString(
                                         R.string.default_notification_channel_label));
+                        updated = true;
                     }
                     // TODO (b/346396459): Localize all reserved channels
                 }
+            }
+            if (android.app.Flags.nmBinderPerfCacheChannels() && updated) {
+                invalidateNotificationChannelCache();
             }
         }
     }
@@ -2884,7 +2954,7 @@ public class PreferencesHelper implements RankingConfig {
                                                     channel.getAudioAttributes().getUsage());
                                     if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(
                                             restoredUri)) {
-                                        Log.w(TAG,
+                                        Slog.w(TAG,
                                                 "Could not restore sound: " + uri + " for channel: "
                                                         + channel);
                                     }
@@ -2922,6 +2992,9 @@ public class PreferencesHelper implements RankingConfig {
 
         if (updated) {
             updateConfig();
+            if (android.app.Flags.nmBinderPerfCacheChannels()) {
+                invalidateNotificationChannelCache();
+            }
         }
         return updated;
     }
@@ -2939,6 +3012,9 @@ public class PreferencesHelper implements RankingConfig {
                 p.priority = DEFAULT_PRIORITY;
                 p.visibility = DEFAULT_VISIBILITY;
                 p.showBadge = DEFAULT_SHOW_BADGE;
+                if (android.app.Flags.nmBinderPerfCacheChannels()) {
+                    invalidateNotificationChannelCache();
+                }
             }
         }
     }
@@ -3123,6 +3199,9 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            invalidateNotificationChannelCache();
+        }
     }
 
     public void migrateNotificationPermissions(List<UserInfo> users) {
@@ -3152,6 +3231,12 @@ public class PreferencesHelper implements RankingConfig {
 
     private void updateConfig() {
         mRankingHandler.requestSort();
+    }
+
+    @VisibleForTesting
+    // Utility method for overriding in tests to confirm that the cache gets cleared.
+    protected void invalidateNotificationChannelCache() {
+        NotificationManager.invalidateNotificationChannelCache();
     }
 
     private static String packagePreferencesKey(String pkg, int uid) {

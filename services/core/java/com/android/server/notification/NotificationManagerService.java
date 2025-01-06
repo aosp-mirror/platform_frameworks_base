@@ -3162,6 +3162,7 @@ public class NotificationManagerService extends SystemService {
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
+            mPreferencesHelper.onBootPhaseAppsCanStart();
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
 
