@@ -2246,10 +2246,6 @@ public final class DisplayManagerService extends SystemService {
 
     @GuardedBy("mSyncRoot")
     private void handleLogicalDisplayDisconnectedLocked(LogicalDisplay display) {
-        if (!mFlags.isConnectedDisplayManagementEnabled()) {
-            Slog.e(TAG, "DisplayDisconnected shouldn't be received when the flag is off");
-            return;
-        }
         releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_DISCONNECTED);
         mExternalDisplayPolicy.handleLogicalDisplayDisconnectedLocked(display);
     }
@@ -2315,11 +2311,6 @@ public final class DisplayManagerService extends SystemService {
 
     @SuppressLint("AndroidFrameworkRequiresPermission")
     private void handleLogicalDisplayConnectedLocked(LogicalDisplay display) {
-        if (!mFlags.isConnectedDisplayManagementEnabled()) {
-            Slog.e(TAG, "DisplayConnected shouldn't be received when the flag is off");
-            return;
-        }
-
         setupLogicalDisplay(display);
 
         if (ExternalDisplayPolicy.isExternalDisplayLocked(display)) {
@@ -2346,9 +2337,6 @@ public final class DisplayManagerService extends SystemService {
     private void handleLogicalDisplayAddedLocked(LogicalDisplay display) {
         final int displayId = display.getDisplayIdLocked();
         final boolean isDefault = displayId == Display.DEFAULT_DISPLAY;
-        if (!mFlags.isConnectedDisplayManagementEnabled()) {
-            setupLogicalDisplay(display);
-        }
 
         // Wake up waitForDefaultDisplay.
         if (isDefault) {
@@ -2443,21 +2431,17 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleLogicalDisplayRemovedLocked(@NonNull LogicalDisplay display) {
-        // With display management, the display is removed when disabled, and it might still exist.
+        // The display is removed when disabled, and it might still exist.
         // Resources must only be released when the disconnected signal is received.
-        if (mFlags.isConnectedDisplayManagementEnabled()) {
-            if (display.isValidLocked()) {
-                updateViewportPowerStateLocked(display);
-            }
+        if (display.isValidLocked()) {
+            updateViewportPowerStateLocked(display);
+        }
 
-            // Note: This method is only called if the display was enabled before being removed.
-            sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        // Note: This method is only called if the display was enabled before being removed.
+        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
 
-            if (display.isValidLocked()) {
-                applyDisplayChangedLocked(display);
-            }
-        } else {
-            releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        if (display.isValidLocked()) {
+            applyDisplayChangedLocked(display);
         }
         if (mDisplayTopologyCoordinator != null) {
             mDisplayTopologyCoordinator.onDisplayRemoved(display.getDisplayIdLocked());
@@ -4565,13 +4549,11 @@ public final class DisplayManagerService extends SystemService {
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
 
-            if (mFlags.isConnectedDisplayManagementEnabled()) {
-                if ((internalEventFlagsMask
-                        & DisplayManagerGlobal
-                        .INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
-                    mContext.enforceCallingOrSelfPermission(MANAGE_DISPLAYS,
-                            "Permission required to get signals about connection events.");
-                }
+            if ((internalEventFlagsMask
+                    & DisplayManagerGlobal
+                    .INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                mContext.enforceCallingOrSelfPermission(MANAGE_DISPLAYS,
+                        "Permission required to get signals about connection events.");
             }
 
             final long token = Binder.clearCallingIdentity();

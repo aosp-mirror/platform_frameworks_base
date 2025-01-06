@@ -222,7 +222,6 @@ public class LogicalDisplayMapperTest {
         when(mSyntheticModeManagerMock.createAppSupportedModes(any(), any(), anyBoolean()))
                 .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
-        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mFoldSettingProviderMock,
@@ -351,8 +350,7 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
-    public void testDisplayDeviceAddAndRemove_withDisplayManagement() {
-        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testDisplayDeviceAddAndRemove() {
         DisplayDevice device = createDisplayDevice(TYPE_INTERNAL, 600, 800,
                 FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
 
@@ -390,8 +388,7 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
-    public void testDisplayDisableEnable_withDisplayManagement() {
-        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testDisplayDisableEnable() {
         DisplayDevice device = createDisplayDevice(TYPE_INTERNAL, 600, 800,
                 FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
         LogicalDisplay displayAdded = add(device);
@@ -1350,9 +1347,14 @@ public class LogicalDisplayMapperTest {
         ArgumentCaptor<LogicalDisplay> displayCaptor =
                 ArgumentCaptor.forClass(LogicalDisplay.class);
         verify(mListenerMock).onLogicalDisplayEventLocked(
-                displayCaptor.capture(), eq(LOGICAL_DISPLAY_EVENT_ADDED));
+                displayCaptor.capture(), eq(LOGICAL_DISPLAY_EVENT_CONNECTED));
+        LogicalDisplay display = displayCaptor.getValue();
+        if (display.isEnabledLocked()) {
+            verify(mListenerMock).onLogicalDisplayEventLocked(
+                    eq(display), eq(LOGICAL_DISPLAY_EVENT_ADDED));
+        }
         clearInvocations(mListenerMock);
-        return displayCaptor.getValue();
+        return display;
     }
 
     private void testDisplayDeviceAddAndRemove_NonInternal(int type) {

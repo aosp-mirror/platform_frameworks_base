@@ -42,10 +42,6 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_PORT_IN_DISPLAY_LAYOUT,
             Flags::enablePortInDisplayLayout);
 
-    private final FlagState mConnectedDisplayManagementFlagState = new FlagState(
-            Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,
-            Flags::enableConnectedDisplayManagement);
-
     private final FlagState mAdaptiveToneImprovements1 = new FlagState(
             Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
             Flags::enableAdaptiveToneImprovements1);
@@ -267,11 +263,6 @@ public class DisplayManagerFlags {
      */
     public boolean isPortInDisplayLayoutEnabled() {
         return mPortInDisplayLayoutFlagState.isEnabled();
-    }
-
-    /** Returns whether connected display management is enabled or not. */
-    public boolean isConnectedDisplayManagementEnabled() {
-        return mConnectedDisplayManagementFlagState.isEnabled();
     }
 
     /** Returns whether power throttling clamper is enabled on not. */
@@ -572,7 +563,6 @@ public class DisplayManagerFlags {
         pw.println(" " + mAdaptiveToneImprovements2);
         pw.println(" " + mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState);
         pw.println(" " + mConnectedDisplayErrorHandlingFlagState);
-        pw.println(" " + mConnectedDisplayManagementFlagState);
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
         pw.println(" " + mDisplayTopology);

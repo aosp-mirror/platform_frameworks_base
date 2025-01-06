@@ -415,7 +415,6 @@ public class DisplayManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
 
         mLocalServiceKeeperRule.overrideLocalService(
                 InputManagerInternal.class, mMockInputManagerInternal);
@@ -2797,30 +2796,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testConnectExternalDisplay_withoutDisplayManagement_shouldAddDisplay() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
-        manageDisplaysPermission(/* granted= */ true);
-        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
-        DisplayManagerService.BinderService bs = displayManager.new BinderService();
-        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
-        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
-        bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
-        callback.expectsEvent(EVENT_DISPLAY_ADDED);
-
-        FakeDisplayDevice displayDevice =
-                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        callback.waitForExpectedEvent();
-
-        LogicalDisplay display =
-                logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
-        assertThat(display.isEnabledLocked()).isTrue();
-        assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_ADDED);
-
-    }
-
-    @Test
-    public void testConnectExternalDisplay_withDisplayManagement_shouldDisableDisplay() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testConnectExternalDisplay_shouldDisableDisplay() {
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -2849,9 +2825,8 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testConnectExternalDisplay_withDisplayManagementAndSysprop_shouldEnableDisplay() {
+    public void testConnectExternalDisplay_withSysprop_shouldEnableDisplay() {
         Assume.assumeTrue(Build.IS_ENG || Build.IS_USERDEBUG);
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         doAnswer((Answer<Boolean>) invocationOnMock -> true)
                 .when(() -> SystemProperties.getBoolean(ENABLE_ON_CONNECT, false));
         manageDisplaysPermission(/* granted= */ true);
@@ -2883,8 +2858,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testConnectExternalDisplay_withDisplayManagement_allowsEnableAndDisableDisplay() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testConnectExternalDisplay_allowsEnableAndDisableDisplay() {
         when(mMockFlags.isApplyDisplayChangedDuringDisplayAddedEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         LocalServices.addService(WindowManagerPolicy.class, mMockedWindowManagerPolicy);
@@ -2955,8 +2929,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testConnectInternalDisplay_withDisplayManagement_shouldConnectAndAddDisplay() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testConnectInternalDisplay_shouldConnectAndAddDisplay() {
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
@@ -3011,7 +2984,7 @@ public class DisplayManagerServiceTest {
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
-        bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
 
         callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
@@ -3032,8 +3005,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testEnableExternalDisplay_withDisplayManagement_shouldSignalDisplayAdded() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testEnableExternalDisplay_shouldSignalDisplayAdded() {
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -3062,8 +3034,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testEnableExternalDisplay_withoutPermission_shouldThrowException() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testEnableExternalDisplay_shouldThrowException() {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -3087,8 +3058,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testEnableInternalDisplay_withManageDisplays_shouldSignalAdded() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testEnableInternalDisplay_shouldSignalAdded() {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -3115,8 +3085,7 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
-    public void testDisableInternalDisplay_withDisplayManagement_shouldSignalRemove() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
+    public void testDisableInternalDisplay_shouldSignalRemove() {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -3140,7 +3109,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testDisableExternalDisplay_shouldSignalDisplayRemoved() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -3181,7 +3149,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testDisableExternalDisplay_withoutPermission_shouldThrowException() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -3207,7 +3174,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testRemoveExternalDisplay_whenDisabled_shouldSignalDisconnected() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -3244,7 +3210,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testRegisterCallback_withoutPermission_shouldThrow() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
@@ -3255,7 +3220,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testRemoveExternalDisplay_whenEnabled_shouldSignalRemovedAndDisconnected() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -3288,7 +3252,6 @@ public class DisplayManagerServiceTest {
 
     @Test
     public void testRemoveInternalDisplay_whenEnabled_shouldSignalRemovedAndDisconnected() {
-        when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
