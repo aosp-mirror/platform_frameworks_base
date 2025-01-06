@@ -22,10 +22,6 @@
 
 namespace android {
 
-namespace hidden {
-    bool isRepresentative(uint64_t packed_locale);
-}
-
 constexpr size_t SCRIPT_LENGTH = 4;
 
 constexpr inline uint32_t packLocale(const char* language, const char* region) {
@@ -45,6 +41,14 @@ constexpr inline bool hasRegion(uint32_t packed_locale) {
     return (packed_locale & 0x0000FFFFLU) != 0;
 }
 
+constexpr inline uint32_t packScript(const char* script) {
+    const unsigned char* s = reinterpret_cast<const unsigned char*>(script);
+    return ((static_cast<uint32_t>(s[0]) << 24u) |
+            (static_cast<uint32_t>(s[1]) << 16u) |
+            (static_cast<uint32_t>(s[2]) <<  8u) |
+            static_cast<uint32_t>(s[3]));
+}
+
 /**
  * Return nullptr if the key isn't found. The input packed_lang_region can be computed
  * by android::packLocale.
@@ -56,17 +60,7 @@ const char* lookupLikelyScript(uint32_t packed_lang_region);
  * Return false if the key isn't representative. The input lookup key can be computed
  * by android::packLocale.
  */
-bool inline isLocaleRepresentative(uint32_t language_and_region, const char* script) {
-    const unsigned char* s = reinterpret_cast<const unsigned char*>(script);
-    const uint64_t packed_locale = (
-            ((static_cast<uint64_t>(language_and_region)) << 32u) |
-            (static_cast<uint64_t>(s[0]) << 24u) |
-            (static_cast<uint64_t>(s[1]) << 16u) |
-            (static_cast<uint64_t>(s[2]) <<  8u) |
-            static_cast<uint64_t>(s[3]));
-
-    return hidden::isRepresentative(packed_locale);
-}
+bool isLocaleRepresentative(uint32_t language_and_region, const char* script);
 
 /**
  * Return a parent packed key for a given script and child packed key. Return 0 if
