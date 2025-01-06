@@ -25,6 +25,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyboard.shortcut.data.repository.CustomInputGesturesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.CommandQueue
@@ -41,6 +42,7 @@ constructor(
     private val stateRepository: ShortcutHelperStateRepository,
     private val activityStarter: ActivityStarter,
     @Background private val backgroundScope: CoroutineScope,
+    private val customInputGesturesRepository: CustomInputGesturesRepository
 ) : CoreStartable {
     override fun start() {
         registerBroadcastReceiver(
@@ -54,6 +56,10 @@ constructor(
         registerBroadcastReceiver(
             action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
             onReceive = { stateRepository.hide() },
+        )
+        registerBroadcastReceiver(
+            action = Intent.ACTION_USER_SWITCHED,
+            onReceive = { customInputGesturesRepository.refreshCustomInputGestures() },
         )
         commandQueue.addCallback(
             object : CommandQueue.Callbacks {

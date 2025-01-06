@@ -18,7 +18,9 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.content.Intent
 import android.hardware.input.InputGestureData
+import android.hardware.input.InputManager
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.EnableFlags
@@ -27,9 +29,12 @@ import androidx.test.filters.SmallTest
 import com.android.hardware.input.Flags.FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES
 import com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.customInputGesturesRepository
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
+import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
@@ -48,18 +53,41 @@ import org.mockito.kotlin.whenever
 @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
 class CustomInputGesturesRepositoryTest : SysuiTestCase() {
 
-    private val mockUserContext: Context = mock()
+    private val primaryUserContext: Context = mock()
+    private val secondaryUserContext: Context = mock()
+    private var activeUserContext: Context = primaryUserContext
+
     private val kosmos = testKosmos().also {
-        it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
+        it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { activeUserContext })
     }
 
     private val inputManager = kosmos.fakeInputManager.inputManager
+    private val broadcastDispatcher = kosmos.broadcastDispatcher
+    private val inputManagerForSecondaryUser: InputManager = mock()
     private val testScope = kosmos.testScope
+    private val testHelper = kosmos.shortcutHelperTestHelper
     private val customInputGesturesRepository = kosmos.customInputGesturesRepository
 
     @Before
-    fun setup(){
-        whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
+    fun setup() {
+        activeUserContext = primaryUserContext
+        whenever(primaryUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
+        whenever(secondaryUserContext.getSystemService(INPUT_SERVICE))
+            .thenReturn(inputManagerForSecondaryUser)
+    }
+
+    @Test
+    fun customInputGestures_emitsNewUsersInputGesturesWhenUserIsSwitch() {
+        testScope.runTest {
+            setCustomInputGesturesForPrimaryUser(allAppsInputGestureData)
+            setCustomInputGesturesForSecondaryUser(goHomeInputGestureData)
+
+            val inputGestures by collectLastValue(customInputGesturesRepository.customInputGestures)
+            assertThat(inputGestures).containsExactly(allAppsInputGestureData)
+
+            switchToSecondaryUser()
+            assertThat(inputGestures).containsExactly(goHomeInputGestureData)
+        }
     }
 
     @Test
@@ -113,6 +141,26 @@ class CustomInputGesturesRepositoryTest : SysuiTestCase() {
             assertThat(customInputGesturesRepository.retrieveCustomInputGestures())
                 .containsExactly(allAppsInputGestureData)
         }
+    }
+
+    private fun setCustomInputGesturesForPrimaryUser(vararg inputGesture: InputGestureData) {
+        whenever(
+            inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
+        ).thenReturn(inputGesture.toList())
+    }
+
+    private fun setCustomInputGesturesForSecondaryUser(vararg inputGesture: InputGestureData) {
+        whenever(
+            inputManagerForSecondaryUser.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
+        ).thenReturn(inputGesture.toList())
+    }
+
+    private fun switchToSecondaryUser() {
+        activeUserContext = secondaryUserContext
+        broadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(Intent.ACTION_USER_SWITCHED)
+        )
     }
 
 }

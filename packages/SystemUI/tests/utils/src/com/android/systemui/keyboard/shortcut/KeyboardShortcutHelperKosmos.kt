@@ -154,6 +154,7 @@ val Kosmos.shortcutHelperCoreStartable by
             shortcutHelperStateRepository,
             activityStarter,
             testScope,
+            customInputGesturesRepository
         )
     }
 
