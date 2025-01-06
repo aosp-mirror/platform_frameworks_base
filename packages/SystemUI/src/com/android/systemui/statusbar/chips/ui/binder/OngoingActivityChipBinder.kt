@@ -242,8 +242,9 @@ object OngoingActivityChipBinder {
         chipTimeView: ChipChronometer,
         chipShortTimeDeltaView: DateTimeView,
     ) {
-        if (chipModel.icon != null) {
-            if (chipModel.icon is OngoingActivityChipModel.ChipIcon.StatusBarView) {
+        val icon = chipModel.icon
+        if (icon != null) {
+            if (iconRequiresEmbeddedPadding(icon)) {
                 // If the icon is a custom [StatusBarIconView], then it should've come from
                 // `Notification.smallIcon`, which is required to embed its own paddings. We need to
                 // adjust the other paddings to make everything look good :)
@@ -264,6 +265,10 @@ object OngoingActivityChipBinder {
             chipShortTimeDeltaView.setTextPaddingForNoIcon()
         }
     }
+
+    private fun iconRequiresEmbeddedPadding(icon: OngoingActivityChipModel.ChipIcon) =
+        icon is OngoingActivityChipModel.ChipIcon.StatusBarView ||
+            icon is OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
 
     private fun View.setTextPaddingForEmbeddedPaddingIcon() {
         val newPaddingEnd =
