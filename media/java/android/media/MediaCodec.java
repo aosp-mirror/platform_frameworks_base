@@ -5866,14 +5866,21 @@ final public class MediaCodec {
                 @NonNull MediaCodec codec, @NonNull MediaFormat format);
 
         /**
-         * Called when the metrics for this codec have been flushed due to the
-         * start of a new subsession.
+         * Called when the metrics for this codec have been flushed "mid-stream"
+         * due to the start of a new subsession during execution.
          * <p>
-         * This can happen when the codec is reconfigured after stop(), or
-         * mid-stream e.g. if the video size changes. When this happens, the
-         * metrics for the previous subsession are flushed, and
-         * {@link MediaCodec#getMetrics} will return the metrics for the
-         * new subsession. This happens just before the {@link Callback#onOutputFormatChanged}
+         * A new codec subsession normally starts when the codec is reconfigured
+         * after stop(), but it can also happen mid-stream e.g. if the video size
+         * changes. When this happens, the metrics for the previous subsession
+         * are flushed, and {@link MediaCodec#getMetrics} will return the metrics
+         * for the new subsession.
+         * <p>
+         * For subsessions that begin due to a reconfiguration, the metrics for
+         * the prior subsession can be retrieved via {@link MediaCodec#getMetrics}
+         * prior to calling {@link #configure}.
+         * <p>
+         * When a new subsession begins "mid-stream", the metrics for the prior
+         * subsession are flushed just before the {@link Callback#onOutputFormatChanged}
          * event, so this <b>optional</b> callback is provided to be able to
          * capture the final metrics for the previous subsession.
          *
