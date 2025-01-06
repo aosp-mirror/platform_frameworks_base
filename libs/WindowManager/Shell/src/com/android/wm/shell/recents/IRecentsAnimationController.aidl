@@ -36,12 +36,6 @@ import com.android.internal.os.IResultReceiver;
 interface IRecentsAnimationController {
 
     /**
-     * Takes a screenshot of the task associated with the given {@param taskId}. Only valid for the
-     * current set of task ids provided to the handler.
-     */
-    TaskSnapshot screenshotTask(int taskId);
-
-    /**
      * Sets the final surface transaction on a Task. This is used by Launcher to notify the system
      * that animating Activity to PiP has completed and the associated task surface should be
      * updated accordingly. This should be called before `finish`

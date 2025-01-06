@@ -21,11 +21,9 @@ import android.util.Log;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
-import android.window.TaskSnapshot;
 import android.window.WindowAnimationState;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.wm.shell.recents.IRecentsAnimationController;
 
 public class RecentsAnimationControllerCompat {
@@ -38,18 +36,6 @@ public class RecentsAnimationControllerCompat {
 
     public RecentsAnimationControllerCompat(IRecentsAnimationController animationController) {
         mAnimationController = animationController;
-    }
-
-    public ThumbnailData screenshotTask(int taskId) {
-        try {
-            final TaskSnapshot snapshot = mAnimationController.screenshotTask(taskId);
-            if (snapshot != null) {
-                return ThumbnailData.fromSnapshot(snapshot);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to screenshot task", e);
-        }
-        return new ThumbnailData();
     }
 
     public void setInputConsumerEnabled(boolean enabled) {
