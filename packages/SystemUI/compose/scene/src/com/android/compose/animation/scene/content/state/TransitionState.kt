@@ -32,6 +32,7 @@ import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
+import com.android.internal.jank.Cuj.CujType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -237,6 +238,11 @@ sealed interface TransitionState {
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
 
+        /** The CUJ covered by this transition. */
+        @CujType
+        val cuj: Int?
+            get() = _cuj
+
         /**
          * The progress of the preview transition. This is usually in the `[0; 1]` range, but it can
          * also be less than `0` or greater than `1` when using transitions with a spring
@@ -251,13 +257,15 @@ sealed interface TransitionState {
         internal open val isInPreviewStage: Boolean = false
 
         /**
-         * The current [TransformationSpecImpl] associated to this transition.
+         * The current [TransformationSpecImpl] and other values associated to this transition from
+         * the spec.
          *
          * Important: These will be set exactly once, when this transition is
          * [started][MutableSceneTransitionLayoutStateImpl.startTransition].
          */
         internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
         internal var previewTransformationSpec: TransformationSpecImpl? = null
+        internal var _cuj: Int? = null
 
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden

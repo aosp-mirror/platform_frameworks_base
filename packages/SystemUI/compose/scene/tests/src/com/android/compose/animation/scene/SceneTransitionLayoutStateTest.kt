@@ -491,4 +491,66 @@ class SceneTransitionLayoutStateTest {
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneC)
     }
+
+    @Test
+    fun trackTransitionCujs() = runTest {
+        val started = mutableSetOf<TransitionState.Transition>()
+        val finished = mutableSetOf<TransitionState.Transition>()
+        val cujWhenStarting = mutableMapOf<TransitionState.Transition, Int?>()
+        val state =
+            MutableSceneTransitionLayoutState(
+                SceneA,
+                transitions {
+                    // A <=> B.
+                    from(SceneA, to = SceneB, cuj = 1)
+
+                    // A <=> C.
+                    from(SceneA, to = SceneC, cuj = 2)
+                    from(SceneC, to = SceneA, cuj = 3)
+                },
+                onTransitionStart = { transition ->
+                    started.add(transition)
+                    cujWhenStarting[transition] = transition.cuj
+                },
+                onTransitionEnd = { finished.add(it) },
+            )
+
+        val aToB = transition(SceneA, SceneB)
+        val bToA = transition(SceneB, SceneA)
+        val aToC = transition(SceneA, SceneC)
+        val cToA = transition(SceneC, SceneA)
+
+        val animationScope = this
+        state.startTransitionImmediately(animationScope, aToB)
+        assertThat(started).containsExactly(aToB)
+        assertThat(finished).isEmpty()
+
+        state.startTransitionImmediately(animationScope, bToA)
+        assertThat(started).containsExactly(aToB, bToA)
+        assertThat(finished).isEmpty()
+
+        aToB.finish()
+        runCurrent()
+        assertThat(finished).containsExactly(aToB)
+
+        state.startTransitionImmediately(animationScope, aToC)
+        assertThat(started).containsExactly(aToB, bToA, aToC)
+        assertThat(finished).containsExactly(aToB)
+
+        state.startTransitionImmediately(animationScope, cToA)
+        assertThat(started).containsExactly(aToB, bToA, aToC, cToA)
+        assertThat(finished).containsExactly(aToB)
+
+        bToA.finish()
+        aToC.finish()
+        cToA.finish()
+        runCurrent()
+        assertThat(started).containsExactly(aToB, bToA, aToC, cToA)
+        assertThat(finished).containsExactly(aToB, bToA, aToC, cToA)
+
+        assertThat(cujWhenStarting[aToB]).isEqualTo(1)
+        assertThat(cujWhenStarting[bToA]).isEqualTo(1)
+        assertThat(cujWhenStarting[aToC]).isEqualTo(2)
+        assertThat(cujWhenStarting[cToA]).isEqualTo(3)
+    }
 }

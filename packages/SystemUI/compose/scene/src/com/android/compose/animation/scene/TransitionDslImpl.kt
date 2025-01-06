@@ -37,6 +37,7 @@ import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationMatcher
 import com.android.compose.animation.scene.transformation.TransformationRange
 import com.android.compose.animation.scene.transformation.Translate
+import com.android.internal.jank.Cuj.CujType
 
 internal fun transitionsImpl(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
@@ -52,28 +53,47 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override fun to(
         to: ContentKey,
         key: TransitionKey?,
+        @CujType cuj: Int?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
     ) {
-        transition(from = null, to = to, key = key, preview, reversePreview, builder)
+        transition(
+            from = null,
+            to = to,
+            key = key,
+            cuj = cuj,
+            preview = preview,
+            reversePreview = reversePreview,
+            builder = builder,
+        )
     }
 
     override fun from(
         from: ContentKey,
         to: ContentKey?,
         key: TransitionKey?,
+        @CujType cuj: Int?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
     ) {
-        transition(from = from, to = to, key = key, preview, reversePreview, builder)
+        transition(
+            from = from,
+            to = to,
+            key = key,
+            cuj = cuj,
+            preview = preview,
+            reversePreview = reversePreview,
+            builder = builder,
+        )
     }
 
     private fun transition(
         from: ContentKey?,
         to: ContentKey?,
         key: TransitionKey?,
+        @CujType cuj: Int?,
         preview: (TransitionBuilder.() -> Unit)?,
         reversePreview: (TransitionBuilder.() -> Unit)?,
         builder: TransitionBuilder.() -> Unit,
@@ -93,9 +113,10 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
 
         val spec =
             TransitionSpecImpl(
-                key,
-                from,
-                to,
+                key = key,
+                from = from,
+                to = to,
+                cuj = cuj,
                 previewTransformationSpec = preview?.let { { t -> transformationSpec(t, it) } },
                 reversePreviewTransformationSpec =
                     reversePreview?.let { { t -> transformationSpec(t, it) } },
@@ -190,6 +211,7 @@ internal class TransitionBuilderImpl(override val transition: TransitionState.Tr
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
     override var swipeSpec: SpringSpec<Float>? = null
     override var distance: UserActionDistance? = null
+    override var cuj: Int? = null
     private val durationMillis: Int by lazy {
         val spec = spec
         if (spec !is DurationBasedAnimationSpec) {

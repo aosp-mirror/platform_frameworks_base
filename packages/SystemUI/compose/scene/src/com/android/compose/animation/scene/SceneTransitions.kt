@@ -29,6 +29,7 @@ import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.TransformationMatcher
 import com.android.compose.animation.scene.transformation.TransformationWithRange
+import com.android.internal.jank.Cuj.CujType
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions
@@ -111,7 +112,15 @@ internal constructor(
     }
 
     private fun defaultTransition(from: ContentKey, to: ContentKey) =
-        TransitionSpecImpl(key = null, from, to, null, null, TransformationSpec.EmptyProvider)
+        TransitionSpecImpl(
+            key = null,
+            from,
+            to,
+            cuj = null,
+            previewTransformationSpec = null,
+            reversePreviewTransformationSpec = null,
+            TransformationSpec.EmptyProvider,
+        )
 
     companion object {
         internal val DefaultSwipeSpec =
@@ -146,6 +155,9 @@ internal interface TransitionSpec {
      * content.
      */
     val to: ContentKey?
+
+    /** The CUJ covered by this transition. */
+    @CujType val cuj: Int?
 
     /**
      * Return a reversed version of this [TransitionSpec] for a transition going from [to] to
@@ -213,6 +225,7 @@ internal class TransitionSpecImpl(
     override val key: TransitionKey?,
     override val from: ContentKey?,
     override val to: ContentKey?,
+    override val cuj: Int?,
     private val previewTransformationSpec:
         ((TransitionState.Transition) -> TransformationSpecImpl)? =
         null,
@@ -226,6 +239,7 @@ internal class TransitionSpecImpl(
             key = key,
             from = to,
             to = from,
+            cuj = cuj,
             previewTransformationSpec = reversePreviewTransformationSpec,
             reversePreviewTransformationSpec = previewTransformationSpec,
             transformationSpec = { transition ->
