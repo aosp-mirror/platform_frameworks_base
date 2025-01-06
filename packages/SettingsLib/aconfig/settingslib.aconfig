@@ -6,7 +6,6 @@ flag {
     namespace: "systemui"
     description: "Enable new status bar system icons"
     bug: "314812750"
-    is_exported: true
 }
 
 flag {
@@ -14,7 +13,6 @@ flag {
     namespace: "bluetooth"
     description: "Displays the auto on toggle in the bluetooth QS tile dialog"
     bug: "316985153"
-    is_exported: true
 }
 
 flag {
@@ -22,7 +20,6 @@ flag {
     namespace: "pixel_cross_device_control"
     description: "Gates the legacy le audio sharing UI."
     bug: "322295262"
-    is_exported: true
 }
 
 flag {
@@ -30,7 +27,6 @@ flag {
     namespace: "pixel_cross_device_control"
     description: "Gates whether to enable LE audio sharing"
     bug: "323125723"
-    is_exported: true
 }
 
 flag {
@@ -38,7 +34,6 @@ flag {
     namespace: "pixel_cross_device_control"
     description: "Gates whether to enable LE audio private broadcast sharing via QR code"
     bug: "323125723"
-    is_exported: true
 }
 
 flag {
@@ -46,7 +41,6 @@ flag {
     namespace: "dck_framework"
     description: "Hide exclusively managed Bluetooth devices in BT settings menu."
     bug: "324475542"
-    is_exported: true
 }
 
 flag {
@@ -54,7 +48,6 @@ flag {
     namespace: "bluetooth"
     description: "Enable setting preferred transport for Le Audio device"
     bug: "330581926"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -65,7 +58,6 @@ flag {
     namespace: "pixel_cross_device_control"
     description: "Use metadata instead of device type to determine whether a bluetooth device should use advanced details header."
     bug: "328556903"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -76,7 +68,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Use bluetooth profile connection policy to determine spatial audio attributes"
     bug: "341005211"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -87,7 +78,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to show separate volume bars during audio sharing"
     bug: "336716411"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -127,7 +117,6 @@ flag {
     namespace: "accessibility"
     description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
     bug: "356530795"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -138,7 +127,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to enable fix for hysteresis mode"
     bug: "355222285"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -149,7 +137,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to enable fix for member device active state sync on lea profile"
     bug: "364201289"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -160,7 +147,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to enable audio sharing qs dialog improvement"
     bug: "360759048"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -171,7 +157,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Gates whether to enable audio sharing developer option"
     bug: "368401233"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -182,7 +167,6 @@ flag {
     namespace: "accessibility"
     description: "Enable the ambient volume control in device details and hearing devices dialog."
     bug: "357878944"
-    is_exported: true
 }
 
 flag {
@@ -190,7 +174,6 @@ flag {
     namespace: "android_settings"
     description: "Enable the user consent prompt before writing sensitive preferences via service"
     bug: "378552675"
-    is_exported: true
 }
 
 flag {
@@ -198,7 +181,6 @@ flag {
     namespace: "accessibility"
     description: "Enable the input routing control in device details and hearing devices dialog."
     bug: "349255906"
-    is_exported: true
 }
 
 flag {
@@ -206,7 +188,6 @@ flag {
     namespace: "accessibility"
     description: "Enable the connection status report for a set of hearing device."
     bug: "357882387"
-    is_exported: true
 }
 
 flag {
@@ -214,7 +195,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Do not show problem connecting message when Android Auto disconnect A2DP"
     bug: "381981752"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -225,7 +205,6 @@ flag {
     namespace: "cross_device_experiences"
     description: "Do not auto pick audio sharing fallback device in UI"
     bug: "383469911"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -236,16 +215,7 @@ flag {
     namespace: "cross_device_experiences"
     description: "UI changes for temporary bond devices in audio sharing."
     bug: "362859132"
-    is_exported: true
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "is_expressive_design_enabled"
-    namespace: "android_settings"
-    description: "enable expressive design in Settings"
-    bug: "386013400"
-    is_exported: true
 }
