@@ -37,9 +37,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
@@ -535,15 +532,7 @@ public class MediaSwitchingController
             // Use default Bluetooth device icon to handle getIcon() is null case.
             drawable = mContext.getDrawable(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
         }
-        if (!(drawable instanceof BitmapDrawable)) {
-            setColorFilter(drawable, isActiveItem(device));
-        }
         return BluetoothUtils.createIconWithDrawable(drawable);
-    }
-
-    void setColorFilter(Drawable drawable, boolean isActive) {
-        drawable.setColorFilter(new PorterDuffColorFilter(mColorItemContent,
-                PorterDuff.Mode.SRC_IN));
     }
 
     boolean isActiveItem(MediaDevice device) {

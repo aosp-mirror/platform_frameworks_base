@@ -234,8 +234,6 @@ public abstract class MediaOutputBaseAdapter extends
                     (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
             params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
                     : mController.getItemMarginEndDefault();
-            mTitleIcon.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
