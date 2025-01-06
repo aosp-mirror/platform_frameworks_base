@@ -1387,7 +1387,7 @@ final class InstallPackageHelper {
         boolean systemApp = false;
         boolean replace = false;
         synchronized (mPm.mLock) {
-            final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
+            PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
             // Check if installing already existing package
             if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                 String oldName = mPm.mSettings.getRenamedPackageLPr(pkgName);
@@ -1398,14 +1398,15 @@ final class InstallPackageHelper {
                     // name.  We must continue using the original name, so
                     // rename the new package here.
                     parsedPackage.setPackageName(oldName);
-                    pkgName = parsedPackage.getPackageName();
-                    replace = true;
+                    pkgName = oldName;
+                    ps = mPm.mSettings.getPackageLPr(oldName);
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "Replacing existing renamed package: oldName="
                                 + oldName + " pkgName=" + pkgName);
                     }
-                } else if (ps != null) {
-                    // This package, under its official name, already exists
+                }
+                if (ps != null) {
+                    // This package, under its official name or its old name, already exists
                     // on the device; we should replace it.
                     replace = true;
                     if (DEBUG_INSTALL) Slog.d(TAG, "Replace existing package: " + pkgName);
