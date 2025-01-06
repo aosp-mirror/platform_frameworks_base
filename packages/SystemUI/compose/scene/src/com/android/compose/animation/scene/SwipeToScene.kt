@@ -54,7 +54,7 @@ private fun DraggableHandlerImpl.contentForSwipes(): Content {
 
 /** Whether swipe should be enabled in the given [orientation]. */
 internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
-    if (userActions.isEmpty()) {
+    if (userActions.isEmpty() || !areSwipesAllowed()) {
         return false
     }
 
@@ -69,6 +69,10 @@ internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
  * @return The best matching [UserActionResult], or `null` if no match is found.
  */
 internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
+    if (!areSwipesAllowed()) {
+        return null
+    }
+
     var bestPoints = Int.MIN_VALUE
     var bestMatch: UserActionResult? = null
     userActions.forEach { (actionSwipe, actionResult) ->
