@@ -44,9 +44,9 @@ class VolumeDialogViewModel
 @Inject
 constructor(
     private val context: Context,
-    private val dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
+    dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
     volumeDialogSlidersInteractor: VolumeDialogSlidersInteractor,
-    private val volumeDialogStateInteractor: VolumeDialogStateInteractor,
+    volumeDialogStateInteractor: VolumeDialogStateInteractor,
     devicePostureController: DevicePostureController,
     configurationController: ConfigurationController,
 ) {

@@ -17,6 +17,7 @@
 package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
+import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.Region
 import android.view.View
@@ -25,6 +26,7 @@ import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.InternalInsetsInfo
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.internal.view.RotationPolicy
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.util.children
 import com.android.systemui.volume.SystemUIInterpolators
@@ -33,7 +35,6 @@ import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerVie
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBinder
-import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
@@ -42,7 +43,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -56,7 +56,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 class VolumeDialogViewBinder
 @Inject
 constructor(
-    private val volumeResources: VolumeDialogResources,
+    @Main resources: Resources,
     private val viewModel: VolumeDialogViewModel,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
@@ -64,6 +64,11 @@ constructor(
     private val slidersViewBinder: VolumeDialogSlidersViewBinder,
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
+
+    private val dialogShowAnimationDurationMs =
+        resources.getInteger(R.integer.config_dialogShowAnimationDurationMs).toLong()
+    private val dialogHideAnimationDurationMs =
+        resources.getInteger(R.integer.config_dialogHideAnimationDurationMs).toLong()
 
     fun CoroutineScope.bind(dialog: Dialog) {
         // Root view of the Volume Dialog.
@@ -99,12 +104,12 @@ constructor(
                     is VolumeDialogVisibilityModel.Visible -> {
                         tracer.traceVisibilityEnd(it)
                         calculateTranslationX(view)?.let(view::setTranslationX)
-                        view.animateShow(volumeResources.dialogShowDurationMillis.first())
+                        view.animateShow(dialogShowAnimationDurationMs)
                     }
                     is VolumeDialogVisibilityModel.Dismissed -> {
                         tracer.traceVisibilityEnd(it)
                         view.animateHide(
-                            duration = volumeResources.dialogHideDurationMillis.first(),
+                            duration = dialogHideAnimationDurationMs,
                             translationX = calculateTranslationX(view),
                         )
                         dialog.dismiss()
