@@ -679,8 +679,7 @@ public final class DisplayTopology implements Parcelable {
     }
 
     /**
-     * Tests whether two brightness float values are within a small enough tolerance
-     * of each other.
+     * Tests whether two float values are within a small enough tolerance of each other.
      * @param a first float to compare
      * @param b second float to compare
      * @return whether the two values are within a small enough tolerance value
