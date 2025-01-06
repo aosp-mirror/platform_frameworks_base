@@ -30,6 +30,10 @@ android.util.AndroidRuntimeException
 android.util.ArrayMap
 android.util.ArraySet
 android.util.AtomicFile
+android.util.AtomicFileOutputStream
+android.util.AtomicFileBufferedOutputStream
+android.util.AtomicFilePrintWriter
+android.util.AtomicFileBufferedPrintWriter
 android.util.BackupUtils
 android.util.Base64
 android.util.Base64DataException
