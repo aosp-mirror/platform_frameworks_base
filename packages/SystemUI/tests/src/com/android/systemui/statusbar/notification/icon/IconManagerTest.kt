@@ -35,7 +35,6 @@ import android.platform.test.annotations.EnableFlags
 import androidx.test.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapperTest.Companion.any
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
@@ -112,20 +111,8 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun testCreateIcons_chipNotifIconFlagDisabled_statusBarChipIconIsNull() {
-        val entry =
-            notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
-        entry?.let { iconManager.createIcons(it) }
-        testScope.runCurrent()
-
-        assertThat(entry?.icons?.statusBarChipIcon).isNull()
-    }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun testCreateIcons_chipNotifIconFlagEnabled_cdFlagDisabled_statusBarChipIconIsNotNull() {
+    fun testCreateIcons_cdFlagDisabled_statusBarChipIconIsNotNull() {
         val entry =
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.let { iconManager.createIcons(it) }
@@ -135,8 +122,8 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
-    fun testCreateIcons_chipNotifIconFlagEnabled_cdFlagEnabled_statusBarChipIconIsNull() {
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun testCreateIcons_cdFlagEnabled_statusBarChipIconIsNull() {
         val entry =
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = true)
         entry?.let { iconManager.createIcons(it) }
@@ -217,7 +204,6 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun testCreateIcons_cdFlagDisabled_sensitiveImportantConversation() {
         val entry =
@@ -233,7 +219,7 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun testCreateIcons_cdFlagEnabled_sensitiveImportantConversation() {
         val entry =
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)
@@ -248,7 +234,6 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun testUpdateIcons_cdFlagDisabled_sensitiveImportantConversation() {
         val entry =
@@ -266,7 +251,7 @@ class IconManagerTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun testUpdateIcons_cdFlagEnabled_sensitiveImportantConversation() {
         val entry =
             notificationEntry(hasShortcut = true, hasMessageSenderIcon = true, hasLargeIcon = false)

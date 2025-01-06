@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -64,18 +63,12 @@ constructor(
                     is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
                         val icon =
-                            if (
-                                Flags.statusBarCallChipNotificationIcon() &&
-                                    state.notificationIconView != null
-                            ) {
+                            if (state.notificationIconView != null) {
                                 StatusBarConnectedDisplays.assertInLegacyMode()
                                 OngoingActivityChipModel.ChipIcon.StatusBarView(
                                     state.notificationIconView
                                 )
-                            } else if (
-                                StatusBarConnectedDisplays.isEnabled &&
-                                    Flags.statusBarCallChipNotificationIcon()
-                            ) {
+                            } else if (StatusBarConnectedDisplays.isEnabled) {
                                 OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(
                                     state.notificationKey
                                 )

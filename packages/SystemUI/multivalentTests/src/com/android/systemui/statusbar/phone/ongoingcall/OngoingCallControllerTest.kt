@@ -28,7 +28,6 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.concurrency.fakeExecutor
@@ -158,28 +157,7 @@ class OngoingCallControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun interactorHasOngoingCallNotif_notifIconFlagOff_repoHasNoNotifIcon() =
-        testScope.runTest {
-            val icon = mock<StatusBarIconView>()
-            setNotifOnRepo(
-                activeNotificationModel(
-                    key = "ongoingNotif",
-                    callType = CallType.Ongoing,
-                    uid = CALL_UID,
-                    statusBarChipIcon = icon,
-                    whenTime = 567,
-                )
-            )
-
-            val repoState = ongoingCallRepository.ongoingCallState.value
-            assertThat(repoState).isInstanceOf(OngoingCallModel.InCall::class.java)
-            assertThat((repoState as OngoingCallModel.InCall).notificationIconView).isNull()
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun interactorHasOngoingCallNotif_notifIconFlagOn_repoHasNotifIcon() =
+    fun interactorHasOngoingCallNotif_repoHasNotifIcon() =
         testScope.runTest {
             val icon = mock<StatusBarIconView>()
 

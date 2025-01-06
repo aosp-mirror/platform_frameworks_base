@@ -22,7 +22,6 @@ import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -126,65 +125,8 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun chip_positiveStartTime_notifIconFlagOff_iconIsPhone() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
-
-            repo.setOngoingCallState(
-                inCallModel(startTimeMs = 1000, notificationIcon = createStatusBarIconViewOrNull())
-            )
-
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
-            val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
-                    .impl as Icon.Resource
-            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
-            assertThat(icon.contentDescription).isNotNull()
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_positiveStartTime_notifIconFlagOn_iconIsNotifIcon() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
-
-            val notifIcon = createStatusBarIconViewOrNull()
-            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, notificationIcon = notifIcon))
-
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.StatusBarView::class.java)
-            val actualIcon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.StatusBarView)
-                    .impl
-            assertThat(actualIcon).isEqualTo(notifIcon)
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_positiveStartTime_notifIconFlagOn_cdFlagOn_iconIsNotifKeyIcon() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
-
-            repo.setOngoingCallState(
-                inCallModel(
-                    startTimeMs = 1000,
-                    notificationIcon = createStatusBarIconViewOrNull(),
-                    notificationKey = "notifKey",
-                )
-            )
-
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon("notifKey"))
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_positiveStartTime_notifIconAndConnectedDisplaysFlagOn_iconIsNotifIcon() =
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun chip_positiveStartTime_connectedDisplaysFlagOn_iconIsNotifIcon() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -205,29 +147,8 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun chip_zeroStartTime_notifIconFlagOff_iconIsPhone() =
-        testScope.runTest {
-            val latest by collectLastValue(underTest.chip)
-
-            repo.setOngoingCallState(
-                inCallModel(startTimeMs = 0, notificationIcon = createStatusBarIconViewOrNull())
-            )
-
-            assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
-            val icon =
-                (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
-                    .impl as Icon.Resource
-            assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
-            assertThat(icon.contentDescription).isNotNull()
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_zeroStartTime_notifIconFlagOn_cdFlagOff_iconIsNotifIcon() =
+    fun chip_zeroStartTime_cdFlagOff_iconIsNotifIcon() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -244,8 +165,8 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
-    fun chip_zeroStartTime_notifIconFlagOn_cdFlagOn_iconIsNotifKeyIcon() =
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun chip_zeroStartTime_cdFlagOn_iconIsNotifKeyIcon() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
@@ -262,7 +183,6 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
     @DisableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun chip_notifIconFlagOn_butNullNotifIcon_cdFlagOff_iconIsPhone() =
         testScope.runTest {
@@ -281,7 +201,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
     fun chip_notifIconFlagOn_butNullNotifIcon_iconNotifKey() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)

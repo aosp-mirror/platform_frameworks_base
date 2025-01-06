@@ -159,21 +159,12 @@ constructor(
             logger.log(
                 TAG,
                 LogLevel.DEBUG,
-                {
-                    bool1 = Flags.statusBarCallChipNotificationIcon()
-                    bool2 = currentInfo.notificationIconView != null
-                },
-                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" },
+                { bool1 = currentInfo.notificationIconView != null },
+                { "Creating OngoingCallModel.InCall. hasIcon=$bool1" },
             )
-            val icon =
-                if (Flags.statusBarCallChipNotificationIcon()) {
-                    currentInfo.notificationIconView
-                } else {
-                    null
-                }
             return OngoingCallModel.InCall(
                 startTimeMs = currentInfo.callStartTime,
-                notificationIconView = icon,
+                notificationIconView = currentInfo.notificationIconView,
                 intent = currentInfo.intent,
                 notificationKey = currentInfo.key,
             )
