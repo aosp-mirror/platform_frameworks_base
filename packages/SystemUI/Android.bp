@@ -841,7 +841,6 @@ android_robolectric_test {
         "androidx.test.ext.truth",
     ],
 
-    upstream: true,
 
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
@@ -879,7 +878,6 @@ android_robolectric_test {
         "androidx.test.ext.truth",
     ],
 
-    upstream: true,
 
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
