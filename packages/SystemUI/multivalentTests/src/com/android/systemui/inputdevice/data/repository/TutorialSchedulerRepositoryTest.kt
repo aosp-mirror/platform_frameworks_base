@@ -84,9 +84,11 @@ class TutorialSchedulerRepositoryTest : SysuiTestCase() {
 
     @Test
     fun notifyKeyboard() = runTestAndClear {
-        underTest.setNotified(KEYBOARD)
+        val now = Instant.now()
+        underTest.setNotifiedTime(KEYBOARD, now)
 
         assertThat(underTest.isNotified(KEYBOARD)).isTrue()
+        assertThat(underTest.getNotifiedTime(KEYBOARD)!!.epochSecond).isEqualTo(now.epochSecond)
         assertThat(underTest.isNotified(TOUCHPAD)).isFalse()
     }
 
