@@ -52,10 +52,10 @@ import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.modifiers.thenIf
 import kotlin.math.sign
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -107,12 +107,16 @@ interface NestedDraggable {
         /**
          * Stop the current drag with the given [velocity].
          *
+         * @param velocity the velocity of the drag when it stopped.
+         * @param awaitFling a lambda that can be used to wait for the end of the full fling, i.e.
+         *   wait for the end of the nested scroll fling or overscroll fling performed with the
+         *   unconsumed velocity *after* this call to [onDragStopped] returned.
          * @return the consumed [velocity]. Any non-consumed velocity will be dispatched to the next
          *   nested scroll connection to be consumed by any composable above in the hierarchy. If
          *   the drag was performed on this draggable directly (instead of on a nested scrollable),
          *   any remaining velocity will be used to animate the overscroll of this draggable.
          */
-        suspend fun onDragStopped(velocity: Float): Float
+        suspend fun onDragStopped(velocity: Float, awaitFling: suspend () -> Unit): Float
     }
 }
 
@@ -277,29 +281,7 @@ private class NestedDraggableNode(
                 }
             }
 
-            var drag = awaitTouchSlopOrCancellation(down.id)
-
-            // We try to pick-up the drag gesture in case the touch slop swipe was consumed by a
-            // nested scrollable child that disappeared.
-            // This was copied from http://shortn/_10L8U02IoL.
-            // TODO(b/380838584): Reuse detect(Horizontal|Vertical)DragGestures() instead.
-            while (drag == null && currentEvent.changes.fastAny { it.pressed }) {
-                var event: PointerEvent
-                do {
-                    event = awaitPointerEvent()
-                } while (
-                    event.changes.fastAny { it.isConsumed } && event.changes.fastAny { it.pressed }
-                )
-
-                // An event was not consumed and there's still a pointer in the screen.
-                if (event.changes.fastAny { it.pressed }) {
-                    // Await touch slop again, using the initial down as starting point.
-                    // For most cases this should return immediately since we probably moved
-                    // far enough from the initial down event.
-                    drag = awaitTouchSlopOrCancellation(down.id)
-                }
-            }
-
+            val drag = awaitTouchSlopOrCancellation(down.id)
             if (drag != null) {
                 velocityTracker.resetTracking()
                 val sign = drag.positionChangeIgnoreConsumed().toFloat().sign
@@ -378,10 +360,20 @@ private class NestedDraggableNode(
         // We launch in the scope of the dispatcher so that the fling is not cancelled if this node
         // is removed right after onDragStopped() is called.
         nestedScrollDispatcher.coroutineScope.launch {
-            flingWithOverscroll(velocity) { velocityFromOverscroll ->
-                flingWithNestedScroll(velocityFromOverscroll) { velocityFromNestedScroll ->
-                    controller.onDragStopped(velocityFromNestedScroll.toFloat()).toVelocity()
+            val flingCompletable = CompletableDeferred<Unit>()
+            try {
+                flingWithOverscroll(velocity) { velocityFromOverscroll ->
+                    flingWithNestedScroll(velocityFromOverscroll) { velocityFromNestedScroll ->
+                        controller
+                            .onDragStopped(
+                                velocityFromNestedScroll.toFloat(),
+                                awaitFling = { flingCompletable.await() },
+                            )
+                            .toVelocity()
+                    }
                 }
+            } finally {
+                flingCompletable.complete(Unit)
             }
         }
     }
@@ -536,8 +528,15 @@ private class NestedDraggableNode(
         }
 
         suspend fun flingWithOverscroll(velocity: Velocity): Velocity {
-            return flingWithOverscroll(overscrollEffect, velocity) {
-                controller.onDragStopped(it.toFloat()).toVelocity()
+            val flingCompletable = CompletableDeferred<Unit>()
+            return try {
+                flingWithOverscroll(overscrollEffect, velocity) {
+                    controller
+                        .onDragStopped(it.toFloat(), awaitFling = { flingCompletable.await() })
+                        .toVelocity()
+                }
+            } finally {
+                flingCompletable.complete(Unit)
             }
         }
     }

@@ -45,6 +45,9 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.math.ceil
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -593,6 +596,63 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         assertThat(effect.applyToFlingDone).isTrue()
     }
 
+    @Test
+    fun awaitFling() = runTest {
+        var flingIsDone = false
+        val draggable =
+            TestDraggable(
+                onDragStopped = { _, awaitFling ->
+                    // Start a coroutine in the background that waits for the fling to be finished.
+                    launch {
+                        awaitFling()
+                        flingIsDone = true
+                    }
+
+                    0f
+                }
+            )
+
+        val effectPostFlingCompletable = CompletableDeferred<Unit>()
+        val effect =
+            TestOverscrollEffect(
+                orientation,
+                onPostScroll = { 0f },
+                onPostFling = {
+                    effectPostFlingCompletable.await()
+                    it
+                },
+            )
+
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(draggable, orientation, overscrollEffect = effect)
+                )
+            }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(touchSlop.toOffset())
+            up()
+        }
+
+        // The drag was started and stopped, but the fling is not finished yet as the overscroll
+        // effect is stuck on the effectPostFlingCompletable.
+        runCurrent()
+        rule.waitForIdle()
+        assertThat(draggable.onDragStartedCalled).isTrue()
+        assertThat(draggable.onDragStoppedCalled).isTrue()
+        assertThat(flingIsDone).isFalse()
+
+        effectPostFlingCompletable.complete(Unit)
+        runCurrent()
+        rule.waitForIdle()
+        assertThat(flingIsDone).isTrue()
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {
@@ -614,7 +674,10 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     private class TestDraggable(
         private val onDragStarted: (Offset, Float) -> Unit = { _, _ -> },
         private val onDrag: (Float) -> Float = { it },
-        private val onDragStopped: suspend (Float) -> Float = { it },
+        private val onDragStopped: suspend (Float, awaitFling: suspend () -> Unit) -> Float =
+            { velocity, _ ->
+                velocity
+            },
         private val shouldConsumeNestedScroll: (Float) -> Boolean = { true },
     ) : NestedDraggable {
         var shouldStartDrag = true
@@ -648,9 +711,12 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
                     return onDrag.invoke(delta)
                 }
 
-                override suspend fun onDragStopped(velocity: Float): Float {
+                override suspend fun onDragStopped(
+                    velocity: Float,
+                    awaitFling: suspend () -> Unit,
+                ): Float {
                     onDragStoppedCalled = true
-                    return onDragStopped.invoke(velocity)
+                    return onDragStopped.invoke(velocity, awaitFling)
                 }
             }
         }
