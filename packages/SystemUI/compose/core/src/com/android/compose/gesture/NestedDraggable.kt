@@ -37,6 +37,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -52,7 +53,6 @@ import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.util.fastSumBy
 import com.android.compose.modifiers.thenIf
 import kotlin.math.sign
 import kotlinx.coroutines.CompletableDeferred
@@ -81,7 +81,13 @@ interface NestedDraggable {
      * in the direction given by [sign], with the given number of [pointersDown] when the touch slop
      * was detected.
      */
-    fun onDragStarted(position: Offset, sign: Float, pointersDown: Int): Controller
+    fun onDragStarted(
+        position: Offset,
+        sign: Float,
+        pointersDown: Int,
+        // TODO(b/382665591): Make this non-nullable.
+        pointerType: PointerType?,
+    ): Controller
 
     /**
      * Whether this draggable should consume any scroll amount with the given [sign] coming from a
@@ -184,8 +190,8 @@ private class NestedDraggableNode(
      */
     private var lastFirstDown: Offset? = null
 
-    /** The number of pointers down. */
-    private var pointersDownCount = 0
+    /** The pointers currently down, in order of which they were done and mapping to their type. */
+    private val pointersDown = linkedMapOf<PointerId, PointerType>()
 
     init {
         delegate(nestedScrollModifierNode(this, nestedScrollDispatcher))
@@ -256,7 +262,9 @@ private class NestedDraggableNode(
             check(down.position == lastFirstDown) {
                 "Position from detectDrags() is not the same as position in trackDownPosition()"
             }
-            check(pointersDownCount == 1) { "pointersDownCount is equal to $pointersDownCount" }
+            check(pointersDown.size == 1 && pointersDown.keys.first() == down.id) {
+                "pointersDown should only contain $down but it contains $pointersDown"
+            }
 
             var overSlop = 0f
             val onTouchSlopReached = { change: PointerInputChange, over: Float ->
@@ -295,8 +303,9 @@ private class NestedDraggableNode(
                     }
                 }
 
-                check(pointersDownCount > 0) { "pointersDownCount is equal to $pointersDownCount" }
-                val controller = draggable.onDragStarted(down.position, sign, pointersDownCount)
+                check(pointersDown.size > 0) { "pointersDown is empty" }
+                val controller =
+                    draggable.onDragStarted(down.position, sign, pointersDown.size, drag.type)
                 if (overSlop != 0f) {
                     onDrag(controller, drag, overSlop, velocityTracker)
                 }
@@ -452,18 +461,18 @@ private class NestedDraggableNode(
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
             lastFirstDown = down.position
-            pointersDownCount = 1
+            pointersDown[down.id] = down.type
 
             do {
-                pointersDownCount +=
-                    awaitPointerEvent().changes.fastSumBy { change ->
-                        when {
-                            change.changedToDownIgnoreConsumed() -> 1
-                            change.changedToUpIgnoreConsumed() -> -1
-                            else -> 0
+                awaitPointerEvent().changes.forEach { change ->
+                    when {
+                        change.changedToDownIgnoreConsumed() -> {
+                            pointersDown[change.id] = change.type
                         }
+                        change.changedToUpIgnoreConsumed() -> pointersDown.remove(change.id)
                     }
-            } while (pointersDownCount > 0)
+                }
+            } while (pointersDown.size > 0)
         }
     }
 
@@ -491,12 +500,13 @@ private class NestedDraggableNode(
         if (nestedScrollController == null && draggable.shouldConsumeNestedScroll(sign)) {
             val startedPosition = checkNotNull(lastFirstDown) { "lastFirstDown is not set" }
 
-            // TODO(b/382665591): Replace this by check(pointersDownCount > 0).
-            val pointersDown = pointersDownCount.coerceAtLeast(1)
+            // TODO(b/382665591): Ensure that there is at least one pointer down.
+            val pointersDownCount = pointersDown.size.coerceAtLeast(1)
+            val pointerType = pointersDown.entries.firstOrNull()?.value
             nestedScrollController =
                 NestedScrollController(
                     overscrollEffect,
-                    draggable.onDragStarted(startedPosition, sign, pointersDown),
+                    draggable.onDragStarted(startedPosition, sign, pointersDownCount, pointerType),
                 )
         }
 
