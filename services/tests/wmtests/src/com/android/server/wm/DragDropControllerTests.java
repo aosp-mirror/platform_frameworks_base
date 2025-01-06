@@ -34,6 +34,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.DragDropController.MSG_UNHANDLED_DROP_LISTENER_TIMEOUT;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -46,12 +47,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
 import android.content.pm.ShortcutServiceInternal;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -60,6 +63,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.DragEvent;
 import android.view.InputChannel;
@@ -74,6 +78,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -141,17 +146,28 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
     }
 
+    private WindowState createDropTargetWindow(String name) {
+        return createDropTargetWindow(name, null /* targetDisplay */);
+    }
+
     /**
      * Creates a window state which can be used as a drop target.
      */
-    private WindowState createDropTargetWindow(String name, int ownerId) {
-        final Task task = new TaskBuilder(mSupervisor).setUserId(ownerId).build();
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).setUseProcess(
-                mProcess).build();
+    private WindowState createDropTargetWindow(String name,
+            @Nullable DisplayContent targetDisplay) {
+        final WindowState window;
+        if (targetDisplay == null) {
+            final Task task = new TaskBuilder(mSupervisor).build();
+            final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).setUseProcess(
+                    mProcess).build();
+            window = newWindowBuilder(name, TYPE_BASE_APPLICATION).setWindowToken(
+                    activity).setClientWindow(new TestIWindow()).build();
+        } else {
+            window = newWindowBuilder(name, TYPE_BASE_APPLICATION).setDisplay(
+                    targetDisplay).setClientWindow(new TestIWindow()).build();
+        }
 
         // Use a new TestIWindow so we don't collect events for other windows
-        final WindowState window = newWindowBuilder(name, TYPE_BASE_APPLICATION).setWindowToken(
-                activity).setOwnerId(ownerId).setClientWindow(new TestIWindow()).build();
         InputChannel channel = new InputChannel();
         window.openInputChannel(channel);
         window.mHasSurface = true;
@@ -174,7 +190,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
         mProcess = mSystemServicesTestRule.addProcess(TEST_PACKAGE, "testProc", TEST_PID, TEST_UID);
-        mWindow = createDropTargetWindow("Drag test window", 0);
+        mWindow = createDropTargetWindow("Drag test window");
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
         when(mWm.mInputManager.startDragAndDrop(any(IBinder.class), any(IBinder.class))).thenReturn(
                 true);
@@ -263,8 +279,8 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testPrivateInterceptGlobalDragDropIgnoresNonLocalWindows() {
-        WindowState nonLocalWindow = createDropTargetWindow("App drag test window", 0);
-        WindowState globalInterceptWindow = createDropTargetWindow("Global drag test window", 0);
+        WindowState nonLocalWindow = createDropTargetWindow("App drag test window");
+        WindowState globalInterceptWindow = createDropTargetWindow("Global drag test window");
         globalInterceptWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 
         // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
@@ -341,6 +357,120 @@ public class DragDropControllerTests extends WindowTestsBase {
                                 | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
 
                         mTarget.reportDropResult(iwindow, true);
+                    } finally {
+                        mTarget.mDeferDragStateClosed = false;
+                    }
+                });
+    }
+
+    @Test
+    public void testDragEventCoordinates() {
+        int dragStartX = mWindow.getBounds().centerX();
+        int dragStartY = mWindow.getBounds().centerY();
+        int startOffsetPx = 10;
+        int dropCoordsPx = 15;
+        WindowState window2 = createDropTargetWindow("App drag test window");
+        Rect bounds = new Rect(dragStartX + startOffsetPx, dragStartY + startOffsetPx,
+                mWindow.getBounds().right, mWindow.getBounds().bottom);
+        window2.setBounds(bounds);
+        window2.getFrame().set(bounds);
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event.
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+        TestIWindow iwindow2 = (TestIWindow) window2.mClient;
+        final ArrayList<DragEvent> dragEvents2 = new ArrayList<>();
+        iwindow2.setDragEventJournal(dragEvents2);
+
+        startDrag(dragStartX, dragStartY, View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ,
+                ClipData.newPlainText("label", "text"), () -> {
+                    // Verify the start-drag event is sent as-is for the drag origin window.
+                    final DragEvent dragEvent = dragEvents.get(0);
+                    assertEquals(ACTION_DRAG_STARTED, dragEvent.getAction());
+                    assertEquals(dragStartX, dragEvent.getX(), 0.0 /* delta */);
+                    assertEquals(dragStartY, dragEvent.getY(), 0.0 /* delta */);
+                    // Verify the start-drag event is sent relative to the window top-left.
+                    final DragEvent dragEvent2 = dragEvents2.get(0);
+                    assertEquals(ACTION_DRAG_STARTED, dragEvent2.getAction());
+                    assertEquals(-startOffsetPx, dragEvent2.getX(),  0.0 /* delta */);
+                    assertEquals(-startOffsetPx, dragEvent2.getY(), 0.0 /* delta */);
+
+                    try {
+                        mTarget.mDeferDragStateClosed = true;
+                        // x, y is window-local coordinate.
+                        mTarget.reportDropWindow(window2.mInputChannelToken, dropCoordsPx,
+                                dropCoordsPx);
+                        mTarget.handleMotionEvent(false, window2.getDisplayId(), dropCoordsPx,
+                                dropCoordsPx);
+                        mToken = window2.mClient.asBinder();
+                        // Verify only window2 received the DROP event and coords are sent as-is.
+                        assertEquals(1, dragEvents.size());
+                        assertEquals(2, dragEvents2.size());
+                        final DragEvent dropEvent = last(dragEvents2);
+                        assertEquals(ACTION_DROP, dropEvent.getAction());
+                        assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
+                        assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
+
+                        mTarget.reportDropResult(iwindow2, true);
+                    } finally {
+                        mTarget.mDeferDragStateClosed = false;
+                    }
+                });
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_DND)
+    public void testDragEventConnectedDisplaysCoordinates() {
+        final DisplayContent testDisplay = createMockSimulatedDisplay();
+        int dragStartX = mWindow.getBounds().centerX();
+        int dragStartY = mWindow.getBounds().centerY();
+        int dropCoordsPx = 15;
+        WindowState window2 = createDropTargetWindow("App drag test window", testDisplay);
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event.
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+        TestIWindow iwindow2 = (TestIWindow) window2.mClient;
+        final ArrayList<DragEvent> dragEvents2 = new ArrayList<>();
+        iwindow2.setDragEventJournal(dragEvents2);
+
+        startDrag(dragStartX, dragStartY, View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ,
+                ClipData.newPlainText("label", "text"), () -> {
+                    // Verify the start-drag event is sent as-is for the drag origin window.
+                    final DragEvent dragEvent = dragEvents.get(0);
+                    assertEquals(ACTION_DRAG_STARTED, dragEvent.getAction());
+                    assertEquals(dragStartX, dragEvent.getX(), 0.0 /* delta */);
+                    assertEquals(dragStartY, dragEvent.getY(), 0.0 /* delta */);
+                    // Verify the start-drag event from different display is sent out of display
+                    // bounds.
+                    final DragEvent dragEvent2 = dragEvents2.get(0);
+                    assertEquals(ACTION_DRAG_STARTED, dragEvent2.getAction());
+                    assertEquals(-window2.getBounds().left - 1, dragEvent2.getX(), 0.0 /* delta */);
+                    assertEquals(-window2.getBounds().top - 1, dragEvent2.getY(), 0.0 /* delta */);
+
+                    try {
+                        mTarget.mDeferDragStateClosed = true;
+                        // x, y is window-local coordinate.
+                        mTarget.reportDropWindow(window2.mInputChannelToken, dropCoordsPx,
+                                dropCoordsPx);
+                        mTarget.handleMotionEvent(false, window2.getDisplayId(), dropCoordsPx,
+                                dropCoordsPx);
+                        mToken = window2.mClient.asBinder();
+                        // Verify only window2 received the DROP event and coords are sent as-is
+                        assertEquals(1, dragEvents.size());
+                        assertEquals(2, dragEvents2.size());
+                        final DragEvent dropEvent = last(dragEvents2);
+                        assertEquals(ACTION_DROP, dropEvent.getAction());
+                        assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
+                        assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
+
+                        mTarget.reportDropResult(iwindow2, true);
                     } finally {
                         mTarget.mDeferDragStateClosed = false;
                     }
@@ -503,7 +633,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testRequestSurfaceForReturnAnimationFlag_dropSuccessful() {
-        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        WindowState otherWindow = createDropTargetWindow("App drag test window");
         TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
 
         // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
@@ -534,7 +664,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testRequestSurfaceForReturnAnimationFlag_dropUnsuccessful() {
-        WindowState otherWindow = createDropTargetWindow("App drag test window", 0);
+        WindowState otherWindow = createDropTargetWindow("App drag test window");
         TestIWindow otherIWindow = (TestIWindow) otherWindow.mClient;
 
         // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
@@ -687,6 +817,14 @@ public class DragDropControllerTests extends WindowTestsBase {
      * Starts a drag with the given parameters, calls Runnable `r` after drag is started.
      */
     private void startDrag(int flag, ClipData data, Runnable r) {
+        startDrag(0, 0, flag, data, r);
+    }
+
+    /**
+     * Starts a drag with the given parameters, calls Runnable `r` after drag is started.
+     */
+    private void startDrag(float startInWindowX, float startInWindowY, int flag, ClipData data,
+            Runnable r) {
         final SurfaceSession appSession = new SurfaceSession();
         try {
             final SurfaceControl surface = new SurfaceControl.Builder(appSession).setName(
@@ -694,8 +832,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                     PixelFormat.TRANSLUCENT).build();
 
             assertTrue(mWm.mInputManager.startDragAndDrop(new Binder(), new Binder()));
-            mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0,
-                    0, 0, data);
+            mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient, flag, surface, 0, 0, 0,
+                    startInWindowX, startInWindowY, 0, 0, data);
             assertNotNull(mToken);
 
             r.run();
