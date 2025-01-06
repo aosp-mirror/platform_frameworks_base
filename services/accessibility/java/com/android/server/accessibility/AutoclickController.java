@@ -18,6 +18,8 @@ package com.android.server.accessibility;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.server.accessibility.AutoclickIndicatorView.SHOW_INDICATOR_DELAY_TIME;
+
 import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.NonNull;
 import android.content.ContentResolver;
@@ -286,8 +288,6 @@ public class AutoclickController extends BaseEventStreamTransformation {
         }
 
         public void update() {
-            // TODO(b/383901288): update delay time once determined by UX.
-            long SHOW_INDICATOR_DELAY_TIME = 150;
             long scheduledShowIndicatorTime =
                     SystemClock.uptimeMillis() + SHOW_INDICATOR_DELAY_TIME;
             // If there already is a scheduled show indicator at time before the updated time, just
@@ -432,6 +432,10 @@ public class AutoclickController extends BaseEventStreamTransformation {
          */
         public void updateDelay(int delay) {
             mDelay = delay;
+
+            if (Flags.enableAutoclickIndicator() && mAutoclickIndicatorView != null) {
+                mAutoclickIndicatorView.setAnimationDuration(delay - SHOW_INDICATOR_DELAY_TIME);
+            }
         }
 
         /**
