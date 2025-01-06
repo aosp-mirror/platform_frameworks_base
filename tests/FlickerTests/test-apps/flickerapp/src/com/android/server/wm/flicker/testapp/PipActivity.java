@@ -350,7 +350,7 @@ public class PipActivity extends Activity {
         mMediaSession.setActive(newState != STATE_STOPPED);
     }
 
-    private void handleIntentExtra(Intent intent) {
+    void handleIntentExtra(Intent intent) {
         // Set the fixed orientation if requested
         if (intent.hasExtra(EXTRA_PIP_ORIENTATION)) {
             final int ori = Integer.parseInt(getIntent().getStringExtra(EXTRA_PIP_ORIENTATION));
