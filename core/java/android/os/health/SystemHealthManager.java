@@ -344,11 +344,7 @@ public class SystemHealthManager {
                 || !mHintManagerClientData.supportInfo.headroom.isCpuSupported) {
             throw new UnsupportedOperationException();
         }
-        try {
-            return mHintManager.getCpuHeadroomMinIntervalMillis();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mHintManagerClientData.supportInfo.headroom.cpuMinIntervalMillis;
     }
 
     /**
@@ -366,11 +362,7 @@ public class SystemHealthManager {
                 || !mHintManagerClientData.supportInfo.headroom.isGpuSupported) {
             throw new UnsupportedOperationException();
         }
-        try {
-            return mHintManager.getGpuHeadroomMinIntervalMillis();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mHintManagerClientData.supportInfo.headroom.gpuMinIntervalMillis;
     }
 
     /**

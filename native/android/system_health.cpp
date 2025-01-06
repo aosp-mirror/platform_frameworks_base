@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "system_health"
+
 #include <aidl/android/hardware/power/CpuHeadroomParams.h>
 #include <aidl/android/hardware/power/GpuHeadroomParams.h>
 #include <aidl/android/os/CpuHeadroomParamsInternal.h>
@@ -23,6 +25,17 @@
 #include <android/system_health.h>
 #include <binder/IServiceManager.h>
 #include <binder/Status.h>
+#include <system_health_private.h>
+
+#include <list>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <utility>
+
+#include "android-base/thread_annotations.h"
+#include "utils/SystemClock.h"
 
 using namespace android;
 using namespace aidl::android::os;
@@ -55,9 +68,20 @@ private:
     IHintManager::HintManagerClientData mClientData;
 };
 
+static std::shared_ptr<IHintManager>* gIHintManagerForTesting = nullptr;
+static std::shared_ptr<ASystemHealthManager> gSystemHealthManagerForTesting = nullptr;
+
 ASystemHealthManager* ASystemHealthManager::getInstance() {
     static std::once_flag creationFlag;
     static ASystemHealthManager* instance = nullptr;
+    if (gSystemHealthManagerForTesting) {
+        return gSystemHealthManagerForTesting.get();
+    }
+    if (gIHintManagerForTesting) {
+        gSystemHealthManagerForTesting =
+                std::shared_ptr<ASystemHealthManager>(create(*gIHintManagerForTesting));
+        return gSystemHealthManagerForTesting.get();
+    }
     std::call_once(creationFlag, []() { instance = create(nullptr); });
     return instance;
 }
@@ -121,7 +145,8 @@ int ASystemHealthManager::getCpuHeadroom(const ACpuHeadroomParams* params, float
         }
         return EPIPE;
     }
-    *outHeadroom = res->get<hal::CpuHeadroomResult::Tag::globalHeadroom>();
+    *outHeadroom = res ? res->get<hal::CpuHeadroomResult::Tag::globalHeadroom>()
+                       : std::numeric_limits<float>::quiet_NaN();
     return OK;
 }
 
@@ -155,37 +180,20 @@ int ASystemHealthManager::getGpuHeadroom(const AGpuHeadroomParams* params, float
         }
         return EPIPE;
     }
-    *outHeadroom = res->get<hal::GpuHeadroomResult::Tag::globalHeadroom>();
+    *outHeadroom = res ? res->get<hal::GpuHeadroomResult::Tag::globalHeadroom>()
+                       : std::numeric_limits<float>::quiet_NaN();
     return OK;
 }
 
 int ASystemHealthManager::getCpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis) {
     if (!mClientData.supportInfo.headroom.isCpuSupported) return ENOTSUP;
-    int64_t minIntervalMillis = 0;
-    ::ndk::ScopedAStatus ret = mHintManager->getCpuHeadroomMinIntervalMillis(&minIntervalMillis);
-    if (!ret.isOk()) {
-        ALOGE("ASystemHealth_getCpuHeadroomMinIntervalMillis fails: %s", ret.getMessage());
-        if (ret.getExceptionCode() == EX_UNSUPPORTED_OPERATION) {
-            return ENOTSUP;
-        }
-        return EPIPE;
-    }
-    *outMinIntervalMillis = minIntervalMillis;
+    *outMinIntervalMillis = mClientData.supportInfo.headroom.cpuMinIntervalMillis;
     return OK;
 }
 
 int ASystemHealthManager::getGpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis) {
     if (!mClientData.supportInfo.headroom.isGpuSupported) return ENOTSUP;
-    int64_t minIntervalMillis = 0;
-    ::ndk::ScopedAStatus ret = mHintManager->getGpuHeadroomMinIntervalMillis(&minIntervalMillis);
-    if (!ret.isOk()) {
-        ALOGE("ASystemHealth_getGpuHeadroomMinIntervalMillis fails: %s", ret.getMessage());
-        if (ret.getExceptionCode() == EX_UNSUPPORTED_OPERATION) {
-            return ENOTSUP;
-        }
-        return EPIPE;
-    }
-    *outMinIntervalMillis = minIntervalMillis;
+    *outMinIntervalMillis = mClientData.supportInfo.headroom.gpuMinIntervalMillis;
     return OK;
 }
 
@@ -298,7 +306,6 @@ void ACpuHeadroomParams_setTids(ACpuHeadroomParams* _Nonnull params, const int* 
                                 size_t tidsSize) {
     LOG_ALWAYS_FATAL_IF(tids == nullptr, "%s: tids should not be null", __FUNCTION__);
     params->tids.resize(tidsSize);
-    params->tids.clear();
     for (int i = 0; i < (int)tidsSize; ++i) {
         LOG_ALWAYS_FATAL_IF(tids[i] <= 0, "ACpuHeadroomParams_setTids: Invalid non-positive tid %d",
                             tids[i]);
@@ -354,4 +361,11 @@ void ACpuHeadroomParams_destroy(ACpuHeadroomParams* _Nullable params) {
 
 void AGpuHeadroomParams_destroy(AGpuHeadroomParams* _Nullable params) {
     delete params;
+}
+
+void ASystemHealth_setIHintManagerForTesting(void* iManager) {
+    if (iManager == nullptr) {
+        gSystemHealthManagerForTesting = nullptr;
+    }
+    gIHintManagerForTesting = static_cast<std::shared_ptr<IHintManager>*>(iManager);
 }
