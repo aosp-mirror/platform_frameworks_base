@@ -94,14 +94,21 @@ public final class RavenwoodEnvironment {
 
         /** Used for testing */
         @Disabled
-        @ChangeId public static final long TEST_COMPAT_ID_2 = 368131701L;
+        @ChangeId
+        public static final long TEST_COMPAT_ID_2 = 368131701L;
 
         /** Used for testing */
         @EnabledAfter(targetSdkVersion = S)
-        @ChangeId public static final long TEST_COMPAT_ID_3 = 368131659L;
+        @ChangeId
+        public static final long TEST_COMPAT_ID_3 = 368131659L;
 
         /** Used for testing */
         @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
-        @ChangeId public static final long TEST_COMPAT_ID_4 = 368132057L;
+        @ChangeId
+        public static final long TEST_COMPAT_ID_4 = 368132057L;
+
+        /** Used for testing */
+        @ChangeId
+        public static final long TEST_COMPAT_ID_5 = 387558811L;
     }
 }
