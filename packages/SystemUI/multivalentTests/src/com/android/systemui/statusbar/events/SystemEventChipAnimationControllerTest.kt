@@ -27,8 +27,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsChangedListener
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor

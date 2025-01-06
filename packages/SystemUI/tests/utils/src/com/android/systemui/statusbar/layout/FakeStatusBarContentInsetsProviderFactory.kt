@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.layout
 
 import android.content.Context
 import com.android.systemui.SysUICutoutProvider
