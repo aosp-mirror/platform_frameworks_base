@@ -1584,6 +1584,13 @@ java_aconfig_library {
 }
 
 java_aconfig_library {
+    name: "android.app.appfunctions.flags-aconfig-java-host",
+    aconfig_declarations: "android.app.appfunctions.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    host_supported: true,
+}
+
+java_aconfig_library {
     name: "android.app.appfunctions.exported-flags-aconfig-java",
     aconfig_declarations: "android.app.appfunctions.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
