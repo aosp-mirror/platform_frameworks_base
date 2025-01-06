@@ -313,6 +313,7 @@ android_ravenwood_test {
         "res/xml/power_profile_test_modem.xml",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
 
 test_module_config {

@@ -69,4 +69,5 @@ android_ravenwood_test {
         "src/com/android/internal/util/**/*.java",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }

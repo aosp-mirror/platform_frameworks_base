@@ -914,6 +914,7 @@ android_ravenwood_test {
         "android.test.mock.impl",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
     plugins: [
         "dagger2-compiler",
     ],

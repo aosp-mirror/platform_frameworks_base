@@ -86,6 +86,7 @@ android_ravenwood_test {
         "src/com/android/server/inputmethod/**/ClientControllerTest.java",
     ],
     auto_gen_config: true,
+    team: "trendy_team_ravenwood",
 }
 
 android_test {
