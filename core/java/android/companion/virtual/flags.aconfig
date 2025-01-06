@@ -11,14 +11,6 @@ package: "android.companion.virtual.flags"
 container: "system"
 
 flag {
-  name: "enable_native_vdm"
-  namespace: "virtual_devices"
-  description: "Enable native VDM service"
-  bug: "303535376"
-  is_fixed_read_only: true
-}
-
-flag {
   name: "dynamic_policy"
   is_exported: true
   namespace: "virtual_devices"

@@ -176,7 +176,7 @@ public class VirtualDeviceManagerService extends SystemService {
     public VirtualDeviceManagerService(Context context) {
         super(context);
         mImpl = new VirtualDeviceManagerImpl();
-        mNativeImpl = Flags.enableNativeVdm() ? new VirtualDeviceManagerNativeImpl() : null;
+        mNativeImpl = new VirtualDeviceManagerNativeImpl();
         mLocalService = new LocalService();
     }
 
@@ -208,9 +208,7 @@ public class VirtualDeviceManagerService extends SystemService {
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
-        if (Flags.enableNativeVdm()) {
-            publishBinderService(VIRTUAL_DEVICE_NATIVE_SERVICE, mNativeImpl);
-        }
+        publishBinderService(VIRTUAL_DEVICE_NATIVE_SERVICE, mNativeImpl);
         publishLocalService(VirtualDeviceManagerInternal.class, mLocalService);
         ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
                 ActivityTaskManagerInternal.class);
