@@ -1278,6 +1278,7 @@
     <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_media_action_spacing">4dp</dimen>
     <dimen name="qs_media_action_margin">12dp</dimen>
+    <dimen name="qs_media_action_play_pause_width">72dp</dimen>
     <dimen name="qs_seamless_height">24dp</dimen>
     <dimen name="qs_seamless_icon_size">12dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>

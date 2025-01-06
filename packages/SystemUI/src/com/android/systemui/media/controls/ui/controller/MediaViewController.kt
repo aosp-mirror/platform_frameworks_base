@@ -1016,7 +1016,22 @@ constructor(
                 expandedLayout.load(context, R.xml.media_recommendations_expanded)
             }
         }
+        readjustPlayPauseWidth()
         refreshState()
+    }
+
+    private fun readjustPlayPauseWidth() {
+        // TODO: move to xml file when flag is removed.
+        if (Flags.mediaControlsUiUpdate()) {
+            collapsedLayout.constrainWidth(
+                R.id.actionPlayPause,
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_action_play_pause_width),
+            )
+            expandedLayout.constrainWidth(
+                R.id.actionPlayPause,
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_action_play_pause_width),
+            )
+        }
     }
 
     /** Get a view state based on the width and height set by the scene */
