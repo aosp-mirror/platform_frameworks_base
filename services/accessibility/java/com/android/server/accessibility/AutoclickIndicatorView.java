@@ -16,24 +16,42 @@
 
 package com.android.server.accessibility;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
+import android.view.animation.LinearInterpolator;
 
 // A visual indicator for the autoclick feature.
 public class AutoclickIndicatorView extends View {
     private static final String TAG = AutoclickIndicatorView.class.getSimpleName();
+
+    // TODO(b/383901288): update delay time once determined by UX.
+    static final int SHOW_INDICATOR_DELAY_TIME = 150;
+
+    static final int MINIMAL_ANIMATION_DURATION = 50;
 
     // TODO(b/383901288): allow users to customize the indicator area.
     static final float RADIUS = 50;
 
     private final Paint mPaint;
 
+    private final ValueAnimator mAnimator;
+
+    private final RectF mRingRect;
+
     // x and y coordinates of the visual indicator.
     private float mX;
     private float mY;
+
+    // Current sweep angle of the animated ring.
+    private float mSweepAngle;
+
+    private int mAnimationDuration = AccessibilityManager.AUTOCLICK_DELAY_DEFAULT;
 
     // Status of whether the visual indicator should display or not.
     private boolean showIndicator = false;
@@ -46,6 +64,18 @@ public class AutoclickIndicatorView extends View {
         mPaint.setARGB(255, 52, 103, 235);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(10);
+
+        mAnimator = ValueAnimator.ofFloat(0, 360);
+        mAnimator.setDuration(mAnimationDuration);
+        mAnimator.setInterpolator(new LinearInterpolator());
+        mAnimator.addUpdateListener(
+                animation -> {
+                    mSweepAngle = (float) animation.getAnimatedValue();
+                    // Redraw the view with the updated angle.
+                    invalidate();
+                });
+
+        mRingRect = new RectF();
     }
 
     @Override
@@ -53,7 +83,12 @@ public class AutoclickIndicatorView extends View {
         super.onDraw(canvas);
 
         if (showIndicator) {
-            canvas.drawCircle(mX, mY, RADIUS, mPaint);
+            mRingRect.set(
+                    /* left= */ mX - RADIUS,
+                    /* top= */ mY - RADIUS,
+                    /* right= */ mX + RADIUS,
+                    /* bottom= */ mY + RADIUS);
+            canvas.drawArc(mRingRect, /* startAngle= */ -90, mSweepAngle, false, mPaint);
         }
     }
 
@@ -75,10 +110,17 @@ public class AutoclickIndicatorView extends View {
     public void redrawIndicator() {
         showIndicator = true;
         invalidate();
+        mAnimator.start();
     }
 
     public void clearIndicator() {
         showIndicator = false;
+        mAnimator.cancel();
         invalidate();
+    }
+
+    public void setAnimationDuration(int duration) {
+        mAnimationDuration = Math.max(duration, MINIMAL_ANIMATION_DURATION);
+        mAnimator.setDuration(mAnimationDuration);
     }
 }
